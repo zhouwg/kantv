@@ -16,11 +16,9 @@
 # limitations under the License.
 #
 
-
-#IJK_OPENSSL_UPSTREAM=https://github.com/Bilibili/openssl.git
-#IJK_OPENSSL_FORK=https://github.com/Bilibili/openssl.git
-IJK_OPENSSL_UPSTREAM=https://github.com/openssl/openssl
-IJK_OPENSSL_FORK=https://github.com/openssl/openssl
+IJK_OPENSSL_UPSTREAM=git@gitee.com:zhouweiguo2020/openssl
+IJK_OPENSSL_FORK=git@gitee.com:zhouweiguo2020/openssl
+#IJK_OPENSSL_COMMIT=OpenSSL_1_0_2n
 IJK_OPENSSL_COMMIT=OpenSSL_1_1_1-stable
 IJK_OPENSSL_LOCAL_REPO=extra/openssl
 

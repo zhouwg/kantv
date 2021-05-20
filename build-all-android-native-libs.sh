@@ -67,6 +67,8 @@ function dump_usage()
 {
     echo "Usage:"
     echo "  $0 clean"
+    echo "  $0 cleanall"
+    echo "  $0 init"
     echo "  $0 build"
     exit 1
 }
@@ -272,8 +274,10 @@ function do_clean()
     cd ${prj_root_path}
     show_pwd
 
-    echo -e "${TEXT_RED}remove android/contrib/build/*${TEXT_RESET}"
-    rm -rf android/contrib/build/*
+    echo -e "${TEXT_RED}remove android/contrib/build${TEXT_RESET}"
+    if [ -d android/contrib/build ]; then
+        rm -rf android/contrib/build
+    fi
 
     if [ ! -d ${prj_root_path}/android/ijkplayer/ijkplayer-example/src/main/jniLibs ]; then
         echo -e "${TEXT_RED}${prj_root_path}/android/ijkplayer/ijkplayer-example/src/main/jniLibs not exist${TEXT_RESET}\n"
@@ -304,8 +308,43 @@ function do_clean()
 }
 
 
+function do_cleanall()
+{
+    do_clean
+
+    cd ${prj_root_path}
+    show_pwd
+
+    echo -e "${TEXT_RED}remove android/contrib/ffmpeg-*${TEXT_RESET}"
+    rm -rf android/contrib/ffmpeg-*
+
+    echo -e "${TEXT_RED}remove android/contrib/openssl-*${TEXT_RESET}"
+    rm -rf android/contrib/openssl-*
+}
+
+
+function do_init()
+{
+    dump_envs
+    check_ndk
+    check_sources  "openssl"
+    check_sources  "ffmpeg"
+}
+
+
 function do_build()
 {
+    cd ${prj_root_path}
+    if  [ ! -d android/contrib/ffmpeg-x86_64 ] || [ ! -d android/contrib/ffmpeg-arm64 ];then
+        echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
+        exit 1
+    fi
+
+    #if [ ! -d android/contrib/ffmpeg-x86 ] || [ ! -d android/contrib/ffmpeg-armv7a ];then
+    #    echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
+    #    exit 1
+    #fi
+
     if [ ${build_type} = "release" ];then
         build_native_release
     elif [ ${build_type} = "debug" ];then
@@ -328,6 +367,12 @@ case "$user_command" in
     clean)
         do_clean
     ;;
+    cleanall)
+        do_cleanall
+    ;;
+    init)
+        do_init
+    ;;
     build)
         do_build
     ;;
@@ -342,8 +387,5 @@ esac
 user_command=$1
 
 dump_envs
-check_ndk
-check_sources  "openssl"
-check_sources  "ffmpeg"
 
 main

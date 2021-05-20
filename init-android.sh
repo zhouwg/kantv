@@ -16,10 +16,19 @@
 # limitations under the License.
 #
 
-# IJK_FFMPEG_UPSTREAM=git://git.videolan.org/ffmpeg.git
-IJK_FFMPEG_UPSTREAM=https://github.com/Bilibili/FFmpeg.git
-IJK_FFMPEG_FORK=https://github.com/Bilibili/FFmpeg.git
-IJK_FFMPEG_COMMIT=ff3.4--ijk0.8.7--20180103--001
+#the speed of fetch code from github.com is very very very slow
+#I have to switch from github.com to gitee.com
+#Thanks GFW
+#IJK_FFMPEG_UPSTREAM=https://github.com/zhouwg/FFmpeg.git
+#IJK_FFMPEG_FORK=https://github.com/zhouwg/FFmpeg.git
+
+#IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/bilibili_ffmpeg.git
+#IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/bilibili_ffmpeg.git
+#IJK_FFMPEG_COMMIT=ff3.4--ijk0.8.7--20180103--001
+
+IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
+IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
+IJK_FFMPEG_COMMIT=release/3.4
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e
@@ -33,9 +42,12 @@ sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
 function pull_fork()
 {
     echo "== pull ffmpeg fork $1 =="
+    echo "$TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/contrib/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}"
     sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/contrib/ffmpeg-$1 ${IJK_FFMPEG_LOCAL_REPO}
     cd android/contrib/ffmpeg-$1
-    git checkout ${IJK_FFMPEG_COMMIT} -B ijkplayer
+    #ff3.4--ijk0.8.7--20180103--001 in bilibili_ffmpeg
+    #git checkout ${IJK_FFMPEG_COMMIT} -B ijkplayer
+    git checkout ${IJK_FFMPEG_COMMIT}
     cd -
 }
 

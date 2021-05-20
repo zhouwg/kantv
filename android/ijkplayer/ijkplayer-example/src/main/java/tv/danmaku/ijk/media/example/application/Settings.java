@@ -102,6 +102,12 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, false);
     }
 
+    public boolean getRtspUseTcp() {
+        String key = mAppContext.getString(R.string.pref_key_rtsp_tcp);
+        return mSharedPreferences.getBoolean(key, true);
+    }
+
+
     public String getLastDirectory() {
         String key = mAppContext.getString(R.string.pref_key_last_directory);
         return mSharedPreferences.getString(key, "/");

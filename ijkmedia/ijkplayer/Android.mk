@@ -26,8 +26,8 @@ include $(CLEAR_VARS)
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
 LOCAL_CFLAGS += -mfloat-abi=soft
 endif
-LOCAL_CFLAGS += -std=c99
-LOCAL_LDLIBS += -llog -landroid
+LOCAL_CFLAGS += -std=c99 -g
+LOCAL_LDLIBS += -lz -lm -llog -landroid
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_C_INCLUDES += $(realpath $(LOCAL_PATH)/..)
@@ -75,8 +75,12 @@ LOCAL_SRC_FILES += ijkavutil/ijktree.c
 LOCAL_SRC_FILES += ijkavutil/ijkfifo.c
 LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
 
-LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
-LOCAL_STATIC_LIBRARIES := android-ndk-profiler ijksoundtouch
+#LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
+#LOCAL_STATIC_LIBRARIES := android-ndk-profiler ijksoundtouch
+
+
+LOCAL_SHARED_LIBRARIES :=  ijksdl
+LOCAL_STATIC_LIBRARIES :=  avformat avcodec swscale swresample avfilter avutil ssl crypto android-ndk-profiler ijksoundtouch
 
 LOCAL_MODULE := ijkplayer
 

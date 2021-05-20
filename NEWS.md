@@ -1,9 +1,11 @@
 branch dev-baseon-latest-k0.8.8
 --------------------------------
-- ffmpeg   : plan to upgrade to 4.4
-- openssl  : upgrading to OpenSSL_1_1_1-stable
-- ijkplayer: rtsp
-- ijkplayer: bugfix
+- ffmpeg   : upgrade from ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg 3.4 Cantor
+- openssl  : upgrading to OpenSSL_1_1_1-stable:
+             target "armv5 armeabi-v7a x86" not working with OpenSSL_1_1_1-stable
+             target "arm64-v8a x86_64" ok now
+- ijkplayer: fix playback issue when switch between rtsp content and http/htls content
+- ijkplayer: add new feature 
 
 tag k0.8.8
 --------------------------------

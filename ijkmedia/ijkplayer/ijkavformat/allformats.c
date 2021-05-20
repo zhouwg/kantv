@@ -79,7 +79,13 @@ void ijkav_register_all(void)
     IJK_REGISTER_PROTOCOL(ijkmediadatasource);
 #endif
     IJK_REGISTER_PROTOCOL(ijkio);
-    IJK_REGISTER_PROTOCOL(async);
+    // weiguo,2021-05-20,20:16 must comment
+    // IJK_REGISTER_PROTOCOL(async)
+    // after upgrade ffmpeg from ff3.4--ijk0.8.7--20180103--001 to latest ffmpeg3.4
+    // root cause is conflict between ijkimp_ff_async_protocol and ff_async_protocol;
+    // so segment fault during memcpy(&ff_##x##_protocol, protocol, protocol_size) in
+    // libavformat/ijkutils.c
+    // IJK_REGISTER_PROTOCOL(async);
     IJK_REGISTER_PROTOCOL(ijklongurl);
     IJK_REGISTER_PROTOCOL(ijktcphook);
     IJK_REGISTER_PROTOCOL(ijkhttphook);

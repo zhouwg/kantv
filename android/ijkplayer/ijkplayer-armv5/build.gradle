@@ -10,16 +10,34 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion rootProject.ext.targetSdkVersion
+        externalNativeBuild {
+            ndkBuild {
+                abiFilters "armeabi"
+            }
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        debug {
+            debuggable true
+            jniDebuggable true
+            ndk {
+                debuggable true
+            }
+        }
     }
-    sourceSets.main {
-        jniLibs.srcDirs 'src/main/libs'
-        jni.srcDirs = [] // This prevents the auto generation of Android.mk
+    //https://developer.android.com/studio/releases/gradle-plugin#cmake-imported-targets
+    //sourceSets.main {
+    //    jniLibs.srcDirs 'src/main/libs'
+    //    jni.srcDirs = [] // This prevents the auto generation of Android.mk
+    //}
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
+        }
     }
 }
 

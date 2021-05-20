@@ -28,9 +28,11 @@
 #include "ff_ffmsg_queue.h"
 
 #include "ijkmeta.h"
+#include "libavutil/cde_log.h"
 
 #ifndef MPTRACE
-#define MPTRACE ALOGD
+//#define MPTRACE ALOGD
+#define MPTRACE LOGD
 #endif
 
 typedef struct IjkMediaPlayer IjkMediaPlayer;

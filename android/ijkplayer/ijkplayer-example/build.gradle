@@ -20,10 +20,11 @@ android {
         ndk {
             //armeabiv-v7a: 第7代及以上的 ARM 处理器。2011年15月以后的生产的大部分Android设备都使用它
             //arm64-v8a: 第8代、64位ARM处理器
-            //armeabi: 第5代、第6代的ARM处理器，早期的手机用的比较多,此工程中默认不处理
+            //armeabi: 第5代、第6代的ARM处理器，早期的手机用的比较多
             //x86: 平板、模拟器用得比较多
             //x86_64: 64位的平板
-            abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            //abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            abiFilters  "arm64-v8a", "x86_64"
         }
     }
 
@@ -68,14 +69,14 @@ dependencies {
     compile project(':ijkplayer-java')
     compile project(':ijkplayer-exo')
 
-    all32Compile project(':ijkplayer-armv5')
-    all32Compile project(':ijkplayer-armv7a')
-    all32Compile project(':ijkplayer-x86')
+    //all32Compile project(':ijkplayer-armv5')
+    //all32Compile project(':ijkplayer-armv7a')
+    //all32Compile project(':ijkplayer-x86')
 
-    all64Compile project(':ijkplayer-armv5')
-    all64Compile project(':ijkplayer-armv7a')
+    //all64Compile project(':ijkplayer-armv5')
+    //all64Compile project(':ijkplayer-armv7a')
     all64Compile project(':ijkplayer-arm64')
-    all64Compile project(':ijkplayer-x86')
+    //all64Compile project(':ijkplayer-x86')
     all64Compile project(':ijkplayer-x86_64')
 
     // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'

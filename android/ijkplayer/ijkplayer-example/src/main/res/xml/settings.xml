@@ -86,5 +86,12 @@
             android:persistent="true"
             android:summary="@string/pref_summary_using_mediadatasource"
             android:title="@string/pref_title_using_mediadatasource" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_rtsp_tcp"
+            android:persistent="true"
+            android:summary="@string/pref_summary_rtsp_tcp"
+            android:title="@string/pref_title_rtsp_tcp" />
     </PreferenceCategory>
 </PreferenceScreen>
