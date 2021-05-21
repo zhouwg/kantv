@@ -20,7 +20,7 @@
 IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
 IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
 #IJK_FFMPEG_COMMIT=ff3.4--ijk0.8.7--20180103--001
-IJK_FFMPEG_COMMIT=release/3.4
+IJK_FFMPEG_COMMIT=release/4.4
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 IJK_GASP_UPSTREAM=git@gitee.com:zhouweiguo2020/gas-preprocessor.git

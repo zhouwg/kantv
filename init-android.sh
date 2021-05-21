@@ -28,7 +28,7 @@
 
 IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
 IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
-IJK_FFMPEG_COMMIT=release/3.4
+IJK_FFMPEG_COMMIT=release/4.4
 IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e
