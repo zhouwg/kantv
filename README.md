@@ -76,8 +76,8 @@ ndk.dir=<your ndk path>/android-ndk-r14b
 step1:build all native libs
 
 ```
-./build-all-android-native-libs.sh clean
-time ./build-all-android-native-libs.sh build
+./build-all-native-libs.sh clean
+time ./build-all-native-libs.sh build
 
 ```
 
@@ -89,11 +89,43 @@ build apk by latest Android Studio IDE
 
 ### iOS
 
- refers to original offcial README
+#### prerequisites
 
- [https://github.com/bilibili/ijkplayer/blob/master/README.md](https://github.com/bilibili/ijkplayer/blob/master/README.md)
+- Host OS information:
+
+```
+uname -a
+
+Darwin 19.6.0 Darwin kernel Version 19.6.0 x86_64
+
+```
+
+- [Xcode-12](https://developer.apple.com/download/more/)
 
 
+#### Before Build
+
+```
+git clone https://github.com/zhouwg/ijkplayer
+cd ijkplayer
+git checkout dev-baseon-latest-k0.8.8
+
+```
+
+#### Build iOS
+
+step1:build all native libs
+
+```
+./build-all-native-libs.sh clean
+time ./build-all-native-libs.sh build
+
+```
+
+step2: build APP
+
+
+build APP by latest Xcode IDE
 
 
 ### Support
