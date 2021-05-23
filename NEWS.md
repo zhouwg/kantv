@@ -20,8 +20,6 @@ branch dev-baseon-latest-k0.8.8
                           stability
 
 
-- build :       [ongoing]  merge my develoment branch: Android port in dev-baseon-latest-k0.8.8 branch & iOS port in     dev-ios-baseon-latest-k0.8.8 branch
-
 tag k0.8.8
 --------------------------------
 - ffmpeg: upgrade to 3.4

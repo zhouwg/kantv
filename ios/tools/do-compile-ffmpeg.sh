@@ -205,10 +205,13 @@ FFMPEG_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
 #--------------------
 # with openssl
 if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
+    echo "openssl detected"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
 
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
     FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+else
+    echo "openssl not detected"
 fi
 
 #--------------------

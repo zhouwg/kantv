@@ -312,7 +312,6 @@ AVInputFormat ijkff_ijklivehook_demuxer = {
     .flags          = AVFMT_NOFILE | AVFMT_TS_DISCONT,
     .priv_data_size = sizeof(Context),
     .read_probe     = ijklivehook_probe,
-    /*.read_header2   = ijklivehook_read_header,*/
     .read_header   = ijklivehook_read_header,
     .read_packet    = ijklivehook_read_packet,
     .read_close     = ijklivehook_read_close,
