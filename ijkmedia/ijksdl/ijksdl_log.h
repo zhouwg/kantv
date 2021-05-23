@@ -26,12 +26,12 @@
 #define IJKSDL__IJKSDL_LOG_H
 
 #include <stdio.h>
+#include "libavutil/cde_log.h"
 
 #ifdef __ANDROID__
 
 #include <android/log.h>
 #include "ijksdl_extra_log.h"
-#include "libavutil/cde_log.h"
 
 #define IJK_LOG_UNKNOWN     ANDROID_LOG_UNKNOWN
 #define IJK_LOG_DEFAULT     ANDROID_LOG_DEFAULT

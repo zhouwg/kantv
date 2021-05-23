@@ -1,22 +1,34 @@
 branch dev-baseon-latest-k0.8.8
 --------------------------------
-- ffmpeg      : [done]    upgrade from ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg 3.4 Cantor
+- ffmpeg      : [done]    upgrade from ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg4.4 Rao
+
                           ok for Android port & iOS port
 
 - openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable:
+
                           target "armv5 armeabi-v7a x86" not working with OpenSSL_1_1_1-stable
+
                           target "arm64-v8a x86_64" ok now for Android port & iOS port
 
+
 - Android port: [done]    refine build system
+
                           add display url in playback for troubleshooting purpose
+
                           fix playback issue when switch between rtsp content and http/htls content
+
                           add display statistic info in playback UI for pressure test & troubleshooting purpose
--               [ongoing] add telemetry module for UI & background statistical usage
+
+                [ongoing] add telemetry module for UI & background statistical usage
+
                           stability
 
 - iOS port    : [done]    dev-ios-baseon-latest-k0.8.8 branch could running on iOS simulator in my macOS
--               [ongoing] refine build system
-                          fix playback issue when switch between rtsp content and http/htls content
+
+                          merge dev-ios-baseon-latest-k0.8.8 to dev-baseon-latest-k0.8.8 and remove dev-ios-baseon-latest-k0.8.8
+
+                [ongoing] fix playback issue when switch between rtsp content and http/htls content
+
                           stability
 
 
