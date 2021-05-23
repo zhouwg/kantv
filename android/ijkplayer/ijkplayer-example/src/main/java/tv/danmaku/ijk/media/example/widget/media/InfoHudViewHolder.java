@@ -7,7 +7,9 @@ import android.util.SparseArray;
 import android.view.View;
 import android.widget.TableLayout;
 
+import java.util.Date;
 import java.util.Locale;
+import java.text.SimpleDateFormat;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -175,6 +177,20 @@ public class InfoHudViewHolder {
                     setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
                     setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
                     setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
+
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+                    long startTime = mp.getBeginTime();
+                    setRowValue(R.string.start_time, formatter.format(new Date(startTime)));
+
+                    Date curTime =  new Date(System.currentTimeMillis());
+                    setRowValue(R.string.current_time, formatter.format(curTime));
+
+                    long playTime = mp.getPlayTime();
+                    setRowValue(R.string.play_time, String.valueOf(playTime) + "  secs");
+
+                    long pauseTime = mp.getPauseTime();
+                    setRowValue(R.string.pause_time, String.valueOf(pauseTime) + "  secs");
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);
                     mHandler.sendEmptyMessageDelayed(MSG_UPDATE_HUD, 500);
