@@ -24,6 +24,9 @@ IJK_OPENSSL_LOCAL_REPO=extra/openssl
 
 set -e
 TOOLS=tools
+FF_ALL_ARCHS_SDK="armv5 armv7a arm64 x86 x86_64"
+FF_ALL_ARCHS=$FF_ALL_ARCHS_SDK
+FF_TARGET=$1
 
 echo "== pull openssl base =="
 sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
@@ -37,8 +40,26 @@ function pull_fork()
     cd -
 }
 
-pull_fork "armv5"
-pull_fork "armv7a"
-pull_fork "arm64"
-pull_fork "x86"
-pull_fork "x86_64"
+
+function pull_fork_all() {
+    for ARCH in $FF_ALL_ARCHS
+    do
+        pull_fork $ARCH
+    done
+}
+
+#pull_fork "armv5"
+#pull_fork "armv7a"
+#pull_fork "arm64"
+#pull_fork "x86"
+#pull_fork "x86_64"
+
+
+case "$FF_TARGET" in
+    armv5|armv7a|arm64|x86|x86_64)
+        pull_fork $FF_TARGET
+    ;;
+    all|*)
+        pull_fork_all
+    ;;
+esac

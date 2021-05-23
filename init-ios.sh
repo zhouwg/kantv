@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /bin/bash
 #
 # Copyright (C) 2013-2015 Bilibili
 # Copyright (C) 2013-2015 Zhang Rui <bbcallen@gmail.com>
@@ -93,5 +93,6 @@ case "$FF_TARGET" in
     ;;
 esac
 
+echo "IJK_FFMPEG_COMMIT = ${IJK_FFMPEG_COMMIT}"
 sync_ff_version
 

@@ -33,6 +33,9 @@ IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
 set -e
 TOOLS=tools
+FF_ALL_ARCHS_SDK="armv5 armv7a arm64 x86 x86_64"
+FF_ALL_ARCHS=$FF_ALL_ARCHS_SDK
+FF_TARGET=$1
 
 git --version
 
@@ -51,12 +54,35 @@ function pull_fork()
     cd -
 }
 
-pull_fork "armv5"
-pull_fork "armv7a"
-pull_fork "arm64"
-pull_fork "x86"
-pull_fork "x86_64"
 
-./init-config.sh
-./init-android-libyuv.sh
-./init-android-soundtouch.sh
+function pull_fork_all() {
+    for ARCH in $FF_ALL_ARCHS
+    do
+        pull_fork $ARCH
+    done
+}
+
+#pull_fork "armv5"
+#pull_fork "armv7a"
+#pull_fork "arm64"
+#pull_fork "x86"
+#pull_fork "x86_64"
+
+function pull_common() {
+    git --version
+    sh ./init-config.sh
+    sh ./init-android-libyuv.sh
+    sh ./init-android-soundtouch.sh
+}
+
+
+case "$FF_TARGET" in
+    armv5|armv7a|arm64|x86|x86_64)
+        pull_common
+        pull_fork $FF_TARGET
+    ;;
+    all|*)
+        pull_common
+        pull_fork_all
+    ;;
+esac
