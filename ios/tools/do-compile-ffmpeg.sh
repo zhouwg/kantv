@@ -125,18 +125,27 @@ FF_XCODE_BITCODE=
 if [ "$FF_ARCH" = "i386" ]; then
     FF_BUILD_NAME="ffmpeg-i386"
     FF_BUILD_NAME_OPENSSL=openssl-i386
+    FF_BUILD_NAME_LIBICONV=libiconv-i386
+    FF_BUILD_NAME_LIBZ=libz-i386
+    FF_BUILD_NAME_LIBXML2=libxml2-i386
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=6.0"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
 elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME="ffmpeg-x86_64"
     FF_BUILD_NAME_OPENSSL=openssl-x86_64
+    FF_BUILD_NAME_LIBICONV=libiconv-x86_64
+    FF_BUILD_NAME_LIBZ=libz-x86_64
+    FF_BUILD_NAME_LIBXML2=libxml2-x86_64
     FF_XCRUN_PLATFORM="iPhoneSimulator"
     FF_XCRUN_OSVERSION="-mios-simulator-version-min=7.0"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_SIMULATOR"
 elif [ "$FF_ARCH" = "armv7" ]; then
     FF_BUILD_NAME="ffmpeg-armv7"
     FF_BUILD_NAME_OPENSSL=openssl-armv7
+    FF_BUILD_NAME_LIBICONV=libiconv-armv7
+    FF_BUILD_NAME_LIBZ=libz-armv7
+    FF_BUILD_NAME_LIBXML2=libxml2-armv7
     FF_XCRUN_OSVERSION="-miphoneos-version-min=6.0"
     FF_XCODE_BITCODE="-fembed-bitcode"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
@@ -144,6 +153,9 @@ elif [ "$FF_ARCH" = "armv7" ]; then
 elif [ "$FF_ARCH" = "armv7s" ]; then
     FF_BUILD_NAME="ffmpeg-armv7s"
     FF_BUILD_NAME_OPENSSL=openssl-armv7s
+    FF_BUILD_NAME_LIBICONV=libiconv-armv7s
+    FF_BUILD_NAME_LIBZ=libz-armv7s
+    FF_BUILD_NAME_LIBXML2=libxml2-armv7s
     FFMPEG_CFG_CPU="--cpu=swift"
     FF_XCRUN_OSVERSION="-miphoneos-version-min=6.0"
     FF_XCODE_BITCODE="-fembed-bitcode"
@@ -151,6 +163,9 @@ elif [ "$FF_ARCH" = "armv7s" ]; then
 elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME="ffmpeg-arm64"
     FF_BUILD_NAME_OPENSSL=openssl-arm64
+    FF_BUILD_NAME_LIBICONV=libiconv-arm64
+    FF_BUILD_NAME_LIBZ=libz-arm64
+    FF_BUILD_NAME_LIBXML2=libxml2-arm64
     FF_XCRUN_OSVERSION="-miphoneos-version-min=7.0"
     FF_XCODE_BITCODE="-fembed-bitcode"
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_FLAGS_ARM"
@@ -185,6 +200,7 @@ echo "[*] configurate ffmpeg"
 echo "--------------------"
 FF_XCRUN_SDK=`echo $FF_XCRUN_PLATFORM | tr '[:upper:]' '[:lower:]'`
 FF_XCRUN_CC="xcrun -sdk $FF_XCRUN_SDK clang"
+export CC="$FF_XCRUN_CC -arch $FF_ARCH $FF_XCRUN_OSVERSION"
 
 FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS $FFMPEG_CFG_CPU"
 
@@ -209,10 +225,50 @@ if [ -f "${FFMPEG_DEP_OPENSSL_LIB}/libssl.a" ]; then
     FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-openssl"
 
     FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_OPENSSL_INC}"
-    FFMPEG_DEP_LIBS="$FFMPEG_CFLAGS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
+    FFMPEG_DEP_LIBS="$FFMPEG_DEP_LIBS -L${FFMPEG_DEP_OPENSSL_LIB} -lssl -lcrypto"
 else
     echo "openssl not detected"
 fi
+
+FFMPEG_DEP_LIBXML2_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/include
+FFMPEG_DEP_LIBXML2_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib
+if [ -f "${FFMPEG_DEP_LIBXML2_LIB}/libxml2.a" ]; then
+    echo "libxml2 detected"
+    FFMPEG_CFG_FLAGS="$FFMPEG_CFG_FLAGS --enable-libxml2"
+
+    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_LIBXML2_INC}"
+    FFMPEG_DEP_LIBS="$FFMPEG_DEP_LIBS -L${FFMPEG_DEP_LIBXML2_LIB} -lxml2 -lz"
+else
+    echo "libxml2 not detected"
+fi
+
+FFMPEG_DEP_LIBZ_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/include
+FFMPEG_DEP_LIBZ_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/lib
+if [ -f "${FFMPEG_DEP_LIBZ_LIB}/libz.a" ]; then
+    echo "libz detected"
+    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_LIBZ_INC}"
+    FFMPEG_DEP_LIBS="$FFMPEG_DEP_LIBS -L${FFMPEG_DEP_LIBZ_LIB} -lz"
+else
+    echo "libz not detected"
+fi
+
+
+FFMPEG_DEP_LIBICONV_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/include
+FFMPEG_DEP_LIBICONV_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/lib
+if [ -f "${FFMPEG_DEP_LIBICONV_LIB}/libiconv.a" ]; then
+    echo "libiconv detected"
+
+    FFMPEG_CFLAGS="$FFMPEG_CFLAGS -I${FFMPEG_DEP_LIBICONV_INC}"
+    FFMPEG_DEP_LIBS="$FFMPEG_DEP_LIBS -L${FFMPEG_DEP_LIBICONV_LIB} -liconv"
+else
+    echo "libiconv not detected"
+fi
+
+
+echo FFMPEG_CFLAGS=$FFMPEG_CFLAGS
+echo FFMPEG_DEP_LIBS=$FFMPEG_DEP_LIBS
+
+
 
 #--------------------
 echo "\n--------------------"
@@ -232,10 +288,14 @@ fi
 export DEBUG_INFORMATION_FORMAT=dwarf-with-dsym
 
 cd $FF_BUILD_SOURCE
+echo "current working path:$(pwd)"
 if [ -f "./config.h" ]; then
     echo 'reuse configure'
 else
     echo "config: $FFMPEG_CFG_FLAGS $FF_XCRUN_CC"
+    which pkg-config
+    echo "export PKG_CONFIG_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib/pkgconfig:$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib/pkgconfig:$PKG_CONFIG_PATH"
+    export PKG_CONFIG_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib/pkgconfig:$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib/pkgconfig:$PKG_CONFIG_PATH
     ./configure \
         $FFMPEG_CFG_FLAGS \
         --cc="$FF_XCRUN_CC" \

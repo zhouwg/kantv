@@ -75,6 +75,28 @@ Darwin 19.6.0 Darwin kernel Version 19.6.0 x86_64
 
 ```
 
+- brew and GNU build tools
+
+```
+brew install automake
+
+brew install autoconf
+
+brew install wget
+
+wget http://mirrors.ustc.edu.cn/gnu/libtool/libtool-2.4.6.tar.xz
+
+tar Jxf libtool-2.4.6.tar.xz
+
+cd libtool-2.4.6
+
+./configure --prefix=/usr/local
+
+make;make install
+
+```
+
+
 - [Xcode-12](https://developer.apple.com/download/more/)
 
 

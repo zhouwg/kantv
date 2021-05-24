@@ -517,42 +517,30 @@ function build_native_release()
         show_pwd
 
         echo "build libiconv-${realname}..."
-        if [ $BUILD_TARGET == "android" ]; then
-            ./compile-libiconv.sh $realname
-            if [ $? != 0 ]; then
-                echo -e "${TEXT_RED} build libiconv failed ${TEXT_RESET}"
-                exit 1
-            else
-                echo -e "${TEXT_BLUE} build libiconv successed ${TEXT_RESET}"
-            fi
+        ./compile-libiconv.sh $realname
+        if [ $? != 0 ]; then
+            echo -e "${TEXT_RED} build libiconv failed ${TEXT_RESET}"
+            exit 1
         else
-            echo -e "${TEXT_RED} build libiconv for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+            echo -e "${TEXT_BLUE} build libiconv successed ${TEXT_RESET}"
         fi
 
         echo "build libz-${realname}..."
-        if [ $BUILD_TARGET == "android" ]; then
-            ./compile-libz.sh $realname
-            if [ $? != 0 ]; then
-                echo -e "${TEXT_RED} build libz failed ${TEXT_RESET}"
-                exit 1
-            else
-                echo -e "${TEXT_BLUE} build libz successed ${TEXT_RESET}"
-            fi
+        ./compile-libz.sh $realname
+        if [ $? != 0 ]; then
+             echo -e "${TEXT_RED} build libz failed ${TEXT_RESET}"
+             exit 1
         else
-            echo -e "${TEXT_RED} build libz for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+             echo -e "${TEXT_BLUE} build libz successed ${TEXT_RESET}"
         fi
 
         echo "build libxml2-${realname}..."
-        if [ $BUILD_TARGET == "android" ]; then
-            ./compile-libxml2.sh $realname
-            if [ $? != 0 ]; then
-                echo -e "${TEXT_RED} build libxml2 failed ${TEXT_RESET}"
-                exit 1
-            else
-                echo -e "${TEXT_BLUE} build libxml2 successed ${TEXT_RESET}"
-            fi
+        ./compile-libxml2.sh $realname
+        if [ $? != 0 ]; then
+             echo -e "${TEXT_RED} build libxml2 failed ${TEXT_RESET}"
+             exit 1
         else
-            echo -e "${TEXT_RED} build libxml2 for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+             echo -e "${TEXT_BLUE} build libxml2 successed ${TEXT_RESET}"
         fi
 
         echo "build openssl-${realname}..."
@@ -688,6 +676,9 @@ function do_cleanall()
 
         echo -e "${TEXT_RED}remove android/contrib/libiconv-*${TEXT_RESET}"
         rm -rf android/contrib/libiconv-*
+
+        echo -e "${TEXT_RED}remove android/contrib/libz-*${TEXT_RESET}"
+        rm -rf android/contrib/libz-*
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_RED}remove ios/ffmpeg-*${TEXT_RESET}"
         rm -rf ios/ffmpeg-*
@@ -700,6 +691,9 @@ function do_cleanall()
 
         echo -e "${TEXT_RED}remove ios/libiconv-*${TEXT_RESET}"
         rm -rf ios/libiconv-*
+
+        echo -e "${TEXT_RED}remove android/contrib/libz-*${TEXT_RESET}"
+        rm -rf android/contrib/libz-*
     else
         echo -e "${TEXT_RED} BUILD_TARGET $BUILD_TARGET unknown,pls check...${TEXT_RESET}"
     fi
