@@ -5,13 +5,18 @@
 # validate ok on Ubuntu 20.04.2 x86_64 LTS
 # validate ok on macOS Catalina(10.15.7) x86_64
 
-# zhou.weiguo, 2021-05-12,16:19
-# zhou.weiguo, 2021-05-22,17:26, refine for target iOS
+# Special thanks to Zhang Rui <bbcallen@gmail.com> & Bilibili
 
-#BUILD_ARCHS=(armv5 armeabi-v7a arm64-v8a x86 x86_64)
-#TODO: target "armv5 armeabi-v7a x86" not working with OpenSSL_1_1_1-stable
-#can't work fine in macOS when put it in function setup_env()
-export BUILD_ARCHS=(arm64-v8a x86_64)
+# Special thanks to:
+# https://github.com/bilibili/ijkplayer/blob/master/init-android.sh
+# https://github.com/bilibili/ijkplayer/blob/master/init-android-openssl.sh
+# https://github.com/bilibili/ijkplayer/blob/master/init-ios.sh
+# https://github.com/bilibili/ijkplayer/blob/master/init-ios-openssl.sh
+
+
+# zhou.weiguo <zhouwg2000@gmail.com> 2021-05-12,16:19
+# zhou.weiguo <zhouwg2000@gmail.com> 2021-05-22,17:26, refine for target iOS
+
 
 function setup_env()
 {
@@ -25,33 +30,29 @@ function setup_env()
 
     export BUILD_USER=$(whoami)
     export BUILD_TIME=`date +"%Y-%m-%d,%H:%M:%S"`
+    export BUILD_HOST=Linux
+    export BUILD_TARGET=android
+    export BUILD_ARCHS="arm64-v8a x86_64"
+    export BUILD_TYPE=release
+
+
     export HOME_PATH=$(env | grep ^HOME= | cut -c 6-)
-    export PROJECT_NAME=ijkplayer-android
+    export PROJECT_NAME=ijkplayer
     export PROJECT_ROOT_PATH=$(pwd)
-    #modify following variable accordingly
     #ndk-r14b must be used in this project but I guess clang mightbe ok
     export ANDROID_NDK=/opt/android-ndk-r14b
     export XCODE_SELECT=/usr/bin/xcode-select
     #TODO:better idea to get real cpu counts in macOS
     export HOST_CPU_COUNTS=4
 
-    if [ ! -d ${BUILD_HOST} ]; then
-        export BUILD_HOST=Linux
-    fi
-    if [ ! -d ${BUILD_TARGET} ]; then
-        export BUILD_TARGET=android
-    fi
-
-    #default release build
-    export BUILD_TYPE=release
-    #some files must be modified according to android/patch-debugging-with-lldb.sh for debug build
-    #becareful there some conflicts between release build and debug build for final Android apk
-    #export BUILD_TYPE=debug
-
+    #the speed of fetch code from github.com is very very very slow
+    #I have to switch from github.com to gitee.com
     IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
     IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
     IJK_FFMPEG_COMMIT=release/4.4
     IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
+
+    IJK_GASP_UPSTREAM=git@gitee.com:zhouweiguo2020/gas-preprocessor.git
 
     IJK_OPENSSL_UPSTREAM=git@gitee.com:zhouweiguo2020/openssl
     IJK_OPENSSL_FORK=git@gitee.com:zhouweiguo2020/openssl
@@ -90,9 +91,35 @@ function check_xcode()
 }
 
 
+function check_ubuntu()
+{
+    if [ ${BUILD_HOST} != "Linux" ]; then
+        echo -e "${TEXT_RED}host os is ${BUILD_HOST}${TEXT_RESET}\n"
+        return 0;
+    fi
+
+    if [ -f /etc/issue ]; then
+        host_os=`cat /etc/issue | awk '{print $1 $2}'`
+        if [ ${host_os} == "Ubuntu20.04.2" ]; then
+            echo -e "${TEXT_BLUE}host os is Ubuntu 20.04.2${TEXT_RESET}\n"
+        else
+            echo -e "${TEXT_RED}host os is ${host_os}, not Ubuntu 20.04.2${TEXT_RESET}\n"
+            echo -e "${TEXT_RED}this script only validated ok on host Ubuntu 20.04.2 x86_64 LTS for target Android at the moment${TEXT_RESET}\n"
+            echo -e "${TEXT_RED}it might be running ok on other Linux-like OS${TEXT_RESET}\n"
+            exit 1
+        fi
+    else
+        echo -e "${TEXT_RED}/etc/issue not exist, pls check...${TEXT_RESET}\n"
+    fi
+    return 0;
+}
+
 
 function check_host()
 {
+    cd ${PROJECT_ROOT_PATH}
+    show_pwd
+
     uname_result=`uname -s`
     case ${uname_result} in
         Linux*)  machine="Linux";;
@@ -105,18 +132,45 @@ function check_host()
         export BUILD_TARGET=android
         export BUILD_HOST=Linux
         export HOST_CPU_COUNTS=`cat /proc/cpuinfo | grep "processor" | wc | awk '{print int($1)}'`
+        export BUILD_TYPE=release
+
+        #some files must be modified according to android/patch-debugging-with-lldb.sh for debug build
+        #becareful there some conflicts between release build and debug build for final Android apk
+        #only validated in my Linux dev-machine and careful sanity check is required before committed to github
+        #export BUILD_TYPE=debug
+
+        #TODO:OpenSSL_1_1_1-stable & FFmpeg4.4 not working with arch-eabi "armv5 armeabi-v7a x86"
+        #     working well with arch-eabi "arm64-v8a x86_64" for target Android
+        #full archs for Android
+        #export BUILD_ARCHS="armv5 armeabi-v7a arm64-v8a x86 x86_64"
+        export BUILD_ARCHS="arm64-v8a x86_64"
     elif [ $machine = "Mac" ]; then
         echo -e "${TEXT_BLUE}host os is ${machine}, reset BUILD_TARGET to ios${TEXT_RESET}"
         export BUILD_TARGET=ios
         export BUILD_HOST=Mac
         export XCODE_PATH=`xcode-select -p`
+        export BUILD_TYPE=release
+
+        #TODO:OpenSSL_1_1_1-stable & FFmpeg4.4 not working with arch-eabi "armv7 i386"
+        #     working well with arch-eabi "arm64 x86_64" for target iOS
+        #full archs for iOS
+        #export BUILD_ARCHS="armv7 arm64 i386 x86_64"
+        export BUILD_ARCHS="arm64 x86_64"
     else
-        echo -e "${TEXT_RED}host os is ${machine}, pls check...${TEXT_RESET}\n"
+        echo -e "${TEXT_RED}host os is ${machine}, not supported at the moment...${TEXT_RESET}\n"
+        exit 1
     fi
 
     if [ $BUILD_TARGET == "android" ]; then
         echo -e "${TEXT_BLUE}BUILD_TARGET is $BUILD_TARGET${TEXT_RESET}"
         check_ndk
+        check_ubuntu
+
+        #make Android Studio happy
+        if [ -f android/ijkplayer/local.properties ]; then
+            echo -e "\n" >> android/ijkplayer/local.properties
+            echo "ndk.dir=${ANDROID_NDK}" >> android/ijkplayer/local.properties
+        fi
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_BLUE}BUILD_TARGET is $BUILD_TARGET${TEXT_RESET}"
         check_xcode
@@ -138,8 +192,8 @@ function dump_envs()
     echo "BUILD_HOST:        $BUILD_HOST"
     echo "BUILD_TARGET:      $BUILD_TARGET"
     echo "BUILD_ARCHS:"
-    for index in ${BUILD_ARCHS[@]};do
-        echo "                   $index"
+    for arch in ${BUILD_ARCHS};do
+        echo "                   $arch"
     done
     echo "HOME_PATH:         $HOME_PATH"
     if [ $BUILD_TARGET == "android" ]; then
@@ -207,13 +261,13 @@ function check_sources()
     #BUILD_ARCHS=(armv5 armeabi-v7a arm64-v8a x86 x86_64)
 
     notexist=0
-    for index in ${BUILD_ARCHS[@]};do
-        if [ ${index} == "arm64-v8a" ] || [ ${index} == "arm64_v8a" ]; then
+    for arch in ${BUILD_ARCHS};do
+        if [ ${arch} == "arm64-v8a" ] || [ ${arch} == "arm64_v8a" ]; then
             realname="arm64"
-        elif [ ${index} == "armeabi-v7a" ]; then
+        elif [ ${arch} == "armeabi-v7a" ]; then
             realname="armv7a"
         else
-            realname=${index}
+            realname=${arch}
         fi
         if [ ${BUILD_TARGET} == "android" ]; then
             test_path=./${BUILD_TARGET}/contrib/${module_name}-${realname}
@@ -227,18 +281,63 @@ function check_sources()
         fi
 
         if [ ! -d ${test_path} ]; then
-            echo_left_align "${TEXT_RED}${module_name}${TEXT_RESET}" "source directory not exist"
+            echo_left_align "${TEXT_RED}${test_path}${TEXT_RESET}" "  not exist"
             echo -e "${TEXT_RED}prepare $module_name codes for target ${realname}...${TEXT_RESET}"
             if [ $module_name == "ffmpeg" ]; then
-                ./init-${BUILD_TARGET}.sh ${realname}
+                git --version
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh ./init-config.sh
+                    sh ./init-android-libyuv.sh
+                    sh ./init-android-soundtouch.sh
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    echo "== pull gas-preprocessor base =="
+                    sh $TOOLS/pull-repo-base.sh $IJK_GASP_UPSTREAM extra/gas-preprocessor
+                fi
+                echo "== pull ffmpeg base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
+                echo "== pull ffmpeg fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    echo "$TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/contrib/ffmpeg-${realname} ${IJK_FFMPEG_LOCAL_REPO}"
+                    sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK android/contrib/ffmpeg-${realname} ${IJK_FFMPEG_LOCAL_REPO}
+                    cd android/contrib/ffmpeg-${realname}
+                    show_pwd
+                    git checkout ${IJK_FFMPEG_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    echo "$TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-${realname} ${IJK_FFMPEG_LOCAL_REPO}"
+                    sh $TOOLS/pull-repo-ref.sh $IJK_FFMPEG_FORK ios/ffmpeg-${realname} ${IJK_FFMPEG_LOCAL_REPO}
+                    cd ios/ffmpeg-${realname}
+                    show_pwd
+                    git checkout ${IJK_FFMPEG_COMMIT}
+                fi
+                cd ${PROJECT_ROOT_PATH}
+
+                #./init-${BUILD_TARGET}.sh ${realname}
             elif [ $module_name == "openssl" ]; then
-                ./init-${BUILD_TARGET}-openssl.sh ${realname}
+                git --version
+                echo "== pull openssl base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_OPENSSL_UPSTREAM $IJK_OPENSSL_LOCAL_REPO
+                echo "== pull openssl fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK android/contrib/openssl-${realname} ${IJK_OPENSSL_LOCAL_REPO}
+                    cd android/contrib/openssl-${realname}
+                    show_pwd
+                    git checkout ${IJK_OPENSSL_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_OPENSSL_FORK ios/openssl-${realname} ${IJK_OPENSSL_LOCAL_REPO}
+                    cd ios/openssl-${realname}
+                    show_pwd
+                    git checkout ${IJK_OPENSSL_COMMIT}
+                fi
+                cd ${PROJECT_ROOT_PATH}
+                #./init-${BUILD_TARGET}-openssl.sh ${realname}
             fi
             let notexist++
         else
             echo_left_align "${test_path}" "exist"
         fi
-        let index++
     done
 
     cd ${PROJECT_ROOT_PATH}
@@ -252,7 +351,7 @@ function build_native_debug()
     set -e
     cd ${PROJECT_ROOT_PATH}
     show_pwd
-    echo "build JNI..."
+    echo "build native libs and JNI..."
 
     if [ $BUILD_TARGET != "android" ]; then
         #focus on Android debug build at the moment
@@ -260,15 +359,14 @@ function build_native_debug()
         return;
     fi
 
-    for index in ${BUILD_ARCHS[@]};do
-        echo "arch = ${index}"
-        #if [ ${index} == "arm64-v8a" ]; then
-        if [ ${index} == "arm64-v8a" ] || [ ${index} == "arm64_v8a" ]; then
+    for arch in ${BUILD_ARCHS};do
+        echo "arch = ${arch}"
+        if [ ${arch} == "arm64-v8a" ] || [ ${arch} == "arm64_v8a" ]; then
             realname="arm64"
-        elif [ ${index} == "armeabi-v7a" ]; then
+        elif [ ${arch} == "armeabi-v7a" ]; then
             realname="armv7a"
         else
-            realname=${index}
+            realname=${arch}
         fi
 
         if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni ]; then
@@ -280,23 +378,21 @@ function build_native_debug()
         cd ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni
 
         show_pwd
-        ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${index} NDK_ALL_ABIS=${index} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1 clean
-        ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${index} NDK_ALL_ABIS=${index} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1
+        ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${arch} NDK_ALL_ABIS=${arch} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1 clean
+        ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${arch} NDK_ALL_ABIS=${arch} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1
 
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} ]; then
-            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} not exist${TEXT_RESET}"
-            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
+            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
         else
-            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} already exist${TEXT_RESET}"
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
         fi
-        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${index}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${index}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}
+        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
 
 
-        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${index}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${index}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}
-
-        let index++
+        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
     done
     set +e
 }
@@ -306,17 +402,16 @@ function build_native_release()
 {
     cd ${PROJECT_ROOT_PATH}
     show_pwd
-    echo "build JNI..."
+    echo "build native libs..."
 
-    for index in ${BUILD_ARCHS[@]};do
-        echo "arch = ${index}"
-        #if [ ${index} == "arm64-v8a" ]; then
-        if [ ${index} == "arm64-v8a" ] || [ ${index} == "arm64_v8a" ]; then
+    for arch in ${BUILD_ARCHS};do
+        echo "arch = ${arch}"
+        if [ ${arch} == "arm64-v8a" ] || [ ${arch} == "arm64_v8a" ]; then
             realname="arm64"
-        elif [ ${index} == "armeabi-v7a" ]; then
+        elif [ ${arch} == "armeabi-v7a" ]; then
             realname="armv7a"
         else
-            realname=${index}
+            realname=${arch}
         fi
 
     	if [ $BUILD_TARGET == "android" ]; then
@@ -328,7 +423,7 @@ function build_native_release()
             continue;
         fi
         show_pwd
-        echo "build openssl..."
+        echo "build openssl-${realname}..."
         ./compile-openssl.sh $realname
         if [ $? != 0 ]; then
             echo -e "${TEXT_RED} build openssl failed ${TEXT_RESET}"
@@ -337,7 +432,7 @@ function build_native_release()
             echo -e "${TEXT_BLUE} build openssl successed ${TEXT_RESET}"
         fi
 
-        echo "build ffmpeg..."
+        echo "build ffmpeg-${realname}..."
         ./compile-ffmpeg.sh  $realname
         if [ $? != 0 ]; then
             echo -e "${TEXT_RED}build ffmpeg failed ${TEXT_RESET}"
@@ -347,7 +442,7 @@ function build_native_release()
         fi
 
     	if [ $BUILD_TARGET != "android" ]; then
-            #TODO: build ijksdl and ijkplayer in this script for ios
+            #TODO: build ijksdl and ijkplayer via this script in macOS for target ios
             return;
 	    fi
 
@@ -362,20 +457,18 @@ function build_native_release()
             echo -e "${TEXT_BlUE}build ijkplayer.so ijksdl.so successed ${TEXT_RESET}"
         fi
 
-
         echo -e "\n"
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} ]; then
-            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} not exist${TEXT_RESET}"
-            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
+            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
         else
-            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index} already exist${TEXT_RESET}"
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
         fi
         cd ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
         show_pwd
-        ls -l ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${index}/libijk*.so
-        echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${index}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${index}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${index}
-        let index++
+        ls -l ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so
+        echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
     done
 
     echo -e "\n"
@@ -390,31 +483,29 @@ function do_clean()
     if [ $BUILD_TARGET == "android" ]; then
 	    echo -e "${TEXT_RED}remove android/contrib/build${TEXT_RESET}"
 	    if [ -d android/contrib/build ]; then
-		rm -rf android/contrib/build
+            rm -rf android/contrib/build
 	    fi
 
 	    if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs ]; then
-		echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs not exist${TEXT_RESET}\n"
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs not exist${TEXT_RESET}\n"
 	    else
-		echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
-		rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
+		    echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
+		    rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
 	    fi
     elif [ $BUILD_TARGET == "ios" ]; then
 	    echo -e "${TEXT_RED}remove ios/build${TEXT_RESET}"
 	    if [ -d ios/build ]; then
-		rm -rf ios/build
+		    rm -rf ios/build
 	    fi
     fi
 
-    for index in ${BUILD_ARCHS[@]};do
-        echo "arch = ${index}"
-        #if [ ${index} == "arm64-v8a" ]; then
-        if [ ${index} == "arm64-v8a" ] || [ ${index} == "arm64_v8a" ]; then
+    for arch in ${BUILD_ARCHS};do
+        if [ ${arch} == "arm64-v8a" ] || [ ${arch} == "arm64_v8a" ]; then
             realname="arm64"
-        elif [ ${index} == "armeabi-v7a" ]; then
+        elif [ ${arch} == "armeabi-v7a" ]; then
             realname="armv7a"
         else
-            realname=${index}
+            realname=${arch}
         fi
 
     	if [ $BUILD_TARGET == "android" ]; then
@@ -479,26 +570,34 @@ function do_build()
 {
     cd ${PROJECT_ROOT_PATH}
 
+    for arch in ${BUILD_ARCHS};do
+        if [ ${arch} == "arm64-v8a" ] || [ ${arch} == "arm64_v8a" ]; then
+            realname="arm64"
+        elif [ ${arch} == "armeabi-v7a" ]; then
+            realname="armv7a"
+        else
+            realname=${arch}
+        fi
+        module_names="ffmpeg openssl"
+        for module_name in ${module_names};do
+            if [ ${BUILD_TARGET} == "android" ]; then
+                test_path=./${BUILD_TARGET}/contrib/${module_name}-${realname}
+            elif [ ${BUILD_TARGET} == "ios" ]; then
+                test_path=./${BUILD_TARGET}/${module_name}-${realname}
+            else
+                echo -e "${TEXT_RED}${BUILD_TARGET} unknown,pls check...${TEXT_RESET}"
+                exit 1
+            fi
 
-    if [ $BUILD_TARGET == "android" ]; then
-        if  [ ! -d android/contrib/ffmpeg-x86_64 ] || [ ! -d android/contrib/ffmpeg-arm64 ];then
-	        echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
-	        exit 1
-	    fi
-
-	    #if [ ! -d android/contrib/ffmpeg-x86 ] || [ ! -d android/contrib/ffmpeg-armv7a ];then
-	    #    echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
-	    #    exit 1
-	    #fi
-    elif [ $BUILD_TARGET == "ios" ]; then
-	    if  [ ! -d ios/ffmpeg-x86_64 ] || [ ! -d ios/ffmpeg-arm64 ];then
-	        echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
-	        exit 1
-	    fi
-    else
-        echo -e "${TEXT_RED} BUILD_TARGET $BUILD_TARGET unknown,pls check...${TEXT_RESET}"
-        exit 1
-    fi
+            if [ ! -d ${test_path} ]; then
+                echo_left_align "${TEXT_RED}${test_path}${TEXT_RESET}" " not exist"
+                echo -e "${TEXT_RED}$0 init mightbe required firstly${TEXT_RESET}"
+                exit 1
+            else
+                echo "test_path:$test_path exist"
+            fi
+        done
+    done
 
     if [ ${BUILD_TYPE} = "release" ];then
         build_native_release
