@@ -45,6 +45,8 @@ function setup_env()
     #TODO:better idea to get real cpu counts in macOS
     export HOST_CPU_COUNTS=4
 
+    TOOLS=${PROJECT_ROOT_PATH}/tools
+
     #the speed of fetch code from github.com is very very very slow
     #I have to switch from github.com to gitee.com
     IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
@@ -54,11 +56,44 @@ function setup_env()
 
     IJK_GASP_UPSTREAM=git@gitee.com:zhouweiguo2020/gas-preprocessor.git
 
-    IJK_OPENSSL_UPSTREAM=git@gitee.com:zhouweiguo2020/openssl
-    IJK_OPENSSL_FORK=git@gitee.com:zhouweiguo2020/openssl
+    IJK_OPENSSL_UPSTREAM=git@gitee.com:zhouweiguo2020/openssl.git
+    IJK_OPENSSL_FORK=git@gitee.com:zhouweiguo2020/openssl.git
     IJK_OPENSSL_COMMIT=OpenSSL_1_1_1-stable
     IJK_OPENSSL_LOCAL_REPO=extra/openssl
-    TOOLS=${PROJECT_ROOT_PATH}/tools
+
+    #https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
+    IJK_LIBICONV_UPSTREAM=git@gitee.com:zhouweiguo2020/libiconv.git
+    IJK_LIBICONV_FORK=git@gitee.com:zhouweiguo2020/libiconv.git
+    IJK_LIBICONV_COMMIT=master
+    IJK_LIBICONV_LOCAL_REPO=extra/libiconv
+
+    IJK_LIBZ_UPSTREAM=git@gitee.com:zhouweiguo2020/libz.git
+    IJK_LIBZ_FORK=git@gitee.com:zhouweiguo2020/libz.git
+    IJK_LIBZ_COMMIT=master
+    IJK_LIBZ_LOCAL_REPO=extra/libz
+
+    #IJK_LIBXML2_FORK=https://gitlab.gnome.org/GNOME/libxml2.git
+    IJK_LIBXML2_UPSTREAM=git@gitee.com:zhouweiguo2020/libxml2.git
+    IJK_LIBXML2_FORK=git@gitee.com:zhouweiguo2020/libxml2.git
+    IJK_LIBXML2_COMMIT=master
+    IJK_LIBXML2_LOCAL_REPO=extra/libxml2
+}
+
+
+function show_pwd()
+{
+    echo -e "current working path:$(pwd)\n"
+}
+
+
+function check_ndk()
+{
+    if [ $BUILD_TARGET == "android" ]; then
+        if [ ! -d ${ANDROID_NDK} ]; then
+            echo -e "${TEXT_RED}${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
+            exit 1
+        fi
+    fi
 }
 
 
@@ -139,7 +174,7 @@ function check_host()
         #only validated in my Linux dev-machine and careful sanity check is required before committed to github
         #export BUILD_TYPE=debug
 
-        #TODO:OpenSSL_1_1_1-stable & FFmpeg4.4 not working with arch-eabi "armv5 armeabi-v7a x86"
+        #TODO:OpenSSL_1_1_1-stable not working with arch-eabi "armv5 armeabi-v7a x86"
         #     working well with arch-eabi "arm64-v8a x86_64" for target Android
         #full archs for Android
         #export BUILD_ARCHS="armv5 armeabi-v7a arm64-v8a x86 x86_64"
@@ -151,7 +186,7 @@ function check_host()
         export XCODE_PATH=`xcode-select -p`
         export BUILD_TYPE=release
 
-        #TODO:OpenSSL_1_1_1-stable & FFmpeg4.4 not working with arch-eabi "armv7 i386"
+        #TODO:OpenSSL_1_1_1-stable not working with arch-eabi "armv7 i386"
         #     working well with arch-eabi "arm64 x86_64" for target iOS
         #full archs for iOS
         #export BUILD_ARCHS="armv7 arm64 i386 x86_64"
@@ -294,6 +329,7 @@ function check_sources()
                     echo "== pull gas-preprocessor base =="
                     sh $TOOLS/pull-repo-base.sh $IJK_GASP_UPSTREAM extra/gas-preprocessor
                 fi
+
                 echo "== pull ffmpeg base =="
                 sh $TOOLS/pull-repo-base.sh $IJK_FFMPEG_UPSTREAM $IJK_FFMPEG_LOCAL_REPO
                 echo "== pull ffmpeg fork ${realname} =="
@@ -333,6 +369,62 @@ function check_sources()
                 fi
                 cd ${PROJECT_ROOT_PATH}
                 #./init-${BUILD_TARGET}-openssl.sh ${realname}
+            elif [ $module_name == "libiconv" ]; then
+                git --version
+                echo "== pull libiconv base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_LIBICONV_UPSTREAM $IJK_LIBICONV_LOCAL_REPO
+                echo "== pull libiconv fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBICONV_FORK android/contrib/libiconv-${realname} ${IJK_LIBICONV_LOCAL_REPO}
+                    cd android/contrib/libiconv-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBICONV_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBICONV_FORK ios/libiconv-${realname} ${IJK_LIBICONV_LOCAL_REPO}
+                    cd ios/libiconv-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBICONV_COMMIT}
+                fi
+                cd ${PROJECT_ROOT_PATH}
+            elif [ $module_name == "libz" ]; then
+                git --version
+                echo "== pull libz base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_LIBZ_UPSTREAM $IJK_LIBZ_LOCAL_REPO
+                echo "== pull libz fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBZ_FORK android/contrib/libz-${realname} ${IJK_LIBZ_LOCAL_REPO}
+                    cd android/contrib/libz-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBZ_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBZ_FORK ios/libz-${realname} ${IJK_LIBZ_LOCAL_REPO}
+                    cd ios/libz-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBZ_COMMIT}
+                fi
+                cd ${PROJECT_ROOT_PATH}
+            elif [ $module_name == "libxml2" ]; then
+                git --version
+                echo "== pull libxml2 base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_LIBXML2_UPSTREAM $IJK_LIBXML2_LOCAL_REPO
+                echo "== pull libxml2 fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBXML2_FORK android/contrib/libxml2-${realname} ${IJK_LIBXML2_LOCAL_REPO}
+                    cd android/contrib/libxml2-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBXML2_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBXML2_FORK ios/libxml2-${realname} ${IJK_LIBXML2_LOCAL_REPO}
+                    cd ios/libxml2-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBXML2_COMMIT}
+                fi
+                cd ${PROJECT_ROOT_PATH}
+            else
+                echo -e "${TEXT_RED}dependent module ${module_name} unknown, pls check...${TEXT_RESET}"
             fi
             let notexist++
         else
@@ -423,6 +515,46 @@ function build_native_release()
             continue;
         fi
         show_pwd
+
+        echo "build libiconv-${realname}..."
+        if [ $BUILD_TARGET == "android" ]; then
+            ./compile-libiconv.sh $realname
+            if [ $? != 0 ]; then
+                echo -e "${TEXT_RED} build libiconv failed ${TEXT_RESET}"
+                exit 1
+            else
+                echo -e "${TEXT_BLUE} build libiconv successed ${TEXT_RESET}"
+            fi
+        else
+            echo -e "${TEXT_RED} build libiconv for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+        fi
+
+        echo "build libz-${realname}..."
+        if [ $BUILD_TARGET == "android" ]; then
+            ./compile-libz.sh $realname
+            if [ $? != 0 ]; then
+                echo -e "${TEXT_RED} build libz failed ${TEXT_RESET}"
+                exit 1
+            else
+                echo -e "${TEXT_BLUE} build libz successed ${TEXT_RESET}"
+            fi
+        else
+            echo -e "${TEXT_RED} build libz for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+        fi
+
+        echo "build libxml2-${realname}..."
+        if [ $BUILD_TARGET == "android" ]; then
+            ./compile-libxml2.sh $realname
+            if [ $? != 0 ]; then
+                echo -e "${TEXT_RED} build libxml2 failed ${TEXT_RESET}"
+                exit 1
+            else
+                echo -e "${TEXT_BLUE} build libxml2 successed ${TEXT_RESET}"
+            fi
+        else
+            echo -e "${TEXT_RED} build libxml2 for target $BUILD_TARGET not supported at the moment${TEXT_RESET}"
+        fi
+
         echo "build openssl-${realname}..."
         ./compile-openssl.sh $realname
         if [ $? != 0 ]; then
@@ -466,6 +598,10 @@ function build_native_release()
         fi
         cd ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
         show_pwd
+        if [ ! -f ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijksdl.so ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijksdl.so not exist, it shouldn't happen, pls check ${BUILD_ARCHS}"
+            exit 1
+        fi
         ls -l ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so
         echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
         /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
@@ -546,12 +682,24 @@ function do_cleanall()
 
         echo -e "${TEXT_RED}remove android/contrib/openssl-*${TEXT_RESET}"
         rm -rf android/contrib/openssl-*
+
+        echo -e "${TEXT_RED}remove android/contrib/libxml2-*${TEXT_RESET}"
+        rm -rf android/contrib/libxml2-*
+
+        echo -e "${TEXT_RED}remove android/contrib/libiconv-*${TEXT_RESET}"
+        rm -rf android/contrib/libiconv-*
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_RED}remove ios/ffmpeg-*${TEXT_RESET}"
         rm -rf ios/ffmpeg-*
 
         echo -e "${TEXT_RED}remove ios/openssl-*${TEXT_RESET}"
         rm -rf ios/openssl-*
+
+        echo -e "${TEXT_RED}remove ios/libxml2-*${TEXT_RESET}"
+        rm -rf ios/libxml2-*
+
+        echo -e "${TEXT_RED}remove ios/libiconv-*${TEXT_RESET}"
+        rm -rf ios/libiconv-*
     else
         echo -e "${TEXT_RED} BUILD_TARGET $BUILD_TARGET unknown,pls check...${TEXT_RESET}"
     fi
@@ -561,6 +709,9 @@ function do_cleanall()
 function do_init()
 {
     check_host
+    check_sources  "libiconv"
+    check_sources  "libz"
+    check_sources  "libxml2"
     check_sources  "openssl"
     check_sources  "ffmpeg"
 }

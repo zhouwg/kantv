@@ -392,7 +392,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
             }
         }
 
-        Log.d(TAG, "Couldn't open file on client side, trying server side");
+        IjkLog.d(TAG, "Couldn't open file on client side, trying server side");
 
         setDataSource(uri.toString(), headers);
     }
@@ -532,7 +532,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void start() throws IllegalStateException {
-        Log.i(TAG, "start playing...");
+        IjkLog.i(TAG, "start playing...");
         stayAwake(true);
         if (bIsPaused) {
             mTotalPauseTime += System.currentTimeMillis() - mLastPauseTime;
@@ -546,7 +546,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void stop() throws IllegalStateException {
-        Log.i(TAG, "stop playing...");
+        IjkLog.i(TAG, "stop playing...");
         stayAwake(false);
         _stop();
     }
@@ -561,7 +561,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         if (!bIsPaused) {
             mLastPauseTime = System.currentTimeMillis();
         }
-        Log.i(TAG, "pause playing...");
+        IjkLog.i(TAG, "pause playing...");
         _pause();
         bIsPaused = !bIsPaused;
     }
@@ -755,7 +755,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
      */
     @Override
     public void release() {
-        Log.i(TAG, "release");
+        IjkLog.i(TAG, "release");
         stayAwake(false);
         updateSurfaceScreenOn();
         resetListeners();
@@ -766,7 +766,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void reset() {
-        Log.i(TAG, "reset");
+        IjkLog.i(TAG, "reset");
         stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore

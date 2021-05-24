@@ -1,18 +1,25 @@
 branch dev-baseon-latest-k0.8.8
 --------------------------------
 - ffmpeg      : [done]    upgrade from ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg4.4 Rao，ok for Android port & iOS port
-- openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: target "armv5 armeabi-v7a x86" not working with OpenSSL_1_1_1-stable，target "arm64-v8a x86_64" ok now for Android port & iOS port
+- openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: OpenSSL_1_1_1-stable not working with arch-eabi "armv5 armeabi-v7a x86"
+                                                             ,working well with arch-eabi "arm64-v8a x86_64" for target Android & iOS
 - android : [done]   add display url in playback for troubleshooting purpose
-- android : [done]   fix playback issue when switch between rtsp content and http/htls content                       
+- android : [done]   fix playback issue when switch between RTSP content and HTTP/HLS content
 - android : [done]   add display statistic info in playback UI for pressure test & troubleshooting purpose                    
-- android : [ongoing] add telemetry module for UI & background statistical usage
-- android : [ongoing] stability
+- android : [done]   enable playback DASH content by add libiconv & libxml2 in the project,validate ok on x86-64
+- android : [done]   enable playback AES-128 encrypt content,validate ok on x86-64
+- android : [ongoing, priority:low]    add telemetry module for UI & background statistical usage
+- android : [ongoing, priority:low]    ANR when switch between dash content and hls content
+- android : [ongoing, priority:low]    low start-up speed with internet DASH/RTMP content(about 2-6 secs)
+- android : [ongoing, priority:medium] various stability issues
+- android : [ongoing, priority:high]   add SampleAES support
+- android : [ongoing, priority:high]   add China SM2/SM3/SM4 support
+
 - iOS         : [done]    dev-ios-baseon-latest-k0.8.8 branch could running ok as expected on iOS simulator in my macOS
 - iOS         : [done]    merge dev-ios-baseon-latest-k0.8.8 to dev-baseon-latest-k0.8.8 and remove dev-ios-baseon-latest-k0.8.8
 - iOS         : [ongoing] fix playback issue when switch between rtsp content and http/htls content
 - iOS         : [ongoing] stability
 - build       : refine build system for more reasonable purpose
-
 
 tag k0.8.8
 --------------------------------

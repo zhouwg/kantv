@@ -44,6 +44,12 @@ FF_ANDROID_PLATFORM=android-9
 
 
 FF_BUILD_NAME=
+FF_BUILD_NAME_OPENSSL=
+FF_BUILD_NAME_LIBSOXR=
+FF_BUILD_NAME_LIBICONV=
+FF_BUILD_NAME_LIBXML2=
+
+
 FF_SOURCE=
 FF_CROSS_PREFIX=
 FF_DEP_OPENSSL_INC=
@@ -51,6 +57,12 @@ FF_DEP_OPENSSL_LIB=
 
 FF_DEP_LIBSOXR_INC=
 FF_DEP_LIBSOXR_LIB=
+
+FF_DEP_LIBICONV_INC=
+FF_DEP_LIBICONV_LIB=
+
+FF_DEP_LIBXML2_INC=
+FF_DEP_LIBXML2_LIB=
 
 FF_CFG_FLAGS=
 
@@ -79,6 +91,9 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME=ffmpeg-armv7a
     FF_BUILD_NAME_OPENSSL=openssl-armv7a
     FF_BUILD_NAME_LIBSOXR=libsoxr-armv7a
+    FF_BUILD_NAME_LIBICONV=libiconv-armv7a
+    FF_BUILD_NAME_LIBXML2=libxml2-armv7a
+    FF_BUILD_NAME_LIBZ=libz-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=arm-linux-androideabi
@@ -97,6 +112,9 @@ elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=ffmpeg-armv5
     FF_BUILD_NAME_OPENSSL=openssl-armv5
     FF_BUILD_NAME_LIBSOXR=libsoxr-armv5
+    FF_BUILD_NAME_LIBICONV=libiconv-armv5
+    FF_BUILD_NAME_LIBXML2=libxml2-armv5
+    FF_BUILD_NAME_LIBZ=libz-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=arm-linux-androideabi
@@ -113,10 +131,13 @@ elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=ffmpeg-x86
     FF_BUILD_NAME_OPENSSL=openssl-x86
     FF_BUILD_NAME_LIBSOXR=libsoxr-x86
+    FF_BUILD_NAME_LIBICONV=libiconv-x86
+    FF_BUILD_NAME_LIBXML2=libxml2-x86
+    FF_BUILD_NAME_LIBZ=libz-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=i686-linux-android
-    FF_TOOLCHAIN_NAME=x86-${FF_GCC_VER}
+    FF_TOOLCHAIN_NAME=${FF_CROSS_PREFIX}-${FF_GCC_VER}
 
     FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=x86 --cpu=i686 --enable-yasm"
 
@@ -131,6 +152,9 @@ elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME=ffmpeg-x86_64
     FF_BUILD_NAME_OPENSSL=openssl-x86_64
     FF_BUILD_NAME_LIBSOXR=libsoxr-x86_64
+    FF_BUILD_NAME_LIBICONV=libiconv-x86_64
+    FF_BUILD_NAME_LIBXML2=libxml2-x86_64
+    FF_BUILD_NAME_LIBZ=libz-x86_64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=x86_64-linux-android
@@ -149,6 +173,9 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME=ffmpeg-arm64
     FF_BUILD_NAME_OPENSSL=openssl-arm64
     FF_BUILD_NAME_LIBSOXR=libsoxr-arm64
+    FF_BUILD_NAME_LIBICONV=libiconv-arm64
+    FF_BUILD_NAME_LIBXML2=libxml2-arm64
+    FF_BUILD_NAME_LIBZ=libz-arm64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=aarch64-linux-android
@@ -157,7 +184,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_CFG_FLAGS="$FF_CFG_FLAGS --arch=aarch64 --enable-yasm"
 
     FF_EXTRA_CFLAGS="$FF_EXTRA_CFLAGS"
-    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS"
+    FF_EXTRA_LDFLAGS="$FF_EXTRA_LDFLAGS -lm"
 
     FF_ASSEMBLER_SUB_DIRS="aarch64 neon"
 
@@ -184,6 +211,12 @@ FF_DEP_OPENSSL_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/include
 FF_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
 FF_DEP_LIBSOXR_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBSOXR/output/include
 FF_DEP_LIBSOXR_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBSOXR/output/lib
+FF_DEP_LIBICONV_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/include
+FF_DEP_LIBICONV_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/lib
+FF_DEP_LIBZ_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/include
+FF_DEP_LIBZ_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/lib
+FF_DEP_LIBXML2_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/include
+FF_DEP_LIBXML2_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib
 
 case "$UNAME_S" in
     CYGWIN_NT-*)
@@ -258,6 +291,29 @@ if [ -f "${FF_DEP_LIBSOXR_LIB}/libsoxr.a" ]; then
     FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_LIBSOXR_LIB} -lsoxr"
 fi
 
+if [ -f "${FF_DEP_LIBXML2_LIB}/libxml2.a" ]; then
+    echo "libxml2 detected"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-libxml2"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_LIBXML2_INC}"
+    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_LIBXML2_LIB} -lxml2 -lz -lm"
+fi
+
+if [ -f "${FF_DEP_LIBICONV_LIB}/libiconv.a" ]; then
+    echo "libiconv detected"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_LIBICONV_INC}"
+    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_LIBICONV_LIB} -lcharset -liconv"
+fi
+
+if [ -f "${FF_DEP_LIBZ_LIB}/libz.a" ]; then
+    echo "libz detected"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_LIBZ_INC}"
+    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_LIBZ_LIB} -lz"
+fi
+
+
 FF_CFG_FLAGS="$FF_CFG_FLAGS $COMMON_FF_CFG_FLAGS"
 
 #--------------------
@@ -304,6 +360,8 @@ else
     which $CC
     if [ -f /usr/bin/pkg-config ]; then
         /bin/cp -fv /usr/bin/pkg-config  $FF_TOOLCHAIN_PATH/bin/$FF_CROSS_PREFIX-pkg-config
+        echo "PKG_CONFIG_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib/pkgconfig:$PKG_CONFIG_PATH"
+        export PKG_CONFIG_PATH=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib/pkgconfig:$PKG_CONFIG_PATH
     else
         echo -e "${TEXT_RED}/usr/bin/pkg-config not exist, pls check${TEXT_RESET}"
     fi
@@ -354,6 +412,9 @@ do
         fi
     done
 done
+
+echo "export PATH=$PATH"
+echo "$CC -llog -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS -Wl,-soname,libijkffmpeg.so $FF_C_OBJ_FILES $FF_ASM_OBJ_FILES $FF_DEP_LIBS -o $FF_PREFIX/libijkffmpeg.so"
 
 $CC -llog -lm -lz -shared --sysroot=$FF_SYSROOT -Wl,--no-undefined -Wl,-z,noexecstack $FF_EXTRA_LDFLAGS \
     -Wl,-soname,libijkffmpeg.so \

@@ -1,10 +1,17 @@
 # -----
 build/
 ffmpeg-temp/
-android/ffmpeg-*
-android/openssl-*
+android/contrib/ffmpeg-*
+android/contrib/openssl-*
+android/contrib/libiconv-*
+android/contrib/libxml2-*
+android/contrib/libz-*
+android/contrib/build
 ios/ffmpeg-*
 ios/openssl-*
+ios/libiconv-*
+ios/libxml2-*
+ios/libz-*
 extra
 .DS_Store
 ijkmedia/ijkyuv/

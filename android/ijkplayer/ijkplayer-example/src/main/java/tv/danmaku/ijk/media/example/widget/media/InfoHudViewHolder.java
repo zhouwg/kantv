@@ -3,6 +3,7 @@ package tv.danmaku.ijk.media.example.widget.media;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.TableLayout;
@@ -22,6 +23,7 @@ public class InfoHudViewHolder {
     private IMediaPlayer mMediaPlayer;
     private long mLoadCost = 0;
     private long mSeekCost = 0;
+    private final static String TAG = InfoHudViewHolder.class.getName();
 
     public InfoHudViewHolder(Context context, TableLayout tableLayout) {
         mTableLayoutBinder = new TableLayoutBinder(context, tableLayout);
@@ -124,13 +126,12 @@ public class InfoHudViewHolder {
                     String url = mp.getDataSource();
                     if (url == null)
                         break;
-
                     String tmpUrl = "";
-                    int  lineLength  = 35;
+                    int  lineLength  = 30;
                     int  endPos      = 0;
                     int  beginPos    = 0;
                     int  otherLength = url.length();
-                    for (int i = 0; i < url.length() % lineLength; i++) {
+                    for (int i = 0; i < (url.length() / lineLength + 1); i++) {
                         beginPos    = i * lineLength;
                         if (otherLength <= lineLength) {
                             endPos =  url.length();

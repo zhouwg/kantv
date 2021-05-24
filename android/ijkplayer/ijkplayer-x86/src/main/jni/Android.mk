@@ -23,6 +23,12 @@ MY_APP_JNI_ROOT := $(realpath $(LOCAL_PATH))
 MY_APP_PRJ_ROOT := $(realpath $(MY_APP_JNI_ROOT)/..)
 MY_APP_ANDROID_ROOT := $(realpath $(MY_APP_PRJ_ROOT)/../../../..)
 
+MY_APP_ICONV_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/libiconv-x86/output)
+MY_APP_ICONV_INCLUDE_PATH := $(realpath $(MY_APP_ICONV_OUTPUT_PATH)/include)
+
+MY_APP_XML2_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/libxml2-x86/output)
+MY_APP_XML2_INCLUDE_PATH := $(realpath $(MY_APP_XML2_OUTPUT_PATH)/include)
+
 MY_APP_OPENSSL_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/openssl-x86/output)
 MY_APP_OPENSSL_INCLUDE_PATH := $(realpath $(MY_APP_OPENSSL_OUTPUT_PATH)/include)
 
