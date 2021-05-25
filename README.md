@@ -80,6 +80,7 @@ step1:build all native libs
 
 ```
 ./build-all-native-libs.sh clean
+./build-all-native-libs.sh init
 time ./build-all-native-libs.sh build
 
 ```
@@ -143,6 +144,7 @@ step1:build all native libs
 
 ```
 ./build-all-native-libs.sh clean
+./build-all-native-libs.sh init
 time ./build-all-native-libs.sh build
 
 ```
