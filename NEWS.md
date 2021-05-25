@@ -10,7 +10,7 @@ branch dev-baseon-latest-k0.8.8
 - android : [done]   enable playback DASH content by add libiconv & libxml2 in the project,validate ok on Android x86-64 and iOS x86-64
 - android : [done]   enable playback AES-128 encrypt content,validate ok on Android x86-64 & iOS x86-64
 - android : [ongoing, priority:low]    add telemetry module for UI & background statistical usage
-- android : [ongoing, priority:low]    ANR when switch between dash content and hls content
+- android : [ongoing, priority:low]    ANR when switch between DASH content and HLS content
 - android : [ongoing, priority:low]    low start-up speed with internet DASH/RTMP content(about 2-6 secs)
 - android : [ongoing, priority:medium] various stability issues
 - android : [ongoing, priority:high]   add SampleAES support
