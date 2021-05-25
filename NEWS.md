@@ -1,6 +1,6 @@
 branch dev-baseon-latest-k0.8.8
 --------------------------------
-- ffmpeg      : [done]    upgrade ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg4.4 Rao，ok for Android port & iOS port
+- ffmpeg      : [done]    upgrade ffmpeg from ff3.4--ijk0.8.7--20180103--001 to FFmpeg4.4 Rao，ok for Android port & iOS port
 - openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "arm64-v8a x86_64" for target Android;
                                                              OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "armv7 arm64 i386 x86_64" for target iOS
                                                           
