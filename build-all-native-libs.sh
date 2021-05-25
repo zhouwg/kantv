@@ -174,8 +174,8 @@ function check_host()
         #only validated in my Linux dev-machine and careful sanity check is required before committed to github
         #export BUILD_TYPE=debug
 
-        #TODO:OpenSSL_1_1_1-stable not working with arch-eabi "armv5 armeabi-v7a x86"
-        #     working well with arch-eabi "arm64-v8a x86_64" for target Android
+        #TODO:OpenSSL_1_1_1-stable & FFmpeg4.4 not working with arch-eabi "armv5 armeabi-v7a x86"
+        #working well with arch-eabi "arm64-v8a x86_64" for target Android
         #full archs for Android
         #export BUILD_ARCHS="armv5 armeabi-v7a arm64-v8a x86 x86_64"
         export BUILD_ARCHS="arm64-v8a x86_64"
@@ -186,11 +186,9 @@ function check_host()
         export XCODE_PATH=`xcode-select -p`
         export BUILD_TYPE=release
 
-        #TODO:OpenSSL_1_1_1-stable not working with arch-eabi "armv7 i386"
-        #     working well with arch-eabi "arm64 x86_64" for target iOS
-        #full archs for iOS
-        #export BUILD_ARCHS="armv7 arm64 i386 x86_64"
-        export BUILD_ARCHS="arm64 x86_64"
+        #OpenSSL_1_1_1-stable & FFmpeg4.4
+        #working well with arch-eabi "armv7 arm64 i386 x86_64" for target iOS
+        export BUILD_ARCHS="armv7 arm64 i386 x86_64"
     else
         echo -e "${TEXT_RED}host os is ${machine}, not supported at the moment...${TEXT_RESET}\n"
         exit 1
