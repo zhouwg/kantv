@@ -50,7 +50,7 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
 
 ```
 
-- [ndk-r14b](https://developer.android.com/ndk)
+- [Android NDK-r14b](https://developer.android.com/ndk/downloads/older_releases)
 - [Android Studio 4.2.1](https://developer.android.google.cn/studio)
 - [Gradle 6.6.1](https://gradle.org/releases)
 
