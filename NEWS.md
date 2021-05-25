@@ -18,8 +18,8 @@ branch dev-baseon-latest-k0.8.8
 
 - iOS         : [done]    dev-ios-baseon-latest-k0.8.8 branch could running ok as expected on iOS simulator in my macOS
 - iOS         : [done]    merge dev-ios-baseon-latest-k0.8.8 to dev-baseon-latest-k0.8.8 and remove dev-ios-baseon-latest-k0.8.8
-- iOS         : [ongoing] fix playback issue when switch between rtsp content and http/htls content
-- iOS         : [ongoing] stability
+- iOS         : [ongoing,priority:low] fix playback issue when switch between RTSP content and HTTP/HLS content
+- iOS         : [ongoing,priority:medium] various stability issues
 - build       : refine build system for more reasonable purpose
 
 tag k0.8.8
