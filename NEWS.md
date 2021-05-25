@@ -13,8 +13,8 @@ branch dev-baseon-latest-k0.8.8
 - android : [ongoing, priority:low]    ANR when switch between DASH content and HLS content
 - android : [ongoing, priority:low]    low start-up speed with internet DASH/RTMP content(about 2-6 secs)
 - android : [ongoing, priority:medium] various stability issues
-- android : [ongoing, priority:high]   add SampleAES support
-- android : [ongoing, priority:high]   add China SM2/SM3/SM4 support
+- android : [ongoing, priority:high]   add HLS SampleAES support
+- android : [ongoing, priority:high]   add HLS China SM2/SM3/SM4 support
 
 - iOS         : [done]    dev-ios-baseon-latest-k0.8.8 branch could running ok as expected on iOS simulator in my macOS
 - iOS         : [done]    merge dev-ios-baseon-latest-k0.8.8 to dev-baseon-latest-k0.8.8 and remove dev-ios-baseon-latest-k0.8.8
