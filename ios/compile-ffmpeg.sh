@@ -120,11 +120,9 @@ do_lipo_all () {
 if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
-    do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs
     sh tools/do-compile-ffmpeg.sh $FF_TARGET $FF_TARGET_EXTRA
-    do_lipo_all
 elif [ "$FF_TARGET" = "lipo" ]; then
     echo_archs
     do_lipo_all

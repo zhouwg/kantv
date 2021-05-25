@@ -561,7 +561,7 @@ function build_native_release()
 
     	if [ $BUILD_TARGET != "android" ]; then
             #TODO: build ijksdl and ijkplayer via this script in macOS for target ios
-            return;
+            continue
 	    fi
 
         echo "build ijksdl.so ijkplayer.so..."
@@ -592,6 +592,16 @@ function build_native_release()
         echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
         /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
     done
+
+    if [ $BUILD_TARGET == "ios" ]; then
+        cd ${PROJECT_ROOT_PATH}/ios
+        ./compile-libiconv.sh lipo
+        ./compile-libz.sh lipo
+        ./compile-libxml2.sh lipo
+        ./compile-openssl.sh lipo
+        ./compile-ffmpeg.sh lipo
+        cd ${PROJECT_ROOT_PATH}
+    fi
 
     echo -e "\n"
 }

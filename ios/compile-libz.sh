@@ -65,11 +65,9 @@ do_lipo_all () {
 if [ "$FF_TARGET" = "armv7" -o "$FF_TARGET" = "armv7s" -o "$FF_TARGET" = "arm64" ]; then
     echo_archs
     sh tools/do-compile-libz.sh $FF_TARGET
-    do_lipo_all
 elif [ "$FF_TARGET" = "i386" -o "$FF_TARGET" = "x86_64" ]; then
     echo_archs
     sh tools/do-compile-libz.sh $FF_TARGET
-    do_lipo_all
 elif [ "$FF_TARGET" = "lipo" ]; then
     echo_archs
     do_lipo_all
