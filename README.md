@@ -51,8 +51,8 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
 ```
 
 - [ndk-r14b](https://developer.android.com/ndk)
-- Android Studio 4.2.1
-- Gradle 6.6.1
+- [Android Studio 4.2.1](https://developer.android.google.cn/studio)
+- [Gradle 6.6.1](https://gradle.org/releases)
 
 #### Before Build
 
@@ -126,7 +126,9 @@ make;make install
 ```
 
 
-- [Xcode-12](https://developer.apple.com/download/more/)
+- [Xcode-12.5](https://developer.apple.com/download/more/)
+- [Command Line Tools for Xcode 12.5](https://developer.apple.com/download/more/)
+- [Additional Tools for Xcode 12.5](https://developer.apple.com/download/more/)
 
 
 #### Before Build
