@@ -282,7 +282,10 @@ function echo_left_align()
 function check_sources()
 {
     module_name=$1
-    #TODO: should I check input args here?
+    if [ $# -ne 1 ]; then
+        echo -e "${TEXT_RED}empty module_name with function check_sources,pls check...${TEXT_RESET}"
+        return 1
+    fi
 
     cd ${PROJECT_ROOT_PATH}
     show_pwd
@@ -488,6 +491,32 @@ function build_native_debug()
 }
 
 
+function build_module()
+{
+    module_name=$1
+    target_name=$2
+    if [ $# -ne 2 ]; then
+        echo -e "${TEXT_RED}empty module_name target_name with function build_module,pls check...${TEXT_RESET}"
+        return 1
+    fi
+
+    echo "build ${module_name}-${target_name}..."
+    if [ -f ./compile-${module_name}.sh ]; then
+        ./compile-${module_name}.sh ${target_name}
+
+        if [ $? != 0 ]; then
+            echo -e "${TEXT_RED} build ${module_name} failed ${TEXT_RESET}"
+            exit 1
+        else
+            echo -e "${TEXT_BLUE} build ${module_name} successed ${TEXT_RESET}"
+        fi
+    else
+        show_pwd
+        echo -e "${TEXT_RED} ./compile-${module_name}.sh not exist, it shouldn't happen here, pls check...${TEXT_RESET}"
+    fi
+}
+
+
 function build_native_release()
 {
     cd ${PROJECT_ROOT_PATH}
@@ -514,66 +543,20 @@ function build_native_release()
         fi
         show_pwd
 
-        echo "build libiconv-${realname}..."
-        ./compile-libiconv.sh $realname
-        if [ $? != 0 ]; then
-            echo -e "${TEXT_RED} build libiconv failed ${TEXT_RESET}"
-            exit 1
-        else
-            echo -e "${TEXT_BLUE} build libiconv successed ${TEXT_RESET}"
-        fi
-
-        echo "build libz-${realname}..."
-        ./compile-libz.sh $realname
-        if [ $? != 0 ]; then
-             echo -e "${TEXT_RED} build libz failed ${TEXT_RESET}"
-             exit 1
-        else
-             echo -e "${TEXT_BLUE} build libz successed ${TEXT_RESET}"
-        fi
-
-        echo "build libxml2-${realname}..."
-        ./compile-libxml2.sh $realname
-        if [ $? != 0 ]; then
-             echo -e "${TEXT_RED} build libxml2 failed ${TEXT_RESET}"
-             exit 1
-        else
-             echo -e "${TEXT_BLUE} build libxml2 successed ${TEXT_RESET}"
-        fi
-
-        echo "build openssl-${realname}..."
-        ./compile-openssl.sh $realname
-        if [ $? != 0 ]; then
-            echo -e "${TEXT_RED} build openssl failed ${TEXT_RESET}"
-            exit 1
-        else
-            echo -e "${TEXT_BLUE} build openssl successed ${TEXT_RESET}"
-        fi
-
-        echo "build ffmpeg-${realname}..."
-        ./compile-ffmpeg.sh  $realname
-        if [ $? != 0 ]; then
-            echo -e "${TEXT_RED}build ffmpeg failed ${TEXT_RESET}"
-            exit 1
-        else
-            echo -e "${TEXT_BLUE} build ffmpeg successed ${TEXT_RESET}"
-        fi
+        build_module libiconv ${realname}
+        build_module libz     ${realname}
+        build_module libxml2  ${realname}
+        build_module openssl  ${realname}
+        build_module ffmpeg   ${realname}
 
     	if [ $BUILD_TARGET != "android" ]; then
             #TODO: build ijksdl and ijkplayer via this script in macOS for target ios
             continue
 	    fi
 
-        echo "build ijksdl.so ijkplayer.so..."
         cd ${PROJECT_ROOT_PATH}/android
         show_pwd
-        ./compile-ijk.sh $realname
-        if [ $? != 0 ]; then
-            echo -e "${TEXT_RED}build ijkplayer.so ijksdl.so failed ${TEXT_RESET}"
-            exit 1
-        else
-            echo -e "${TEXT_BlUE}build ijkplayer.so ijksdl.so successed ${TEXT_RESET}"
-        fi
+        build_module ijk     ${realname}
 
         echo -e "\n"
         if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} ]; then
