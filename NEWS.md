@@ -1,8 +1,9 @@
 branch dev-baseon-latest-k0.8.8
 --------------------------------
 - ffmpeg      : [done]    upgrade from ffmpeg from ff3.4--ijk0.8.7--20180103--001 to to FFmpeg4.4 Rao，ok for Android port & iOS port
-- openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: OpenSSL_1_1_1-stable not working with arch-eabi "armv5 armeabi-v7a x86"
-                                                             ,working well with arch-eabi "arm64-v8a x86_64" for target Android & iOS
+- openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "arm64-v8a x86_64" for target Android;
+                                                             OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "armv7 arm64 i386 x86_64" for target iOS
+                                                          
 - android : [done]   add display url in playback for troubleshooting purpose
 - android : [done]   fix playback issue when switch between RTSP content and HTTP/HLS content
 - android : [done]   add display statistic info in playback UI for pressure test & troubleshooting purpose                    
