@@ -1,8 +1,9 @@
-# ijkplayer
+# hijkplayer
 
-cross-platform video player based on [ffplay](http://ffmpeg.org) for Android & iOS
+cross-platform video player based on [ffplay](http://ffmpeg.org) for Android & iOS, derived from 
 
-original official ijkplayer could be found at [ijkplayer](https://github.com/bilibili/ijkplayer)
+original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some enhancements([NEWS.md](NEWS.md)).
+
 
 
 ### Android
@@ -161,6 +162,7 @@ build APP by latest Xcode IDE
 
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
+- 欢迎提交issue或需求，在时间允许下提供Android平台下的义务技术支持。
 
 
 ### Latest Changes
