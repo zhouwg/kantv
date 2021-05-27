@@ -1,8 +1,6 @@
 # hijkplayer
 
-cross-platform video player based on [ffplay](http://ffmpeg.org) for Android & iOS, derived from 
-
-original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some enhancements([NEWS.md](NEWS.md)).
+cross-platform video player based on [ffplay](http://ffmpeg.org) for Android & iOS, derived from original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some enhancements.
 
 
 
@@ -58,8 +56,8 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
 #### Before Build
 
 ```
-git clone https://github.com/zhouwg/ijkplayer
-cd ijkplayer
+git clone https://github.com/zhouwg/hijkplayer
+cd hijkplayer
 git checkout dev-baseon-latest-k0.8.8
 
 
@@ -135,8 +133,8 @@ make;make install
 #### Before Build
 
 ```
-git clone https://github.com/zhouwg/ijkplayer
-cd ijkplayer
+git clone https://github.com/zhouwg/hijkplayer
+cd hijkplayer
 git checkout dev-baseon-latest-k0.8.8
 
 ```
@@ -162,7 +160,6 @@ build APP by latest Xcode IDE
 
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
-- 欢迎提交issue或需求，在时间允许下提供Android平台下的义务技术支持。
 
 
 ### Latest Changes
@@ -176,7 +173,13 @@ Copyright (c) 2017 Bilibili
 Licensed under LGPLv2.1 or later
 ```
 
-ijkplayer required features are based on or derives from projects below:
+```
+Copyright (c) 2021 maintainer of hijkplayer project
+
+Licensed under Apachev2.0 or later
+```
+
+the original official ijkplayer & hijkplayer required features are based on or derives from projects below:
 - LGPL
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
@@ -207,9 +210,14 @@ ijkplayer's build scripts are based on or derives from projects below:
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
 - [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script) 
 
+hijkplayer's build scripts was created and maintained by maintainer of hijkplayer project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
+
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
 
 But ijkplayer is also based on other different projects under various licenses, which I have no idea whether they are compatible to each other or to your product.
 
 [IANAL](https://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
+
+
+hijkplayer is licensed under Apachev2.0 or later, so itself is free for commercial use under Apachev2.0 or later
