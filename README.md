@@ -52,6 +52,8 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
 
 - vim settings
 
+fetch from http://ffmpeg.org/developer.html#Editor-configuration
+
 ```
 set ai
 set nu
@@ -67,6 +69,10 @@ set cinoptions=(0
 " Allow tabs in Makefiles.
 autocmd FileType make,automake set noexpandtab shiftwidth=8 softtabstop=8
 " Trailing whitespace and tabs are forbidden, so highlight them.
+highlight ForbiddenWhitespace ctermbg=red guibg=red
+match ForbiddenWhitespace /\s\+$\|\t/
+" Do not highlight spaces at the end of line while typing on that line.
+autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 ```
 
 
