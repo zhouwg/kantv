@@ -201,8 +201,13 @@ function check_host()
 
         #make Android Studio happy
         if [ -f android/ijkplayer/local.properties ]; then
-            echo -e "\n" >> android/ijkplayer/local.properties
-            echo "ndk.dir=${ANDROID_NDK}" >> android/ijkplayer/local.properties
+            echo "ANDROID_NDK is: ${ANDROID_NDK}"
+            if cat './android/ijkplayer/local.properties' | grep $ANDROID_NDK ; then
+                echo "found $ANDROID_NDK in ./android/ijkplayer/local.properties"
+            else
+                echo -e "\n" >> android/ijkplayer/local.properties
+                echo "ndk.dir=${ANDROID_NDK}" >> android/ijkplayer/local.properties
+            fi
         fi
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_BLUE}BUILD_TARGET is $BUILD_TARGET${TEXT_RESET}"
