@@ -36,6 +36,12 @@
 
     NSMutableArray *sampleList = [[NSMutableArray alloc] init];
 
+    [sampleList addObject:@[@"cctv-13", @"rtmp://58.200.131.2:1935/livetv/cctv13"]];
+    [sampleList addObject:@[@"dash",   @"http://dash.edgesuite.net/dash264/TestCases/3b/fraunhofer/heaac_stereo_with_video/Sintel/sintel_480p_heaac_stereo_sidx.mpd"]];
+    [sampleList addObject:@[@"aes", @"http://192.168.0.100:81/mediaroot/AES-128/aes128_no_IV/pantos_aes.m3u8"]];
+    [sampleList addObject:@[@"SampleAES", @"http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_localkey.m3u8"]];
+    //ok
+
     [sampleList addObject:@[@"bipbop basic master playlist",
                             @"http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"]];
     [sampleList addObject:@[@"bipbop basic 400x300 @ 232 kbps",
