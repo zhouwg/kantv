@@ -68,19 +68,63 @@ public class SampleMediaListFragment extends Fragment {
             }
         });
 
+        //HLS H264 SAMPLE-AES supportive is ongoing
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_localkey.m3u8", "ocn_samplesaes_localkey.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnclear/ocn_clear.m3u8", "ocnclear/ocn.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_chinadrm.m3u8", "ocn_sampleaes_chinadrm.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnSample_full.m3u8", "ocnSample_full.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
+
+        //HLS
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/AES-128/aes128_no_IV/pantos_aes.m3u8", "aes128_no_IV/pantos_aes.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/AES-128/rotation_key/key_rotation.m3u8", "rotation_key/key_rotation.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/sintel_clear/sintelclear.m3u8", "sintel_clear/sintelclear.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/sintel264/sintel264.m3u8", "sintel264/sintel264.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/HD1280P/HD1280P.m3u8", "HD1280P/HD1280P.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/Avengers/Avengers_2012.mp4", "Avengers/Avengers_2012.mp4");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/BigBuckBunny_HD1500/BigBuckBunnyHD500.m3u8", "BigBuckBunny_HD1500/BigBuckBunnyHD500.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/BigBuckBunny_HD1500/BigBuckBunnyHD1500.m3u8", "BigBuckBunny_HD1500/BigBuckBunnyHD1500.m3u8");
+
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8", "bipbop basic 640x480 @ 650 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear3/prog_index.m3u8", "bipbop basic 640x480 @ 1 Mbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear4/prog_index.m3u8", "bipbop basic 960x720 @ 2 Mbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear0/prog_index.m3u8", "bipbop basic 22.050Hz stereo @ 40 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8", "bipbop advanced master playlist");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear1/prog_index.m3u8", "bipbop advanced 416x234 @ 265 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear2/prog_index.m3u8", "bipbop advanced 640x360 @ 580 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear3/prog_index.m3u8", "bipbop advanced 960x540 @ 910 kbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear4/prog_index.m3u8", "bipbop advanced 1289x720 @ 1 Mbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear5/prog_index.m3u8", "bipbop advanced 1920x1080 @ 2 Mbps");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/gear0/prog_index.m3u8", "bipbop advanced 22.050Hz stereo @ 40 kbps");
+
+        //HTTP
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/purevideo.mp4", "mediaroot/purevideo.mp4");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.flv", "mediaroot/html/test.flv");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.mp4", "mediaroot/html/test.mp4");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/sintel.mp4", "mediaroot/html/sintel.mp4");
+        mAdapter.addItem("http://192.168.0.100:81/bigbuckbunnyh264.ts", "http://192.168.0.100:81/bigbuckbunnyh264.ts");
+        mAdapter.addItem("http://192.168.0.100:81/bigbuckbunnyh265.ts", "http://192.168.0.100:81/bigbuckbunnyh265.ts");
+
+        //RTSP
+        mAdapter.addItem("rtsp://192.168.0.100:8000/testrtsp.ts", "rtsp://192.168.0.100:8000/testrtsp.ts");
+        mAdapter.addItem("rtsp://192.168.0.100:8000/bigbuckbunnyh265.ts", "rtsp://192.168.0.100:8000/bigbuckbunnyh265.ts");
+
+        //DASH
+        //ok
+        mAdapter.addItem("http://dash.as.s3.amazonaws.com/media/sintel/out/sintel.mpd", "sintel/out/sintel.mpd");
+        //Not yet implemented in FFmpeg, patches welcome
+        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/1a/sony/SNE_DASH_SD_CASE1A_REVISED.mpd", "http://dash.edgesuite.net/dash264/TestCases/1a/sony/SNE_DASH_SD_CASE1A_REVISED.mpd");
+        //ok
+        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd", "http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd");
+        //ok
+        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd", "http://dash.edgesuite.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd");
+        //ok
+        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/3b/fraunhofer/heaac_stereo_with_video/Sintel/sintel_480p_heaac_stereo_sidx.mpd", "sintel_480p_heaac_stereo_sidx.mpd");
+        //why this URL couldn't displayed in playback UI correctly?
+        //route cause is lineLength should < 35
+        //Failed to resolve hostname hls-lin-329.timewarnercable.com: No address associated with hostname
+        mAdapter.addItem("http://hls-lin-329.timewarnercable.com/dash/DASH_720p60_SAP/manifest.mpd", "DASH_720p60_SAP/manifest.mpd");
+        // 403 Forbidden
+        mAdapter.addItem("http://dashas.castlabs.com/videos/files/bbb/Manifest.mpd", "files/bbb/Manifest.mpd");
+        //Server returned 403 Forbidden (access denied)
+        mAdapter.addItem("http://dashas.castlabs.com/videos/bytes/bbb/Manifest.mpd", "http://dashas.castlabs.com/videos/bytes/bbb/Manifest.mpd");
+        //failure
+        mAdapter.addItem("http://usp-demo.castlabs.com/live/channel1/channel1.isml/channel1.mpd", "http://usp-demo.castlabs.com/live/channel1/channel1.isml/channel1.mpd");
+
+        //RTMP
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13 News");
     }
 
     final class SampleMediaItem {

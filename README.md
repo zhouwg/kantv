@@ -30,6 +30,7 @@ sudo apt-get install python -y
 sudo apt-get install tcl expect -y
 sudo apt-get install nginx -y
 sudo apt-get install git -y
+sudo apt-get install vim -y
 sudo apt-get install spawn-fcgi -y
 sudo apt-get install u-boot-tools -y
 sudo apt-get install ffmpeg -y
@@ -48,6 +49,26 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
         rsync unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
 
 ```
+
+- vim settings
+
+```
+set ai
+set nu
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set noundofile
+set nobackup
+set undodir=~/.undodir
+set cindent
+set cinoptions=(0
+" Allow tabs in Makefiles.
+autocmd FileType make,automake set noexpandtab shiftwidth=8 softtabstop=8
+" Trailing whitespace and tabs are forbidden, so highlight them.
+```
+
 
 - [Android NDK-r14b](https://developer.android.com/ndk/downloads/older_releases)
 - [Android Studio 4.2.1](https://developer.android.google.cn/studio)
@@ -208,7 +229,7 @@ ijkplayer's build scripts are based on or derives from projects below:
 - [gas-preprocessor](http://git.libav.org/?p=gas-preprocessor.git)
 - [VideoLAN](http://git.videolan.org)
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
-- [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script) 
+- [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script)
 
 hijkplayer's build scripts was created and maintained by maintainer of hijkplayer project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
 

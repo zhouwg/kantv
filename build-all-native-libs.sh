@@ -97,7 +97,7 @@ function check_ndk()
 }
 
 
-function show_pwd() 
+function show_pwd()
 {
     echo -e "current working path:$(pwd)\n"
 }
@@ -292,7 +292,7 @@ function check_sources()
     echo "======enter function check sources of $module_name ======"
 
     #it should be local variable in a standalone function
-    #but be a global variable might be a better idea because the same variable 
+    #but be a global variable might be a better idea because the same variable
     #would be defined in other place
     #BUILD_ARCHS=(armv5 armeabi-v7a arm64-v8a x86 x86_64)
 
@@ -533,9 +533,9 @@ function build_native_release()
             realname=${arch}
         fi
 
-    	if [ $BUILD_TARGET == "android" ]; then
+        if [ $BUILD_TARGET == "android" ]; then
             cd ${PROJECT_ROOT_PATH}/android/contrib
-    	elif [ $BUILD_TARGET == "ios" ]; then
+        elif [ $BUILD_TARGET == "ios" ]; then
             cd ${PROJECT_ROOT_PATH}/ios
         else
             echo -e "${TEXT_RED} BUILD_TARGET $BUILD_TARGET unknown,pls check...${TEXT_RESET}"
@@ -549,10 +549,10 @@ function build_native_release()
         build_module openssl  ${realname}
         build_module ffmpeg   ${realname}
 
-    	if [ $BUILD_TARGET != "android" ]; then
+        if [ $BUILD_TARGET != "android" ]; then
             #TODO: build ijksdl and ijkplayer via this script in macOS for target ios
             continue
-	    fi
+        fi
 
         cd ${PROJECT_ROOT_PATH}/android
         show_pwd
@@ -596,22 +596,22 @@ function do_clean()
     show_pwd
 
     if [ $BUILD_TARGET == "android" ]; then
-	    echo -e "${TEXT_RED}remove android/contrib/build${TEXT_RESET}"
-	    if [ -d android/contrib/build ]; then
+        echo -e "${TEXT_RED}remove android/contrib/build${TEXT_RESET}"
+        if [ -d android/contrib/build ]; then
             rm -rf android/contrib/build
-	    fi
+        fi
 
-	    if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs ]; then
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs ]; then
             echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs not exist${TEXT_RESET}\n"
-	    else
-		    echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
-		    rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
-	    fi
+        else
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
+            rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
+        fi
     elif [ $BUILD_TARGET == "ios" ]; then
-	    echo -e "${TEXT_RED}remove ios/build${TEXT_RESET}"
-	    if [ -d ios/build ]; then
-		    rm -rf ios/build
-	    fi
+        echo -e "${TEXT_RED}remove ios/build${TEXT_RESET}"
+        if [ -d ios/build ]; then
+            rm -rf ios/build
+        fi
     fi
 
     for arch in ${BUILD_ARCHS};do
@@ -623,9 +623,9 @@ function do_clean()
             realname=${arch}
         fi
 
-    	if [ $BUILD_TARGET == "android" ]; then
+        if [ $BUILD_TARGET == "android" ]; then
             cd ${PROJECT_ROOT_PATH}/android/contrib
-    	elif [ $BUILD_TARGET == "ios" ]; then
+        elif [ $BUILD_TARGET == "ios" ]; then
             cd ${PROJECT_ROOT_PATH}/ios
         else
             echo -e "${TEXT_RED} BUILD_TARGET $BUILD_TARGET unknown,pls check...${TEXT_RESET}"
@@ -747,9 +747,9 @@ function do_build()
     cd ${PROJECT_ROOT_PATH}
     show_pwd
     if [ $BUILD_TARGET == "android" ]; then
-    	echo -e "${TEXT_BLUE} all dependent android native libs and JNI libs build finished, pls build ijkplayer APK via latest Andriod Studio IDE ${TEXT_RESET}"
+        echo -e "${TEXT_BLUE} all dependent android native libs and JNI libs build finished, pls build ijkplayer APK via latest Andriod Studio IDE ${TEXT_RESET}"
     elif [ $BUILD_TARGET == "ios" ]; then
-    	echo -e "${TEXT_BLUE} all dependent ios native libs build finished, pls build IJKMediaDemo  via latest Xcode IDE ${TEXT_RESET}"
+        echo -e "${TEXT_BLUE} all dependent ios native libs build finished, pls build IJKMediaDemo  via latest Xcode IDE ${TEXT_RESET}"
     fi
 }
 
