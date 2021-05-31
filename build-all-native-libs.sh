@@ -97,23 +97,6 @@ function check_ndk()
 }
 
 
-function show_pwd()
-{
-    echo -e "current working path:$(pwd)\n"
-}
-
-
-function check_ndk()
-{
-    if [ $BUILD_TARGET == "android" ]; then
-        if [ ! -d ${ANDROID_NDK} ]; then
-            echo -e "${TEXT_RED}${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
-            exit 1
-        fi
-    fi
-}
-
-
 function check_xcode()
 {
     if [ $BUILD_TARGET == "ios" ]; then
