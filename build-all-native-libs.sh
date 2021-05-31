@@ -49,8 +49,13 @@ function setup_env()
 
     #the speed of fetch code from github.com is very very very slow
     #I have to switch from github.com to gitee.com
-    IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
-    IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
+    #for domestic users, it will be updated aperiodicity
+    #IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
+    #IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
+
+    #for overseas users,  up-to-date codes would be found here to keep pace with hijkplayer
+    IJK_FFMPEG_UPSTREAM=https://github.com/zhouwg/FFmpeg.git
+    IJK_FFMPEG_FORK=https://github.com/zhouwg/FFmpeg.git
     IJK_FFMPEG_COMMIT=release/4.4
     IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 

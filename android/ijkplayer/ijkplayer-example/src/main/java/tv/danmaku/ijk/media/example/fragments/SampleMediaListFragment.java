@@ -1,5 +1,4 @@
-:q
-        /*
+/*
  * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
@@ -71,15 +70,17 @@ public class SampleMediaListFragment extends Fragment {
 
         // HLS H264 SAMPLE-AES supportive is done
         // https://github.com/zhouwg/hijkplayer/issues/5
-        // fetch key.txt from remote http server
+        // fetch key from remote http server directly
         // both  ok
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_localkey.m3u8", "ocn_samplesaes_localkey.m3u8");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnSample.m3u8", "ocnSample_full.m3u8");
 
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_samplesm4_localkey.m3u8", "ocn_samplessm4_localkey.m3u8");
+
         //ok
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnclear/ocn_clear.m3u8", "ocnclear/ocn.m3u8");
 
-        // fetch key from ChinaDRM server
+        // fetch license from ChinaDRM server
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_chinadrm.m3u8", "ocn_sampleaes_chinadrm.m3u8");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
