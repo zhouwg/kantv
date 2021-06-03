@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2015 Bilibili
  * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
  *
@@ -68,19 +68,23 @@ public class SampleMediaListFragment extends Fragment {
             }
         });
 
+        // fetch key from remote http server directly
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_sm4cbc/1.m3u8",  "h264 china sample sm4 cbc");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sample_sm4cbc/1.m3u8",  "h265 china sample sm4 cbc");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sm4cbc/1.m3u8", "h264 china sm4 cbc");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sm4cbc/1.m3u8", "h265 china sm4 cbc");
+
         // HLS H264 SAMPLE-AES supportive is done
         // https://github.com/zhouwg/hijkplayer/issues/5
         // fetch key from remote http server directly
         // both  ok
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_localkey.m3u8", "ocn_samplesaes_localkey.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnSample.m3u8", "ocnSample_full.m3u8");
-
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_samplesm4_localkey.m3u8", "ocn_samplessm4_localkey.m3u8");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_aes_video.m3u8", "h264 sample aes video only");
+        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_aes_audiovideo.m3u8", "h264 sample aes video&audio");
 
         //ok
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnclear/ocn_clear.m3u8", "ocnclear/ocn.m3u8");
 
-        // fetch license from ChinaDRM server
+        // fetch license from ChinaDRM server, not support at the moment
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_chinadrm.m3u8", "ocn_sampleaes_chinadrm.m3u8");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
@@ -99,7 +103,6 @@ public class SampleMediaListFragment extends Fragment {
         mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");
 
         //HTTP
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/purevideo.mp4", "mediaroot/purevideo.mp4");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.flv", "mediaroot/html/test.flv");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.mp4", "mediaroot/html/test.mp4");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/sintel.mp4", "mediaroot/html/sintel.mp4");
@@ -108,7 +111,6 @@ public class SampleMediaListFragment extends Fragment {
 
         //RTSP
         mAdapter.addItem("rtsp://192.168.0.100:8000/testrtsp.ts", "rtsp://192.168.0.100:8000/testrtsp.ts");
-        mAdapter.addItem("rtsp://192.168.0.100:8000/bigbuckbunnyh265.ts", "rtsp://192.168.0.100:8000/bigbuckbunnyh265.ts");
 
         //DASH
         //ok
