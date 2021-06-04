@@ -67,7 +67,6 @@ public class SampleMediaListFragment extends Fragment {
                 VideoActivity.intentTo(activity, url, name);
             }
         });
-
         // fetch key from remote http server directly
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_sm4cbc/1.m3u8",  "h264 china sample sm4 cbc");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sample_sm4cbc/1.m3u8",  "h265 china sample sm4 cbc");
@@ -136,6 +135,11 @@ public class SampleMediaListFragment extends Fragment {
 
         //RTMP
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13 News");
+
+        //FLV
+        mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "mutfysrq.flv");
+
+        mAdapter.addItem("https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218093206z8V1JuPlpe.mp4", "testmp4");
     }
 
     final class SampleMediaItem {
