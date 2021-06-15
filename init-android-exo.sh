@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-IJK_EXO_UPSTREAM=git@gitee.com:zhouweiguo2020/ExoPlayer.git
-IJK_EXO_FORK=git@gitee.com:zhouweiguo2020/ExoPlayer.git
+IJK_EXO_UPSTREAM=https://gitee.com/zhouweiguo2020/ExoPlayer.git
+IJK_EXO_FORK=https://gitee.com/zhouweiguo2020/ExoPlayer.git
 IJK_EXO_COMMIT=r1.5.11
 IJK_EXO_LOCAL_REPO=extra/ExoPlayer
 

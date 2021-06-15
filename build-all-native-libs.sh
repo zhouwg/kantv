@@ -50,8 +50,8 @@ function setup_env()
     #the speed of fetch code from github.com is very very very slow
     #I have to switch from github.com to gitee.com
     #for domestic users, it will be updated aperiodicity
-    #IJK_FFMPEG_UPSTREAM=git@gitee.com:zhouweiguo2020/FFmpeg.git
-    #IJK_FFMPEG_FORK=git@gitee.com:zhouweiguo2020/FFmpeg.git
+    #IJK_FFMPEG_UPSTREAM=https://gitee.com/zhouweiguo2020/FFmpeg.git
+    #IJK_FFMPEG_FORK=https://gitee.com/zhouweiguo2020/FFmpeg.git
 
     #for overseas users,  up-to-date codes would be found here to keep pace with hijkplayer
     IJK_FFMPEG_UPSTREAM=https://github.com/zhouwg/FFmpeg.git
@@ -59,27 +59,27 @@ function setup_env()
     IJK_FFMPEG_COMMIT=release/4.4
     IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
-    IJK_GASP_UPSTREAM=git@gitee.com:zhouweiguo2020/gas-preprocessor.git
+    IJK_GASP_UPSTREAM=https://gitee.com/zhouweiguo2020/gas-preprocessor.git
 
-    IJK_OPENSSL_UPSTREAM=git@gitee.com:zhouweiguo2020/openssl.git
-    IJK_OPENSSL_FORK=git@gitee.com:zhouweiguo2020/openssl.git
+    IJK_OPENSSL_UPSTREAM=https://gitee.com/zhouweiguo2020/openssl.git
+    IJK_OPENSSL_FORK=https://gitee.com/zhouweiguo2020/openssl.git
     IJK_OPENSSL_COMMIT=OpenSSL_1_1_1-stable
     IJK_OPENSSL_LOCAL_REPO=extra/openssl
 
     #https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
-    IJK_LIBICONV_UPSTREAM=git@gitee.com:zhouweiguo2020/libiconv.git
-    IJK_LIBICONV_FORK=git@gitee.com:zhouweiguo2020/libiconv.git
+    IJK_LIBICONV_UPSTREAM=https://gitee.com/zhouweiguo2020/libiconv.git
+    IJK_LIBICONV_FORK=https://gitee.com/zhouweiguo2020/libiconv.git
     IJK_LIBICONV_COMMIT=master
     IJK_LIBICONV_LOCAL_REPO=extra/libiconv
 
-    IJK_LIBZ_UPSTREAM=git@gitee.com:zhouweiguo2020/libz.git
-    IJK_LIBZ_FORK=git@gitee.com:zhouweiguo2020/libz.git
+    IJK_LIBZ_UPSTREAM=https://gitee.com/zhouweiguo2020/libz.git
+    IJK_LIBZ_FORK=https://gitee.com/zhouweiguo2020/libz.git
     IJK_LIBZ_COMMIT=master
     IJK_LIBZ_LOCAL_REPO=extra/libz
 
     #IJK_LIBXML2_FORK=https://gitlab.gnome.org/GNOME/libxml2.git
-    IJK_LIBXML2_UPSTREAM=git@gitee.com:zhouweiguo2020/libxml2.git
-    IJK_LIBXML2_FORK=git@gitee.com:zhouweiguo2020/libxml2.git
+    IJK_LIBXML2_UPSTREAM=https://gitee.com/zhouweiguo2020/libxml2.git
+    IJK_LIBXML2_FORK=https://gitee.com/zhouweiguo2020/libxml2.git
     IJK_LIBXML2_COMMIT=master
     IJK_LIBXML2_LOCAL_REPO=extra/libxml2
 }

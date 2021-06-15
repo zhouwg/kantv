@@ -17,8 +17,8 @@
 #
 
 
-IJK_LIBYUV_UPSTREAM=git@gitee.com:zhouweiguo2020/libyuv
-IJK_LIBYUV_FORK=git@gitee.com:zhouweiguo2020/libyuv
+IJK_LIBYUV_UPSTREAM=https://gitee.com/zhouweiguo2020/libyuv
+IJK_LIBYUV_FORK=https://gitee.com/zhouweiguo2020/libyuv
 IJK_LIBYUV_COMMIT=ijk-r0.2.1-dev
 IJK_LIBYUV_LOCAL_REPO=extra/libyuv
 

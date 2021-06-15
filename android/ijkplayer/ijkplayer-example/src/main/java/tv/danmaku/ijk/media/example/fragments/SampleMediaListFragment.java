@@ -67,6 +67,10 @@ public class SampleMediaListFragment extends Fragment {
                 VideoActivity.intentTo(activity, url, name);
             }
         });
+        //Apple's FairPlay DRM
+        //https://github.com/yt-dlp/yt-dlp/issues/377
+        mAdapter.addItem("https://siloh-aka.plutotv.net/abe03d_MGM_Studios/clip/5966922a70e766a31078cf8d_Dark_Blue_2003/720pDRM/20210513_081743/hls/0-end/fp/hls_2400.m3u8", "hl2_2400.m3u8");
+
         // fetch key from remote http server directly
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_sm4cbc/1.m3u8",  "h264 china sample sm4 cbc");
         mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sample_sm4cbc/1.m3u8",  "h265 china sample sm4 cbc");

@@ -17,8 +17,8 @@
 #
 
 
-IJK_SOUNDTOUCH_UPSTREAM=git@gitee.com:zhouweiguo2020/soundtouch.git
-IJK_SOUNDTOUCH_FORK=git@gitee.com:zhouweiguo2020/soundtouch.git
+IJK_SOUNDTOUCH_UPSTREAM=https://gitee.com/zhouweiguo2020/soundtouch.git
+IJK_SOUNDTOUCH_FORK=https://gitee.com/zhouweiguo2020/soundtouch.git
 IJK_SOUNDTOUCH_COMMIT=ijk-r0.1.2-dev
 IJK_SOUNDTOUCH_LOCAL_REPO=extra/soundtouch
 
