@@ -306,7 +306,7 @@ if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
             mkdir -p ${FF_PREFIX}/lib
         fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_PREFIX}/lib/
-        if [ ! -d  ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/ ]; then
+        if [ ! -d ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/ ]; then
             mkdir -p ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/
         fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/
@@ -314,8 +314,11 @@ if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
 
     if [ "$FF_ARCH" = "x86_64" ]; then
         #just make build system happy
+        if [ ! -d ${FF_PREFIX}/lib/ ]; then
+            mkdir -p ${FF_PREFIX}/lib/
+        fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/x86_64/libdrmclient.so ${FF_PREFIX}/lib/
-        if [ ! -d  ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/ ]; then
+        if [ ! -d ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/ ]; then
             mkdir -p ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/
         fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/x86_64/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/
