@@ -82,6 +82,11 @@ function setup_env()
     IJK_LIBXML2_FORK=https://gitee.com/zhouweiguo2020/libxml2.git
     IJK_LIBXML2_COMMIT=master
     IJK_LIBXML2_LOCAL_REPO=extra/libxml2
+
+    IJK_LIBCURL_UPSTREAM=https://gitee.com/zhouweiguo2020/curl.git
+    IJK_LIBCURL_FORK=https://gitee.com/zhouweiguo2020/curl.git
+    IJK_LIBCURL_COMMIT=master
+    IJK_LIBCURL_LOCAL_REPO=extra/curl
 }
 
 
@@ -417,6 +422,23 @@ function check_sources()
                     git checkout ${IJK_LIBXML2_COMMIT}
                 fi
                 cd ${PROJECT_ROOT_PATH}
+            elif [ $module_name == "curl" ]; then
+                git --version
+                echo "== pull libcurl base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_LIBCURL_UPSTREAM $IJK_LIBCURL_LOCAL_REPO
+                echo "== pull libcurl fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBCURL_FORK android/contrib/curl-${realname} ${IJK_LIBCURL_LOCAL_REPO}
+                    cd android/contrib/curl-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBCURL_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_LIBCURL_FORK ios/curl-${realname} ${IJK_LIBCURL_LOCAL_REPO}
+                    cd ios/curl-${realname}
+                    show_pwd
+                    git checkout ${IJK_LIBCURL_COMMIT}
+                fi
             else
                 echo -e "${TEXT_RED}dependent module ${module_name} unknown, pls check...${TEXT_RESET}"
             fi
@@ -539,6 +561,7 @@ function build_native_release()
         build_module libiconv ${realname}
         build_module libz     ${realname}
         build_module libxml2  ${realname}
+        build_module curl     ${realname}
         build_module openssl  ${realname}
         build_module ffmpeg   ${realname}
 
@@ -574,6 +597,7 @@ function build_native_release()
         ./compile-libiconv.sh lipo
         ./compile-libz.sh lipo
         ./compile-libxml2.sh lipo
+        ./compile-curl.sh lipo
         ./compile-openssl.sh lipo
         ./compile-ffmpeg.sh lipo
         cd ${PROJECT_ROOT_PATH}
@@ -655,6 +679,9 @@ function do_cleanall()
         echo -e "${TEXT_RED}remove android/contrib/openssl-*${TEXT_RESET}"
         rm -rf android/contrib/openssl-*
 
+        echo -e "${TEXT_RED}remove android/contrib/curl-*${TEXT_RESET}"
+        rm -rf android/contrib/curl-*
+
         echo -e "${TEXT_RED}remove android/contrib/libxml2-*${TEXT_RESET}"
         rm -rf android/contrib/libxml2-*
 
@@ -669,6 +696,9 @@ function do_cleanall()
 
         echo -e "${TEXT_RED}remove ios/openssl-*${TEXT_RESET}"
         rm -rf ios/openssl-*
+
+        echo -e "${TEXT_RED}remove ios/curl-*${TEXT_RESET}"
+        rm -rf ios/curl-*
 
         echo -e "${TEXT_RED}remove ios/libxml2-*${TEXT_RESET}"
         rm -rf ios/libxml2-*
@@ -690,6 +720,7 @@ function do_init()
     check_sources  "libiconv"
     check_sources  "libz"
     check_sources  "libxml2"
+    check_sources  "curl"
     check_sources  "openssl"
     check_sources  "ffmpeg"
 }

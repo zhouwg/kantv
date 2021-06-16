@@ -32,6 +32,9 @@ MY_APP_XML2_INCLUDE_PATH := $(realpath $(MY_APP_XML2_OUTPUT_PATH)/include)
 MY_APP_OPENSSL_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/openssl-arm64/output)
 MY_APP_OPENSSL_INCLUDE_PATH := $(realpath $(MY_APP_OPENSSL_OUTPUT_PATH)/include)
 
+MY_APP_CURL_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/curl-arm64/output)
+MY_APP_CURL_INCLUDE_PATH := $(realpath $(MY_APP_CURL_OUTPUT_PATH)/include)
+
 MY_APP_FFMPEG_OUTPUT_PATH := $(realpath $(MY_APP_ANDROID_ROOT)/contrib/build/ffmpeg-arm64/output)
 MY_APP_FFMPEG_INCLUDE_PATH := $(realpath $(MY_APP_FFMPEG_OUTPUT_PATH)/include)
 

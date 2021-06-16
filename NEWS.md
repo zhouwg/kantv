@@ -3,18 +3,19 @@ branch dev-baseon-latest-k0.8.8
 - ffmpeg      : [done]    upgrade ffmpeg from ff3.4--ijk0.8.7--20180103--001 to FFmpeg4.4 Rao，ok for Android port & iOS port
 - openssl     : [ongoing] upgrading to OpenSSL_1_1_1-stable: OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "arm64-v8a x86_64" for target Android;
                                                              OpenSSL_1_1_1-stable & FFmpeg4.4 working well with arch-eabi "armv7 arm64 i386 x86_64" for target iOS
-                                                          
+
 - android : [done]   add display url in playback for troubleshooting purpose
 - android : [done]   fix playback issue when switch between RTSP content and HTTP/HLS content
-- android : [done]   add display statistic info in playback UI for pressure test & troubleshooting purpose                    
+- android : [done]   add display statistic info in playback UI for pressure test & troubleshooting purpose
 - android : [done]   enable playback DASH content by add libiconv & libxml2 in the project,validate ok on Android x86-64 and iOS x86-64
 - android : [done]   enable playback AES-128 encrypt content,validate ok on Android x86-64 & iOS x86-64
 - android : [ongoing, priority:low]    add telemetry module for UI & background statistical usage
 - android : [ongoing, priority:low]    ANR when switch between DASH content and HLS content
 - android : [ongoing, priority:low]    low start-up speed with internet DASH/RTMP content(about 2-6 secs)
 - android : [ongoing, priority:medium] various stability issues
-- android : [done, priority:high]   add HLS SampleAES support：HLS H264 SampleAES works fine for the first time in hijkplayer
-- android : [ongoing, priority:high]   add HLS China SM2/SM3/SM4 support:data path already finished
+- android : [done,    priority:high]   add HLS SampleAES support：HLS H264 SampleAES works fine for the first time in hijkplayer
+- android : [ongoing, priority:high]   add HLS China SM4-CBC support:SM4-CBC works but not perfectly, ticky issue with Sample-SM4-CBC
+- android : [done,    priority:high]   add ChinaDRM client subsystem support: works fine for the first time in hijkplayer
 
 - iOS         : [done]    dev-ios-baseon-latest-k0.8.8 branch could running ok as expected on iOS simulator in my macOS
 - iOS         : [done]    merge dev-ios-baseon-latest-k0.8.8 to dev-baseon-latest-k0.8.8 and remove dev-ios-baseon-latest-k0.8.8

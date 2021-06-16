@@ -55,6 +55,9 @@ FF_CROSS_PREFIX=
 FF_DEP_OPENSSL_INC=
 FF_DEP_OPENSSL_LIB=
 
+FF_DEP_CURL_INC=
+FF_DEP_CURL_LIB=
+
 FF_DEP_LIBSOXR_INC=
 FF_DEP_LIBSOXR_LIB=
 
@@ -94,6 +97,7 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-armv7a
     FF_BUILD_NAME_LIBXML2=libxml2-armv7a
     FF_BUILD_NAME_LIBZ=libz-armv7a
+    FF_BUILD_NAME_CURL=curl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=arm-linux-androideabi
@@ -115,6 +119,7 @@ elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-armv5
     FF_BUILD_NAME_LIBXML2=libxml2-armv5
     FF_BUILD_NAME_LIBZ=libz-armv5
+    FF_BUILD_NAME_CURL=curl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=arm-linux-androideabi
@@ -134,6 +139,7 @@ elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-x86
     FF_BUILD_NAME_LIBXML2=libxml2-x86
     FF_BUILD_NAME_LIBZ=libz-x86
+    FF_BUILD_NAME_CURL=curl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=i686-linux-android
@@ -155,6 +161,7 @@ elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-x86_64
     FF_BUILD_NAME_LIBXML2=libxml2-x86_64
     FF_BUILD_NAME_LIBZ=libz-x86_64
+    FF_BUILD_NAME_CURL=curl-x86_64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=x86_64-linux-android
@@ -176,6 +183,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-arm64
     FF_BUILD_NAME_LIBXML2=libxml2-arm64
     FF_BUILD_NAME_LIBZ=libz-arm64
+    FF_BUILD_NAME_CURL=curl-arm64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CROSS_PREFIX=aarch64-linux-android
@@ -209,6 +217,8 @@ FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
 FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
 FF_DEP_OPENSSL_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/include
 FF_DEP_OPENSSL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_OPENSSL/output/lib
+FF_DEP_CURL_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_CURL/output/include
+FF_DEP_CURL_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_CURL/output/lib
 FF_DEP_LIBSOXR_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBSOXR/output/include
 FF_DEP_LIBSOXR_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBSOXR/output/lib
 FF_DEP_LIBICONV_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/include
@@ -281,6 +291,35 @@ if [ -f "${FF_DEP_OPENSSL_LIB}/libssl.a" ]; then
 
     FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_OPENSSL_INC}"
     FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_OPENSSL_LIB} -lssl -lcrypto"
+fi
+
+if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
+    echo "libcurl detected"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_CURL_INC}"
+    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_CURL_LIB} -lcurl"
+
+    if [ "$FF_ARCH" = "arm64" ]; then
+        FF_CFLAGS="$FF_CFLAGS -DENABLE_DRMCLIENT"
+        FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_SOURCE}/prebuilts/arm64-v8a/ -ldrmclient -llog"
+        if [ ! -d ${FF_PREFIX}/lib ]; then
+            mkdir -p ${FF_PREFIX}/lib
+        fi
+        /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_PREFIX}/lib/
+        if [ ! -d  ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/ ]; then
+            mkdir -p ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/
+        fi
+        /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/arm64-v8a/
+    fi
+
+    if [ "$FF_ARCH" = "x86_64" ]; then
+        #just make build system happy
+        /bin/cp -fv ${FF_SOURCE}/prebuilts/x86_64/libdrmclient.so ${FF_PREFIX}/lib/
+        if [ ! -d  ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/ ]; then
+            mkdir -p ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/
+        fi
+        /bin/cp -fv ${FF_SOURCE}/prebuilts/x86_64/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/ijkplayer-example/src/main/jniLibs/x86_64/
+    fi
 fi
 
 if [ -f "${FF_DEP_LIBSOXR_LIB}/libsoxr.a" ]; then
@@ -378,10 +417,10 @@ echo "[*] compile ffmpeg"
 echo "--------------------"
 cp config.* $FF_PREFIX
 CPU_COUNTS=`cat /proc/cpuinfo | grep "processor" | wc | awk '{print int($1)}'`
+echo "pwd is `pwd`"
 echo "host cpu counts is $CPU_COUNTS"
 echo "make -j${CPU_COUNTS} $FF_MAKE_FLAGS"
 make -j${CPU_COUNTS} $FF_MAKE_FLAGS
-#make $FF_MAKE_FLAGS > /dev/null
 make install
 mkdir -p $FF_PREFIX/include/libffmpeg
 cp -f config.h $FF_PREFIX/include/libffmpeg/config.h
