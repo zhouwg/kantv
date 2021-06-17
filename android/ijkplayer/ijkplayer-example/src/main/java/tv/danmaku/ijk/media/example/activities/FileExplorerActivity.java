@@ -17,15 +17,22 @@
 
 package tv.danmaku.ijk.media.example.activities;
 
+import android.app.ListActivity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
+import android.widget.ArrayAdapter;
 
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.AppActivity;
@@ -35,6 +42,16 @@ import tv.danmaku.ijk.media.example.fragments.FileListFragment;
 
 public class FileExplorerActivity extends AppActivity {
     private Settings mSettings;
+    private String path;
+
+    public static Intent newIntent(Context context) {
+        Intent intent = new Intent(context, FileExplorerActivity.class);
+        return intent;
+    }
+
+    public static void intentTo(Context context) {
+        context.startActivity(newIntent(context));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,11 +61,12 @@ public class FileExplorerActivity extends AppActivity {
             mSettings = new Settings(this);
         }
 
-        String lastDirectory = mSettings.getLastDirectory();
+        String lastDirectory = "/sdcard";//mSettings.getLastDirectory();
         if (!TextUtils.isEmpty(lastDirectory) && new File(lastDirectory).isDirectory())
             doOpenDirectory(lastDirectory, false);
         else
             doOpenDirectory("/", false);
+
     }
 
     @Override

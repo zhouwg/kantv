@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ijkmediademo</string>
+    <string name="app_name">Kan TV</string>
 
     <string name="N_A">N/A</string>
     <string name="close">Close</string>
     <string name="exit">Exit</string>
     <string name="sample">Sample</string>
+    <string name="file">File</string>
     <string name="recent">Recent</string>
     <string name="settings">Settings</string>
     <string name="tracks">Tracks</string>

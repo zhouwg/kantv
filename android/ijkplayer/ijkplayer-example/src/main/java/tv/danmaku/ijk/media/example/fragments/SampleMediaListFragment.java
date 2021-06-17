@@ -67,83 +67,88 @@ public class SampleMediaListFragment extends Fragment {
                 VideoActivity.intentTo(activity, url, name);
             }
         });
-        //Apple's FairPlay DRM
-        //https://github.com/yt-dlp/yt-dlp/issues/377
-        mAdapter.addItem("https://siloh-aka.plutotv.net/abe03d_MGM_Studios/clip/5966922a70e766a31078cf8d_Dark_Blue_2003/720pDRM/20210513_081743/hls/0-end/fp/hls_2400.m3u8", "hl2_2400.m3u8");
 
-        // fetch key from remote http server directly
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_sm4cbc/1.m3u8",  "h264 china sample sm4 cbc");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sample_sm4cbc/1.m3u8",  "h265 china sample sm4 cbc");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sm4cbc/1.m3u8", "h264 china sm4 cbc");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h265_sm4cbc/1.m3u8", "h265 china sm4 cbc");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13新闻");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv16", "CGTN-新闻");
+        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8", "CCTV1高清");
+        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8", "CCTV3高清");
+        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5hd.m3u8", "CCTV5高清");
+        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5phd.m3u8", "CCTV5+高清");
+        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8", "CCTV6高清");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv1", "CCTV-1综合");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv2", "CCTV-2财经");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv3", "CCTV-3综艺");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv4", "CCTV-4中文国际");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv5", "CCTV-5体育");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv6", "CCTV-6电影");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv7", "CCTV-7军事农业");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv8", "CCTV-8电视剧");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv9", "CCTV-9记录");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv10", "CCTV-10科教");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv11", "CCTV-11戏曲");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv12", "CCTV-12社会与法");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv14", "CCTV-14少儿");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv15", "CCTV-15音乐");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sjdltv", "CCTV-世界地理");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fyyytv", "CCTV-风云音乐");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fyzqtv", "CCTV-风云足球");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fyjctv", "CCTV-风云剧场");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hjjctv", "CCTV-怀旧剧场");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gfjstv", "CCTV-国防军事");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/dyjctv", "CCTV-第一剧场");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv1", "中国教育-1");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv2", "中国教育-2");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv3", "中国教育-3");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv4", "中国教育-4");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sdetv", "山东教育");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gdtv", "广东卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gxtv", "广西卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gstv", "甘肃卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gztv", "贵州卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hbtv", "湖北卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hunantv", "湖南卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hebtv", "河北卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hntv", "河南卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/hljtv", "黑龙江卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/jstv", "江苏卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/jxtv", "江西卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/jltv", "吉林卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/lntv", "辽宁卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/nmtv", "内蒙古卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/nxtv", "宁夏卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/qhtv", "青海卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sctv", "四川卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sdtv", "山东卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sxrtv", "山西卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/sxtv", "陕西卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv1", "中国教育-1");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv3", "中国教育-3");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv4", "中国教育-4");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chcatv", "CHC动作电影");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chctv", "CHC家庭影院");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chchd", "CHC高清电影");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/natlgeo", "国家地理频道");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/discovery", "探索频道");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/channelv", "Channel[V]");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/starsports", "Star Sports");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/startv", "星空卫视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fhdy", "凤凰卫视电影台");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fhzx", "凤凰卫视资讯台");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/fhzw", "凤凰卫视中文台");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/documentaryhd", "全纪实高清");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gedocu", "金鹰纪实高清");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/docuchina", "上海纪实高清");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv9", "北京新闻");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv7", "北京生活");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv8", "北京青年");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv6", "北京体育");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv5", "北京财经");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv4", "北京影视");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv3", "北京科教");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv2", "北京文艺");
+        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv1", "北京卫视");
+        mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "HKS TV");
 
-        // HLS H264 SAMPLE-AES supportive is done
-        // https://github.com/zhouwg/hijkplayer/issues/5
-        // fetch key from remote http server directly
-        // both  ok
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_aes_video.m3u8", "h264 sample aes video only");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_aes_audiovideo.m3u8", "h264 sample aes video&audio");
-
-        //ok
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocnclear/ocn_clear.m3u8", "ocnclear/ocn.m3u8");
-
-        // fetch license from ChinaDRM server, not support at the moment
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/ocn_sampleaes_chinadrm.m3u8", "ocn_sampleaes_chinadrm.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
-
-        //HLS
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/AES-128/aes128_no_IV/pantos_aes.m3u8", "aes128_no_IV/pantos_aes.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/AES-128/rotation_key/key_rotation.m3u8", "rotation_key/key_rotation.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/sintel_clear/sintelclear.m3u8", "sintel_clear/sintelclear.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/sintel264/sintel264.m3u8", "sintel264/sintel264.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/HD1280P/HD1280P.m3u8", "HD1280P/HD1280P.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/Avengers/Avengers_2012.mp4", "Avengers/Avengers_2012.mp4");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/BigBuckBunny_HD1500/BigBuckBunnyHD500.m3u8", "BigBuckBunny_HD1500/BigBuckBunnyHD500.m3u8");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/clear/BigBuckBunny_HD1500/BigBuckBunnyHD1500.m3u8", "BigBuckBunny_HD1500/BigBuckBunnyHD1500.m3u8");
-
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", "bipbop basic master playlist");
-        mAdapter.addItem("http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/prog_index.m3u8", "bipbop basic 400x300 @ 232 kbps");
-
-        //HTTP
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.flv", "mediaroot/html/test.flv");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/test.mp4", "mediaroot/html/test.mp4");
-        mAdapter.addItem("http://192.168.0.100:81/mediaroot/html/sintel.mp4", "mediaroot/html/sintel.mp4");
-        mAdapter.addItem("http://192.168.0.100:81/bigbuckbunnyh264.ts", "http://192.168.0.100:81/bigbuckbunnyh264.ts");
-        mAdapter.addItem("http://192.168.0.100:81/bigbuckbunnyh265.ts", "http://192.168.0.100:81/bigbuckbunnyh265.ts");
-
-        //RTSP
-        mAdapter.addItem("rtsp://192.168.0.100:8000/testrtsp.ts", "rtsp://192.168.0.100:8000/testrtsp.ts");
-
-        //DASH
-        //ok
-        mAdapter.addItem("http://dash.as.s3.amazonaws.com/media/sintel/out/sintel.mpd", "sintel/out/sintel.mpd");
-        //Not yet implemented in FFmpeg, patches welcome
-        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/1a/sony/SNE_DASH_SD_CASE1A_REVISED.mpd", "http://dash.edgesuite.net/dash264/TestCases/1a/sony/SNE_DASH_SD_CASE1A_REVISED.mpd");
-        //ok
-        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd", "http://dash.edgesuite.net/dash264/TestCases/1a/netflix/exMPD_BIP_TC1.mpd");
-        //ok
-        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd", "http://dash.edgesuite.net/dash264/TestCases/2a/qualcomm/1/MultiResMPEG2.mpd");
-        //ok
-        mAdapter.addItem("http://dash.edgesuite.net/dash264/TestCases/3b/fraunhofer/heaac_stereo_with_video/Sintel/sintel_480p_heaac_stereo_sidx.mpd", "sintel_480p_heaac_stereo_sidx.mpd");
-        //why this URL couldn't displayed in playback UI correctly?
-        //route cause is lineLength should < 35
-        //Failed to resolve hostname hls-lin-329.timewarnercable.com: No address associated with hostname
-        mAdapter.addItem("http://hls-lin-329.timewarnercable.com/dash/DASH_720p60_SAP/manifest.mpd", "DASH_720p60_SAP/manifest.mpd");
-        // 403 Forbidden
-        mAdapter.addItem("http://dashas.castlabs.com/videos/files/bbb/Manifest.mpd", "files/bbb/Manifest.mpd");
-        //Server returned 403 Forbidden (access denied)
-        mAdapter.addItem("http://dashas.castlabs.com/videos/bytes/bbb/Manifest.mpd", "http://dashas.castlabs.com/videos/bytes/bbb/Manifest.mpd");
-        //failure
-        mAdapter.addItem("http://usp-demo.castlabs.com/live/channel1/channel1.isml/channel1.mpd", "http://usp-demo.castlabs.com/live/channel1/channel1.isml/channel1.mpd");
-
-        //RTMP
-        mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13 News");
-
-        //FLV
-        mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "mutfysrq.flv");
-
-        mAdapter.addItem("https://stream7.iqilu.com/10339/upload_transcode/202002/18/20200218093206z8V1JuPlpe.mp4", "testmp4");
     }
 
     final class SampleMediaItem {
