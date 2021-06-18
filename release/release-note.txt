@@ -1,0 +1,14 @@
+v0.0.1:
+    kantv project was launched base on branch dev-baseon-latest-k0.8.8 in my
+    on-going developing hijkplayer project;
+
+v0.0.2:
+    add development mode;
+
+v0.0.3:
+    add author/maintainer info;
+
+v0.0.4:
+    media category for online TV and online Movie;
+    disable progress bar when playback online TV;
+    display media name in Media Information dialog;
