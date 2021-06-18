@@ -4,6 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
+        android:id="@+id/action_movie"
+        android:title="@string/movie"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_file"
         android:title="@string/file"
         app:showAsAction="ifRoom" />

@@ -64,7 +64,7 @@ import tv.danmaku.ijk.media.example.application.Settings;
 import tv.danmaku.ijk.media.example.services.MediaPlayerService;
 
 public class IjkVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
-    private String TAG = "IjkVideoView";
+    private String TAG = IjkVideoView.class.getName();
     // settable by the client
     private Uri mUri;
     private Map<String, String> mHeaders;
@@ -127,6 +127,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     private long mSeekStartTime = 0;
     private long mSeekEndTime = 0;
+    private String mVideoTitle;
 
     private TextView subtitleDisplay;
 
@@ -257,6 +258,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         setVideoURI(Uri.parse(path));
     }
 
+    public void setVideoTitle(String title) {
+        mVideoTitle = title;
+    }
+
     /**
      * Sets video URI.
      *
@@ -352,11 +357,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             if (mHudViewHolder != null) {
                 mHudViewHolder.setMediaPlayer(mMediaPlayer);
                 if (mHudViewHolder != null) {
+                    IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                     if (mSettings.getDevMode()) {
-                        IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                         mHudViewHolder.setVisibility(View.VISIBLE);
                     } else {
-                        IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                         mHudViewHolder.setVisibility(View.INVISIBLE);
                     }
                 }
@@ -414,12 +418,14 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
                         }
                         if (mHudViewHolder != null) {
+                            IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                             if (mSettings.getDevMode()) {
-                                IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                                 mHudViewHolder.setVisibility(View.VISIBLE);
                             } else {
-                                IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
                                 mHudViewHolder.setVisibility(View.INVISIBLE);
+                            }
+                            if (0 == mMediaPlayer.getDuration()) {
+                                mMediaController.setEnabled(false);
                             }
                         }
                         // REMOVED: getHolder().setFixedSize(mVideoWidth, mVideoHeight);
@@ -1168,10 +1174,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         int selectedSubtitleTrack = MediaPlayerCompat.getSelectedTrack(mMediaPlayer, ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
 
         TableLayoutBinder builder = new TableLayoutBinder(getContext());
-        builder.appendSection(R.string.mi_player);
-        builder.appendRow2(R.string.mi_player, MediaPlayerCompat.getName(mMediaPlayer));
+        //builder.appendSection(R.string.mi_player);
+        //builder.appendRow2(R.string.mi_player, MediaPlayerCompat.getName(mMediaPlayer));
         builder.appendSection(R.string.mi_media);
         builder.appendRow2(R.string.mi_resolution, buildResolution(mVideoWidth, mVideoHeight, mVideoSarNum, mVideoSarDen));
+        builder.appendRow2("Name", mVideoTitle);
         builder.appendRow2(R.string.mi_length, buildTimeMilli(mMediaPlayer.getDuration()));
 
         ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();

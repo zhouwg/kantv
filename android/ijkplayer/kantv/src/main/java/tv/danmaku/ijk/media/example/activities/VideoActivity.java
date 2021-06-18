@@ -53,6 +53,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
     private String mVideoPath;
     private Uri    mVideoUri;
+    private String mVideoTitle;
 
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
@@ -83,7 +84,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mSettings = new Settings(this);
 
         // handle arguments
-        mVideoPath = getIntent().getStringExtra("videoPath");
+        mVideoPath  = getIntent().getStringExtra("videoPath");
+        mVideoTitle = getIntent().getStringExtra("videoTitle");
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
@@ -140,10 +142,11 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
         mVideoView.setMediaController(mMediaController);
         mVideoView.setHudView(mHudView);
+        mVideoView.setVideoTitle(mVideoTitle);
         // prefer mVideoPath
-        if (mVideoPath != null)
+        if (mVideoPath != null) {
             mVideoView.setVideoPath(mVideoPath);
-        else if (mVideoUri != null)
+        } else if (mVideoUri != null)
             mVideoView.setVideoURI(mVideoUri);
         else {
             Log.e(TAG, "Null Data Source\n");
