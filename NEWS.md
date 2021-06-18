@@ -1,3 +1,10 @@
+branch kantv
+--------------------------------
+- project: 2021-06-18,00:13, launch branch "kantv" base on branch "dev-baseon-latest-k0.8.8"
+
+- project: 2021-06-18,00:13, rename project's name from hijkplayer to kantv, and this branch "dev-baseon-latest-k0.8.8" will be no longer supported from now on
+
+
 branch dev-baseon-latest-k0.8.8
 --------------------------------
 - ffmpeg      : [done]    upgrade ffmpeg from ff3.4--ijk0.8.7--20180103--001 to FFmpeg4.4 Rao，ok for Android port & iOS port
