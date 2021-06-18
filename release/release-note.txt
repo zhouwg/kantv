@@ -12,3 +12,8 @@ v0.0.4:
     media category for online TV and online Movie;
     disable progress bar when playback online TV;
     display media name in Media Information dialog;
+    
+   
+TODO:
+    remove illegal advertisement in some online movie，we must keep compliant in opensource software project; priority level：HIGH
+    UI refactoring for Android apk, priority level：MEDIUM
