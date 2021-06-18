@@ -123,6 +123,8 @@ build apk by latest Android Studio IDE
 
 - Host OS information:
 
+![macos-info](https://user-images.githubusercontent.com/6889919/122509084-bac13380-d035-11eb-9d8a-ae676a11fa39.png)
+
 ```
 uname -a
 
@@ -207,7 +209,7 @@ Licensed under LGPLv2.1 or later
 ```
 
 ```
-Copyright (c) 2021 maintainer of hijkplayer project
+Copyright (c) 2021 maintainer of kantv project
 
 Licensed under Apachev2.0 or later
 ```
