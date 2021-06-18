@@ -1,6 +1,6 @@
-# hijkplayer
+# kantv
 
-cross-platform video player based on [ffplay](http://ffmpeg.org) for Android & iOS, derived from original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some enhancements.
+cross-platform online-tv & online-media & local media player based on [ffmpeg](https://github.com/zhouwg/FFmpeg) for Android & iOS, derived from original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some [enhancements](https://github.com/zhouwg/kantv/blob/kantv/NEWS.md).
 
 
 
@@ -83,9 +83,9 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 #### Before Build
 
 ```
-git clone https://github.com/zhouwg/hijkplayer
-cd hijkplayer
-git checkout dev-baseon-latest-k0.8.8
+git clone https://github.com/zhouwg/kantv
+cd kantv
+git checkout kantv
 
 
 # add these lines to your ~/.bash_profile or ~/.profile
@@ -160,9 +160,9 @@ make;make install
 #### Before Build
 
 ```
-git clone https://github.com/zhouwg/hijkplayer
-cd hijkplayer
-git checkout dev-baseon-latest-k0.8.8
+git clone https://github.com/zhouwg/kantv
+cd kantv
+git checkout kantv
 
 ```
 
@@ -182,15 +182,21 @@ step2: build APP
 
 build APP by latest Xcode IDE
 
+### KanTV Android apk download
+
+> The KanTV apk is about 21M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
+
+
+[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
+
+### KanTV iOS app download
+
+> TBD
 
 ### Support
 
 - Please do not send e-mail to me. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
-
-
-### Latest Changes
-- [NEWS.md](NEWS.md)
 
 
 ### License
@@ -206,7 +212,7 @@ Copyright (c) 2021 maintainer of hijkplayer project
 Licensed under Apachev2.0 or later
 ```
 
-the original official ijkplayer & hijkplayer required features are based on or derives from projects below:
+the original official ijkplayer & kantv required features are based on or derives from projects below:
 - LGPL
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
@@ -237,7 +243,7 @@ ijkplayer's build scripts are based on or derives from projects below:
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
 - [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script)
 
-hijkplayer's build scripts was created and maintained by maintainer of hijkplayer project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
+kantv's build scripts was created and maintained by maintainer of kantv project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
 
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
@@ -247,4 +253,4 @@ But ijkplayer is also based on other different projects under various licenses, 
 [IANAL](https://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
 
 
-hijkplayer is licensed under Apachev2.0 or later, so itself is free for commercial use under Apachev2.0 or later
+kantv is licensed under Apachev2.0 or later, so itself is free for commercial use under Apachev2.0 or later

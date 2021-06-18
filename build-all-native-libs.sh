@@ -477,30 +477,30 @@ function build_native_debug()
             realname=${arch}
         fi
 
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni ]; then
-            echo "${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni not exist"
-            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jni ]; then
+            echo "${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jni not exist"
+            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jni
         else
-            echo "${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni already exist"
+            echo "${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jni already exist"
         fi
-        cd ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jni
+        cd ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jni
 
         show_pwd
         ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${arch} NDK_ALL_ABIS=${arch} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1 clean
         ${ANDROID_NDK}/ndk-build APP_BUILD_SCRIPT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Android.mk NDK_APPLICATION_MK=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/jni/Application.mk APP_ABI=${arch} NDK_ALL_ABIS=${arch} NDK_DEBUG=1 APP_PLATFORM=android-21 NDK_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realnaem}/build/intermediates/ndkBuild/debug/obj NDK_LIBS_OUT=${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib NDK_LOG=1 V=1
 
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} ]; then
-            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
-            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
+            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}
         else
-            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
         fi
-        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
+        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijksdl.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}
 
 
-        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
+        echo -e "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/build/intermediates/ndkBuild/debug/lib/${arch}/libijkplayer.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}
     done
     set +e
 }
@@ -575,21 +575,21 @@ function build_native_release()
         build_module ijk     ${realname}
 
         echo -e "\n"
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} ]; then
-            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
-            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} not exist${TEXT_RESET}"
+            mkdir -p ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}
         else
-            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch} already exist${TEXT_RESET}"
         fi
-        cd ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
+        cd ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs
         show_pwd
         if [ ! -f ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijksdl.so ]; then
             echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijksdl.so not exist, it shouldn't happen, pls check ${BUILD_ARCHS}"
             exit 1
         fi
         ls -l ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so
-        echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}"
-        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs/${arch}
+        echo "/bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}"
+        /bin/cp -fv ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-${realname}/src/main/obj/local/${arch}/libijk*.so  ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs/${arch}
     done
 
     if [ $BUILD_TARGET == "ios" ]; then
@@ -618,11 +618,11 @@ function do_clean()
             rm -rf android/contrib/build
         fi
 
-        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs ]; then
-            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs not exist${TEXT_RESET}\n"
+        if [ ! -d ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs ]; then
+            echo -e "${TEXT_RED}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs not exist${TEXT_RESET}\n"
         else
-            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
-            rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/ijkplayer-example/src/main/jniLibs
+            echo -e "${TEXT_BLUE}${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs exist${TEXT_RESET}, remove it\n"
+            rm -rf ${PROJECT_ROOT_PATH}/android/ijkplayer/kantv/src/main/jniLibs
         fi
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_RED}remove ios/build${TEXT_RESET}"

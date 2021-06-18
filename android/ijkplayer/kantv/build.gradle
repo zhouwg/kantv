@@ -1,0 +1,100 @@
+apply plugin: 'com.android.application'
+
+android {
+    // http://tools.android.com/tech-docs/new-build-system/tips
+    //noinspection GroovyAssignabilityCheck
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    //noinspection GroovyAssignabilityCheck
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    lintOptions {
+        abortOnError false
+    }
+    defaultConfig {
+        applicationId "tv.danmaku.ijk.media.example"
+        minSdkVersion 9
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        flavorDimensions "versionCode"
+        ndk {
+            //armeabiv-v7a: 第7代及以上的 ARM 处理器。2011年15月以后的生产的大部分Android设备都使用它
+            //arm64-v8a: 第8代、64位ARM处理器
+            //armeabi: 第5代、第6代的ARM处理器，早期的手机用的比较多
+            //x86: 平板、模拟器用得比较多
+            //x86_64: 64位的平板
+            //abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            abiFilters  "arm64-v8a", "x86_64"
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    productFlavors {
+        all32 { minSdkVersion 9 }
+        all64 { minSdkVersion 21 }
+        // armv5 {}
+        // armv7a {}
+        // arm64 { minSdkVersion 21 }
+        // x86 {}
+
+    }
+
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs  = ['src/main/jniLibs']
+        }
+    }
+
+
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:23.0.1'
+    compile 'com.android.support:preference-v7:23.0.1'
+    compile 'com.android.support:support-annotations:23.0.1'
+
+    compile 'com.squareup:otto:1.3.8'
+
+    compile project(':ijkplayer-java')
+    compile project(':ijkplayer-exo')
+
+    //all32Compile project(':ijkplayer-armv5')
+    //all32Compile project(':ijkplayer-armv7a')
+    //all32Compile project(':ijkplayer-x86')
+
+    //all64Compile project(':ijkplayer-armv5')
+    //all64Compile project(':ijkplayer-armv7a')
+    all64Compile project(':ijkplayer-arm64')
+    //all64Compile project(':ijkplayer-x86')
+    all64Compile project(':ijkplayer-x86_64')
+
+    // compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.8'
+    // compile 'tv.danmaku.ijk.media:ijkplayer-exo:0.8.8'
+
+    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+    // all32Compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+
+    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-armv5:0.8.8'
+    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-armv7a:0.8.8'
+    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-arm64:0.8.8'
+    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.8'
+    // all64Compile 'tv.danmaku.ijk.media:ijkplayer-x86_64:0.8.8'
+
+    // armv5Compile project(':player-armv5')
+    // armv7aCompile project(':player-armv7a')
+    // arm64Compile project(':player-arm64')
+    // x86Compile project(':player-x86')
+    // x86_64Compile project(':player-x86_64')
+}

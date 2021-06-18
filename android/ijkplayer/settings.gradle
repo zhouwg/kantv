@@ -6,5 +6,5 @@ include ':ijkplayer-x86_64'
 include ':ijkplayer-java'
 include ':ijkplayer-exo'
 
-include ':ijkplayer-example'
+include ':kantv'
 

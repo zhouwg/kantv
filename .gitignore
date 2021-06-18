@@ -48,7 +48,7 @@ xcuserdata
 xcshareddata
 *.xccheckout
 
-android/ijkplayer/ijkplayer-example/gradle
-android/ijkplayer/ijkplayer-example/src/main/jniLibs
+android/ijkplayer/kantv/gradle
+android/ijkplayer/kantv/src/main/jniLibs
 .cxx
 ndkBuild
