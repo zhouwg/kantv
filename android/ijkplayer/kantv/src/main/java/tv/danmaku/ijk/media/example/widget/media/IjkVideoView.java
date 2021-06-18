@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkLog;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkTimedText;
 import tv.danmaku.ijk.media.player.TextureMediaPlayer;
@@ -348,8 +349,18 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mPrepareStartTime = System.currentTimeMillis();
             mMediaPlayer.prepareAsync();
-            if (mHudViewHolder != null)
+            if (mHudViewHolder != null) {
                 mHudViewHolder.setMediaPlayer(mMediaPlayer);
+                if (mHudViewHolder != null) {
+                    if (mSettings.getDevMode()) {
+                        IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
+                        mHudViewHolder.setVisibility(View.VISIBLE);
+                    } else {
+                        IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
+                        mHudViewHolder.setVisibility(View.INVISIBLE);
+                    }
+                }
+            }
 
             // REMOVED: mPendingSubtitleTracks
 
@@ -401,6 +412,15 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         if (mRenderView != null) {
                             mRenderView.setVideoSize(mVideoWidth, mVideoHeight);
                             mRenderView.setVideoSampleAspectRatio(mVideoSarNum, mVideoSarDen);
+                        }
+                        if (mHudViewHolder != null) {
+                            if (mSettings.getDevMode()) {
+                                IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
+                                mHudViewHolder.setVisibility(View.VISIBLE);
+                            } else {
+                                IjkLog.d(TAG, "dev_mode: " + mSettings.getDevMode());
+                                mHudViewHolder.setVisibility(View.INVISIBLE);
+                            }
                         }
                         // REMOVED: getHolder().setFixedSize(mVideoWidth, mVideoHeight);
                         requestLayout();

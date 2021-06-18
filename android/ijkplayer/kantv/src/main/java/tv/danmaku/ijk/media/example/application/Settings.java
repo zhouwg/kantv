@@ -107,6 +107,10 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, true);
     }
 
+    public boolean getDevMode() {
+        String key = mAppContext.getString(R.string.pref_dev_mode);
+        return mSharedPreferences.getBoolean(key, false);
+    }
 
     public String getLastDirectory() {
         String key = mAppContext.getString(R.string.pref_key_last_directory);

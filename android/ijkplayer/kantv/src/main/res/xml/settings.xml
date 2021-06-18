@@ -93,5 +93,12 @@
             android:persistent="true"
             android:summary="@string/pref_summary_rtsp_tcp"
             android:title="@string/pref_title_rtsp_tcp" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_dev_mode"
+            android:persistent="true"
+            android:summary="@string/pref_summary_dev_mode"
+            android:title="@string/pref_title_dev_mode" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.text.SimpleDateFormat;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
+import tv.danmaku.ijk.media.player.IjkLog;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.MediaPlayerProxy;
 import tv.danmaku.ijk.media.example.R;
@@ -90,6 +91,10 @@ public class InfoHudViewHolder {
 
     public void updateSeekCost(long time)  {
         mSeekCost = time;
+    }
+
+    public void setVisibility (int visibility) {
+        mTableLayoutBinder.setVisibility(visibility);
     }
 
     private static String formatedSize(long bytes) {

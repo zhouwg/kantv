@@ -110,6 +110,10 @@
     <string name="pref_title_rtsp_tcp">Use TCP for rtsp</string>
     <string name="pref_summary_rtsp_tcp"></string>
 
+    <string name="pref_dev_mode">pref.dev_mode</string>
+    <string name="pref_title_dev_mode">Development Mode</string>
+    <string name="pref_summary_dev_mode"></string>
+
 
     <!-- -->
     <string name="pref_key_last_directory"></string>

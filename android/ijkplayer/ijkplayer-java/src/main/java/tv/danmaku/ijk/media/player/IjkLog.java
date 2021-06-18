@@ -100,7 +100,7 @@ public class IjkLog
         StackTraceElement[] elements = Thread.currentThread().getStackTrace();
         if (elements.length < 5)
         {
-            Log.e("IrsLog", "invalid stack info");
+            Log.e("IJKMEDIA", "invalid stack info");
             return infos;
         }
         else
@@ -113,7 +113,8 @@ public class IjkLog
             infos[2] = " at (" + elements[4].getClassName() + ".java:"
                        + elements[4].getLineNumber() + ")";
             */
-            infos[1] = "[" + elements[4].getClassName() + ".java:"
+            //add prefix IJKMEDIA in Java Layer and Native layer to make adb logcat happy
+            infos[1] = "[IJKMEDIA][" + elements[4].getClassName() + ".java:"
                        + elements[4].getLineNumber() + ",";
             infos[2] = elements[4].getMethodName() + "()" + "] ";
             return infos;

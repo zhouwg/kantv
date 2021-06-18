@@ -26,11 +26,13 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import tv.danmaku.ijk.media.example.R;
+import tv.danmaku.ijk.media.player.IjkLog;
 
 public class TableLayoutBinder {
     private Context mContext;
     public ViewGroup mTableView;
     public TableLayout mTableLayout;
+    private final static String TAG = TableLayoutBinder.class.getName();
 
     public TableLayoutBinder(Context context) {
         this(context, R.layout.table_media_info);
@@ -110,6 +112,10 @@ public class TableLayoutBinder {
         AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(mContext);
         dlgBuilder.setView(buildLayout());
         return dlgBuilder;
+    }
+
+    public void setVisibility (int visibility) {
+        mTableView.setVisibility(visibility);
     }
 
     private static class ViewHolder {
