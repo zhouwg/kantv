@@ -70,11 +70,6 @@ public class SampleMediaListFragment extends Fragment {
 
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13新闻");
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv16", "CGTN-新闻");
-        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8", "CCTV1高清");
-        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8", "CCTV3高清");
-        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5hd.m3u8", "CCTV5高清");
-        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5phd.m3u8", "CCTV5+高清");
-        mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8", "CCTV6高清");
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv1", "CCTV-1综合");
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv2", "CCTV-2财经");
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv3", "CCTV-3综艺");
@@ -148,6 +143,13 @@ public class SampleMediaListFragment extends Fragment {
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv2", "北京文艺");
         mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv1", "北京卫视");
         mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "HKS TV");
+
+        //TODO:not supported at the momnet
+        //.addItem("http://ivi.bupt.edu.cn/hls/cctv1hd.m3u8", "CCTV1高清");
+        //mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv3hd.m3u8", "CCTV3高清");
+        //mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5hd.m3u8", "CCTV5高清");
+        //mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv5phd.m3u8", "CCTV5+高清");
+        //mAdapter.addItem("http://ivi.bupt.edu.cn/hls/cctv6hd.m3u8", "CCTV6高清");
 
     }
 

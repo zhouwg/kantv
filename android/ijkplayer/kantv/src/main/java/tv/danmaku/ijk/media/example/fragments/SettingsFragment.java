@@ -19,6 +19,9 @@ package tv.danmaku.ijk.media.example.fragments;
 
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceFragmentCompat;
+import android.preference.CheckBoxPreference;
+import android.preference.PreferenceActivity;
+import android.preference.RingtonePreference;
 
 import tv.danmaku.ijk.media.example.R;
 

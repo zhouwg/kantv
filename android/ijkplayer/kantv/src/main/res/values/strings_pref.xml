@@ -114,6 +114,16 @@
     <string name="pref_title_dev_mode">Development Mode</string>
     <string name="pref_summary_dev_mode"></string>
 
+    <!-- -->
+    <string name="pref_title_about">About</string>
+    <string name="pref_author">pref.author</string>
+    <string name="pref_title_author">Author/Maintainer </string>
+    <string name="pref_summary_author">zhouwg, xiaohui</string>
+
+    <string name="pref_source">pref.author</string>
+    <string name="pref_title_source">Source code of KanTV </string>
+    <string name="pref_summary_source">https://github.com/zhouwg/kantv \n\nspecial thanks to Zhang Rui(bbcallen@gmail.com) and open source project ijkplayer from Bilibili Inc. </string>
+
 
     <!-- -->
     <string name="pref_key_last_directory"></string>
