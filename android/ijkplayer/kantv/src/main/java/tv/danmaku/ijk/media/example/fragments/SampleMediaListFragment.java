@@ -159,7 +159,7 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
             mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "HKS TV");
         } else if (MEDIA_MOVIE== mMediaType) {
             //TODO: add one or two or three high-score / classic online movies every week
-            mAdapter.addItem("https://v3.dious.cc/20210416/nIYS8a98/1000kb/hls/index.m3u8", "小人物");
+            mAdapter.addItem("https://v3.dious.cc//20210416/nIYS8a98/index.m3u8", "小人物");
             mAdapter.addItem("https://vod3.buycar5.cn//20210416/AxCh7eY4/1000kb/hls/index.m3u8", "小人物 -- AES encrypted");
             mAdapter.addItem("https://vod.bunediy.com/20200426/kd4Th5ZQ/index.m3u8", "肖申克的救赎 -- AES encrypted");
         } else { //local test content for study DRM system
