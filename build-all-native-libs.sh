@@ -47,15 +47,21 @@ function setup_env()
 
     TOOLS=${PROJECT_ROOT_PATH}/tools
 
-    #the speed of fetch code from github.com is very very very slow
-    #I have to switch from github.com to gitee.com
+    #the speed of fetch code from github.com is VERY VERY VERY slow
+    #I HAVE TO put source codes of some third-party libraries on gitee.com
+    #to make daily developent activities a bit easier
+
+    #but it will bring some trouble for overseas users because ENFORCED registration
+    #was required for gitee, we'll try to find a reasonable workaround
+
+    #modify it accordingly
     #for domestic users, it will be updated aperiodicity
     #IJK_FFMPEG_UPSTREAM=https://gitee.com/zhouweiguo2020/FFmpeg.git
     #IJK_FFMPEG_FORK=https://gitee.com/zhouweiguo2020/FFmpeg.git
-
-    #for overseas users,  up-to-date codes would be found here to keep pace with hijkplayer
+    #for overseas users,  up-to-date codes would be found here to keep pace with project kantv
     IJK_FFMPEG_UPSTREAM=https://github.com/zhouwg/FFmpeg.git
     IJK_FFMPEG_FORK=https://github.com/zhouwg/FFmpeg.git
+
     IJK_FFMPEG_COMMIT=release/4.4
     IJK_FFMPEG_LOCAL_REPO=extra/ffmpeg
 
@@ -77,7 +83,7 @@ function setup_env()
     IJK_LIBZ_COMMIT=master
     IJK_LIBZ_LOCAL_REPO=extra/libz
 
-    #IJK_LIBXML2_FORK=https://gitlab.gnome.org/GNOME/libxml2.git
+    #IJK_LIBXML2_UPSTREAM=https://gitlab.gnome.org/GNOME/libxml2.git
     IJK_LIBXML2_UPSTREAM=https://gitee.com/zhouweiguo2020/libxml2.git
     IJK_LIBXML2_FORK=https://gitee.com/zhouweiguo2020/libxml2.git
     IJK_LIBXML2_COMMIT=master
@@ -87,6 +93,17 @@ function setup_env()
     IJK_LIBCURL_FORK=https://gitee.com/zhouweiguo2020/curl.git
     IJK_LIBCURL_COMMIT=master
     IJK_LIBCURL_LOCAL_REPO=extra/curl
+
+    #modify it accordingly
+    #for domestic users
+    IJK_TENSORFLOW_UPSTREAM=https://gitee.com/zhouweiguo2020/tensorflow.git
+    IJK_TENSORFLOW_FORK=https://gitee.com/zhouweiguo2020/tensorflow.git
+    #for overseas users
+    #IJK_TENSORFLOW_UPSTREAM=https://github.com/tensorflow/tensorflow
+    #IJK_TENSORFLOW_FORK=https://github.com/tensorflow/tensorflow
+
+    IJK_TENSORFLOW_COMMIT=master
+    IJK_TENSORFLOW_LOCAL_REPO=extra/tensorflow
 }
 
 
@@ -441,6 +458,22 @@ function check_sources()
                     show_pwd
                     git checkout ${IJK_LIBCURL_COMMIT}
                 fi
+            elif [ $module_name == "tensorflow" ]; then
+                git --version
+                echo "== pull tensorflow base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_TENSORFLOW_UPSTREAM $IJK_TENSORFLOW_LOCAL_REPO
+                echo "== pull tensorflow fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_TENSORFLOW_FORK android/contrib/tensorflow-${realname} ${IJK_TENSORFLOW_LOCAL_REPO}
+                    cd android/contrib/tensorflow-${realname}
+                fi
+
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_TENSORFLOW_FORK ios/tensorflow-${realname} ${IJK_TENSORFLOW_LOCAL_REPO}
+                    cd ios/tensorflow-${realname}
+                fi
+                show_pwd
+                git checkout ${IJK_TENSORFLOW_COMMIT}
             else
                 echo -e "${TEXT_RED}dependent module ${module_name} unknown, pls check...${TEXT_RESET}"
             fi
@@ -566,6 +599,7 @@ function build_native_release()
         build_module curl     ${realname}
         build_module openssl  ${realname}
         build_module ffmpeg   ${realname}
+        build_module tensorflow   ${realname}
 
         if [ $BUILD_TARGET != "android" ]; then
             #TODO: build ijksdl and ijkplayer via this script in macOS for target ios
@@ -725,6 +759,7 @@ function do_init()
     check_sources  "curl"
     check_sources  "openssl"
     check_sources  "ffmpeg"
+    check_sources  "tensorflow"
 }
 
 
@@ -740,7 +775,7 @@ function do_build()
         else
             realname=${arch}
         fi
-        module_names="ffmpeg openssl"
+        module_names="ffmpeg openssl libiconv libz libxml2 curl tensorflow"
         for module_name in ${module_names};do
             if [ ${BUILD_TARGET} == "android" ]; then
                 test_path=./${BUILD_TARGET}/contrib/${module_name}-${realname}

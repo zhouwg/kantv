@@ -133,9 +133,9 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv1", "中国教育-1");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv3", "中国教育-3");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cetv4", "中国教育-4");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chcatv", "CHC动作电影");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chctv", "CHC家庭影院");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chchd", "CHC高清电影");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chcatv", "CHC ATV 动作电影");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chctv", "CHC CTV 家庭影院");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/chchd", "CHC CHD 高清电影");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/natlgeo", "国家地理频道");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/discovery", "探索频道");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/channelv", "Channel[V]");
@@ -147,21 +147,21 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/documentaryhd", "全纪实高清");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/gedocu", "金鹰纪实高清");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/docuchina", "上海纪实高清");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv9", "北京新闻");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv7", "北京生活");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv8", "北京青年");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv6", "北京体育");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv5", "北京财经");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv4", "北京影视");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv3", "北京科教");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv2", "北京文艺");
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv1", "北京卫视");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv9", "BTV-9 北京新闻");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv8", "BTV-8 北京青年");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv7", "BTV-7 北京生活");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv6", "BTV-6 北京体育");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv5", "BTV-5 北京财经");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv4", "BTV-4 北京影视");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv3", "BTV-3 北京科教");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv2", "BTV-2 北京文艺");
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/btv1", "BTV-1 北京卫视");
             mAdapter.addItem("http://zhibo.hkstv.tv/livestream/mutfysrq.flv", "HKS TV");
         } else if (MEDIA_MOVIE== mMediaType) {
             //TODO: add one or two or three high-score / classic online movies every week
-            mAdapter.addItem("https://v3.dious.cc//20210416/nIYS8a98/index.m3u8", "小人物");
-            mAdapter.addItem("https://vod3.buycar5.cn//20210416/AxCh7eY4/1000kb/hls/index.m3u8", "小人物 -- AES encrypted");
-            mAdapter.addItem("https://vod.bunediy.com/20200426/kd4Th5ZQ/index.m3u8", "肖申克的救赎 -- AES encrypted");
+            mAdapter.addItem("https://v3.dious.cc//20210416/nIYS8a98/index.m3u8", "Nobody(小人物)");
+            mAdapter.addItem("https://vod3.buycar5.cn//20210416/AxCh7eY4/1000kb/hls/index.m3u8", "Nobody(小人物) -- AES encrypted");
+            mAdapter.addItem("https://vod.bunediy.com/20200426/kd4Th5ZQ/index.m3u8", "The Shawshank Redemption(肖申克的救赎) -- AES encrypted");
         } else { //local test content for study DRM system
             // fetch key from remote http server directly
             mAdapter.addItem("http://192.168.0.100:81/mediaroot/ocn/h264_sample_sm4cbc/1.m3u8",  "h264 china sample sm4 cbc");

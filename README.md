@@ -50,6 +50,22 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
 
 ```
 
+- Tensorflow
+
+  setup prerequisites according to
+
+  https://docs.bazel.build/versions/main/install-ubuntu.html
+
+  https://www.tensorflow.org/lite/guide/build_cmake
+
+  before
+
+```
+  sudo apt-get update && sudo apt-get install bazel-3.7.2
+
+```
+
+
 - vim settings
 
 fetch from http://ffmpeg.org/developer.html#Editor-configuration
