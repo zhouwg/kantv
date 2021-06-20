@@ -171,7 +171,9 @@ function check_host()
         #working well with arch-eabi "arm64-v8a x86_64" for target Android
         #full archs for Android
         #export BUILD_ARCHS="armv5 armeabi-v7a arm64-v8a x86 x86_64"
-        export BUILD_ARCHS="arm64-v8a x86_64"
+        #export BUILD_ARCHS="arm64-v8a x86_64"
+        #remove target x86_64 to reduce size of APK
+        export BUILD_ARCHS="arm64-v8a"
     elif [ $machine = "Mac" ]; then
         echo -e "${TEXT_BLUE}host os is ${machine}, reset BUILD_TARGET to ios${TEXT_RESET}"
         export BUILD_TARGET=ios
