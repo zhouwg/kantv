@@ -808,7 +808,7 @@ function do_build()
     cd ${PROJECT_ROOT_PATH}
     show_pwd
     if [ $BUILD_TARGET == "android" ]; then
-        echo -e "${TEXT_BLUE} all dependent android native libs and JNI libs build finished, pls build ijkplayer APK via latest Andriod Studio IDE ${TEXT_RESET}"
+        echo -e "${TEXT_BLUE} all dependent android native libs and JNI libs build finished, pls build kantv APK via latest Andriod Studio IDE ${TEXT_RESET}"
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_BLUE} all dependent ios native libs build finished, pls build IJKMediaDemo  via latest Xcode IDE ${TEXT_RESET}"
     fi
