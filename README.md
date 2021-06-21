@@ -204,7 +204,7 @@ build APP by latest Xcode IDE
 
 ### KanTV Android apk download
 
-> The KanTV apk is about 21M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
+> The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
 
 
 [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
@@ -232,7 +232,7 @@ Copyright (c) 2021 maintainer of kantv project
 Licensed under Apachev2.0 or later
 ```
 
-the original official ijkplayer & kantv required features are based on or derives from projects below:
+the original official ijkplayer required features are based on or derives from projects below:
 - LGPL
   - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
   - [libVLC](http://git.videolan.org/?p=vlc.git)
@@ -263,7 +263,32 @@ ijkplayer's build scripts are based on or derives from projects below:
 - [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
 - [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script)
 
+
+
+
+
+the kantv required features are based on or derives from projects below:
+
+- zlib license
+  - [zlib](http://www.zlib.net/)
+
+- libxml2 license
+  - [libxml2](http://xmlsoft.org/)
+
+- libcurl license
+  - [curl](https://curl.se/libcurl/)
+
+- GPL license
+  - [libiconv](https://www.gnu.org/software/libiconv/)
+
+- Apache license
+  - [tensorflow](https://github.com/tensorflow/tensorflow)
+
+
+
 kantv's build scripts was created and maintained by maintainer of kantv project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
+
+
 
 ### Commercial Use
 ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
