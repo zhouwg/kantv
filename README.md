@@ -79,6 +79,7 @@ set shiftwidth=4
 set softtabstop=4
 set noundofile
 set nobackup
+set fileformat=unix 
 set undodir=~/.undodir
 set cindent
 set cinoptions=(0
@@ -89,6 +90,7 @@ highlight ForbiddenWhitespace ctermbg=red guibg=red
 match ForbiddenWhitespace /\s\+$\|\t/
 " Do not highlight spaces at the end of line while typing on that line.
 autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
+
 ```
 
 
