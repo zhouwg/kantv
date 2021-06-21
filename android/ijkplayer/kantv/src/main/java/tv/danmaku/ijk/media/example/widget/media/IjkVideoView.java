@@ -424,7 +424,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             } else {
                                 mHudViewHolder.setVisibility(View.INVISIBLE);
                             }
-                            if (0 == mMediaPlayer.getDuration()) {
+                            if ((0 == mMediaPlayer.getDuration()) && (!mSettings.getDevMode())) {
                                 mMediaController.setEnabled(false);
                             }
                         }
