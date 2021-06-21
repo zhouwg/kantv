@@ -63,6 +63,7 @@ set shiftwidth=4
 set softtabstop=4
 set noundofile
 set nobackup
+set fileformat=unix 
 set undodir=~/.undodir
 set cindent
 set cinoptions=(0
@@ -193,6 +194,12 @@ build APP by latest Xcode IDE
 
 ### Latest Changes
 - [NEWS.md](NEWS.md)
+
+
+  2021-06-18,00:13, launch branch "kantv" base on branch "dev-baseon-latest-k0.8.8"
+
+  2021-06-18,00:13, rename project's name from hijkplayer to kantv, and this branch "dev-baseon-latest-k0.8.8" will be no longer supported from now on
+
 
 
 ### License
