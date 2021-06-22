@@ -73,4 +73,11 @@ public class MediaPlayerCompat {
             return -1;
         return ijkMediaPlayer.getSelectedTrack(trackType);
     }
+
+    public static void setTFLite(IMediaPlayer mp, boolean enableTFLite) {
+        IjkMediaPlayer ijkMediaPlayer = getIjkMediaPlayer(mp);
+        if (ijkMediaPlayer == null)
+            return;
+        ijkMediaPlayer.setTFLite(enableTFLite);
+    }
 }

@@ -192,6 +192,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             mToastTextView.setText(aspectRatioText);
             mMediaController.showOnce(mToastTextView);
             return true;
+        } else if (id == R.id.action_toggle_tflite) {
+            boolean enableTFLite = mVideoView.toggleTFLite();
+            String tfliteText = (enableTFLite ? "enable tensorflowlite"  : "disable tensorflowlite");
+            mToastTextView.setText(tfliteText);
+            mMediaController.showOnce(mToastTextView);
+            return true;
         } else if (id == R.id.action_toggle_player) {
             int player = mVideoView.togglePlayer();
             String playerText = IjkVideoView.getPlayerText(this, player);

@@ -691,6 +691,9 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         }
     }
 
+    public void setTFLite(boolean enableTFLite) {
+        _setTFLite(enableTFLite);
+    }
     // experimental, should set DEFAULT_MIN_FRAMES and MAX_MIN_FRAMES to 25
     // TODO: @Override
     public void selectTrack(int track) {
@@ -703,6 +706,7 @@ public final class IjkMediaPlayer extends AbstractMediaPlayer {
         _setStreamSelected(track, false);
     }
 
+    private native void _setTFLite(boolean enabled);
     private native void _setStreamSelected(int stream, boolean select);
 
     @Override

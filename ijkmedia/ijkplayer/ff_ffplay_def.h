@@ -700,6 +700,7 @@ typedef struct FFPlayer {
     int         pf_playback_rate_changed;
     float       pf_playback_volume;
     int         pf_playback_volume_changed;
+    int         enable_tflite;
 
     void               *inject_opaque;
     void               *ijkio_inject_opaque;

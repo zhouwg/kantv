@@ -953,6 +953,14 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         return mCurrentAspectRatio;
     }
 
+    private boolean mEnableTFLite = false;
+    public boolean toggleTFLite() {
+        mEnableTFLite = !mEnableTFLite;
+        MediaPlayerCompat.setTFLite(mMediaPlayer, mEnableTFLite);
+        return mEnableTFLite;
+    }
+
+
     //-------------------------
     // Extend: Render
     //-------------------------

@@ -916,7 +916,10 @@ static void video_image_display2(FFPlayer *ffp)
                 SDL_Delay(20);
             }
         }
-        discard_frame = preprocess_picture(vp);
+
+        if (ffp->enable_tflite) {
+            discard_frame = preprocess_picture(vp);
+        }
         if (0 == discard_frame) {
             SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
         }
@@ -4871,7 +4874,17 @@ void ffp_set_playback_volume(FFPlayer *ffp, float volume)
         return;
     ffp->pf_playback_volume = volume;
     ffp->pf_playback_volume_changed = 1;
+
 }
+
+
+void ffp_set_enable_tflite(FFPlayer *ffp, int enabled)
+{
+    if (!ffp)
+        return;
+    ffp->enable_tflite = enabled;
+}
+
 
 int ffp_get_video_rotate_degrees(FFPlayer *ffp)
 {

@@ -481,6 +481,20 @@ LABEL_RETURN:
 }
 
 static void
+ijkMediaPlayer_setTFLite(JNIEnv *env, jobject thiz, jboolean enabled)
+{
+    IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
+    int ret = 0;
+    JNI_CHECK_GOTO(mp, env, NULL, "mpjni: setTFLite: null mp", LABEL_RETURN);
+
+    ijkmp_set_enable_tflite(mp, enabled);
+
+LABEL_RETURN:
+    ijkmp_dec_ref_p(&mp);
+    return;
+}
+
+static void
 ijkMediaPlayer_setStreamSelected(JNIEnv *env, jobject thiz, jint stream, jboolean selected)
 {
     IjkMediaPlayer *mp = jni_get_media_player(env, thiz);
@@ -1174,6 +1188,7 @@ static JNINativeMethod g_methods[] = {
     { "_getPropertyLong",       "(IJ)J",                    (void *) ijkMediaPlayer_getPropertyLong },
     { "_setPropertyLong",       "(IJ)V",                    (void *) ijkMediaPlayer_setPropertyLong },
     { "_setStreamSelected",     "(IZ)V",                    (void *) ijkMediaPlayer_setStreamSelected },
+    { "_setTFLite",             "(Z)V",                     (void *) ijkMediaPlayer_setTFLite },
 
     { "native_profileBegin",    "(Ljava/lang/String;)V",    (void *) IjkMediaPlayer_native_profileBegin },
     { "native_profileEnd",      "()V",                      (void *) IjkMediaPlayer_native_profileEnd },

@@ -178,6 +178,7 @@ void            ijkmp_set_playback_rate(IjkMediaPlayer *mp, float rate);
 void            ijkmp_set_playback_volume(IjkMediaPlayer *mp, float rate);
 
 int             ijkmp_set_stream_selected(IjkMediaPlayer *mp, int stream, int selected);
+void            ijkmp_set_enable_tflite(IjkMediaPlayer *mp, int enabled);
 
 float           ijkmp_get_property_float(IjkMediaPlayer *mp, int id, float default_value);
 void            ijkmp_set_property_float(IjkMediaPlayer *mp, int id, float value);
