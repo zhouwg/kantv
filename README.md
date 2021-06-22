@@ -1,6 +1,6 @@
 # kantv
 
-cross-platform online-tv & online-media & local media player based on [ffmpeg](https://github.com/zhouwg/FFmpeg) for Android & iOS, derived from original official [ijkplayer](https://github.com/bilibili/ijkplayer) , with some [enhancements](https://github.com/zhouwg/kantv/blob/kantv/NEWS.md).
+cross-platform online TV/movie(especially online overseas TV/movie for english learning purpose) player based on FFmpeg n4.4, also used for learning and studying Computer Vision/Deep Learning/...;  derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with some enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
 
 
 
