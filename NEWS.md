@@ -4,6 +4,12 @@ branch kantv
 
 - project: 2021-06-18,00:13, rename project's name from hijkplayer to kantv
 
+- android: finish ChinaDRM client subsystem
+
+- android: integrate Tensorflowlite for learning and studying Deep Learning/Computer Vision
+
+- android: UI enhancement
+
 
 branch dev-baseon-latest-k0.8.8
 --------------------------------
