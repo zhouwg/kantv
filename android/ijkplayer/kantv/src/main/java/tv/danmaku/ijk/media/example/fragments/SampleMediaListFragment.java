@@ -82,8 +82,21 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
         });
 
         if (MEDIA_TV == mMediaType) {
-            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13新闻");
+            //following are online English TV outside of China
+            //TODO: collect more online English TV for English learning purpose
+            //network quality is very good
+            mAdapter.addItem("http://sportportal1.akamaized.net/hls/live/702646/itvlive/ITV1PORTAL2/master_Main600.m3u8", "ITV UK - English");
+            //buffering frequently
+            mAdapter.addItem("https://p1media-americasvoice-1.vizio.wurl.com/manifest/playlist.m3u8", "Americas Voice - English");
+            //buffering frequently
+            mAdapter.addItem("https://biglife.sinclair.wurl.com/manifest/3000.m3u8", "Big Life TV - English");
+
+            //following are online English TV in China
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv16", "CGTN-English");
+            //following are online Chinese TV in China
+            // TODO: fetch EPG data or movie list from remote server, and render the EPG data or movie list in kantv apk
+            // https://www.deepepg.com/epg
+            mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv13", "CCTV-13新闻");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv1", "CCTV-1综合");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv2", "CCTV-2财经");
             mAdapter.addItem("rtmp://58.200.131.2:1935/livetv/cctv3", "CCTV-3综艺");
@@ -176,8 +189,7 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
             mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
             mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
         }
-        //TODO: fetch ChinaDRM encrypted EPG data or movie list from remote server, and render the decrypted data in kantv apk
-        //https://www.deepepg.com/epg
+
 
     }
 
