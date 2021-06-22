@@ -86,6 +86,12 @@
 #define AV_CODEC_CAP_DR1 CODEC_CAP_DR1
 #endif
 
+#define ENABLE_TENSORFLOW  1
+
+#if ENABLE_TENSORFLOW
+#include "tensorflow/lite/c/c_api.h"
+#endif
+
 // FIXME: 9 work around NDKr8e or gcc4.7 bug
 // isnan() may not recognize some double NAN, so we test both double and float
 #if defined(__ANDROID__)
@@ -139,6 +145,7 @@ int64_t get_valid_channel_layout(int64_t channel_layout, int channels)
 #endif
 
 static void free_picture(Frame *vp);
+static int  preprocess_picture(Frame *vp);
 
 static int packet_queue_put_private(PacketQueue *q, AVPacket *pkt)
 {
@@ -874,6 +881,7 @@ static void video_image_display2(FFPlayer *ffp)
     VideoState *is = ffp->is;
     Frame *vp;
     Frame *sp = NULL;
+    int discard_frame = 0;
 
     vp = frame_queue_peek_last(&is->pictq);
 
@@ -908,7 +916,10 @@ static void video_image_display2(FFPlayer *ffp)
                 SDL_Delay(20);
             }
         }
-        SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        discard_frame = preprocess_picture(vp);
+        if (0 == discard_frame) {
+            SDL_VoutDisplayYUVOverlay(ffp->vout, vp->bmp);
+        }
         ffp->stat.vfps = SDL_SpeedSamplerAdd(&ffp->vfps_sampler, FFP_SHOW_VFPS_FFPLAY, "vfps[ffplay]");
         if (!ffp->first_video_frame_rendered) {
             ffp->first_video_frame_rendered = 1;
@@ -3054,6 +3065,72 @@ static int is_realtime(AVFormatContext *s)
                 )
     )
         return 1;
+    return 0;
+}
+
+/**
+ *@brief      check whether the current video frame contain illegal advertisement
+ *@param[in]  vp  decoded video frame
+ *@return     1 or 0
+   - return 1 frame contains illegal advertisement and the frame will not be rendered
+   - return 0 frame will be rendered normally
+ *@see        https://github.com/zhouwg/kantv/issues/13
+*/
+static int preprocess_picture(Frame *vp)
+{
+#if ENABLE_TENSORFLOW
+    //pre-trained tensorflow model file
+    char *tfmodel_path    = "/sdcard/mobilenet_v1_1.0_224.tflite";
+    float input_data[49]  = { 0.0 };
+    float output_data[49] = { 0.0 };
+    TfLiteStatus  status  = kTfLiteOk;
+
+    //just for validate whether tensorflowlite works fine in kantv internal
+    ALOGD("tflite version: %s", TfLiteVersion());
+
+    if (0 != access(tfmodel_path, R_OK)) {
+        av_log(NULL, AV_LOG_WARNING, "cant' find tensorflowlite model file %s, reason:%s", tfmodel_path, strerror(errno));
+        return 0;
+    }
+
+    //borrow from https://github.com/tensorflow/tensorflow/issues/39253
+    //just for validate performance concern compare to original kantv
+    TfLiteModel *model = TfLiteModelCreateFromFile(tfmodel_path);
+    av_assert0(model != NULL);
+    TfLiteInterpreterOptions *options = TfLiteInterpreterOptionsCreate();
+    av_assert0(options != NULL);
+    TfLiteInterpreterOptionsSetNumThreads(options, 2);
+    TfLiteInterpreter *interpreter = TfLiteInterpreterCreate(model, options);
+    av_assert0(interpreter != NULL);
+    status = TfLiteInterpreterAllocateTensors(interpreter);
+    av_assert0(status == kTfLiteOk);
+
+    TfLiteTensor *input_tensor = TfLiteInterpreterGetInputTensor(interpreter, 0);
+    av_assert0(input_tensor != NULL);
+    status = TfLiteTensorCopyFromBuffer(input_tensor, input_data, 49 * sizeof(float));
+    if (status != kTfLiteOk) {
+        ALOGD("TfLiteTensorCopyFromBuffer failed");
+    }
+
+    status = TfLiteInterpreterInvoke(interpreter);
+    av_assert0(status == kTfLiteOk);
+
+    const TfLiteTensor *output_tensor = TfLiteInterpreterGetOutputTensor(interpreter, 14);
+    if (NULL != output_tensor) {
+        status = TfLiteTensorCopyToBuffer(output_tensor, output_data, 49 * sizeof(float));
+        if (status != kTfLiteOk) {
+            ALOGD("TfLiteTensorCopyToBuffer failed");
+        }
+    } else {
+        ALOGD("output_tensor is NULL");
+    }
+
+    TfLiteInterpreterDelete(interpreter);
+    TfLiteInterpreterOptionsDelete(options);
+    TfLiteModelDelete(model);
+
+#endif // #if ENABLE_TENSORFLOW
+
     return 0;
 }
 

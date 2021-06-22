@@ -305,11 +305,24 @@ if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
         if [ ! -d ${FF_PREFIX}/lib ]; then
             mkdir -p ${FF_PREFIX}/lib
         fi
+        if [ ! -d ${FF_PREFIX}/include ]; then
+            mkdir -p ${FF_PREFIX}/include
+        fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_PREFIX}/lib/
         if [ ! -d ${FF_SOURCE}/../../ijkplayer/kantv/src/main/jniLibs/arm64-v8a/ ]; then
             mkdir -p ${FF_SOURCE}/../../ijkplayer/kantv/src/main/jniLibs/arm64-v8a/
         fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/kantv/src/main/jniLibs/arm64-v8a/
+
+        #for https://github.com/zhouwg/kantv/issues/13
+        FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_SOURCE}/prebuilts/arm64-v8a/ -ltensorflowlite_c"
+        /bin/cp -fv ${FF_SOURCE}/prebuilts/arm64-v8a/libtensorflowlite_c.so ${FF_PREFIX}/lib/
+        if [ ! -d ${FF_PREFIX}/include/tensorflow/ ]; then
+            #make ff_ffplay.c happy
+            /bin/cp -rfv ${FF_SOURCE}/libavutil/tensorflow  ${FF_PREFIX}/include/
+        fi
+        /bin/cp -fv  ${FF_SOURCE}/prebuilts/arm64-v8a/libtensorflowlite_c.so ${FF_SOURCE}/../../ijkplayer/kantv/src/main/jniLibs/arm64-v8a/
+        #end for https://github.com/zhouwg/kantv/issues/13
     fi
 
     if [ "$FF_ARCH" = "x86_64" ]; then

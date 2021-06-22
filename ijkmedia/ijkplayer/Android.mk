@@ -78,9 +78,8 @@ LOCAL_SRC_FILES += ijkavutil/ijkstl.cpp
 #LOCAL_SHARED_LIBRARIES := ijkffmpeg ijksdl
 #LOCAL_STATIC_LIBRARIES := android-ndk-profiler ijksoundtouch
 
-
 LOCAL_SHARED_LIBRARIES :=  ijksdl
-LOCAL_STATIC_LIBRARIES :=  avformat avcodec swscale swresample avfilter avutil xml2 iconv ssl crypto curl drmclient android-ndk-profiler ijksoundtouch
+LOCAL_STATIC_LIBRARIES :=  avformat avcodec swscale swresample avfilter avutil xml2 iconv ssl crypto curl drmclient tensorflowlite_c android-ndk-profiler ijksoundtouch
 
 LOCAL_MODULE := ijkplayer
 
