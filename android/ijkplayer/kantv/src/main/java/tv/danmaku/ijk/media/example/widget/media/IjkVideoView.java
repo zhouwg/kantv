@@ -18,6 +18,7 @@
 package tv.danmaku.ijk.media.example.widget.media;
 
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
@@ -38,6 +39,7 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.app.ProgressDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +50,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import tv.danmaku.ijk.media.example.activities.VideoActivity;
 import tv.danmaku.ijk.media.exo.IjkExoMediaPlayer;
 import tv.danmaku.ijk.media.player.AndroidMediaPlayer;
 import tv.danmaku.ijk.media.player.IMediaPlayer;
@@ -130,6 +133,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private String mVideoTitle;
 
     private TextView subtitleDisplay;
+    private ProgressDialog mProgressDialog;
+    private VideoActivity  mActivity;
 
     public IjkVideoView(Context context) {
         super(context);
@@ -249,6 +254,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mHudViewHolder = new InfoHudViewHolder(getContext(), tableLayout);
     }
 
+    public void setActivity(VideoActivity activity) {
+        mActivity = activity;
+    }
     /**
      * Sets video path.
      *
@@ -519,9 +527,41 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                             Log.d(TAG, "MEDIA_INFO_BUFFERING_START:");
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if( mProgressDialog == null ) {
+                                        mProgressDialog = new ProgressDialog(mActivity);
+                                        mProgressDialog.setMessage("buffering...");
+                                        mProgressDialog.setIndeterminate(true);
+                                        //allows user cancel playback when buffering
+                                        mProgressDialog.setCancelable(true);
+                                        mProgressDialog.setCanceledOnTouchOutside (false);
+
+                                        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                                            @Override
+                                            public void onCancel(DialogInterface dialogInterface) {
+                                                stopPlayback();
+                                                mActivity.finish();
+                                            }
+                                        });
+                                        mProgressDialog.show();
+                                    }
+                                }
+                            });
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
                             Log.d(TAG, "MEDIA_INFO_BUFFERING_END:");
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mProgressDialog != null)
+                                    {
+                                        mProgressDialog.dismiss();
+                                        mProgressDialog = null;
+                                    }
+                                }
+                            });
                             break;
                         case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
                             Log.d(TAG, "MEDIA_INFO_NETWORK_BANDWIDTH: " + arg2);

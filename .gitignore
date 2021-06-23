@@ -6,6 +6,7 @@ android/contrib/openssl-*
 android/contrib/libiconv-*
 android/contrib/libxml2-*
 android/contrib/libz-*
+android/contrib/tensorflow-*
 android/contrib/build
 ios/ffmpeg-*
 ios/openssl-*
@@ -52,3 +53,7 @@ android/ijkplayer/kantv/gradle
 android/ijkplayer/kantv/src/main/jniLibs
 .cxx
 ndkBuild
+tags
+
+android/ijkplayer/kantv/all32
+android/ijkplayer/kantv/all64
