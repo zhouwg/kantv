@@ -524,13 +524,23 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             break;
                         case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
                             Log.d(TAG, "MEDIA_INFO_VIDEO_RENDERING_START:");
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mProgressDialog != null)
+                                    {
+                                        mProgressDialog.dismiss();
+                                        mProgressDialog = null;
+                                    }
+                                }
+                            });
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                             Log.d(TAG, "MEDIA_INFO_BUFFERING_START:");
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    if( mProgressDialog == null ) {
+                                    if (mProgressDialog == null) {
                                         mProgressDialog = new ProgressDialog(mActivity);
                                         mProgressDialog.setMessage("buffering...");
                                         mProgressDialog.setIndeterminate(true);
@@ -871,6 +881,28 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mCurrentState = STATE_PLAYING;
         }
         mTargetState = STATE_PLAYING;
+
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mProgressDialog == null) {
+                    mProgressDialog = new ProgressDialog(mActivity);
+                    mProgressDialog.setMessage("waiting...");
+                    mProgressDialog.setIndeterminate(true);
+                    mProgressDialog.setCancelable(true);
+                    mProgressDialog.setCanceledOnTouchOutside (false);
+
+                    mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialogInterface) {
+                            stopPlayback();
+                            mActivity.finish();
+                        }
+                    });
+                    mProgressDialog.show();
+                }
+            }
+        });
     }
 
     @Override
