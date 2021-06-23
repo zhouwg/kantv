@@ -299,4 +299,4 @@ But ijkplayer is also based on other different projects under various licenses, 
 [IANAL](https://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
 
 
-kantv is licensed under Apachev2.0 or later, so itself is free for commercial use under Apachev2.0 or later
+kantv is licensed under Apachev2.0 or later, so itself is free for commercial use UNDER Apachev2.0 or later
