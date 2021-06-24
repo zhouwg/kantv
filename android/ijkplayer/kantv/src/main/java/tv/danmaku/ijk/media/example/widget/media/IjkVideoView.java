@@ -886,33 +886,39 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     @Override
     public void start() {
+        int previousStatus = mCurrentState;
+
         if (isInPlaybackState()) {
             mMediaPlayer.start();
             mCurrentState = STATE_PLAYING;
         }
         mTargetState = STATE_PLAYING;
 
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mProgressDialog == null) {
-                    mProgressDialog = new ProgressDialog(mActivity);
-                    mProgressDialog.setMessage("waiting...");
-                    mProgressDialog.setIndeterminate(true);
-                    mProgressDialog.setCancelable(true);
-                    mProgressDialog.setCanceledOnTouchOutside (false);
+        if (STATE_PAUSED == previousStatus) {
+            IjkLog.d(TAG, "previous status: " + previousStatus + " current status:" + mCurrentState);
+        } else {
+            mActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mProgressDialog == null) {
+                        mProgressDialog = new ProgressDialog(mActivity);
+                        mProgressDialog.setMessage("waiting...");
+                        mProgressDialog.setIndeterminate(true);
+                        mProgressDialog.setCancelable(true);
+                        mProgressDialog.setCanceledOnTouchOutside(false);
 
-                    mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                        @Override
-                        public void onCancel(DialogInterface dialogInterface) {
-                            stopPlayback();
-                            mActivity.finish();
-                        }
-                    });
-                    mProgressDialog.show();
+                        mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                            @Override
+                            public void onCancel(DialogInterface dialogInterface) {
+                                stopPlayback();
+                                mActivity.finish();
+                            }
+                        });
+                        mProgressDialog.show();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override
