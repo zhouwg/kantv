@@ -300,10 +300,3 @@ But ijkplayer is also based on other different projects under various licenses, 
 
 
 kantv is licensed under Apachev2.0 or later, so itself is free for commercial use UNDER Apachev2.0 or later
-
-### Support Author
-
-star this open source project if you think it's useful for you or your business. Thanks.
-
-为kantv开源项目点赞，如果认为它有用，谢谢
-
