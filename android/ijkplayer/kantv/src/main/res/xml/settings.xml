@@ -96,7 +96,7 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/pref_dev_mode"
+            android:key="@string/pref_key_dev_mode"
             android:persistent="true"
             android:summary="@string/pref_summary_dev_mode"
             android:title="@string/pref_title_dev_mode" />
@@ -105,12 +105,17 @@
 
     <PreferenceCategory android:title="@string/pref_title_about">
         <Preference
-            android:key="@string/pref_author"
+            android:key="@string/pref_key_version"
+            android:title="@string/pref_title_version"
+            android:summary="@string/pref_summary_version" />
+
+        <Preference
+            android:key="@string/pref_key_author"
             android:title="@string/pref_title_author"
             android:summary="@string/pref_summary_author" />
 
         <Preference
-            android:key="@string/pref_source"
+            android:key="@string/pref_key_source"
             android:title="@string/pref_title_source"
             android:summary="@string/pref_summary_source" />
     </PreferenceCategory>

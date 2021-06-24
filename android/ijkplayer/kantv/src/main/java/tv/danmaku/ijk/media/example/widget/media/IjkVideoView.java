@@ -599,6 +599,16 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             break;
                         case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
                             Log.d(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mProgressDialog != null)
+                                    {
+                                        mProgressDialog.dismiss();
+                                        mProgressDialog = null;
+                                    }
+                                }
+                            });
                             break;
                     }
                     return true;

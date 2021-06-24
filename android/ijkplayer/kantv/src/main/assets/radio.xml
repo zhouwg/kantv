@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>online TV</title>
+    <link href="http://192.168.0.100:81/mediaroot/epg?radio"/>
+    <updated>2021-06-23,19:26</updated>
+    <author>
+        <name>zhouwg</name>
+    </author>
+    <id>urn:uuid:12345678-1234-3456-AABB-123412345678</id>
+
+
+<entry>
+    <title>
+        CRI (online english radio from China)
+    </title>
+    <link href="http://sk.cri.cn/am846.m3u8" urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+</feed>

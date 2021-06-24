@@ -15,6 +15,11 @@
  * limitations under the License.
  */
 
+
+ //2021-06-24, weiguo: this file will be removed in the future
+ //because it's replaced with ContentListFragment.java which
+ //load EPG infos from local xml file(or remote server) and then
+ //render/layout the EPG data accordingly
 package tv.danmaku.ijk.media.example.fragments;
 
 import android.app.Activity;
@@ -32,11 +37,12 @@ import android.widget.TextView;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.VideoActivity;
-import tv.danmaku.ijk.media.example.application.MediaType;
+import tv.danmaku.ijk.media.example.content.MediaType;
 import tv.danmaku.ijk.media.player.IjkLog;
 
-import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_MOVIE;
-import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
+import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_MOVIE;
+import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_TV;
+
 
  public class SampleMediaListFragment extends Fragment {
     private ListView mFileListView;
@@ -189,8 +195,6 @@ import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
             mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba.m3u8", "aesbba/aesbba.m3u8");
             mAdapter.addItem("http://192.168.0.100:81/mediaroot/tee/aesbba/aesbba_24hour.m3u8", "aesbba/aesbba_24hour.m3u8");
         }
-
-
     }
 
     final class SampleMediaItem {

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>online movie</title>
+  <link href="http://192.168.0.100:81/mediaroot/epg?movie"/>
+  <updated>2021-06-23,19:26</updated>
+  <author>
+    <name>zhouwg</name>
+  </author>
+  <id>urn:uuid:12345678-1234-3456-AABB-123412345678</id>
+
+
+<entry>
+   <title>
+       Nobody(小人物)
+   </title>
+   <link href="https://v3.dious.cc//20210416/nIYS8a98/index.m3u8" urltype="hls" protected="no" />
+   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Nobody(小人物) -- AES encrypted
+    </title>
+   <link href=
+       "https://vod3.buycar5.cn//20210416/AxCh7eY4/1000kb/hls/index.m3u8"
+       urltype="hls" protected="no" />
+   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        The Shawshank Redemption(肖申克的救赎) -- AES encrypted
+    </title>
+   <link href=
+       "https://vod.bunediy.com/20200426/kd4Th5ZQ/index.m3u8"
+       urltype="hls" protected="no" />
+   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+</feed>

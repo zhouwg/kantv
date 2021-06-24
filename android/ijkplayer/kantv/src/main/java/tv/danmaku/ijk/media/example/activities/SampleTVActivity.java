@@ -1,24 +1,21 @@
-/*
- * Copyright (C) 2015 Bilibili
- * Copyright (C) 2015 Zhang Rui <bbcallen@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ /*
+  * Copyright (C) 2021 zhouwg <zhouwg2000@gmail.com>
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *      http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
 
 package tv.danmaku.ijk.media.example.activities;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,21 +25,19 @@ import android.view.MenuItem;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.AppActivity;
-import tv.danmaku.ijk.media.example.application.MediaType;
-import tv.danmaku.ijk.media.example.fragments.SampleMediaListFragment;
+import tv.danmaku.ijk.media.example.fragments.ContentListFragment;
 import tv.danmaku.ijk.media.player.IjkLog;
 
-import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_TV;
+import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_TV;
 
 public class SampleTVActivity extends AppActivity  {
     private static String TAG = SampleTVActivity.class.getName();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Fragment newFragment = SampleMediaListFragment.newInstance(MEDIA_TV);
+        Fragment newFragment = ContentListFragment.newInstance(MEDIA_TV);
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         transaction.replace(R.id.body, newFragment);
@@ -71,12 +66,12 @@ public class SampleTVActivity extends AppActivity  {
         IjkLog.d(TAG, "******************************************\n");
     }
 
-
     private void addBuildField(String name, String value) {
         //TODO: save the build filed infos to file
         //TODO: should I upload the user's device info to server? better user experience if keep kantv apk be a purely client application
         IjkLog.d(TAG, "  " + name + ": " + value + "\n");
     }
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {

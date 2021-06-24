@@ -1,3 +1,19 @@
+ /*
+  * Copyright (C) 2021 zhouwg <zhouwg2000@gmail.com>
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+  * you may not use this file except in compliance with the License.
+  * You may obtain a copy of the License at
+  *
+  *      http://www.apache.org/licenses/LICENSE-2.0
+  *
+  * Unless required by applicable law or agreed to in writing, software
+  * distributed under the License is distributed on an "AS IS" BASIS,
+  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  * See the License for the specific language governing permissions and
+  * limitations under the License.
+  */
+
 package tv.danmaku.ijk.media.example.activities;
 
 import android.os.Bundle;
@@ -8,13 +24,11 @@ import android.view.MenuItem;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.AppActivity;
-import tv.danmaku.ijk.media.example.fragments.SampleMediaListFragment;
+import tv.danmaku.ijk.media.example.fragments.ContentListFragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-
-import static tv.danmaku.ijk.media.example.application.MediaType.MEDIA_MOVIE;
+import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_MOVIE;
 
 
 public class SampleMovieActivity extends AppActivity {
@@ -32,12 +46,14 @@ public class SampleMovieActivity extends AppActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Fragment newFragment = SampleMediaListFragment.newInstance(MEDIA_MOVIE);
+        Fragment newFragment = ContentListFragment.newInstance(MEDIA_MOVIE);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
         transaction.replace(R.id.body, newFragment);
         transaction.commit();
+
+
     }
 
     @Override

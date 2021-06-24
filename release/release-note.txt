@@ -12,6 +12,11 @@ v0.0.4:
     media category for online TV and online Movie;
     disable progress bar when playback online TV;
     display media name in Media Information dialog;
+
+v0.0.5:
+    add UI during long time waiting before the first video frame was rendered
+    add UI during network buffering
+    load EPG infos(aka online TV channels & online Radio programs & online Movie lists) from local XML and then render/layout the UI accordingly
     
    
 TODO:

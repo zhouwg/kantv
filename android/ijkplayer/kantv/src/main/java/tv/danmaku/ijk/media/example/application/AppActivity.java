@@ -31,7 +31,7 @@ import android.view.MenuItem;
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.FileExplorerActivity;
 import tv.danmaku.ijk.media.example.activities.RecentMediaActivity;
-import tv.danmaku.ijk.media.example.activities.SampleTVActivity;
+import tv.danmaku.ijk.media.example.activities.SampleRadioActivity;
 import tv.danmaku.ijk.media.example.activities.SampleMovieActivity;
 import tv.danmaku.ijk.media.example.activities.SettingsActivity;
 
@@ -93,6 +93,8 @@ public class AppActivity extends AppCompatActivity {
             FileExplorerActivity.intentTo(this);
         } else if (id == R.id.action_movie) {
             SampleMovieActivity.intentTo(this);
+        } else if (id == R.id.action_radio) {
+            SampleRadioActivity.intentTo(this);
         }
 
         return super.onOptionsItemSelected(item);
