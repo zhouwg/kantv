@@ -30,36 +30,6 @@
 </entry>
 
 <entry>
-    <title>
-        ITV UK(online english TV from UK)
-    </title>
-   <link href=
-       "http://sportportal1.akamaized.net/hls/live/702646/itvlive/ITV1PORTAL2/master_Main600.m3u8"
-       urltype="rtmp" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
-
-<entry>
-    <title>
-        Americas Voice(online english TV from US)
-    </title>
-   <link href=
-       "https://p1media-americasvoice-1.vizio.wurl.com/manifest/playlist.m3u8"
-       urltype="rtmp" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
-
-<entry>
-    <title>
-        Big Life TV(online english TV from US)
-    </title>
-   <link href=
-       "https://biglife.sinclair.wurl.com/manifest/3000.m3u8"
-       urltype="rtmp" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
-
-<entry>
    <title>
        cctv1 综合
    </title>
@@ -357,6 +327,37 @@
         Star Sports
     </title>
     <link href="rtmp://58.200.131.2:1935/livetv/starsports" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+
+<entry>
+    <title>
+        ITV UK(online english TV from UK)
+    </title>
+    <link href=
+        "http://sportportal1.akamaized.net/hls/live/702646/itvlive/ITV1PORTAL2/master_Main600.m3u8"
+        urltype="rtmp" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Americas Voice(online english TV from US)
+    </title>
+    <link href=
+        "https://p1media-americasvoice-1.vizio.wurl.com/manifest/playlist.m3u8"
+        urltype="rtmp" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Big Life TV(online english TV from US)
+    </title>
+    <link href=
+        "https://biglife.sinclair.wurl.com/manifest/3000.m3u8"
+        urltype="rtmp" protected="no" />
     <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
 </entry>
 
