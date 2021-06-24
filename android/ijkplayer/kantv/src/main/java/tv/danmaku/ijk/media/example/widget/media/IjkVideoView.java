@@ -658,6 +658,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                                                 if (mOnCompletionListener != null) {
                                                     mOnCompletionListener.onCompletion(mMediaPlayer);
                                                 }
+
+                                                if (mProgressDialog != null) {
+                                                    mProgressDialog.dismiss();
+                                                    mProgressDialog = null;
+                                                }
+                                                mActivity.finish();
                                             }
                                         })
                                 .setCancelable(false)
