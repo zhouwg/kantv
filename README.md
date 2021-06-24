@@ -1,6 +1,6 @@
 # kantv
 
-cross-platform online TV/movie(especially online overseas TV/movie for english learning purpose) player based on FFmpeg n4.4, also used for learning and studying Computer Vision/Deep Learning/...;  derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with some enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
+Android/iOS online TV/radio/movie player based on FFmpeg n4.4，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with some enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
 
 
 
@@ -202,16 +202,7 @@ step2: build APP
 
 build APP by latest Xcode IDE
 
-### KanTV Android apk download
 
-> The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
-
-
-[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
-
-### KanTV iOS app download
-
-> TBD
 
 ### Support
 
@@ -300,3 +291,16 @@ But ijkplayer is also based on other different projects under various licenses, 
 
 
 kantv is licensed under Apachev2.0 or later, so itself is free for commercial use UNDER Apachev2.0 or later
+
+### ChangeLog（APK发布以及版本更改记录）
+
+[ChangeLog(版本更改记录)](https://github.com/zhouwg/kantv/tree/kantv/release)
+
+### KanTV Android apk download(预编译的Android应用程序下载)
+
+> The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
+
+
+[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
+
+
