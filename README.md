@@ -303,7 +303,7 @@ kantv is licensed under Apachev2.0 or later, so itself is free for commercial us
 
 ### Support Author
 
-Your support is the driving force of my maintenace of project kantv, pls give a star to this open source project if you think it's useful for you or your business. Thanks.
+star this open source project if you think it's useful for you or your business. Thanks.
 
-请为kantv开源项目点个赞，如果您认为它对您有用，谢谢
+为kantv开源项目点赞，如果认为它有用，谢谢
 
