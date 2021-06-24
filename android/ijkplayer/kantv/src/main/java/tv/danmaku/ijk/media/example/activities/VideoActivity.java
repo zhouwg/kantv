@@ -169,6 +169,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         }
 
         mVideoView.start();
+        mVideoView.startUIBuffering("waiting...");
     }
 
     private boolean isNetworkAvailable() {
