@@ -276,6 +276,9 @@ the kantv required features are based on or derives from projects below:
   - [tensorflow](https://github.com/tensorflow/tensorflow)
   - [irsa](https://github.com/zhouwg/irsa)
 
+- Github license
+  - [VoisePlayingIcon](https://github.com/chaohengxing/VoisePlayingIcon/)
+
 
 
 kantv's build scripts was created and maintained by maintainer of kantv project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
