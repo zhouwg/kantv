@@ -39,7 +39,7 @@ public class Settings {
 
     public boolean getEnableBackgroundPlay() {
         String key = mAppContext.getString(R.string.pref_key_enable_background_play);
-        return mSharedPreferences.getBoolean(key, false);
+        return mSharedPreferences.getBoolean(key, true);
     }
 
     public int getPlayer() {

@@ -31,7 +31,7 @@
     在第一帧视频画面显示之前在界面上显示一个状态信息对话框；
     
     add UI during network buffering;
-    在观看收听在线电视/在线电影/在线谷广播时如果网络质量不佳时在界面上显示一个正在缓冲的状态信息对话框;
+    在观看收听在线电视/在线电影/在线广播时如果网络质量不佳时在界面上显示一个正在缓冲的状态信息对话框;
     
     load EPG infos(aka online TV channels & online Radio programs & online Movie lists) from local XML and then render/layout the UI accordingly;
     从apk内置的xml文件中加载在线电视节目信息列表与在线广播节目信息列表以及在线电影节目信息列表；
