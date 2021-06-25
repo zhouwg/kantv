@@ -1218,6 +1218,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     public boolean isBackgroundPlayEnabled() {
+        mEnableBackgroundPlay = mSettings.getEnableBackgroundPlay();
+
         return mEnableBackgroundPlay;
     }
 

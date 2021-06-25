@@ -194,6 +194,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             mVideoView.stopPlayback();
             mVideoView.release(true);
             mVideoView.stopBackgroundPlay();
+            finish();
         } else {
             mVideoView.enterBackground();
         }
