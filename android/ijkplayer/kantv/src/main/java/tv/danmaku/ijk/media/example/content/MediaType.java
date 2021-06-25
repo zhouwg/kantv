@@ -18,10 +18,10 @@ package tv.danmaku.ijk.media.example.content;
 
 
 public enum MediaType {
-    MEDIA_TV("Online TV", 0),
-    MEDIA_RADIO("Online RADIO", 1),
-    MEDIA_MOVIE("Online MOVIE", 2),
-    MEDIA_FILE("Local File", 3);
+    MEDIA_TV("Online_TV", 0),
+    MEDIA_RADIO("Online_RADIO", 1),
+    MEDIA_MOVIE("Online_MOVIE", 2),
+    MEDIA_FILE("Local_File", 3);
 
     private String name;
     private int index;
@@ -34,5 +34,18 @@ public enum MediaType {
     @Override
     public String toString() {
         return this.index + "_" + this.name;
+    }
+
+    public static MediaType toMediaType(String mediaType) {
+        if (mediaType.equals("0_Online_TV"))
+            return MEDIA_TV;
+        else if (mediaType.equals("1_Online_RADIO"))
+            return MEDIA_RADIO;
+        else if (mediaType.equals("2_Online_MOVIE"))
+            return MEDIA_MOVIE;
+        else if (mediaType.equals("3_Local_File"))
+            return MEDIA_FILE;
+
+        return MEDIA_TV;
     }
 }

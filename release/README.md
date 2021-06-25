@@ -37,6 +37,15 @@
     从apk内置的xml文件中加载在线电视节目信息列表与在线广播节目信息列表以及在线电影节目信息列表；
     
    
+- v0.0.6:
+
+   add animation during playback online radio program;
+   在播放在线广播时在界面上显示简单的动画
+
+   UI bug fix;
+
+   一些与UI相关的bugfix;
+
 
 ### Screenshot(一些屏幕截图）
 ![Screenshot_20210625_124431_tv](https://user-images.githubusercontent.com/6889919/123371050-86a8be00-d5b3-11eb-9b33-130ac1c7d00d.jpg)

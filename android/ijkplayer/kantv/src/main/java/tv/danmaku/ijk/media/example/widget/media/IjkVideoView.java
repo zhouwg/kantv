@@ -131,9 +131,11 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private long mSeekStartTime = 0;
     private long mSeekEndTime = 0;
     private String mVideoTitle;
+    private String mMediaType;
 
     private TextView subtitleDisplay;
     private ProgressDialog mProgressDialog;
+    private VoisePlayingIcon mAudioAnimatonView;
     private VideoActivity  mActivity;
 
     public IjkVideoView(Context context) {
@@ -254,6 +256,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mHudViewHolder = new InfoHudViewHolder(getContext(), tableLayout);
     }
 
+    public void setAudioView(VoisePlayingIcon audioView) {
+        mAudioAnimatonView = audioView;
+    }
+
     public void setActivity(VideoActivity activity) {
         mActivity = activity;
     }
@@ -268,6 +274,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     public void setVideoTitle(String title) {
         mVideoTitle = title;
+    }
+
+    public void setMediaType(String mediaType) {
+        mMediaType = mediaType;
     }
 
     /**
@@ -308,6 +318,10 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             mMediaPlayer = null;
             if (mHudViewHolder != null)
                 mHudViewHolder.setMediaPlayer(null);
+
+            if (mAudioAnimatonView != null)
+                stopAudioAnimation();
+
             mCurrentState = STATE_IDLE;
             mTargetState = STATE_IDLE;
             AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
@@ -372,6 +386,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         mHudViewHolder.setVisibility(View.INVISIBLE);
                     }
                 }
+
+
             }
 
             // REMOVED: mPendingSubtitleTracks
@@ -563,6 +579,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                         case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
                             Log.d(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
                             stopUIBuffering();
+
+                            startAudioAnimation();
+
                             break;
                     }
                     return true;
@@ -887,6 +906,33 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                 if (mProgressDialog != null) {
                     mProgressDialog.dismiss();
                     mProgressDialog = null;
+                }
+            }
+        });
+    }
+
+    public void startAudioAnimation() {
+        IjkLog.d(TAG, "start audio animation {");
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                IjkLog.d(TAG, "media type:" + mMediaType);
+                if ((mAudioAnimatonView != null) && mMediaType.equals("1_Online_RADIO")) {
+                    mAudioAnimatonView.setVisibility(View.VISIBLE);
+                    mAudioAnimatonView.start();
+                }
+            }
+        });
+    }
+
+    public void stopAudioAnimation() {
+        IjkLog.d(TAG, "stop audio animation }");
+        mActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if ((mAudioAnimatonView != null) && mMediaType.equals("1_Online_RADIO")) {
+                    mAudioAnimatonView.setVisibility(View.INVISIBLE);
+                    mAudioAnimatonView.stop();
                 }
             }
         });

@@ -37,6 +37,7 @@ import java.util.List;
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.application.AppActivity;
 import tv.danmaku.ijk.media.example.application.Settings;
+import tv.danmaku.ijk.media.example.content.MediaType;
 import tv.danmaku.ijk.media.example.eventbus.FileExplorerEvents;
 import tv.danmaku.ijk.media.example.fragments.FileListFragment;
 
@@ -111,7 +112,7 @@ public class FileExplorerActivity extends AppActivity {
             mSettings.setLastDirectory(path);
             doOpenDirectory(path, true);
         } else if (f.exists()) {
-            VideoActivity.intentTo(this, f.getPath(), f.getName());
+            VideoActivity.intentTo(this, f.getPath(), f.getName(), MediaType.MEDIA_FILE);
         }
     }
 }

@@ -139,8 +139,8 @@ import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_MOVIE;
                     public void onClick(View v) {
                         String name = descriptor.getName();
                         String url = descriptor.getUrl();
-                        IjkLog.d(TAG, "name:" + name + " url:" + url);
-                        VideoActivity.intentTo(activity, url, name);
+                        IjkLog.d(TAG, "name:" + name + " url:" + url + " mediatype: " + mMediaType.toString());
+                        VideoActivity.intentTo(activity, url, name, mMediaType);
                     }
                 });
                 layout.addView(contentButton);

@@ -34,6 +34,7 @@ import android.widget.ListView;
 
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.VideoActivity;
+import tv.danmaku.ijk.media.example.content.MediaType;
 import tv.danmaku.ijk.media.example.content.RecentMediaStorage;
 
 public class RecentMediaListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -66,7 +67,8 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
             public void onItemClick(AdapterView<?> parent, View view, final int position, final long id) {
                 String url = mAdapter.getUrl(position);
                 String name = mAdapter.getName(position);
-                VideoActivity.intentTo(activity, url, name);
+                String type = mAdapter.getType(position);
+                VideoActivity.intentTo(activity, url, name, MediaType.toMediaType(type));
             }
         });
 
@@ -93,6 +95,7 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
         private int mIndex_id = -1;
         private int mIndex_url = -1;
         private int mIndex_name = -1;
+        private int mIndex_type = -1;
 
         public RecentMediaAdapter(Context context) {
             super(context, android.R.layout.simple_list_item_2, null,
@@ -107,6 +110,7 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
             mIndex_id = c.getColumnIndex(RecentMediaStorage.Entry.COLUMN_NAME_ID);
             mIndex_url = c.getColumnIndex(RecentMediaStorage.Entry.COLUMN_NAME_URL);
             mIndex_name = c.getColumnIndex(RecentMediaStorage.Entry.COLUMN_NAME_NAME);
+            mIndex_type = c.getColumnIndex(RecentMediaStorage.Entry.COLUMN_NAME_TYPE);
 
             return res;
         }
@@ -135,6 +139,14 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
                 return "";
 
             return cursor.getString(mIndex_url);
+        }
+
+        public String getType(int position) {
+            final Cursor cursor = moveToPosition(position);
+            if (cursor == null)
+                return "";
+
+            return cursor.getString(mIndex_type);
         }
 
         public String getName(int position) {

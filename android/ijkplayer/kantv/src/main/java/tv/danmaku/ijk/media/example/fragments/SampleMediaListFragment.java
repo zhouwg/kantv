@@ -83,7 +83,7 @@ import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_TV;
                 String name = item.mName;
                 String url = item.mUrl;
                 IjkLog.d(TAG, "position: " + position + " id:" + id + " name:" + name + " url:" + url);
-                VideoActivity.intentTo(activity, url, name);
+                VideoActivity.intentTo(activity, url, name, MEDIA_TV);
             }
         });
 

@@ -10,7 +10,7 @@ branch kantv
 
 - android: UI enhancement
 
-- android: kantv-0.0.5 was released, the APK could be found at
+- android: the APK could be found at
 
 [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
 

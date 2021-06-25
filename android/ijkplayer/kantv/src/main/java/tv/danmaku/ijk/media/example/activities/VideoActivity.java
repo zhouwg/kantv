@@ -42,6 +42,8 @@ import android.view.ViewGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import tv.danmaku.ijk.media.example.content.MediaType;
+import tv.danmaku.ijk.media.example.widget.media.VoisePlayingIcon;
 import tv.danmaku.ijk.media.player.IjkLog;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.misc.ITrackInfo;
@@ -59,26 +61,30 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private String mVideoPath;
     private Uri    mVideoUri;
     private String mVideoTitle;
+    private String mMediaType;
 
     private AndroidMediaController mMediaController;
     private IjkVideoView mVideoView;
     private TextView mToastTextView;
     private TableLayout mHudView;
+    private VoisePlayingIcon mAudioAnimatonView;
+
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
 
     private Settings mSettings;
     private boolean mBackPressed;
 
-    public static Intent newIntent(Context context, String videoPath, String videoTitle) {
+    public static Intent newIntent(Context context, String videoPath, String videoTitle, MediaType mediaType) {
         Intent intent = new Intent(context, VideoActivity.class);
         intent.putExtra("videoPath", videoPath);
         intent.putExtra("videoTitle", videoTitle);
+        intent.putExtra("mediaType", mediaType.toString());
         return intent;
     }
 
-    public static void intentTo(Context context, String videoPath, String videoTitle) {
-        context.startActivity(newIntent(context, videoPath, videoTitle));
+    public static void intentTo(Context context, String videoPath, String videoTitle, MediaType mediaType) {
+        context.startActivity(newIntent(context, videoPath, videoTitle, mediaType));
     }
 
     @Override
@@ -91,6 +97,9 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         // handle arguments
         mVideoPath  = getIntent().getStringExtra("videoPath");
         mVideoTitle = getIntent().getStringExtra("videoTitle");
+        mMediaType  = getIntent().getStringExtra("mediaType");
+
+        IjkLog.d(TAG, "media type:" + mMediaType + " media path:" + mVideoPath + " media title:" + mVideoTitle );
 
         Intent intent = getIntent();
         String intentAction = intent.getAction();
@@ -122,7 +131,9 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         }
 
         if (!TextUtils.isEmpty(mVideoPath)) {
-            new RecentMediaStorage(this).saveUrlAsync(mVideoPath);
+            //use "_KANTV_" as delimiter here
+            String syncString = mVideoPath + "_KANTV_" + mMediaType;
+            new RecentMediaStorage(this).saveUrlAsync(syncString);
         }
 
         // init UI
@@ -137,6 +148,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mHudView = (TableLayout) findViewById(R.id.hud_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
+        mAudioAnimatonView = (VoisePlayingIcon) findViewById(R.id.audio_animation_view);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
@@ -148,6 +160,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mVideoView.setActivity(this);
         mVideoView.setMediaController(mMediaController);
         mVideoView.setHudView(mHudView);
+        mVideoView.setAudioView(mAudioAnimatonView);
+        mVideoView.setMediaType(mMediaType);
         mVideoView.setVideoTitle(mVideoTitle);
 
         if (!isNetworkAvailable()) {
