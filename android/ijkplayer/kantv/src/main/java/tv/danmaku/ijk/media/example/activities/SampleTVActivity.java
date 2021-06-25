@@ -16,6 +16,8 @@
 
 package tv.danmaku.ijk.media.example.activities;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +34,15 @@ import static tv.danmaku.ijk.media.example.content.MediaType.MEDIA_TV;
 
 public class SampleTVActivity extends AppActivity  {
     private static String TAG = SampleTVActivity.class.getName();
+
+    public static Intent newIntent(Context context) {
+        Intent intent = new Intent(context, SampleTVActivity.class);
+        return intent;
+    }
+
+    public static void intentTo(Context context) {
+        context.startActivity(newIntent(context));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

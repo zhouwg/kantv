@@ -4,23 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".menu_app">
     <item
+        android:id="@+id/action_tv"
+        android:title="@string/tv"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_radio"
         android:title="@string/radio"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_movie"
         android:title="@string/movie"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
     <item
         android:id="@+id/action_file"
         android:title="@string/file"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_recent"
-        android:title="@string/recent"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_recent"
+        android:title="@string/recent"
         app:showAsAction="ifRoom" />
 </menu>
