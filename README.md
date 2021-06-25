@@ -1,10 +1,10 @@
-# kantv
+# KanTV
 
-Android/iOS online TV/radio/movie player based on FFmpeg n4.4，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with some enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV/radio/music/movie for Android/iOS based on FFmpeg n4.4，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with some enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
 
 
 
-### Android
+### How to build project for target Android
 
 #### prerequisites
 
@@ -118,7 +118,7 @@ ndk.dir=<your ndk path>/android-ndk-r14b
 
 ```
 
-#### Build Android
+#### Build Android APK
 
 step1:build all native libs
 
@@ -135,7 +135,7 @@ step2: build APK
 build apk by latest Android Studio IDE
 
 
-### iOS
+### How to build project for target iOS
 
 #### prerequisites
 
@@ -186,7 +186,7 @@ git checkout kantv
 
 ```
 
-#### Build iOS
+#### Build iOS APP
 
 step1:build all native libs
 
@@ -292,15 +292,18 @@ But ijkplayer is also based on other different projects under various licenses, 
 
 kantv is licensed under Apachev2.0 or later, so itself is free for commercial use UNDER Apachev2.0 or later
 
-### ChangeLog（APK发布以及版本更改记录）
+### ChangeLog
 
-[ChangeLog(版本更改记录)](https://github.com/zhouwg/kantv/tree/kantv/release)
+[ChangeLog](https://github.com/zhouwg/kantv/tree/kantv/release)
 
-### KanTV Android apk download(预编译的Android应用程序下载)
+### KanTV Android APK download
 
 > The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
 
 
 [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
 
+### KanTV iOS APP download
+
+TBD
 

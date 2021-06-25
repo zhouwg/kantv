@@ -39,8 +39,9 @@
    
 
 ### Screenshot(一些屏幕截图）
-![Screenshot_20210624_190110_kantv](https://user-images.githubusercontent.com/6889919/123252715-2f590e00-d51f-11eb-89b3-8c43552c1c04.jpg)
-![Screenshot_20210624_190122_kantv](https://user-images.githubusercontent.com/6889919/123252726-3122d180-d51f-11eb-9ec7-8a94148f605e.jpg)
+![Screenshot_20210625_124431_tv](https://user-images.githubusercontent.com/6889919/123371050-86a8be00-d5b3-11eb-9b33-130ac1c7d00d.jpg)
+
+
 ![Screenshot_20210624_190144_kantv](https://user-images.githubusercontent.com/6889919/123252738-32ec9500-d51f-11eb-9eca-0f0ab49bfafe.jpg)
 ![Screenshot_20210624_190206_kantv](https://user-images.githubusercontent.com/6889919/123252753-35e78580-d51f-11eb-900d-dfdb5ffffc49.jpg)
 ![Screenshot_20210624_190243_kantv](https://user-images.githubusercontent.com/6889919/123252766-3849df80-d51f-11eb-91eb-75061259fe0e.jpg)
@@ -55,8 +56,8 @@
 
 ### TODO（待完成的任务）
 
-- remove illegal advertisement in some online movie，we must keep compliant in opensource software project; [issue could be found here](https://github.com/zhouwg/kantv/issues/13), priority level：MEDIUM, PR from expert in deep learning field is greatly welcomed;  为了满足合规要求，用tensorflowlite去掉某些在线电影中的非法广告信息，[相关issue在此](https://github.com/zhouwg/kantv/issues/13)，欢迎深度学习领域的技术专家/专业人员提交PR(Pull Request);
+- remove illegal advertisement in some online movie，we must keep compliant in opensource software project; [issue could be found here](https://github.com/zhouwg/kantv/issues/13); PR from expert in deep learning field is greatly welcomed;  为了满足合规要求，用tensorflowlite去掉某些在线电影中的非法广告信息，[相关issue在此](https://github.com/zhouwg/kantv/issues/13)，欢迎深度学习领域的技术专家/专业人员提交PR(Pull Request);
     
--  UI refactoring for Android apk; 重构应用程序的用户界面以提升用户使用应用程序的用户体验;
+-  UI refactoring for Android apk,[issue could be found here](https://github.com/zhouwg/kantv/issues/26),PR from domain expert is greatly welcomed; 重构应用程序的用户界面以提升用户使用应用程序的用户体验,[相关issue在此](https://github.com/zhouwg/kantv/issues/26),欢迎精通UI开发的技术专家/专业人员提交PR(Pull Request);
     
 - TBD/others ; 其它的待定任务;
