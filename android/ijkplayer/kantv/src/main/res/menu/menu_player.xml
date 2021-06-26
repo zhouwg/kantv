@@ -15,16 +15,4 @@
         android:id="@+id/action_show_tracks"
         android:title="@string/tracks"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_toggle_player"
-        android:title="@string/toggle_player"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_toggle_render"
-        android:title="@string/toggle_render"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_toggle_tflite"
-        android:title="@string/toggle_tflite"
-        app:showAsAction="never" />
 </menu>

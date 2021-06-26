@@ -84,16 +84,5 @@ public class SampleTVActivity extends AppActivity  {
     }
 
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean show = super.onPrepareOptionsMenu(menu);
-        if (!show)
-            return show;
 
-        MenuItem item = menu.findItem(R.id.action_recent);
-        if (item != null)
-            item.setVisible(false);
-
-        return true;
-    }
 }

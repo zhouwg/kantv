@@ -28,6 +28,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.util.Locale;
+
 import tv.danmaku.ijk.media.example.R;
 import tv.danmaku.ijk.media.example.activities.FileExplorerActivity;
 import tv.danmaku.ijk.media.example.activities.RecentMediaActivity;
@@ -48,6 +50,11 @@ public class AppActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayShowHomeEnabled(false);
+        getSupportActionBar().setDisplayUseLogoEnabled(false);
+
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -108,6 +115,10 @@ public class AppActivity extends AppCompatActivity {
         boolean show = super.onPrepareOptionsMenu(menu);
         if (!show)
             return show;
+
+        //MenuItem item = menu.findItem(R.id.action_recent);
+        //if (item != null)
+        //    item.setVisible(false);
 
         return true;
     }

@@ -11,7 +11,7 @@
 
 <entry>
     <title>
-        CGTN (online english TV from China)
+        CGTN (CCTV-16英文频道)
     </title>
    <link href=
        "rtmp://58.200.131.2:1935/livetv/cctv16"
@@ -330,6 +330,301 @@
     <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
 </entry>
 
+<entry>
+    <title>
+        HKS TV
+    </title>
+    <link href="http://zhibo.hkstv.tv/livestream/mutfysrq.flv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-世界地理
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sjdltv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-风云音乐
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/fyyytv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-风云足球
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/fyzqtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-风云剧场
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/fyjctv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-怀旧剧场
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hjjctv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-国防军事
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gfjstv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        CCTV-第一剧场
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/dyjctv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        中国教育-1
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/cetv1" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        中国教育-2
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/cetv2" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        中国教育-3
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/cetv3" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        中国教育-4
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/cetv4" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        中国教育-4
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/cetv4" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        全纪实高清
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/documentaryhd" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        金鹰纪实高清
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gedocu" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        上海纪实高清
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/docuchina" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        山东教育
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sdetv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        广东卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gdtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        广西卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gxtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        甘肃卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gstv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        贵州卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/gztv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        湖北卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hbtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        湖南卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hunantv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        河北卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hebtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        河南卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hntv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        黑龙江卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/hljtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        江苏卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/jstv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        江西卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/jxtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        吉林卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/jltv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        辽宁卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/lntv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        内蒙古卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/nmtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        宁夏卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/nxtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        青海卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/qhtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        四川卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sctv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        山东卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sdtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        山西卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sxrtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        陕西卫视
+    </title>
+    <link href="rtmp://58.200.131.2:1935/livetv/sxtv" protected="no" urltype="rtmp" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
 
 <entry>
     <title>

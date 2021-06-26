@@ -37,4 +37,24 @@
    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
 </entry>
 
+<entry>
+    <title>
+        La vita è bella(美丽人生) -- AES encrypted
+    </title>
+    <link href=
+        "https://vod.bunediy.com/20201217/HB2n7eY8/index.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Leon.The.Professional.1994(这个杀手不太冷) -- AES encrypted
+    </title>
+    <link href=
+        "https://vod.bunediy.com/20200426/lBjl2lEc/index.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
 </feed>

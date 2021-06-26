@@ -43,11 +43,17 @@
    在播放在线广播时在界面上显示简单的动画
 
    UI bug fix;
-
    一些与UI相关的bugfix;
 
+   add Chinese language for UI;
+   在界面增加了中文语言，海外地区界面默认为英文，国内界面默认为中文;
 
-### Screenshot(一些屏幕截图）
+
+### Screenshots(一些屏幕截图）
+
+English UI(英文界面，海外地区默认为英文界面）
+-------------------------------------------------------------
+
 ![Screenshot_20210625_124431_tv](https://user-images.githubusercontent.com/6889919/123371050-86a8be00-d5b3-11eb-9b33-130ac1c7d00d.jpg)
 
 
@@ -55,9 +61,24 @@
 ![Screenshot_20210624_190206_kantv](https://user-images.githubusercontent.com/6889919/123252753-35e78580-d51f-11eb-900d-dfdb5ffffc49.jpg)
 ![Screenshot_20210624_190243_kantv](https://user-images.githubusercontent.com/6889919/123252766-3849df80-d51f-11eb-91eb-75061259fe0e.jpg)
 
+Chinese UI（中文界面，国内默认为中文界面）
+-------------------------------------------------------------
+![Screenshot_20210626_205437_tv](https://user-images.githubusercontent.com/6889919/123513675-e6d95600-d6c0-11eb-8398-054413f64220.jpg)
+
+![Screenshot_20210626_141032_kantv_01](https://user-images.githubusercontent.com/6889919/123503910-947c4300-d688-11eb-8e3b-85b9185e3e16.jpg)
+
+![Screenshot_20210626_203649_tv 3](https://user-images.githubusercontent.com/6889919/123513263-cad4b500-d6be-11eb-9344-7f5848236c12.jpg)
+
+
+![Screenshot_20210626_203603_tv 2](https://user-images.githubusercontent.com/6889919/123513251-b5f82180-d6be-11eb-9a7a-0594e5498c72.jpg)
+
+
+
+
+
 ### Advantage (优点）
 
-- purely client application and purely green application; 纯客户端软件，无任何插件，不会与任何远程服务器交互，不会收集上传用户手机的设备信息以及手机中的文件，只能用于观看收听在线电视/在线广播/在线电影;
+- purely client application and purely GREEN application, the released apk MUST BE built from the source code of project kantv to avoid collecting/uploading device info/user's datas and ensure better user experience for apk's users; 纯客户端软件，无任何插件，不会与任何远程服务器交互，不会收集上传用户手机的设备信息以及手机中的文件，只能用于观看收听在线电视/在线广播/在线电影;
 - complete（except source code of libdrmclient.so because it contains proprietary IPR） open source project；  接近于完全开源（libdrmclient.so出于知识产权因素无法开源）的开源项目，基于开源社区的各种项目进行二次开发的代码完全100%开源，不会像有些“开源项目”一样将基于开源社区项目进行二次开发的结果封装成二进制的库进行“开源”，便于有开发能力的用户自行编译出完全安全放心的apk或者进行二次开发;
 - integrate TensorflowLite and other tools for learning/studying computer vision/deep learning/online media QoS conveniently; 内建了完整的编译系统生成二进制库与最终在手机上运行的应用程序，便于ICT专业人员在计算机视觉/深度学习/在线媒体服务质量等技术领域的研究；
 - non-profit open source project，just for giving back to the open source community; 非盈利性开源项目，出于回报开源社区与学习研究目的开源；

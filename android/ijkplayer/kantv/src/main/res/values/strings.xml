@@ -34,6 +34,9 @@
     <string name="current_time">current_time</string>
     <string name="play_time">play_time</string>
     <string name="pause_time">pause_time</string>
+    <string name="wating">waiting...</string>
+    <string name="buffering">buffering...</string>
+    <string name="network_un_available">it seems network connection is unavailable, pls check</string>
 
     <string name="media_information">Media Information</string>
     <string name="mi_player">Player</string>

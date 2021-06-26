@@ -21,6 +21,8 @@ import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -39,7 +41,6 @@ import android.widget.FrameLayout;
 import android.widget.MediaController;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.app.ProgressDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import tv.danmaku.ijk.media.example.activities.VideoActivity;
@@ -452,6 +452,13 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                                 mMediaController.setEnabled(false);
                             }
                         }
+
+                        if (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                            if (mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                            }
+                        }
+
                         // REMOVED: getHolder().setFixedSize(mVideoWidth, mVideoHeight);
                         requestLayout();
                     }
@@ -546,7 +553,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                             Log.d(TAG, "MEDIA_INFO_BUFFERING_START:");
-                            startUIBuffering("buffering...");
+                            String status = getResources().getString(R.string.buffering);
+                            startUIBuffering(status);
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
                             Log.d(TAG, "MEDIA_INFO_BUFFERING_END:");
@@ -1293,7 +1301,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         //builder.appendRow2(R.string.mi_player, MediaPlayerCompat.getName(mMediaPlayer));
         builder.appendSection(R.string.mi_media);
         builder.appendRow2(R.string.mi_resolution, buildResolution(mVideoWidth, mVideoHeight, mVideoSarNum, mVideoSarDen));
-        builder.appendRow2("Name", mVideoTitle);
+        String regEx = "[`~!@#$%^&*()+=|{}:;\\\\[\\\\].<>/?~！@（）——+|{}【】‘；：”“’。，、？']";
+        String videoTitle  = Pattern.compile(regEx).matcher(mVideoTitle).replaceAll("").trim();
+        builder.appendRow2(R.string.mi_name, videoTitle);
         builder.appendRow2(R.string.mi_length, buildTimeMilli(mMediaPlayer.getDuration()));
 
         ITrackInfo trackInfos[] = mMediaPlayer.getTrackInfo();

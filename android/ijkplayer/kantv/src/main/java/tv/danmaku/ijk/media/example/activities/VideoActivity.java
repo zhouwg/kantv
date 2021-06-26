@@ -20,6 +20,7 @@ package tv.danmaku.ijk.media.example.activities;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -39,6 +40,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
@@ -90,6 +93,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_player);
 
         mSettings = new Settings(this);
@@ -139,6 +144,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         // init UI
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
+        String title = getResources().getString(R.string.app_name);
+        getSupportActionBar().setTitle(title);
 
         ActionBar actionBar = getSupportActionBar();
         mMediaController = new AndroidMediaController(this, false);
@@ -165,7 +176,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mVideoView.setVideoTitle(mVideoTitle);
 
         if (!isNetworkAvailable()) {
-            mToastTextView.setText("it seems network connection is unavailable, pls check");
+            mToastTextView.setText(R.string.network_un_available);
             mToastTextView.setGravity(Gravity.CENTER);
             mToastTextView.setVisibility(View.VISIBLE);
             return;
@@ -183,7 +194,8 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         }
 
         mVideoView.start();
-        mVideoView.startUIBuffering("waiting...");
+        String status = getResources().getString(R.string.wating);
+        mVideoView.startUIBuffering(status);
     }
 
     private boolean isNetworkAvailable() {
@@ -217,7 +229,11 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_player, menu);
+        if (mSettings.getDevMode()) {
+            getMenuInflater().inflate(R.menu.menu_player_devmode, menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_player, menu);
+        }
         return true;
     }
 
@@ -232,6 +248,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             return true;
         } else if (id == R.id.action_toggle_tflite) {
             boolean enableTFLite = mVideoView.toggleTFLite();
+            //this menu item only available in development mode and we think english is not a problem to developers
             String tfliteText = (enableTFLite ? "enable tensorflowlite"  : "disable tensorflowlite");
             mToastTextView.setText(tfliteText);
             mMediaController.showOnce(mToastTextView);
@@ -266,6 +283,12 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
                 transaction.commit();
                 mDrawerLayout.openDrawer(mRightDrawer);
             }
+        } else if (id == android.R.id.home) {
+            mVideoView.stopPlayback();
+            mVideoView.release(true);
+            mVideoView.stopBackgroundPlay();
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            finish();
         }
 
         return super.onOptionsItemSelected(item);
@@ -296,4 +319,5 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
 
         return mVideoView.getSelectedTrack(trackType);
     }
+
 }
