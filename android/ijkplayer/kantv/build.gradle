@@ -15,7 +15,7 @@ android {
         checkReleaseBuilds false
     }
     defaultConfig {
-        applicationId "tv.danmaku.ijk.media.example"
+        applicationId "tv.danmaku.ijk.kantv"
         minSdkVersion 9
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode

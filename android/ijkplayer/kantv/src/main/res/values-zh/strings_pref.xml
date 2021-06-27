@@ -32,6 +32,24 @@
         <item>ExoPlaer</item>
     </string-array>
 
+    <string name="pref_key_lang">pref.lang</string>
+    <string name="pref_title_lang">选择界面语言</string>
+    <string-array name="pref_entries_lang">
+        <item>自动选择</item>
+        <item>中文</item>
+        <item>英文</item>
+    </string-array>
+    <string-array name="pref_entry_values_lang">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_lang">
+        <item>自动选择</item>
+        <item>中文</item>
+        <item>英文</item>
+    </string-array>
+
     <!-- -->
     <string name="pref_title_ijkplayer_video">视频播放设置</string>
 

@@ -32,6 +32,25 @@
         <item>IjkExoMediaPlayer</item>
     </string-array>
 
+
+    <string name="pref_key_lang">pref.lang</string>
+    <string name="pref_title_lang">Choose Language</string>
+    <string-array name="pref_entries_lang">
+        <item>Auto Select</item>
+        <item>Chinese</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="pref_entry_values_lang">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_lang">
+        <item>Auto Select</item>
+        <item>Chinese</item>
+        <item>English</item>
+    </string-array>
+
     <!-- -->
     <string name="pref_title_ijkplayer_video">Video: ijkplayer</string>
 

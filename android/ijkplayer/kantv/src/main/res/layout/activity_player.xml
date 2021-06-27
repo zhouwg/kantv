@@ -13,12 +13,12 @@
         android:layout_height="match_parent"
         android:background="#0099cc">
 
-        <tv.danmaku.ijk.media.example.widget.media.IjkVideoView
+        <tv.danmaku.ijk.kantv.widget.media.IjkVideoView
             android:id="@+id/video_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center">
-        </tv.danmaku.ijk.media.example.widget.media.IjkVideoView>
+        </tv.danmaku.ijk.kantv.widget.media.IjkVideoView>
 
         <TextView
             android:id="@+id/toast_text_view"
@@ -38,7 +38,7 @@
             android:background="@color/ijk_transparent_dark"
             android:padding="8dp" />
 
-        <tv.danmaku.ijk.media.example.widget.media.VoisePlayingIcon
+        <tv.danmaku.ijk.kantv.widget.media.VoisePlayingIcon
             android:id="@+id/audio_animation_view"
             android:layout_width="wrap_content"
             android:layout_height="150dp"

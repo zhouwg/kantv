@@ -19,14 +19,12 @@
         android:id="@+id/action_file"
         android:title="@string/file"
         app:showAsAction="always" />
-
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/settings"
-        app:showAsAction="always" />
-
     <item
         android:id="@+id/action_recent"
         android:title="@string/recent"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
         app:showAsAction="always" />
 </menu>

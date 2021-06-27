@@ -47,6 +47,9 @@
 
    add Chinese language for UI;
    在界面增加了中文语言，海外地区界面默认为英文，国内界面默认为中文;
+   
+   add toggle UI language between Chinese and English;
+   在设置中增加了切换界面语言功能;
 
 
 ### Screenshots(一些屏幕截图）
@@ -54,23 +57,23 @@
 English UI(英文界面，海外地区默认为英文界面）
 -------------------------------------------------------------
 
-![Screenshot_20210625_124431_tv](https://user-images.githubusercontent.com/6889919/123371050-86a8be00-d5b3-11eb-9b33-130ac1c7d00d.jpg)
+![Screenshot_20210627_111103_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531948-42e0c080-d73b-11eb-87b2-556e8b8feb13.jpg)
+![Screenshot_20210627_111115_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531950-46744780-d73b-11eb-8fda-1266a4c5c740.jpg)
 
-
-![Screenshot_20210624_190144_kantv](https://user-images.githubusercontent.com/6889919/123252738-32ec9500-d51f-11eb-9eca-0f0ab49bfafe.jpg)
-![Screenshot_20210624_190206_kantv](https://user-images.githubusercontent.com/6889919/123252753-35e78580-d51f-11eb-900d-dfdb5ffffc49.jpg)
-![Screenshot_20210624_190243_kantv](https://user-images.githubusercontent.com/6889919/123252766-3849df80-d51f-11eb-91eb-75061259fe0e.jpg)
+![Screenshot_20210627_111130_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531955-4ffdaf80-d73b-11eb-9aa1-2c8d01c9be49.jpg)
 
 Chinese UI（中文界面，国内默认为中文界面）
 -------------------------------------------------------------
-![Screenshot_20210626_205437_tv](https://user-images.githubusercontent.com/6889919/123513675-e6d95600-d6c0-11eb-8398-054413f64220.jpg)
-
-![Screenshot_20210626_141032_kantv_01](https://user-images.githubusercontent.com/6889919/123503910-947c4300-d688-11eb-8e3b-85b9185e3e16.jpg)
-
-![Screenshot_20210626_203649_tv 3](https://user-images.githubusercontent.com/6889919/123513263-cad4b500-d6be-11eb-9344-7f5848236c12.jpg)
+![Screenshot_20210627_112635_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531869-c221c480-d73a-11eb-8204-221e56c23d5e.jpg)
+![Screenshot_20210627_112651_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531872-c77f0f00-d73a-11eb-89d0-04a7d1490ae1.jpg)
 
 
-![Screenshot_20210626_203603_tv 2](https://user-images.githubusercontent.com/6889919/123513251-b5f82180-d6be-11eb-9a7a-0594e5498c72.jpg)
+![Screenshot_20210627_111156_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531876-cfd74a00-d73a-11eb-902e-b18cebe69597.jpg)
+
+![Screenshot_20210627_111205_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531879-d5349480-d73a-11eb-8234-7d9d808280ab.jpg)
+
+![Screenshot_20210626_222306_tv 9](https://user-images.githubusercontent.com/6889919/123516218-8c92c200-d6cd-11eb-9474-f3767db37b29.jpg)
+
 
 
 
