@@ -16,25 +16,24 @@
 
 package tv.danmaku.ijk.kantv.activities;
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.os.Bundle;
+ import android.support.v4.app.Fragment;
+ import android.support.v4.app.FragmentTransaction;
 
-import tv.danmaku.ijk.kantv.R;
-import tv.danmaku.ijk.kantv.application.AppActivity;
-import tv.danmaku.ijk.kantv.fragments.ContentListFragment;
+ import tv.danmaku.ijk.kantv.R;
+ import tv.danmaku.ijk.kantv.application.AppActivity;
+ import tv.danmaku.ijk.kantv.fragments.ContentListFragment;
 
-import android.content.Context;
-import android.content.Intent;
-import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_MOVIE;
+ import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_MOVIE;
 
 
-public class SampleMovieActivity extends AppActivity {
+ public class SampleMovieActivity extends AppActivity {
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, SampleMovieActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
@@ -52,10 +51,11 @@ public class SampleMovieActivity extends AppActivity {
 
         transaction.replace(R.id.body, newFragment);
         transaction.commit();
-
-
     }
 
-
+    @Override
+    protected int getOptionMenuId() {
+        return R.id.action_movie;
+    }
 }
 

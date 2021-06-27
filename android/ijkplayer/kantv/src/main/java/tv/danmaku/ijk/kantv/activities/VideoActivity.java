@@ -70,7 +70,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     private IjkVideoView mVideoView;
     private TextView mToastTextView;
     private TableLayout mHudView;
-    private VoisePlayingIcon mAudioAnimatonView;
+    private VoisePlayingIcon mAudioAnimationView;
 
     private DrawerLayout mDrawerLayout;
     private ViewGroup mRightDrawer;
@@ -159,7 +159,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mHudView = (TableLayout) findViewById(R.id.hud_view);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
-        mAudioAnimatonView = (VoisePlayingIcon) findViewById(R.id.audio_animation_view);
+        mAudioAnimationView = (VoisePlayingIcon) findViewById(R.id.audio_animation_view);
 
         mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
@@ -171,7 +171,7 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         mVideoView.setActivity(this);
         mVideoView.setMediaController(mMediaController);
         mVideoView.setHudView(mHudView);
-        mVideoView.setAudioView(mAudioAnimatonView);
+        mVideoView.setAudioView(mAudioAnimationView);
         mVideoView.setMediaType(mMediaType);
         mVideoView.setVideoTitle(mVideoTitle);
 

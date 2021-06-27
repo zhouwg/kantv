@@ -16,27 +16,26 @@
 
 package tv.danmaku.ijk.kantv.activities;
 
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.os.Build;
+ import android.os.Bundle;
+ import android.support.v4.app.Fragment;
+ import android.support.v4.app.FragmentTransaction;
 
-import tv.danmaku.ijk.kantv.R;
-import tv.danmaku.ijk.kantv.application.AppActivity;
-import tv.danmaku.ijk.kantv.fragments.ContentListFragment;
-import tv.danmaku.ijk.media.player.IjkLog;
+ import tv.danmaku.ijk.kantv.R;
+ import tv.danmaku.ijk.kantv.application.AppActivity;
+ import tv.danmaku.ijk.kantv.fragments.ContentListFragment;
+ import tv.danmaku.ijk.media.player.IjkLog;
 
-import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_TV;
+ import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_TV;
 
-public class SampleTVActivity extends AppActivity  {
+ public class SampleTVActivity extends AppActivity  {
     private static String TAG = SampleTVActivity.class.getName();
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, SampleTVActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
@@ -77,12 +76,14 @@ public class SampleTVActivity extends AppActivity  {
         IjkLog.d(TAG, "******************************************\n");
     }
 
+    @Override
+    protected int getOptionMenuId() {
+        return R.id.action_tv;
+    }
+
     private void addBuildField(String name, String value) {
         //TODO: save the build filed infos to file
         //TODO: should I upload the user's device info to server? better user experience if keep kantv apk be a purely client application
         IjkLog.d(TAG, "  " + name + ": " + value + "\n");
     }
-
-
-
 }

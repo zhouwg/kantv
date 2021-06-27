@@ -35,7 +35,7 @@ public class ContentDescriptor implements Parcelable {
     private String mLanguage;
     private String mIdString;
     private String mLogo;       //TV logo if mMediaType == MEDIA_TV
-    private String mGroupTitle; //catagory of content
+    private String mGroupTitle; //category of content
     private MediaType mMediaType;
 
     public ContentDescriptor(String name, String url, IjkUrlType urlType) {

@@ -22,8 +22,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import tv.danmaku.ijk.kantv.R;
 import tv.danmaku.ijk.kantv.application.AppActivity;
@@ -32,6 +30,7 @@ import tv.danmaku.ijk.kantv.fragments.RecentMediaListFragment;
 public class RecentMediaActivity extends AppActivity {
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, RecentMediaActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
@@ -50,5 +49,8 @@ public class RecentMediaActivity extends AppActivity {
         transaction.commit();
     }
 
-
+    @Override
+    protected int getOptionMenuId() {
+        return R.id.action_recent;
+    }
 }

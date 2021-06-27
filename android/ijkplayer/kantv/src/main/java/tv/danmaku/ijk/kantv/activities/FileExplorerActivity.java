@@ -17,22 +17,17 @@
 
 package tv.danmaku.ijk.kantv.activities;
 
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
-import android.widget.ArrayAdapter;
 
 import com.squareup.otto.Subscribe;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import tv.danmaku.ijk.kantv.R;
 import tv.danmaku.ijk.kantv.application.AppActivity;
@@ -47,6 +42,7 @@ public class FileExplorerActivity extends AppActivity {
 
     public static Intent newIntent(Context context) {
         Intent intent = new Intent(context, FileExplorerActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         return intent;
     }
 
@@ -68,6 +64,11 @@ public class FileExplorerActivity extends AppActivity {
         else
             doOpenDirectory("/", false);
 
+    }
+
+    @Override
+    protected int getOptionMenuId() {
+        return R.id.action_file;
     }
 
     @Override

@@ -80,7 +80,7 @@ import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_MOVIE;
 
     public void setMediaType(MediaType type) {
         mMediaType = type;
-        IjkLog.d(TAG, "mediatype : " + type.toString());
+        IjkLog.d(TAG, "mediaType : " + type.toString());
     }
 
     @Nullable
@@ -139,7 +139,7 @@ import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_MOVIE;
                     public void onClick(View v) {
                         String name = descriptor.getName();
                         String url = descriptor.getUrl();
-                        IjkLog.d(TAG, "name:" + name + " url:" + url + " mediatype: " + mMediaType.toString());
+                        IjkLog.d(TAG, "name:" + name + " url:" + url + " mediaType: " + mMediaType.toString());
                         VideoActivity.intentTo(activity, url, name, mMediaType);
                     }
                 });
@@ -273,6 +273,5 @@ import static tv.danmaku.ijk.kantv.content.MediaType.MEDIA_MOVIE;
             return descriptors;
         }
     }
-
 }
 

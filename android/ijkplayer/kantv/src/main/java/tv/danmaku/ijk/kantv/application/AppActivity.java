@@ -20,14 +20,14 @@ package tv.danmaku.ijk.kantv.application;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -40,12 +40,10 @@ import tv.danmaku.ijk.kantv.activities.SampleRadioActivity;
 import tv.danmaku.ijk.kantv.activities.SampleMovieActivity;
 import tv.danmaku.ijk.kantv.activities.SampleTVActivity;
 import tv.danmaku.ijk.kantv.activities.SettingsActivity;
-import tv.danmaku.ijk.media.player.IjkLog;
 
 
 @SuppressLint("Registered")
-public class AppActivity extends AppCompatActivity {
-    private static final String TAG = AppActivity.class.getName();
+public abstract class AppActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private Settings mSettings;
     @Override
@@ -91,9 +89,15 @@ public class AppActivity extends AppCompatActivity {
         }
     }
 
+    protected abstract int getOptionMenuId();
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_app, menu);
+        MenuItem item = menu.findItem(getOptionMenuId());
+        SpannableString spanString = new SpannableString((item.getTitle().toString()));
+        spanString.setSpan(new ForegroundColorSpan(Color.LTGRAY), 0, spanString.length(), 0);
+        item.setTitle(spanString);
         return true;
     }
 
