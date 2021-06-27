@@ -27,5 +27,9 @@
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_quit"
+        android:title="@string/quit"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -21,6 +21,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -117,6 +118,15 @@ public abstract class AppActivity extends AppCompatActivity {
             SampleRadioActivity.intentTo(this);
         } else if (id == R.id.action_tv) {
             SampleTVActivity.intentTo(this);
+        } else if (id == R.id.action_quit) {
+            if (Build.VERSION.SDK_INT>=16 && Build.VERSION.SDK_INT<21) {
+                finishAffinity();
+            } else if(Build.VERSION.SDK_INT>=21) {
+                finishAffinity();
+            } else {
+                finish();
+                System.exit(0);
+            }
         }
 
         return super.onOptionsItemSelected(item);
