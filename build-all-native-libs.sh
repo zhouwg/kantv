@@ -40,7 +40,7 @@ function setup_env()
     export PROJECT_NAME=ijkplayer
     export PROJECT_ROOT_PATH=$(pwd)
     #ndk-r14b must be used in this project but I guess clang mightbe ok
-    export ANDROID_NDK=/opt/android-ndk-r14b
+	export ANDROID_NDK=${ANDROID_NDK:-/opt/android-ndk-r14b}
     export XCODE_SELECT=/usr/bin/xcode-select
     #TODO:better idea to get real cpu counts in macOS
     export HOST_CPU_COUNTS=4
