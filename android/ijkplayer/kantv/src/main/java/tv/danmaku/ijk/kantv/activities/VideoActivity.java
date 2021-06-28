@@ -149,6 +149,15 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         String title = getResources().getString(R.string.app_name);
+        if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_TV) {
+            title = getResources().getString(R.string.tv);
+        } if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_RADIO) {
+            title = getResources().getString(R.string.radio);
+        } if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_MOVIE) {
+            title = getResources().getString(R.string.movie);
+        } if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_FILE) {
+            title = getResources().getString(R.string.file);
+        }
         getSupportActionBar().setTitle(title);
 
         ActionBar actionBar = getSupportActionBar();
@@ -208,7 +217,9 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
     @Override
     public void onBackPressed() {
         mBackPressed = true;
-        this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (mVideoView.isEnableLandscape())
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         super.onBackPressed();
     }
 
@@ -244,6 +255,22 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             int aspectRatio = mVideoView.toggleAspectRatio();
             String aspectRatioText = MeasureHelper.getAspectRatioText(this, aspectRatio);
             mToastTextView.setText(aspectRatioText);
+            mMediaController.showOnce(mToastTextView);
+            return true;
+        } else if (id == R.id.action_toggle_fullscreen) {
+            boolean enableFullscreen = mVideoView.toggleFullscreen();
+            String enabledText = getResources().getString(R.string.enter_fullscreen);
+            String disabledText = getResources().getString(R.string.leave_fullscreen);
+            String infoText = (enableFullscreen ? enabledText : disabledText);
+            mToastTextView.setText(infoText);
+            mMediaController.showOnce(mToastTextView);
+            return true;
+        } else if (id == R.id.action_toggle_landscape) {
+            boolean enableLandscape = mVideoView.toggleLandscape();
+            String landscapeText = getResources().getString(R.string.landscape_playback);
+            String portraitText = getResources().getString(R.string.portrait_playback);
+            String infoText = (enableLandscape ? landscapeText : portraitText);
+            mToastTextView.setText(infoText);
             mMediaController.showOnce(mToastTextView);
             return true;
         } else if (id == R.id.action_toggle_tflite) {

@@ -132,6 +132,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private long mSeekEndTime = 0;
     private String mVideoTitle;
     private String mMediaType;
+    private boolean mEnableTFLite     = false;
+    private boolean mEnableLandscape  = false;
+    private boolean mEnableFullscreen = false;
 
     private TextView subtitleDisplay;
     private ProgressDialog mProgressDialog;
@@ -313,7 +316,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
 
     public void stopPlayback() {
         if (mMediaPlayer != null) {
-            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            if (mEnableLandscape)
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
             mMediaPlayer.stop();
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -450,13 +455,8 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                                 mHudViewHolder.setVisibility(View.INVISIBLE);
                             }
                             if ((0 == mMediaPlayer.getDuration()) && (!mSettings.getDevMode())) {
-                                mMediaController.setEnabled(false);
-                            }
-                        }
-
-                        if (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                            if (mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-                                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                                //enable pause during online TV playback so APK's user could capture TV screenshot conveniently
+                                //mMediaController.setEnabled(false);
                             }
                         }
 
@@ -589,6 +589,9 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             Log.d(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
                             stopUIBuffering();
 
+                            if (mMediaPlayer.isPlaying()) {
+                                mMediaController.show();
+                            }
                             startAudioAnimation();
 
                             break;
@@ -1055,6 +1058,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
             IRenderView.AR_16_9_FIT_PARENT,
             IRenderView.AR_4_3_FIT_PARENT};
     private int mCurrentAspectRatioIndex = 0;
+    private int mPreviousAspectRatioIndex = 2;
     private int mCurrentAspectRatio = s_allAspectRatio[0];
 
     public int toggleAspectRatio() {
@@ -1064,10 +1068,39 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
         mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
         if (mRenderView != null)
             mRenderView.setAspectRatio(mCurrentAspectRatio);
+        mPreviousAspectRatioIndex = mCurrentAspectRatioIndex;
         return mCurrentAspectRatio;
     }
 
-    private boolean mEnableTFLite = false;
+    public boolean toggleFullscreen() {
+        mEnableFullscreen = !mEnableFullscreen;
+        if (mEnableFullscreen)
+            mCurrentAspectRatioIndex = 1;
+        else
+            mCurrentAspectRatioIndex = mPreviousAspectRatioIndex;
+
+        mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
+        if (mRenderView != null)
+            mRenderView.setAspectRatio(mCurrentAspectRatio);
+        return mEnableFullscreen;
+    }
+
+    public boolean isEnableLandscape() {
+        return mEnableLandscape;
+    }
+
+    public boolean toggleLandscape() {
+        mEnableLandscape = !mEnableLandscape;
+        if (mEnableLandscape && (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)) {
+            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+
+        if (!mEnableLandscape && (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)) {
+            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        return mEnableLandscape;
+    }
+
     public boolean toggleTFLite() {
         mEnableTFLite = !mEnableTFLite;
         MediaPlayerCompat.setTFLite(mMediaPlayer, mEnableTFLite);

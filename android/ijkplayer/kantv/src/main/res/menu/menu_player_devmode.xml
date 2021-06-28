@@ -8,6 +8,14 @@
         android:title="@string/toggle_ratio"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_toggle_fullscreen"
+        android:title="@string/toggle_fullscreen"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_toggle_landscape"
+        android:title="@string/toggle_landscape"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_show_info"
         android:title="@string/show_info"
         app:showAsAction="never" />

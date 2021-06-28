@@ -15,6 +15,12 @@
     <string name="content">内容</string>
     <string name="settings">设置</string>
     <string name="toggle_ratio">切换画面大小</string>
+    <string name="toggle_fullscreen">切换全屏</string>
+    <string name="enter_fullscreen">进入全屏播放</string>
+    <string name="leave_fullscreen">退出全屏播放</string>
+    <string name="toggle_landscape">切换横屏/竖屏</string>
+    <string name="landscape_playback">横屏播放</string>
+    <string name="portrait_playback">竖屏播放</string>
     <string name="tracks">轨道</string>
     <string name="toggle_player">切换播放器</string>
     <string name="toggle_render">切换渲染器</string>

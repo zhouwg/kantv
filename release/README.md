@@ -50,6 +50,12 @@
    
    add toggle UI language between Chinese and English;
    在设置中增加了切换界面语言功能;
+   
+   add option menu highlight and start activity with SINGLE_TOP mode；
+   增加了高亮导航菜单；
+   
+   add "quit" option in toolbar;
+   增加了“退出”子菜单，用户可以通过此子菜单直接退出APK;
 
 
 ### Screenshots(一些屏幕截图）

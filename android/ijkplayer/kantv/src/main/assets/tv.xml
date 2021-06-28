@@ -8,7 +8,6 @@
   </author>
   <id>urn:uuid:12345678-1234-3456-AABB-123412345678</id>
 
-
 <entry>
     <title>
         CGTN (CCTV-16英文频道)
@@ -628,7 +627,7 @@
 
 <entry>
     <title>
-        ITV UK(online english TV from UK)
+        ITV UK(UK)
     </title>
     <link href=
         "http://sportportal1.akamaized.net/hls/live/702646/itvlive/ITV1PORTAL2/master_Main600.m3u8"
@@ -638,7 +637,7 @@
 
 <entry>
     <title>
-        Americas Voice(online english TV from US)
+        Americas Voice(US)
     </title>
     <link href=
         "https://p1media-americasvoice-1.vizio.wurl.com/manifest/playlist.m3u8"
@@ -648,11 +647,71 @@
 
 <entry>
     <title>
-        Big Life TV(online english TV from US)
+        Big Life TV(US)
     </title>
     <link href=
         "https://biglife.sinclair.wurl.com/manifest/3000.m3u8"
         urltype="rtmp" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Sky News Extra 1 (UK)
+    </title>
+    <link href=
+        "https://skynewsau-live.akamaized.net/hls/live/2002689/skynewsau-extra1/master.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Sky-Movies Comedy (UK)
+    </title>
+    <link href=
+        "http://dminnvll.cdn.mangomolo.com/dubaione/smil:dubaione.stream.smil/chunklist_b380000.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Sports Channel Network (UK)
+    </title>
+    <link href=
+        "https://vod365-sports-channel-network-1-gb.samsung.wurl.com/manifest/playlist.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Tennis Channel (UK)
+    </title>
+    <link href=
+        "https://tennischannel-int-samsunguk.amagi.tv/playlist.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Wonder.uk
+    </title>
+    <link href=
+        "https://wonder-samsung-uk.amagi.tv/playlist.m3u8"
+        urltype="hls" protected="no" />
+    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+</entry>
+
+<entry>
+    <title>
+        Truly.uk
+    </title>
+    <link href=
+        "https://barcroft-truly-1-gb.samsung.wurl.com/manifest/playlist.m3u8"
+        urltype="hls" protected="no" />
     <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
 </entry>
 
