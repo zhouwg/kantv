@@ -26,6 +26,7 @@
     <string name="toggle_render">切换渲染器</string>
     <string name="toggle_tflite">切换Tensorflow</string>
     <string name="show_info">媒体信息</string>
+    <string name="development_mode">开发者模式:</string>
     <string name="url">URL</string>
     <string name="vdec">解码器</string>
     <string name="fps">帧率</string>

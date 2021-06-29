@@ -148,6 +148,7 @@ public class InfoHudViewHolder {
                         }
                         otherLength = otherLength - lineLength;
                     }
+                    setRowValue(R.string.development_mode, "");
                     setRowValue(R.string.url, tmpUrl);
 
 
@@ -168,11 +169,15 @@ public class InfoHudViewHolder {
                     float fpsDecode = mp.getVideoDecodeFramesPerSecond();
                     setRowValue(R.string.fps, String.format(Locale.US, "%.2f / %.2f", fpsDecode, fpsOutput));
 
+                    long playTime            = mp.getPlayTime();
+                    long pauseTime           = mp.getPauseTime();
                     long videoCachedDuration = mp.getVideoCachedDuration();
                     long audioCachedDuration = mp.getAudioCachedDuration();
                     long videoCachedBytes    = mp.getVideoCachedBytes();
                     long audioCachedBytes    = mp.getAudioCachedBytes();
+                    long totalBytes          = mp.getTrafficStatisticByteCount();
                     long tcpSpeed            = mp.getTcpSpeed();
+
                     long bitRate             = mp.getBitRate();
                     long seekLoadDuration    = mp.getSeekLoadDuration();
 
@@ -181,8 +186,9 @@ public class InfoHudViewHolder {
                     setRowValue(R.string.load_cost, String.format(Locale.US, "%d ms", mLoadCost));
                     setRowValue(R.string.seek_cost, String.format(Locale.US, "%d ms", mSeekCost));
                     setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
-                    setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
-                    setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
+                    //setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
+                    //setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
+                    setRowValue(R.string.bit_rate, String.format(Locale.US, "%s", formatedSpeed(totalBytes, (playTime + pauseTime) * 1000)));
 
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -192,10 +198,10 @@ public class InfoHudViewHolder {
                     Date curTime =  new Date(System.currentTimeMillis());
                     setRowValue(R.string.current_time, formatter.format(curTime));
 
-                    long playTime = mp.getPlayTime();
+                    //long playTime = mp.getPlayTime();
                     setRowValue(R.string.play_time, String.valueOf(playTime) + "  secs");
 
-                    long pauseTime = mp.getPauseTime();
+                    //long pauseTime = mp.getPauseTime();
                     setRowValue(R.string.pause_time, String.valueOf(pauseTime) + "  secs");
 
                     mHandler.removeMessages(MSG_UPDATE_HUD);

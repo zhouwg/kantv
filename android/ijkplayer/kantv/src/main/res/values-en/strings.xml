@@ -26,6 +26,7 @@
     <string name="toggle_render">Toggle Render</string>
     <string name="toggle_tflite">Toggle Tensorflowlite</string>
     <string name="show_info">Info</string>
+    <string name="development_mode">Development Mode:</string>
     <string name="url">URL</string>
     <string name="vdec">vdec</string>
     <string name="fps">fps</string>
