@@ -98,9 +98,16 @@ public class RecentMediaListFragment extends Fragment implements LoaderManager.L
         private int mIndex_type = -1;
 
         public RecentMediaAdapter(Context context) {
+            //dont's display URL of content in UI here because APK's user doesn't care it
+            //and developers could found URL of content in "development mode"
+            /*
             super(context, android.R.layout.simple_list_item_2, null,
-                    new String[]{RecentMediaStorage.Entry.COLUMN_NAME_NAME, RecentMediaStorage.Entry.COLUMN_NAME_URL},
+                    new String[]{RecentMediaStorage.Entry.COLUMN_NAME_NAME, RecentMediaStorage.Entry.COLUMN_NAME_TYPE},
                     new int[]{android.R.id.text1, android.R.id.text2}, 0);
+             */
+            super(context, android.R.layout.simple_list_item_1, null,
+                    new String[]{RecentMediaStorage.Entry.COLUMN_NAME_NAME},
+                    new int[]{android.R.id.text1}, 0);
         }
 
         @Override

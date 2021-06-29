@@ -109,7 +109,7 @@ public class TableLayoutBinder {
     }
 
     public AlertDialog.Builder buildAlertDialogBuilder() {
-        AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(mContext);
+        AlertDialog.Builder dlgBuilder = new AlertDialog.Builder(mContext, R.style.TransparentDialog);
         dlgBuilder.setView(buildLayout());
         return dlgBuilder;
     }

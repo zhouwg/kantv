@@ -52,20 +52,23 @@ public class RecentMediaStorage {
         ContentValues cv = new ContentValues();
         String url = "unknown";
         String mediaType = "unknown";
+        String title = "unknown";
         try {
             String[] strArr = syncUrl.split("_KANTV_");
-            if (2 != strArr.length) {
+            if (3 != strArr.length) {
                 IjkLog.w(TAG, "it shouldn't happen here, pls check");
                 return;
             }
             url = strArr[0];
             mediaType = strArr[1];
+            title = strArr[2];
             cv.putNull(Entry.COLUMN_NAME_ID);
-            IjkLog.d(TAG,"url: " + url + " mediatype:" + mediaType);
+            IjkLog.d(TAG,"url: " + url + " mediatype:" + mediaType + " mediaTitle:" + title);
             cv.put(Entry.COLUMN_NAME_URL, url);
             cv.put(Entry.COLUMN_NAME_TYPE, mediaType);
             cv.put(Entry.COLUMN_NAME_LAST_ACCESS, System.currentTimeMillis());
-            cv.put(Entry.COLUMN_NAME_NAME, getNameOfUrl(url));
+            //cv.put(Entry.COLUMN_NAME_NAME, getNameOfUrl(url));
+            cv.put(Entry.COLUMN_NAME_NAME, title);
             save(cv);
         } catch (IllegalArgumentException ex) {
             IjkLog.w(TAG, "can't get url and mediatype" + ex.getMessage());
@@ -116,13 +119,13 @@ public class RecentMediaStorage {
 
     public static class OpenHelper extends SQLiteOpenHelper {
         private static final int DATABASE_VERSION = 1;
-        private static final String DATABASE_NAME = "RecentMedia_NEW.db";
+        private static final String DATABASE_NAME = "RecentMedia_kantv.db";
         private static final String SQL_CREATE_ENTRIES =
                 " CREATE TABLE IF NOT EXISTS " + Entry.TABLE_NAME + " (" +
                         Entry.COLUMN_NAME_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         Entry.COLUMN_NAME_URL + " VARCHAR UNIQUE, " +
-                        Entry.COLUMN_NAME_TYPE + " VARCHAR UNIQUE, " +
-                        Entry.COLUMN_NAME_NAME + " VARCHAR, " +
+                        Entry.COLUMN_NAME_TYPE + " VARCHAR , " +
+                        Entry.COLUMN_NAME_NAME + " VARCHAR UNIQUE, " +
                         Entry.COLUMN_NAME_LAST_ACCESS + " INTEGER) ";
 
         public OpenHelper(Context context) {

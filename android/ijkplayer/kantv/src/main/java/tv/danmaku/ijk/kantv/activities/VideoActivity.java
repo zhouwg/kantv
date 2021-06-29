@@ -45,6 +45,8 @@ import android.view.WindowManager;
 import android.widget.TableLayout;
 import android.widget.TextView;
 
+import java.util.regex.Pattern;
+
 import tv.danmaku.ijk.kantv.content.MediaType;
 import tv.danmaku.ijk.kantv.widget.media.VoisePlayingIcon;
 import tv.danmaku.ijk.media.player.IjkLog;
@@ -136,8 +138,10 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         }
 
         if (!TextUtils.isEmpty(mVideoPath)) {
+            String regEx = "[`~!@#$%^&*()+=|{}:;\\\\[\\\\].<>/?~！@（）——+|{}【】‘；：”“’。，、？']";
+            String videoTitle  = Pattern.compile(regEx).matcher(mVideoTitle).replaceAll("").trim();
             //use "_KANTV_" as delimiter here
-            String syncString = mVideoPath + "_KANTV_" + mMediaType;
+            String syncString = mVideoPath + "_KANTV_" + mMediaType + "_KANTV_" + videoTitle;
             new RecentMediaStorage(this).saveUrlAsync(syncString);
         }
 
