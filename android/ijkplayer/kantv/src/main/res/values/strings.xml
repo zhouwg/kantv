@@ -56,7 +56,8 @@
     <string name="mi_stream_fmt1">Stream #%d</string>
     <string name="mi_type">Type</string>
     <string name="mi_language">Language</string>
-    <string name="mi_codec">Codec</string>
+    <string name="mi_video_codec">Video Codec</string>
+    <string name="mi_audio_codec">Audio Codec</string>
     <string name="mi_frame_rate">Frame rate</string>
     <string name="mi_bit_rate">Bit rate</string>
     <string name="mi_sample_rate">Sample rate</string>

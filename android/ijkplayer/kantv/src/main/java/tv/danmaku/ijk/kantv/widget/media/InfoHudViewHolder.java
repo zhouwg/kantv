@@ -17,6 +17,9 @@ import tv.danmaku.ijk.media.player.IjkLog;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.MediaPlayerProxy;
 import tv.danmaku.ijk.kantv.R;
+import tv.danmaku.ijk.media.player.misc.IMediaFormat;
+import tv.danmaku.ijk.media.player.misc.ITrackInfo;
+import tv.danmaku.ijk.media.player.misc.IjkMediaFormat;
 
 public class InfoHudViewHolder {
     private TableLayoutBinder mTableLayoutBinder;
@@ -183,9 +186,37 @@ public class InfoHudViewHolder {
 
                     setRowValue(R.string.v_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(videoCachedDuration), formatedSize(videoCachedBytes)));
                     setRowValue(R.string.a_cache, String.format(Locale.US, "%s, %s", formatedDurationMilli(audioCachedDuration), formatedSize(audioCachedBytes)));
-                    setRowValue(R.string.load_cost, String.format(Locale.US, "%d ms", mLoadCost));
-                    setRowValue(R.string.seek_cost, String.format(Locale.US, "%d ms", mSeekCost));
-                    setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
+                    //setRowValue(R.string.load_cost, String.format(Locale.US, "%d ms", mLoadCost));
+                    //setRowValue(R.string.seek_cost, String.format(Locale.US, "%d ms", mSeekCost));
+                    //setRowValue(R.string.seek_load_cost, String.format(Locale.US, "%d ms", seekLoadDuration));
+                    ITrackInfo trackInfos[] = mp.getTrackInfo();
+                    if (trackInfos != null) {
+                        int index = -1;
+                        for (ITrackInfo trackInfo : trackInfos) {
+                            index++;
+                            int trackType = trackInfo.getTrackType();
+                            IMediaFormat mediaFormat = trackInfo.getFormat();
+                            if (mediaFormat == null) {
+                            } else if (mediaFormat instanceof IjkMediaFormat) {
+                                switch (trackType) {
+                                    case ITrackInfo.MEDIA_TRACK_TYPE_VIDEO:
+                                        setRowValue(R.string.mi_video_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_NAME_UI));
+                                        setRowValue(R.string.mi_profile_level, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PROFILE_LEVEL_UI));
+                                        setRowValue(R.string.mi_pixel_format, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_PIXEL_FORMAT_UI));
+                                        setRowValue(R.string.mi_resolution, mediaFormat.getString(IjkMediaFormat.KEY_IJK_RESOLUTION_UI));
+                                        break;
+                                    case ITrackInfo.MEDIA_TRACK_TYPE_AUDIO:
+                                        setRowValue(R.string.mi_audio_codec, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CODEC_NAME_UI));
+                                        setRowValue(R.string.mi_sample_rate, mediaFormat.getString(IjkMediaFormat.KEY_IJK_SAMPLE_RATE_UI));
+                                        setRowValue(R.string.mi_channels, mediaFormat.getString(IjkMediaFormat.KEY_IJK_CHANNEL_UI));
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
                     //setRowValue(R.string.tcp_speed, String.format(Locale.US, "%s", formatedSpeed(tcpSpeed, 1000)));
                     //setRowValue(R.string.bit_rate, String.format(Locale.US, "%.2f kbs", bitRate/1000f));
                     setRowValue(R.string.bit_rate, String.format(Locale.US, "%s", formatedSpeed(totalBytes, (playTime + pauseTime) * 1000)));
