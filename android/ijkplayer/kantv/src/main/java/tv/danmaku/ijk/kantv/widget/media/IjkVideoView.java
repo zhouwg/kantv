@@ -1073,11 +1073,23 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     }
 
     public boolean toggleFullscreen() {
-        mEnableFullscreen = !mEnableFullscreen;
-        if (mEnableFullscreen)
-            mCurrentAspectRatioIndex = 1;
-        else
-            mCurrentAspectRatioIndex = mPreviousAspectRatioIndex;
+        //becareful here
+        if (mEnableFullscreen && (mPreviousAspectRatioIndex != IRenderView.AR_ASPECT_FILL_PARENT)) {
+            mEnableFullscreen = true;
+            mPreviousAspectRatioIndex = IRenderView.AR_ASPECT_FILL_PARENT;
+        } else if (!mEnableFullscreen && (mPreviousAspectRatioIndex != IRenderView.AR_ASPECT_FILL_PARENT)) {
+            mEnableFullscreen = true;
+            mPreviousAspectRatioIndex = IRenderView.AR_ASPECT_FILL_PARENT;
+        } else {
+            mEnableFullscreen = false;
+            mPreviousAspectRatioIndex = IRenderView.AR_MATCH_PARENT;
+        }
+
+        if (mEnableFullscreen) {
+            mCurrentAspectRatioIndex = IRenderView.AR_ASPECT_FILL_PARENT;
+        } else {
+            mCurrentAspectRatioIndex = IRenderView.AR_MATCH_PARENT;
+        }
 
         mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
         if (mRenderView != null)

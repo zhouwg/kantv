@@ -16,8 +16,8 @@
     <string name="settings">Settings</string>
     <string name="toggle_ratio">Scale</string>
     <string name="toggle_fullscreen">Fullscreen</string>
-    <string name="enter_fullscreen">Fullscreen playback enabled</string>
-    <string name="leave_fullscreen">Fullscreen playback disabled</string>
+    <string name="enter_fullscreen">enter fullscreen playback</string>
+    <string name="leave_fullscreen">leave fullscreen playback</string>
     <string name="toggle_landscape">Landscape/Portrait</string>
     <string name="landscape_playback">Landscape Playback</string>
     <string name="portrait_playback">Portrait Playback</string>
