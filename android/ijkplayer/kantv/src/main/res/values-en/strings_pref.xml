@@ -145,8 +145,11 @@
 
     <string name="pref_key_source">pref.author</string>
     <string name="pref_title_source">Source code of KanTV </string>
-    <string name="pref_summary_source">https://github.com/zhouwg/kantv \n\nspecial thanks to Zhang Rui(bbcallen@gmail.com) and open source project ijkplayer from Bilibili Inc. </string>
+    <string name="pref_summary_source">https://github.com/zhouwg/kantv \n\nspecial thanks to Zhang Rui(bbcallen@gmail.com) and open source project ijkplayer from Bilibili Inc.</string>
 
+    <string name="pref_key_ipr">pref.ipr</string>
+    <string name="pref_title_ipr">IPR Statement</string>
+    <string name="pref_summary_ipr">All online TV/Radio/Movies only used for purpose of learning and studying and copyright belong to the corresponding holder</string>
 
     <!-- -->
     <string name="pref_key_last_directory"></string>

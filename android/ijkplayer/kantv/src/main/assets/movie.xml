@@ -8,55 +8,29 @@
   </author>
   <id>urn:uuid:12345678-1234-3456-AABB-123412345678</id>
 
-<!--
-online movie list willn't be updated from now on because all these online movies contain illegal advertisement
--->
-<entry>
-   <title>
-       Nobody(小人物)
-   </title>
-   <link href="https://v3.dious.cc//20210416/nIYS8a98/index.m3u8" urltype="hls" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
+    <!--
+        the following online movies are come from ixigua.com and copyright belong to the corresponding holder,
+        ONLY used for purpose of software learning and research
+    -->
 
-<entry>
-    <title>
-        Nobody(小人物) -- AES encrypted
-    </title>
-   <link href=
-       "https://vod3.buycar5.cn//20210416/AxCh7eY4/1000kb/hls/index.m3u8"
-       urltype="hls" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
+    <entry>
+        <title>
+            机械师2：复活(Mechanic: Resurrection)
+        </title>
+        <link href="https://v9-xg-web-s.ixigua.com/3566ed81d3d3250d0a143ac4bf7fa4fb/60dc9ad7/dash/tos-cn-v020437b0000bcmc8p2k781uptdkctqg/tos-cn-vd-0026_b6c436866edc4f02ac3b405039294454_1a1c907b14824b0995142bc8da025678_629e0d375b794757a3e61161af3a6d85_c337e10c85224d1ca238901b224f02dc.mpd" urltype="dash" protected="yes" />
+        <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+    </entry>
 
-<entry>
-    <title>
-        The Shawshank Redemption(肖申克的救赎) -- AES encrypted
-    </title>
-   <link href=
-       "https://vod.bunediy.com/20200426/kd4Th5ZQ/index.m3u8"
-       urltype="hls" protected="no" />
-   <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
+    <entry>
+        <title>
+            绣春刀2(Brotherhood of Blades II: The Infernal Battlefield)
+        </title>
+        <link
+            href="https://v9-xg-web-s.ixigua.com/8b00ce50333559b3a7224527688c0726/60dcad71/dash/tos-cn-v020435c0000bjgdcffk43agspk35eo0/tos-cn-vd-0026_ea7c13873be848c5bf758f01e6b777ca_a46d6b4834af46b5ad07f720b43dbbd0_e9b2d2d76724468980bb2d0fbb46411c_a896bf1f133f4b10b2761a9039c5cab5.mpd"
+            urltype="dash" protected="yes" />
+        <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
+    </entry>
 
-<entry>
-    <title>
-        La vita è bella(美丽人生) -- AES encrypted
-    </title>
-    <link href=
-        "https://vod.bunediy.com/20201217/HB2n7eY8/index.m3u8"
-        urltype="hls" protected="no" />
-    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
 
-<entry>
-    <title>
-        Leon.The.Professional.1994(这个杀手不太冷) -- AES encrypted
-    </title>
-    <link href=
-        "https://vod.bunediy.com/20200426/lBjl2lEc/index.m3u8"
-        urltype="hls" protected="no" />
-    <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>
-</entry>
 
-</feed>
+  </feed>

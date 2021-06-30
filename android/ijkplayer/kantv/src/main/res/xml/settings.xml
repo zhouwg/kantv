@@ -126,6 +126,11 @@
             android:key="@string/pref_key_source"
             android:title="@string/pref_title_source"
             android:summary="@string/pref_summary_source" />
+
+        <Preference
+            android:key="@string/pref_key_ipr"
+            android:title="@string/pref_title_ipr"
+            android:summary="@string/pref_summary_ipr" />
     </PreferenceCategory>
 
 </PreferenceScreen>

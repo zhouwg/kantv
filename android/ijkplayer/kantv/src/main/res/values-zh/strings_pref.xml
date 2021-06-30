@@ -144,9 +144,11 @@
 
     <string name="pref_key_source">pref.author</string>
     <string name="pref_title_source">KanTV源代码地址</string>
-    <string name="pref_summary_source">https://github.com/zhouwg/kantv \n\nspecial thanks to Zhang Rui(bbcallen@gmail.com) and open source project ijkplayer from Bilibili Inc. </string>
+    <string name="pref_summary_source">https://github.com/zhouwg/kantv \n\nspecial thanks to Zhang Rui(bbcallen@gmail.com) and open source project ijkplayer from Bilibili Inc.</string>
 
-
+    <string name="pref_key_ipr">pref.ipr</string>
+    <string name="pref_title_ipr">知识产权声明</string>
+    <string name="pref_summary_ipr">本应用程序中出现的所有在线电视/电台/电影仅供个人学习与研究之用，其知识产权属于原始持有人或版权所有人所有</string>
     <!-- -->
     <string name="pref_key_last_directory"></string>
 
