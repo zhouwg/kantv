@@ -3680,7 +3680,7 @@ static int read_thread(void *arg)
         //add following line to fix https://github.com/zhouwg/kantv/issues/35
         //it's just a workaround because ijkio and ijkiocache was not used actually
         //pls refer to:
-        //ttps://github.com/Bilibili/ijkplayer/issues/3446
+        //https://github.com/Bilibili/ijkplayer/issues/3446
         ffp->stat.byte_count += pkt->size;
         ffp_statistic_l(ffp);
 
