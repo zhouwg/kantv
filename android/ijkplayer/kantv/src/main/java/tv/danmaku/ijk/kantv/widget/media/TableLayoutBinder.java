@@ -18,7 +18,7 @@
 package tv.danmaku.ijk.kantv.widget.media;
 
 import android.content.Context;
-import android.support.v7.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +26,6 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 
 import tv.danmaku.ijk.kantv.R;
-import tv.danmaku.ijk.media.player.IjkLog;
 
 public class TableLayoutBinder {
     private Context mContext;

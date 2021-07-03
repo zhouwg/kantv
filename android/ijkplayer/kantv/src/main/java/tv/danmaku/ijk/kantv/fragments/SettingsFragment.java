@@ -19,25 +19,15 @@ package tv.danmaku.ijk.kantv.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceFragmentCompat;
-import android.preference.CheckBoxPreference;
-import android.preference.PreferenceActivity;
-import android.preference.RingtonePreference;
-import android.util.DisplayMetrics;
-
-import java.util.Locale;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
 
 import tv.danmaku.ijk.kantv.R;
 import tv.danmaku.ijk.kantv.activities.SettingsActivity;
-import tv.danmaku.ijk.kantv.application.AppActivity;
 import tv.danmaku.ijk.kantv.application.Settings;
-import tv.danmaku.ijk.media.player.IjkLog;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
     private static final String TAG = SettingsFragment.class.getName();

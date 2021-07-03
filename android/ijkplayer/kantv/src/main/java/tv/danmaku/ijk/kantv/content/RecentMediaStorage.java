@@ -22,9 +22,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
-import android.support.v4.content.AsyncTaskLoader;
+import androidx.loader.content.AsyncTaskLoader;
 import android.text.TextUtils;
 
 import tv.danmaku.ijk.media.player.IjkLog;

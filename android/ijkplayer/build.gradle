@@ -2,9 +2,8 @@
 
 buildscript {
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
         google()
-        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.1'
@@ -18,23 +17,20 @@ buildscript {
 
 allprojects {
     repositories {
-       maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
+        maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
         google()
-        jcenter()
     }
 }
 
 ext {
-    compileSdkVersion = 28
-    buildToolsVersion = "28.0.3"
+    compileSdkVersion = 30
+    buildToolsVersion = "30.0.3"
 
-    targetSdkVersion = 28
+    targetSdkVersion = 30
 	minSdkVersion = 21
 
-    versionCode = 000400
-    versionName = "0.0.4"
-
-
+    versionCode = 000600
+    versionName = "0.0.6"
 }
 
 wrapper {
