@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "tv.danmaku.ijk.kantv"
-        minSdkVersion 9
+        minSdkVersion 21
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode rootProject.ext.versionCode
         versionName rootProject.ext.versionName

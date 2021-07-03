@@ -94,7 +94,7 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 ```
 
 
-- [Android NDK-r14b](https://developer.android.com/ndk/downloads/older_releases)
+- [Android NDK-r21e(LTS)](https://developer.android.com/ndk/downloads)
 - [Android Studio 4.2.1](https://developer.android.google.cn/studio)
 - [Gradle 6.6.1](https://gradle.org/releases)
 
@@ -108,13 +108,12 @@ git checkout kantv
 
 # add these lines to your ~/.bash_profile or ~/.profile
 # export ANDROID_SDK=<your sdk path>
-# ndk-r14b was used in this project
-# export ANDROID_NDK=<your ndk path>/android-ndk-r14b
+# ndk-r21e was used in this project, if you intall from SDK Manager
+# export ANDROID_NDK=<your sdk path>/sdk/ndk/21.4.7075529
 
 # add these line to ./android/ijkplayer/local.properties
 
 sdk.dir=<your sdk path>
-ndk.dir=<your ndk path>/android-ndk-r14b
 
 ```
 
