@@ -271,6 +271,9 @@ the kantv required features are based on or derives from projects below:
 - GPL license
   - [libiconv](https://www.gnu.org/software/libiconv/)
 
+- MIT license
+  - [brotli](https://github.com/google/brotli)
+
 - Apache license
   - [tensorflow](https://github.com/tensorflow/tensorflow)
   - [irsa](https://github.com/zhouwg/irsa)

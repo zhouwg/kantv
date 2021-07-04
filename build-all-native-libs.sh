@@ -94,6 +94,11 @@ function setup_env()
     IJK_LIBCURL_COMMIT=master
     IJK_LIBCURL_LOCAL_REPO=extra/curl
 
+    IJK_BROTLI_UPSTREAM=https://gitee.com/zhouweiguo2020/brotli.git
+    IJK_BROTLI_FORK=https://gitee.com/zhouweiguo2020/brotli.git
+    IJK_BROTLI_COMMIT=master
+    IJK_BROTLI_LOCAL_REPO=extra/brotli
+
     #modify it accordingly
     #for domestic users
     IJK_TENSORFLOW_UPSTREAM=https://gitee.com/zhouweiguo2020/tensorflow.git
@@ -214,12 +219,12 @@ function check_host()
         #make Android Studio happy
         if [ -f android/ijkplayer/local.properties ]; then
             echo "ANDROID_NDK is: ${ANDROID_NDK}"
-            if cat './android/ijkplayer/local.properties' | grep $ANDROID_NDK ; then
-                echo "found $ANDROID_NDK in ./android/ijkplayer/local.properties"
-            else
-                echo -e "\n" >> android/ijkplayer/local.properties
-                echo "ndk.dir=${ANDROID_NDK}" >> android/ijkplayer/local.properties
-            fi
+            #if cat './android/ijkplayer/local.properties' | grep $ANDROID_NDK ; then
+            #    echo "found $ANDROID_NDK in ./android/ijkplayer/local.properties"
+            #else
+                #echo -e "\n" >> android/ijkplayer/local.properties
+                #echo "ndk.dir=${ANDROID_NDK}" >> android/ijkplayer/local.properties
+            #fi
         fi
     elif [ $BUILD_TARGET == "ios" ]; then
         echo -e "${TEXT_BLUE}BUILD_TARGET is $BUILD_TARGET${TEXT_RESET}"
@@ -458,6 +463,23 @@ function check_sources()
                     show_pwd
                     git checkout ${IJK_LIBCURL_COMMIT}
                 fi
+            elif [ $module_name == "brotli" ]; then
+                git --version
+                echo "== pull brotli base =="
+                sh $TOOLS/pull-repo-base.sh $IJK_BROTLI_UPSTREAM $IJK_BROTLI_LOCAL_REPO
+                echo "== pull brotli fork ${realname} =="
+                if [ ${BUILD_TARGET} == "android" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_BROTLI_FORK android/contrib/brotli-${realname} ${IJK_BROTLI_LOCAL_REPO}
+                    cd android/contrib/brotli-${realname}
+                    show_pwd
+                    git checkout ${IJK_BROTLI_COMMIT}
+                fi
+                if [ ${BUILD_TARGET} == "ios" ]; then
+                    sh $TOOLS/pull-repo-ref.sh $IJK_BROTLI_FORK ios/brotli-${realname} ${IJK_BROTLI_LOCAL_REPO}
+                    cd ios/brotli-${realname}
+                    show_pwd
+                    git checkout ${IJK_BROTLI_COMMIT}
+                fi
             elif [ $module_name == "tensorflow" ]; then
                 git --version
                 echo "== pull tensorflow base =="
@@ -593,6 +615,7 @@ function build_native_release()
         fi
         show_pwd
 
+        build_module brotli   ${realname}
         build_module libiconv ${realname}
         build_module libz     ${realname}
         build_module libxml2  ${realname}
@@ -760,6 +783,7 @@ function do_init()
     check_sources  "openssl"
     check_sources  "ffmpeg"
     check_sources  "tensorflow"
+    check_sources  "brotli"
 }
 
 
@@ -775,7 +799,7 @@ function do_build()
         else
             realname=${arch}
         fi
-        module_names="ffmpeg openssl libiconv libz libxml2 curl tensorflow"
+        module_names="ffmpeg openssl libiconv libz libxml2 curl tensorflow brotli"
         for module_name in ${module_names};do
             if [ ${BUILD_TARGET} == "android" ]; then
                 test_path=./${BUILD_TARGET}/contrib/${module_name}-${realname}

@@ -7,6 +7,7 @@ android/contrib/libiconv-*
 android/contrib/libxml2-*
 android/contrib/libz-*
 android/contrib/tensorflow-*
+android/contrib/brotli-*
 android/contrib/build
 ios/ffmpeg-*
 ios/openssl-*

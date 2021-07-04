@@ -136,7 +136,7 @@
     <string name="pref_title_about">关于</string>
     <string name="pref_key_version">pref.version</string>
     <string name="pref_title_version">当前版本</string>
-    <string name="pref_summary_version">0.0.6</string>
+    <string name="pref_summary_version">0.0.7</string>
 
     <string name="pref_key_author">pref.author</string>
     <string name="pref_title_author">作者/维护人</string>
