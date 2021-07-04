@@ -57,6 +57,17 @@
    add "quit" option in toolbar;
    增加了“退出”子菜单，用户可以通过此子菜单直接退出APK;
 
+- v0.0.7:
+
+   UI modification for purpose of improve user's experience;
+   UI的一些改动，为了提升用户使用APK的体验;
+
+   remove online movie lists which contain illegal advertisement;
+   移除含有非法广告的在线电影;
+
+   update NDK version to r21.4.7075529 LTS for prepare switch to AndroidX, validated on arm64 target only;
+   将NDK升级到r21.4.7075529 LTS,为切换到AndroidX做准备;
+
 
 ### Screenshots(一些屏幕截图）
 
