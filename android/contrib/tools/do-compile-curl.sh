@@ -42,6 +42,15 @@ FF_DEP_LIBICONV_LIB=
 
 FF_DEP_LIBZ_INC=
 FF_DEP_LIBZ_LIB=
+FF_DEP_LIBZ_NAME=
+
+FF_DEP_BROTLI_INC=
+FF_DEP_BROTLI_LIB=
+FF_DEP_BROTLI_NAME=
+
+FF_DEP_OPENSSL_INC=
+FF_DEP_OPENSSL_LIB=
+FF_DEP_OPENSSL_NAME=
 
 FF_CFG_FLAGS=
 FF_PLATFORM_CFG_FLAGS=
@@ -55,6 +64,9 @@ FF_CMAKE_EXTRA_FLAGS=
 #----- armv7a begin -----
 if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME=curl-armv7a
+    FF_DEP_LIBZ_NAME=libz-armv7a
+    FF_DEP_BROTLI_NAME=brotli-armv7a
+    FF_DEP_OPENSSL_NAME=openssl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CMAKE_ABI="armeabi-v7a with NEON"
@@ -65,6 +77,9 @@ if [ "$FF_ARCH" = "armv7a" ]; then
 
 elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME=curl-armv5
+    FF_DEP_LIBZ_NAME=libz-armv5
+    FF_DEP_BROTLI_NAME=brotli-armv5
+    FF_DEP_OPENSSL_NAME=openssl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CMAKE_ABI="armeabi"
@@ -75,6 +90,9 @@ elif [ "$FF_ARCH" = "armv5" ]; then
 
 elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME=curl-x86
+    FF_DEP_LIBZ_NAME=libz-x86
+    FF_DEP_BROTLI_NAME=brotli-x86
+    FF_DEP_OPENSSL_NAME=openssl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CMAKE_ABI="x86"
@@ -88,6 +106,9 @@ elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_ANDROID_PLATFORM=android-21
 
     FF_BUILD_NAME=curl-x86_64
+    FF_DEP_LIBZ_NAME=libz-x86_64
+    FF_DEP_BROTLI_NAME=brotli-x86_64
+    FF_DEP_OPENSSL_NAME=openssl-x86_64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CMAKE_ABI="x86_64"
@@ -103,6 +124,9 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_ANDROID_PLATFORM=android-21
 
     FF_BUILD_NAME=curl-arm64
+    FF_DEP_LIBZ_NAME=libz-arm64
+    FF_DEP_BROTLI_NAME=brotli-arm64
+    FF_DEP_OPENSSL_NAME=openssl-arm64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
     FF_CMAKE_ABI="arm64-v8a"
@@ -117,6 +141,9 @@ fi
 
 FF_SYSROOT=$FF_TOOLCHAIN_PATH/sysroot
 FF_PREFIX=$FF_BUILD_ROOT/build/$FF_BUILD_NAME/output
+FF_DEP_LIBZ_PREFIX=$FF_BUILD_ROOT/build/$FF_DEP_LIBZ_NAME/output
+FF_DEP_BROTLI_PREFIX=$FF_BUILD_ROOT/build/$FF_DEP_BROTLI_NAME/output
+FF_DEP_OPENSSL_PREFIX=$FF_BUILD_ROOT/build/$FF_DEP_OPENSSL_NAME/output
 
 mkdir -p $FF_PREFIX
 
@@ -169,7 +196,9 @@ FF_CFG_FLAGS="$FF_CFG_FLAGS \
 --disable-smb \
 --disable-smtp \
 --disable-unix-sockets \
---without-ssl \
+--with-zlib=$FF_DEP_LIBZ_PREFIX \
+--with-brotli=$FF_DEP_BROTLI_PREFIX \
+--with-openssl=$FF_DEP_OPENSSL_PREFIX \
 --enable-threaded-resolver \
 --enable-ipv6 "
 FF_CFG_FLAGS="$FF_CFG_FLAGS --host=${FF_CROSS_PREFIX}"

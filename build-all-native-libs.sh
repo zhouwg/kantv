@@ -615,12 +615,12 @@ function build_native_release()
         fi
         show_pwd
 
+        build_module libz     ${realname}
         build_module brotli   ${realname}
         build_module libiconv ${realname}
-        build_module libz     ${realname}
         build_module libxml2  ${realname}
-        build_module curl     ${realname}
         build_module openssl  ${realname}
+        build_module curl     ${realname}
         build_module ffmpeg   ${realname}
         build_module tensorflow   ${realname}
 

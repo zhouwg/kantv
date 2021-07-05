@@ -97,6 +97,7 @@ if [ "$FF_ARCH" = "armv7a" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-armv7a
     FF_BUILD_NAME_LIBXML2=libxml2-armv7a
     FF_BUILD_NAME_LIBZ=libz-armv7a
+    FF_BUILD_NAME_BROTLI=brotli-armv7a
     FF_BUILD_NAME_CURL=curl-armv7a
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -119,6 +120,7 @@ elif [ "$FF_ARCH" = "armv5" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-armv5
     FF_BUILD_NAME_LIBXML2=libxml2-armv5
     FF_BUILD_NAME_LIBZ=libz-armv5
+    FF_BUILD_NAME_BROTLI=brotli-armv5
     FF_BUILD_NAME_CURL=curl-armv5
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -139,6 +141,7 @@ elif [ "$FF_ARCH" = "x86" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-x86
     FF_BUILD_NAME_LIBXML2=libxml2-x86
     FF_BUILD_NAME_LIBZ=libz-x86
+    FF_BUILD_NAME_BROTLI=brotli-x86
     FF_BUILD_NAME_CURL=curl-x86
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -161,6 +164,7 @@ elif [ "$FF_ARCH" = "x86_64" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-x86_64
     FF_BUILD_NAME_LIBXML2=libxml2-x86_64
     FF_BUILD_NAME_LIBZ=libz-x86_64
+    FF_BUILD_NAME_BROTLI=brotli-x86_64
     FF_BUILD_NAME_CURL=curl-x86_64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -183,6 +187,7 @@ elif [ "$FF_ARCH" = "arm64" ]; then
     FF_BUILD_NAME_LIBICONV=libiconv-arm64
     FF_BUILD_NAME_LIBXML2=libxml2-arm64
     FF_BUILD_NAME_LIBZ=libz-arm64
+    FF_BUILD_NAME_BROTLI=brotli-arm64
     FF_BUILD_NAME_CURL=curl-arm64
     FF_SOURCE=$FF_BUILD_ROOT/$FF_BUILD_NAME
 
@@ -225,6 +230,7 @@ FF_DEP_LIBICONV_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/include
 FF_DEP_LIBICONV_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBICONV/output/lib
 FF_DEP_LIBZ_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/include
 FF_DEP_LIBZ_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBZ/output/lib
+FF_DEP_BROTLI_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_BROTLI/output/lib
 FF_DEP_LIBXML2_INC=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/include
 FF_DEP_LIBXML2_LIB=$FF_BUILD_ROOT/build/$FF_BUILD_NAME_LIBXML2/output/lib
 
@@ -282,16 +288,7 @@ export COMMON_FF_CFG_FLAGS=
 . $FF_BUILD_ROOT/../../config/module.sh
 
 
-#--------------------
-# with openssl
-if [ -f "${FF_DEP_OPENSSL_LIB}/libssl.a" ]; then
-    echo "OpenSSL detected"
-# FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-nonfree"
-    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-openssl"
 
-    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_OPENSSL_INC}"
-    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_OPENSSL_LIB} -lssl -lcrypto"
-fi
 
 if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
     echo "libcurl detected"
@@ -336,6 +333,17 @@ if [ -f "${FF_DEP_CURL_LIB}/libcurl.a" ]; then
         fi
         /bin/cp -fv ${FF_SOURCE}/prebuilts/x86_64/libdrmclient.so ${FF_SOURCE}/../../ijkplayer/kantv/src/main/jniLibs/x86_64/
     fi
+fi
+
+#--------------------
+# with openssl
+if [ -f "${FF_DEP_OPENSSL_LIB}/libssl.a" ]; then
+    echo "OpenSSL detected"
+# FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-nonfree"
+    FF_CFG_FLAGS="$FF_CFG_FLAGS --enable-openssl"
+
+    FF_CFLAGS="$FF_CFLAGS -I${FF_DEP_OPENSSL_INC}"
+    FF_DEP_LIBS="$FF_DEP_LIBS -L${FF_DEP_OPENSSL_LIB} -lssl -lcrypto"
 fi
 
 if [ -f "${FF_DEP_LIBSOXR_LIB}/libsoxr.a" ]; then

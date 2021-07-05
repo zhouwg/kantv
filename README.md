@@ -315,7 +315,7 @@ kantv is licensed under Apachev2.0 or later, so itself is free for commercial us
 
 ### KanTV Android APK download
 
-> The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
+> The KanTV apk is about 12M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
 
 
 [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)

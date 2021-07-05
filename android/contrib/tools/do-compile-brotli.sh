@@ -163,9 +163,8 @@ echo "current working path:$(pwd)"
 echo "--------------------"
 cd $FF_SOURCE
 echo "current working path:$(pwd)"
-if [ ! -f configure ];then
-    ./bootstrap
-fi
+./bootstrap
+echo "PATH=$PATH"
 echo "./configure $FF_CFG_FLAGS $FF_EXTRA_CFLAGS"
 ./configure $FF_CFG_FLAGS $FF_EXTRA_CFLAGS
 

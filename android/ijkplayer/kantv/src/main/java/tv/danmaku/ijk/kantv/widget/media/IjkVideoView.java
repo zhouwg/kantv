@@ -22,6 +22,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -132,7 +133,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
     private String mVideoTitle;
     private String mMediaType;
     private boolean mEnableTFLite     = false;
-    private boolean mEnableLandscape  = false;
+    private boolean mEnableLandscape  = true;
     private boolean mEnableFullscreen = false;
 
     private TextView subtitleDisplay;
@@ -453,6 +454,12 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             } else {
                                 mHudViewHolder.setVisibility(View.INVISIBLE);
                             }
+                            if (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                                if (mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+                                    mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                                }
+                            }
+
                             if ((0 == mMediaPlayer.getDuration()) && (!mSettings.getDevMode())) {
                                 //enable pause during online TV playback so APK's user could capture TV screenshot conveniently
                                 //mMediaController.setEnabled(false);
