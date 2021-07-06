@@ -35,6 +35,7 @@ import android.view.MenuItem;
 import tv.danmaku.ijk.kantv.R;
 import tv.danmaku.ijk.kantv.activities.FileExplorerActivity;
 import tv.danmaku.ijk.kantv.activities.RecentMediaActivity;
+import tv.danmaku.ijk.kantv.activities.SampleDevActivity;
 import tv.danmaku.ijk.kantv.activities.SampleRadioActivity;
 import tv.danmaku.ijk.kantv.activities.SampleMovieActivity;
 import tv.danmaku.ijk.kantv.activities.SampleTVActivity;
@@ -116,6 +117,8 @@ public abstract class AppActivity extends AppCompatActivity {
             SampleRadioActivity.intentTo(this);
         } else if (id == R.id.action_tv) {
             SampleTVActivity.intentTo(this);
+        } else if ((id == R.id.action_devmode) && mSettings.getDevMode()) {
+            SampleDevActivity.intentTo(this);
         } else if (id == R.id.action_quit) {
             if (Build.VERSION.SDK_INT>=16 && Build.VERSION.SDK_INT<21) {
                 finishAffinity();
@@ -136,9 +139,12 @@ public abstract class AppActivity extends AppCompatActivity {
         if (!show)
             return show;
 
-        //MenuItem item = menu.findItem(R.id.action_recent);
-        //if (item != null)
-        //    item.setVisible(false);
+
+        if (!mSettings.getDevMode()) {
+            MenuItem item = menu.findItem(R.id.action_devmode);
+            if (item != null)
+                item.setVisible(false);
+        }
 
         return true;
     }

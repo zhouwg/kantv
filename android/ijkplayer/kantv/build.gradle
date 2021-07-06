@@ -29,14 +29,13 @@ android {
         }
     }
 
-
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
 
     productFlavors {
         //all32 { minSdkVersion 9 }
@@ -48,14 +47,11 @@ android {
 
     }
 
-
     sourceSets {
         main {
             jniLibs.srcDirs  = ['src/main/jniLibs']
         }
     }
-
-
 }
 
 

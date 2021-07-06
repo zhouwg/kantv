@@ -25,6 +25,10 @@
         android:title="@string/recent"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_devmode"
+        android:title="@string/devmode"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="ifRoom" />
@@ -32,4 +36,5 @@
         android:id="@+id/action_quit"
         android:title="@string/quit"
         app:showAsAction="ifRoom" />
+
 </menu>

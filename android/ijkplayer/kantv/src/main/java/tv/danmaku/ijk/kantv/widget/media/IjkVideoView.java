@@ -454,7 +454,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                             } else {
                                 mHudViewHolder.setVisibility(View.INVISIBLE);
                             }
-                            if (mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                            if ((mActivity.getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) && (!mSettings.getDevMode())) {
                                 if (mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
                                     mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                                 }
@@ -539,6 +539,7 @@ public class IjkVideoView extends FrameLayout implements MediaController.MediaPl
                     if (mOnCompletionListener != null) {
                         mOnCompletionListener.onCompletion(mMediaPlayer);
                     }
+                    mActivity.finish();
                 }
             };
 

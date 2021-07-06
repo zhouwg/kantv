@@ -137,12 +137,14 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
             }
         }
 
-        if (!TextUtils.isEmpty(mVideoPath)) {
-            String regEx = "[`~!@#$%^&*()+=|{}:;\\\\[\\\\].<>/?~！@（）——+|{}【】‘；：”“’。，、？']";
-            String videoTitle  = Pattern.compile(regEx).matcher(mVideoTitle).replaceAll("").trim();
-            //use "_KANTV_" as delimiter here
-            String syncString = mVideoPath + "_KANTV_" + mMediaType + "_KANTV_" + videoTitle;
-            new RecentMediaStorage(this).saveUrlAsync(syncString);
+        if (!mSettings.getDevMode()) {
+            if (!TextUtils.isEmpty(mVideoPath)) {
+                String regEx = "[`~!@#$%^&*()+=|{}:;\\\\[\\\\].<>/?~！@（）——+|{}【】‘；：”“’。，、？']";
+                String videoTitle = Pattern.compile(regEx).matcher(mVideoTitle).replaceAll("").trim();
+                //use "_KANTV_" as delimiter here
+                String syncString = mVideoPath + "_KANTV_" + mMediaType + "_KANTV_" + videoTitle;
+                new RecentMediaStorage(this).saveUrlAsync(syncString);
+            }
         }
 
         // init UI
@@ -153,7 +155,9 @@ public class VideoActivity extends AppCompatActivity implements TracksFragment.I
         getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         String title = getResources().getString(R.string.app_name);
-        if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_TV) {
+        if (mSettings.getDevMode()){
+            title = getResources().getString(R.string.devmode);
+        } else if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_TV) {
             title = getResources().getString(R.string.tv);
         } if (MediaType.toMediaType(mMediaType) == MediaType.MEDIA_RADIO) {
             title = getResources().getString(R.string.radio);

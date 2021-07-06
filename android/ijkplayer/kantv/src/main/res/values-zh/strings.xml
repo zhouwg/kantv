@@ -93,5 +93,6 @@
     <string name="VideoView_player_IjkMediaPlayer">Player: IjkMediaPlayer</string>
     <string name="VideoView_player_IjkExoMediaPlayer">Player: IjkExoMediaPlayer</string>
     <string name="quit">退出</string>
+    <string name="devmode">开发者模式</string>
 
 </resources>
