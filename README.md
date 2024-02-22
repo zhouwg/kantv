@@ -134,7 +134,15 @@ step2: build APK
 build apk by latest Android Studio IDE
 
 
-### How to build project for target iOS
+### Snapshot(Chinese available)
+
+![Screenshot_20240220_085618_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/ac4f447a-35ea-411e-b34e-b818c8050b28)
+
+
+
+
+
+### How to build project for target iOS(will be deprecated soon)
 
 #### prerequisites
 
