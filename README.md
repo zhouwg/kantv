@@ -1,6 +1,16 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for Android-based phone，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with many enhancements(recording online TV program, performance benchmark, UI, realtime subtitle with online TV program(under development)...)
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for Android-based phone，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with many enhancements:
+
+- Watch online TV
+
+- Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR)
+
+- Watch local media (movies, videos, music, etc.) on your mobile phone
+
+- Set up a custom playlist and then use this software to watch the content of the custom playlist
+
+- Smartphone performance benchmark
 
 
 
