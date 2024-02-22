@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV/radio/music/movie for Android/iOS based on FFmpeg n4.4，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with many enhancements(https://github.com/zhouwg/kantv/blob/kantv/NEWS.md)
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for Android-based phone，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with many enhancements(recording online TV program, performance benchmark, realtime subtitle with online TV program...)
 
 
 
