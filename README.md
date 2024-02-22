@@ -10,7 +10,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Set up a custom playlist and then use this software to watch the content of the custom playlist
 
-- Smartphone performance benchmark
+- Performance benchmark for mobile phone
 
 - UI refactor
 
