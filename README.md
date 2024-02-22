@@ -12,6 +12,8 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Smartphone performance benchmark
 
+- UI refactor
+
 
 
 ### How to build project for target Android
