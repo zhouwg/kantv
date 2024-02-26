@@ -34,9 +34,13 @@ cat /etc/issue
 Ubuntu 20.04.2 LTS \n \l
 
 ```
+
+
 - tools & utilities
 ```
 sudo apt-get update
+sudo apt-get install vim -y
+sudo apt-get install net-tools -y
 sudo apt-get install build-essential -y
 sudo apt-get install cmake -y
 sudo apt-get install curl -y
@@ -44,25 +48,62 @@ sudo apt-get install python -y
 sudo apt-get install tcl expect -y
 sudo apt-get install nginx -y
 sudo apt-get install git -y
-sudo apt-get install vim -y
 sudo apt-get install spawn-fcgi -y
 sudo apt-get install u-boot-tools -y
-sudo apt-get install ffmpeg -y
-sudo apt-get install openssh-client -y
 
-sudo dpkg --add-architecture i386
-sudo apt-get install lib32z1
+sudo apt-get install libbrotli-dev -y
+sudo apt-get install nasm -y
+sudo apt-get install yasm -y
+sudo apt-get install libass-dev -y
+sudo apt-get install libx11-dev -y
+sduo apt-get install libxcb-xinerama0-dev -y
+sudo apt-get install libxfixes-dev -y
+sudo apt-get install libxcb-xfixes0-dev -y
+sudo apt-get install libxinerama-dev -y
+sudo apt-get install libxcb-xinput-dev -y
+sudo apt-get install libxi-dev -y
+sudo apt-get install libasound2-dev -y
+sudo apt-get install libxv-dev -y
+sudo apt-get install libsdl2-dev -y
+sudo apt install openjdk-17-jdk-headless -y
 
-sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
+sudo apt-get install -y android-tools-adb android-tools-fastboot autoconf \
         automake bc bison build-essential ccache cscope curl device-tree-compiler \
         expect flex ftp-upload gdisk acpica-tools libattr1-dev libcap-dev \
         libfdt-dev libftdi-dev libglib2.0-dev libhidapi-dev libncurses5-dev \
-        libpixman-1-dev libssl-dev libtool make \
+        libssl-dev libtool make \
         mtools netcat python-crypto python3-crypto python-pyelftools \
         python3-pycryptodome python3-pyelftools python3-serial \
         rsync unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
 
+sudo apt-get install python3-pip -y
+sudo apt-get install indent -y
+pip3 install meson ninja
+
+echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
+
 ```
+
+- bazel
+  
+  download ![bazel-3.1.0](https://github.com/bazelbuild/bazel/releases?page=5) and install bazel manually
+
+```
+  wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-linux-x86_64
+```
+```
+  sudo ./bazel-3.1.0-installer-linux-x86_64.sh
+```
+
+- Android Studio & Android NDK
+
+  download and install Android Studio and Android NDK manually
+  
+  [Android Studio 4.2.1](https://developer.android.google.cn/studio)
+  
+  [Android NDK-r18b](https://developer.android.com/ndk/downloads)
+  
+  [Android NDK-r21e(LTS)](https://developer.android.com/ndk/downloads)
 
 
 - vim settings
@@ -93,9 +134,6 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 ```
 
 
-- [Android NDK-r21e(LTS)](https://developer.android.com/ndk/downloads)
-- [Android Studio 4.2.1](https://developer.android.google.cn/studio)
-- [Gradle 6.6.1](https://gradle.org/releases)
 
 #### Fetch source codes
 
