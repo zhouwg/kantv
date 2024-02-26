@@ -15,7 +15,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 - UI refactor
 
 
-Pls attention this is **NOT** the latest source code of project KanTV.
+Pls attention this is **NOT** the latest source code of project KanTV. I think it should be fully here someday.
 
 
 ### How to build project for target Android
