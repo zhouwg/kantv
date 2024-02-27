@@ -148,43 +148,6 @@ step2: build APK
 build apk by latest Android Studio IDE
 
 
-### Snapshot(Chinese available)
-
-![Screenshot_20240220_085618_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/ac4f447a-35ea-411e-b34e-b818c8050b28)
-
-
-![Screenshot_20240220_085622_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/e34ac861-8242-4fcc-9f22-7e7d63ab27dc)
-
-![Screenshot_20240220_085630_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/171d37d3-e709-4b72-9025-1bc214d334af)
-
-![Screenshot_20240220_085636_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/4a32fd83-5731-478a-88d5-de4c089df56c)
-
-
-![Screenshot_20240220_085646_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/ab5e1ed8-d724-43eb-8ed7-3af23b0706b7)
-
-![1453910779](https://github.com/zhouwg/kantv/assets/6889919/23692a5b-f897-4bcd-9955-57c2fcc7cc1c)
-
-
-
-![371274193](https://github.com/zhouwg/kantv/assets/6889919/b189260b-6011-4c18-a3c0-cd55c2a36b8f)
-
-![1398616229](https://github.com/zhouwg/kantv/assets/6889919/e798b58c-554c-443f-ad76-59f795760ed5)
-
-![1476549041](https://github.com/zhouwg/kantv/assets/6889919/badae664-c864-4d84-87a4-f3d5636c4ff6)
-
-
-![1109625356](https://github.com/zhouwg/kantv/assets/6889919/829a88d1-a021-4766-a3fc-c65265cc3fdc)
-
-
-![Screenshot_20240222_111241_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/5762ce61-3e4a-4cbf-988f-65e7910a616d)
-
-
-![Screenshot_20240222_111248_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/7a8c110d-5f8a-47a8-8018-a5c9d0e1d30a)
-
-![Screenshot_20240222_111326_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/2794894b-1911-465c-a274-cfff9b116e40)
-
-
-
 ### How to build project for target iOS(will be deprecated soon)
 
 #### prerequisites
