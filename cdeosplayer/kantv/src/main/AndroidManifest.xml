@@ -65,7 +65,7 @@
         </activity>
 
         <activity
-            android:name="com.cdeos.kantv.ui.activities.setting.ScanManagerManagerActivity"
+            android:name="com.cdeos.kantv.ui.activities.setting.ScanManagerActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
