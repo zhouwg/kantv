@@ -133,6 +133,17 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 #### Fetch source codes
 
+
+For KanTV Android APK developers,
+
+```
+git clone https://github.com/zhouwg/kantv.git
+cd kantv
+git checkout kantv
+```
+
+For other developers,
+
 ```
 git clone --recurse-submodules https://github.com/zhouwg/kantv.git
 cd kantv
