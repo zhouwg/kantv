@@ -25,7 +25,7 @@ function build_ffmpeg
 {
     cd ${PROJECT_ROOT_PATH}
     show_pwd
-    echo "build ffmpeg for target ${BUILD_TAREGT} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode"
+    echo "build ffmpeg for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode"
 }
 
 
