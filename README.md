@@ -216,7 +216,8 @@ or just fetch your favourite playlist from <a href="https://github.com/iptv-org/
 I'd like to use Mozilla's <a href="https://github.com/zhouwg/DeepSpeech">DeepSpeech</a> to explain how to integrate your proprietary native libs with project KanTV for your R&D activity.
 
 
-TBD
+Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
+
 
 
 ### Run kantv apk on real Android phone
