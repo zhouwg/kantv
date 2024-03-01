@@ -134,7 +134,7 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 #### Fetch source codes
 
 ```
-git clone https://github.com/zhouwg/kantv
+git clone --recurse-submodules https://github.com/zhouwg/kantv.git
 cd kantv
 git checkout kantv
 ```
