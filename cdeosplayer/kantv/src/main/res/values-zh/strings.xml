@@ -205,4 +205,6 @@
     <string name="ASR">语音研究</string>
     <string name="ME">我</string>
     <string name="personal_center">个人中心</string>
+
+    <string name="key_press_warning">再按一次退出应用</string>
 </resources>

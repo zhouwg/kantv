@@ -208,4 +208,6 @@
     <string name="ME">Me</string>
     <string name="personal_center">Person Center</string>
 
+    <string name="key_press_warning">Exit app when press anykey</string>
+
 </resources>

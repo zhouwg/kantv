@@ -226,7 +226,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (System.currentTimeMillis() - touchTime > 1500) {
-                ToastUtils.showShort("再按一次退出应用");
+                ToastUtils.showShort(getBaseContext().getString(R.string.key_press_warning));
                 touchTime = System.currentTimeMillis();
             } else {
                 AppUtils.exitApp();
