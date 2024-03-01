@@ -1,0 +1,3 @@
+[submodule "DeepSpeech"]
+	path = DeepSpeech
+	url = https://github.com/zhouwg/DeepSpeech
