@@ -1,6 +1,6 @@
 [submodule "DeepSpeech"]
-	path = DeepSpeech
+	path = external/DeepSpeech
 	url = https://github.com/zhouwg/DeepSpeech
 [submodule "FFmpeg"]
-	path = FFmpeg
+	path = external/FFmpeg
 	url = https://github.com/zhouwg/FFmpeg
