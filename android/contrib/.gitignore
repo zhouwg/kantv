@@ -1,8 +1,0 @@
-build
-ffmpeg-*
-libsoxr-*
-openssl-*
-curl-*
-libiconv-*
-libxml2-*
-libz-*

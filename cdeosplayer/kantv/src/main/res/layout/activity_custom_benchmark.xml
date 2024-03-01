@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    android:background="@color/layout_bg_color">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/pageinfo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+
+            <TextView
+                android:id="@+id/tvEncodeBenchmarkInfo"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginTop="5dp" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/GraphicBenchmark_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="2dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnGraphicBenchmark"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_gravity="start"
+                    android:background="@drawable/button_drawable"
+                    android:text="@string/StartGraphicBenchmark"
+                    android:textAllCaps="false"
+                    android:textColor="#ffffff" />
+
+                <Button
+                    android:id="@+id/btnSynthesisBenchmark"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_gravity="end"
+                    android:background="@drawable/button_drawable"
+                    android:text="@string/StartSynthesisBenchmark"
+                    android:textAllCaps="false"
+                    android:textColor="#ffffff" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/EncodeBenchmark_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Spinner
+                    android:id="@+id/spinnerEncode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:dropDownSelector="#63D81B60"
+                    android:spinnerMode="dropdown" />
+
+                <Spinner
+                    android:id="@+id/spinnerResolution"
+                    android:layout_width="wrap_content"
+                    android:layout_height="60dp"
+                    android:dropDownSelector="#63D81B60"
+                    android:spinnerMode="dropdown" />
+
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/chkEnableFilter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="编码视频帧保存为文件" />
+
+            <Button
+                android:id="@+id/btnEncodeBenchmark"
+                android:layout_marginTop="5dp"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/button_drawable"
+                android:text="@string/StartEncodeBenchmark"
+                android:textAllCaps="false"
+                android:textColor="#ffffff" />
+
+            <FrameLayout
+                android:id="@+id/flEncodeBenchmark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                android:background="@color/white">
+
+                <SurfaceView
+                    android:id="@+id/svEncodeBenchmark"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    />
+            </FrameLayout>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</ScrollView>
+
+
+</LinearLayout>

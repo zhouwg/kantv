@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">KanTV</string>
+    <string name="about_download_subtitle">网络字幕</string>
+    <string name="folder_icon_resouces">Folder Icon</string>
+    <string name="menu_favorite_string">favorite</string>
+    <string name="video_record">上次播放到</string>
+    <string name="video_skip">继续播放</string>
+    <item name="tag_key_data" type="id"/>
+    <item name="tag_key_position" type="id"/>
+    <string name="app_fullname">Project KanTV</string>
+    <string name="movies">movies</string>
+    <string name="N_A">N/A</string>
+    <string name="close">Close</string>
+    <string name="exit">Exit</string>
+    <string name="sample">Sample</string>
+    <string name="tv">TV</string>
+    <string name="movie">Movie</string>
+    <string name="radio">Radio</string>
+    <string name="file">File</string>
+    <string name="recent">Recent</string>
+    <string name="content">Content</string>
+    <string name="settings">Settings</string>
+    <string name="live">Live</string>
+    <string name="toggle_ratio">Scale</string>
+    <string name="toggle_fullscreen">Fullscreen</string>
+    <string name="enter_fullscreen">enter fullscreen playback</string>
+    <string name="leave_fullscreen">leave fullscreen playback</string>
+    <string name="toggle_landscape">Landscape/Portrait</string>
+    <string name="toggle_devmode">Toggle DevMode</string>
+    <string name="landscape_playback">Landscape Playback</string>
+    <string name="portrait_playback">Portrait Playback</string>
+    <string name="tracks">Tracks</string>
+    <string name="toggle_player">Toggle Player</string>
+    <string name="toggle_render">Toggle Render</string>
+    <string name="toggle_tflite">Toggle Tensorflowlite</string>
+    <string name="show_info">Meida Info</string>
+    <string name="show_calendar">Calendar</string>
+    <string name="screenshot">ScreenShot</string>
+    <string name="development_mode">Development Mode:</string>
+    <string name="url">URL</string>
+    <string name="name">name</string>
+    <string name="vdec">vdec</string>
+    <string name="playengine">playEngine</string>
+    <string name="clear_content">is clear content</string>
+    <string name="disable_audiotrack">disable audio</string>
+    <string name="disable_videotrack">disable video</string>
+    <string name="drminfo">drminfo</string>
+    <string name="encryptinfo">encryptinfo</string>
+    <string name="decrypt">decrypt</string>
+    <string name="fps">fps</string>
+    <string name="videoinfo">videoinfo</string>
+    <string name="audioinfo">audioinfo</string>
+    <string name="v_cache">v-cache</string>
+    <string name="a_cache">a-cache</string>
+    <string name="load_cost">load-cost</string>
+    <string name="seek_cost">seek_cost</string>
+    <string name="seek_load_cost">seek_load_cost</string>
+    <string name="tcp_speed">tcp_speed</string>
+    <string name="bit_rate">bit_rate</string>
+    <string name="bandwidth">bit_rate</string>
+    <string name="start_time">start_time</string>
+    <string name="current_time">current_time</string>
+    <string name="play_time">play_time</string>
+    <string name="content_time">content_timeinfo</string>
+    <string name="position_time">position_time</string>
+    <string name="pause_time">pause_time</string>
+    <string name="stuck_info">stuck info</string>
+    <string name="buffering_counts">buffering_counts</string>
+    <string name="buffering_duration">buffering_duration</string>
+    <string name="buffering_network_bandwidth">buffering_network_bandwidth</string>
+    <string name="device_info">device_info</string>
+    <string name="brand_info">Brand</string>
+    <string name="cpu_abi">CPU</string>
+    <string name="hardware_info">Hardware</string>
+    <string name="os_info">OS</string>
+    <string name="fingerprint_info">Fingerprint</string>
+    <string name="network_info">network_info</string>
+    <string name="network_type">network type</string>
+    <string name="network_ip">IP</string>
+    <string name="memory_info">memory_info</string>
+    <string name="debug_info">debug_info</string>
+    <string name="wating">waiting...</string>
+    <string name="buffering">buffering...</string>
+    <string name="epg_updating">EPG data updating...</string>
+    <string name="network_un_available">it seems network connection is unavailable, pls check</string>
+    <string name="permission_not_granted">required permission was not granted, APK could not works as expected</string>
+
+    <string name="media_information">Media Information</string>
+    <string name="mi_player">Player</string>
+    <string name="mi_media">Media</string>
+    <string name="mi_profile_level">Profile level</string>
+    <string name="mi_pixel_format">Pixel format</string>
+    <string name="mi_resolution">Resolution</string>
+    <string name="mi_name">Name</string>
+    <string name="mi_length">Length</string>
+    <string name="mi_stream_fmt1">Stream #%d</string>
+    <string name="mi_type">Type</string>
+    <string name="mi_language">Language</string>
+    <string name="mi_video_codec">Video Codec</string>
+    <string name="mi_audio_codec">Audio Codec</string>
+    <string name="mi_frame_rate">Frame rate</string>
+    <string name="mi_bit_rate">Bit rate</string>
+    <string name="mi_sample_rate">Sample rate</string>
+    <string name="mi_channels">Channels</string>
+    <string name="mi__selected_video_track">*</string>
+    <string name="mi__selected_audio_track">*</string>
+    <string name="mi__selected_subtitle_track">*</string>
+
+    <string name="TrackType_video">Video</string>
+    <string name="TrackType_audio">Audio</string>
+    <string name="TrackType_subtitle">Subtitle</string>
+    <string name="TrackType_timedtext">Timed text</string>
+    <string name="TrackType_metadata">Meta data</string>
+    <string name="TrackType_unknown">Unknown</string>
+
+    <string name="VideoView_error_text_invalid_progressive_playback">Invalid progressive playback</string>
+    <string name="VideoView_error_text_unknown">Unknown</string>
+    <string name="VideoView_error_button">OK</string>
+
+    <string name="VideoView_ar_aspect_fit_parent">Aspect / Fit parent</string>
+    <string name="VideoView_ar_aspect_fill_parent">Aspect / Fill parent</string>
+    <string name="VideoView_ar_aspect_wrap_content">Aspect / Wrap content</string>
+    <string name="VideoView_ar_match_parent">Free / Fill parent</string>
+    <string name="VideoView_ar_16_9_fit_parent">16:9 / Fit parent</string>
+    <string name="VideoView_ar_4_3_fit_parent">4:3 / Fit parent</string>
+
+    <string name="VideoView_render_none">Render: None</string>
+    <string name="VideoView_render_surface_view">Render: SurfaceView</string>
+    <string name="VideoView_render_texture_view">Render: TextureView</string>
+
+    <string name="VideoView_playerengine_FFmpeg">PlayerEngine: FFmpeg</string>
+    <string name="VideoView_playerengine_Exoplayer">PlayerEngine: Exoplayer</string>
+    <string name="VideoView_playerengine_AndroidMediaPlayer">PlayerEngine: AndroidMediaPlayer</string>
+    <string name="VideoView_playerengine_GStreamer">PlayerEngine: GStreamer</string>
+
+    <string name="quit">Quit</string>
+    <string name="devmode">Dev Mode</string>
+
+    <string name="OK">OK</string>
+    <string name="Cancel">Cancel</string>
+    <string name="Update">Update</string>
+    <string name="software_update">upgrade software</string>
+    <string name="cannot_fetch_version">failed to fetch software version info, pls check network connection</string>
+    <string name="no_new_version">new version not found</string>
+    <string name="found_new_version">new version was found</string>
+    <string name="server_exception">check network connection or exception might be occurred in KanTV server</string>
+    <string name="download_speed">Download speed</string>
+    <string name="version">Current Version</string>
+    <string name="buildTime">Build Time</string>
+    <string name="epgUpdateOK">update EPG data succeed</string>
+    <string name="epgUpdateFailed">update EPG data failed, pls check</string>
+    <string name="serverUpdateOK">setting kantvserver address ok</string>
+    <string name="serverUpdateFailed">setting kantvserver address failed</string>
+
+    <string name="path_is_invalid">invalid path</string>
+    <string name="kantv_title">KanTV</string>
+    <string name="kantv_test_warning">The following TV channels only used for learning purpose</string>
+
+    <string name="recording_under_development">The feature of TV record is under development</string>
+    <string name="asr_tip">ASR research(by Mozilla\'s DeepSpeech, whisper.cpp would be preferred)</string>
+
+    <string name="ASRstart">start ASR</string>
+    <string name="TTSstart">start TTS</string>
+    <string name="asr_engine_not_initialize">ASR engine not initialized</string>
+    <string name="tts_engine_not_initialize">TTS engine not initialized</string>
+    <string name="asr_model_not_found">ASR model not found</string>
+    <string name="tts_model_not_found">TTS model not found</string>
+    <string name="please_download_asr_model">ASR model not found, Please download them in "ASR Setting"</string>
+    <string name="please_download_tts_model">TTS model not found, Please download them in "ASR Setting"</string>
+
+    <string name="benchmark_start">Benchmark start</string>
+    <string name="benchmark_updating">Benchmark is progressing...</string>
+    <string name="benchmark_stop">Benchmark stop</string>
+
+    <string name="graphic_benchmark_title">graphic performance benchmark</string>
+    <string name="StartGraphicBenchmark">graphic benchmark(with UI)</string>
+    <string name="StartEncodeBenchmark">video encode benchmark</string>
+    <string name="StartSynthesisBenchmark">synthesis benchmark</string>
+    <string name="graphic_benchmark_is_doing">under graphic benchamrk(about 2-3 minitues), please waiting...</string>
+
+    <string name="cleanup_cache_finished">finish cleanup cache</string>
+    <string name="network_content">network content</string>
+    <string name="input_network_content">please input URL of network content</string>
+
+    <string name="system_settings">System Setting</string>
+    <string name="playback_settings">Playback Setting</string>
+    <string name="record_settings">Record Setting</string>
+    <string name="play_history">Play History</string>
+    <string name="performance_bechmark">Benchmark</string>
+    <string name="asr_settings">ASR Setting</string>
+    <string name="video_scan">Video Scan</string>
+    <string name="general_question">Help</string>
+    <string name="skin_nighttime">Night Mode</string>
+    <string name="skin_daytime">Daytime Mode</string>
+    <string name="exit_app">Exit App</string>
+
+    <string name="homepage">Home</string>
+    <string name="media">Media</string>
+    <string name="localmedia">Local Media</string>
+    <string name="EPG">EPG</string>
+    <string name="custom_playlist">Custom Playlist</string>
+    <string name="onlinetv">Online TV</string>
+    <string name="ASR">ASR</string>
+    <string name="ME">Me</string>
+    <string name="personal_center">Person Center</string>
+
+</resources>

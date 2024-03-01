@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black_overlay">#66000000</color>
+
+    <color name="ijk_color_blue_main">@color/ijk_color_blue_500</color>
+    <color name="ijk_color_blue_50">#E3F2FD</color>
+    <color name="ijk_color_blue_100">#BBDEFB</color>
+    <color name="ijk_color_blue_200">#90CAF9</color>
+    <color name="ijk_color_blue_300">#64B5F6</color>
+    <color name="ijk_color_blue_400">#42A5F5</color>
+    <color name="ijk_color_blue_500">#2196F3</color>
+    <color name="ijk_color_blue_600">#1E88E5</color>
+    <color name="ijk_color_blue_700">#1976D2</color>
+    <color name="ijk_color_blue_800">#1565C0</color>
+    <color name="ijk_color_blue_900">#0D47A1</color>
+
+
+    <color name="blue">#FF0000FF</color>
+    <color name="cyan">#FF00FFFF</color>
+    <color name="green">#FF00FF00</color>
+    <color name="yellow">#FFFFFF00</color>
+    <color name="dkgray">#80808FF0</color>
+    <color name="ijk_transparent_dark">#77000000</color>
+
+    <color name="colorPrimary">#2095f4</color>
+
+    <color name="colorPrimaryDark">#2095f4</color>
+
+    <color name="colorAccent">#2095f4</color>
+
+    <color name="colorControlNormal">#353535</color>
+
+
+    <color name="theme_color">#2095f4</color>
+
+    <color name="text_black">#353535</color>
+    <color name="text_white">#ffffff</color>
+
+    <color name="layout_bg_color">#f3f3f3</color>
+
+    <color name="item_bg_color">#ffffff</color>
+
+
+    <color name="edit_text_bg_color">#ffffff</color>
+    <color name="edit_text_text_color">#353535</color>
+    <color name="edit_text_hint_color">#9b9b9b</color>
+
+
+    <color name="indicator_checked_color">#2095f4</color>
+    <color name="indicator_uncheck_color">#353535</color>
+
+    <color name="viewpager_bg_color">#ffffff</color>
+
+    <color name="menu_bg_color">#ffffff</color>
+    <color name="menu_text_color">#353535</color>
+
+    <color name="block_label_bg_color">#ffffff</color>
+    <color name="block_label_stoke_uncheck_color">#353535</color>
+    <color name="block_label_stoke_checked_color">#2095f4</color>
+    <color name="block_label_text_uncheck_color">#353535</color>
+    <color name="block_label_text_checked_color">#2095f4</color>
+
+
+    <color name="item_control_mask_color">#aa212121</color>
+
+    <color name="loading_dialog_bg_color">#b0000000</color>
+
+
+    <color name="immutable_text_white">#ffffff</color>
+    <color name="immutable_text_black">#353535</color>
+    <color name="immutable_text_theme">#2095f4</color>
+    <color name="immutable_text_red">#FF5340</color>
+    <color name="immutable_text_orange">#f89957</color>
+    <color name="immutable_text_pink">#fb7299</color>
+    <color name="text_gray">#9b9b9b</color>
+
+    <color name="download_light">#88c1e1fa</color>
+    <color name="download_dark">#664ea9f4</color>
+
+    <color name="scan_window_mask">#60000000</color>
+    <color name="scan_window_frame">#7F1FB3E2</color>
+    <color name="scan_window_corner">#FF1FB3E2</color>
+    <color name="scan_window_laser">#FF1FB3E2</color>
+
+    <color name="transparent">#00000000</color>
+
+    <color name="video_item_mask_color">#88000000</color>
+
+    <color name="toolbar_text_color">#ffffff</color>
+
+    <color name="theme_button_bg_color">#2095f4</color>
+    <color name="theme_button_text_color">#ffffff</color>
+
+    <color name="float_button_bg_color">#2095f4</color>
+    <color name="float_button_ripple_color">#4ea9f4</color>
+
+    <color name="navigation_checked_color">#2095f4</color>
+    <color name="navigation_uncheck_color">#9b9b9b</color>
+
+
+    <color name="anime_detail_mask_color">#2a000000</color>
+
+    <color name="anime_item_mask_color">#77000000</color>
+
+
+    <color name="immutable_background_black_color">#212121</color>
+
+    <color name="video_item_image_default_color">#212121</color>
+
+    <color name="splash_icon_fill_color">#002095f4</color>
+    <color name="splash_icon_trace_color">#ff2095f4</color>
+    <color name="splash_icon_residue_color">#ffffffff</color>
+    <color name="splash_text_bg_color">#00ffffff</color>
+    <color name="splash_text_fg_color">#ffffffff</color>
+
+    <color name="bg_video_view">#bb000000</color>
+    <color name="selected_view_bg">#33ffffff</color>
+
+    <color name="seek_background">#809e9e9e</color>
+    <color name="seek_progress">#2095f4</color>
+    <color name="seek_secondary_progress">#882095f4</color>
+    <color name="seek_ball">#ffffffff</color>
+
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+
+    <color name="red">#e3010f</color>
+    <color name="pink">#fb7299</color>
+
+    <color name="text_hint">#55ffffff</color>
+
+    <color name="text_red">#FF5340</color>
+    <color name="text_red_dark">#e91e63</color>
+
+    <color name="text_theme">#2095f4</color>
+    <color name="text_pink">#fb7299</color>
+
+    <color name="background_gray">#a5a5a5</color>
+    <color name="background_gray_light">#bababa</color>
+
+</resources>

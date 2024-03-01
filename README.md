@@ -1,24 +1,35 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for Android-based phone，derived from original ijkplayer(https://github.com/bilibili/ijkplayer) , with many enhancements:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many enhancements:
 
-- Watch online TV(by customized FFmpeg and Exoplayer and gstreamer with updated version:FFmpeg 6.1, Exoplayer 2.15, gstreamer 1.23)
+- Watch online TV(by customized ![FFmpeg](https://github.com/zhouwg/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15)
 
 - Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR)
 
-- Watch local media (movies, videos, music, etc.) on your mobile phone
+- Watch local media (movies, videos, music, etc.) on Android-based mobile phone
 
 - Set up a custom playlist and then use this software to watch the content of the custom playlist
 
-- Performance benchmark for mobile phone
+- Performance benchmark for Android-based mobile phone
+
+- VoD & Live encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with ChinaDRM(similar to <a href="http://www.widevine.com/" target="_blank">Google Widevine</a> or <a href="https://www.microsoft.com/playready/" target="_blank">Microsoft's PlayReady</a>) server
+
+- VoD encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with <a href="https://developer.huawei.com/consumer/en/hms/huawei-wiseplay" target="_blank">Huawei's WisePlay</a> (similar to <a href="http://www.widevine.com/" target="_blank">Google Widevine</a>) server
+
+- VoD & Live encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with customized <a href="https://ossrs.net/lts/en-us/" target="_blank">SRS</a>
 
 - UI refactor
 
+- ......
 
-Pls attention this is **NOT** the latest source code of project KanTV. I think it should be fully here someday.
+The goal of this project is:
+
+- Plain Java implementation **with proprietary native libs**(source code of customized FFmpeg could be found ![here](https://github.com/zhouwg/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer could be found within source code of this project)
+- Android **turn-key project** for AI experts/ASR researchers and software developers who was interested in device-side AI application(you could integrate your proprietary native libs(such as <a href="https://github.com/zhouwg/DeepSpeech">DeepSpeech</a>) to customized/derived project of KanTV as your desire or for your R&D activity) 
+- Well-maintained open source and free online-TV player for Android-based mobile phone(or extended for Android-based tablet/TV)
 
 
-### How to build project for target Android
+### How to build project
 
 #### prerequisites
 
@@ -62,27 +73,41 @@ sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
         python3-pycryptodome python3-pyelftools python3-serial \
         rsync unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
 
-```
+sudo apt-get install python3-pip -y
+sudo apt-get install indent -y
+pip3 install meson ninja
 
-- Tensorflow
-
-  setup prerequisites according to
-
-  https://docs.bazel.build/versions/main/install-ubuntu.html
-
-  https://www.tensorflow.org/lite/guide/build_cmake
-
-  before
+echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
 
 ```
-  sudo apt-get update && sudo apt-get install bazel-3.7.2
+
+- bazel
+  
+  download ![bazel-3.1.0](https://github.com/bazelbuild/bazel/releases?page=5) and install bazel manually
 
 ```
+  wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-linux-x86_64
+```
+```
+  sudo ./bazel-3.1.0-installer-linux-x86_64.sh
+```
+
+- Android NDK & Android Studio
+
+  download and install Android Studio and Android NDK manually
+  
+  [Android Studio 4.2.1](https://developer.android.google.cn/studio)
+  
+  [Android NDK-r18b](https://developer.android.com/ndk/downloads)
+  
+  [Android NDK-r21e](https://developer.android.com/ndk/downloads)
+
+bazel and Android NDK aren't used currently but put them here for further usage in the future.Of course, you can **skip these two steps** currently.
 
 
 - vim settings
 
-fetch from http://ffmpeg.org/developer.html#Editor-configuration
+borrow from http://ffmpeg.org/developer.html#Editor-configuration
 
 ```
 set ai
@@ -107,122 +132,186 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 ```
 
-
-- [Android NDK-r21e(LTS)](https://developer.android.com/ndk/downloads)
-- [Android Studio 4.2.1](https://developer.android.google.cn/studio)
-- [Gradle 6.6.1](https://gradle.org/releases)
-
-#### Before Build
+#### Fetch source codes
 
 ```
 git clone https://github.com/zhouwg/kantv
 cd kantv
 git checkout kantv
-
-
-# add these lines to your ~/.bash_profile or ~/.profile
-# export ANDROID_SDK=<your sdk path>
-# ndk-r21e was used in this project, if you intall from SDK Manager
-# export ANDROID_NDK=<your sdk path>/sdk/ndk/21.4.7075529
-
-# add these line to ./android/ijkplayer/local.properties
-
-sdk.dir=<your sdk path>
-
 ```
 
 #### Build Android APK
 
-step1:build all native libs
 
+Build apk by latest Android Studio IDE.
+
+ 
+### Prebuit KanTV Android APK
+
+> The latest prebuit KanTV apk is about 37M.[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
+
+
+### How to setup customized KanTV server in your local development env
+
+ - setup a http server(by apache or nginx) in your local development env
+
+ - modify kant server address in app(recommend)
+
+![1370107702](https://github.com/zhouwg/kantv/assets/6889919/1e994269-28be-4513-9f74-3973269b8832)
+
+ - upload required files to your http server like this(dependent files for DeepSpeech could be found <a href="https://github.com/mozilla/DeepSpeech/releases/tag/v0.9.3">here</a>)
 ```
-./build-all-native-libs.sh clean
-./build-all-native-libs.sh init
-time ./build-all-native-libs.sh build
+   apk ->                              http(s)://your_http_server/kantv/apk/kantv-latest.apk
+   apk version ->                      http(s)://your_http_server/kantv/apk/kantv-version.txt
+   audio.wav  ->                       http(s)://your_http_server/kantv/deepspeech/audio.wav
+   deepspeech-0.9.3-models.tflite ->   http(s)://your_http_server/kantv/deepspeech/deepspeech-0.9.3-models.tflite
+   deepspeech-0.9.3-models.scorer ->   http(s)://your_http_server/kantv/deepspeech/deepspeech-0.9.3-models.scorer
+  
 
-```
+   something for whisper.cpp      ->   http(s)://your_http_server/kantv/whisper/something
 
-step2: build APK
-
-
-build apk by latest Android Studio IDE
-
-
-### How to build project for target iOS(will be deprecated soon)
-
-#### prerequisites
-
-- Host OS information:
-
-![macos-info](https://user-images.githubusercontent.com/6889919/122509084-bac13380-d035-11eb-9d8a-ae676a11fa39.png)
-
-```
-uname -a
-
-Darwin 19.6.0 Darwin kernel Version 19.6.0 x86_64
-
-```
-
-- brew and GNU build tools
-
-```
-brew install automake
-
-brew install autoconf
-
-brew install wget
-
-wget http://mirrors.ustc.edu.cn/gnu/libtool/libtool-2.4.6.tar.xz
-
-tar Jxf libtool-2.4.6.tar.xz
-
-cd libtool-2.4.6
-
-./configure --prefix=/usr/local
-
-make;make install
-
+   something for paddlespeech     ->   http(s)://your_http_server/kantv/paddlespeech/something
 ```
 
+### How to create customized playlist for kantv apk
 
-- [Xcode-12.5](https://developer.apple.com/download/more/)
-- [Command Line Tools for Xcode 12.5](https://developer.apple.com/download/more/)
-- [Additional Tools for Xcode 12.5](https://developer.apple.com/download/more/)
-
-
-#### Before Build
+- create **test.m3u**(recommend name or hardcode in source code) like this:
 
 ```
-git clone https://github.com/zhouwg/kantv
-cd kantv
-git checkout kantv
+  #EXTM3U
+  #EXTINF:-1,hls
+  http(s)://your_http_server/kantv/media/test.hls
+  #EXTINF:-1,dash
+  http(s)://your_http_server/kantv/media/test.dash
+  #EXTINF:-1,rtmp
+  http(s)://your_http_server/kantv/media/test.rtmp
+  #EXTINF:-1,webrtc
+  http(s)://your_http_server/kantv/media/test.rtc
+  #EXTINF:-1,hevc(h265)
+  http(s)://your_http_server/kantv/media/test.hevc
+  #EXTINF:-1,h266
+  http(s)://your_http_server/kantv/media/test.h266
+  #EXTINF:-1,av1
+  http(s)://your_http_server/kantv/media/test.av1
+  #EXTINF:-1,testvideo-1 (pls attention following path is start with /)
+  /test.mp4
+  #EXTINF:-1,testvideo-2
+  /video/test.ts
 
 ```
 
-#### Build iOS APP
+or just fetch your favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/zhouwg/kantv/issues/27">this issue</a>)
 
-step1:build all native libs
-
-```
-./build-all-native-libs.sh clean
-./build-all-native-libs.sh init
-time ./build-all-native-libs.sh build
+ - upload test.m3u to your http server like this
 
 ```
+ test.m3u                  ->   http(s)://your_http_server/kantv/epg/test.m3u
+```
 
-step2: build APP
 
 
-build APP by latest Xcode IDE
 
+### How to integrate your proprietary native libs with project KanTV for your R&D activity
+
+I'd like to use Mozilla's <a href="https://github.com/zhouwg/DeepSpeech">DeepSpeech</a> to explain how to integrate your proprietary native libs with project KanTV for your R&D activity.
+
+
+TBD
+
+
+### Run kantv apk on real Android phone
+
+This apk follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
+
+- Access to storage is required to generate necessary temporary files
+- Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
+
+The following is some English snapshots.
+
+![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
+![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
+![Screenshot_20240301_000515_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/bfbc2521-b119-4f47-84e6-7f60e65fe100)
+
+
+
+![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
+![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
+![942275970](https://github.com/zhouwg/kantv/assets/6889919/65878537-fa82-4e60-a454-5ed6a154ca86)
+
+
+
+![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
+![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
+
+
+Other English and Chinese snapshots could be found in ![release directory](https://github.com/zhouwg/kantv/tree/kantv/release).
+
+
+### ChangeLog
+
+Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/release/README.md">here</a>.
+
+
+
+### Roadmap
+
+- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
+
+- real-time subtitle(English / Chinese) with online TV (by ![DeepSpeech](https://github.com/zhouwg/DeepSpeech)  /  ![whisper.cpp](https://github.com/zhouwg/whisper.cpp))
+
+- real-time advertisement analysis and illegal advertisement removal
+
+- other device-side AI feature
+
+- UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
+
+- ...
 
 
 ### Support
 
-- Please do not send e-mail to me. Public technical discussion on github is preferred.
+- Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
 
 
+### Contribution
+
+ If you want to contribute to project KanTV, be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue).We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+
+ Great welcome if you report issue in various Android-based phone or even submit PR to this project.
+
+ **English** is preferred in this project. thank your for your cooperation and appreciate your understanding.
+
+### Acknowledgement
+
+Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg and other excellent projects. 
+
+The KanTV has used/tried following open-source projects:
+<ul>
+ 	<li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
+ 	<li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
+ 	<li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
+ 	<li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
+ 	<li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
+ 	<li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
+ 	<li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
+ 	<li><a href="https://github.com/openai/whisper" target="_blank" rel="noopener">OpenAI/Whisper</a></li>
+ 	<li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
+ 	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>
+ 	<li><a href="https://github.com/fraunhoferhhi/vvenc" target="_blank" rel="noopener">VVenc</a></li>
+ 	<li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
+ 	<li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
+ 	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
+ 	<li><a href="https://aomedia.org/" target="_blank" rel="noopener">AOM-AV1</a></li>
+ 	<li><a href="https://opencv.org/" target="_blank" rel="noopener">OpenCV</a></li>
+ 	<li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
+ 	<li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
+ 	<li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
+ 	<li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
+ 	<li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
+ 	<li>......</li>
+</ul>
+ 
 ### License
 
 ```
@@ -231,107 +320,10 @@ Licensed under LGPLv2.1 or later
 ```
 
 ```
-Copyright (c) 2021 maintainer of kantv project
+Copyright (c) 2021 -  Authors of project KanTV
 
 Licensed under Apachev2.0 or later
 ```
 
-the original official ijkplayer required features are based on or derives from projects below:
-- LGPL
-  - [FFmpeg](http://git.videolan.org/?p=ffmpeg.git)
-  - [libVLC](http://git.videolan.org/?p=vlc.git)
-  - [kxmovie](https://github.com/kolyvan/kxmovie)
-  - [soundtouch](http://www.surina.net/soundtouch/sourcecode.html)
-- zlib license
-  - [SDL](http://www.libsdl.org)
-- BSD-style license
-  - [libyuv](https://code.google.com/p/libyuv/)
-- ISC license
-  - [libyuv/source/x86inc.asm](https://code.google.com/p/libyuv/source/browse/trunk/source/x86inc.asm)
-
-android/ijkplayer-exo is based on or derives from projects below:
-- Apache License 2.0
-  - [ExoPlayer](https://github.com/google/ExoPlayer)
-
-android/example is based on or derives from projects below:
-- GPL
-  - [android-ndk-profiler](https://github.com/richq/android-ndk-profiler) (not included by default)
-
-ios/IJKMediaDemo is based on or derives from projects below:
-- Unknown license
-  - [iOS7-BarcodeScanner](https://github.com/jpwiddy/iOS7-BarcodeScanner)
-
-ijkplayer's build scripts are based on or derives from projects below:
-- [gas-preprocessor](http://git.libav.org/?p=gas-preprocessor.git)
-- [VideoLAN](http://git.videolan.org)
-- [yixia/FFmpeg-Android](https://github.com/yixia/FFmpeg-Android)
-- [kewlbear/FFmpeg-iOS-build-script](https://github.com/kewlbear/FFmpeg-iOS-build-script)
-
-
-
-
-
-the kantv required features are based on or derives from projects below:
-
-- zlib license
-  - [zlib](http://www.zlib.net/)
-
-- libxml2 license
-  - [libxml2](http://xmlsoft.org/)
-
-- libcurl license
-  - [curl](https://curl.se/libcurl/)
-
-- GPL license
-  - [libiconv](https://www.gnu.org/software/libiconv/)
-
-- Apache license
-  - [tensorflow](https://github.com/tensorflow/tensorflow)
-  - [irsa](https://github.com/zhouwg/irsa)
-
-- Github license
-  - [VoisePlayingIcon](https://github.com/chaohengxing/VoisePlayingIcon/)
-
-
-
-kantv's build scripts was created and maintained by maintainer of kantv project, thanks to Linux&Android open source community, special thanks to Zhang Rui(<bbcallen@gmail.com>) & [Bilibili](https://www.bilibili.com/) for the born of original great ijkplayer.
-
-
-
 ### Commercial Use
-ijkplayer is licensed under LGPLv2.1 or later, so itself is free for commercial use under LGPLv2.1 or later
-
-But ijkplayer is also based on other different projects under various licenses, which I have no idea whether they are compatible to each other or to your product.
-
-[IANAL](https://en.wikipedia.org/wiki/IANAL), you should always ask your lawyer for these stuffs before use it in your product.
-
-
-kantv is licensed under Apachev2.0 or later, so itself is free for commercial use UNDER Apachev2.0 or later
-
-### ChangeLog
-
-[ChangeLog](https://github.com/zhouwg/kantv/tree/kantv/release)
-
-
-### Contribution
-
- **If you want to contribute to Project KanTV, be sure to review the
- [ChangeLog](https://github.com/zhouwg/kantv/blob/kantv/release/README.md) and
- [NEWS](NEWS.md) and
- [build script](build-all-native-libs.sh) and
- [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue).**
-
- **We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs,
- please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).**
-
-### KanTV Android APK download
-
-> The KanTV apk is about 10M (mainly because the apk integrates FFmpeg +  chinadrm client subsystem libraries (only arm64-v8a for reduce apk's size);  or could be built the KanTV apk from [source code ](https://github.com/zhouwg/kantv) according to this [README](https://github.com/zhouwg/kantv/blob/kantv/README.md).
-
-
-[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
-
-### KanTV iOS APP download
-
-TBD
-
+Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.

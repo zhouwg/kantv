@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_title_general">通用设置</string>
+
+    <string name="pref_key_enable_background_play">pref.enable_background_play</string>
+    <string name="pref_title_enable_background_play">后台播放</string>
+    <string name="pref_summary_enable_background_play">Android 4.0+支持后台播放功能</string>
+
+    <string name="pref_key_using_tee">pref.using_tee</string>
+    <string name="pref_title_using_tee">使用TEE解密</string>
+    <string name="pref_summary_using_tee"></string>
+
+    <string name="pref_key_disable_audio">pref.disable_audio</string>
+    <string name="pref_title_disable_audio">禁止音频播放</string>
+    <string name="pref_summary_disable_audio"></string>
+
+    <string name="pref_key_disable_video">pref.disable_video</string>
+    <string name="pref_title_disable_video">禁止视频播放</string>
+    <string name="pref_summary_disable_video"></string>
+
+    <string name="pref_key_enable_wiseplay">pref.enable_wiseplay</string>
+    <string name="pref_title_enable_wiseplay">Enable WisePlay</string>
+    <string name="pref_summary_enable_wiseplay"></string>
+
+    <string name="pref_key_playerengine">pref.playerEngine</string>
+    <string name="pref_title_player">播放引擎</string>
+    <string-array name="pref_entries_player">
+        <item>FFmpeg</item>
+        <item>ExoPlayer</item>
+    </string-array>
+    <string-array name="pref_entry_values_player">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_player">
+        <item>使用FFmpeg引擎</item>
+        <item>使用ExoPlayer引擎</item>
+    </string-array>
+
+
+    <string name="pref_key_playerTroubleshooting">pref.playerEngineTroubleshooting</string>
+    <string name="pref_title_playerTroubleshooting">调试模式</string>
+    <string-array name="pref_entries_playerTroubleshooting">
+        <item>disable</item>
+        <item>internal</item>
+    </string-array>
+    <string-array name="pref_entry_values_playerTroubleshooting">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_playerTroubleshooting">
+        <item>disable</item>
+        <item>internal</item>
+    </string-array>
+
+
+    <string name="pref_key_lang">pref.lang</string>
+    <string name="pref_title_lang">选择界面语言</string>
+    <string-array name="pref_entries_lang">
+        <item>中文</item>
+        <item>英文</item>
+    </string-array>
+    <string-array name="pref_entry_values_lang">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_lang">
+        <item>中文</item>
+        <item>英文</item>
+    </string-array>
+
+    <string name="pref_key_voiceapi">pref.voiceapi</string>
+    <string name="pref_title_voiceapi">选择运算负载</string>
+    <string-array name="pref_entries_voiceapi">
+        <item>CPU</item>
+        <item>NNAPI</item>
+    </string-array>
+    <string-array name="pref_entry_values_voiceapi">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_voiceapi">
+        <item>CPU</item>
+        <item>NNAPI</item>
+    </string-array>
+
+
+    <string name="pref_title_ffmpegplayer_video">视频播放设置</string>
+
+    <string name="pref_key_using_media_codec">pref.using_media_codec</string>
+    <string name="pref_title_using_media_codec">使用MediaCodec解码视频</string>
+    <string name="pref_summary_using_media_codec">此开关仅对FFmpeg引擎起作用</string>
+
+    <string name="pref_key_using_ffmpeg_codec">pref.using_ffmpeg_codec</string>
+    <string name="pref_title_using_ffmpeg_codec">使用FFmpeg解码音频</string>
+    <string name="pref_summary_using_ffmpeg_codec">此开关仅对ExoPlayer引擎起作用</string>
+
+    <string name="pref_key_startplaypos">pref.startplaypos</string>
+    <string name="pref_title_startplaypos">起始播放时间(分)</string>
+    <string name="pref_summary_startplaypos">点击设置视频起始播放时间</string>
+
+    <string name="pref_key_using_media_codec_auto_rotate">pref.using_media_codec_auto_rotate</string>
+    <string name="pref_title_using_media_codec_auto_rotate">处理自动旋转</string>
+    <string name="pref_summary_using_media_codec_auto_rotate"></string>
+
+    <string name="pref_key_media_codec_handle_resolution_change">pref.media_codec_handle_resolution_change</string>
+    <string name="pref_title_media_codec_handle_resolution_change">处理分辨率改变</string>
+    <string name="pref_summary_media_codec_handle_resolution_change"></string>
+
+    <string name="pref_key_pixel_format">pref.pixel_format</string>
+    <string name="pref_title_pixel_format">像素格式</string>
+    <string-array name="pref_entries_pixel_format">
+        <item>自动选择</item>
+        <item>RGB 565</item>
+        <item>RGB 888</item>
+        <item>RGBX 8888</item>
+        <item>YV12</item>
+        <item>OpenGL ES2</item>
+    </string-array>
+    <string-array name="pref_entry_values_pixel_format">
+        <item></item>
+        <item>fcc-rv16</item>
+        <item>fcc-rv24</item>
+        <item>fcc-rv32</item>
+        <item>fcc-yv12</item>
+        <item>fcc-_es2</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_pixel_format">
+        <item>Auto Select</item>
+        <item>RGB 565</item>
+        <item>RGB 888</item>
+        <item>RGBX 8888</item>
+        <item>YV12</item>
+        <item>OpenGL ES2</item>
+    </string-array>
+
+
+    <string name="pref_title_ffmpegplayer_audio">音频播放设置</string>
+
+    <string name="pref_key_using_opensl_es">pref.using_opensl_es</string>
+    <string name="pref_title_using_opensl_es">使用 OpenSL ES</string>
+    <string name="pref_summary_using_opensl_es"></string>
+
+
+    <string name="pref_title_render_view">渲染设置</string>
+
+    <string name="pref_key_enable_no_view">pref.enable_no_view</string>
+    <string name="pref_title_enable_no_view">使能NoView</string>
+    <string name="pref_summary_enable_no_view"></string>
+
+    <string name="pref_key_enable_surface_view">pref.enable_surface_view</string>
+    <string name="pref_title_enable_surface_view">使能SurfaceView</string>
+    <string name="pref_summary_enable_surface_view"></string>
+
+    <string name="pref_key_enable_texture_view">pref.enable_texture_view</string>
+    <string name="pref_title_enable_texture_view">使能TextureView</string>
+    <string name="pref_summary_enable_texture_view"></string>
+
+    <string name="pref_key_enable_detached_surface_texture">pref.enable_detached_surface_texture</string>
+    <string name="pref_title_enable_detached_surface_texture">使能分离SurfaceTexture</string>
+    <string name="pref_summary_enable_detached_surface_texture"></string>
+
+
+    <string name="pref_title_epg">EPG</string>
+    <string name="pref_key_epgenabled">pref.epgenabled</string>
+    <string name="pref_title_epgenabled">使能EPG</string>
+    <string name="pref_summary_epgenabled"></string>
+
+    <string name="pref_key_kantvserver">pref.kantvserver</string>
+    <string name="pref_title_kantvserver">KanTV服务器</string>
+    <string name="pref_summary_kantvserver">点击设置自定义KanTV服务器地址</string>
+
+    <string name="pref_key_epgupdate">pref.epgupdate</string>
+    <string name="pref_title_epgupdate">更新节目数据</string>
+    <string name="pref_summary_epgupdate"></string>
+
+    <string name="pref_key_cleanupcache">pref.cleanupcache</string>
+    <string name="pref_title_cleanupcache">清理软件缓存</string>
+    <string name="pref_summary_cleanupcache">清理完缓存后需要重启软件</string>
+
+    <string name="pref_key_closesplashpage">pref.close_splash_page</string>
+    <string name="pref_title_closesplashpage">关闭启动界面</string>
+    <string name="pref_summary_closespashpage"></string>
+
+    <string name="pref_key_rtmpserver">pref.rtmpserver</string>
+    <string name="pref_title_rtmpserver">RTMP Server</string>
+    <string name="pref_summary_rtmpserver">点击设置RTMP Server Url</string>
+
+    <string name="pref_title_multidrm">MultiDRM</string>
+
+    <string name="pref_key_apigateway">pref.apigateway</string>
+    <string name="pref_title_apigateway">MultiDRM APIGateWay</string>
+    <string name="pref_summary_apigateway">点击设置MultiDRM APIGateWay</string>
+
+    <string name="pref_key_nginx">pref.nginx</string>
+    <string name="pref_title_nginx">MultiDRM NGINX Server IP</string>
+    <string name="pref_summary_nginx">click to setting NGINX Server IP</string>
+
+
+    <string name="pref_title_misc">其它设置</string>
+    <string name="pref_key_using_mediadatasource">pref.using_mediadatasource</string>
+    <string name="pref_title_using_mediadatasource">使用MediaDataSource</string>
+    <string name="pref_summary_using_mediadatasource"></string>
+
+    <string name="pref_key_rtsp_tcp">pref.rtsp_tcp</string>
+    <string name="pref_title_rtsp_tcp">RTSP使用TCP协议</string>
+    <string name="pref_summary_rtsp_tcp"></string>
+
+    <string name="pref_key_continued_playback">pref.continued_playback</string>
+    <string name="pref_title_continued_playback">记忆播放</string>
+    <string name="pref_summary_continued_playback"></string>
+
+    <string name="pref_title_debug">调试</string>
+    <string name="pref_key_dev_mode">pref.dev_mode</string>
+    <string name="pref_title_dev_mode">开发者模式</string>
+    <string name="pref_summary_dev_mode"></string>
+
+    <string name="pref_key_dump_videoes">pref.dump_videoes</string>
+    <string name="pref_title_dump_videoes">dump video es to file</string>
+    <string name="pref_summary_dump_videoes"></string>
+
+    <string name="pref_key_dump_audioes">pref.dump_audioes</string>
+    <string name="pref_title_dump_audioes">dump audio es to file</string>
+    <string name="pref_summary_dump_audioes"></string>
+
+    <string name="pref_key_dump_duration">pref.dump_duration</string>
+    <string name="pref_title_dump_duration">dump duration</string>
+    <string name="pref_summary_dump_duration">click to setting dump duration(seconds)</string>
+
+    <string name="pref_key_dump_size">pref.dump_size</string>
+    <string name="pref_title_dump_size">dump size</string>
+    <string name="pref_summary_dump_size">click to setting dump size(kbytes)</string>
+
+    <string name="pref_key_dump_counts">pref.dump_counts</string>
+    <string name="pref_title_dump_counts">dump counts</string>
+    <string name="pref_summary_dump_counts">click to setting dump counts</string>
+
+    <string name="pref_key_dump_mode">pref.dump_mode</string>
+    <string name="pref_title_dump_mode">dump mode</string>
+    <string-array name="pref_entries_dumpmode">
+        <item>disable dump</item>
+        <item>dump partial decrypt video data to terminal</item>
+        <item>dump fully decrypt video data to terminal</item>
+        <item>dump decrypt video data to file</item>
+        <item>dump benchmark of decrypt to terminal</item>
+        <item>dump benchmark of decrypt to file</item>
+    </string-array>
+    <string-array name="pref_entry_values_dumpmode">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_dumpmode">
+        <item>disable dump</item>
+        <item>dump partial decrypt video data to terminal</item>
+        <item>dump fully decrypt video data to terminal</item>
+        <item>dump decrypt video data to file</item>
+        <item>dump benchmark of decrypt to terminal</item>
+        <item>dump benchmark of decrypt to file</item>
+    </string-array>
+
+    <string name="pref_key_play_mode">pref.play_mode</string>
+    <string name="pref_title_play_mode">播放模式</string>
+    <string-array name="pref_entries_playmode">
+        <item>普通模式</item>
+        <item>当前内容循环播放</item>
+        <item>列表循环播放</item>
+    </string-array>
+    <string-array name="pref_entry_values_playmode">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_playmode">
+        <item>普通模式</item>
+        <item>当前内容循环播放</item>
+        <item>列表循环播放</item>
+    </string-array>
+
+
+    <string name="pref_title_about">关于</string>
+    <string name="pref_key_version">pref.version</string>
+    <string name="pref_title_version">当前版本</string>
+    <string name="pref_summary_version">1.2.8</string>
+
+    <string name="pref_key_versionhistory">pref.versionhistory</string>
+    <string name="pref_title_versionhistory">版本历史</string>
+    <string name="pref_summary_versionhistory"></string>
+
+    <string name="pref_key_author">pref.author</string>
+    <string name="pref_title_author">作者 </string>
+    <string name="pref_summary_author">KanTV项目开发与维护人</string>
+
+    <string name="pref_key_authorinfo">pref.authorinfo</string>
+    <string name="pref_title_authorinfo">本软件官方网站 </string>
+    <string name="pref_summary_authorinfo">www.cde-os.com</string>
+
+    <string name="pref_key_ipr">pref.ipr</string>
+    <string name="pref_title_ipr">知识产权声明</string>
+    <string name="pref_summary_ipr">本应用软件中出现的所有在线电视/电台如未有特别声明，其知识产权属于原始制作人或版权人所有</string>
+
+
+    <string name="pref_title_update"></string>
+    <string name="pref_key_checkupdate">pref.checkupdate</string>
+    <string name="pref_title_checkupdate">软件更新</string>
+    <string name="pref_summary_checkupdate">更新版本</string>
+
+    <string name="pref_title_exit"></string>
+    <string name="pref_key_exitapp">pref.exitapp</string>
+    <string name="pref_title_exitapp">退出</string>
+    <string name="pref_summary_exitapp">退出</string>
+
+    <string name="pref_title_ASRmodel"></string>
+    <string name="pref_key_downloadASRmodel">pref.downloadASRmodel</string>
+    <string name="pref_title_downloadASRmodel">下载ASR模型</string>
+    <string name="pref_summary_downloadASRmodel"></string>
+
+    <string name="pref_title_TTSmodel"></string>
+    <string name="pref_key_downloadTTSmodel">pref.downloadTTSmodel</string>
+    <string name="pref_title_downloadTTSmodel">下载TTS模型</string>
+    <string name="pref_summary_downloadTTSmodel"></string>
+
+
+    <string name="pref_key_benchmark">pref.benchmark</string>
+    <string name="pref_title_benchmark">录制性能测试</string>
+    <string name="pref_summary_benchmark">测试当前手机性能(共10个测试项)</string>
+
+    <string name="pref_key_benchmarkinfo">pref.benchmarkinfo</string>
+    <string name="pref_title_benchmarkinfo">录制性能测试结果</string>
+    <string name="pref_summary_benchmarkinfo"></string>
+
+    <string name="pref_key_recordformat">pref.recordformat</string>
+    <string name="pref_title_recordformat">文件格式</string>
+    <string-array name="pref_entries_recordformat">
+        <item>MP4</item>
+        <item>TS</item>
+    </string-array>
+    <string-array name="pref_entry_values_recordformat">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_recordformat">
+        <item>使用MP4格式</item>
+        <item>使用TS格式</item>
+    </string-array>
+
+    <string name="pref_key_recordcodec">pref.recordcodec</string>
+    <string name="pref_title_recordcodec">视频编码格式</string>
+    <string-array name="pref_entries_recordcodec">
+        <item>H264</item>
+        <item>H265</item>
+        <item>H266</item>
+        <item>AV1</item>
+    </string-array>
+    <string-array name="pref_entry_values_recordcodec">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_recordcodec">
+        <item>使用H264编码</item>
+        <item>使用H265编码视频</item>
+        <item>使用H266编码视频</item>
+        <item>使用AV1编码视频</item>
+    </string-array>
+
+    <string name="pref_key_recordmode">pref.recordmode</string>
+    <string name="pref_title_recordmode">录制模式</string>
+    <string-array name="pref_entries_recordmode">
+        <item>视频与音频数据都录制</item>
+        <item>只录制视频数据</item>
+    </string-array>
+    <string-array name="pref_entry_values_recordmode">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_recordmode">
+        <item>视频与音频数据都录制</item>
+        <item>只录制视频数据</item>
+    </string-array>
+
+
+    <string name="pref_title_record">录制设置</string>
+    <string name="pref_key_record_videoes">pref.record_videoes</string>
+    <string name="pref_title_record_videoes">录制视频</string>
+    <string name="pref_summary_record_videoes"></string>
+
+    <string name="pref_key_record_audioes">pref.record_audioes</string>
+    <string name="pref_title_record_audioes">录制音频</string>
+    <string name="pref_summary_record_audioes"></string>
+
+    <string name="pref_key_record_duration">pref.record_duration</string>
+    <string name="pref_title_record_duration">录制时长</string>
+    <string name="pref_summary_record_duration">设置录制时长(以分钟为单位)</string>
+
+    <string name="pref_key_record_size">pref.record_size</string>
+    <string name="pref_title_record_size">文件大小</string>
+    <string name="pref_summary_record_size" translatable="false">设置录制文件大小(M字节)</string>
+
+    <string name="pref_key_record_thresholddisksize">pref.record_thresholddisksize</string>
+    <string name="pref_title_record_thresholddisksize">存储空间预警(MBytes)</string>
+    <string name="pref_summary_record_thresholddisksize" translatable="false">存储空间小于设置的数值时无法录制(Mbytes)</string>
+
+
+    <string name="pref_key_last_directory"></string>
+
+</resources>

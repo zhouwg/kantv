@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">KanTV</string>
+    <string name="about_download_subtitle">网络字幕</string>
+    <string name="folder_icon_resouces">Folder Icon</string>
+    <string name="menu_favorite_string">关注</string>
+    <string name="video_record">上次播放到</string>
+    <string name="video_skip">继续播放</string>
+
+    <item name="tag_key_data" type="id"/>
+    <item name="tag_key_position" type="id"/>
+    <string name="app_fullname">Project KanTV</string>
+
+    <string name="movies">片库</string>
+    <string name="N_A">N/A</string>
+    <string name="close">关闭</string>
+    <string name="exit">退出</string>
+    <string name="sample">Sample</string>
+    <string name="tv">电视</string>
+    <string name="movie">电影</string>
+    <string name="radio">电台</string>
+    <string name="file">文件</string>
+    <string name="recent">最近播放</string>
+    <string name="content">内容</string>
+    <string name="settings">设置</string>
+    <string name="live">直播</string>
+    <string name="toggle_ratio">切换画面大小</string>
+    <string name="toggle_fullscreen">切换全屏</string>
+    <string name="enter_fullscreen">进入全屏播放</string>
+    <string name="leave_fullscreen">退出全屏播放</string>
+    <string name="toggle_landscape">切换横屏/竖屏</string>
+    <string name="landscape_playback">横屏播放</string>
+    <string name="portrait_playback">竖屏播放</string>
+    <string name="tracks">轨道</string>
+    <string name="toggle_player">切换播放器</string>
+    <string name="toggle_render">切换渲染器</string>
+    <string name="toggle_tflite">切换Tensorflow</string>
+    <string name="toggle_devmode">切换开发者模式</string>
+    <string name="show_info">媒体信息</string>
+    <string name="show_calendar">日历</string>
+    <string name="screenshot">屏幕截图</string>
+    <string name="development_mode">开发者模式:</string>
+    <string name="url">URL</string>
+    <string name="name">标题</string>
+    <string name="vdec">解码器</string>
+    <string name="playengine">播放引擎</string>
+    <string name="clear_content">是否为清流</string>
+    <string name="disable_audiotrack">禁止音频</string>
+    <string name="disable_videotrack">禁止视频</string>
+    <string name="drminfo">DRM信息</string>
+    <string name="encryptinfo">加密信息</string>
+    <string name="decrypt">解密模式</string>
+    <string name="fps">帧率</string>
+    <string name="videoinfo">视频信息</string>
+    <string name="audioinfo">音频信息</string>
+    <string name="v_cache">视频缓冲区</string>
+    <string name="a_cache">音频缓冲区</string>
+    <string name="load_cost">播放启动耗时</string>
+    <string name="seek_cost">seek_cost</string>
+    <string name="seek_load_cost">seek_load_cost</string>
+    <string name="tcp_speed">tcp_speed</string>
+    <string name="bit_rate">码率</string>
+    <string name="bandwidth">带宽</string>
+    <string name="start_time">开始播放时间</string>
+    <string name="current_time">当前时间</string>
+    <string name="play_time">已播放时间</string>
+    <string name="content_time">媒体时间信息</string>
+    <string name="position_time">视频流当前时间</string>
+    <string name="pause_time">暂停时间</string>
+    <string name="stuck_info">卡顿信息</string>
+    <string name="buffering_counts">缓冲次数</string>
+    <string name="buffering_duration">缓冲时长</string>
+    <string name="buffering_network_bandwidth">网络速度</string>
+    <string name="device_info">设备信息</string>
+    <string name="brand_info">品牌:</string>
+    <string name="cpu_abi">架构:</string>
+    <string name="hardware_info">硬件:</string>
+    <string name="os_info">操作系统:</string>
+    <string name="fingerprint_info">指纹:</string>
+    <string name="memory_info">内存信息</string>
+    <string name="network_type">网络类型</string>
+    <string name="network_ip">IP</string>
+    <string name="debug_info">调试信息</string>
+    <string name="network_info">网络信息</string>
+    <string name="wating">请等待...</string>
+    <string name="buffering">正在缓冲...</string>
+    <string name="epg_updating">正在更新EPG数据...</string>
+    <string name="network_un_available">请检查网络连接</string>
+    <string name="permission_not_granted">APK需要的权限未授权</string>
+
+    <string name="media_information">媒体信息</string>
+    <string name="mi_player">播放器</string>
+    <string name="mi_media">媒体</string>
+    <string name="mi_profile_level">编码级别</string>
+    <string name="mi_pixel_format">像素格式</string>
+    <string name="mi_resolution">分辨率</string>
+    <string name="mi_name">名字</string>
+    <string name="mi_length">长度</string>
+    <string name="mi_stream_fmt1">节目流 #%d</string>
+    <string name="mi_type">类型</string>
+    <string name="mi_language">语言</string>
+    <string name="mi_video_codec">视频编码</string>
+    <string name="mi_audio_codec">音频编码</string>
+    <string name="mi_frame_rate">帧率</string>
+    <string name="mi_bit_rate">码率</string>
+    <string name="mi_sample_rate">采样率</string>
+    <string name="mi_channels">音轨</string>
+    <string name="mi__selected_video_track">*</string>
+    <string name="mi__selected_audio_track">*</string>
+    <string name="mi__selected_subtitle_track">*</string>
+
+    <string name="TrackType_video">视频</string>
+    <string name="TrackType_audio">音频</string>
+    <string name="TrackType_subtitle">Subtitle</string>
+    <string name="TrackType_timedtext">Timed text</string>
+    <string name="TrackType_metadata">Meta data</string>
+    <string name="TrackType_unknown">未知</string>
+
+    <string name="VideoView_error_text_invalid_progressive_playback">未知错误</string>
+    <string name="VideoView_error_text_unknown">未知错误</string>
+    <string name="VideoView_error_button">确定</string>
+
+    <string name="VideoView_ar_aspect_fit_parent">Aspect / Fit parent</string>
+    <string name="VideoView_ar_aspect_fill_parent">Aspect / Fill parent</string>
+    <string name="VideoView_ar_aspect_wrap_content">Aspect / Wrap content</string>
+    <string name="VideoView_ar_match_parent">Free / Fill parent</string>
+    <string name="VideoView_ar_16_9_fit_parent">16:9 / Fit parent</string>
+    <string name="VideoView_ar_4_3_fit_parent">4:3 / Fit parent</string>
+
+    <string name="VideoView_render_none">Render: None</string>
+    <string name="VideoView_render_surface_view">Render: SurfaceView</string>
+    <string name="VideoView_render_texture_view">Render: TextureView</string>
+
+    <string name="VideoView_playerengine_FFmpeg">PlayerEngine: FFmpeg</string>
+    <string name="VideoView_playerengine_Exoplayer">PlayerEngine: Exoplayer</string>
+    <string name="VideoView_playerengine_AndroidMediaPlayer">PlayerEngine: AndroidMediaPlayer</string>
+    <string name="VideoView_playerengine_GStreamer">PlayerEngine: GStreamer</string>
+
+    <string name="quit">退出</string>
+    <string name="devmode">开发者模式</string>
+
+    <string name="OK">确定</string>
+    <string name="Cancel">取消</string>
+    <string name="Update">更新</string>
+    <string name="software_update">软件版本更新</string>
+    <string name="cannot_fetch_version">无法获取版本信息(请检查本地网络连接或服务器是否可以正常访问)</string>
+    <string name="no_new_version">未发现新版本</string>
+    <string name="found_new_version">发现新版本</string>
+    <string name="server_exception">当前使用的是最新版本或服务器有异常</string>
+    <string name="download_speed">下载速度</string>
+    <string name="version">当前版本</string>
+    <string name="buildTime">编译时间</string>
+    <string name="epgUpdateOK">EPG数据更新成功</string>
+    <string name="epgUpdateFailed">EPG数据更新失败,请检查</string>
+    <string name="serverUpdateOK">设置KanTV服务器地址成功</string>
+    <string name="serverUpdateFailed">设置KanTV服务器地址失败</string>
+    <string name="path_is_invalid">无效的路径</string>
+    <string name="kantv_title">KanTV严选频道</string>
+    <string name="kantv_test_warning">本页面仅为测试频道,其中很多频道可能无法访问或无法播放，请关注本APP主页的＂严选电视频道(为符合广电总局相关规定，仅提供英文频道，供英语学习或相关研究之用)或请关注本APP后续更新版本中的测试频道更新.\n\n本APP所有在线电视源均来自互联网，本APP仅为工具类软件，不提供在线电视内容制作．\n\n根据国家广电总局关于OTT TV相关规定,本APP仅供个人学习之用.</string>
+    <string name="asr_tip">本页面为ASR研究,基于Mozilla DeepSpeech(最好用whisper.cpp),ASR研究结果将用于本软件中在线电视(中文/英文)实时字幕生成</string>
+    <string name="recording_under_development">录制功能开发中...</string>
+
+    <string name="ASRstart">开始语音识别</string>
+    <string name="TTSstart">开始语音合成</string>
+    <string name="asr_engine_not_initialize">ASR引擎未初始化</string>
+    <string name="tts_engine_not_initialize">TTS引擎未初始化</string>
+    <string name="asr_model_not_found">未发现ASR模型文件</string>
+    <string name="tts_model_not_found">未发现TTS模型文件</string>
+    <string name="please_download_asr_model">未发现ASR模型文件，请在\"语音设置\"界面下载模型文件</string>
+    <string name="please_download_tts_model">未发现TTS模型文件，请在\"语音设置\"界面下载模型文件</string>
+
+    <string name="benchmark_start">手机性能综合测试开始(一共10个测试项目，提前退出测试可能导致测试结果不准确)</string>
+    <string name="benchmark_updating">手机性能综合测试("手机跑分")中...</string>
+    <string name="benchmark_stop">手机性能综合测试结束</string>
+
+    <string name="graphic_benchmark_title">图形性能测试</string>
+    <string name="StartGraphicBenchmark">图形测试</string>
+    <string name="StartEncodeBenchmark">编码测试</string>
+    <string name="StartSynthesisBenchmark">CPU算力综合测试</string>
+    <string name="graphic_benchmark_is_doing">正在进行图形性能测试(大约需要2-3分钟)，强制退出可能导致应用软件异常退出</string>
+
+    <string name="cleanup_cache_finished">清理缓存完成</string>
+    <string name="network_content">网络串流</string>
+    <string name="input_network_content">请输入要播放的视频地址(网络链接或本地路径)</string>
+
+    <string name="system_settings">系统设置</string>
+    <string name="playback_settings">播放设置</string>
+    <string name="record_settings">录制设置</string>
+    <string name="play_history">播放历史</string>
+    <string name="performance_bechmark">性能评测</string>
+    <string name="asr_settings">语音设置</string>
+    <string name="video_scan">扫描管理</string>
+    <string name="general_question">常见问题</string>
+    <string name="skin_nighttime">夜间模式</string>
+    <string name="skin_daytime">日间模式</string>
+    <string name="exit_app">退出应用</string>
+
+    <string name="homepage">首页</string>
+    <string name="media">本地媒体</string>
+    <string name="localmedia">本地媒体</string>
+    <string name="EPG">自定义节目</string>
+    <string name="custom_playlist">自定义节目</string>
+    <string name="onlinetv">在线电视(严选外语节目)</string>
+    <string name="ASR">语音研究</string>
+    <string name="ME">我</string>
+    <string name="personal_center">个人中心</string>
+</resources>

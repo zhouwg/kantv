@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/pref_title_general">
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_voiceapi"
+            android:entryValues="@array/pref_entry_values_voiceapi"
+            android:key="@string/pref_key_voiceapi"
+            android:persistent="true"
+            android:title="@string/pref_title_voiceapi"
+            app:entrySummaries="@array/pref_entry_summaries_voiceapi" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_downloadASRmodel"
+            android:persistent="true"
+            android:summary="@string/pref_summary_downloadASRmodel"
+            android:title="@string/pref_title_downloadASRmodel"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_downloadTTSmodel"
+            android:persistent="true"
+            android:summary="@string/pref_summary_downloadTTSmodel"
+            android:title="@string/pref_title_downloadTTSmodel"
+            android:widgetLayout="@layout/my_checkbox" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

@@ -1,7 +1,9 @@
 ### ChangeLog (版本更改记录)
 - v0.0.1:
 
-    kantv project was launched base on branch dev-baseon-latest-k0.8.8 in my on-going developing hijkplayer project;
+    build time(编译时间)：2021-05-19
+
+    project KanTV was launched base on branch dev-baseon-latest-k0.8.8 in my on-going developing hijkplayer project;
     基于开发了较长时间的hijkplayer项目的dev-baseon-latest-k0.8.8分支启动kantv项目，用于观看在线电视节目/在线电影/收听在线广播，同时用于软件领域相关技术的学习与研究;
 
 - v0.0.2:
@@ -69,45 +71,102 @@
    将NDK升级到r21.4.7075529 LTS,为切换到AndroidX做准备;
 
 
+- v1.0.0  build time(编译时间)：2023-11-14
+
+- v1.0.1  build time(编译时间)：2023-11-16,00:11
+
+- v1.0.6  build time(编译时间)：2023-11-22,10:00
+
+- v1.0.7  build time(编译时间)：2023-11-24,15:38
+- v1.0.10 build time(编译时间)：2023-11-27,12:38 这个版本里有个明显的bug:在＂设置＂界面点击更新节目单后，切回主界面可能会(随机)导致APP crash退出重启
+
+- v1.0.12 build time(编译时间)：2023-11-27,20:41 .修正了上述bug(JNI so里的一个bug，不是每次必现，不确定与华为荣耀手机里的Maple是否有关?)，并增加了其他一个功能(安全方面的改进)
+
+- v1.0.14 build time(编译时间)：2023-11-28,20:06
+
+- v1.0.16 build time(编译时间)：2023-11-30,12:08
+
+- v1.1.0  build time(编译时间)：2023-12-04,13:10由v1.0.x系列demo级水平的UI向商业Android应用软件UI水平迈进
+
+- v1.1.6  build time(编译时间)：2023-12-13,16:15初步集成了语音研究页面，为未来ASR实时字幕开发打下基础
+
+- v1.1.8  build time(编译时间)：2023-12-16,10:28 <strong>初步</strong>完成了录制功能PoC(Proof of Concept，概念验证)开发(也就是打通Java UI-&gt;JNI-&gt;SDK数据通道)，修正了自定义节目单功能中的一个bug，修正了一些其他问题.
+
+- v1.1.16 build time(编译时间):2023-12-30,20:40，自2023年12月16号发布v1.1.8 版本之后，经过近期高强度的开发(每天10+小时)，在解决了一些列高/中/低难度的技术问题后与2天的测试后，v1.1.16版本终于发布了.<strong><font color="red">v1.1.16版本最重要的改进是第一次在产品意义上实现了在线电视录制</font>:对于720×576分辨率的在线电视(CGTN中国国际电视台英文频道)使用H264编码录制生成的文件音视频同步的很好；</strong>支持AV1与WEBP编码的文件播放；解决了FFmpeg软解码时可能导致app退出的问题；因为本版本在产品意义上实现了在线电视录制，所以也解决了v1.1.8版本录制生成的文件无声音且录制生成的文件在\"本地视频\"播放界面无缩略图的问题；包含了向商业软件看齐的一些工程化改进．
+
+- v1.1.18 build time(编译时间):2024-1-5,16:52,
+                    <strong>v1.1.18版本最主要的改进是增加了性能测试</strong>，
+                    便于对各种宣传资料中的专业术语不太熟悉的Android手机用户，
+                    在购买/使用Android手机时从图形处理与视频编码视角直观的评测Android手机性能;
+                    同时包含了一些工程化/产品化改进，
+                    去掉了程序员思维的一些东西(比如\"语音研究\"等)．
+                
+
+- v1.2.0 build time(编译时间):2024-1-14,16:11，v1.2.0相比v1.1.18最大的变化是在性能评测页面增加了手机图形性能测试；同时修正了v1.1.18中native层c/c++代码中的一个非\"防御式编程\"bug导致的一些问题: 
+                    性能测试页面在某些手机上来回切换编码格式进行性能测试时，<strong>花屏问题</strong>，以及app<strong>异常退出</strong>问题；
+                    １月７日晚上突然发现在某种特殊场景(正在播放央视新闻频道，手机掉到地上，拾起后点击了下屏幕)下app突然莫名其妙异常退出
+
+
+- v1.2.1 build time(编译时间):2024-2-1，按照Roadmap将自定义节目单从主界面挪到＂个人中心＂页面，主界面类似微信主界面，只保留4个按钮； 
+                    在系统设置中增加版本历史；在＂个人中心＂中增加常见问题；在＂个人中心＂增加通过微信赞赏码赞助本软件功能；
+                    修正了播放在线电视时的一个bug；<strong>去掉了所有与已经废弃的c/c++写的kantvserver交互的代码</strong>，
+                    回到纯客户端工具软件；ASR研究； 修复了一些已知问题
+
+- v1.2.2 build time(编译时间):2024-2-3，首页改为全部是严选外语节目，所有中文节目都移到自定义节目单中；修改自定义节目单功能中的一个bug；
+                    修复了一些已知问题
+
+- v1.2.3 build time(编译时间):2024-2-9，修复了一些已知问题
+
+- v1.2.4 build time(编译时间):2024-2-19，去掉了＂个人中心＂中微信赞赏码赞助本软件功能；修复了一些已知问题
+
+- v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024
+
+- v1.2.6 build time(编译时间):2024-02-29 prepare for migrate kantv to github(add clean-room white-box anti-tamper codes in native layer, add ASR in main UI because ASR is important for an open source project(将语音研究又添加到了主界面，因为对于本开源项目尤其是专业AI开发者而言，语音研究比较重要。所以现在主界面又有5个按纽))
+
+- v1.2.7 2024-03-01, 00:30(Beijing Time) prepare for migrate kantv to github(remove SoftwareHistoryActivity.java and CommonQuestionActivity.java because it's highly personalized and not important for an open source project， and then adjust UI accordingly). I hope v1.2.8 could be available in github in next few days(because 8,aka HanZi "发", means lucky in Chinese).
+
+- v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity. today is Friday and have a good weekend)
+
+
 ### Screenshots(一些屏幕截图）
 
 English UI(英文界面，海外地区默认为英文界面）
 -------------------------------------------------------------
-
-![Screenshot_20210627_111103_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531948-42e0c080-d73b-11eb-87b2-556e8b8feb13.jpg)
-![Screenshot_20210627_111115_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531950-46744780-d73b-11eb-8fda-1266a4c5c740.jpg)
-
-![Screenshot_20210627_111130_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531955-4ffdaf80-d73b-11eb-9aa1-2c8d01c9be49.jpg)
+![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
+![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
+![Screenshot_20240301_000515_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/bfbc2521-b119-4f47-84e6-7f60e65fe100)
+![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
+![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
+![Screenshot_20240301_114125_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/d382cad8-513e-454e-88e5-a624c40ae355)
+![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
+![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
 Chinese UI（中文界面，国内默认为中文界面）
 -------------------------------------------------------------
-![Screenshot_20210627_112635_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531869-c221c480-d73a-11eb-8204-221e56c23d5e.jpg)
-![Screenshot_20210627_112651_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531872-c77f0f00-d73a-11eb-89d0-04a7d1490ae1.jpg)
 
-
-![Screenshot_20210627_111156_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531876-cfd74a00-d73a-11eb-902e-b18cebe69597.jpg)
-
-![Screenshot_20210627_111205_tv danmaku ijk kantv](https://user-images.githubusercontent.com/6889919/123531879-d5349480-d73a-11eb-8234-7d9d808280ab.jpg)
-
-![Screenshot_20210626_222306_tv 9](https://user-images.githubusercontent.com/6889919/123516218-8c92c200-d6cd-11eb-9474-f3767db37b29.jpg)
-
-
-
+![Screenshot_20240301_000319_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48ebec5-4942-4e93-9e3a-a8626d553e9e)
+![Screenshot_20240301_000324_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/66185ef2-f7e0-4b0f-b01b-ab097167bf8b)
+![Screenshot_20240301_000330_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c0f6a0a0-f150-4126-876a-021465406819)
+![Screenshot_20240301_114156_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/51f1292e-0bea-4ffc-98bf-0b4463d48dc4)
+![Screenshot_20240301_114203_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/adbff52c-c0fb-48dd-85c9-4e740c736d7a)
+![Screenshot_20240301_114210_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48bff82-ed27-47cc-aeee-bc3183707690)
+![Screenshot_20240301_000403_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/ebdaa2b6-d177-40c0-9d31-1e583088dd5b)
+![Screenshot_20240301_000410_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c9ec41fc-e3f3-4088-8e6b-5de12145e562)
 
 
 
-### Advantage (优点）
+![371274193](https://github.com/zhouwg/kantv/assets/6889919/b189260b-6011-4c18-a3c0-cd55c2a36b8f)
 
-- purely client application and purely GREEN application, the released apk MUST BE built from the source code of project kantv to avoid collecting/uploading device info/user's datas and ensure better user experience for apk's users; 纯客户端软件，无任何插件，不会与任何远程服务器交互，不会收集上传用户手机的设备信息以及手机中的文件，只能用于观看收听在线电视/在线广播/在线电影;
-- complete（except source code of libdrmclient.so because it contains proprietary IPR） open source project；  接近于完全开源（libdrmclient.so出于知识产权因素无法开源）的开源项目，基于开源社区的各种项目进行二次开发的代码完全100%开源，不会像有些“开源项目”一样将基于开源社区项目进行二次开发的结果封装成二进制的库进行“开源”，便于有开发能力的用户自行编译出完全安全放心的apk或者进行二次开发;
-- integrate TensorflowLite and other tools for learning/studying computer vision/deep learning/online media QoS conveniently; 内建了完整的编译系统生成二进制库与最终在手机上运行的应用程序，便于ICT专业人员在计算机视觉/深度学习/在线媒体服务质量等技术领域的研究；
-- non-profit open source project，just for giving back to the open source community; 非盈利性开源项目，出于回报开源社区与学习研究目的开源；
-- LTS 用户可以在此开源项目提交问题，会尽量解答解决用户提出的与此开源项目相关的技术问题；
+![1398616229](https://github.com/zhouwg/kantv/assets/6889919/e798b58c-554c-443f-ad76-59f795760ed5)
 
-### TODO（待完成的任务）
+![1476549041](https://github.com/zhouwg/kantv/assets/6889919/badae664-c864-4d84-87a4-f3d5636c4ff6)
 
-- remove illegal advertisement in some online movie，we must keep compliant in opensource software project; [issue could be found here](https://github.com/zhouwg/kantv/issues/13); PR from expert in deep learning field is greatly welcomed;  为了满足合规要求，用tensorflowlite去掉某些在线电影中的非法广告信息，[相关issue在此](https://github.com/zhouwg/kantv/issues/13)，欢迎深度学习领域的技术专家/专业人员提交PR(Pull Request);
-    
--  UI refactoring for Android apk,[issue could be found here](https://github.com/zhouwg/kantv/issues/26),PR from domain expert is greatly welcomed; 重构应用程序的用户界面以提升用户使用应用程序的用户体验,[相关issue在此](https://github.com/zhouwg/kantv/issues/26),欢迎精通UI开发的技术专家/专业人员提交PR(Pull Request);
-    
-- TBD/others ; 其它的待定任务;
+
+![1109625356](https://github.com/zhouwg/kantv/assets/6889919/829a88d1-a021-4766-a3fc-c65265cc3fdc)
+
+
+![Screenshot_20240222_111241_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/5762ce61-3e4a-4cbf-988f-65e7910a616d)
+
+![Screenshot_20240222_111248_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/7a8c110d-5f8a-47a8-8018-a5c9d0e1d30a)
+
+![Screenshot_20240222_111326_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/2794894b-1911-465c-a274-cfff9b116e40)

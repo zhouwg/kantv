@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/pref_title_general">
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_player"
+            android:entryValues="@array/pref_entry_values_player"
+            android:key="@string/pref_key_playerengine"
+            android:persistent="true"
+            android:title="@string/pref_title_player"
+            app:entrySummaries="@array/pref_entry_summaries_player" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_enable_background_play"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_background_play"
+            android:title="@string/pref_title_enable_background_play" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_using_media_codec"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_media_codec"
+            android:title="@string/pref_title_using_media_codec" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_using_ffmpeg_codec"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_ffmpeg_codec"
+            android:title="@string/pref_title_using_ffmpeg_codec" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_continued_playback"
+            android:persistent="true"
+            android:summary="@string/pref_summary_continued_playback"
+            android:title="@string/pref_title_continued_playback" />
+
+        <EditTextPreference
+            android:defaultValue="0"
+            android:enabled="true"
+            android:key="@string/pref_key_startplaypos"
+            android:persistent="true"
+            android:summary="@string/pref_summary_startplaypos"
+            android:title="@string/pref_title_startplaypos"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:key="subtitle"
+        android:title="字幕设置">
+        <SwitchPreference
+            android:key="network_subtitle"
+            android:summary="打开视频时，自动匹配网络字幕"
+            android:title="开启网络字幕"
+            app:icon="@drawable/ic_player_setting_subtitle_load" />
+        <SwitchPreference
+            android:key="auto_load_network_subtitle"
+            android:summary="未绑定字幕时，加载视频匹配的网络字幕"
+            android:title="自动加载网络字幕"
+            app:icon="@drawable/ic_player_setting_subtitle_network" />
+        <SwitchPreference
+            android:key="auto_load_local_subtitle"
+            android:summary="未绑定字幕时，加载视频的本地同名字幕"
+            android:title="自动加载同名字幕"
+            app:icon="@drawable/ic_player_setting_subtitle_setting" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="drm"
+        android:title="@string/pref_title_multidrm">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_wiseplay"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_wiseplay"
+            android:title="@string/pref_title_enable_wiseplay" />
+
+        <EditTextPreference
+            android:defaultValue="http://www.cde-os.com:8888/wiseplay/getlicense"
+            android:enabled="true"
+            android:key="@string/pref_key_apigateway"
+            android:persistent="true"
+            android:summary="@string/pref_summary_apigateway"
+            android:title="@string/pref_title_apigateway"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_using_tee"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_tee"
+            android:title="@string/pref_title_using_tee" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="debug"
+        android:title="@string/pref_title_debug">
+
+        <SwitchPreference
+            android:key="surface_renders"
+            android:summary="视频渲染性能更高，但不支持截图"
+            android:title="SurfaceView"
+            app:icon="@drawable/ic_player_setting_surface" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_surface_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_surface_view"
+            android:title="@string/pref_title_enable_surface_view" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_enable_texture_view"
+            android:persistent="true"
+            android:summary="@string/pref_summary_enable_texture_view"
+            android:title="@string/pref_title_enable_texture_view" />
+
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:enabled="true"
+            android:entries="@@array/pref_entries_playmode"
+            android:entryValues="@array/pref_entry_values_playmode"
+            android:key="@string/pref_key_play_mode"
+            android:persistent="true"
+            android:title="@string/pref_title_play_mode"
+            app:entrySummaries="@array/pref_entry_summaries_playmode" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_disable_audio"
+            android:persistent="true"
+            android:summary="@string/pref_summary_disable_audio"
+            android:title="@string/pref_title_disable_audio" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="@string/pref_key_disable_video"
+            android:persistent="true"
+            android:summary="@string/pref_summary_disable_video"
+            android:title="@string/pref_title_disable_video" />
+
+
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:enabled="false"
+            android:entries="@@array/pref_entries_dumpmode"
+            android:entryValues="@array/pref_entry_values_dumpmode"
+            android:key="@string/pref_key_dump_mode"
+            android:persistent="true"
+            android:title="@string/pref_title_dump_mode"
+            app:entrySummaries="@array/pref_entry_summaries_dumpmode" />
+
+        <EditTextPreference
+            android:defaultValue="10"
+            android:enabled="true"
+            android:key="@string/pref_key_dump_duration"
+            android:persistent="true"
+            android:summary="@string/pref_summary_dump_duration"
+            android:title="@string/pref_title_dump_duration"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <EditTextPreference
+            android:defaultValue="1024"
+            android:enabled="true"
+            android:key="@string/pref_key_dump_size"
+            android:persistent="true"
+            android:summary="@string/pref_summary_dump_size"
+            android:title="@string/pref_title_dump_size"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <EditTextPreference
+            android:defaultValue="1000"
+            android:enabled="true"
+            android:key="@string/pref_key_dump_counts"
+            android:persistent="true"
+            android:summary="@string/pref_summary_dump_counts"
+            android:title="@string/pref_title_dump_counts"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <EditTextPreference
+            android:defaultValue="rtmp://www.cde-os.com/live/livestream"
+            android:enabled="true"
+            android:icon="@drawable/ic_app_setting_cache_path"
+            android:key="@string/pref_key_rtmpserver"
+            android:persistent="true"
+            android:summary="@string/pref_summary_rtmpserver"
+            android:title="@string/pref_title_rtmpserver"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

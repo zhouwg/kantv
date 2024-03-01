@@ -1,59 +1,55 @@
-# -----
-build/
-ffmpeg-temp/
-android/contrib/ffmpeg-*
-android/contrib/openssl-*
-android/contrib/libiconv-*
-android/contrib/libxml2-*
-android/contrib/libz-*
-android/contrib/tensorflow-*
-android/contrib/build
-ios/ffmpeg-*
-ios/openssl-*
-ios/libiconv-*
-ios/libxml2-*
-ios/libz-*
-extra
-.DS_Store
-ijkmedia/ijkyuv/
-ijkmedia/ijksoundtouch
-ijkprof/android-ndk-profiler/
+.vscode
 
-# built application files
 *.apk
 *.ap_
 
-# files for the dex VM
 *.dex
 
-# Java class files
 *.class
 
-# generated files
 bin/
 gen/
 libs/
 obj/
-ijkmedia/ijkplayer/ijkversion.h
 
-# Local configuration file (sdk path, etc)
+
 local.properties
 
-# Android Studio
 .idea
 .gradle
-build/
+all64
+all32
 
-# Xcode
+
 xcuserdata
 xcshareddata
 *.xccheckout
 
-android/ijkplayer/kantv/gradle
-android/ijkplayer/kantv/src/main/jniLibs
-.cxx
+*.swp
+*.la
+*.pc
+*.lo
+*.Plo
+*.Po
+.libs
+.deps
 ndkBuild
 tags
 
-android/ijkplayer/kantv/all32
-android/ijkplayer/kantv/all64
+*.wasm
+*.tmp
+
+*.a
+*.so
+*.jar
+*.o
+*.obj
+*.swp
+*.hprof
+.travis.yml
+
+out
+build
+
+*.mp4
+*.ts
