@@ -61,9 +61,9 @@ sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
 
 sudo dpkg --add-architecture i386
-sudo apt-get install lib32z1
+sudo apt-get install lib32z1 -y
 
-sudo apt-get install android-tools-adb android-tools-fastboot autoconf \
+sudo apt-get install -y android-tools-adb android-tools-fastboot autoconf \
         automake bc bison build-essential ccache cscope curl device-tree-compiler \
         expect flex ftp-upload gdisk acpica-tools libattr1-dev libcap-dev \
         libfdt-dev libftdi-dev libglib2.0-dev libhidapi-dev libncurses5-dev \
