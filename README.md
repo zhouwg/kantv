@@ -24,7 +24,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 The goal of this project is:
 
-- Android **turn-key project** for AI experts/ASR researchers and software developers who was interested in device-side AI application(you could integrate your proprietary native libs(such as <a href="https://github.com/zhouwg/DeepSpeech">DeepSpeech</a>) to customized/derived project of KanTV as your desire or for your R&D activity) 
+- Android **turn-key project** for AI experts/ASR researchers and software developers who was interested in device-side AI application
 - Well-maintained open source and free online-TV player for Android-based mobile phone(or extended for Android-based tablet/TV)
 
 
@@ -212,10 +212,7 @@ or just fetch your favourite playlist from <a href="https://github.com/iptv-org/
 
 ### How to integrate your proprietary native libs with project KanTV for your R&D activity
 
-I'd like to use Mozilla's <a href="https://github.com/zhouwg/DeepSpeech">DeepSpeech</a> to explain how to integrate your proprietary native libs with project KanTV for your R&D activity.
-
-
-Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
+For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
 
 
 
