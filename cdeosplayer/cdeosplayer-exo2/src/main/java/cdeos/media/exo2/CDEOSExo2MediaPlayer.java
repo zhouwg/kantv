@@ -511,9 +511,9 @@ public class CDEOSExo2MediaPlayer extends AbstractMediaPlayer {
            // @Override
            // public void run() {
                 if (bEnableRecord)
-                    notifyOnInfo(1981, 0);
+                    notifyOnInfo(1983, 0);
                 else
-                    notifyOnInfo(1982, 0);
+                    notifyOnInfo(1984, 0);
            // }
        // });
        // modelDownLoadThread.start();

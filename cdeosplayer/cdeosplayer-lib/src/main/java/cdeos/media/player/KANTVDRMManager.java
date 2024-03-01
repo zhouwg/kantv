@@ -55,7 +55,7 @@ public class KANTVDRMManager {
 
 
     public static int start(Context context) {
-        CDELog.j(TAG, "copy local asset files, attention here");
+        CDELog.j(TAG, "copy local asset files");
         CDEUtils.copyAssetFile(context, "config.json", CDEUtils.getDataPath(context) + "config.json");
 
         String configString = CDEUtils.readTextFromFile(CDEUtils.getDataPath(context) + "config.json");
@@ -83,12 +83,12 @@ public class KANTVDRMManager {
                     int result = myHttpsURLConnection.doHttpRequest(requestType, url, requestBodyLength, requestBody, dataEntity);
 
                     if (dataEntity != null && dataEntity.getData() != null) {
-                        CDELog.d(TAG, "Post Response: " + new String(dataEntity.getData()));
+                        CDELog.d(TAG, "post response: " + new String(dataEntity.getData()));
                     }
 
                     if (0 == result) {
                         if (dataEntity != null && dataEntity.getData() != null) {
-                            CDELog.d(TAG, "Response Body: " + new String(dataEntity.getData()));
+                            CDELog.d(TAG, "response body: " + new String(dataEntity.getData()));
                         }
                         result = drmInstance.ANDROID_DRM_ProcessLicenseResponse(context, dataEntity.getResult(), dataEntity.getDataLength(), dataEntity.getData());
                     }
@@ -130,6 +130,7 @@ public class KANTVDRMManager {
         CDELog.d(TAG, "enter closePlaybackService");
         CDEUtils.setOfflineDRM(false);
         drmInstance.ANDROID_DRM_CloseSession(playbackSessionHandle);
+        CDELog.d(TAG, "leave closePlaybackService");
 
         return 0;
     }
@@ -155,10 +156,10 @@ public class KANTVDRMManager {
     }
 
     public static int setDrmInfo(byte[] pmtSection) {
-        String watermarkContentID = "networkContentId002";
+        String watermarkContentID = "12345678";
         int result = drmInstance.ANDROID_DRM_SetDrmInfo(playbackSessionHandle, pmtSection, pmtSection.length, watermarkContentID);
         if (result != 0 && result != -2)
-            CDELog.d(TAG, "setDrmInfo error." + result);
+            CDELog.d(TAG, "ANDROID_DRM_SetDrmInfo return:" + result);
         return result;
     }
 
@@ -172,7 +173,7 @@ public class KANTVDRMManager {
 
     public static int parseData(byte[] nalUnits, int length, CDECryptoInfo cryptoInfo) {
         if (0 != drmInstance.ANDROID_DRM_ParseData(playbackSessionHandle, nalUnits, length, cryptoInfo)) {
-            CDELog.j(TAG, "parseData failed");
+            CDELog.j(TAG, "ANDROID_DRM_ParseData failed");
         }
         return 0;
     }
