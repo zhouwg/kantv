@@ -4,3 +4,6 @@
 [submodule "FFmpeg"]
 	path = external/FFmpeg
 	url = https://github.com/zhouwg/FFmpeg
+[submodule "external/gstreamer"]
+	path = external/gstreamer
+	url = https://github.com/zhouwg/gstreamer
