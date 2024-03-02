@@ -258,16 +258,16 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/zhouwg/kantv/issues/27">this issue</a>)
 
- - upload test.m3u to your http server like this
+ - upload test.m3u to local http server like this
 
 ```
- test.m3u                  ->   http(s)://your_http_server/kantv/epg/test.m3u
+ test.m3u                  ->   http(s)://local_http_server/kantv/epg/test.m3u
 ```
 
 
 ### How to integrate proprietary native libs with project KanTV for proprietary R&D activity
 
-For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
+For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate proprietary native libs with project KanTV for proprietary R&D activity</a>
 
 
 ### Support
