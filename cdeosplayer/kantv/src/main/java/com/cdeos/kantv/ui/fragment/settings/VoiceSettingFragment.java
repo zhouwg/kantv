@@ -54,7 +54,7 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
 
     @Override
     public String getTitle() {
-        return "语音设置";
+        return mActivity.getBaseContext().getString(R.string.asr_settings);
     }
 
     @Override
