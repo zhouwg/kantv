@@ -134,7 +134,7 @@ English UI(英文界面，海外地区默认为英文界面）
 -------------------------------------------------------------
 ![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
-![Screenshot_20240301_000515_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/bfbc2521-b119-4f47-84e6-7f60e65fe100)
+![990238413](https://github.com/zhouwg/kantv/assets/6889919/44054d57-0149-4d45-8762-46ec80682c66)
 ![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
 ![Screenshot_20240301_114125_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/d382cad8-513e-454e-88e5-a624c40ae355)
