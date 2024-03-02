@@ -159,7 +159,7 @@ git checkout kantv
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/kantv/release/kantv-latest.apk)
 
 
-### Run kantv apk on real Android phone
+### Run Android APK on real Android phone
 
 This apk follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
 
