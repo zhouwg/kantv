@@ -156,7 +156,7 @@ git checkout kantv
 
   Please attention ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
 
-- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/kantv/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contain **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
+- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/kantv/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
 
 
 ### Run Android APK on real Android phone
