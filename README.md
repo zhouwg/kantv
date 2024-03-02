@@ -267,9 +267,9 @@ or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv"
 ```
 
 
-### How to integrate proprietary native libs with project KanTV for proprietary R&D activity
+### How to integrate proprietary codes with project KanTV for proprietary R&D activity
 
-For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate proprietary native libs for proprietary R&D activity</a>
+For AI expert who want to integrate **proprietary codes**(which contains IPR and consists of Java/JNI/native...) to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate proprietary codes for proprietary R&D activity</a>
 
 
 ### Support
