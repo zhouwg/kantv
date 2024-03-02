@@ -152,14 +152,11 @@ git checkout kantv
 
 #### Build Android APK
 
+Build apk from source code by Android Studio IDE manually.
 
-Build apk by latest Android Studio IDE.
+Commenting out ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) will significantly reduce the size of the generated APK。
 
- 
-### Prebuit KanTV Android APK
-
-> The latest prebuit KanTV apk is about 37M.[![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
-
+Latest prebuit KanTV apk could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/blob/kantv/release/kantv-latest.apk?raw=true)
 
 ### How to setup customized KanTV server in your local development env
 
