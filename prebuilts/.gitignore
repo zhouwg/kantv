@@ -1,6 +1,13 @@
 out
 build
+
 deepspeech-0.9.3-models.scorer
+
 fastspeech2_cnndecoder_csmsc_pdlite_1.3.0.zip
 mb_melgan_csmsc_pdlite_1.3.0.zip
 
+fastspeech2_cnndecoder_csmsc_pdlite_1.3.0
+mb_melgan_csmsc_pdlite_1.3.0
+
+fastspeech2_csmsc_arm.nb
+mb_melgan_csmsc_arm.nb
