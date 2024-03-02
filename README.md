@@ -133,7 +133,6 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 #### Fetch source codes
 
-
 For KanTV Android APK developers,
 
 ```
@@ -150,6 +149,7 @@ cd kantv
 git checkout kantv
 ```
 
+
 #### Build Android APK
 
 - Build APK from source code by Android Studio IDE manually.
@@ -157,6 +157,55 @@ git checkout kantv
   Please attention that commen out ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) will significantly reduce the size of the generated APK(from 90M to 40M).
 
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/kantv/release/kantv-latest.apk)
+
+
+### Run kantv apk on real Android phone
+
+This apk follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
+
+- Access to storage is required to generate necessary temporary files
+- Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
+
+The following is some English snapshots.
+
+![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
+![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
+![Screenshot_20240301_000515_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/bfbc2521-b119-4f47-84e6-7f60e65fe100)
+
+
+
+![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
+![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
+![942275970](https://github.com/zhouwg/kantv/assets/6889919/65878537-fa82-4e60-a454-5ed6a154ca86)
+
+
+
+![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
+![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
+
+
+Other English and Chinese snapshots could be found in ![release directory](https://github.com/zhouwg/kantv/tree/kantv/release).
+
+
+### ChangeLog
+
+Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/release/README.md">here</a>.
+
+
+### Roadmap
+
+- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
+
+- real-time subtitle(English / Chinese) with online TV (by ![DeepSpeech](https://github.com/zhouwg/DeepSpeech)  /  ![whisper.cpp](https://github.com/zhouwg/whisper.cpp))
+
+- real-time advertisement analysis and illegal advertisement removal
+
+- other device-side AI feature
+
+- UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
+
+- ...
+
 
 ### How to setup customized KanTV server in your local development env
 
@@ -216,61 +265,9 @@ or just fetch your favourite playlist from <a href="https://github.com/iptv-org/
 ```
 
 
-
-
 ### How to integrate your proprietary native libs with project KanTV for your R&D activity
 
 For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
-
-
-
-### Run kantv apk on real Android phone
-
-This apk follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
-
-- Access to storage is required to generate necessary temporary files
-- Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
-
-The following is some English snapshots.
-
-![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
-![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
-![Screenshot_20240301_000515_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/bfbc2521-b119-4f47-84e6-7f60e65fe100)
-
-
-
-![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
-![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
-![942275970](https://github.com/zhouwg/kantv/assets/6889919/65878537-fa82-4e60-a454-5ed6a154ca86)
-
-
-
-![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
-![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
-
-
-Other English and Chinese snapshots could be found in ![release directory](https://github.com/zhouwg/kantv/tree/kantv/release).
-
-
-### ChangeLog
-
-Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/release/README.md">here</a>.
-
-
-
-### Roadmap
-
-- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
-
-- real-time subtitle(English / Chinese) with online TV (by ![DeepSpeech](https://github.com/zhouwg/DeepSpeech)  /  ![whisper.cpp](https://github.com/zhouwg/whisper.cpp))
-
-- real-time advertisement analysis and illegal advertisement removal
-
-- other device-side AI feature
-
-- UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
-
-- ...
 
 
 ### Support
