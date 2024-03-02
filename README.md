@@ -211,7 +211,7 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
  - setup a http server(by apache or nginx) in local development env
 
- - modify kant server address in app(recommend)
+ - modify kant server address in app
 
 ![1370107702](https://github.com/zhouwg/kantv/assets/6889919/1e994269-28be-4513-9f74-3973269b8832)
 
@@ -231,7 +231,7 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 ### How to create customized playlist for kantv apk
 
-- create **test.m3u**(recommend name or hardcode in source code) like this:
+- create **test.m3u**(recommend name and it's hardcoded in source code) like this:
 
 ```
   #EXTM3U
@@ -278,11 +278,11 @@ For AI expert who want to integrate **proprietary native libs** to customized/de
 
 ### Contribution
 
- If you want to contribute to project KanTV, be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue).We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
 
- Great welcome if you report issue in various Android-based phone or even submit PR to this project.
+Report issue in various Android-based phone or even submit PR to this project is great welcomed.
 
- **English** is preferred in this project. thank your for your cooperation and appreciate your understanding.
+ **English** is preferred in this project. thanks for cooperation and understanding.
 
 ### Acknowledgement
 
