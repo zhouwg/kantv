@@ -2,7 +2,7 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many enhancements:
 
-- Watch online TV(by customized ![FFmpeg](https://github.com/zhouwg/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/zhouwg/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer could be found within source code of this project)
+- Watch online TV(by customized ![FFmpeg](https://github.com/zhouwg/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/zhouwg/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
 
 - Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR)
 
