@@ -101,7 +101,7 @@ echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
   
   [Android NDK-r21e](https://developer.android.com/ndk/downloads)
 
-bazel and Android NDK aren't used currently but put them here for further usage in the future.Of course, you can **skip these two steps** currently.
+bazel and Android NDK aren't used currently but put them here for further usage in the future.Of course, **these two steps could be skipped** currently.
 
 
 - vim settings
@@ -207,26 +207,26 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 - ...
 
 
-### How to setup customized KanTV server in your local development env
+### How to setup customized KanTV server in local development env
 
- - setup a http server(by apache or nginx) in your local development env
+ - setup a http server(by apache or nginx) in local development env
 
  - modify kant server address in app(recommend)
 
 ![1370107702](https://github.com/zhouwg/kantv/assets/6889919/1e994269-28be-4513-9f74-3973269b8832)
 
- - upload required files to your http server like this(dependent files for DeepSpeech could be found <a href="https://github.com/mozilla/DeepSpeech/releases/tag/v0.9.3">here</a>)
+ - upload required files to local http server like this(dependent files for DeepSpeech could be found <a href="https://github.com/mozilla/DeepSpeech/releases/tag/v0.9.3">here</a>)
 ```
-   apk ->                              http(s)://your_http_server/kantv/apk/kantv-latest.apk
-   apk version ->                      http(s)://your_http_server/kantv/apk/kantv-version.txt
-   audio.wav  ->                       http(s)://your_http_server/kantv/deepspeech/audio.wav
-   deepspeech-0.9.3-models.tflite ->   http(s)://your_http_server/kantv/deepspeech/deepspeech-0.9.3-models.tflite
-   deepspeech-0.9.3-models.scorer ->   http(s)://your_http_server/kantv/deepspeech/deepspeech-0.9.3-models.scorer
+   apk ->                              http(s)://local_http_server/kantv/apk/kantv-latest.apk
+   apk version ->                      http(s)://local_http_server/kantv/apk/kantv-version.txt
+   audio.wav  ->                       http(s)://local_http_server/kantv/deepspeech/audio.wav
+   deepspeech-0.9.3-models.tflite ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.tflite
+   deepspeech-0.9.3-models.scorer ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.scorer
   
 
-   something for whisper.cpp      ->   http(s)://your_http_server/kantv/whisper/something
+   something for whisper.cpp      ->   http(s)://local_http_server/kantv/whisper/something
 
-   something for paddlespeech     ->   http(s)://your_http_server/kantv/paddlespeech/something
+   something for paddlespeech     ->   http(s)://local_http_server/kantv/paddlespeech/something
 ```
 
 ### How to create customized playlist for kantv apk
@@ -236,19 +236,19 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 ```
   #EXTM3U
   #EXTINF:-1,hls
-  http(s)://your_http_server/kantv/media/test.hls
+  http(s)://local_http_server/kantv/media/test.hls
   #EXTINF:-1,dash
-  http(s)://your_http_server/kantv/media/test.dash
+  http(s)://local_http_server/kantv/media/test.dash
   #EXTINF:-1,rtmp
-  http(s)://your_http_server/kantv/media/test.rtmp
+  http(s)://local_http_server/kantv/media/test.rtmp
   #EXTINF:-1,webrtc
-  http(s)://your_http_server/kantv/media/test.rtc
+  http(s)://local_http_server/kantv/media/test.rtc
   #EXTINF:-1,hevc(h265)
-  http(s)://your_http_server/kantv/media/test.hevc
+  http(s)://local_http_server/kantv/media/test.hevc
   #EXTINF:-1,h266
-  http(s)://your_http_server/kantv/media/test.h266
+  http(s)://local_http_server/kantv/media/test.h266
   #EXTINF:-1,av1
-  http(s)://your_http_server/kantv/media/test.av1
+  http(s)://local_http_server/kantv/media/test.av1
   #EXTINF:-1,testvideo-1 (pls attention following path is start with /)
   /test.mp4
   #EXTINF:-1,testvideo-2
@@ -256,7 +256,7 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 ```
 
-or just fetch your favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/zhouwg/kantv/issues/27">this issue</a>)
+or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/zhouwg/kantv/issues/27">this issue</a>)
 
  - upload test.m3u to your http server like this
 
@@ -265,7 +265,7 @@ or just fetch your favourite playlist from <a href="https://github.com/iptv-org/
 ```
 
 
-### How to integrate your proprietary native libs with project KanTV for your R&D activity
+### How to integrate proprietary native libs with project KanTV for proprietary R&D activity
 
 For AI expert who want to integrate **proprietary native libs** to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate your proprietary native libs with project KanTV for your R&D activity</a>
 
