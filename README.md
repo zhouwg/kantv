@@ -154,7 +154,7 @@ git checkout kantv
 
 - Build APK from source code by Android Studio IDE manually.
 
-  Please attention that commen out ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) will significantly reduce the size of the generated APK(from 90M to 40M).
+  Please attention ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
 
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/kantv/release/kantv-latest.apk)
 
