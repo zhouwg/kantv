@@ -128,11 +128,15 @@
          _pageInfo = (TextView) mActivity.findViewById(R.id.pageinfo);
 
 
-         //following lines works fine when put model file and audio file in directory src/main/assets, but the generated apk would be very big(about 80M)
-         //comment following lines and put model file in remote server and download model file in "ASR Setting" and remove model file
-         //in directory src/main/assets, then the size of generated apk would be 38M.
-         CDEAssetLoader.copyAssetFile(mContext, modelFileName, CDEUtils.getDataPath(mContext) + modelFileName);
-         CDEAssetLoader.copyAssetFile(mContext, audioFileName, CDEUtils.getDataPath(mContext) + audioFileName);
+         //the dependent files(audio file audio.wav and model file deepspeech-0.9.3-models.tflite) of DeepSpeech are located at directory $PROJECT_ROOT_PATH/prebuilts
+         //uncomment following lines and copy dependent files of DeepSpeech from $PROJECT_ROOT_PATH/prebuilts  to $PROJECT_ROOT_PATH/cdeosplayer/kantv/src/main/assets
+         //the generated apk would be very big(about 90M)
+         //CDEAssetLoader.copyAssetFile(mContext, modelFileName, CDEUtils.getDataPath(mContext) + modelFileName);
+         //CDEAssetLoader.copyAssetFile(mContext, audioFileName, CDEUtils.getDataPath(mContext) + audioFileName);
+         //the generated apk would be about 38M if you don't uncomment above two lines and download model file in "ASR Setting" was required when running the APK on phone
+         
+         //network bandwidth of default kantvserver is very low due to insufficient fund. so you should upload the dependent files of DeepSpeech to your local kantvserver
+         //according to steps in $PROJECT_ROOT_PATH/README.md
 
          _asrInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 
