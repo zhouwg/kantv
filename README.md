@@ -209,6 +209,8 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 ### How to setup customized KanTV server in local development env
 
+The computing power and network bandwidth of default kantvserver is very low due to insufficient fund, so setup a local End-2-End development env is strongly recommended.
+
  - setup a http server(by apache or nginx) in local development env
 
  - modify kant server address in app
