@@ -138,7 +138,7 @@ For KanTV Android APK developers,
 ```
 git clone https://github.com/zhouwg/kantv.git
 cd kantv
-git checkout kantv
+git checkout master
 ```
 
 For other developers,
@@ -146,7 +146,7 @@ For other developers,
 ```
 git clone --recurse-submodules https://github.com/zhouwg/kantv.git
 cd kantv
-git checkout kantv
+git checkout master
 ```
 
 
