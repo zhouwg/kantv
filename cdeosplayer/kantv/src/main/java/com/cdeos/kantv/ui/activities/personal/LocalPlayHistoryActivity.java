@@ -44,7 +44,7 @@ public class LocalPlayHistoryActivity extends BaseMvcActivity {
 
     @Override
     public void initPageView() {
-        setTitle("播放历史");
+        setTitle("Playback history");
 
         historyList = new ArrayList<>();
 
@@ -58,7 +58,7 @@ public class LocalPlayHistoryActivity extends BaseMvcActivity {
                         for (LocalPlayHistoryBean historyBean : historyList) {
                             historyBean.setDeleteMode(true);
                         }
-                        setTitle("删除播放历史");
+                        setTitle("delete playback history");
                         menuDeleteCheckedItem.setVisible(true);
                         menuDeleteCancelItem.setVisible(true);
                         menuDeleteAllItem.setVisible(false);
@@ -150,7 +150,7 @@ public class LocalPlayHistoryActivity extends BaseMvcActivity {
                     historyBean.setDeleteMode(false);
                     historyBean.setChecked(false);
                 }
-                setTitle("本地播放历史");
+                setTitle("Playback history");
                 menuDeleteCheckedItem.setVisible(false);
                 menuDeleteCancelItem.setVisible(false);
                 menuDeleteAllItem.setVisible(true);
@@ -175,7 +175,7 @@ public class LocalPlayHistoryActivity extends BaseMvcActivity {
                 if (isRemove) {
                     adapter.notifyDataSetChanged();
                 } else {
-                    ToastUtils.showShort("未选中播放记录");
+                    ToastUtils.showShort("history item was not selected");
                 }
                 break;
         }

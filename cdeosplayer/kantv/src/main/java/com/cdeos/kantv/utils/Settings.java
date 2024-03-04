@@ -41,8 +41,8 @@ public class Settings {
     private Context mAppContext;
     private SharedPreferences mSharedPreferences;
 
-    public static final int KANTV_UILANG_CN = 0;
-    public static final int KANTV_UILANG_EN = 1;
+    public static final int KANTV_UILANG_CN = 1;
+    public static final int KANTV_UILANG_EN = 0;
 
     public Settings(Context context) {
         mAppContext = context.getApplicationContext();
@@ -60,7 +60,7 @@ public class Settings {
         try {
             return Integer.valueOf(value).intValue();
         } catch (NumberFormatException e) {
-            CDELog.j(TAG, "expection occured");
+            CDELog.j(TAG, "exception occurred");
             return 0;
         }
     }
@@ -77,7 +77,7 @@ public class Settings {
 
     public void updateUILang(AppCompatActivity activity) {
         int current_lang = getUILang();
-        //CDELog.j(TAG, "user's seletion lang: " + current_lang);
+        CDELog.j(TAG, "user's selection lang: " + current_lang);
         String lang = "en";
         if (KANTV_UILANG_CN == current_lang)
             lang = "zh";
@@ -89,13 +89,13 @@ public class Settings {
         Locale myLocale;
         Resources res = activity.getResources();
         String country = res.getConfiguration().locale.getCountry();
-        //CDELog.j(TAG, "current country: " + country);
+        CDELog.j(TAG, "current country: " + country);
         DisplayMetrics dm = res.getDisplayMetrics();
         Configuration conf = res.getConfiguration();
         if (KANTV_UILANG_CN == current_lang) {
             if ((country == null) || country.isEmpty()) {
-                //CDELog.j(TAG, "can't get current country, set lang to chinese");
-                myLocale = new Locale("zh");
+                CDELog.j(TAG, "can't get current country, set lang to english");
+                myLocale = new Locale("en");
             } else if (country.contains("CN")) {
                 CDELog.j(TAG, "set lang to chinese");
                 myLocale = new Locale("zh");

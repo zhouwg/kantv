@@ -138,12 +138,12 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
                             || (asrModelFile == null) || (!asrModelFile.exists())
             ) {
                 DownloadModel manager = new DownloadModel(mActivity);
-                manager.setTitle("开始下载ASR模型");
+                manager.setTitle("begin download ASR model");
                 manager.setModeName("ASR");
                 manager.setModeName("deepspeech", "audio.wav", "deepspeech-0.9.3-models.tflite");
                 manager.showUpdateDialog();
             } else {
-                Toast.makeText(mContext, "ASR模型文件已经存在", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "ASR model file already exist", Toast.LENGTH_SHORT).show();
             }
 
 
@@ -166,12 +166,12 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
             ) {
 
                 DownloadModel manager = new DownloadModel(mActivity);
-                manager.setTitle("开始下载TTS模型");
+                manager.setTitle("begin download TTS model");
                 manager.setModeName("TTS");
                 manager.setModeName("paddlespeech", "mb_melgan_csmsc_arm.nb", "fastspeech2_csmsc_arm.nb");
                 manager.showUpdateDialog();
             } else {
-                Toast.makeText(mContext, "TTS模型文件已经存在", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "TTS model file already exist", Toast.LENGTH_SHORT).show();
             }
 
         }

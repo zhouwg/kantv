@@ -20,7 +20,7 @@
                 android:textColor="@color/text_white"
                 android:layout_marginTop="5dp"
                 android:textSize="16sp"
-                android:text="音视频"/>
+                android:text="A/V"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -35,7 +35,7 @@
                     android:textColor="@color/text_white"
                     android:layout_centerVertical="true"
                     android:textSize="14sp"
-                    android:text="显示媒体信息"/>
+                    android:text="Display playback info"/>
 
                 <Switch
                     android:id="@+id/landscape_change_sw"
@@ -58,7 +58,7 @@
                     android:textColor="@color/text_white"
                     android:layout_centerVertical="true"
                     android:textSize="14sp"
-                    android:text="视频录制"/>
+                    android:text="Record media"/>
 
                 <Switch
                     android:id="@+id/tv_recording_sw"
@@ -82,7 +82,7 @@
                     android:textColor="@color/text_white"
                     android:layout_centerVertical="true"
                     android:textSize="14sp"
-                    android:text="允许屏幕自动翻转"/>
+                    android:text="Allow auto-flip screen"/>
 
                 <Switch
                     android:id="@+id/orientation_change_sw"
@@ -99,7 +99,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="10dp"
                 android:textSize="14sp"
-                android:text="视频尺寸"/>
+                android:text="Video aspect"/>
 
             <RadioGroup
                 android:id="@+id/aspect_ratio_group"
@@ -145,7 +145,7 @@
                     android:layout_marginStart="10dp"
                     android:textColor="@color/text_white"
                     android:textSize="14sp"
-                    android:text="播放速度"/>
+                    android:text="Playback speed"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -243,7 +243,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginStart="10dp"
                     android:textSize="14sp"
-                    android:text="音频流"/>
+                    android:text="Audio track"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/audio_track_rv"

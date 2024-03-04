@@ -107,7 +107,7 @@ public class VideoScanFragment extends BaseMvpFragment<VideoScanFragmentPresente
     public void addPath(String path){
         for (ScanFolderBean bean : folderList){
             if (path.contains(bean.getFolder())){
-                ToastUtils.showShort("已在扫描范围内");
+                ToastUtils.showShort("already in scanning");
                 return;
             }
         }

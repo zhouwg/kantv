@@ -140,9 +140,9 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
     public void onResume() {
         super.onResume();
         if (mEPGDataLoadded) {
-            CDELog.d(TAG, "epg data already loadded");
+            CDELog.d(TAG, "epg data already loaded");
         } else {
-            CDELog.d(TAG, "epg data not loadded");
+            CDELog.d(TAG, "epg data not loaded");
             loadEPGData();
             mEPGDataLoadded = true;
             layoutUI(mActivity);

@@ -130,7 +130,7 @@ public class WebViewActivity extends BaseMvcActivity {
                     setResult(RESULT_OK, intent);
                     WebViewActivity.this.finish();
                 } else {
-                    ToastUtils.showShort("url不能为空");
+                    ToastUtils.showShort("url is not empty");
                 }
                 break;
         }

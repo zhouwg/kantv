@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/action_start_benchmark"
-        android:title="设备信息"
+        android:title="device info"
         app:showAsAction="never" />
 
 </menu>

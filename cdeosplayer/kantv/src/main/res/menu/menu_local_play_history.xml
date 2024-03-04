@@ -4,18 +4,18 @@
     <item
         android:id="@+id/item_delete_checked"
         android:orderInCategory="100"
-        android:title="删除"
+        android:title="Delete"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/item_delete_cancel"
         android:orderInCategory="100"
-        android:title="取消"
+        android:title="Cancel"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/item_delete_all"
         android:orderInCategory="100"
-        android:title="清空"
+        android:title="Clean All"
         app:showAsAction="ifRoom" />
 </menu>

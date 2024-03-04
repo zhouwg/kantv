@@ -226,13 +226,13 @@ public class SoftwareUpgrade {
 
     private void showDownloadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("软件版本更新");
+        builder.setTitle("software upgrade");
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View v = inflater.inflate(R.layout.progress_bar, null);
         mProgress = (ProgressBar) v.findViewById(R.id.progress);
         mTextSpeed = (TextView) v.findViewById(R.id.txtSpeed);
         builder.setView(v);
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 intercept = true;

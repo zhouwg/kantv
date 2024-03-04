@@ -188,7 +188,7 @@ public class SystemSettingFragment extends BaseSettingsFragment {
                 ttsModelFile2.delete();
             }
 
-            Toast.makeText(mContext, "清理缓存完成", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "clean up cache done", Toast.LENGTH_LONG).show();
             return true;
         });
 
@@ -204,7 +204,7 @@ public class SystemSettingFragment extends BaseSettingsFragment {
         if (findPreference("aboutkantv") != null) {
             findPreference("aboutkantv").setOnPreferenceClickListener(preference -> {
                 Intent intent_about = new Intent(view.getContext(), WebViewActivity.class);
-                intent_about.putExtra("title", "关于本软件");
+                intent_about.putExtra("title", "about KanTV");
                 intent_about.putExtra("link", "http://" + CDEUtils.getKANTVMasterServer() + "/aboutkantv.html");
                 startActivity(intent_about);
                 return true;
@@ -214,7 +214,7 @@ public class SystemSettingFragment extends BaseSettingsFragment {
         if (findPreference("aboutauthorinfo") != null) {
             findPreference("aboutauthorinfo").setOnPreferenceClickListener(preference -> {
                 Intent intent_about = new Intent(view.getContext(), WebViewActivity.class);
-                intent_about.putExtra("title", "软件官网");
+                intent_about.putExtra("title", "official website");
                 intent_about.putExtra("link", "http://www.cde-os.com");
                 startActivity(intent_about);
                 return true;
