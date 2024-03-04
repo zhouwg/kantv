@@ -290,7 +290,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg and other excellent projects. 
 
-The KanTV has used/tried following open-source projects:
+Project KanTV has used/tried following open-source projects:
 <ul>
  	<li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
  	<li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
