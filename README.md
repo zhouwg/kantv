@@ -176,7 +176,7 @@ The following is some English snapshots.
 
 ![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
-![942275970](https://github.com/zhouwg/kantv/assets/6889919/65878537-fa82-4e60-a454-5ed6a154ca86)
+![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
 
 
