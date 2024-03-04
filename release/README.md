@@ -127,6 +127,8 @@
 
 - v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity. today is Friday and have a good weekend)
 
+- v1.29 2024-03-04, set English as default UI language.
+
 
 ### Screenshots(一些屏幕截图）
 
@@ -137,7 +139,9 @@ English UI(英文界面，海外地区默认为英文界面）
 ![990238413](https://github.com/zhouwg/kantv/assets/6889919/44054d57-0149-4d45-8762-46ec80682c66)
 ![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
-![Screenshot_20240301_114125_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/d382cad8-513e-454e-88e5-a624c40ae355)
+
+![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
+
 ![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
 ![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
