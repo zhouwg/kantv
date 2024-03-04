@@ -93,7 +93,7 @@
             android:src="@drawable/sel_player_setting" />
     </LinearLayout>
 
-    <!--视频设置-->
+
     <com.cdeos.kantv.player.common.widgets.SettingPlayerView
         android:id="@+id/player_setting_view"
         android:layout_width="300dp"
@@ -104,7 +104,6 @@
 
     </com.cdeos.kantv.player.common.widgets.SettingPlayerView>
 
-    <!--字幕设置-->
     <com.cdeos.kantv.player.common.widgets.SettingSubtitleView
         android:id="@+id/subtitle_setting_view"
         android:layout_width="300dp"

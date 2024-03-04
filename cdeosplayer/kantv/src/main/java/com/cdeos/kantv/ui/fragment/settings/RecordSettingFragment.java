@@ -187,12 +187,12 @@ public class RecordSettingFragment extends BaseSettingsFragment {
 
             if (key.contains("pref.record_thresholddisksize")) {
                 String recordSizeString = mSettings.getThresholddisksizeString();
-                CDELog.d(TAG, "thresold size: " + recordSizeString);
+                CDELog.d(TAG, "threshold size: " + recordSizeString);
                 Pattern pattern = Pattern.compile("[0-9]*");
                 Matcher isNum = pattern.matcher(recordSizeString);
                 if (!isNum.matches()) {
                     CDELog.d(TAG, "user's input is invalid");
-                    Toast.makeText(mContext, "无效的数值 " + recordSizeString, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "invalid value " + recordSizeString, Toast.LENGTH_LONG).show();
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     key = mContext.getString(R.string.pref_key_record_thresholddisksize);
                     editor.putString(key, "500");
@@ -253,7 +253,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                         editor.putString(key, "0"); //H264
                         editor.commit();
                         mWidgetRecordCodec.setValue("0");
-                        Toast.makeText(mContext, "当前只能使用H264/H265编码", Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "only H264/H265 is available", Toast.LENGTH_LONG).show();
                         return;
                     }
                 }
@@ -278,7 +278,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                 Matcher isNum = pattern.matcher(durationRecordESString);
                 if (!isNum.matches()) {
                     CDELog.d(TAG, "user's input is invalid");
-                    Toast.makeText(mContext, "无效的时间 " + durationRecordESString, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "invalid time " + durationRecordESString, Toast.LENGTH_LONG).show();
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     key = mAppContext.getString(R.string.pref_key_record_duration);
                     editor.putString(key, "3");
@@ -310,7 +310,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                 Matcher isNum = pattern.matcher(recordSizeString);
                 if (!isNum.matches()) {
                     CDELog.d(TAG, "user's input is invalid");
-                    Toast.makeText(mContext, "无效的数值 " + recordSizeString, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "invalid value " + recordSizeString, Toast.LENGTH_LONG).show();
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     key = mAppContext.getString(R.string.pref_key_record_size);
                     editor.putString(key, "20");
@@ -392,8 +392,8 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            String benchmarkTip = strBenchmarkInfo + "\n" + "第" + benchmarkIndex + "项测试耗时:" + duration + "毫秒";
-                            String benchmarkTip1 = strBenchmarkInfo + ",第" + benchmarkIndex + "项测试耗时:" + duration + "毫秒" + ",总耗时:" + totalDuration + "毫秒";
+                            String benchmarkTip = strBenchmarkInfo + "\n" + "Item " + benchmarkIndex + " cost :" + duration + "milliseconds";
+                            String benchmarkTip1 = strBenchmarkInfo + ",Item " + benchmarkIndex + " cost :" + duration + "milliseconds" + ", total time:" + totalDuration + "milliseconds";
                             CDELog.j(TAG, benchmarkTip1);
                             if ((mWidgetBenchmarkStatus != null) && (benchmarkIndex <= 10) && (mProgressDialog != null)) {
                                 strBenchmarkReport += benchmarkTip + "\n";
@@ -462,7 +462,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                 }
                 CDELog.j(TAG, "benchmarkIndex: " + benchmarkIndex);
                 CDELog.j(TAG, "benchmark report:" + strBenchmarkReport);
-                String benchmarkTip1 = "完成" + benchmarkIndex + "项测试,总耗时:" + totalDuration + "毫秒";
+                String benchmarkTip1 = "finish " + benchmarkIndex + " items, total cost:" + totalDuration + " milliseconds";
                 CDELog.j(TAG, benchmarkTip1);
                 mWidgetBenchmark.setEnabled(true);
             }
@@ -474,46 +474,46 @@ public class RecordSettingFragment extends BaseSettingsFragment {
         int durationPerItem = 0;
         int durations = 0;
         if (totalDuration == 0) {
-            benchmarkTip = "您尚未完成手机性能测试";
+            benchmarkTip = "you canceled the benchmark";
         } else {
-            benchmarkTip = "您完成了" + benchmarkIndex + "项性能测试" + "\n" + "总耗时" + totalDuration + "毫秒(1秒=1000毫秒)";
+            benchmarkTip = "you finished " + benchmarkIndex + " items" + "\n" + "total cost " + totalDuration + "milliseconds";
             durations = totalDuration / 1000;
 
             if (benchmarkIndex > 0)
                 durationPerItem = durations / benchmarkIndex;
 
-            benchmarkTip += "\n" + "单项测试平均耗时" + durationPerItem + "秒";
+            benchmarkTip += "\n" + "single item cost " + durationPerItem + " seconds";
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString("pref.recordBenchmark", String.valueOf(durationPerItem));
             editor.commit();
             CDELog.j(TAG, "pref.recordBenchmark=" + mSettings.getRecordBenchmark());
 
             if (durationPerItem <= 1) {
-                benchmarkTip += "\n" + "恭贺您，您的手机性能非常不错";
+                benchmarkTip += "\n" + "performance of your phone seems good";
             } else if ((durationPerItem >= 2) && (durationPerItem < 4)) {
-                benchmarkTip += "\n" + "您的手机性能很不错";
+                benchmarkTip += "\n" + "performance of your phone seems well";
             } else if ((durationPerItem >= 4) && (durationPerItem < 6)) {
-                benchmarkTip += "\n" + "您的手机性能不错";
+                benchmarkTip += "\n" + "performance of your phone seems very good";
             } else if ((durationPerItem >= 6) && (durationPerItem < 9)) {
-                benchmarkTip += "\n" + "您的手机速度可能比较慢";
+                benchmarkTip += "\n" + "performance of your phone seems not good";
             } else if ((durationPerItem >= 9) && (durationPerItem < 12)) {
-                benchmarkTip += "\n" + "您的手机可能很慢";
+                benchmarkTip += "\n" + "performance of your phone seems a little slow";
             } else if (durationPerItem >= 12) {
-                benchmarkTip += "\n" + "您的手机可能非常慢";
+                benchmarkTip += "\n" + "performance of your phone seems very slow";
             }
 
-            benchmarkTip += "\n\n" + "KanTV视频录制提示:AV1编码非常耗时，H265编码也很耗时";
+            benchmarkTip += "\n\n";
 
         }
         CDELog.j(TAG, benchmarkTip);
-        CDELog.j(TAG, "单项测试耗时:" + durationPerItem + "秒");
+        CDELog.j(TAG, "single item cost:" + durationPerItem + " seconds");
         CDEUtils.umRecordBenchmark(benchmarkIndex, totalDuration, durationPerItem);
         showBenchmarkResult(mActivity, benchmarkTip);
     }
 
     private void showBenchmarkResult(Context context, String benchmarkInfo) {
         new AlertDialog.Builder(context)
-                .setTitle("您的手机性能测试报告")
+                .setTitle("result of performance benchmark")
                 .setMessage(benchmarkInfo)
                 .setCancelable(true)
                 .setNegativeButton(context.getString(R.string.OK),

@@ -111,7 +111,7 @@ public class DownloadModel {
         builder.setTitle(title);
         builder.setMessage("");
         builder.setCancelable(true);
-        builder.setPositiveButton("下载", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Download", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 updateDialog.dismiss();
@@ -132,13 +132,13 @@ public class DownloadModel {
 
     private void showDownloadDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setTitle("下载" + modelName + "模型");
+        builder.setTitle("Download " + modelName + " model");
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View v = inflater.inflate(R.layout.progress_bar, null);
         mProgress = (ProgressBar) v.findViewById(R.id.progress);
         mTextSpeed = (TextView) v.findViewById(R.id.txtSpeed);
         builder.setView(v);
-        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 intercept = true;
@@ -257,9 +257,9 @@ public class DownloadModel {
                     (fileA == null) || (!fileA.exists())
                             || (fileB == null) || (!fileB.exists())
             ) {
-                Toast.makeText(mContext, modelName + "模型文件下载失败", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(mContext, modelName + "模型文件下载成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
             }
 
 

@@ -131,14 +131,14 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     @Override
                     public void onNext(Boolean granted) {
                         if (granted) {
-                            CDELog.j(TAG, "init scan foler");
+                            CDELog.j(TAG, "init scan folder");
                             presenter.initScanFolder();
                             if (LocalMediaFragment != null) {
                                 LocalMediaFragment.initVideoData();
                             }
                         } else {
-                            ToastUtils.showLong("未授予文件管理权限，无法扫描视频");
-                            CDELog.j(TAG, "未授予文件管理权限，无法扫描视频");
+                            ToastUtils.showLong("can't scan video because required permission was not granted");
+                            CDELog.j(TAG, "can't scan video because required permission was not granted");
                         }
                     }
 
@@ -268,7 +268,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
         CDEUtils.dumpDeviceInfo();
 
         if (CDEUtils.isEmulator(this)) {
-            showWarningDialog(this, "无法在模拟器中运行本软件");
+            showWarningDialog(this, "can't running this app in emulator");
             navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_epglist).setEnabled(false);
@@ -281,7 +281,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             //if (CDEUtils.isAppDebuggable(this) || CDEUtils.isDebuggerAttached())
             if (false)
             {
-                showWarningDialog(this, "本软件可能处于被调试状态，您将无法正常使用本软件");
+                showWarningDialog(this, "warning:the app seems running within debugger");
                 navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_epglist).setEnabled(false);
@@ -370,7 +370,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
     private void showWarningDialog(Context context, String warningInfo) {
         new AlertDialog.Builder(this)
-                .setTitle("提示信息")
+                .setTitle("Tip")
                 .setMessage(warningInfo)
                 .setCancelable(true)
                 .setNegativeButton(context.getString(R.string.OK),

@@ -105,7 +105,7 @@ public class LocalMediaFragment extends BaseMvpFragment<LocalMediaFragmentPresen
                         })
                         .setAutoDismiss()
                         .build()
-                        .show("确认删除文件夹 [" + title + "] 内视频文件？");
+                        .show("confirm to delete video files in [" + title + "]？");
             }
 
             @Override
@@ -119,7 +119,7 @@ public class LocalMediaFragment extends BaseMvpFragment<LocalMediaFragmentPresen
                         })
                         .setAutoDismiss()
                         .build()
-                        .show("确认屏蔽文件夹 [" + title + "]及其子文件夹？");
+                        .show("confirm to shield video files in [" + title + "]？");
             }
         };
 
@@ -270,7 +270,7 @@ public class LocalMediaFragment extends BaseMvpFragment<LocalMediaFragmentPresen
                         if (granted) {
                             presenter.refreshVideo(getContext(), reScan);
                         } else {
-                            ToastUtils.showLong("未授予文件管理权限，无法扫描视频");
+                            ToastUtils.showLong("can't scan video files because required permission was not granted");
                             refresh.setRefreshing(false);
                         }
                     }

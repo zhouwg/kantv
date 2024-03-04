@@ -450,11 +450,11 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!CDEUtils.isNetworkAvailable(mActivity)) {
-                    Toast.makeText(getContext(), "网络未连接", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "pls check network connection", Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (CDEUtils.getNetworkType() == CDEUtils.NETWORK_MOBILE) {
-                    Toast.makeText(getContext(), "您正在使用手机流量播放在线视频", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "warning:you are using 3G/4G/5G network to watch online media", Toast.LENGTH_LONG).show();
                     //return;
                 }
 
@@ -484,7 +484,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                 } else {
                     CDELog.j(TAG, "vod content");
                 }
-                CDELog.j(TAG, "节目： " + item.getItemName() + " ,url:" + url + " ,name:" + name.trim() + " ,mediaType:" + mMediaType.toString());
+                CDELog.j(TAG, "Program： " + item.getItemName() + " ,url:" + url + " ,name:" + name.trim() + " ,mediaType:" + mMediaType.toString());
 
 
                 if (descriptor.getIsProtected()) {

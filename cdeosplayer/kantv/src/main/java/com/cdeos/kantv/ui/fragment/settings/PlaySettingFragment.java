@@ -388,7 +388,7 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                 Matcher isNum = pattern.matcher(startPlayPosString);
                 if( !isNum.matches() ) {
                     CDELog.d(TAG, "user's input is invalid");
-                    Toast.makeText(mContext, "无效的起始播放时间 " + startPlayPosString, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "invalid start time of playback " + startPlayPosString, Toast.LENGTH_LONG).show();
                 } else {
                     int startPlayPos = Integer.valueOf(mSettings.getStartPlaypos());
                     CDELog.j(TAG, "start play pos: " + startPlayPos);
@@ -434,21 +434,21 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                 }
 
                 if (CDEUtils.DUMP_MODE_PERF_DECRYPT_TERMINAL == mSettings.getDumpMode()) {
-                    CDEUtils.createPerfFile("/tmp/cdeplayer_perf_teedecrypt.dat");
+                    CDEUtils.createPerfFile("/tmp/cdeosplayer_perf_teedecrypt.dat");
                 }
 
                 if (CDEUtils.DUMP_MODE_DATA_DECRYPT_FILE == mSettings.getDumpMode()) {
                     String filename = " ";
                     String filenameInput = " ";
                     if (CDEUtils.PV_PLAYERENGINE__Exoplayer == mSettings.getPlayerEngine()) {
-                        filename = "/tmp/cdeplayer_decrypt_exoplayer.dat";
-                        filenameInput = "/tmp/cdeplayer_input_exoplayer.dat";
+                        filename = "/tmp/cdeosplayer_decrypt_exoplayer.dat";
+                        filenameInput = "/tmp/cdeosplayer_input_exoplayer.dat";
                     } else if (CDEUtils.PV_PLAYERENGINE__FFmpeg == mSettings.getPlayerEngine()) {
-                        filename = "/tmp/cdeplayer_decrypt_ffmpeg.dat";
-                        filenameInput = "/tmp/cdeplayer_input_ffmpeg.dat";
+                        filename = "/tmp/cdeosplayer_decrypt_ffmpeg.dat";
+                        filenameInput = "/tmp/cdeosplayer_input_ffmpeg.dat";
                     } else {
-                        filename = "/tmp/cdeplayer_decrypt_androimediaplayer.dat";
-                        filenameInput = "/tmp/cdeplayer_input_androimediaplayer.dat";
+                        filename = "/tmp/cdeosplayer_decrypt_androimediaplayer.dat";
+                        filenameInput = "/tmp/cdeosplayer_input_androimediaplayer.dat";
                     }
                     CDEUtils.createPerfFile(filename);
                     CDEUtils.createPerfFile(filenameInput);
@@ -463,7 +463,7 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                 Matcher isNum = pattern.matcher(durationDumpESString);
                 if( !isNum.matches() ) {
                     CDELog.d(TAG, "user's input is invalid");
-                    Toast.makeText(mContext, "无效的时间 " + durationDumpESString, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, "invalid time " + durationDumpESString, Toast.LENGTH_LONG).show();
                 } else {
                     int dumpDuration = Integer.valueOf(mSettings.getDumpDuration());
                     CDELog.d(TAG, "dump duration: " + dumpDuration);
