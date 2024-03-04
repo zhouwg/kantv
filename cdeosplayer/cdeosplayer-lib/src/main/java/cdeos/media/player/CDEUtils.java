@@ -3710,9 +3710,9 @@ public class CDEUtils {
     public static String getRecordModeString(int recordMode) {
         switch (recordMode) {
             case 0:
-                return "视频音频数据都录制";
+                return " audio & video ";
             case 1:
-                return "只录制视频数据";
+                return " video only";
             default:
                 return "Unknown record mode";
         }

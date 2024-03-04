@@ -176,7 +176,7 @@
     <string name="benchmark_updating">Benchmark is progressing...</string>
     <string name="benchmark_stop">Benchmark stop</string>
 
-    <string name="graphic_benchmark_title">graphic performance benchmark</string>
+    <string name="graphic_benchmark_title">graphic benchmark</string>
     <string name="StartGraphicBenchmark">graphic benchmark</string>
     <string name="StartEncodeBenchmark">video encode benchmark</string>
     <string name="StartSynthesisBenchmark">synthesis benchmark</string>

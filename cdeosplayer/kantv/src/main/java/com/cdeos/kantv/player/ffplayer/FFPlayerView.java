@@ -589,7 +589,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 CDELog.j(TAG, "onBack because back button on top view");
 
                 if (CDEUtils.getTVRecording()) {
-                    showWarningDialog(mAttachActivity, "正在录制中，请先停止录制");
+                    showWarningDialog(mAttachActivity, "under recording, pls stop recording before exit");
                     return;
                 }
 
@@ -670,7 +670,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                     pause();
                     new DialogScreenShot(mAttachActivity, mVideoView.getScreenshot()).show();
                 } else {
-                    ToastUtils.showShort("当前渲染器不支持截屏");
+                    ToastUtils.showShort("screenshot not supported by current render");
                 }
             });
         }
@@ -733,7 +733,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         public void setSubtitleSwitch(Switch switchView, boolean isChecked) {
                             if (!topBarView.getSubtitleSettingView().isLoadSubtitle() && isChecked) {
                                 switchView.setChecked(false);
-                                Toast.makeText(getContext(), "未加载字幕源", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), "subtitle was not loaded", Toast.LENGTH_LONG).show();
                                 subtitleManager.hideExSub();
                                 return;
                             }
@@ -803,7 +803,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         public void setSubtitleSwitch(Switch switchView, boolean isChecked) {
                             if (!topBarView.getSubtitleSettingView().isLoadSubtitle() && isChecked) {
                                 switchView.setChecked(false);
-                                Toast.makeText(getContext(), "未加载字幕源", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), "subtitle was not loaded", Toast.LENGTH_LONG).show();
                                 //mVideoView.getSubtitleView().setVisibility(VISIBLE);
                                 subtitleManager.hideExSub();
                                 return;
@@ -920,38 +920,38 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         topBarView.hideItemView();
 
                         if (!mVideoView.isPlaying()) {
-                            Toast.makeText(getContext(), "当前不支持录制", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
 
                         if (mVideoName.startsWith("kantv-record")) {
-                            Toast.makeText(getContext(), "当前文件可能为已录制文件,不支持录制", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported because it seems a recorded file", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
 
                         if (mVideoUrl.startsWith("/storage/emulated")) {
-                            //Toast.makeText(getContext(), "当前文件可能为本地文件,不支持录制", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getContext(), "record not supported because it seems a local media file", Toast.LENGTH_SHORT).show();
                             //topBarView.updateTVRecordingVisibility(false);
                             //return;
                         }
 
                         if ((CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) || (mSettings.getUsingMediaCodec())
                         ) {
-                            Toast.makeText(getContext(), "当前播放器设置不支持录制", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
 
                         if ((KANTVDRM.getInstance().ANDROID_JNI_GetVideoWidth() == 0) || (KANTVDRM.getInstance().ANDROID_JNI_GetVideoHeight() == 0)) {
-                            Toast.makeText(getContext(), "当前媒体为纯音频流或文件，无法录制", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "record not supported because it seems a pure audio content", Toast.LENGTH_LONG).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
 
-                        if ((KANTVDRM.getInstance().ANDROID_JNI_GetVideoWidth() > 720) || (KANTVDRM.getInstance().ANDROID_JNI_GetVideoHeight() > 576)) {
-                            //Toast.makeText(getContext(), "当前视频分辨率大于720x576，录制生成的文件可能有同步问题，建议换性能更好的手机或在录制设置中选择只录制视频", Toast.LENGTH_SHORT).show();
+                        if ((KANTVDRM.getInstance().ANDROID_JNI_GetVideoWidth() > 1920) || (KANTVDRM.getInstance().ANDROID_JNI_GetVideoHeight() > 1080)) {
+                            //Toast.makeText(getContext(), "issues might occurred during recording because video resolution is above 1920x1080，", Toast.LENGTH_SHORT).show();
                             //topBarView.updateTVRecordingVisibility(false);
                             //return;
                         }
@@ -967,7 +967,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                             CDELog.j(TAG, "disk free:" + diskFreeSize + "MB");
                             CDELog.j(TAG, "disk total:" + diskTotalSize + "MB");
                             if (diskFreeSize < CDEUtils.getDiskThresholdFreeSize()) {
-                                Toast.makeText(getContext(), "存储空间不足，无法录制:" + "总存储空间:" + diskTotalSize + "M，剩余存储空间:" + diskFreeSize + "M", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "record not supported because lack of storage:" + " total space: " + diskTotalSize
+                                        + " M， available space: " + diskFreeSize + " M ", Toast.LENGTH_SHORT).show();
                             } else {
                                 mVideoView.setEnableRecord(bRecording);
                             }
@@ -1486,19 +1487,19 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             int recordMode = mSettings.getRecordMode();
             int recordFormat = mSettings.getRecordFormat();
             int recordCodec = mSettings.getRecordCodec();
-            String tipInfo = "录制开始."
-                    + "当前视频分辨率为:" + videoWidth + "x" + videoHeight + "\n"
-                    + "当前录制设置:\n"
-                    + "录制模式:" + CDEUtils.getRecordModeString(recordMode)
-                    + ",文件格式:" + CDEUtils.getRecordFormatString(recordFormat)
-                    + ",视频编码:" + CDEUtils.getRecordCodecString(recordCodec)
-                    + ",最大文件大小:" + mSettings.getRecordSizeString() + "M字节"
-                    + ",最长录制时间:" + mSettings.getRecordDurationString() + "分钟";
+            String tipInfo = "Recording was launched."
+                    + "video resolution:" + videoWidth + "x" + videoHeight + "\n"
+                    + "video recording configuration:\n"
+                    + "record mode:" + CDEUtils.getRecordModeString(recordMode)
+                    + ",record format:" + CDEUtils.getRecordFormatString(recordFormat)
+                    + ",video codec:" + CDEUtils.getRecordCodecString(recordCodec)
+                    + ",max record file size: " + mSettings.getRecordSizeString() + " M bytes"
+                    + ", max record duration: " + mSettings.getRecordDurationString() + " minutes";
 
             CDELog.j(TAG, "record mode:" + recordMode);
-            if (videoWidth > 720 || videoHeight > 576) {
+            if (videoWidth > 1920 || videoHeight > 1080) {
                 if (recordMode == 0) {
-                    tipInfo += "\n\n当前视频分辨率大于720x576且录制模式为视频音频数据都录制，对手机性能要求很高，会导致播放音视频不同步且录制生成的文件有同步问题. 如有同步问题建议换性能更好的手机或在录制设置中选择只录制视频";
+                    tipInfo += "\n\n issues might be occurred because video resolution is above 1920 x 1080";
                 }
             }
             //Toast.makeText(getContext(), tipInfo, Toast.LENGTH_LONG).show();
@@ -1748,7 +1749,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
     private void showWarningDialog(Context context, String warningInfo) {
         new AlertDialog.Builder(context)
-                .setTitle("提示信息")
+                .setTitle("Tip")
                 .setMessage(warningInfo)
                 .setCancelable(true)
                 .setNegativeButton(context.getString(R.string.OK),

@@ -103,9 +103,9 @@ public class KanTVBenchmarkActivity extends AppCompatActivity {
 
         int currentOrientation = getResources().getConfiguration().orientation;
         if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
-            CDELog.j(TAG, "竖屏");
+            CDELog.j(TAG, "portrait");
         } else if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-            CDELog.j(TAG, "横屏");
+            CDELog.j(TAG, "landscape");
 
         }
         setContentView(R.layout.activity_benchmark);

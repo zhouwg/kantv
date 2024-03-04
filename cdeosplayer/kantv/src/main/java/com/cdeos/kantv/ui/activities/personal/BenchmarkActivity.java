@@ -174,7 +174,7 @@ public class BenchmarkActivity extends BaseMvcActivity {
 
     @Override
     public void initPageView() {
-        setTitle("性能评测");
+        setTitle("Performance benchmark");
         long beginTime = 0;
         long endTime = 0;
         beginTime = System.currentTimeMillis();
@@ -221,9 +221,9 @@ public class BenchmarkActivity extends BaseMvcActivity {
 
         _tvSynthesisBenchmarkInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 
-        //if (mSettings.getUILang() == Settings.KANTV_UILANG_CN)
+        //if (mSettings.getUILang() == Settings.KANTV_UILANG_EN)
         {
-            String info = "性能评测分为三类:图形处理,CPU算力,视频编码\n";
+            String info = "performance benchmark consist of: graphic benchmark, CPU, video encode <br>";
             addBuildField("BOARD", Build.BOARD);
             addBuildField("BOOTLOADER", Build.BOOTLOADER);
             addBuildField("BRAND", Build.BRAND);
@@ -243,16 +243,14 @@ public class BenchmarkActivity extends BaseMvcActivity {
             addBuildField("USER", Build.USER);
             addBuildField("ANDROID SDK", String.valueOf(android.os.Build.VERSION.SDK_INT));
             addBuildField("OS Version", android.os.Build.VERSION.RELEASE);
-            info += "设备信息:" + "<br>"
-                    + "品牌:" + Build.BRAND + "<br>"
-                    + "架构:" + Build.CPU_ABI + "<br>"
-                    + "硬件:" + Build.HARDWARE + "<br>"
-                    /*+ "指纹:" + Build.FINGERPRINT + "<br>" */
-                    + "操作系统:" + "Android " + android.os.Build.VERSION.RELEASE;
-            //_deviceInfo.setText("手机设备信息:" + deviceInfo);
+            info += "<br>"
+                    + "Brand:" + Build.BRAND + "<br>"
+                    + "CPU:" + Build.CPU_ABI + "<br>"
+                    + "Hardware:" + Build.HARDWARE + "<br>"
+                    /*+ "Fingerprint:" + Build.FINGERPRINT + "<br>" */
+                    + "OS:" + "Android " + android.os.Build.VERSION.RELEASE;
             _tvPageInfo.setText(Html.fromHtml(info));
             //_tvPageInfo.setMovementMethod(LinkMovementMethod.getInstance());
-
 
             _tvSynthesisBenchmarkInfo.setText("");
             _tvSynthesisBenchmarkInfo.setMovementMethod(LinkMovementMethod.getInstance());
@@ -301,30 +299,6 @@ public class BenchmarkActivity extends BaseMvcActivity {
             }
         });
 
-/*
-        Spinner spinnerPattern = mActivity.findViewById(R.id.spinnerPattern);
-        String[] sentencesPattern = getResources().getStringArray(R.array.encodePattern);
-        ArrayAdapter<String> adapterPattern = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, sentencesPattern);
-        spinnerPattern.setAdapter(adapterPattern);
-        spinnerPattern.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                CDELog.j(TAG, "position=" + position);
-                if (position >= 0) {
-                    mEncodePattern = position;
-                    CDELog.j(TAG, "pattern id:" + mEncodePattern);
-
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
- */
-
 
         _checkEnablefilter = mActivity.findViewById(R.id.chkEnableFilter);
         _checkEnablefilter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -339,18 +313,9 @@ public class BenchmarkActivity extends BaseMvcActivity {
         flEncodeBenchmark = mActivity.findViewById(R.id.flEncodeBenchmark);
 
 
-        //layoutUI(mActivity);
-
-
         _tvPageInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String strTipInfo = "" +
-                        "图形测试大约需要1-3分钟，不能中途退出图形测试(强制退出可能导致app异常)\n\n" +
-                        "综合测试很耗时，大约需要5-10分钟，可以随时退出综合测试\n\n" +
-                        "编码测试可以随时退出，如果勾选编码视频帧保存为文件，为节约手机存储资源，只保存250帧.保存的文件在\"本地媒体\"页面中可查看\n\n" +
-                        "如在进行性能评测中有bug或技术问题需要反馈，可在各类测试完毕后截图，然后将截图发给开发人员(admin@cde-os.com)，便于改进性能评测";
-                showMsgBox(mActivity, strTipInfo);
             }
         });
 
@@ -441,7 +406,7 @@ public class BenchmarkActivity extends BaseMvcActivity {
                     initKANTVMgr();
                     if (mKANTVMgr != null) {
                         _bPreviewing = true;
-                        _btnEncodeBenchmark.setText("停止测试");
+                        _btnEncodeBenchmark.setText("stop benchmark");
                         _tvEncodeBenchmarkInfo.setText(" ");
 
 
@@ -465,7 +430,7 @@ public class BenchmarkActivity extends BaseMvcActivity {
 
                 } else {
                     _bPreviewing = false;
-                    _btnEncodeBenchmark.setText("编码测试");
+                    _btnEncodeBenchmark.setText("video encode benchmark");
                     if (mKANTVMgr != null) {
                         mKANTVMgr.disablePreview(0);
                         mKANTVMgr.stopPreview();
@@ -477,7 +442,6 @@ public class BenchmarkActivity extends BaseMvcActivity {
                     //_btnSynthesisBenchmark.setEnabled(true);
 
                     if (_bEnableFilter) {
-                        //通知系统刷新目录
                         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                         //intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
                         Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
@@ -576,7 +540,7 @@ public class BenchmarkActivity extends BaseMvcActivity {
         _btnGraphicBenchmark.setEnabled(false);
         _btnEncodeBenchmark.setEnabled(false);
         _tvSynthesisBenchmarkInfo.setVisibility(View.VISIBLE);
-        _btnSynthesisBenchmark.setText("测试中...");
+        _btnSynthesisBenchmark.setText("progressing..");
         _tvEncodeBenchmarkInfo.setText(" ");
 
     }
@@ -623,11 +587,10 @@ public class BenchmarkActivity extends BaseMvcActivity {
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            //String benchmarkTip = strBenchmarkInfo + "\n" + "第" + benchmarkIndex + "项测试耗时:" + duration + "毫秒";
-                            String benchmarkTip = "综合测试第" + benchmarkIndex + "项耗时:" + duration + "毫秒";
-                            String benchmarkTip1 = strBenchmarkInfo + ",第" + benchmarkIndex + "项测试耗时:" + duration + "毫秒" + ",总耗时:" + totalDuration + "毫秒";
+                            String benchmarkTip = "item " + benchmarkIndex + " cost: " + duration + " milliseconds";
+                            String benchmarkTip1 = strBenchmarkInfo + " ,item " + benchmarkIndex + " cost: "
+                                    + duration + " milliseconds" + " ,total cost: " + totalDuration + " millisecond";
                             CDELog.j(TAG, benchmarkTip1);
-                            //Toast.makeText(mActivity, "ANDROID_JNI_Benchmark cost: " + duration + " milliseconds", Toast.LENGTH_LONG).show();
                             if ((_tvSynthesisBenchmarkInfo != null) && (benchmarkIndex <= 10) && (mProgressDialog != null)) {
                                 strBenchmarkReport += benchmarkTip + "\n";
                                 _tvSynthesisBenchmarkInfo.setText(benchmarkTip);
@@ -695,7 +658,7 @@ public class BenchmarkActivity extends BaseMvcActivity {
                 }
                 CDELog.j(TAG, "benchmarkIndex: " + benchmarkIndex);
                 CDELog.j(TAG, "benchmark report:" + strBenchmarkReport);
-                String benchmarkTip1 = "完成" + benchmarkIndex + "项测试,总耗时:" + totalDuration + "毫秒";
+                String benchmarkTip1 = "benchmark finished " + benchmarkIndex + ", cost:" + totalDuration + " milliseconds";
                 CDELog.j(TAG, benchmarkTip1);
                 _btnSynthesisBenchmark.setEnabled(true);
                 _btnGraphicBenchmark.setEnabled(true);
@@ -705,51 +668,53 @@ public class BenchmarkActivity extends BaseMvcActivity {
         });
     }
 
+
+
     private void displayBenchmarkResult() {
         String benchmarkTip;
         int durationPerItem = 0;
         int durations = 0;
         if (totalDuration == 0) {
-            benchmarkTip = "您尚未完成手机性能综合测试";
+            benchmarkTip = "you canceled the benchmark";
         } else {
-            benchmarkTip = "您完成了" + benchmarkIndex + "项手机性能综合测试" + "\n" + "总耗时" + totalDuration + "毫秒(1秒=1000毫秒)";
+            benchmarkTip = "you finished " + benchmarkIndex + " items" + "\n" + " total cost " + totalDuration + " milliseconds";
             durations = totalDuration / 1000;
 
             if (benchmarkIndex > 0)
                 durationPerItem = durations / benchmarkIndex;
 
-            benchmarkTip += "\n" + "单项测试平均耗时" + durationPerItem + "秒";
+            benchmarkTip += "\n" + "single item cost " + durationPerItem + " seconds";
             SharedPreferences.Editor editor = mSharedPreferences.edit();
             editor.putString("pref.recordBenchmark", String.valueOf(durationPerItem));
             editor.commit();
             CDELog.j(TAG, "pref.recordBenchmark=" + mSettings.getRecordBenchmark());
 
             if (durationPerItem <= 1) {
-                benchmarkTip += "\n" + "恭贺您，您的手机性能非常不错";
+                benchmarkTip += "\n" + "performance of your phone seems good";
             } else if ((durationPerItem >= 2) && (durationPerItem < 4)) {
-                benchmarkTip += "\n" + "您的手机性能很不错";
-            } else if ((durationPerItem >= 4) && (durationPerItem <= 6)) {
-                benchmarkTip += "\n" + "您的手机性能不错";
-            } else if ((durationPerItem > 6) && (durationPerItem <= 9)) {
-                benchmarkTip += "\n" + "您的手机速度可能比较慢";
-            } else if ((durationPerItem > 9) && (durationPerItem < 12)) {
-                benchmarkTip += "\n" + "您的手机可能很慢";
+                benchmarkTip += "\n" + "performance of your phone seems well";
+            } else if ((durationPerItem >= 4) && (durationPerItem < 6)) {
+                benchmarkTip += "\n" + "performance of your phone seems very good";
+            } else if ((durationPerItem >= 6) && (durationPerItem < 9)) {
+                benchmarkTip += "\n" + "performance of your phone seems not good";
+            } else if ((durationPerItem >= 9) && (durationPerItem < 12)) {
+                benchmarkTip += "\n" + "performance of your phone seems a little slow";
             } else if (durationPerItem >= 12) {
-                benchmarkTip += "\n" + "您的手机可能非常慢";
+                benchmarkTip += "\n" + "performance of your phone seems very slow";
             }
+
+            benchmarkTip += "\n\n";
+
         }
         CDELog.j(TAG, benchmarkTip);
-        CDELog.j(TAG, "单项测试耗时:" + durationPerItem + "秒");
+        CDELog.j(TAG, "single item cost:" + durationPerItem + " seconds");
         CDEUtils.umRecordBenchmark(benchmarkIndex, totalDuration, durationPerItem);
-        _tvSynthesisBenchmarkInfo.setVisibility(View.VISIBLE);
-        _tvSynthesisBenchmarkInfo.setText(benchmarkTip);
-        //benchmarkTip += "\n\n" + "KanTV视频录制提示:AV1编码非常耗时，H265编码也很耗时";
         showBenchmarkResult(mActivity, benchmarkTip);
     }
 
     private void showBenchmarkResult(Context context, String benchmarkInfo) {
         new AlertDialog.Builder(context)
-                .setTitle("您的手机性能综合测试结果")
+                .setTitle("result of performance benchmark")
                 .setMessage(benchmarkInfo)
                 .setCancelable(true)
                 .setNegativeButton(context.getString(R.string.OK),
