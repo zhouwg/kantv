@@ -194,13 +194,11 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 ### Roadmap
 
+- real-time English subtitle with online TV by ![whisper.cpp](https://github.com/zhouwg/whisper.cpp)) on Xiao 14(becuase it contains a very powerful mobile SoC)
+
+- real-time Chinese subtitle with online TV by ![whisper.cpp](https://github.com/zhouwg/whisper.cpp)) on Xiao 14(becuase it contains a very powerful mobile SoC)
+
 - integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
-
-- real-time subtitle(English / Chinese) with online TV (by ![DeepSpeech](https://github.com/zhouwg/DeepSpeech)  /  ![whisper.cpp](https://github.com/zhouwg/whisper.cpp))
-
-- real-time advertisement analysis and illegal advertisement removal
-
-- other device-side AI feature
 
 - UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
 
