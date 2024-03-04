@@ -62,7 +62,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/ASRstart"
+                android:text="Start ASR"
                 android:background="@drawable/button_drawable"
                 android:textAllCaps="false"
                 android:textColor="#ffffff"

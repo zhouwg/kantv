@@ -53,3 +53,6 @@ build
 
 *.mp4
 *.ts
+
+cdeosplayer/kantv/src/main/assets/audio.wav
+cdeosplayer/kantv/src/main/assets/deepspeech-0.9.3-models.tflite

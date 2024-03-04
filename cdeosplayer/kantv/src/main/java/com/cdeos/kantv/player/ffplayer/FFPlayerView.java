@@ -589,7 +589,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 CDELog.j(TAG, "onBack because back button on top view");
 
                 if (CDEUtils.getTVRecording()) {
-                    showWarningDialog(mAttachActivity, "under recording, pls stop recording before exit");
+                    showWarningDialog(mAttachActivity, "under recording, pls stop recording before exit playback");
                     return;
                 }
 
@@ -1520,11 +1520,11 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         File file = new File(CDEUtils.getRecordingFileName());
         if (file.exists()) {
             CDELog.j(TAG, "recording file " + CDEUtils.getRecordingFileName() + ", size:" + file.length() + " bytes");
-            Toast.makeText(getContext(), "录制结束，录制文件大小:" + CDEUtils.formatedSize(file.length()), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "recording stopped，size of recorded file: " + CDEUtils.formatedSize(file.length()), Toast.LENGTH_LONG).show();
             CDEUtils.umStopRecord(CDEUtils.getRecordingFileName());
         } else {
             CDELog.j(TAG, "it shouldn't happen");
-            Toast.makeText(getContext(), "录制结束", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "recording stopped", Toast.LENGTH_SHORT).show();
             CDEUtils.umStopRecord("unknown");
         }
 

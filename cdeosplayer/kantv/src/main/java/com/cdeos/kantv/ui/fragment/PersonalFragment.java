@@ -107,7 +107,7 @@ public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter>
         mActivity = getActivity();
         mSettings = new Settings(mActivity.getBaseContext());
         mContext = mActivity.getBaseContext();
-        mSettings.updateUILang((AppCompatActivity) mActivity);
+        mSettings.updateUILang((AppCompatActivity) getActivity());
 
         mWebView = (WebView) mActivity.findViewById(R.id.webview_ad);
         if (mWebView != null) {
