@@ -125,7 +125,7 @@
 
 - v1.2.7 2024-03-01, 00:30(Beijing Time) prepare for migrate kantv to github(remove SoftwareHistoryActivity.java and CommonQuestionActivity.java because it's highly personalized and not important for an open source project， and then adjust UI accordingly). I hope v1.2.8 could be available in github in next few days(because 8,aka HanZi "发", means lucky in Chinese).
 
-- v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity. today is Friday and have a good weekend)
+- v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity.
 
 - v1.29 2024-03-04, set English as default UI language.
 
