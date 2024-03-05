@@ -132,7 +132,7 @@
                     <li>set English as default UI language(it would be more useful for community)</li>
                     <li> create <a href="https://github.com/cdeos">cde-os</a> org account in github and migrate project KanTV from personal github account to cde-os org account accordingly. so oneday I can assign one friend to continue maintaining it</li>
                     <li> release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard whisper.cpp too late but just try it since March 5,2024</li>
-                    <li> I have to say once again that GFW has very strongly affected programmers in Mainland China because I have to spent much efforts to fix issue which caused by GFW. it's the fact although I love my country</li>
+                    <li> I have to say once again that GFW has very strongly affected programmers in Mainland China because I have to spent much efforts to fix issue which caused by GFW. It's the fact although I don't have any negative opinion of my country</li>
                 </ul>
 
 
