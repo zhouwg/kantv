@@ -127,7 +127,7 @@
 
 - v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity.
 
-- v1.2.9 2024-03-04, set English as default UI language and release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard the excellent and amazing whisper.cpp too late but just try it since March 5,2024.
+- v1.2.9 2024-03-04, set English as default UI language(it would be more useful for community) and release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard the excellent and amazing whisper.cpp too late but just try it since March 5,2024.
 
 
 ### Screenshots(一些屏幕截图）
