@@ -2,7 +2,7 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many enhancements:
 
-- Watch online TV(by customized ![FFmpeg](https://github.com/zhouwg/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/zhouwg/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
+- Watch online TV(by customized ![FFmpeg](https://github.com/cdeos/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
 
 - Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR)
 
@@ -154,9 +154,9 @@ git checkout master
 
 - Build APK from source code by Android Studio IDE manually(the size of the generated APK is about 38M).
 
-  Please attention ![some source codes in ASRFragment.java](https://github.com/zhouwg/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
+  Please attention ![some source codes in ASRFragment.java](https://github.com/cdeos/kantv/blob/kantv/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
 
-- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
+- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
 
 
 ### Run Android APK on real Android phone
@@ -198,7 +198,7 @@ Changelog could be found <a href="https://github.com/zhouwg/kantv/blob/kantv/rel
 
 - real-time Chinese subtitle with online TV by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Xiaomi 14(because it contains a very powerful mobile SoC)
 
-- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
+- integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
 - UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
 
@@ -256,7 +256,7 @@ The computing power and network bandwidth of default kantvserver is very low due
 
 ```
 
-or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/zhouwg/kantv/issues/27">this issue</a>)
+or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/cdeos/kantv/issues/27">this issue</a>)
 
  - upload test.m3u to local http server like this
 
@@ -267,7 +267,7 @@ or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv"
 
 ### How to integrate proprietary codes with project KanTV for proprietary R&D activity
 
-For AI expert who want to integrate **proprietary codes**(which contains IPR and consists of Java/JNI/native...) to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/zhouwg/kantv/issues/74">How to integrate proprietary codes for proprietary R&D activity</a>
+For AI expert who want to integrate **proprietary codes**(which contains IPR and consists of Java/JNI/native...) to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/cdeos/kantv/issues/74">How to integrate proprietary codes for proprietary R&D activity</a>
 
 
 ### Support
@@ -278,7 +278,7 @@ For AI expert who want to integrate **proprietary codes**(which contains IPR and
 
 ### Contribution
 
-Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+Be sure to review the [opening issues](https://github.com/cdeos/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/cdeos/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/cdeos/kantv/issues/1).
 
 Report issue in various Android-based phone or even submit PR to this project is great welcomed.
 
