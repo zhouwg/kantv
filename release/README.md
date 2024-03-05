@@ -119,7 +119,7 @@
 
 - v1.2.4 build time(编译时间):2024-2-19，去掉了＂个人中心＂中微信赞赏码赞助本软件功能；修复了一些已知问题
 
-- v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024
+- v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024.
 
 - v1.2.6 build time(编译时间):2024-02-29 prepare for migrate kantv to github(add clean-room white-box anti-tamper codes in native layer, add ASR in main UI because ASR is important for an open source project(将语音研究又添加到了主界面，因为对于本开源项目尤其是专业AI开发者而言，语音研究比较重要。所以现在主界面又有5个按纽))
 
@@ -127,7 +127,7 @@
 
 - v1.2.8 2024-03-01, ready to go(open source the latest source code of project KanTV(without native codes currently) in github and this will be the new baseline for personal/community's development activity.
 
-- v1.29 2024-03-04, set English as default UI language.
+- v1.2.9 2024-03-04, set English as default UI language and release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard the excellent and amazing whisper.cpp too late but just try it since March 5,2024.
 
 
 ### Screenshots(一些屏幕截图）
