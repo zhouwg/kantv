@@ -184,12 +184,12 @@ The following is some English snapshots.
 ![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
 
-Other English and Chinese snapshots could be found in ![release directory](https://github.com/cdeos/kantv/tree/kantv/release).
+Other English and Chinese snapshots could be found in ![release directory](https://github.com/cdeos/kantv/tree/master/release).
 
 
 ### ChangeLog
 
-Changelog could be found <a href="https://github.com/cdeos/kantv/blob/kantv/release/README.md">here</a>.
+Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/release/README.md">here</a>.
 
 
 ### Roadmap
