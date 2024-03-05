@@ -119,7 +119,7 @@
 
 - v1.2.4 build time(编译时间):2024-2-19，去掉了＂个人中心＂中微信赞赏码赞助本软件功能；修复了一些已知问题
 
-- v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024.
+- v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024 after experienced too much in recently months.
 
 - v1.2.6 build time(编译时间):2024-02-29 prepare for migrate kantv to github(add clean-room white-box anti-tamper codes in native layer, add ASR in main UI because ASR is important for an open source project(将语音研究又添加到了主界面，因为对于本开源项目尤其是专业AI开发者而言，语音研究比较重要。所以现在主界面又有5个按纽))
 
