@@ -209,7 +209,7 @@ public class CDELibraryLoader
                 sLoadedLibrarySuffix = str.substring(lib.length());
                 //if (!CDEUtils.getReleaseMode())
                 {
-                    CDELog.d(TAG, "loadLibrary " + str + " succeed");
+                    CDELog.j(TAG, "loadLibrary " + str + " succeed");
                 }
                 loaded = true;
                 break;

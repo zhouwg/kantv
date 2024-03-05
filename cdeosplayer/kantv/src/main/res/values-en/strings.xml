@@ -159,7 +159,7 @@
     <string name="kantv_test_warning">The following TV channels only used for learning purpose</string>
 
     <string name="recording_under_development">The feature of TV record is under development</string>
-    <string name="asr_tip">ASR research(by Mozilla\'s DeepSpeech, whisper.cpp would be preferred)</string>
+    <string name="asr_tip">ASR research(by GGML\'s whisper.cpp)</string>
 
     <string name="ASRstart">start ASR</string>
     <string name="TTSstart">start TTS</string>
@@ -167,12 +167,16 @@
     <string name="tts_engine_not_initialize">TTS engine not initialized</string>
     <string name="asr_model_not_found">ASR model not found</string>
     <string name="tts_model_not_found">TTS model not found</string>
-    <string name="please_download_asr_model">ASR model not found, Please download them in "ASR Setting"</string>
+    <string name="please_download_asr_model">DeepSpeech model not found, Please download them in "ASR Setting"</string>
     <string name="please_download_tts_model">TTS model not found, Please download them in "ASR Setting"</string>
 
     <string name="benchmark_start">Benchmark start</string>
     <string name="benchmark_updating">Benchmark is progressing...</string>
     <string name="benchmark_stop">Benchmark stop</string>
+
+    <string name="ggml_benchmark_start">GGML benchmark start</string>
+    <string name="ggml_benchmark_stop">GGML benchmark stop</string>
+    <string name="ggml_benchmark_updating">GGML benchmark is progressing...</string>
 
     <string name="graphic_benchmark_title">graphic benchmark</string>
     <string name="StartGraphicBenchmark">graphic benchmark</string>

@@ -19,11 +19,16 @@
 
  import android.annotation.SuppressLint;
  import android.app.Activity;
+ import android.app.ProgressDialog;
  import android.content.Context;
+ import android.content.DialogInterface;
  import android.content.res.Resources;
  import android.media.MediaPlayer;
+ import android.os.Build;
  import android.text.Html;
  import android.text.method.LinkMovementMethod;
+ import android.view.View;
+ import android.view.WindowManager;
  import android.widget.Button;
  import android.widget.EditText;
  import android.widget.LinearLayout;
@@ -31,6 +36,7 @@
  import android.widget.Toast;
 
  import androidx.annotation.NonNull;
+ import androidx.annotation.RequiresApi;
  import androidx.appcompat.app.AppCompatActivity;
 
  import com.cdeos.kantv.mvp.impl.ASRPresenterImpl;
@@ -46,33 +52,40 @@
  import java.io.RandomAccessFile;
  import java.nio.ByteBuffer;
  import java.nio.ByteOrder;
+ import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
  import cdeos.media.player.CDEAssetLoader;
+ import cdeos.media.player.CDELibraryLoader;
  import cdeos.media.player.CDELog;
  import cdeos.media.player.CDEUtils;
 
- import org.deepspeech.libdeepspeech.DeepSpeechModel;
+ import org.ggml.whispercpp.WhisperLib;
 
 
  public class ASRFragment extends BaseMvpFragment<ASRPresenter> implements ASRView {
-     @BindView(R.id.asr_layout)
+     @BindView(R.id.ggmlLayout)
      LinearLayout layout;
 
      private static final String TAG = ASRFragment.class.getName();
-     DeepSpeechModel _m = null;
-     EditText _audioFile;
-     TextView _asrInfo;
-     TextView _pageInfo;
-     TextView _decodedString;
-     TextView _tfliteStatus;
+     TextView _txtASRInfo;
+     TextView _txtGGMLInfo;
+     TextView _txtGGMLStatus;
 
-     Button _startInference;
+     Button _ggmlLoadModel;
+     Button _ggmlBenchmark;
+     Button _ggmlInference;
 
-     final int BEAM_WIDTH = 50;
+     private long beginTime = 0;
+     private long endTime = 0;
+     private long duration = 0;
+     private String strBenchmarkInfo;
 
-     private String modelFileName = "deepspeech-0.9.3-models.tflite";
-     private String audioFileName = "audio.wav";
+     private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
+     private ProgressDialog mProgressDialog;
+
+     private String ggmlModelFileName   = "ggml-tiny.bin";
+     private String ggmlSampleFileName  = "jfk.wav";
 
      private Context mContext;
      private Activity mActivity;
@@ -94,6 +107,7 @@
          return R.layout.fragment_asr;
      }
 
+     @RequiresApi(api = Build.VERSION_CODES.O)
      @SuppressLint("CheckResult")
      @Override
      public void initView() {
@@ -107,63 +121,158 @@
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
 
-         _tfliteStatus = (TextView) mActivity.findViewById(R.id.tfliteStatus);
-         _decodedString = (TextView) mActivity.findViewById(R.id.decodedString);
-         _audioFile = (EditText) mActivity.findViewById(R.id.audioFile);
+         _txtASRInfo = (TextView) mActivity.findViewById(R.id.asrInfo);
+         _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfo);
+         _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatus);
+         _ggmlLoadModel = (Button) mActivity.findViewById(R.id.btnGGMLLoadModel);
+         _ggmlBenchmark = (Button) mActivity.findViewById(R.id.btnGGMLBenchmark);
+         _ggmlInference = (Button) mActivity.findViewById(R.id.btnGGMLInference);
 
-         _audioFile.setEnabled(false);
-         _audioFile.setText("Audio file:" + audioFileName);
+         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath(mContext) + ggmlModelFileName);
+         CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
 
-         _startInference = (Button) mActivity.findViewById(R.id.btnStartInference);
-         _startInference.setOnClickListener(v -> {
-             CDELog.j(TAG, "start ASR");
-             this.newModel(CDEUtils.getDataPath(mContext) + modelFileName);
-             if ((this._m != null) && (this._m.isInitOK())) {
-                 this.playAudioFile();
-                 this.doInference(CDEUtils.getDataPath(mContext) + audioFileName);
-             }
+         _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+
+         File modelFile = new File(CDEUtils.getDataPath(mContext) + ggmlModelFileName);
+         if (modelFile.exists()) {
+             _txtGGMLStatus.setText("model file exist:" + ggmlModelFileName);
+         } else {
+             CDELog.j(TAG, "model file not exist:" + modelFile.getAbsolutePath());
+             _txtGGMLStatus.setText("model file not exist: " + ggmlModelFileName);
+         }
+
+         File sampleFile = new File(CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
+         if (sampleFile.exists()) {
+             _txtGGMLStatus.append("\nsample file exist:" + ggmlSampleFileName);
+         } else {
+             CDELog.j(TAG, "model file not exist:" + sampleFile.getAbsolutePath());
+             _txtGGMLStatus.append("\nmodel file not exist: " + ggmlSampleFileName);
+         }
+
+         CDELibraryLoader.load("whisper");
+
+         //_ggmlLoadModel.setOnClickListener(v -> {
+             CDELog.j(TAG, "load ggml's whisper model");
+             String systemInfo = WhisperLib.getSystemInfo();
+             String phoneInfo = "Device info:" + "\n"
+                     + "Brand:" + Build.BRAND + "\n"
+                     + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")" + "\n"
+                     + "Hardware:" + Build.HARDWARE + "\n"
+                     /*+ "Fingerprint:" + Build.FINGERPRINT + "\n"*/
+                     + "OS:" + "Android " + android.os.Build.VERSION.RELEASE;
+             _txtGGMLInfo.setText("");
+             _txtGGMLInfo.append(phoneInfo + "\n\n");
+             _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n\n");
+         //});
+
+         _ggmlBenchmark.setOnClickListener(v -> {
+             CDELog.j(TAG, "exec ggml benchmark");
+             isBenchmarking.set(true);
+             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating));
+             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+
+             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
+             attributes.screenBrightness = 1.0f;
+             mActivity.getWindow().setAttributes(attributes);
+             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+             launchGGMLBenchmarkThread();
+
          });
 
-         _asrInfo = (TextView) mActivity.findViewById(R.id.asrinfo);
-         _pageInfo = (TextView) mActivity.findViewById(R.id.pageinfo);
+         _ggmlInference.setOnClickListener(v -> {
+             CDELog.j(TAG, "exec ggml inference");
+             this.playAudioFile();
+             _txtASRInfo.setText("");
+             //TODO:exec inference by ggml's whisper.cpp
+         });
 
-
-         //the dependent files(audio file audio.wav and model file deepspeech-0.9.3-models.tflite) of DeepSpeech are located at directory $PROJECT_ROOT_PATH/prebuilts
-         //uncomment following lines and copy dependent files of DeepSpeech from $PROJECT_ROOT_PATH/prebuilts  to $PROJECT_ROOT_PATH/cdeosplayer/kantv/src/main/assets
-         //the generated apk would be very big(about 90M)
-         //CDEAssetLoader.copyAssetFile(mContext, modelFileName, CDEUtils.getDataPath(mContext) + modelFileName);
-         //CDEAssetLoader.copyAssetFile(mContext, audioFileName, CDEUtils.getDataPath(mContext) + audioFileName);
-         //the generated apk would be about 38M if you don't uncomment above two lines and download model file in "ASR Setting" was required when running the APK on phone
-         
-         //network bandwidth of default kantvserver is very low due to insufficient fund. so you should upload the dependent files of DeepSpeech to your local kantvserver
-         //according to steps in $PROJECT_ROOT_PATH/README.md
-
-         _asrInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-
-
-         String info = mContext.getString(R.string.asr_tip);
-         _pageInfo.setText(Html.fromHtml(info));
-         _pageInfo.setMovementMethod(LinkMovementMethod.getInstance());
-
-         if (this._m != null) {
-             info = "ASR engine version:" + this._m.getVersion();
-         } else {
-             info = mActivity.getBaseContext().getString(R.string.asr_engine_not_initialize);
-         }
-         _asrInfo.setText(info);
-
-
-         File file = new File(CDEUtils.getDataPath(mContext) + modelFileName);
-         if (file.exists()) {
-             this.newModel(CDEUtils.getDataPath(mContext) + modelFileName);
-         } else {
-             CDELog.j(TAG, "model file not exist:" + file.getAbsolutePath());
-             _asrInfo.setText("DeepSpeech's model file not exist");
-         }
 
          endTime = System.currentTimeMillis();
          CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
      }
+
+
+     private final void launchGGMLBenchmarkThread() {
+
+         Thread workThread = new Thread(new Runnable() {
+             @RequiresApi(api = Build.VERSION_CODES.O)
+             @Override
+             public void run() {
+                 while (isBenchmarking.get()) {
+                     beginTime = System.currentTimeMillis();
+
+                     strBenchmarkInfo = WhisperLib.benchMemcpy(1);
+
+                     endTime = System.currentTimeMillis();
+
+                     duration = (endTime - beginTime);
+
+                     CDELog.j(TAG, "benchMemcpy cost: " + duration + " milliseconds");
+
+                     isBenchmarking.set(false);
+                     mActivity.runOnUiThread(new Runnable() {
+                         @Override
+                         public void run() {
+                             String benchmarkTip = "benchmark cost: " + duration + " milliseconds";
+                             benchmarkTip += "\n";
+                             benchmarkTip += strBenchmarkInfo;
+                             CDELog.j(TAG, benchmarkTip);
+                             _txtASRInfo.setText("");
+                             _txtASRInfo.setText(benchmarkTip);
+                         }
+                     });
+                 }
+                 stopUIBuffering();
+             }
+         });
+         workThread.start();
+
+     }
+
+     private void startUIBuffering(String status) {
+         mActivity.runOnUiThread(new Runnable() {
+             @Override
+             public void run() {
+                 if (mProgressDialog == null) {
+                     mProgressDialog = new ProgressDialog(mActivity);
+                     mProgressDialog.setMessage(status);
+                     mProgressDialog.setIndeterminate(true);
+                     mProgressDialog.setCancelable(true);
+                     mProgressDialog.setCanceledOnTouchOutside(true);
+
+                     mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                         @Override
+                         public void onCancel(DialogInterface dialogInterface) {
+                             if (mProgressDialog != null) {
+                                 CDELog.j(TAG, "stop benchmark");
+                                 isBenchmarking.set(false);
+                                 mProgressDialog.dismiss();
+                                 mProgressDialog = null;
+                             }
+                         }
+                     });
+                     mProgressDialog.show();
+                 }
+             }
+         });
+     }
+
+
+     private void stopUIBuffering() {
+         mActivity.runOnUiThread(new Runnable() {
+             @Override
+             public void run() {
+                 if (mProgressDialog != null) {
+                     mProgressDialog.dismiss();
+                     mProgressDialog = null;
+                     Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_stop), Toast.LENGTH_SHORT).show();
+                 }
+                 String benchmarkTip = "benchmark finished ";
+                 CDELog.j(TAG, benchmarkTip);
+             }
+         });
+     }
+
 
      @Override
      public void initListener() {
@@ -174,10 +283,6 @@
      @Override
      public void onDestroy() {
          super.onDestroy();
-         if (this._m != null) {
-             CDELog.j(TAG, "free ASR engine");
-             this._m.freeModel();
-         }
      }
 
      @Override
@@ -205,55 +310,8 @@
          return (int) ((b1 & 0xFF) | (b2 & 0xFF) << 8 | (b3 & 0xFF) << 16 | (b4 & 0xFF) << 24);
      }
 
-     private void newModel(String tfliteModel) {
-         File file = new File(tfliteModel);
-         if (!file.exists()) {
-             CDELog.j(TAG, "model file not found:" + tfliteModel);
-             Toast.makeText(mActivity, mActivity.getBaseContext().getString(R.string.please_download_asr_model), Toast.LENGTH_SHORT).show();
-             return;
-         } else {
-             CDELog.j(TAG, "model file found:" + tfliteModel);
-         }
-         this._tfliteStatus.setText("Initialize ASR engine...");
-         if (this._m == null) {
-             // sphinx-doc: java_ref_model_start
-             this._m = new DeepSpeechModel(tfliteModel);
-             if (this._m.isInitOK()) {
-                 this._m.setBeamWidth(BEAM_WIDTH);
-             } else {
-                 CDELog.j(TAG, "ASR engine initialized failed");
-                 this._m = null;
-                 String asrAudioFileName = CDEUtils.getDataPath(mContext) + audioFileName;
-                 String asrModelFileName = CDEUtils.getDataPath(mContext) + modelFileName;
-                 File asrAudioFile = new File(asrAudioFileName);
-                 File asrModelFile = new File(asrModelFileName);
-                 if (asrAudioFile.exists())
-                     asrAudioFile.delete();
-                 if (asrModelFile.exists())
-                     asrModelFile.delete();
-
-                 _asrInfo.setText(mActivity.getBaseContext().getString(R.string.please_download_asr_model));
-                 return;
-             }
-         }
-         this._tfliteStatus.setText("ASR engine initialized ok");
-
-         String info;
-         if (this._m != null) {
-             info = "ASR engine:" + this._m.getVersion();
-         } else {
-             info = "ASR engine not initialized";
-         }
-         _asrInfo.setText(info);
-     }
-
      private void doInference(String audioFile) {
          long inferenceExecTime = 0;
-
-         this._startInference.setEnabled(false);
-
-         this._tfliteStatus.setText("Extracting audio features ...");
-
          try {
              RandomAccessFile wave = new RandomAccessFile(audioFile, "r");
 
@@ -267,7 +325,7 @@
 
              wave.seek(24);
              int sampleRate = this.readLEInt(wave);
-             assert (sampleRate == this._m.sampleRate()); // desired sample rate
+             //assert (sampleRate == this._m.sampleRate()); // desired sample rate
 
              wave.seek(34);
              char bitsPerSample = this.readLEChar(wave);
@@ -285,15 +343,15 @@
              // to turn bytes to shorts as either big endian or little endian.
              ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
 
-             this._tfliteStatus.setText("Running inference ...");
+             //this._tfliteStatus.setText("Running inference ...");
 
              long inferenceStartTime = System.currentTimeMillis();
 
-             String decoded = this._m.stt(shorts, shorts.length);
+             //String decoded = this._m.stt(shorts, shorts.length);
 
              inferenceExecTime = System.currentTimeMillis() - inferenceStartTime;
 
-             this._decodedString.setText("ASR result:" + decoded);
+             //this._decodedString.setText("ASR result:" + decoded);
 
          } catch (FileNotFoundException ex) {
 
@@ -302,15 +360,16 @@
          } finally {
 
          }
-         this._tfliteStatus.setText("ASR cost: " + inferenceExecTime + " milliseconds");
+         //this._tfliteStatus.setText("ASR cost: " + inferenceExecTime + " milliseconds");
 
-         this._startInference.setEnabled(true);
+         //this._startInference.setEnabled(true);
      }
 
      public void playAudioFile() {
          try {
              MediaPlayer mediaPlayer = new MediaPlayer();
-             mediaPlayer.setDataSource(CDEUtils.getDataPath(mContext) + audioFileName);
+             CDELog.j(TAG, "audio file:" + CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
+             mediaPlayer.setDataSource(CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
              mediaPlayer.prepare();
              mediaPlayer.start();
          } catch (IOException ex) {

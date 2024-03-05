@@ -9,64 +9,85 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/pageInfo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/pageinfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-
+            android:text="@string/asr_tip" />
 
         <LinearLayout
-            android:id="@+id/asr_layout"
+            android:id="@+id/ggmlLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/deepspeech_logo"
+                android:id="@+id/ggmlLogo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/deepspeech_logo" />
+                android:layout_marginTop="@dimen/dp_10"
+                android:src="@drawable/whispercpp_logo" />
 
             <TextView
-                android:id="@+id/asrinfo"
+                android:id="@+id/ggmlInfo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <EditText
-                android:id="@+id/audioFile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="220dp" />
 
             <TextView
-                android:id="@+id/decodedString"
+                android:id="@+id/ggmlStatus"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
-                android:text="  " />
-
-            <TextView
-                android:id="@+id/tfliteStatus"
-                android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="5dp"
                 android:text=" " />
 
-            <Button
-                android:id="@+id/btnStartInference"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:text="Start ASR"
-                android:background="@drawable/button_drawable"
-                android:textAllCaps="false"
-                android:textColor="#ffffff"
+            <TextView
+                android:id="@+id/asrInfo"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="5dp"
                 />
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnGGMLLoadModel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="left"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:background="@drawable/button_drawable"
+                    android:text="Load model"
+                    android:textAllCaps="false"
+                    android:textColor="#ffffff" />
+
+                <Button
+                    android:id="@+id/btnGGMLBenchmark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_marginRight="@dimen/dp_10"
+                    android:background="@drawable/button_drawable"
+                    android:text="Benchmark"
+                    android:textAllCaps="false"
+                    android:textColor="#ffffff" />
+
+                <Button
+                    android:id="@+id/btnGGMLInference"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:background="@drawable/button_drawable"
+                    android:text="Exec inference"
+                    android:textAllCaps="false"
+                    android:textColor="#ffffff" />
+
+            </LinearLayout>
         </LinearLayout>
 
 

@@ -158,7 +158,7 @@
     <string name="path_is_invalid">无效的路径</string>
     <string name="kantv_title">KanTV严选频道</string>
     <string name="kantv_test_warning">本页面仅为测试频道,其中很多频道可能无法访问或无法播放，请关注本APP主页的＂严选电视频道(为符合广电总局相关规定，仅提供英文频道，供英语学习或相关研究之用)或请关注本APP后续更新版本中的测试频道更新.\n\n本APP所有在线电视源均来自互联网，本APP仅为工具类软件，不提供在线电视内容制作．\n\n根据国家广电总局关于OTT TV相关规定,本APP仅供个人学习之用.</string>
-    <string name="asr_tip">本页面为ASR研究,基于Mozilla DeepSpeech(最好用whisper.cpp),ASR研究结果将用于本软件中在线电视(中文/英文)实时字幕生成</string>
+    <string name="asr_tip">本页面为ASR研究,基于whisper.cpp,ASR研究结果将用于本软件中在线电视(中文/英文)实时字幕生成</string>
     <string name="recording_under_development">录制功能开发中...</string>
 
     <string name="ASRstart">开始语音识别</string>
@@ -173,6 +173,10 @@
     <string name="benchmark_start">手机性能综合测试开始(一共10个测试项目，提前退出测试可能导致测试结果不准确)</string>
     <string name="benchmark_updating">手机性能综合测试("手机跑分")中...</string>
     <string name="benchmark_stop">手机性能综合测试结束</string>
+
+    <string name="ggml_benchmark_start">GGML benchmark start</string>
+    <string name="ggml_benchmark_stop">GGML benchmark stop</string>
+    <string name="ggml_benchmark_updating">GGML benchmark is progressing...</string>
 
     <string name="graphic_benchmark_title">图形性能测试</string>
     <string name="StartGraphicBenchmark">图形测试</string>
