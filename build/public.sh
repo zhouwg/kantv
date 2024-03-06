@@ -93,6 +93,37 @@ function check_ubuntu()
 }
 
 
+function check_upstream_whispercpp()
+{
+if [  -z ${UPSTREAM_WHISPERCPP_PATH} ]; then
+    echo "pls set UPSTREAM_WHISPERCPP_PATH properly"
+    echo "or run . build/envsetup.sh firstly"
+    exit 1
+fi
+
+
+if [ ! -d ${UPSTREAM_WHISPERCPP_PATH} ]; then
+    echo "${UPSTREAM_WHISPERCPP_PATH} not exist, pls check"
+    exit 1
+fi
+}
+
+
+function check_local_whispercpp()
+{
+if [ "x${LOCAL_WHISPERCPP_PATH}" == "x" ]; then
+    echo "pls checkout LOCAL_WHISPERCPP_PATH"
+    exit 1
+fi
+
+
+if [ ! -d ${LOCAL_WHISPERCPP_PATH} ]; then
+    echo "${LOCAL_WHISPERCPP_PATH} not exist, pls check"
+    exit 1
+fi
+}
+
+
 function dump_global_envs()
 {
     echo -e "\n"

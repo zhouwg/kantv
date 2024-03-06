@@ -25,6 +25,7 @@
 #include <signal.h>
 #if defined(__gnu_linux__)
 #include <syscall.h>
+#include <sched.h>
 #endif
 
 #ifdef GGML_USE_METAL

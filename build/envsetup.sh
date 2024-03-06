@@ -33,6 +33,9 @@ export PROJECT_HOME_PATH=`pwd`
 export PROJECT_BRANCH=`git branch | grep "*" | cut -f 2 -d ' ' `
 export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
 
+
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jni/whispercpp
+
 #modify following lines to adapt to local dev envs
 export ANDROID_NDK=/opt/kantv-toolchains/android-ndk-r21e
 export LOCAL_BAZEL_PATH=${HOME_PATH}/.cache/bazel/_bazel_${BUILD_USER}/d483cd2a2d9204cb5bb4d870c2729238

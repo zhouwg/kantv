@@ -76,9 +76,9 @@
      Button _ggmlBenchmark;
      Button _ggmlInference;
 
-     private long beginTime = 0;
-     private long endTime = 0;
-     private long duration = 0;
+     private long beginTime     = 0;
+     private long endTime       = 0;
+     private long duration      = 0;
      private String strBenchmarkInfo;
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
@@ -198,6 +198,7 @@
              @RequiresApi(api = Build.VERSION_CODES.O)
              @Override
              public void run() {
+                 strBenchmarkInfo = "";
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
 
@@ -209,11 +210,23 @@
 
                      CDELog.j(TAG, "benchMemcpy cost: " + duration + " milliseconds");
 
+                     beginTime = System.currentTimeMillis();
+                     strBenchmarkInfo += "\n";
+
+                     strBenchmarkInfo += WhisperLib.benchGgmlMulMat(1);
+
+                     endTime = System.currentTimeMillis();
+
+                     duration = (endTime - beginTime);
+
+                     CDELog.j(TAG, "benchGgmlMulMat cost: " + duration + " milliseconds");
+
+
                      isBenchmarking.set(false);
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String benchmarkTip = "benchmark cost: " + duration + " milliseconds";
+                             String benchmarkTip = "GGML benchmark cost: " + duration + " milliseconds";
                              benchmarkTip += "\n";
                              benchmarkTip += strBenchmarkInfo;
                              CDELog.j(TAG, benchmarkTip);
@@ -244,7 +257,7 @@
                          @Override
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
-                                 CDELog.j(TAG, "stop benchmark");
+                                 CDELog.j(TAG, "stop GGML benchmark");
                                  isBenchmarking.set(false);
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;
@@ -267,7 +280,7 @@
                      mProgressDialog = null;
                      Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_stop), Toast.LENGTH_SHORT).show();
                  }
-                 String benchmarkTip = "benchmark finished ";
+                 String benchmarkTip = "GGML benchmark finished ";
                  CDELog.j(TAG, benchmarkTip);
              }
          });
