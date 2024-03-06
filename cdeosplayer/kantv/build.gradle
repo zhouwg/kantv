@@ -32,7 +32,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "src/main/jni/whisper/CMakeLists.txt"
+            path "src/main/jni/whispercpp/CMakeLists.txt"
         }
     }
 

@@ -138,7 +138,6 @@ void cdelog_setGlobalDumpCounts(int64_t maxDumpCounts);
 void cdelog_setGlobalLogLevel(int);
 int  cdelog_validateLogLevel(int);
 void cdelog_setGlobalLogEnabled(int bEnable);
-void cdelog_setGlobalLogModule(const char *moduleName, int bEnabled);
 
 
 

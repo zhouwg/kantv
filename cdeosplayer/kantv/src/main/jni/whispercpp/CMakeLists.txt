@@ -46,7 +46,7 @@ function(build_library target_name)
     endif ()
 endfunction()
 
-build_library("whisper") # Default target
+build_library("whispercpp") # Default target
 
 #if (${ANDROID_ABI} STREQUAL "arm64-v8a")
 #    build_library("whisper_v8fp16_va")

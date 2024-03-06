@@ -149,7 +149,7 @@
              _txtGGMLStatus.append("\nmodel file not exist: " + ggmlSampleFileName);
          }
 
-         CDELibraryLoader.load("whisper");
+         CDELibraryLoader.load("whispercpp");
 
          //_ggmlLoadModel.setOnClickListener(v -> {
              CDELog.j(TAG, "load ggml's whisper model");

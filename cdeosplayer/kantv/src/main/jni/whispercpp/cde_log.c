@@ -75,25 +75,11 @@ extern  int __android_log_print(int prio, const char *tag,  const char *fmt, ...
 
 
 static char logBuf[LOG_BUF_LEN];
-static int gAllowedLogEnabled   = 1;
-static int gAllowedLogLevel     = CDE_LOG_DEFAULT;
+static int gAllowedLogEnabled       = 1;
+static int gAllowedLogLevel         = CDE_LOG_DEFAULT;
 static int64_t gMaxDumpCounts       = 0; //no limit
 static int64_t gLogDumpCounts       = 0;
 
-typedef struct {
-    const char *szModuleName;
-    int bModuleEnabled;
-    const char *szFileName;
-    int bFileEnabled;
-}MODULE_LOG_PROP;
-
-//developer could modify this array to disable/enable module's log output
-//we should group some source file into a standalone module
-//need sanity check with gLogPropConfs to keep consistency
-static MODULE_LOG_PROP gLogPropConfs[] = {
-    {"ijkplayer", true, "ijkplayer.c", true},
-    {"live555", true, "DynamicRTSPServer.cpp", true},
-};
 
 #if 1// (defined(TEE_TA_SIDE))
 static char* cde_strcat(char *dst, const char *src)
@@ -142,7 +128,7 @@ static int cde_isprint(int c)
 #define cde_strcat strcat
 #endif
 
-#if 1//ndef BUILD_LIBDRMCLIENT
+#if 1
 void cdelog_setGlobalLogEnabled(int bEnable) {
     if (bEnable) {
         gAllowedLogEnabled = 1;
@@ -153,28 +139,11 @@ void cdelog_setGlobalLogEnabled(int bEnable) {
 }
 
 
-void  cdelog_setGlobalLogModule(const char *moduleName, int bEnabled) {
-    size_t logPropCounts = sizeof(gLogPropConfs) / sizeof(MODULE_LOG_PROP);
-    size_t i = 0;
-
-    if (NULL == moduleName)
-        return;
-
-    for (i = 0; i < logPropCounts; i++) {
-        if (gLogPropConfs[i].szModuleName != NULL) {
-            if (0 == memcmp(moduleName, gLogPropConfs[i].szModuleName, strlen(gLogPropConfs[i].szModuleName))) {
-                gLogPropConfs[i].bModuleEnabled = bEnabled;
-                break;
-            }
-        }
-    }
-}
-
 
 void cdelog_setGlobalLogLevel(int level) {
     gAllowedLogLevel = (level >= 0 ? level : CDE_LOG_SILENT);
     gMaxDumpCounts   = 0; //reset
-    gLogDumpCounts = 0; //reset
+    gLogDumpCounts   = 0; //reset
 }
 
 
@@ -228,7 +197,7 @@ void  LOG_PRI_ORIG_IMPL(const char *file, const char *func, unsigned int line,  
 #if (!defined(__KERNEL__)) && (!defined(TEE_TA_SIDE))
     pthread_mutex_lock(&cde_log_mutex);
 #endif
-    if (gAllowedLogEnabled) {
+    {
         va_list va;
         char *pfile     = NULL;
         int len_prefix  = 0;
@@ -331,8 +300,7 @@ pthread_mutex_t cde_logzwg_mutex = PTHREAD_MUTEX_INITIALIZER;
 void  LOG_PRI_ZWG_IMPL(const char *file, const char *func, unsigned int line,  int priority, const char *tag, const char *format,  ...) {
 #endif
 
-    //make kantv happy because some codes(i.e. native codes in AOSP) already set the tag
-    //if (NULL == tag)
+
     {
         tag = "KANTV";
     }
@@ -431,7 +399,7 @@ void  LOG_PRI_ZWG_IMPL(const char *file, const char *func, unsigned int line,  i
 EXPORT_SYMBOL_GPL(LOG_PRI_ZWG_IMPL);
 #endif
 
-#endif //#ifndef BUILD_LIBDRMCLIENT
+#endif
 
 #ifdef __KERNEL__
 asmlinkage void HEXDUMP_PRI_ORIG_IMPL(const char *file, const char *func, unsigned int line, const char *name, const void *_data, unsigned int size, int have_prefix, int should_skip) {
@@ -446,7 +414,7 @@ void HEXDUMP_PRI_ORIG_IMPL(const char *file, const char *func, unsigned int line
     int priority = CDE_LOG_DEBUG;
     const char *tag = NULL;
 
-    if (NULL == tag) {
+    {
         tag = "KANTV";
     }
 #endif

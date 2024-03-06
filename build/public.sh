@@ -117,9 +117,8 @@ function dump_global_envs()
 
     if [ "${BUILD_TARGET}" = "android" ]; then
     echo -e "\n"
-    echo -e "ANDROID_NDK:          ${ANDROID_NDK}"
-    echo -e "TEE_TDK_DIR:          ${TDK_DIR}"
-    echo -e "BOARD_INFO:           ${BOARD_INFO}"
+    echo -e "ANDROID_NDK:               ${ANDROID_NDK}"
+    echo -e "UPSTREAM_WHISPERCPP_PATH:  ${UPSTREAM_WHISPERCPP_PATH}"
     echo -e "\n"
     fi
 
