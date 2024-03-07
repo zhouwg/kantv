@@ -112,7 +112,7 @@ fi
 function check_local_whispercpp()
 {
 if [ "x${LOCAL_WHISPERCPP_PATH}" == "x" ]; then
-    echo "pls checkout LOCAL_WHISPERCPP_PATH"
+    echo "pls check LOCAL_WHISPERCPP_PATH"
     exit 1
 fi
 

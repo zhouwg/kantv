@@ -20,6 +20,13 @@ android {
             //abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
             abiFilters  "arm64-v8a"
         }
+
+        //fix conflict between open source native libs and prebuilt proprietary native libs(IDE would complain more than one file was found)
+        packagingOptions {
+            pickFirst 'lib/arm64-v8a/libkantv-core.so'
+            pickFirst 'lib/arm64-v8a/libwhispercpp.so'
+        }
+
         versionName project.ext.releaseVersion
         versionCode project.ext.releaseVersionCode
         minSdkVersion project.ext.minSdkVersion
@@ -32,7 +39,8 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "src/main/jni/whispercpp/CMakeLists.txt"
+            //path "src/main/jni/whispercpp/CMakeLists.txt"
+            path "../../external/whispercpp/CMakeLists.txt"
         }
     }
 

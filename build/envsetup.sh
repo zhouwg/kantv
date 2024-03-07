@@ -34,7 +34,7 @@ export PROJECT_BRANCH=`git branch | grep "*" | cut -f 2 -d ' ' `
 export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
 
 
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jni/whispercpp
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 
 #modify following lines to adapt to local dev envs
 export ANDROID_NDK=/opt/kantv-toolchains/android-ndk-r21e

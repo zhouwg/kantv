@@ -819,11 +819,11 @@ public class BenchmarkActivity extends BaseMvcActivity {
                 mKANTVMgr.release();
                 mKANTVMgr = null;
                 _bPreviewing = false;
-                _btnEncodeBenchmark.setText("编码测试");
+                _btnEncodeBenchmark.setText("video encode benchmark");
             }
         } catch (Exception ex) {
             String errorMsg = "An Exception was thrown because:\n" + " " + ex.getMessage();
-            CDELog.j(TAG, "error occured: " + errorMsg);
+            CDELog.j(TAG, "error occurred: " + errorMsg);
             ex.printStackTrace();
         }
     }

@@ -1,0 +1,7 @@
+*.jar
+*.so
+*.a
+
+out
+build
+models

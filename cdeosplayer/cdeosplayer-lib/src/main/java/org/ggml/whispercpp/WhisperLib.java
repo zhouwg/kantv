@@ -39,4 +39,6 @@ public class WhisperLib {
   public static native String benchMemcpy(int nthread);
 
   public static native String benchGgmlMulMat(int nthread);
+
+  public static native void set_mulmat_benchmark_status(int bExit);
 }

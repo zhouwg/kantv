@@ -48,42 +48,41 @@
                 android:layout_marginTop="5dp"
                 />
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/btnGGMLLoadModel"
+                    android:id="@+id/btnBenchmarkMemcpy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="left"
-                    android:layout_marginLeft="@dimen/dp_10"
+                    android:layout_marginLeft="5dp"
                     android:background="@drawable/button_drawable"
-                    android:text="Load model"
+                    android:text="MemcpyBenchmark"
                     android:textAllCaps="false"
                     android:textColor="#ffffff" />
 
                 <Button
-                    android:id="@+id/btnGGMLBenchmark"
+                    android:id="@+id/btnBenchmarkMulmat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginLeft="@dimen/dp_10"
-                    android:layout_marginRight="@dimen/dp_10"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
                     android:background="@drawable/button_drawable"
-                    android:text="Benchmark"
+                    android:text="MulmatBenchmark"
                     android:textAllCaps="false"
                     android:textColor="#ffffff" />
 
                 <Button
-                    android:id="@+id/btnGGMLInference"
+                    android:id="@+id/btnInference"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:background="@drawable/button_drawable"
-                    android:text="Exec inference"
+                    android:text="Inference"
                     android:textAllCaps="false"
                     android:textColor="#ffffff" />
 

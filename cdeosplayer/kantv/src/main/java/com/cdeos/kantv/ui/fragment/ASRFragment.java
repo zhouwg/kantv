@@ -17,20 +17,20 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
+ import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALiZE;
+ import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
+
  import android.annotation.SuppressLint;
  import android.app.Activity;
+ import android.app.AlertDialog;
  import android.app.ProgressDialog;
  import android.content.Context;
  import android.content.DialogInterface;
  import android.content.res.Resources;
  import android.media.MediaPlayer;
  import android.os.Build;
- import android.text.Html;
- import android.text.method.LinkMovementMethod;
- import android.view.View;
  import android.view.WindowManager;
  import android.widget.Button;
- import android.widget.EditText;
  import android.widget.LinearLayout;
  import android.widget.TextView;
  import android.widget.Toast;
@@ -39,12 +39,14 @@
  import androidx.annotation.RequiresApi;
  import androidx.appcompat.app.AppCompatActivity;
 
+ import com.cdeos.kantv.R;
+ import com.cdeos.kantv.base.BaseMvpFragment;
  import com.cdeos.kantv.mvp.impl.ASRPresenterImpl;
  import com.cdeos.kantv.mvp.presenter.ASRPresenter;
  import com.cdeos.kantv.mvp.view.ASRView;
- import com.cdeos.kantv.R;
- import com.cdeos.kantv.base.BaseMvpFragment;
  import com.cdeos.kantv.utils.Settings;
+
+ import org.ggml.whispercpp.WhisperLib;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -59,8 +61,11 @@
  import cdeos.media.player.CDELibraryLoader;
  import cdeos.media.player.CDELog;
  import cdeos.media.player.CDEUtils;
-
- import org.ggml.whispercpp.WhisperLib;
+ import cdeos.media.player.KANTVEvent;
+ import cdeos.media.player.KANTVEventListener;
+ import cdeos.media.player.KANTVEventType;
+ import cdeos.media.player.KANTVException;
+ import cdeos.media.player.KANTVMgr;
 
 
  public class ASRFragment extends BaseMvpFragment<ASRPresenter> implements ASRView {
@@ -72,24 +77,28 @@
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
 
-     Button _ggmlLoadModel;
-     Button _ggmlBenchmark;
-     Button _ggmlInference;
+     Button _btnBenchmarkMemcpy;
+     Button _btnBenchmarkMalmat;
+     Button _btnInference;
 
-     private long beginTime     = 0;
-     private long endTime       = 0;
-     private long duration      = 0;
+     private int benchmarkIndex = 0;
+     private long beginTime = 0;
+     private long endTime = 0;
+     private long duration = 0;
      private String strBenchmarkInfo;
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
-     private String ggmlModelFileName   = "ggml-tiny.bin";
-     private String ggmlSampleFileName  = "jfk.wav";
+     private String ggmlModelFileName = "ggml-tiny.bin";
+     private String ggmlSampleFileName = "jfk.wav";
 
      private Context mContext;
      private Activity mActivity;
      private Settings mSettings;
+
+     private KANTVMgr mKANTVMgr = null;
+     private ASRFragment.MyEventListener mEventListener = new ASRFragment.MyEventListener();
 
 
      public static ASRFragment newInstance() {
@@ -124,9 +133,9 @@
          _txtASRInfo = (TextView) mActivity.findViewById(R.id.asrInfo);
          _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfo);
          _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatus);
-         _ggmlLoadModel = (Button) mActivity.findViewById(R.id.btnGGMLLoadModel);
-         _ggmlBenchmark = (Button) mActivity.findViewById(R.id.btnGGMLBenchmark);
-         _ggmlInference = (Button) mActivity.findViewById(R.id.btnGGMLInference);
+         _btnBenchmarkMemcpy = (Button) mActivity.findViewById(R.id.btnBenchmarkMemcpy);
+         _btnBenchmarkMalmat = (Button) mActivity.findViewById(R.id.btnBenchmarkMulmat);
+         _btnInference = (Button) mActivity.findViewById(R.id.btnInference);
 
          CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath(mContext) + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
@@ -151,35 +160,58 @@
 
          CDELibraryLoader.load("whispercpp");
 
-         //_ggmlLoadModel.setOnClickListener(v -> {
-             CDELog.j(TAG, "load ggml's whisper model");
-             String systemInfo = WhisperLib.getSystemInfo();
-             String phoneInfo = "Device info:" + "\n"
-                     + "Brand:" + Build.BRAND + "\n"
-                     + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")" + "\n"
-                     + "Hardware:" + Build.HARDWARE + "\n"
-                     /*+ "Fingerprint:" + Build.FINGERPRINT + "\n"*/
-                     + "OS:" + "Android " + android.os.Build.VERSION.RELEASE;
-             _txtGGMLInfo.setText("");
-             _txtGGMLInfo.append(phoneInfo + "\n\n");
-             _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n\n");
-         //});
+         initKANTVMgr();
 
-         _ggmlBenchmark.setOnClickListener(v -> {
-             CDELog.j(TAG, "exec ggml benchmark");
+
+         CDELog.j(TAG, "load ggml's whisper model");
+         String systemInfo = WhisperLib.getSystemInfo();
+         String phoneInfo = "Device info:" + "\n"
+                 + "Brand:" + Build.BRAND + "\n"
+                 + "Hardware:" + Build.HARDWARE + "\n"
+                 /*+ "Fingerprint:" + Build.FINGERPRINT + "\n"*/
+                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
+                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
+         _txtGGMLInfo.setText("");
+         _txtGGMLInfo.append(phoneInfo + "\n\n");
+         _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n\n");
+
+
+         _btnBenchmarkMemcpy.setOnClickListener(v -> {
+             CDELog.j(TAG, "exec ggml benchmark of memcopy");
+             benchmarkIndex = 0;
              isBenchmarking.set(true);
              startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating));
              Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+             _txtASRInfo.setText("");
 
              WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
              attributes.screenBrightness = 1.0f;
              mActivity.getWindow().setAttributes(attributes);
              mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
              launchGGMLBenchmarkThread();
 
          });
 
-         _ggmlInference.setOnClickListener(v -> {
+         _btnBenchmarkMalmat.setOnClickListener(v -> {
+             CDELog.j(TAG, "exec ggml benchmakr of matrix multiply");
+             isBenchmarking.set(true);
+             benchmarkIndex = 1;
+             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating));
+             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+             _txtASRInfo.setText("");
+
+             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
+             attributes.screenBrightness = 1.0f;
+             mActivity.getWindow().setAttributes(attributes);
+             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+             launchGGMLBenchmarkThread();
+
+         });
+
+
+         _btnInference.setOnClickListener(v -> {
              CDELog.j(TAG, "exec ggml inference");
              this.playAudioFile();
              _txtASRInfo.setText("");
@@ -193,36 +225,41 @@
 
 
      private final void launchGGMLBenchmarkThread() {
-
          Thread workThread = new Thread(new Runnable() {
              @RequiresApi(api = Build.VERSION_CODES.O)
              @Override
              public void run() {
                  strBenchmarkInfo = "";
+
+                 initKANTVMgr();
+                 WhisperLib.set_mulmat_benchmark_status(0);
+
+                 if (mKANTVMgr != null) {
+                     mKANTVMgr.initASR();
+                     mKANTVMgr.startASR();
+                 }
                  while (isBenchmarking.get()) {
-                     beginTime = System.currentTimeMillis();
-
-                     strBenchmarkInfo = WhisperLib.benchMemcpy(1);
-
-                     endTime = System.currentTimeMillis();
-
-                     duration = (endTime - beginTime);
-
-                     CDELog.j(TAG, "benchMemcpy cost: " + duration + " milliseconds");
-
-                     beginTime = System.currentTimeMillis();
-                     strBenchmarkInfo += "\n";
-
-                     strBenchmarkInfo += WhisperLib.benchGgmlMulMat(1);
-
-                     endTime = System.currentTimeMillis();
-
-                     duration = (endTime - beginTime);
-
-                     CDELog.j(TAG, "benchGgmlMulMat cost: " + duration + " milliseconds");
-
-
+                     switch (benchmarkIndex) {
+                         case 0:
+                             beginTime = System.currentTimeMillis();
+                             strBenchmarkInfo = WhisperLib.benchMemcpy(1);
+                             endTime = System.currentTimeMillis();
+                             duration = (endTime - beginTime);
+                             CDELog.j(TAG, "GGML memcpy benchmark cost: " + duration + " milliseconds");
+                             break;
+                         case 1:
+                             beginTime = System.currentTimeMillis();
+                             strBenchmarkInfo += "\n";
+                             strBenchmarkInfo += WhisperLib.benchGgmlMulMat(1);
+                             endTime = System.currentTimeMillis();
+                             duration = (endTime - beginTime);
+                             CDELog.j(TAG, "GGML mulmat benchmark cost: " + duration + " milliseconds");
+                         default:
+                             break;
+                     }
                      isBenchmarking.set(false);
+
+
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
@@ -235,7 +272,10 @@
                          }
                      });
                  }
+
                  stopUIBuffering();
+                 release();
+
              }
          });
          workThread.start();
@@ -254,10 +294,12 @@
                      mProgressDialog.setCanceledOnTouchOutside(true);
 
                      mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                         @RequiresApi(api = Build.VERSION_CODES.O)
                          @Override
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
+                                 WhisperLib.set_mulmat_benchmark_status(1);
                                  isBenchmarking.set(false);
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;
@@ -273,6 +315,7 @@
 
      private void stopUIBuffering() {
          mActivity.runOnUiThread(new Runnable() {
+             @RequiresApi(api = Build.VERSION_CODES.O)
              @Override
              public void run() {
                  if (mProgressDialog != null) {
@@ -282,6 +325,7 @@
                  }
                  String benchmarkTip = "GGML benchmark finished ";
                  CDELog.j(TAG, benchmarkTip);
+                 release();
              }
          });
      }
@@ -291,7 +335,6 @@
      public void initListener() {
 
      }
-
 
      @Override
      public void onDestroy() {
@@ -303,80 +346,11 @@
          super.onResume();
      }
 
-
      @Override
      public void onStop() {
          super.onStop();
      }
 
-     private char readLEChar(RandomAccessFile f) throws IOException {
-         byte b1 = f.readByte();
-         byte b2 = f.readByte();
-         return (char) ((b2 << 8) | b1);
-     }
-
-     private int readLEInt(RandomAccessFile f) throws IOException {
-         byte b1 = f.readByte();
-         byte b2 = f.readByte();
-         byte b3 = f.readByte();
-         byte b4 = f.readByte();
-         return (int) ((b1 & 0xFF) | (b2 & 0xFF) << 8 | (b3 & 0xFF) << 16 | (b4 & 0xFF) << 24);
-     }
-
-     private void doInference(String audioFile) {
-         long inferenceExecTime = 0;
-         try {
-             RandomAccessFile wave = new RandomAccessFile(audioFile, "r");
-
-             wave.seek(20);
-             char audioFormat = this.readLEChar(wave);
-             assert (audioFormat == 1); // 1 is PCM
-
-             wave.seek(22);
-             char numChannels = this.readLEChar(wave);
-             assert (numChannels == 1); // MONO
-
-             wave.seek(24);
-             int sampleRate = this.readLEInt(wave);
-             //assert (sampleRate == this._m.sampleRate()); // desired sample rate
-
-             wave.seek(34);
-             char bitsPerSample = this.readLEChar(wave);
-             assert (bitsPerSample == 16); // 16 bits per sample
-
-             wave.seek(40);
-             int bufferSize = this.readLEInt(wave);
-             assert (bufferSize > 0);
-
-             wave.seek(44);
-             byte[] bytes = new byte[bufferSize];
-             wave.readFully(bytes);
-
-             short[] shorts = new short[bytes.length / 2];
-             // to turn bytes to shorts as either big endian or little endian.
-             ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-
-             //this._tfliteStatus.setText("Running inference ...");
-
-             long inferenceStartTime = System.currentTimeMillis();
-
-             //String decoded = this._m.stt(shorts, shorts.length);
-
-             inferenceExecTime = System.currentTimeMillis() - inferenceStartTime;
-
-             //this._decodedString.setText("ASR result:" + decoded);
-
-         } catch (FileNotFoundException ex) {
-
-         } catch (IOException ex) {
-
-         } finally {
-
-         }
-         //this._tfliteStatus.setText("ASR cost: " + inferenceExecTime + " milliseconds");
-
-         //this._startInference.setEnabled(true);
-     }
 
      public void playAudioFile() {
          try {
@@ -392,7 +366,81 @@
          }
      }
 
+     protected class MyEventListener implements KANTVEventListener {
 
-     public static native int kantv_anti_tamper();
+         MyEventListener() {
+         }
 
+
+         @Override
+         public void onEvent(KANTVEventType eventType, int what, int arg1, int arg2, Object obj) {
+             String eventString = "got event from native layer: " + eventType.toString() + " (" + what + ":" + arg1 + " ) :" + (String) obj;
+             String content = (String) obj;
+
+             if (eventType.getValue() == KANTVEvent.KANTV_ERROR) {
+                 CDELog.j(TAG, "ERROR:" + eventString);
+                 _txtASRInfo.setText("ERROR:" + content);
+             }
+
+             if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
+                 if ((arg1 == KANTV_INFO_ASR_STOP)
+                         || (arg1 == KANTV_INFO_ASR_FINALiZE)
+                 ) {
+                     return;
+                 }
+                 CDELog.j(TAG, "eventString:" + eventString);
+                 _txtASRInfo.setText(content);
+             }
+
+         }
+     }
+
+
+     private void initKANTVMgr() {
+         if (mKANTVMgr != null) {
+             return;
+         }
+
+         try {
+             mKANTVMgr = new KANTVMgr(mEventListener);
+             CDELog.j(TAG, "KANTVMgr version:" + mKANTVMgr.getMgrVersion());
+         } catch (KANTVException ex) {
+             String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
+             CDELog.j(TAG, "error occurred: " + errorMsg);
+             showMsgBox(mActivity, errorMsg);
+             ex.printStackTrace();
+         }
+     }
+
+
+     public void release() {
+         if (mKANTVMgr == null) {
+             return;
+         }
+
+         try {
+             CDELog.j(TAG, "release");
+             {
+                 mKANTVMgr.finalizeASR();
+                 mKANTVMgr.stopASR();
+                 mKANTVMgr.release();
+                 mKANTVMgr = null;
+             }
+         } catch (Exception ex) {
+             String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
+             CDELog.j(TAG, "error occurred: " + errorMsg);
+             ex.printStackTrace();
+         }
+     }
+
+     private void showMsgBox(Context context, String message) {
+         AlertDialog dialog = new AlertDialog.Builder(context).create();
+         dialog.setMessage(message);
+         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+             public void onClick(DialogInterface dialog, int which) {
+
+             }
+         });
+         dialog.show();
+     }
  }

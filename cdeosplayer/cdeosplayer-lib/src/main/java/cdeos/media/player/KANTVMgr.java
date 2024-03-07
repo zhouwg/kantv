@@ -215,9 +215,14 @@ final public class KANTVMgr
     public native void startGraphicBenchmarkPreview();
     public native void stopGraphicBenchmarkPreview();
 
+    public native void initASR();
+    public native void finalizeASR();
+    public native void startASR();
+    public native void stopASR();
+
     private native static int getVersionDescription(byte[] byteSecurityToken, int bufSize);
     private native static final void native_init();
-    private native final void native_setup(Object KANTVmgr_this);
+    private native final void native_setup(Object KANTVMgr_this);
     private native final void native_release();
 
 
