@@ -1,0 +1,6 @@
+FFmpeg/
+DeepSpeech/
+gstreamer/
+
+*.a
+*.so

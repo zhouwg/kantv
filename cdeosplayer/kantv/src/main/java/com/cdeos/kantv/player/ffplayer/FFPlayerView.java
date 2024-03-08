@@ -889,7 +889,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
                     @Override
                     public void setOrientationStatus(boolean isEnable) {
-                        CDELog.j(TAG, "orientation isenable :" + isEnable);
+                        CDELog.j(TAG, "orientation status :" + isEnable);
                         PlayerConfigShare.getInstance().setAllowOrientationChange(isEnable);
                         if (mOrientationListener != null) {
                             if (isEnable)
@@ -937,6 +937,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                             //return;
                         }
 
+                        //TODO:kantv-record with Exoplayer engine is not finished currently,so disable it here
                         if ((CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) || (mSettings.getUsingMediaCodec())
                         ) {
                             Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg", Toast.LENGTH_SHORT).show();
@@ -951,7 +952,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         }
 
                         if ((KANTVDRM.getInstance().ANDROID_JNI_GetVideoWidth() > 1920) || (KANTVDRM.getInstance().ANDROID_JNI_GetVideoHeight() > 1080)) {
-                            //Toast.makeText(getContext(), "issues might occurred during recording because video resolution is above 1920x1080，", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getContext(), "A/V sync issue might be occurred during recording because video resolution is above 1920x1080 or powerful phone is required", Toast.LENGTH_SHORT).show();
                             //topBarView.updateTVRecordingVisibility(false);
                             //return;
                         }
@@ -1520,7 +1521,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         File file = new File(CDEUtils.getRecordingFileName());
         if (file.exists()) {
             CDELog.j(TAG, "recording file " + CDEUtils.getRecordingFileName() + ", size:" + file.length() + " bytes");
-            Toast.makeText(getContext(), "recording stopped，size of recorded file: " + CDEUtils.formatedSize(file.length()), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "recording stopped，size of recorded file: " + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
             CDEUtils.umStopRecord(CDEUtils.getRecordingFileName());
         } else {
             CDELog.j(TAG, "it shouldn't happen");
@@ -1564,10 +1565,10 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 File file = new File(CDEUtils.getRecordingFileName());
                 if (file.exists()) {
                     CDELog.j(TAG, "recording file size:" + file.length());
-                    //Toast.makeText(getContext(), "录制结束，录制文件大小:" + CDEUtils.formatedSize(file.length()), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getContext(), "recording finished，size of recorded file:" + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
                 } else {
-                    CDELog.j(TAG, "it shouldn't happen");
-                    //Toast.makeText(getContext(), "录制结束", Toast.LENGTH_SHORT).show();
+                    CDELog.j(TAG, "it shouldn't happen, pls check why?");
+                    //Toast.makeText(getContext(), "recording finished", Toast.LENGTH_SHORT).show();
                 }
             }
             break;

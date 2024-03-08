@@ -149,6 +149,7 @@ function dump_global_envs()
     if [ "${BUILD_TARGET}" = "android" ]; then
     echo -e "\n"
     echo -e "ANDROID_NDK:               ${ANDROID_NDK}"
+    echo -e "LOCAL_WHISPERCPP_PATH:     ${LOCAL_WHISPERCPP_PATH}"
     echo -e "UPSTREAM_WHISPERCPP_PATH:  ${UPSTREAM_WHISPERCPP_PATH}"
     echo -e "\n"
     fi

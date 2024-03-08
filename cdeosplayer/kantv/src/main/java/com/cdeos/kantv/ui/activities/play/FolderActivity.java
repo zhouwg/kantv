@@ -98,17 +98,17 @@ public class FolderActivity extends BaseMvpActivity<FolderPresenter> implements 
                                     String path = videoList.get(position).getVideoPath();
                                     CDELog.j(TAG, "file path:" + path);
                                     if (FileUtils.delete(path)) {
-                                        CDELog.j(TAG, "删除文件成功");
+                                        CDELog.j(TAG, "delete file ok");
                                         adapter.removeItem(position);
                                         EventBus.getDefault().post(UpdateFragmentEvent.updatePlay(LocalMediaFragment.UPDATE_DATABASE_DATA));
                                     } else {
-                                        ToastUtils.showShort("删除文件失败");
-                                        CDELog.j(TAG, "删除文件失败");
+                                        ToastUtils.showShort("delete file failure");
+                                        CDELog.j(TAG, "delete folders failure");
                                     }
                                 })
                                 .setAutoDismiss()
                                 .build()
-                                .show("确认删除文件？");
+                                .show("confirm to delete file？");
                     }
 
                     @Override
@@ -178,7 +178,7 @@ public class FolderActivity extends BaseMvpActivity<FolderPresenter> implements 
                 //showVideoEditDialog();
                 showVideoSortDialog();
             } else {
-                ToastUtils.showShort("视频列表为空");
+                ToastUtils.showShort("video list is empty");
             }
         }
 
@@ -247,10 +247,10 @@ public class FolderActivity extends BaseMvpActivity<FolderPresenter> implements 
     }
 
     private void showVideoEditDialog() {
-        final String[] playTypes = { "视频排序"};
+        final String[] playTypes = { "video sort"};
 
         new AlertDialog.Builder(this)
-                .setTitle("全局编辑")
+                .setTitle("edit")
                 .setItems(playTypes, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -258,16 +258,16 @@ public class FolderActivity extends BaseMvpActivity<FolderPresenter> implements 
                             break;
                     }
                 })
-                .setNegativeButton("取消", null)
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
 
     private void showVideoSortDialog() {
-        final String[] playTypes = {"按 文件名 排序", "按 视频时长 排序", "按 生成时间 排序"};
+        final String[] playTypes = {"sort by filename", "sort by duration", "sort by create time"};
 
         new AlertDialog.Builder(this)
-                .setTitle("视频排序")
+                .setTitle("video sort")
                 .setItems(playTypes, (dialog, which) -> {
                     switch (which) {
                         case 0:
@@ -306,7 +306,7 @@ public class FolderActivity extends BaseMvpActivity<FolderPresenter> implements 
                             break;
                     }
                 })
-                .setNegativeButton("取消", null)
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 

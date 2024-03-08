@@ -153,7 +153,7 @@ final public class KANTVMgr
             }
             catch (Exception e)
             {
-                CDELog.j(TAG, "exception occured in event handler");
+                CDELog.j(TAG, "exception occurred in event handler");
             }
         }
     }
@@ -235,6 +235,7 @@ final public class KANTVMgr
         catch (Exception e)
         {
             e.printStackTrace();
+            CDELog.j(TAG, "failed to initialize KANTVMgr: " + e.toString());
         }
     }
 

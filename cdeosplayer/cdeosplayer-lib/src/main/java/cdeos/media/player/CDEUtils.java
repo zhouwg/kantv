@@ -812,7 +812,7 @@ public class CDEUtils {
         CDELog.j(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()));
         String dataDirectoryPath = null;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            dataDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "kantv";
+            dataDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "kantv" + File.separator;
         } else {
             dataDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() +
                     File.separator + "Android" + File.separator + "data" + File.separator + "com.cdeos.kantv" + File.separator + "files" + File.separator + "kantv";
@@ -2217,7 +2217,7 @@ public class CDEUtils {
         }
     }
 
-    public static String formatedSize(long bytes) {
+    public static String formattedSize(long bytes) {
 
         if (bytes <= 0) {
             return "0 Bytes";

@@ -9,8 +9,6 @@
 PWD=`pwd`
 REL_PATH=${PWD##*/}
 
-echo -e  "current path: ${PWD}\n"
-
 if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
     echo "pwd is `pwd`"
     echo "pls run . build/envsetup in project's toplevel directory firstly"
@@ -19,6 +17,7 @@ fi
 
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 
+show_pwd
 check_upstream_whispercpp
 check_local_whispercpp
 
@@ -30,7 +29,7 @@ fi
 
 
 echo -e  "upstream whispercpp path: ${UPSTREAM_WHISPERCPP_PATH}\n"
-echo -e  "local    whispercpp path: ${UPSTREAM_WHISPERCPP_PATH}\n"
+echo -e  "local    whispercpp path: ${LOCAL_WHISPERCPP_PATH}\n"
 
 #the following method borrow from bench-all.sh in GGML's project whisper.cpp
 WHISPERCPP_SRCS=(ggml-alloc.c  ggml-backend.c  ggml.c  ggml-quants.c whisper.cpp)

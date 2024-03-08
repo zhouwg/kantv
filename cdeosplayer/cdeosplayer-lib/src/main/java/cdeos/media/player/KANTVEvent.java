@@ -39,12 +39,13 @@
      public final static int KANTV_INFO_STATUS = 14;
 
      public final static int KANTV_INFO_ASR_INIT = 15;
-     public final static int KANTV_INFO_ASR_FINALiZE = 16;
+     public final static int KANTV_INFO_ASR_FINALIZE = 16;
 
      public final static int KANTV_INFO_ASR_START = 17;
      public final static int KANTV_INFO_ASR_STOP = 18;
-     public final static int KANTV_INFO_GGML_INTERNAL = 19;
-     public final static int KANTV_INFO_WHISPERCPP_INTERNAL = 20;
+     public final static int KANTV_INFO_ASR_GGML_INTERNAL = 19;
+     public final static int KANTV_INFO_ASR_WHISPERCPP_INTERNAL = 20;
+     public final static int KANTV_INFO_ASR_RESULT = 21;
 
      public final static int KANTV_ERROR_PREVIEW_START = 0;
      public final static int KANTV_ERROR_PREVIEW_STOP = 1;
@@ -60,8 +61,9 @@
      public final static int KANTV_ERROR_ASR_FINALiZE = 12;
      public final static int KANTV_ERROR_ASR_START = 13;
      public final static int KANTV_ERROR_ASR_STOP = 14;
-     public final static int KANTV_ERROR_GGML_INTERNAL = 15;
-     public final static int KANTV_ERROR_WHISPERCPP_INTERNAL = 16;
+     public final static int KANTV_ERROR_ASR_GGML_INTERNAL = 15;
+     public final static int KANTV_ERROR_ASR_WHISPERCPP_INTERNAL = 16;
+     public final static int KANTV_ERROR_ASR_RESULT = 17;
 
      public static native int kantv_anti_tamper();
  }

@@ -128,9 +128,11 @@ WHISPER_ATTRIBUTE_FORMAT(2, 3)
 static void whisper_log_internal        (ggml_log_level level, const char * format, ...);
 static void whisper_log_callback_default(ggml_log_level level, const char * text, void * user_data);
 
+/*
 #define WHISPER_LOG_ERROR(...) whisper_log_internal(GGML_LOG_LEVEL_ERROR, __VA_ARGS__)
 #define WHISPER_LOG_WARN(...)  whisper_log_internal(GGML_LOG_LEVEL_WARN , __VA_ARGS__)
 #define WHISPER_LOG_INFO(...)  whisper_log_internal(GGML_LOG_LEVEL_INFO , __VA_ARGS__)
+
 
 // define this to enable verbose trace logging - useful for debugging purposes
 //#define WHISPER_DEBUG
@@ -140,6 +142,14 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
 #else
 #define WHISPER_LOG_DEBUG(...)
 #endif
+*/
+
+#define WHISPER_LOG_ERROR LOGGE
+#define WHISPER_LOG_WARN  LOGGW
+#define WHISPER_LOG_INFO  LOGGI
+#define WHISPER_LOG_DEBUG LOGGD
+
+
 
 #define WHISPER_ASSERT(x) \
     do { \
@@ -3780,8 +3790,8 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
 void whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
 
-    WHISPER_LOG_INFO("\n");
-    WHISPER_LOG_INFO("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
+    LOGGV("\n");
+    LOGGV("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
     if (ctx->state != nullptr) {
 
         const int32_t n_sample = std::max(1, ctx->state->n_sample);
@@ -3790,15 +3800,15 @@ void whisper_print_timings(struct whisper_context * ctx) {
         const int32_t n_batchd = std::max(1, ctx->state->n_batchd);
         const int32_t n_prompt = std::max(1, ctx->state->n_prompt);
 
-        WHISPER_LOG_INFO("%s:     fallbacks = %3d p / %3d h\n", __func__, ctx->state->n_fail_p, ctx->state->n_fail_h);
-        WHISPER_LOG_INFO("%s:      mel time = %8.2f ms\n", __func__, ctx->state->t_mel_us / 1000.0f);
-        WHISPER_LOG_INFO("%s:   sample time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_sample_us, n_sample, 1e-3f * ctx->state->t_sample_us / n_sample);
-        WHISPER_LOG_INFO("%s:   encode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_encode_us, n_encode, 1e-3f * ctx->state->t_encode_us / n_encode);
-        WHISPER_LOG_INFO("%s:   decode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_decode_us, n_decode, 1e-3f * ctx->state->t_decode_us / n_decode);
-        WHISPER_LOG_INFO("%s:   batchd time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_batchd_us, n_batchd, 1e-3f * ctx->state->t_batchd_us / n_batchd);
-        WHISPER_LOG_INFO("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
+        LOGGV("%s:     fallbacks = %3d p / %3d h\n", __func__, ctx->state->n_fail_p, ctx->state->n_fail_h);
+        LOGGV("%s:      mel time = %8.2f ms\n", __func__, ctx->state->t_mel_us / 1000.0f);
+        LOGGV("%s:   sample time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_sample_us, n_sample, 1e-3f * ctx->state->t_sample_us / n_sample);
+        LOGGV("%s:   encode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_encode_us, n_encode, 1e-3f * ctx->state->t_encode_us / n_encode);
+        LOGGV("%s:   decode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_decode_us, n_decode, 1e-3f * ctx->state->t_decode_us / n_decode);
+        LOGGV("%s:   batchd time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_batchd_us, n_batchd, 1e-3f * ctx->state->t_batchd_us / n_batchd);
+        LOGGV("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
     }
-    WHISPER_LOG_INFO("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
+    LOGGV("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
 }
 
 void whisper_reset_timings(struct whisper_context * ctx) {
@@ -6182,16 +6192,7 @@ WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads) {
     return 0;
 }
 
-static bool b_should_abort = false;
-
-WHISPER_API void whisper_set_ggml_mul_mat_status(int b_exit) {
-    LOGGI("set b_should_abort to %d", b_exit);
-    b_should_abort = ((1 == b_exit) ? true : false);
-}
-static bool myAbortCallback(void *data)
-{
-    return b_should_abort;
-}
+static bool myAbortCallback(void *data);
 
 WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
     static std::string s;
@@ -6669,3 +6670,314 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
     fputs(text, stderr);
     fflush(stderr);
 }
+
+
+//------------------------------------ added by zhou.weguo -----------------------------------------
+//I should follow coding style of GGML
+static bool b_should_abort = false;
+
+
+static bool myAbortCallback(void * data) {
+    return b_should_abort;
+}
+
+
+WHISPER_API void whisper_set_ggml_mul_mat_status(int b_exit) {
+    LOGGI("set b_should_abort to %d", b_exit);
+    b_should_abort = ((1 == b_exit) ? true : false);
+}
+
+
+/**
+ * @param file_name
+ * @param pp_data
+ * @param p_datalen
+ *
+ * @return  0  : ok , other return value means failed to read binary data from file
+ */
+static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_t * p_datalen) {
+    int result          = 0;
+    FILE* fp            = NULL;
+    uint8_t * p_data    = NULL;
+    uint32_t datalen    = 0;
+
+    if ((NULL == file_name) || (NULL == pp_data) || (NULL == p_datalen)) {
+        result = -1;
+    }
+
+    if (0 == result) {
+        LOGGD("open file: %s", file_name);
+        fp = fopen(file_name, "rb");
+        if (NULL == fp)
+        {
+            result = -errno;
+            LOGD("open file %s failed(reason:%s)", file_name, strerror(errno));
+        }
+    }
+
+    if (0 == result) {
+        fseek(fp, 0, SEEK_END);
+        datalen = (uint32_t) ftell(fp);
+        LOGGD("file size %d\n", datalen);
+        if (0 == datalen) {
+            LOGGW("pls check why size is zero of file %s\n", file_name);
+            result = -2;
+        }
+    }
+
+    if (0 == result) {
+        p_data = (uint8_t *) malloc(datalen);
+        if (NULL == p_data) {
+            LOGGW("malloc memory failure, pls check why?");
+            result = -3;
+        }
+    }
+
+    if (0 == result) {
+        fseek(fp, 0, SEEK_SET);
+        datalen = (uint32_t)fread(p_data, 1, datalen, fp);
+    }
+
+    if (0 == result) {
+        *pp_data    = p_data;
+        *p_datalen  = datalen;
+        p_data      = NULL;
+    }
+
+    if (NULL != fp) {
+        fclose(fp);
+        fp = NULL;
+    }
+
+    //attention here, just for avoid memory leak
+    if (NULL != p_data) {
+        free(p_data);
+        p_data = NULL;
+    }
+
+    return result;
+}
+
+
+//2024-03-08, zhou.weiguo, integrate customized FFmpeg to whisper.cpp:
+//(1) it would be very important for PoC stage 3 in project KanTV(https://github.com/cdeos/kantv/issues/64)
+//(2) customized FFmpeg would/might be heavily used within customized whisper.cpp in the future
+
+extern "C" {
+#include "libavutil/opt.h"
+#include "libavutil/samplefmt.h"
+#include "libswresample/swresample.h"
+}
+
+//ffmpeg -i jfk.wav -ar 16000 -ac 1 -c:a pcm_s16le new.wav
+//this is a reverse engineering hardcode function and should not be used in real project
+static float * convert_to_float(uint8_t * in_audio_data, size_t in_audio_size, size_t * out_sample_counts) {
+    int result = 0;
+    int in_audio_channels       = 0;
+    int in_sample_counts        = 0;
+    int in_sample_rates         = 0;
+    int in_sample_bits          = 0;
+    int out_audio_channels      = 0;
+    int out_sample_rates        = 0;
+    int dst_sample_counts       = 0;
+    struct SwrContext *swr_ctx  = NULL;
+    uint8_t *in                 = NULL;
+    uint8_t *payload            = NULL;
+    size_t payload_len          = 0;
+    size_t skip_len             = 0;
+    int i                       = 0;
+    float *out_audio_data       = NULL;
+
+    if ((NULL == in_audio_data) || (NULL == out_sample_counts)) {
+        LOGGW("pls check params");
+        return NULL;
+    }
+
+    in                              = in_audio_data;
+    in_audio_channels               = (in[23] << 8) | in[22];
+    in_sample_rates                 = (in[27] << 24) | (in[26] << 16) | (in[25] << 8) | in[24];
+    in_sample_bits                  = (in[35] << 8) | in[34];
+    skip_len                        = (in[43] << 24) | (in[42] << 16) | (in[41] << 8) | in[40];
+    payload_len                     = (in[51 + skip_len] << 24) | (in[50 + skip_len] << 16) | (in[49 + skip_len] << 8) | in[48 + skip_len];
+    LOGGD("%c %c %c %c\n", in[44 + skip_len], in[45 + skip_len], in[46 + skip_len], in[47 + skip_len]);
+    LOGGD("in_sample_rates:    %d\n", in_sample_rates);
+    LOGGD("in_audio_channels:  %d\n", in_audio_channels);
+    LOGGD("in_sample_bits:     %d\n", in_sample_bits);
+    LOGGD("in_audio_size:      %d\n", in_audio_size);
+    LOGGD("skip_len:           %d\n", skip_len);
+    LOGGD("payload_len:        %d\n", payload_len);
+    payload                         = in_audio_data + 44 + skip_len + 8;
+    payload_len                     = in_audio_size - 44 - skip_len - 8;
+    LOGGD("payload_len:        %d\n", payload_len);
+    in_sample_counts                = payload_len / 2;
+    *out_sample_counts              = payload_len / 2;
+    out_audio_channels              = in_audio_channels;
+    out_sample_rates                = in_sample_rates;
+    LOGGD("in_sample_counts:   %d\n", in_sample_counts);
+    HEXDUMP(in_audio_data, in_audio_size);
+    HEXDUMP(payload, payload_len);
+
+    swr_ctx = swr_alloc();
+    if (NULL == swr_ctx) {
+        LOGGW("could not allocate FFmpeg resample context\n");
+        return NULL;
+    }
+
+    av_opt_set_int       (swr_ctx, "in_channel_count",    in_audio_channels,  0);
+    av_opt_set_int       (swr_ctx, "in_sample_rate",      in_sample_rates,    0);
+    av_opt_set_sample_fmt(swr_ctx, "in_sample_fmt",   AV_SAMPLE_FMT_S16, 0);
+    av_opt_set_int       (swr_ctx, "out_channel_count",   out_audio_channels,0);
+    av_opt_set_int       (swr_ctx, "out_sample_rate",     out_sample_rates,  0);
+    av_opt_set_sample_fmt(swr_ctx, "out_sample_fmt",  AV_SAMPLE_FMT_FLT, 0);
+    if ((result = swr_init(swr_ctx)) < 0) {
+        LOGGI( "Failed to initialize the resampling context\n");
+        goto failure;
+    }
+
+    out_audio_data  = (float*)malloc( (in_sample_counts) * sizeof(float));
+    if (NULL == out_audio_data) {
+        LOGGW("malloc failed\n");
+        goto failure;
+    }
+
+    dst_sample_counts = av_rescale_rnd(swr_get_delay(swr_ctx, in_sample_rates) + in_sample_counts, out_sample_rates, in_sample_rates, AV_ROUND_UP);
+    LOGGI("dst_sample_counts %d\n", dst_sample_counts);
+    if (dst_sample_counts != *out_sample_counts) {
+        LOGGW("it shouldn't happened, pls check");
+    }
+
+    result = swr_convert(swr_ctx,
+                         (uint8_t **)(&out_audio_data),
+                         *out_sample_counts,
+                         (const uint8_t**)(&payload),
+                         in_sample_counts);
+
+    if (result < 0) {
+        LOGGW("audio sample convert failure");
+        free(out_audio_data);
+        out_audio_data = NULL;
+    }
+    LOGGD("audio sample convert's result: %d\n", result);
+
+failure:
+    if (NULL != swr_ctx) {
+        swr_free(&swr_ctx);
+        swr_ctx = NULL;
+    }
+
+    return out_audio_data;
+}
+
+
+
+/**
+ * @param model_path
+ * @param audio_path
+ * @param num_threads
+ *
+ * @return asr result which generated by whispercpp's inference. the caller should be responsible for release memory and careful potential memory leak
+ */
+WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads) {
+    struct whisper_context *context                 = NULL;
+    struct whisper_full_params whisper_params;
+    uint8_t * audio_data                            = NULL;
+    size_t   audio_size                             = 0;
+    float   * float_audio_data                      = NULL;
+    size_t   float_sample_counts                    = 0;
+    int      result                                 = 0;
+    int      num_segments                           = 0;
+    int      index                                  = 0;
+    int64_t  begin_time                             = 0LL;
+    int64_t  end_time                               = 0LL;
+    int64_t  t0_segment                             = 0;
+    int64_t  t1_segment                             = 0;
+    const char * text                               = NULL;
+    //TODO: static variable should not be used in real project
+    static std::string asr_result;
+
+    if ((NULL == model_path) || (NULL == audio_path)) {
+        LOGGW("pls check params");
+        return NULL;
+    }
+
+    LOGGI("mode path:   %s\n", model_path);
+    LOGGI("audio file:  %s\n", audio_path);
+    LOGGI("num threads: %d\n", num_threads);
+
+    asr_result = "";
+    context = whisper_init_from_file(model_path);
+    if (nullptr == context) {
+        LOGGW("whisper_init_from_file failure, pls check why");
+        goto failure;
+    }
+
+    result = read_data_from_file(audio_path, &audio_data, &audio_size);
+    if (0 != result) {
+        LOGGW("read data from file %s failure,pls check why?", audio_path);
+        goto failure;
+    }
+    LOGGD("audio size %d\n", audio_size);
+    float_audio_data = convert_to_float(audio_data, audio_size, &float_sample_counts);
+    LOGGD("float_sample_counts %d\n", float_sample_counts);
+
+    whisper_params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+    whisper_params.print_realtime       = true;
+    whisper_params.print_progress       = true;
+    whisper_params.print_timestamps     = true;
+    whisper_params.print_special        = false;
+    whisper_params.translate            = false;
+    whisper_params.language             = "en";
+    whisper_params.n_threads            = num_threads;
+    whisper_params.offset_ms            = 0;
+    whisper_params.no_context           = true;
+    whisper_params.single_segment       = false;
+    whisper_reset_timings(context);
+
+    LOGGV("calling whisper_full\n");
+    begin_time = ggml_time_ms();
+    if (whisper_full(context, whisper_params, float_audio_data, float_sample_counts) != 0) {
+        LOGGW("inference failure, pls check why?");
+        goto failure;
+    }
+    LOGGI("whispercpp inference successfully");
+    whisper_print_timings(context);
+    num_segments = whisper_full_n_segments(context);
+    LOGGD("num_segments:%d\n", num_segments);
+    for (index = 0; index < num_segments; index++) {
+        text = whisper_full_get_segment_text(context, index);
+        t0_segment = whisper_full_get_segment_t0(context, index);
+        t1_segment = whisper_full_get_segment_t1(context, index);
+
+        std::string cur_line = "";
+        LOGGV("text[%d]:[%s --> %s] %s\n",
+              index,
+              to_timestamp(t0_segment).c_str(),
+              to_timestamp(t1_segment).c_str(),
+              text);
+        cur_line += "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" + std::string(text);
+        asr_result += cur_line + "\n";
+#ifdef TARGET_ANDROID
+        LOGGD("asr result:\n%s\n", cur_line.c_str());
+        kantv_asr_notify(cur_line);
+#endif
+    }
+    end_time = ggml_time_ms();
+    LOGGI("inference cost %d ms\n", end_time - begin_time);
+    LOGGV("after calling whisper_full\n");
+
+failure:
+    if (NULL != float_audio_data) {
+        free(float_audio_data);
+        float_audio_data = NULL;
+    }
+
+    if (NULL != audio_data) {
+        free(audio_data);
+        audio_data = NULL;
+    }
+
+    whisper_free(context);
+
+    return asr_result.c_str();
+}
+//------------------------------------ end added by zhou.weguo -------------------------------------

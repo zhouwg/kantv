@@ -27,6 +27,7 @@ public class KANTVBenchmarkType
     public static final int BENCHMARK_SVT_AV1  = 4;
 
 
+    //borrow from FFmpeg
     public static final int AV_PIX_FMT_YUV420P = 0;   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
     public static final int AV_PIX_FMT_YUYV422 = 1;   ///< packed YUV 4:2:2, 16bpp, Y0 Cb Y1 Cr
     public static final int AV_PIX_FMT_RGB24 = 2;     ///< packed RGB 8:8:8, 24bpp, RGBRGB...
