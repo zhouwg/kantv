@@ -80,7 +80,8 @@ final public class KANTVMgr
             String nativeVersion = getVersion();
             String errorMsg = "JAR's version " + javaVersion + " does not match JNI's version: " + nativeVersion;
             CDELog.j(TAG, errorMsg);
-            throw new KANTVException(errorMsg);
+            //weiguo:uncomment it for production project
+            //throw new KANTVException(errorMsg);
         }
 
         mEventListener = eventListener;

@@ -1,6 +1,6 @@
 {
   "kantvServer": "www.cde-os.com",
-  "releaseMode": "0",
-  "apkVersion": "1.2.9",
+  "releaseMode": "1",
+  "apkVersion": "1.3.0",
   "apkForTV": "0"
 }

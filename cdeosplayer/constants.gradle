@@ -21,8 +21,8 @@ project.ext {
     ndkVersion = "21.4.7075529"
 
     //version and version code of KanTV
-    releaseVersion     = '1.2.9'
-    releaseVersionCode = 1000209
+    releaseVersion     = '1.3.0'
+    releaseVersionCode = 1000300
 
     //version and version code of internal Exoplayer2 playEngine
     releaseVersionExoplayer     = '2.15.1'
