@@ -37,6 +37,16 @@ include_directories(${PREBUIT_INC_PATH}/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
+#add_definitions(-DGGML_USE_CLBLAST)
+add_definitions(-DGGML_USE_OPENBLAS)
+
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_definitions(-O0 -g)
+ELSE()
+    add_definitions(-DNDEBUG)
+    add_definitions(-O3)
+    #add_definitions(-fvisibility=hidden -fvisibility-inlines-hidden)
+ENDIF()
 
 
 find_library(LOG_LIB log)
@@ -50,6 +60,16 @@ set_target_properties(kantvcore
         IMPORTED_LOCATION
         ${PREBUIT_LIB_PATH}/libkantv-core.so)
 
+
+add_library(openblas
+        SHARED
+        IMPORTED)
+
+set_target_properties(openblas
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUIT_LIB_PATH}/libopenblas.so)
+
 function(build_library target_name)
     add_library(
         ${target_name}
@@ -57,7 +77,7 @@ function(build_library target_name)
         ${SOURCE_FILES}
     )
 
-    target_link_libraries(${target_name} ${LOG_LIB}  kantvcore android)
+    target_link_libraries(${target_name} ${LOG_LIB}  kantvcore openblas android)
 
 endfunction()
 

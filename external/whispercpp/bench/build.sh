@@ -2,7 +2,7 @@
 
 # Copyright (c) 2024- KanTV Authors. All Rights Reserved.
 
-# Description: build whispercpp's bench tool for target x86-linux and target Android
+# Description: build whispercpp's bench tool for target Android(this project only focus on Android-based device)
 #
 
 set -e
@@ -50,6 +50,8 @@ ls -l ${TARGET}
 ls -lah ${TARGET}
 /bin/cp -fv ${TARGET} ../../${TARGET}_arm64
 cd -
+echo -e `pwd`
+ls -l ${TARGET}_arm64
 }
 
 
@@ -63,6 +65,7 @@ ls -l ${TARGET}
 ls -lah ${TARGET}
 /bin/cp -fv ${TARGET} ../../${TARGET}_armv7a
 cd -
+ls -l ${TARGET}_armv7a
 }
 
 
@@ -79,5 +82,5 @@ cd -
 }
 
 build_arm64
-build_armv7a
-build_x86
+#build_armv7a
+#build_x86

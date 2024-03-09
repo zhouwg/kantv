@@ -48,7 +48,7 @@ make
 
 ls -l lib${TARGET}.so
 ls -lah lib${TARGET}.so
-#don't do this because IDE is preferred
+#don't do this because IDE is preferred to this open source project for purpose of more easily/friendly
 #/bin/cp -fv lib${TARGET}.so ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/
 cd -
 }
@@ -62,11 +62,11 @@ make
 
 ls -l lib${TARGET}.so
 ls -lah lib${TARGET}.so
-#don't do this because IDE is preferred
+#don't do this because IDE is preferred to this open source project for purpose of more easily/friendly
 #/bin/cp -fv lib${TARGET}.so ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/armeabi-v7a/
 cd -
 }
 
 
 build_arm64
-build_armv7a
+#build_armv7a

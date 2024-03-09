@@ -71,4 +71,34 @@
         <item>存</item>
         <item>不存</item>
     </string-array>
+
+    <string-array name="benchType">
+        <item>mempcpy</item>
+        <item>mulmat</item>
+        <item>asr</item>
+        <item>whisper encoder</item>
+    </string-array>
+
+    <string-array name="threadCounts">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+
+    <string-array name="modelName">
+        <item>tiny</item>
+        <item>tiny.en</item>
+        <item>base</item>
+        <item>base.en</item>
+        <item>small</item>
+        <item>small.en</item>
+        <item>medium</item>
+        <item>medium.en</item>
+        <item>large</item>
+    </string-array>
 </resources>

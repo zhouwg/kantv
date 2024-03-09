@@ -3787,13 +3787,18 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
     return ctx->vocab.token_transcribe;
 }
 
+#include <sstream>
 void whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
 
+#ifdef TARGET_ANDROID
+    std::ostringstream timing;
+#endif
+
     LOGGV("\n");
     LOGGV("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
-    if (ctx->state != nullptr) {
 
+    if (ctx->state != nullptr) {
         const int32_t n_sample = std::max(1, ctx->state->n_sample);
         const int32_t n_encode = std::max(1, ctx->state->n_encode);
         const int32_t n_decode = std::max(1, ctx->state->n_decode);
@@ -3807,8 +3812,25 @@ void whisper_print_timings(struct whisper_context * ctx) {
         LOGGV("%s:   decode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_decode_us, n_decode, 1e-3f * ctx->state->t_decode_us / n_decode);
         LOGGV("%s:   batchd time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_batchd_us, n_batchd, 1e-3f * ctx->state->t_batchd_us / n_batchd);
         LOGGV("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
+#ifdef TARGET_ANDROID
+        timing << "\n" << "   load time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  (ctx->t_load_us / 1000.0f) << " ms";
+        timing << "\n" << "   fallbacks  = " << std::setw(3)  << (ctx->state->n_fail_p) << " p / " << (ctx->state->n_fail_h) << " h";
+        timing << "\n" << "    mel time  = " << std::setw(10) << std::fixed <<  std::setprecision(2)<< (ctx->state->t_mel_us / 1000.0f)  << " ms";
+        timing << "\n" << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_sample_us) << " ms / " << n_sample << " runs (" << (1e-3f * ctx->state->t_sample_us / n_sample) << " ms per run)";
+        timing << "\n" << " encode time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_encode_us) << " ms / " << n_encode << " runs (" << (1e-3f * ctx->state->t_encode_us / n_sample) << " ms per run)";
+        timing << "\n" << " decode time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_decode_us) << " ms / " << n_decode << " runs (" << (1e-3f * ctx->state->t_decode_us / n_sample) << " ms per run)";
+        timing << "\n" << " batchd time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_batchd_us) << " ms / " << n_batchd << " runs (" << (1e-3f * ctx->state->t_batchd_us / n_sample) << " ms per run)";
+        timing << "\n" << " prompt time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_prompt_us) << " ms / " << n_prompt << " runs (" << (1e-3f * ctx->state->t_prompt_us / n_sample) << " ms per run)";
+#endif
     }
-    LOGGV("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
+    LOGGV("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us) / 1000.0f);
+
+#ifdef TARGET_ANDROID
+        timing << "\n" << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((t_end_us - ctx->t_start_us) / 1000.0f) << " ms";
+
+    std::string result = timing.str();
+    kantv_asr_notify(result);
+#endif
 }
 
 void whisper_reset_timings(struct whisper_context * ctx) {
@@ -6027,7 +6049,6 @@ WHISPER_API int whisper_bench_memcpy(int n_threads) {
 }
 
 WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
-
     ENTER_FUNC();
     static std::string s;
     s = "";
@@ -6193,6 +6214,7 @@ WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads) {
 }
 
 static bool myAbortCallback(void *data);
+static const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
 WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
     static std::string s;
@@ -6231,10 +6253,12 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 #ifdef TARGET_ANDROID
     tipString += "\nprepare matrix";
     kantv_asr_notify(tipString);
+    LOGGI("%s\n", tipString.c_str());
 #endif
     // put a bunch of random data in the buffer
     for (size_t i = 0; i < buf.size(); i++) buf[i] = i;
 
+    LOGGI("sizes.size() = %d\n", sizes.size());
     for (int j = 0; j < (int) sizes.size(); j++) {
         int n_q4_0 = 0;
         int n_q4_1 = 0;
@@ -6295,8 +6319,12 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
 #ifdef TARGET_ANDROID
                 tipString = "calling ggml_graphic_compute_helper:\n";
-                tipString += "j= " + std::to_string(j) + ",k=" + std::to_string(k) + ",i=" + std::to_string(i) + "\n";
+                tipString += "j= " + std::to_string(j) + "(matrix dimension = " + std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
+                             + ",k=" + std::to_string(k) + "(ggml quant type=" + std::string(whisper_get_ggml_type_str(static_cast<ggml_type>(wtype))) + ")"
+                             + ",i=" + std::to_string(i) + "\n";
+
                 kantv_asr_notify(tipString);
+                //LOGGI("%s\n", tipString.c_str());
 #endif
                 //ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
                 ggml_graph_compute_helper(gf, work, n_threads, fnAbortCallback, &myData);
@@ -6332,6 +6360,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
         s += strbuf;
 #ifdef TARGET_ANDROID
         kantv_asr_notify(s);
+        LOGGI("%s\n", s.c_str());
 #endif
     }
 
@@ -6672,7 +6701,7 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
 }
 
 
-//------------------------------------ added by zhou.weguo -----------------------------------------
+//------------------------------------ added by zhou.weiguo -----------------------------------------
 //I should follow coding style of GGML
 static bool b_should_abort = false;
 
@@ -6708,8 +6737,7 @@ static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_
     if (0 == result) {
         LOGGD("open file: %s", file_name);
         fp = fopen(file_name, "rb");
-        if (NULL == fp)
-        {
+        if (NULL == fp) {
             result = -errno;
             LOGD("open file %s failed(reason:%s)", file_name, strerror(errno));
         }
@@ -6843,7 +6871,7 @@ static float * convert_to_float(uint8_t * in_audio_data, size_t in_audio_size, s
     dst_sample_counts = av_rescale_rnd(swr_get_delay(swr_ctx, in_sample_rates) + in_sample_counts, out_sample_rates, in_sample_rates, AV_ROUND_UP);
     LOGGI("dst_sample_counts %d\n", dst_sample_counts);
     if (dst_sample_counts != *out_sample_counts) {
-        LOGGW("it shouldn't happened, pls check");
+        LOGGW("it shouldn't happen, pls check");
     }
 
     result = swr_convert(swr_ctx,
@@ -6875,7 +6903,7 @@ failure:
  * @param audio_path
  * @param num_threads
  *
- * @return asr result which generated by whispercpp's inference. the caller should be responsible for release memory and careful potential memory leak
+ * @return asr result which generated by whispercpp's inference
  */
 WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads) {
     struct whisper_context *context                 = NULL;
@@ -6907,17 +6935,24 @@ WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, con
     asr_result = "";
     context = whisper_init_from_file(model_path);
     if (nullptr == context) {
-        LOGGW("whisper_init_from_file failure, pls check why");
+        LOGGW("whisper_init_from_file failure, pls check why\n");
+        result = -1;
         goto failure;
     }
 
     result = read_data_from_file(audio_path, &audio_data, &audio_size);
     if (0 != result) {
-        LOGGW("read data from file %s failure,pls check why?", audio_path);
+        LOGGW("read data from file %s failure,pls check why?\n", audio_path);
+        result = -2;
         goto failure;
     }
     LOGGD("audio size %d\n", audio_size);
     float_audio_data = convert_to_float(audio_data, audio_size, &float_sample_counts);
+    if (NULL == float_audio_data) {
+        LOGGW("convert audio sample failure,pls check why?\n");
+        result = -3;
+        goto failure;
+    }
     LOGGD("float_sample_counts %d\n", float_sample_counts);
 
     whisper_params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -6935,16 +6970,23 @@ WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, con
 
     LOGGV("calling whisper_full\n");
     begin_time = ggml_time_ms();
-    if (whisper_full(context, whisper_params, float_audio_data, float_sample_counts) != 0) {
-        LOGGW("inference failure, pls check why?");
+    result = whisper_full(context, whisper_params, float_audio_data, float_sample_counts);
+    if (0 != result) {
+        LOGGW("inference failure, pls check why?\n");
+        result = -4;
         goto failure;
     }
-    LOGGI("whispercpp inference successfully");
+    LOGGI("whispercpp inference successfully\n");
     whisper_print_timings(context);
     num_segments = whisper_full_n_segments(context);
     LOGGD("num_segments:%d\n", num_segments);
     for (index = 0; index < num_segments; index++) {
         text = whisper_full_get_segment_text(context, index);
+        if (NULL == text) {
+            LOGGW("whisper_full_get_segment_text failure, pls check why\n");
+            result = -5;
+            goto failure;
+        }
         t0_segment = whisper_full_get_segment_t0(context, index);
         t1_segment = whisper_full_get_segment_t1(context, index);
 
@@ -6958,7 +7000,7 @@ WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, con
         asr_result += cur_line + "\n";
 #ifdef TARGET_ANDROID
         LOGGD("asr result:\n%s\n", cur_line.c_str());
-        kantv_asr_notify(cur_line);
+        kantv_asr_notify(asr_result);
 #endif
     }
     end_time = ggml_time_ms();
@@ -6976,8 +7018,155 @@ failure:
         audio_data = NULL;
     }
 
-    whisper_free(context);
+    if (nullptr != context) {
+        whisper_free(context);
+    }
 
-    return asr_result.c_str();
+    if (0 == result)
+        return asr_result.c_str();
+    else
+        return NULL;
 }
-//------------------------------------ end added by zhou.weguo -------------------------------------
+
+
+static const char * whisper_get_ggml_type_str(enum ggml_type wtype) {
+    switch (wtype) {
+        case GGML_TYPE_Q4_0:
+            return "GGML_TYPE_Q4_0";
+        case GGML_TYPE_Q4_1:
+            return "GGML_TYPE_Q4_1";
+        case GGML_TYPE_Q5_0:
+            return "GGML_TYPE_Q5_0";
+        case GGML_TYPE_Q5_1:
+            return "GGML_TYPE_Q5_1";
+        case GGML_TYPE_Q8_0:
+            return "GGML_TYPE_Q8_0";
+        case GGML_TYPE_F16:
+            return "GGML_TYPE_F16";
+        case GGML_TYPE_F32:
+            return "GGML_TYPE_F32";
+        default:
+            return "unknown";
+    }
+}
+
+
+//borrow from examples/bench/bench.cpp
+struct whisper_params {
+    int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
+    int32_t what = 0; // what to benchmark: 0: memcpy 1: mulmat 2: asr 3: whisper_encoder
+
+    //std::string model = "models/ggml-base.en.bin";
+    std::string model = "models/ggml-small.en.bin";
+
+    bool use_gpu = true;
+};
+
+
+static int whisper_bench_full(const whisper_params & params) {
+    // whisper init
+    struct whisper_context_params cparams = whisper_context_default_params();
+    cparams.use_gpu = params.use_gpu;
+
+    struct whisper_context * ctx = whisper_init_from_file_with_params(params.model.c_str(), cparams);
+
+    {
+        LOGGD("system_info: n_threads = %d / %d | %s\n", params.n_threads, std::thread::hardware_concurrency(), whisper_print_system_info());
+    }
+
+    if (ctx == nullptr) {
+        LOGGW("error: failed to initialize whisper context\n");
+        return 2;
+    }
+
+    const int n_mels = whisper_model_n_mels(ctx);
+
+    if (int ret = whisper_set_mel(ctx, nullptr, 0, n_mels)) {
+        LOGGW("error: failed to set mel: %d\n", ret);
+        return 3;
+    }
+    // heat encoder
+    if (int ret = whisper_encode(ctx, 0, params.n_threads) != 0) {
+        LOGGW("error: failed to encode: %d\n", ret);
+        return 4;
+    }
+
+    whisper_token tokens[512];
+    memset(tokens, 0, sizeof(tokens));
+
+    // prompt heat
+    if (int ret = whisper_decode(ctx, tokens, 256, 0, params.n_threads) != 0) {
+        LOGGW("error: failed to decode: %d\n", ret);
+        return 4;
+    }
+
+    // text-generation heat
+    if (int ret = whisper_decode(ctx, tokens, 1, 256, params.n_threads) != 0) {
+        LOGGW( "error: failed to decode: %d\n", ret);
+        return 4;
+    }
+
+    whisper_reset_timings(ctx);
+
+    // actual run
+    if (int ret = whisper_encode(ctx, 0, params.n_threads) != 0) {
+        LOGGW( "error: failed to encode: %d\n", ret);
+        return 4;
+    }
+
+    // text-generation
+    for (int i = 0; i < 256; i++) {
+        if (int ret = whisper_decode(ctx, tokens, 1, i, params.n_threads) != 0) {
+            LOGGW( "error: failed to decode: %d\n", ret);
+            return 4;
+        }
+    }
+
+    // batched decoding
+    for (int i = 0; i < 64; i++) {
+        if (int ret = whisper_decode(ctx, tokens, 5, 0, params.n_threads) != 0) {
+            LOGGW( "error: failed to decode: %d\n", ret);
+            return 4;
+        }
+    }
+
+    // prompt processing
+    for (int i = 0; i < 16; i++) {
+        if (int ret = whisper_decode(ctx, tokens, 256, 0, params.n_threads) != 0) {
+            LOGGW( "error: failed to decode: %d\n", ret);
+            return 4;
+        }
+    }
+
+    whisper_print_timings(ctx);
+    whisper_free(ctx);
+
+    return 0;
+}
+
+
+void whispercpp_bench(const char *model_path, int bench_type, int n_threads) {
+    whisper_params params;
+
+    params.n_threads    = n_threads;
+    params.what         = bench_type;
+    params.model        = model_path;
+    params.use_gpu      = false;
+
+    LOGGD("model path:%s\n", model_path);
+    switch (bench_type) {
+        case 3: // whisper encoder
+            whisper_bench_full(params);
+            break;
+        case 0: // memcpy
+            whisper_bench_memcpy(n_threads);
+            break;
+        case 1: // mulmat
+            whisper_bench_ggml_mul_mat(n_threads);
+            break;
+        default:
+            break;
+    }
+}
+//end borrow from examples/bench/bench.cpp
+//------------------------------------ end added by zhou.weiguo -------------------------------------

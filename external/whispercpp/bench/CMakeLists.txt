@@ -9,14 +9,27 @@ project(whisperbench)
 set(CMAKE_VERBOSE_MAKEFILE on  )
 
 set(TARGET             ${TARGET_NAME})
-
+set(PREBUIT_INC_PATH   ${CMAKE_SOURCE_DIR}/../../../prebuilts/include/)
+set(PREBUIT_LIB_PATH   ${CMAKE_SOURCE_DIR}/../../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 
 message("project root path: " ${PROJECT_ROOT_PATH})
 message("whispercpp path  : " ${WHISPERCPP_PATH})
+message("PREBUIT_INC_PATH : ${PREBUIT_INC_PATH}")
+
+include_directories(${PREBUIT_INC_PATH}/)
+
+add_library(kantvcore
+        SHARED
+        IMPORTED)
+
+set_target_properties(kantvcore
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUIT_LIB_PATH}/libkantv-core.so)
 
 IF (${BUILD_TARGET} MATCHES "android")
     add_definitions(-D__ARM_NEON)
-    link_libraries(log)
+    link_libraries(log kantvcore android)
 ENDIF()
 
 

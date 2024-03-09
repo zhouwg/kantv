@@ -6,13 +6,17 @@ package org.ggml.whispercpp;
 public class whispercpp {
   private static final String TAG = whispercpp.class.getName();
 
-  public static native String getSystemInfo();
+  public static native String get_systeminfo();
 
-  public static native String benchMemcpy(int nThreadCounts);
+  public static native void   set_benchmark_status(int bExitBenchmark);
 
-  public static native String benchMulMat(int nThreadCounts);
-
-  public static native void set_mulmat_benchmark_status(int bExitBenchmark);
-
-  public static native String transcribe_from_file(String modelPath, String audioFile, int nThreadCounts);
+  /**
+   *
+   * @param modelPath
+   * @param audioFile
+   * @param nBenchType  0: memcpy 1: mulmat 2: asr 3: full/whisper_encoder
+   * @param nThreadCounts
+   * @return
+   */
+  public static native String bench(String modelPath, String audioFile, int nBenchType, int nThreadCounts);
 }

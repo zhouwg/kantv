@@ -617,6 +617,9 @@ extern "C" {
 
     // PoC codes for PoC(https://github.com/cdeos/kantv/issues/64) in project KanTV
     WHISPER_API void         whisper_set_ggml_mul_mat_status(int b_exit);
+
+    WHISPER_API void         whispercpp_bench(const char *model_path, int bench_type, int n_threads);
+
     WHISPER_API const char * whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads);
 
 #ifdef __cplusplus

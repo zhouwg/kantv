@@ -35,9 +35,13 @@
  import android.content.res.Resources;
  import android.media.MediaPlayer;
  import android.os.Build;
+ import android.view.View;
  import android.view.WindowManager;
+ import android.widget.AdapterView;
+ import android.widget.ArrayAdapter;
  import android.widget.Button;
  import android.widget.LinearLayout;
+ import android.widget.Spinner;
  import android.widget.TextView;
  import android.widget.Toast;
 
@@ -83,33 +87,33 @@
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
 
-     Button _btnBenchmarkMemcpy;
-     Button _btnBenchmarkMulmat;
-     Button _btnBenchmarkInference;
+     Button _btnBenchmark;
 
-     //keep sync with bench.cpp in official/upstream whisper.cpp
-     private static final int BECHMARK_INFERENCE    = 0;
-     private static final int BECHMARK_MEMCPY       = 1;
-     private static final int BECHMARK_MULMAT       = 2;
+     private static final int BECHMARK_MEMCPY       = 0;
+     private static final int BECHMARK_MULMAT       = 1;
+     private static final int BECHMARK_ASR          = 2;
+     private static final int BECHMARK_FULL         = 3; //very slow on Android phone
 
+     private int nThreadCounts = 1;
+     private int benchmarkIndex = 0;
+     private String strModeName = "tiny";
 
-     private int benchmarkIndex                     = 0;
-     private long beginTime                         = 0;
-     private long endTime                           = 0;
-     private long duration                          = 0;
+     private long beginTime = 0;
+     private long endTime = 0;
+     private long duration = 0;
      private String strBenchmarkInfo;
 
-     private AtomicBoolean isBenchmarking           = new AtomicBoolean(false);
+     private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
-     private String ggmlModelFileName               = "ggml-tiny.bin";
-     private String ggmlSampleFileName              = "jfk.wav";
+     private String ggmlModelFileName = "ggml-tiny.bin";
+     private String ggmlSampleFileName = "jfk.wav";
 
-     private Context    mContext;
-     private Activity   mActivity;
-     private Settings   mSettings;
+     private Context mContext;
+     private Activity mActivity;
+     private Settings mSettings;
 
-     private KANTVMgr   mKANTVMgr                   = null;
+     private KANTVMgr mKANTVMgr = null;
      private ASRFragment.MyEventListener mEventListener = new ASRFragment.MyEventListener();
 
 
@@ -145,38 +149,16 @@
          _txtASRInfo = (TextView) mActivity.findViewById(R.id.asrInfo);
          _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfo);
          _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatus);
-         _btnBenchmarkMemcpy = (Button) mActivity.findViewById(R.id.btnBenchmarkMemcpy);
-         _btnBenchmarkMulmat = (Button) mActivity.findViewById(R.id.btnBenchmarkMulmat);
-         _btnBenchmarkInference = (Button) mActivity.findViewById(R.id.btnBenchmarkInference);
+         _btnBenchmark = (Button) mActivity.findViewById(R.id.btnBenchmark);
+
 
          //copy asset files to /sdcard
          //or just upload dependent files to /sdcard accordingly so the APK size would be smaller significantly
-         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName,  CDEUtils.getDataPath() + ggmlModelFileName);
+         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-
-         File modelFile = new File(CDEUtils.getDataPath() + ggmlModelFileName);
-         if (modelFile.exists()) {
-             _txtGGMLStatus.setText("model   file exist:" + CDEUtils.getDataPath() + ggmlModelFileName);
-         } else {
-             CDELog.j(TAG, "model file not exist:" + modelFile.getAbsolutePath());
-             _txtGGMLStatus.setText("model   file not exist: " + CDEUtils.getDataPath() + ggmlModelFileName);
-
-             //GGML model file was not found, so just return in PoC stage
-             return;
-         }
-
-         File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
-         if (sampleFile.exists()) {
-             _txtGGMLStatus.append("\nsample file exist:" + CDEUtils.getDataPath() + ggmlSampleFileName);
-         } else {
-             CDELog.j(TAG, "model file not exist:" + sampleFile.getAbsolutePath());
-             _txtGGMLStatus.append("\nmodel  file not exist: " + CDEUtils.getDataPath() + ggmlSampleFileName);
-
-             //GGML model file was not found, so just return in PoC stage
-             return;
-         }
+         displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
          CDELibraryLoader.load("whispercpp");
 
@@ -188,7 +170,7 @@
          }
 
          CDELog.j(TAG, "load ggml's whisper model");
-         String systemInfo = whispercpp.getSystemInfo();
+         String systemInfo = whispercpp.get_systeminfo();
          String phoneInfo = "Device info:" + "\n"
                  + "Brand:" + Build.BRAND + "\n"
                  + "Hardware:" + Build.HARDWARE + "\n"
@@ -200,65 +182,88 @@
          _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n");
 
 
-         _btnBenchmarkMemcpy.setOnClickListener(v -> {
-             CDELog.j(TAG, "exec ggml benchmark of memcopy");
-             benchmarkIndex = 1;
-             isBenchmarking.set(true);
-             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + getBenchmarkDesc(benchmarkIndex) + ")");
-             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+         Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
+         String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
+         ArrayAdapter<String> adapterBenchType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBenchType);
+         spinnerBenchType.setAdapter(adapterBenchType);
+         spinnerBenchType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "bench type:" + arrayBenchType[position]);
+                 benchmarkIndex = Integer.valueOf(position);
+             }
 
-             //update UI status
-             _txtASRInfo.setText("");
-             _btnBenchmarkMemcpy.setEnabled(false);
-             _btnBenchmarkMulmat.setEnabled(false);
-             _btnBenchmarkInference.setEnabled(false);
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
 
-             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
-             attributes.screenBrightness = 1.0f;
-             mActivity.getWindow().setAttributes(attributes);
-             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-             launchGGMLBenchmarkThread();
-
+             }
          });
 
-         _btnBenchmarkMulmat.setOnClickListener(v -> {
-             CDELog.j(TAG, "exec ggml benchmakr of matrix multiply");
-             isBenchmarking.set(true);
-             benchmarkIndex = 2;
-             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + getBenchmarkDesc(benchmarkIndex) + ")");
-             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+         Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerThreadCounts);
+         String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
+         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayThreadCounts);
+         spinnerThreadsCounts.setAdapter(adapter);
+         spinnerThreadsCounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "thread counts:" + arrayThreadCounts[position]);
+                 nThreadCounts = Integer.valueOf(arrayThreadCounts[position]);
+             }
 
-             //update UI status
-             _txtASRInfo.setText("");
-             _btnBenchmarkMemcpy.setEnabled(false);
-             _btnBenchmarkMulmat.setEnabled(false);
-             _btnBenchmarkInference.setEnabled(false);
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
 
-             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
-             attributes.screenBrightness = 1.0f;
-             mActivity.getWindow().setAttributes(attributes);
-             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+             }
+         });
 
-             launchGGMLBenchmarkThread();
+         Spinner spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
+         String[] arrayModelName = getResources().getStringArray(R.array.modelName);
+         ArrayAdapter<String> adapterModel = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayModelName);
+         spinnerModelName.setAdapter(adapterModel);
+         spinnerModelName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "model:" + arrayModelName[position]);
+                 strModeName = arrayModelName[position];
+             }
 
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
          });
 
 
-         _btnBenchmarkInference.setOnClickListener(v -> {
-             CDELog.j(TAG, "exec ggml inference");
-             playAudioFile();
+         _btnBenchmark.setOnClickListener(v -> {
+             CDELog.j(TAG, "exec ggml benchmark: type: " + getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
+
+             String selectModeFileName = "ggml-" + strModeName + ".bin";
+             String selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             File selectModeFile = new File(selectModelFilePath);
+             displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
+             if (!selectModeFile.exists()) {
+                 CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
+             }
+             File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
+
+             if (!selectModeFile.exists() || (!sampleFile.exists())) {
+                 showMsgBox(mActivity, "pls check whether model file or sample file exist in /sdcard/kantv/");
+                 return;
+             }
+
+             if (benchmarkIndex == BECHMARK_ASR) {
+                 //playAudioFile();
+             }
 
              isBenchmarking.set(true);
-             benchmarkIndex = 0;
+
              startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + getBenchmarkDesc(benchmarkIndex) + ")");
+
              Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
 
              //update UI status
              _txtASRInfo.setText("");
-             _btnBenchmarkMemcpy.setEnabled(false);
-             _btnBenchmarkMulmat.setEnabled(false);
-             _btnBenchmarkInference.setEnabled(false);
+             _btnBenchmark.setEnabled(false);
 
              WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
              attributes.screenBrightness = 1.0f;
@@ -266,6 +271,7 @@
              mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
              launchGGMLBenchmarkThread();
+
          });
 
 
@@ -282,60 +288,48 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 whispercpp.set_mulmat_benchmark_status(0);
+                 whispercpp.set_benchmark_status(0);
 
                  if (mKANTVMgr != null) {
                      mKANTVMgr.initASR();
                      mKANTVMgr.startASR();
                  }
+
                  while (isBenchmarking.get()) {
-                     switch (benchmarkIndex) {
-                         case BECHMARK_INFERENCE:
-                             beginTime = System.currentTimeMillis();
-                             strBenchmarkInfo = whispercpp.transcribe_from_file(CDEUtils.getDataPath() + ggmlModelFileName,
-                                     CDEUtils.getDataPath() + ggmlSampleFileName,
-                                     1);
-                             endTime = System.currentTimeMillis();
-                             duration = (endTime - beginTime);
-                             CDELog.j(TAG, "GGML inference benchmark cost: " + duration + " milliseconds");
-                             break;
+                     beginTime = System.currentTimeMillis();
+                     strBenchmarkInfo = whispercpp.bench(
+                             CDEUtils.getDataPath() + ggmlModelFileName,
+                             CDEUtils.getDataPath() + ggmlSampleFileName,
+                             benchmarkIndex,
+                             nThreadCounts);
+                     endTime = System.currentTimeMillis();
+                     duration = (endTime - beginTime);
 
-                         case BECHMARK_MEMCPY:
-                             beginTime = System.currentTimeMillis();
-                             strBenchmarkInfo = whispercpp.benchMemcpy(1);
-                             endTime = System.currentTimeMillis();
-                             duration = (endTime - beginTime);
-                             CDELog.j(TAG, "GGML memcpy benchmark cost: " + duration + " milliseconds");
-                             break;
-
-                         case BECHMARK_MULMAT:
-                             beginTime = System.currentTimeMillis();
-                             strBenchmarkInfo += "\n";
-                             strBenchmarkInfo += whispercpp.benchMulMat(1);
-                             endTime = System.currentTimeMillis();
-                             duration = (endTime - beginTime);
-                             CDELog.j(TAG, "GGML mulmat benchmark cost: " + duration + " milliseconds");
-                             break;
-
-                         default:
-                             break;
-                     }
                      isBenchmarking.set(false);
-
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String benchmarkTip = getBenchmarkDesc(benchmarkIndex) + " cost " + duration + " milliseconds";
+                             String benchmarkTip = getBenchmarkDesc(benchmarkIndex) + "(model: " + strModeName
+                                     + " ,threads: " + nThreadCounts
+                                     + " ) cost " + duration + " milliseconds";
                              benchmarkTip += "\n";
-                             benchmarkTip += strBenchmarkInfo;
+
+                             //becareful here
+                             if (!strBenchmarkInfo.startsWith("unknown")) {
+                                 benchmarkTip += strBenchmarkInfo;
+                             }
+
+
+                             if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
+                                 playAudioFile();
+                             }
+
                              CDELog.j(TAG, benchmarkTip);
-                             _txtASRInfo.setText("");
-                             _txtASRInfo.setText(benchmarkTip);
+                             _txtGGMLStatus.setText("");
+                             _txtGGMLStatus.setText(benchmarkTip);
 
                              //update UI status
-                             _btnBenchmarkMemcpy.setEnabled(true);
-                             _btnBenchmarkMulmat.setEnabled(true);
-                             _btnBenchmarkInference.setEnabled(true);
+                             _btnBenchmark.setEnabled(true);
                          }
                      });
                  }
@@ -365,7 +359,7 @@
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
-                                 whispercpp.set_mulmat_benchmark_status(1);
+                                 whispercpp.set_benchmark_status(1);
                                  isBenchmarking.set(false);
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;
@@ -405,7 +399,6 @@
      }
 
 
-
      @Override
      public void initListener() {
 
@@ -430,8 +423,8 @@
      public void playAudioFile() {
          try {
              MediaPlayer mediaPlayer = new MediaPlayer();
-             CDELog.j(TAG, "audio file:" + CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
-             mediaPlayer.setDataSource(CDEUtils.getDataPath(mContext) + ggmlSampleFileName);
+             CDELog.j(TAG, "audio file:" + CDEUtils.getDataPath() + ggmlSampleFileName);
+             mediaPlayer.setDataSource(CDEUtils.getDataPath() + ggmlSampleFileName);
              mediaPlayer.prepare();
              mediaPlayer.start();
          } catch (IOException ex) {
@@ -463,8 +456,14 @@
                  ) {
                      return;
                  }
-                 CDELog.j(TAG, "eventString:" + eventString);
-                 _txtASRInfo.setText(content);
+
+
+                 //CDELog.j(TAG, "content:" + content);
+                 if (content.startsWith("unknown")) {
+
+                 } else {
+                     _txtASRInfo.setText(content);
+                 }
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO_ASR_RESULT) {
@@ -527,14 +526,42 @@
 
      private String getBenchmarkDesc(int benchmarkIndex) {
          switch (benchmarkIndex) {
-             case BECHMARK_INFERENCE:
-                 return "GGML inference";
+             case BECHMARK_FULL:
+                 return "GGML whisper_encoder";
+
              case BECHMARK_MEMCPY:
                  return "GGML memcopy";
+
              case BECHMARK_MULMAT:
                  return "GGML matrix multipy";
+
+             case BECHMARK_ASR:
+                 return "GGML ASR inference";
          }
 
          return "unknown";
      }
+
+     private void displayFileStatus(String sampleFilePath, String modelFilePath) {
+         _txtGGMLStatus.setText("");
+
+         File sampleFile = new File(sampleFilePath);
+         if (sampleFile.exists()) {
+             _txtGGMLStatus.append("sample file exist:" + sampleFile.getAbsolutePath());
+         } else {
+             CDELog.j(TAG, "sample file not exist:" + sampleFile.getAbsolutePath());
+             _txtGGMLStatus.append("\nsample file not exist: " + sampleFile.getAbsolutePath());
+         }
+
+         _txtGGMLStatus.append("\n");
+
+         File modelFile = new File(modelFilePath);
+         if (modelFile.exists()) {
+             _txtGGMLStatus.append("model   file exist:" + modelFile.getAbsolutePath());
+         } else {
+             CDELog.j(TAG, "model file not exist:" + modelFile.getAbsolutePath());
+             _txtGGMLStatus.append("model   file not exist: " + modelFile.getAbsolutePath());
+         }
+     }
+
  }
