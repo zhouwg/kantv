@@ -76,7 +76,7 @@
         <item>mempcpy</item>
         <item>mulmat</item>
         <item>asr</item>
-        <item>whisper encoder</item>
+        <item>full</item>
     </string-array>
 
     <string-array name="threadCounts">

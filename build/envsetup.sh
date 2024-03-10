@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+# Copyright (c) zhou.weiguo(zhouwg2000@gmail.com). 2021-2023. All rights reserved.
+
 # Copyright (c) Project KanTV. 2021-2023. All rights reserved.
 
 # Copyright (c) 2024- KanTV Authors. All Rights Reserved.
 
-#Description: configure project's compilation environment
+# Description: configure project's compilation environment
 #
 #
 
@@ -19,25 +21,32 @@ export TEXT_RESET=" \033[0m  "
 
 export BUILD_USER=$(whoami)
 export BUILD_TIME=`date +"%Y-%m-%d-%H-%M-%S"`
+
 export BUILD_HOST=Linux
+
+#export BUILD_TARGET=ios
+#export BUILD_TARGET=wasm
 export BUILD_TARGET=android
 
 export PROJECT_NAME=KanTV
 export PROJECT_BUILD_TYPE=debug
 export PROJECT_BUILD_TYPE=release
-export BUILD_ARCHS="arm64-v8a armeabi-v7a"
+#export BUILD_ARCHS="arm64-v8a armeabi-v7a"
 export BUILD_ARCHS="arm64-v8a"
 
 export HOME_PATH=$(env | grep ^HOME= | cut -c 6-)
 export PROJECT_HOME_PATH=`pwd`
 export PROJECT_BRANCH=`git branch | grep "*" | cut -f 2 -d ' ' `
 export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
+export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 
 
 export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 
 #modify following lines to adapt to local dev envs
-export ANDROID_NDK=/opt/kantv-toolchains/android-ndk-r21e
+#export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/toolchain
+export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
+export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 export LOCAL_BAZEL_PATH=${HOME_PATH}/.cache/bazel/_bazel_${BUILD_USER}/d483cd2a2d9204cb5bb4d870c2729238
 export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 
@@ -52,7 +61,12 @@ if [ $? != 0 ]; then
 fi
 
 
+setup_env
 check_host
 check_ubuntu
-check_ndk
+
+if [ "${BUILD_TARGET}" == "android" ]; then
+    check_ndk
+fi
+
 dump_global_envs

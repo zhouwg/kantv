@@ -1,1 +1,1 @@
-kantv 1.2.8 (based on customized FFmpeg 6.1, customized ExoPlayer 2.15)
+kantv 1.3.0 (based on customized FFmpeg 6.1, customized ExoPlayer 2.15, whisper.cpp)

@@ -1,31 +1,35 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many enhancements:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many/much enhancements:
 
-- Watch online TV(by customized ![FFmpeg](https://github.com/cdeos/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
+- Watch online TV and local media (by customized ![FFmpeg](https://github.com/cdeos/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
 
-- Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR)
-
-- Watch local media (movies, videos, music, etc.) on Android-based mobile phone
+- Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
 - Set up a custom playlist and then use this software to watch the content of the custom playlist
 
 - Performance benchmark for Android-based mobile phone
 
-- VoD & Live encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with ChinaDRM(similar to <a href="http://www.widevine.com/" target="_blank">Google Widevine</a> or <a href="https://www.microsoft.com/playready/" target="_blank">Microsoft's PlayReady</a>) server
+- Watch encrypted live stream(Google Widevine, Huawei WisePlay, ChinaDRM......)
 
-- VoD encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with <a href="https://developer.huawei.com/consumer/en/hms/huawei-wiseplay" target="_blank">Huawei's WisePlay</a> (similar to <a href="http://www.widevine.com/" target="_blank">Google Widevine</a>) server
-
-- VoD & Live encrypted content(by customized <a href="https://github.com/shaka-project/shaka-packager" target="_blank">Google ShakaPackager</a>) playback with customized <a href="https://ossrs.net/lts/en-us/" target="_blank">SRS</a>
+- Real-time English subtitle by excellent&amazing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> for unencrypted/clear online TV  (not finished)  
 
 - UI refactor
 
-- ......
+- Android turn-key project(follow steps here would get same result to my local dev envs)
 
-The goal of this project is:
+Some goals of this project are:
 
-- Android **turn-key project** for AI experts/ASR researchers and software developers who was interested in device-side AI application
-- Well-maintained open source and free online-TV player for Android-based mobile phone(or extended for Android-based tablet/TV)
+- Well-maintained "workbench" for AI experts to study AI tech for video & audio
+
+  <ul>
+
+    <li>Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like <a href="https://github.com/ggerganov/whisper.cpp">GGML's whisper.cpp</a>) in "real application" </li>
+    <li>...</li>
+
+  </ul>
+
+- Android **turn-key project** for software programmers who was interested in device-side AI application on **Android**-based device
 
 
 ### How to build project
@@ -91,17 +95,24 @@ echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
   sudo ./bazel-3.1.0-installer-linux-x86_64.sh
 ```
 
+bazel is **NOT** used currently but put it here for further usage in the future. Of course, **this step could be skipped** accordingly.
+
 - Android NDK & Android Studio
 
   download and install Android Studio and Android NDK manually
   
   [Android Studio 4.2.1](https://developer.android.google.cn/studio)
   
-  [Android NDK-r18b](https://developer.android.com/ndk/downloads)
   
   [Android NDK-r21e](https://developer.android.com/ndk/downloads)
 
-bazel and Android NDK aren't used currently but put them here for further usage in the future.Of course, **these two steps could be skipped** currently.
+
+  then put Android NDK-r21e into /opt/kantv-toolchain accordingly
+
+  ```
+  ls /opt/kantv-toolchain/android-ndk-r21e
+  
+  ```
 
 
 - vim settings
@@ -133,7 +144,7 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 #### Fetch source codes
 
-For KanTV Android APK developers,
+For Android APP/APK developers,
 
 ```
 git clone https://github.com/cdeos/kantv.git
@@ -141,7 +152,7 @@ cd kantv
 git checkout master
 ```
 
-For other developers,
+For C/C++ developers,
 
 ```
 git clone --recurse-submodules https://github.com/cdeos/kantv.git
@@ -149,10 +160,21 @@ cd kantv
 git checkout master
 ```
 
+#### Build all dependent native codes
+
+modify <a href="https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
+
+```
+. build/envsetup.sh
+
+time ./build-all.sh
+```
+
+
 
 #### Build Android APK
 
-- Build APK from source code by Android Studio IDE manually(the size of the generated APK is about 38M).
+- Build APK from source code by Android Studio IDE manually
 
   Please attention ![some source codes in ASRFragment.java](https://github.com/cdeos/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
 
@@ -194,11 +216,13 @@ Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/rel
 
 ### Roadmap
 
-- real-time English subtitle with online TV by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Xiaomi 14(because it contains a very powerful mobile SoC)
+- real-time English subtitle for online English TV on Xiaomi 14 by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- real-time Chinese subtitle with online TV by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Xiaomi 14(because it contains a very powerful mobile SoC)
+- real-time Chinese subtitle for online English TV on Xiaomi 14 by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
+
+- bugfix in UI layer
 
 - UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
 
@@ -288,29 +312,29 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg and other excellent projects. 
 
-Project KanTV has used/tried following open-source projects:
+Project KanTV has used/tried following open-source projects(list in here is not incomplete):
 <ul>
+  <li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
  	<li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
- 	<li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
  	<li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
  	<li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
- 	<li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
+  <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
  	<li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
- 	<li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
- 	<li><a href="https://github.com/openai/whisper" target="_blank" rel="noopener">OpenAI/Whisper</a></li>
  	<li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
  	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>
+  <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
  	<li><a href="https://github.com/fraunhoferhhi/vvenc" target="_blank" rel="noopener">VVenc</a></li>
  	<li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
  	<li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
- 	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
  	<li><a href="https://aomedia.org/" target="_blank" rel="noopener">AOM-AV1</a></li>
  	<li><a href="https://opencv.org/" target="_blank" rel="noopener">OpenCV</a></li>
  	<li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
- 	<li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
  	<li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
+  <li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
  	<li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
  	<li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
+  <li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
+  <li><a href="https://github.com/OpenMathLib/OpenBLAS" target="_blank">OpenBLAS</a></li>
  	<li>......</li>
 </ul>
  

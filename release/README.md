@@ -134,7 +134,7 @@
                     <li> release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard whisper.cpp too late but just try it since March 5,2024</li>
                 </ul>
 
-- v1.3.0 2024-03-05,
+- v1.3.0 2024-03-09,
                  <ul>
                      <li> start integrating whisper.cpp to project kantv. breankdown task in PoC </li>
                      <li> PoC stage-1 is finished and works well as expected </li>

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 
+# Copyright (c) zhou.weiguo(zhouwg2000@gmail.com). 2021-2023. All rights reserved.
+
 # Copyright (c) Project KanTV. 2021-2023. All rights reserved.
 
 # Copyright (c) 2024- KanTV Authors. All Rights Reserved.
 
-#Description: public script functions for entire project
+# Description: public script functions for entire project
 #
 #
 
@@ -20,6 +22,29 @@ function check_global_envs()
 function show_pwd()
 {
     echo -e "current working path:$(pwd)\n"
+}
+
+
+function setup_env
+{
+if [ "${BUILD_TARGET}" == "wasm" ]; then
+    export EMSDK=${KANTV_TOOLCHAIN_PATH}/emsdk
+    export NODEJS_ROOT_PATH=${KANTV_TOOLCHAIN_PATH}/nodejs
+    export EM_CONFIG=${EMSDK}/.emscripten
+    export EMSDK_CMAKE_FILE=${EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake
+    if [ "${PROJECT_CACHE_PATH}" = "" ]; then
+        export PROJECT_CACHE_PATH=${EMSDK}:${EMSDK}/upstream/emscripten:${EMSDK}/node/14.15.5_64bit/bin:${EMSDK}/upstream/bin:${NODEJS_ROOT_PATH}/bin:$PATH
+    fi
+    export PATH=${PROJECT_CACHE_PATH}
+    mkdir -p ${PROJECT_OUT_PATH}/wasm
+fi
+
+
+if [ "${BUILD_TARGET}" == "ios" ]; then
+    export XCODE_SELECT=/usr/bin/xcode-select
+    #export BUILD_ARCHS="armv7 arm64 i386 x86_64"
+    export BUILD_ARCHS="arm64"
+fi
 }
 
 
@@ -93,6 +118,53 @@ function check_ubuntu()
 }
 
 
+function check_emsdk()
+{
+    if [ ! -d ${EMSDK} ]; then
+        echo -e "${TEXT_RED}${EMSDK} not exist, pls check...${TEXT_RESET}"
+        #exit 1
+    fi
+}
+
+
+function check_xcode()
+{
+    if [ $BUILD_TARGET == "ios" ]; then
+        echo -e "${TEXT_BLUE}check xcode...${TEXT_RESET}\n"
+        if [ ! -f ${XCODE_SELECT} ]; then
+            echo -e "${TEXT_RED}${XCODE_SELECT} not exist, pls check...${TEXT_RESET}\n"
+            #exit 1
+        fi
+    fi
+}
+
+
+function echo_left_align()
+{
+    if [ ! $# -eq 2 ]; then
+        echo "params counts should be 2"
+        exit 1
+    fi
+
+    index=0
+    max_length=40
+    l_string=$1
+    r_string=$2
+
+    length=${#l_string}
+    echo -e "${TEXT_BLUE}$l_string${TEXT_RESET}\c"
+    if [ $length -lt $max_length ]; then
+        padding_length=`expr $max_length - $length`
+        for (( tmp=0; tmp < $padding_length; tmp++ ))
+            do
+               echo -e " \c"
+            done
+    fi
+
+    echo $r_string
+}
+
+
 function check_upstream_whispercpp()
 {
 if [  -z ${UPSTREAM_WHISPERCPP_PATH} ]; then
@@ -143,6 +215,7 @@ function dump_global_envs()
     echo -e "PROJECT_BRANCH:       ${PROJECT_BRANCH}"
     echo -e "PROJECT_HOME_PATH:    ${PROJECT_HOME_PATH}"
     echo -e "PROJECT_ROOT_PATH:    ${PROJECT_ROOT_PATH}"
+    echo -e "KANTV_TOOLCHAIN_PATH: ${KANTV_TOOLCHAIN_PATH}"
 
     echo -e "host cpu counts:      ${HOST_CPU_COUNTS}"
 
@@ -154,6 +227,20 @@ function dump_global_envs()
     echo -e "\n"
     fi
 
-    echo "PATH=${PATH}"
+    if [ $BUILD_TARGET == "ios" ]; then
+    echo -e "XCODE_PATH:           ${XCODE_PATH}"
+    echo -e "\n"
+    fi
+
+    if [ "${BUILD_TARGET}" = "wasm" ]; then
+    echo -e "\n"
+    echo -e "EMSDK:                ${EMSDK}"
+    echo -e "EM_CONFIG:            ${EM_CONFIG}"
+    echo -e "EMSDK_CMAKE_FILE:     ${EMSDK_CMAKE_FILE}"
+    echo -e "NODEJS_ROOT_PATH:     ${NODEJS_ROOT_PATH}"
+    echo -e "\n"
+    fi
+
+    echo -e "PATH=${PATH}"
     echo -e "\n"
 }
