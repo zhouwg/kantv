@@ -138,8 +138,16 @@
                  <ul>
                      <li> start integrating whisper.cpp to project kantv. breankdown task in PoC </li>
                      <li> PoC stage-1 is finished and works well as expected </li>
-                     <li> PoC stage-2 is finished and works well as expected, it's a milestone </li>
+                     <li> PoC stage-2 is finished and works well as expected, it's the first milestone </li>
                  </ul>
+
+- v1.3.1 2024-03-11,
+                 <ul>
+                     <li> ASR performance improved from 21 secs to 2 secs on Xiaomi 14 by build optimization, it's the second milestone for <a href="https://github.com/cdeos/kantv/issues/64">POC</a></li>
+                     <li> add some technical docs to prepared empty directory doc </li>
+                     <li> refine regular codes and prepare for coding work of implement real-time English subtitle for online English TV</li>
+                 </ul>
+             
 
 
 ### Screenshots(一些屏幕截图）
@@ -149,7 +157,12 @@ English UI(英文界面，海外地区默认为英文界面）
 ![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
 ![990238413](https://github.com/zhouwg/kantv/assets/6889919/44054d57-0149-4d45-8762-46ec80682c66)
-![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
+
+
+![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
+
+
+
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
 
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
@@ -163,7 +176,7 @@ Chinese UI（中文界面，国内默认为中文界面）
 ![Screenshot_20240301_000319_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48ebec5-4942-4e93-9e3a-a8626d553e9e)
 ![Screenshot_20240301_000324_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/66185ef2-f7e0-4b0f-b01b-ab097167bf8b)
 ![Screenshot_20240301_000330_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c0f6a0a0-f150-4126-876a-021465406819)
-![Screenshot_20240301_114156_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/51f1292e-0bea-4ffc-98bf-0b4463d48dc4)
+![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
 ![Screenshot_20240301_114203_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/adbff52c-c0fb-48dd-85c9-4e740c736d7a)
 ![Screenshot_20240301_114210_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48bff82-ed27-47cc-aeee-bc3183707690)
 ![Screenshot_20240301_000403_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/ebdaa2b6-d177-40c0-9d31-1e583088dd5b)

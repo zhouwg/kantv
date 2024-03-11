@@ -46,7 +46,25 @@ export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 #modify following lines to adapt to local dev envs
 #export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/toolchain
 export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
-export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
+#API21：Android 5.0 (Android L)Lollipop
+#API22：Android 5.1 (Android L)Lollipop
+#API23：Android 6.0 (Android M)Marshmallow
+#API24: Android 7.0 (Android N)Nougat
+#API25: Android 7.1 (Android N)Nougat
+#API26：Android 8.0 (Android O)Oreo
+#API27：Android 8.1 (Android O)Oreo
+#API28：Android 9.0 (Android P)Pie
+#API29：Android 10
+#API30：Android 11
+#API31：Android 12
+#API31：Android 12L
+#API33：Android 13
+#API34：Android 14
+export ANDROID_PLATFORM=android-34
+#export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r18b
+#export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
+#export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
+export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
 export LOCAL_BAZEL_PATH=${HOME_PATH}/.cache/bazel/_bazel_${BUILD_USER}/d483cd2a2d9204cb5bb4d870c2729238
 export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 

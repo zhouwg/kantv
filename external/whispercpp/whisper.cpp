@@ -3182,7 +3182,7 @@ struct whisper_context * whisper_init_from_file_with_params_no_state(const char 
 
     auto fin = std::ifstream(path_model, std::ios::binary);
     if (!fin) {
-        WHISPER_LOG_ERROR("%s: failed to open '%s'\n", __func__, path_model);
+        WHISPER_LOG_ERROR("%s: failed to open '%s', reason %s\n", __func__, path_model, strerror(errno));
         return nullptr;
     }
 
@@ -3886,7 +3886,8 @@ const char * whisper_print_system_info(void) {
     s += "VSX = "       + std::to_string(ggml_cpu_has_vsx())       + " | ";
     s += "CUDA = "      + std::to_string(ggml_cpu_has_cublas())    + " | ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
-    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())          ;
+    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())   + " | ";
+    s += "counts = "    + std::to_string(std::thread::hardware_concurrency());
 
     return s.c_str();
 }
@@ -7155,13 +7156,13 @@ void whispercpp_bench(const char *model_path, int bench_type, int n_threads) {
 
     LOGGD("model path:%s\n", model_path);
     switch (bench_type) {
-        case 3: // whisper encoder
+        case BECHMARK_FULL: // whisper encode
             whisper_bench_full(params);
             break;
-        case 0: // memcpy
+        case BECHMARK_MEMCPY:
             whisper_bench_memcpy(n_threads);
             break;
-        case 1: // mulmat
+        case BECHMARK_MULMAT:
             whisper_bench_ggml_mul_mat(n_threads);
             break;
         default:
@@ -7169,4 +7170,8 @@ void whispercpp_bench(const char *model_path, int bench_type, int n_threads) {
     }
 }
 //end borrow from examples/bench/bench.cpp
+
+int whisper_get_cpu_core_counts() {
+    return std::thread().hardware_concurrency();
+}
 //------------------------------------ end added by zhou.weiguo -------------------------------------

@@ -44,7 +44,9 @@ android {
         }
     }
 
-    ndkVersion '21.1.6352462'
+    //weiguo:2024-03-10, attention here
+    //ndkVersion '21.1.6352462'
+    ndkVersion  '26.2.11394342'
 
     sourceSets {
         main {

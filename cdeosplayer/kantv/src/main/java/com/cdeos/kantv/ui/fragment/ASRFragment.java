@@ -89,10 +89,11 @@
 
      Button _btnBenchmark;
 
-     private static final int BECHMARK_MEMCPY       = 0;
-     private static final int BECHMARK_MULMAT       = 1;
-     private static final int BECHMARK_ASR          = 2;
-     private static final int BECHMARK_FULL         = 3; //very slow on Android phone
+     //keep sync with kantv_asr.h
+     private static final int BECHMARK_ASR = 0;
+     private static final int BECHMARK_MEMCPY = 1;
+     private static final int BECHMARK_MULMAT = 2;
+     private static final int BECHMARK_FULL = 3; //very slow on Android phone
 
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
@@ -160,7 +161,13 @@
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
-         CDELibraryLoader.load("whispercpp");
+         try {
+             CDELibraryLoader.load("whispercpp");
+             CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+         } catch (Exception e) {
+             CDELog.j(TAG, "failed to initialize whispercpp jni");
+             return;
+         }
 
          try {
              initKANTVMgr();
@@ -216,6 +223,24 @@
              }
          });
 
+     /*
+        <item>tiny</item>
+        <item>tiny.en</item>       good
+        <item>tiny.en-q5_1</item>  good
+        <item>tiny.en-q8_0</item>
+        <item>tiny-q5_1</item>
+        <item>base</item>
+        <item>base.en</item>
+        <item>base-q5_1</item>
+        <item>small</item>
+        <item>small.en</item>
+        <item>small.en-q5_1</item>
+        <item>small-q5_1</item>
+        <item>medium</item>
+        <item>medium.en</item>
+        <item>medium.en-q5_0</item>
+        <item>large</item>
+     */
          Spinner spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
          String[] arrayModelName = getResources().getStringArray(R.array.modelName);
          ArrayAdapter<String> adapterModel = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayModelName);
@@ -247,7 +272,7 @@
              File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
 
              if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                 showMsgBox(mActivity, "pls check whether model file or sample file exist in /sdcard/kantv/");
+                 showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
 
@@ -290,10 +315,6 @@
                  initKANTVMgr();
                  whispercpp.set_benchmark_status(0);
 
-                 if (mKANTVMgr != null) {
-                     mKANTVMgr.initASR();
-                     mKANTVMgr.startASR();
-                 }
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
@@ -481,6 +502,10 @@
 
          try {
              mKANTVMgr = new KANTVMgr(mEventListener);
+             if (mKANTVMgr != null) {
+                 mKANTVMgr.initASR();
+                 mKANTVMgr.startASR();
+             }
              CDELog.j(TAG, "KANTVMgr version:" + mKANTVMgr.getMgrVersion());
          } catch (KANTVException ex) {
              String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();

@@ -211,13 +211,13 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                 if (libLoader == null)
                     libLoader = sLocalLibLoader;
 
-                CDELog.j(TAG, "load library kantv-ffmpeg-jni");
-                libLoader.loadLibrary("kantv-ffmpeg-jni");
-                CDELog.j(TAG, "after load library kantv-ffmpeg-jni");
+                CDELog.j(TAG, "load library kantv-play-jni");
+                libLoader.loadLibrary("kantv-play-jni");
+                CDELog.j(TAG, "after load library kantv-play-jni");
 
-                CDELog.j(TAG, "load library kantv-ffmpeg");
-                libLoader.loadLibrary("kantv-ffmpeg");
-                CDELog.j(TAG, "after load library kantv-ffmpeg");
+                CDELog.j(TAG, "load library kantv-play");
+                libLoader.loadLibrary("kantv-play");
+                CDELog.j(TAG, "after load library kantv-play");
                 mIsLibLoaded = true;
             }
         }

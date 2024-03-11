@@ -71,19 +71,19 @@ Java_org_ggml_whispercpp_whispercpp_bench(JNIEnv *env, jclass clazz, jstring mod
         num_threads = 1;
 
     switch (bench_type) {
-        case 0: // memcpy
-        case 1: // mulmat
-        case 3: // whisper encoder
+        case BECHMARK_MEMCPY: // memcpy
+        case BECHMARK_MULMAT: // mulmat
+        case BECHMARK_FULL:   // whisper encode
             whispercpp_bench(sz_model_path, bench_type, num_threads);
             break;
-        case 2: // asr
+        case BECHMARK_ASR: // asr
             bench_result = whisper_transcribe_from_file(sz_model_path, sz_audio_path, num_threads);
             break;
         default:
             break;
     }
 
-    if (2 == bench_type) { // asr
+    if (BECHMARK_ASR == bench_type) { // asr
         if (NULL == bench_result) {
             LOGGW("failed to get asr result, pls check why?");
             goto failure;
@@ -107,4 +107,12 @@ failure:
 
     jstring string = (*env)->NewStringUTF(env, sz_bench_result);
     return string;
+}
+
+JNIEXPORT jint JNICALL
+Java_org_ggml_whispercpp_whispercpp_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+    UNUSED(clazz);
+
+    return whisper_get_cpu_core_counts();
 }

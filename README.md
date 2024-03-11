@@ -12,7 +12,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Watch encrypted live stream(Google Widevine, Huawei WisePlay, ChinaDRM......)
 
-- Real-time English subtitle by excellent&amazing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> for unencrypted/clear online TV  (not finished)  
+- Real-time English subtitle for online TV by excellent&amazing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a>  (not finished)  
 
 - UI refactor
 
@@ -104,13 +104,13 @@ bazel is **NOT** used currently but put it here for further usage in the future.
   [Android Studio 4.2.1](https://developer.android.google.cn/studio)
   
   
-  [Android NDK-r21e](https://developer.android.com/ndk/downloads)
+  [Android NDK-r26c](https://developer.android.com/ndk/downloads)
 
 
-  then put Android NDK-r21e into /opt/kantv-toolchain accordingly
+  then put Android NDK-r26c into /opt/kantv-toolchain accordingly
 
   ```
-  ls /opt/kantv-toolchain/android-ndk-r21e
+  ls /opt/kantv-toolchain/android-ndk-r26c
   
   ```
 
@@ -176,7 +176,7 @@ time ./build-all.sh
 
 - Build APK from source code by Android Studio IDE manually
 
-  Please attention ![some source codes in ASRFragment.java](https://github.com/cdeos/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L131) which affect the running of the ASR demo and the size of the generated APK.
+  Please attention ![some source codes in ASRFragment.java](https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L155) which affect the running of the ASR demo and the size of the generated APK.
 
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
 
@@ -192,11 +192,10 @@ The following is some English snapshots.
 
 ![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
-![990238413](https://github.com/zhouwg/kantv/assets/6889919/44054d57-0149-4d45-8762-46ec80682c66)
+![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
 
 
 
-![Screenshot_20240301_114059_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/b0171435-44a5-48bf-9b59-a4b5fbcaa39f)
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
@@ -216,9 +215,9 @@ Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/rel
 
 ### Roadmap
 
-- real-time English subtitle for online English TV on Xiaomi 14 by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- real-time English subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- real-time Chinese subtitle for online English TV on Xiaomi 14 by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- real-time Chinese subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
@@ -310,15 +309,16 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Acknowledgement
 
-Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg and other excellent projects. 
+Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg && whisper.cpp and other excellent projects. 
 
 Project KanTV has used/tried following open-source projects(list in here is not incomplete):
 <ul>
+  <li><a href="https://github.com/torvalds/linux"     target="_blank">Linux</a></li>
   <li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
  	<li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
- 	<li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
- 	<li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
   <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
+  <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
+ 	<li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
  	<li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
  	<li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
  	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>

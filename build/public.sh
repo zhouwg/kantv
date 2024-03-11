@@ -216,14 +216,14 @@ function dump_global_envs()
     echo -e "PROJECT_HOME_PATH:    ${PROJECT_HOME_PATH}"
     echo -e "PROJECT_ROOT_PATH:    ${PROJECT_ROOT_PATH}"
     echo -e "KANTV_TOOLCHAIN_PATH: ${KANTV_TOOLCHAIN_PATH}"
-
     echo -e "host cpu counts:      ${HOST_CPU_COUNTS}"
 
     if [ "${BUILD_TARGET}" = "android" ]; then
     echo -e "\n"
-    echo -e "ANDROID_NDK:               ${ANDROID_NDK}"
-    echo -e "LOCAL_WHISPERCPP_PATH:     ${LOCAL_WHISPERCPP_PATH}"
-    echo -e "UPSTREAM_WHISPERCPP_PATH:  ${UPSTREAM_WHISPERCPP_PATH}"
+    echo -e "${TEXT_RED}ANDROID_PLATFORM:         ${ANDROID_PLATFORM}${TEXT_RESET}"
+    echo -e "${TEXT_RED}ANDROID_NDK:              ${ANDROID_NDK}${TEXT_RESET}"
+    echo -e "LOCAL_WHISPERCPP_PATH:        ${LOCAL_WHISPERCPP_PATH}"
+    echo -e "UPSTREAM_WHISPERCPP_PATH:     ${UPSTREAM_WHISPERCPP_PATH}"
     echo -e "\n"
     fi
 

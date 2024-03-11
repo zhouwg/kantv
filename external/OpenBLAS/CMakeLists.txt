@@ -5,6 +5,7 @@
 cmake_minimum_required(VERSION 2.8.5)
 
 project(OpenBLAS C ASM)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 set(OpenBLAS_MAJOR_VERSION 0)
 set(OpenBLAS_MINOR_VERSION 3)
@@ -23,6 +24,15 @@ option(BUILD_WITHOUT_LAPACK "Do not build LAPACK and LAPACKE (Only BLAS or CBLAS
 set(NO_FORTRAN 1)
 set(BUILD_WITHOUT_LAPACK 1)
 set(BUILD_TESTING  0)
+
+add_definitions(-DNDEBUG)
+add_definitions(-O3)
+#add_definitions(-funsafe-math-optimizations)
+#add_definitions(-march=armv8.6-a+simd)
+#add_definitions(-mcpu=cortex-a78)
+add_definitions(-march=armv9+simd)
+add_definitions(-mcpu=cortex-x3)
+add_definitions(-mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 option(BUILD_LAPACK_DEPRECATED "When building LAPACK, include also some older, deprecated routines" ON)
 
@@ -327,7 +337,7 @@ endif()
 if (NOT NO_CBLAS)
   if (NOT ONLY_CBLAS)
   # Broken without fortran on unix
-    add_subdirectory(utest)
+  #add_subdirectory(utest)
 endif()
 endif()
 

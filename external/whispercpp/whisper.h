@@ -622,6 +622,8 @@ extern "C" {
 
     WHISPER_API const char * whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads);
 
+    WHISPER_API int          whisper_get_cpu_core_counts(void);
+
 #ifdef __cplusplus
 }
 #endif

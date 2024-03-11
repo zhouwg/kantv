@@ -73,32 +73,39 @@
     </string-array>
 
     <string-array name="benchType">
+        <item>asr</item>
         <item>mempcpy</item>
         <item>mulmat</item>
-        <item>asr</item>
         <item>full</item>
     </string-array>
 
     <string-array name="threadCounts">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
         <item>8</item>
+        <item>7</item>
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
     </string-array>
 
     <string-array name="modelName">
         <item>tiny</item>
         <item>tiny.en</item>
+        <item>tiny.en-q5_1</item>
+        <item>tiny.en-q8_0</item>
+        <item>tiny-q5_1</item>
         <item>base</item>
         <item>base.en</item>
+        <item>base-q5_1</item>
         <item>small</item>
         <item>small.en</item>
+        <item>small.en-q5_1</item>
+        <item>small-q5_1</item>
         <item>medium</item>
         <item>medium.en</item>
+        <item>medium.en-q5_0</item>
         <item>large</item>
     </string-array>
 </resources>

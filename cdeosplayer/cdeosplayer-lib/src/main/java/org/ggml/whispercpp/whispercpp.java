@@ -8,13 +8,15 @@ public class whispercpp {
 
   public static native String get_systeminfo();
 
+  public static native int    get_cpu_core_counts();
+
   public static native void   set_benchmark_status(int bExitBenchmark);
 
   /**
    *
    * @param modelPath
    * @param audioFile
-   * @param nBenchType  0: memcpy 1: mulmat 2: asr 3: full/whisper_encoder
+   * @param nBenchType  0: asr 1: memcpy 2: mulmat  3: full/whisper_encode
    * @param nThreadCounts
    * @return
    */

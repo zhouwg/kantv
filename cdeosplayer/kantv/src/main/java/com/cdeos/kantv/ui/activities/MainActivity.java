@@ -267,7 +267,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
         CDEUtils.dumpDeviceInfo();
 
-        if (CDEUtils.isEmulator(this)) {
+        //if (CDEUtils.isEmulator(this))
+        if (false)
+        {
             showWarningDialog(this, "can't running this app in emulator");
             navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
@@ -319,6 +321,15 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
         } else if (previousFragment != null) {
             getFragmentTransaction().hide(previousFragment).commit();
         }
+
+        if (previousFragment != null) {
+            String fragmentName = previousFragment.getClass().getName();
+            if (fragmentName.contains("ASRFragment")) {
+                CDELog.j(TAG, "release ASR resource");
+                asrFragment.release();
+            }
+        }
+
 
         if (clazz == TVGridFragment.class) {
             if (homeFragment == null) {

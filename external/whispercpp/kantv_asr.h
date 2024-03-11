@@ -27,6 +27,11 @@ void kantv_asr_notify(std::string &info);
     extern "C" {
 #endif
 
+#define BECHMARK_ASR                0
+#define BECHMARK_MEMCPY             1
+#define BECHMARK_MULMAT             2
+#define BECHMARK_FULL               3
+
 void kantv_asr_notify_c(const char *info);
 
 #ifdef __cplusplus
