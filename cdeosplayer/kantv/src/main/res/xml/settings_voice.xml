@@ -5,13 +5,23 @@
     <PreferenceCategory android:title="@string/pref_title_general">
         <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
             android:defaultValue="0"
+            android:entries="@@array/pref_entries_asrmode"
+            android:entryValues="@array/pref_entry_values_asrmode"
+            android:key="@string/pref_key_asrmode"
+            android:persistent="true"
+            android:title="@string/pref_title_asrmode"
+            app:entrySummaries="@array/pref_entry_summaries_asrmode" />
+
+        <!-- not implemented currently
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
             android:entries="@@array/pref_entries_voiceapi"
             android:entryValues="@array/pref_entry_values_voiceapi"
             android:key="@string/pref_key_voiceapi"
             android:persistent="true"
             android:title="@string/pref_title_voiceapi"
             app:entrySummaries="@array/pref_entry_summaries_voiceapi" />
-
+        -->
 
         <CheckBoxPreference
             android:defaultValue="true"

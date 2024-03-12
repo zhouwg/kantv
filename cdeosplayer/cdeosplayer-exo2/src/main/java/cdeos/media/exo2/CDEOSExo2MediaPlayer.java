@@ -503,6 +503,12 @@ public class CDEOSExo2MediaPlayer extends AbstractMediaPlayer {
         CDEUtils.setTVRecording(bEnableRecord);
     }
 
+    //TODO
+    @Override
+    public void setEnableASR(boolean bEnableASR) {
+        CDEUtils.setTVASR(bEnableASR);
+    }
+
     //FIXME
     @Override
     public void updateRecordingStatus(boolean bEnableRecord) {
@@ -524,6 +530,12 @@ public class CDEOSExo2MediaPlayer extends AbstractMediaPlayer {
     @Override
     public boolean getEnableRecord() {
         return CDEUtils.getTVRecording();
+    }
+
+    //TODO
+    @Override
+    public boolean getEnableASR() {
+        return CDEUtils.getTVASR();
     }
 
 

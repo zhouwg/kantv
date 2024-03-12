@@ -33,7 +33,6 @@
         android:padding="5dp"
         android:visibility="invisible" />
 
-
     <com.cdeos.kantv.player.subtitle.SubtitleView
         android:id="@+id/subtitle_view"
         android:layout_width="match_parent"

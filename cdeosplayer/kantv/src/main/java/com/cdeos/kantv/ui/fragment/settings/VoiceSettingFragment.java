@@ -76,13 +76,24 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
 
         CDELog.j(TAG, "dev mode:" + mSettings.getDevMode());
         if (!mSettings.getDevMode()) {
-            findPreference("pref.voiceapi").setEnabled(true);
+            if (findPreference("pref.voiceapi") != null) {
+                findPreference("pref.voiceapi").setEnabled(true);
+            }
         }
+
+
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if (findPreference("pref.voiceapi") != null) {
+            findPreference("pref.voiceapi").setOnPreferenceClickListener(preference -> {
+                CDEUtils.showMsgBox(mActivity, "This feature not implmented currently");
+                return false;
+            });
+        }
     }
 
 
@@ -108,8 +119,6 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             CDELog.j(TAG, "key : " + key);
-            CDELog.j(TAG, "key: " + key);
-
         }
     };
 
@@ -122,6 +131,7 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
             CDELog.d(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getBoolean(key, false));
         }
 
+        //TODO: focus on GGML's model
         if (key.contains("downloadASRmodel")) {
             CDELog.j(TAG, "download ASR model");
             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
@@ -175,6 +185,12 @@ public class VoiceSettingFragment extends BaseSettingsFragment {
             }
 
         }
+
+        if (key.contains("pref.asrmode")) {
+            CDELog.j(TAG, "asrmode: "  + mSettings.getASRMode());
+        }
+
+
         return true;
     }
 }

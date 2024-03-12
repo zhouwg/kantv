@@ -113,7 +113,7 @@ public class SubtitleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        CDELog.j(TAG, "draw subtitle");
+        CDELog.d(TAG, "draw subtitle");
 
         clearSubtitle(canvas);
 

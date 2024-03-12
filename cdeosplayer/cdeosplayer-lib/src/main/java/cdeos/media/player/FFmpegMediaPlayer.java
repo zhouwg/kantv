@@ -42,6 +42,8 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import org.ggml.whispercpp.whispercpp;
+
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -179,13 +181,14 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
     private long mTotalPauseTime;
     private boolean bIsPaused;
     private int mDecryptMode = CDEUtils.DECRYPT_SOFT;
-    private boolean mDisableAudioTrack = false; //troubleshooting Huaxia's <<狄仁杰>>
+    private boolean mDisableAudioTrack = false;
     private boolean mDisableVideoTrack = false;
     private boolean mEnableDumpVideoES = false;
     private boolean mEnableDumpAudioES = false;
     private int mDurationDumpES = 10; //default dumped duration is 10 seconds
 
     private boolean mEnableRecord = false;
+    private boolean mEnableASR    = false;
 
     private String mVideoTitle;
 
@@ -218,6 +221,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                 CDELog.j(TAG, "load library kantv-play");
                 libLoader.loadLibrary("kantv-play");
                 CDELog.j(TAG, "after load library kantv-play");
+
                 mIsLibLoaded = true;
             }
         }
@@ -260,6 +264,15 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
         CDELog.j(TAG, "initPlayer");
         loadLibrariesOnce(libLoader);
         initNativeOnce();
+
+        //TODO
+        try {
+            CDELibraryLoader.load("whispercpp");
+            CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+        } catch (Exception e) {
+            CDELog.j(TAG, "failed to initialize whispercpp jni");
+            return;
+        }
 
         //should I put it in another better place?
         mBeginTime = System.currentTimeMillis();
@@ -856,6 +869,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
         _setEnableRecord(mEnableRecord ? 1 : 0);
     }
 
+
     //TODO
     @Override
     public void updateRecordingStatus(boolean bEnableRecord) {
@@ -869,6 +883,23 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
         else
             mEnableRecord = true;
         return mEnableRecord;
+    }
+
+    @Override
+    public void setEnableASR(boolean bEnableASR) {
+        mEnableASR = bEnableASR;
+        CDELog.d(TAG, "enable ASR: " + mEnableASR);
+        _setEnableASR(mEnableASR ? 1 : 0);
+    }
+
+    @Override
+    public boolean getEnableASR() {
+        int isASRing= _getEnableASR();
+        if (0 == isASRing)
+            mEnableASR = false;
+        else
+            mEnableASR = true;
+        return mEnableASR;
     }
 
 
@@ -917,6 +948,10 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
     public native void _setEnableRecord(int bEnableRecord);
 
     public native int _getEnableRecord();
+
+    public native void _setEnableASR(int bEnableASR);
+
+    public native int _getEnableASR();
 
     @Override
     public native void seekTo(long msec) throws IllegalStateException;
@@ -1296,7 +1331,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     // No real default action so far.
                     return;
                 case MEDIA_TIMED_TEXT:
-                    CDELog.j(TAG, "subtitle coming");
+                    CDELog.d(TAG, "subtitle coming");
                     if (msg.obj == null) {
                         player.notifyOnTimedText(null);
                     } else {

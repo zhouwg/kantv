@@ -22,8 +22,10 @@ import static java.lang.Math.abs;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.hardware.Sensor;
@@ -232,6 +234,7 @@ public class CDEUtils {
     private static int mRecordSize                  = 20; //default record size is 20 Mbytes
     private static int mRecordMode                  = 0; //0:video, 1:audio, 2:video&audio
     private static boolean mIsTVRecording           = false;
+    private static boolean mIsTVASR                 = false;
     private static String  mRecordingFileName       = "";
     private static boolean mEnableRecordVideoES     = true;
     private static boolean mEnableRecordAudioES     = false;
@@ -3664,6 +3667,14 @@ public class CDEUtils {
         mIsTVRecording = bRecording;
     }
 
+    public static boolean getTVASR() {
+        return mIsTVASR;
+    }
+
+    public static void setTVASR(boolean bASR) {
+        mIsTVASR = bASR;
+    }
+
 
     public static void setRecordDuration(int recordDuration) {
         mRecordDuration = recordDuration;
@@ -3822,6 +3833,17 @@ public class CDEUtils {
 
     public static boolean isDisableUM(){
         return mDisableUM;
+    }
+
+    public static void showMsgBox(Context context, String message) {
+        AlertDialog dialog = new AlertDialog.Builder(context).create();
+        dialog.setMessage(message);
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        dialog.show();
     }
 
     public static native int kantv_anti_tamper();

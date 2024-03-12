@@ -65,6 +65,17 @@ public class Settings {
         }
     }
 
+    public int getASRMode() {
+        String key = mAppContext.getString(R.string.pref_key_asrmode);
+        String value = mSharedPreferences.getString(key, "0");
+        try {
+            return Integer.valueOf(value).intValue();
+        } catch (NumberFormatException e) {
+            CDELog.j(TAG, "exception occurred");
+            return 0;
+        }
+    }
+
     public int getUILang() {
         String key = "pref.lang";
         String value = mSharedPreferences.getString(key, "0");
@@ -77,7 +88,7 @@ public class Settings {
 
     public void updateUILang(AppCompatActivity activity) {
         int current_lang = getUILang();
-        CDELog.j(TAG, "user's selection lang: " + current_lang);
+        CDELog.d(TAG, "user's selection lang: " + current_lang);
         String lang = "en";
         if (KANTV_UILANG_CN == current_lang)
             lang = "zh";
@@ -89,7 +100,7 @@ public class Settings {
         Locale myLocale;
         Resources res = activity.getResources();
         String country = res.getConfiguration().locale.getCountry();
-        CDELog.j(TAG, "current country: " + country);
+        CDELog.d(TAG, "current country: " + country);
         DisplayMetrics dm = res.getDisplayMetrics();
         Configuration conf = res.getConfiguration();
         if (KANTV_UILANG_CN == current_lang) {

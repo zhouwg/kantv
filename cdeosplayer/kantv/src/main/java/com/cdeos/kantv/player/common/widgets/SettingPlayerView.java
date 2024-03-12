@@ -38,6 +38,8 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
 
     private Switch tvRecordingSw;
     private Switch landscapeChangeSw;
+    private Switch tvASRSw;
+
     private LinearLayout audioRl;
     private RadioGroup mAspectRatioOptions;
 
@@ -71,6 +73,7 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
 
         landscapeChangeSw = this.findViewById(R.id.landscape_change_sw);
         tvRecordingSw     = this.findViewById(R.id.tv_recording_sw);
+        tvASRSw           = this.findViewById(R.id.tv_asr_sw);
 
         mAspectRatioOptions.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.aspect_fit_parent) {
@@ -149,7 +152,11 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
         //    tvRecordingSw.setChecked(true);
         //else
          //   tvRecordingSw.setChecked(false);
-
+        tvASRSw.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            CDELog.j(TAG, "tv ASR status:" + isChecked);
+            listener.setTVASRStatus(isChecked);
+        });
+        CDELog.j(TAG, "isASR enabled:" + CDEUtils.getTVASR());
         setPlayerSpeedView(3);
     }
 
@@ -160,6 +167,17 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
             tvRecordingSw.setChecked(true);
         else
             tvRecordingSw.setChecked(false);
+
+    }
+
+    public void updateASRUIStatus(boolean isASR) {
+        CDELog.j(TAG, "isASR:" + isASR);
+        CDELog.j(TAG, "isASR:" + CDEUtils.getTVASR());
+
+        if (CDEUtils.getTVASR())
+            tvASRSw.setChecked(true);
+        else
+            tvASRSw.setChecked(false);
     }
 
     @Override
@@ -287,5 +305,7 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
         void setLandscapeStatus(boolean bLandScape);
 
         void setTVRecordingStatus(boolean bRecording);
+
+        void setTVASRStatus(boolean bEnableASR);
     }
 }

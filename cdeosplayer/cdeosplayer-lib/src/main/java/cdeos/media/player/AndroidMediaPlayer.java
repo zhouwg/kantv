@@ -627,12 +627,23 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
 
     //TODO
     @Override
+    public void setEnableASR(boolean bEnableRecord) {
+    }
+
+    //TODO
+    @Override
     public void updateRecordingStatus(boolean bEnableRecord) {
     }
 
     //TODO
     @Override
     public boolean getEnableRecord() {
+        return false;
+    }
+
+    //TODO
+    @Override
+    public boolean getEnableASR() {
         return false;
     }
 

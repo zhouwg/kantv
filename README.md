@@ -16,7 +16,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - UI refactor
 
-- Android turn-key project(follow steps here would get same result to my local dev envs)
+- Android turn-key project(follow steps here would get same result **on Xiaomi 14** to my local dev envs)
 
 Some goals of this project are:
 

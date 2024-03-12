@@ -88,10 +88,9 @@ Java_org_ggml_whispercpp_whispercpp_bench(JNIEnv *env, jclass clazz, jstring mod
             LOGGW("failed to get asr result, pls check why?");
             goto failure;
         } else {
+            LOGGD("asr result:\n%s\n", bench_result);
+            //dont't do this and just return "asr_result" even get correct asr result because I'll try to do everything in native layer
             //sz_bench_result = bench_result;
-            //just return "asr_result" even get correct asr result
-            //because asr result already sent to Java layer
-            LOGGD("asr result:\n%s\n", sz_bench_result);
             sz_bench_result = "asr_result";
         }
     }
@@ -109,10 +108,46 @@ failure:
     return string;
 }
 
+
 JNIEXPORT jint JNICALL
 Java_org_ggml_whispercpp_whispercpp_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
     return whisper_get_cpu_core_counts();
+}
+
+
+//TODO: not a good idea, just skip this during PoC stage
+JNIEXPORT void JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint num_threads, jint n_devmode) {
+    UNUSED(clazz);
+
+    const char *sz_model_path = NULL;
+
+    sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
+    if (NULL == sz_model_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    LOGGV("model path:%s\n", sz_model_path);
+    LOGGV("thread counts:%d\n", num_threads);
+    LOGGV("dev mode:%d\n", n_devmode);
+
+    whisper_asr_init(sz_model_path, num_threads, n_devmode);
+
+failure:
+    if (NULL != sz_model_path) {
+        (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
+    }
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1finalize(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+    UNUSED(clazz);
+
+    whisper_asr_finalize();
 }

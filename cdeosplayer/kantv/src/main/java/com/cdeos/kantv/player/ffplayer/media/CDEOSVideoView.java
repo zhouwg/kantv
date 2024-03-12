@@ -19,6 +19,9 @@
 
 package com.cdeos.kantv.player.ffplayer.media;
 
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -56,6 +59,7 @@ import java.util.Map;
 
 import cdeos.media.exo2.CDEOSExo2MediaPlayer;
 import cdeos.media.player.AndroidMediaPlayer;
+import cdeos.media.player.CDELibraryLoader;
 import cdeos.media.player.KANTVDRM;
 import cdeos.media.player.IMediaPlayer;
 import cdeos.media.player.CDEDataEntity;
@@ -88,6 +92,8 @@ import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+
+import org.ggml.whispercpp.whispercpp;
 
 
 public class CDEOSVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
@@ -509,6 +515,13 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 }
             }
 
+
+            //TODO: potential bug here,don't care it during PoC stage
+            whispercpp.asr_finalize();
+            setEnableASR(false);
+            CDEUtils.setTVASR(false);
+
+
             CDEUtils.setTVRecording(false);
             mMediaPlayer.stop();
             mMediaPlayer.release();
@@ -663,6 +676,36 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     public boolean getEnableRecord() {
         if (mMediaPlayer != null)
             return mMediaPlayer.getEnableRecord();
+        else
+            return false;
+    }
+
+    public void setEnableASR(boolean bEnableASR) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setEnableASR(bEnableASR);
+            //TODO: not a good idea because it is a blocked operation. don't care it during PoC stage
+            if (bEnableASR) {
+                CDEUtils.setTVASR(true);
+                //TODO: hardcode path, should be configured in "ASR Settings"
+                String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+                CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+                if (1 == mSettings.getASRMode()) {
+                    whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_PRESURETEST);
+                } else {
+                    whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_NORMAL);
+                }
+            } else {
+                CDEUtils.setTVASR(false);
+                whispercpp.asr_finalize();
+            }
+        } else {
+            CDELog.j(TAG, "player not initialized");
+        }
+    }
+
+    public boolean getEnableASR() {
+        if (mMediaPlayer != null)
+            return mMediaPlayer.getEnableASR();
         else
             return false;
     }

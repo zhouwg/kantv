@@ -615,14 +615,23 @@ extern "C" {
 
     WHISPER_API void whisper_log_set(ggml_log_callback log_callback, void * user_data);
 
-    // PoC codes for PoC(https://github.com/cdeos/kantv/issues/64) in project KanTV
-    WHISPER_API void         whisper_set_ggml_mul_mat_status(int b_exit);
+    // the following is for PoC(https://github.com/cdeos/kantv/issues/64) in project KanTV
 
-    WHISPER_API void         whispercpp_bench(const char *model_path, int bench_type, int num_threads);
+    // JNI helper function
 
-    WHISPER_API const char * whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads);
+    //for benchmark
+    void         whisper_set_ggml_mul_mat_status(int b_exit);
 
-    WHISPER_API int          whisper_get_cpu_core_counts(void);
+    void         whispercpp_bench(const char *model_path, int bench_type, int num_threads);
+
+    const char * whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads);
+
+    //for ASR
+    int          whisper_get_cpu_core_counts(void);
+
+    void         whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
+
+    void         whisper_asr_finalize(void);
 
 #ifdef __cplusplus
 }

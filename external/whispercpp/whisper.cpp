@@ -1,5 +1,6 @@
 #include "whisper.h"
 #include "cde_log.h"
+#include "cde_assert.h"
 #include "kantv_asr.h"
 
 #ifdef WHISPER_USE_COREML
@@ -35,6 +36,7 @@
 #include <cstdarg>
 #include <cstring>
 #include <fstream>
+#include <sstream>
 #include <map>
 #include <set>
 #include <string>
@@ -856,6 +858,8 @@ struct whisper_context {
     ggml_backend_t backend = nullptr;
 
     std::string path_model; // populated by whisper_init_from_file_with_params()
+
+    bool no_timing;
 };
 
 struct whisper_global {
@@ -3787,9 +3791,13 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
     return ctx->vocab.token_transcribe;
 }
 
-#include <sstream>
+
+
 void whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
+
+    if (ctx->no_timing)
+        return;
 
 #ifdef TARGET_ANDROID
     std::ostringstream timing;
@@ -3829,7 +3837,7 @@ void whisper_print_timings(struct whisper_context * ctx) {
         timing << "\n" << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((t_end_us - ctx->t_start_us) / 1000.0f) << " ms";
 
     std::string result = timing.str();
-    kantv_asr_notify(result);
+    kantv_asr_notify(result); //TODO: only works for ASRFragment.java
 #endif
 }
 
@@ -6702,21 +6710,75 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
 }
 
 
+
 //------------------------------------ added by zhou.weiguo -----------------------------------------
 //I should follow coding style of GGML
-static bool b_should_abort = false;
 
+extern "C" {
+#include <inttypes.h>
+#include <math.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdint.h>
+#include <stdatomic.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-static bool myAbortCallback(void * data) {
-    return b_should_abort;
+#include "libavutil/avstring.h"
+#include "libavutil/eval.h"
+#include "libavutil/mathematics.h"
+#include "libavutil/pixdesc.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/dict.h"
+#include "libavutil/parseutils.h"
+#include "libavutil/avassert.h"
+#include "libavutil/time.h"
+#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
+#include "libswscale/swscale.h"
+#include "libavcodec/avfft.h"
+#include "libswresample/swresample.h"
+#include "libavutil/log.h"
+#include "libavutil/avutil.h"
+#include "libavutil/opt.h"
+#include "libavutil/samplefmt.h"
+#include "libswresample/swresample.h"
+#if CONFIG_AVFILTER
+# include "libavfilter/avfilter.h"
+# include "libavfilter/buffersink.h"
+# include "libavfilter/buffersrc.h"
+#endif
+
 }
+#define MAX_SAMPLE_SIZE  (256 * 1024)
+
+typedef struct {
+    struct whisper_context * p_context;
+    struct whisper_full_params * p_params;
+
+    /*char * sz_model_path;*/ //not used currently
+    size_t n_threads;
+
+    uint8_t * p_sample_buffer;
+    size_t   n_sample_size;
+
+    size_t   n_dev_mode;            //0: normal transcription 1: ASR pressure test
+
+    pthread_mutex_t  mutex;
+} whisper_asr_context;
+
+static whisper_asr_context *p_asr_ctx   = NULL;
+
+static bool b_should_abort              = false;   //for exit benchmark
 
 
-WHISPER_API void whisper_set_ggml_mul_mat_status(int b_exit) {
-    LOGGI("set b_should_abort to %d", b_exit);
-    b_should_abort = ((1 == b_exit) ? true : false);
-}
+static const char * whisper_asr_callback(void * opaque);
+static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, int num_samples);
 
+//
+// helper function
+//
 
 /**
  * @param file_name
@@ -6792,11 +6854,7 @@ static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_
 //(1) it would be very important for PoC stage 3 in project KanTV(https://github.com/cdeos/kantv/issues/64)
 //(2) customized FFmpeg would/might be heavily used within customized whisper.cpp in the future
 
-extern "C" {
-#include "libavutil/opt.h"
-#include "libavutil/samplefmt.h"
-#include "libswresample/swresample.h"
-}
+
 
 //ffmpeg -i jfk.wav -ar 16000 -ac 1 -c:a pcm_s16le new.wav
 //this is a reverse engineering hardcode function and should not be used in real project
@@ -6898,16 +6956,96 @@ failure:
 }
 
 
+static const char * whisper_get_ggml_type_str(enum ggml_type wtype) {
+    switch (wtype) {
+        case GGML_TYPE_Q4_0:
+            return "GGML_TYPE_Q4_0";
+        case GGML_TYPE_Q4_1:
+            return "GGML_TYPE_Q4_1";
+        case GGML_TYPE_Q5_0:
+            return "GGML_TYPE_Q5_0";
+        case GGML_TYPE_Q5_1:
+            return "GGML_TYPE_Q5_1";
+        case GGML_TYPE_Q8_0:
+            return "GGML_TYPE_Q8_0";
+        case GGML_TYPE_F16:
+            return "GGML_TYPE_F16";
+        case GGML_TYPE_F32:
+            return "GGML_TYPE_F32";
+        default:
+            return "unknown";
+    }
+}
+
+
+static const char * whisper_sampleformat_string(int format)
+{
+    switch (format)
+    {
+        case AV_SAMPLE_FMT_U8:
+            return "AV_SAMPLE_FMT_U8";          ///< unsigned 8 bits
+        case AV_SAMPLE_FMT_S16:
+            return "AV_SAMPLE_FMT_S16";         ///< signed 16 bits
+        case AV_SAMPLE_FMT_S32:
+            return "AV_SAMPLE_FMT_S32";         ///< signed 32 bits
+        case AV_SAMPLE_FMT_FLT:
+            return "AV_SAMPLE_FMT_FLT";         ///< float
+        case AV_SAMPLE_FMT_DBL:
+            return "AV_SAMPLE_FMT_DBL";
+        case AV_SAMPLE_FMT_U8P:
+            return "AV_SAMPLE_FMT_U8P";         ///< unsigned 8 bits, planar
+        case AV_SAMPLE_FMT_S16P:
+            return "AV_SAMPLE_FMT_S16P";        ///< signed 16 bits, planar
+        case AV_SAMPLE_FMT_S32P:
+            return "AV_SAMPLE_FMT_S32P";        ///< signed 32 bits, planar
+        case AV_SAMPLE_FMT_FLTP:
+            return "AV_SAMPLE_FMT_FLTP";        ///< float, planar
+        case AV_SAMPLE_FMT_DBLP:
+            return "AV_SAMPLE_FMT_DBLP";        ///< double, planar
+        case AV_SAMPLE_FMT_S64:
+            return "AV_SAMPLE_FMT_S64";         ///< signed 64 bits
+        case AV_SAMPLE_FMT_S64P:
+            return "AV_SAMPLE_FMT_S64P";        ///< signed 64 bits, planar
+
+    }
+    return "unknown audio sample format";
+}
+
+
+static std::string whisper_get_time_string()
+{
+    auto to_string = [](const std::chrono::system_clock::time_point& t)->std::string
+    {
+        auto as_time_t = std::chrono::system_clock::to_time_t(t);
+        struct tm tm;
+
+        localtime_r(&as_time_t, &tm);
+
+        std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(t.time_since_epoch());
+        char buf[128];
+        snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d %03lld ",
+                 tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, ms.count() % 1000);
+        return buf;
+    };
+
+    std::chrono::system_clock::time_point t = std::chrono::system_clock::now();
+    return to_string(t);
+}
+
+
+//
+// native function for whisper.cpp JNI / JNI helper function
+//
 
 /**
- * @param model_path
- * @param audio_path
- * @param num_threads
+ * @param model_path       /sdcard/kantv/ggml-xxxxx.bin
+ * @param audio_path       /sdcard/kantv/jfk.wav
+ * @param num_threads      1 - 8
  *
  * @return asr result which generated by whispercpp's inference
  */
-WHISPER_API const char *whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads) {
-    struct whisper_context *context                 = NULL;
+const char *whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads) {
+    struct whisper_context *context                 = nullptr;
     struct whisper_full_params whisper_params;
     uint8_t * audio_data                            = NULL;
     size_t   audio_size                             = 0;
@@ -7030,35 +7168,24 @@ failure:
 }
 
 
-static const char * whisper_get_ggml_type_str(enum ggml_type wtype) {
-    switch (wtype) {
-        case GGML_TYPE_Q4_0:
-            return "GGML_TYPE_Q4_0";
-        case GGML_TYPE_Q4_1:
-            return "GGML_TYPE_Q4_1";
-        case GGML_TYPE_Q5_0:
-            return "GGML_TYPE_Q5_0";
-        case GGML_TYPE_Q5_1:
-            return "GGML_TYPE_Q5_1";
-        case GGML_TYPE_Q8_0:
-            return "GGML_TYPE_Q8_0";
-        case GGML_TYPE_F16:
-            return "GGML_TYPE_F16";
-        case GGML_TYPE_F32:
-            return "GGML_TYPE_F32";
-        default:
-            return "unknown";
-    }
+static bool myAbortCallback(void * data) {
+    return b_should_abort;
 }
 
 
-//borrow from examples/bench/bench.cpp
-struct whisper_params {
-    int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
-    int32_t what = 0; // what to benchmark: 0: memcpy 1: mulmat 2: asr 3: whisper_encoder
+void whisper_set_ggml_mul_mat_status(int b_exit) {
+    LOGGI("set b_should_abort to %d", b_exit);
+    b_should_abort = ((1 == b_exit) ? true : false);
+}
 
-    //std::string model = "models/ggml-base.en.bin";
-    std::string model = "models/ggml-small.en.bin";
+
+//TODO: borrow from examples/bench/bench.cpp, should refine in the future
+struct whisper_params {
+   int32_t n_threads = std::min(4, (int32_t) std::thread::hardware_concurrency());
+   int32_t what = 0; // what to benchmark: 0: memcpy 1: mulmat 2: asr 3: whisper_encoder
+
+   //std::string model = "models/ggml-base.en.bin";
+     std::string model = "models/ggml-small.en.bin";
 
     bool use_gpu = true;
 };
@@ -7171,7 +7298,250 @@ void whispercpp_bench(const char *model_path, int bench_type, int n_threads) {
 }
 //end borrow from examples/bench/bench.cpp
 
+
 int whisper_get_cpu_core_counts() {
     return std::thread().hardware_concurrency();
 }
+
+
+//
+// ASR for real-time subtitle in UI layer
+//
+
+//TODO: add return value and refine code, don't care it during PoC stage
+ /**
+  *
+  * @param model_path
+  * @param num_threads
+  * @param n_devmode            0: normal asr  1: pressure test
+  */
+void whisper_asr_init(const char *model_path, int num_threads, int n_devmode) {
+     LOGGV("enter whisper_asr_init\n");
+
+     if ((NULL == model_path) || (n_devmode > 1)) {
+         LOGGW("invalid param\n");
+         return;
+     }
+
+     LOGGV("model path:%s\n", model_path);
+     LOGGV("thread counts:%d\n", num_threads);
+     LOGGV("dev mode:%d\n", n_devmode);
+
+     kantv_asr_callback pfn_asr_callback = whisper_asr_callback;
+     kantv_asr_set_callback(pfn_asr_callback);
+
+     if (NULL != p_asr_ctx)
+         return;
+
+     if (NULL == p_asr_ctx) {
+         p_asr_ctx = (whisper_asr_context *) malloc(sizeof(whisper_asr_context));
+     }
+     CHECK(NULL != p_asr_ctx);
+
+     pthread_mutex_init(&p_asr_ctx->mutex, NULL);
+     pthread_mutex_lock(&p_asr_ctx->mutex);
+
+     p_asr_ctx->p_sample_buffer = (uint8_t *) malloc(MAX_SAMPLE_SIZE);
+     CHECK(NULL != p_asr_ctx->p_sample_buffer);
+
+     p_asr_ctx->n_dev_mode = n_devmode;
+
+     LOGGD("calling whisper_init_from_file");
+     p_asr_ctx->p_context = whisper_init_from_file(model_path);
+     if (nullptr == p_asr_ctx->p_context) {
+         LOGGW("whisper_init_from_file failure, pls check why\n");
+         free(p_asr_ctx);
+         p_asr_ctx = NULL;
+         return;
+     }
+     p_asr_ctx->p_context->no_timing = true;
+     LOGGD("after calling whisper_init_from_file");
+
+     p_asr_ctx->p_params = (struct whisper_full_params *) malloc(sizeof(struct whisper_full_params));
+     CHECK(NULL != p_asr_ctx->p_params);
+
+     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+     params.print_realtime          = true;
+     params.print_progress          = false;
+     params.print_timestamps        = true;
+     params.print_special           = false;
+     params.translate               = false; //first step is transcription, the second step is English -> Chinese
+     params.language                = "en";
+     params.n_threads               = num_threads;
+     params.offset_ms               = 0;
+     params.no_context              = true;
+     params.single_segment          = true;
+     params.no_timestamps           = params.single_segment;
+     memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
+
+     pthread_mutex_unlock(&p_asr_ctx->mutex);
+     LOGGV("leave kantv_asr_init\n");
+ }
+
+
+//TODO: refine code, don't care it during PoC stage
+void whisper_asr_finalize() {
+    LOGGV("enter whisper_asr_finalize\n");
+
+    if (NULL == p_asr_ctx)
+        return;
+
+    free(p_asr_ctx->p_sample_buffer);
+    free(p_asr_ctx->p_params);
+
+    whisper_free(p_asr_ctx->p_context);
+
+    pthread_mutex_destroy(&p_asr_ctx->mutex);
+
+    free(p_asr_ctx);
+    p_asr_ctx = NULL;
+
+    LOGGV("leave whisper_asr_finalize\n");
+}
+
+
+// TODO: remove the mutex
+/**
+ *
+ * @param  opaque          uncompressed pcm data presented as AVFrame
+ *
+ * @return asr result which generated by whispercpp's inference
+ */
+static const char * whisper_asr_callback(void * opaque) {
+    size_t data_size = 0;
+    size_t resampled_data_size = 0;
+    const char *asr_result = NULL;
+    AVFrame *audioframe = NULL;
+
+    size_t sample_size = 0;
+    uint8_t *p_sample = NULL;
+    int num_sample = 0;
+
+    if (NULL == opaque)
+        return NULL;
+
+    if ((NULL == p_asr_ctx))
+        return NULL;
+
+    if (1 == p_asr_ctx->n_dev_mode) { //pressure test
+        std::string test_info;
+
+        test_info = whisper_get_time_string() + "\n" +
+                    " First line:this is pressure test of whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n "
+                    "second line:thanks for your interesting in whisper.cpp\n"
+                    " third line:have fun with whisper.cpp\n"
+                    "fourth line:we value your feedback and suggestion\n";
+        return test_info.c_str();
+    }
+
+    pthread_mutex_lock(&p_asr_ctx->mutex);
+
+    audioframe = (AVFrame *) opaque;
+    p_sample = p_asr_ctx->p_sample_buffer;
+    num_sample = audioframe->nb_samples;
+
+    data_size = av_samples_get_buffer_size(NULL, audioframe->channels, audioframe->nb_samples,
+                                           static_cast<AVSampleFormat>(audioframe->format), 1);
+    LOGI("Audio AVFrame(size %d): "
+         "nb_samples %d, sample_rate %d, channels %d, channel_layout %d, "
+         "format 0x%x(%s), pts %lld,"
+         "pitches[0] %d, pitches[1] %d, pitches[2] %d, "
+         "pixels[0] %p, pixels[1] %p, pixels[2] %p \n",
+         data_size,
+         audioframe->nb_samples, audioframe->sample_rate, audioframe->channels,
+         audioframe->channel_layout,
+         audioframe->format, whisper_sampleformat_string(audioframe->format), audioframe->pts,
+         audioframe->linesize[0], audioframe->linesize[1], audioframe->linesize[2],
+         audioframe->data[0], audioframe->data[1], audioframe->data[2]
+    );
+    data_size = av_get_bytes_per_sample(static_cast<AVSampleFormat>(audioframe->format));
+
+    if (av_sample_fmt_is_planar(static_cast<AVSampleFormat>(audioframe->format))) {
+        for (int i = 0; i < audioframe->nb_samples; i++) {
+            for (int ch = 0; ch < audioframe->channels; ch++) {
+                memcpy(p_sample, audioframe->data[ch] + data_size * i, data_size);
+                p_sample     += data_size;
+                sample_size  += data_size;
+            }
+        }
+    } else {
+        memcpy(p_sample, audioframe->data[0], audioframe->linesize[0]);
+        sample_size = audioframe->linesize[0];
+    }
+
+    enum AVSampleFormat sampleformat = av_get_packed_sample_fmt(static_cast<AVSampleFormat>(audioframe->format));
+    CHECK(sampleformat == AV_SAMPLE_FMT_FLT);
+
+    //TODO: do not do this in this function
+    // this function should not do time-consuming operation, otherwise unexpected behaviour would happen
+    asr_result = whisper_asr_audio_to_text(reinterpret_cast<const float *>(p_asr_ctx->p_sample_buffer), num_sample);
+
+    pthread_mutex_unlock(&p_asr_ctx->mutex);
+
+    return asr_result;
+}
+
+
+//TODO:not work as expect because whisper complain: whisper_full_with_state: input is too short - 60 ms < 1000 ms
+// data structure should be re-designed for live stream scenario and refine it in next stage(PoC-stage S34)
+/**
+ *
+ * @param pf32_audio_buffer
+ * @param num_samples
+ * @return
+ */
+static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, int num_samples) {
+    if ((NULL == pf32_audio_buffer) || (num_samples < 1)) {
+        LOGGW("pls check params\n");
+        return NULL;
+    }
+
+    int result                          = 0;
+    int index                           = 0;
+    const char *text                    = NULL;
+    int64_t begin_time                  = 0LL;
+    int64_t end_time                    = 0LL;
+    int64_t t0_segment                  = 0;
+    int64_t t1_segment                  = 0;
+    int num_segments                    = 0;
+
+    std::string asr_result;
+    asr_result = whisper_get_time_string() + "\n" +  "whisper.cpp inference is under development";
+
+    begin_time = ggml_time_ms();
+    whisper_reset_timings(p_asr_ctx->p_context);
+    result = whisper_full(p_asr_ctx->p_context, *p_asr_ctx->p_params, pf32_audio_buffer, num_samples);
+    if (0 != result) {
+        LOGGW("inference failure, pls check why?\n");
+        result = -1;
+        goto failure;
+    }
+    end_time = ggml_time_ms();
+    //LOGGI("inference cost %d ms\n", end_time - begin_time);
+    whisper_print_timings(p_asr_ctx->p_context);
+    num_segments = whisper_full_n_segments(p_asr_ctx->p_context);
+    for (index = 0; index < num_segments; index++) {
+        text = whisper_full_get_segment_text(p_asr_ctx->p_context, index);
+        if (NULL == text) {
+            LOGGW("whisper_full_get_segment_text failure, pls check why\n");
+            result = -2;
+            goto failure;
+        }
+        t0_segment = whisper_full_get_segment_t0(p_asr_ctx->p_context, index);
+        t1_segment = whisper_full_get_segment_t1(p_asr_ctx->p_context, index);
+        asr_result +=
+                "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
+                std::string(text);
+        LOGGD("asr result:\n%s\n", asr_result.c_str());
+    }
+    text = asr_result.c_str();
+
+failure:
+    if (0 != result) {
+        return NULL;
+    }
+
+    return text;
+}
+
 //------------------------------------ end added by zhou.weiguo -------------------------------------

@@ -42,9 +42,14 @@ public class CDEAssetLoader {
         FileOutputStream outStream = null;
         try {
             File destFile = new File(destFilePath);
+
+            if (destFile.exists())
+                return;
+
             if (!destFile.exists()) {
                 destFile.createNewFile();
             }
+
             inStream = context.getAssets().open(srcFilePath);
             outStream = new FileOutputStream(destFilePath);
 

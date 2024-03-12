@@ -36,10 +36,11 @@ API34：Android 14
 */
 project.ext {
     //weiguo:2024-03-10, attention here,only validated ok on Xiaomi 14
-    compileSdkVersion = 34
-    buildToolsVersion = "34.0.0"
-    targetSdkVersion  = 34
-    minSdkVersion     = 34
+    compileSdkVersion   = 34
+    buildToolsVersion   = "34.0.0"
+    targetSdkVersion    = 34
+    //34 is too strict and the generated apk couldn't run on low-end vivo Android phone,target phone should be above Android 8
+    minSdkVersion       = 26
     appTargetSdkVersion = 29
 
     //version and version code of KanTV

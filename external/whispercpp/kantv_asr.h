@@ -19,11 +19,6 @@
 
 
 #ifdef __cplusplus
-#include <string>
-void kantv_asr_notify(std::string &info);
-#endif
-
-#ifdef __cplusplus
     extern "C" {
 #endif
 
@@ -32,10 +27,28 @@ void kantv_asr_notify(std::string &info);
 #define BECHMARK_MULMAT             2
 #define BECHMARK_FULL               3
 
+
+typedef const char* (*kantv_asr_callback)(void *opaque);
+
+void kantv_asr_set_callback(kantv_asr_callback callback);
+
+kantv_asr_callback kantv_asr_get_callback(void);
+
+void kantv_asr_init(void);
+void kantv_asr_finalize(void);
 void kantv_asr_notify_c(const char *info);
 
 #ifdef __cplusplus
     }
+#endif
+
+
+#ifdef __cplusplus
+
+#include <string>
+
+void kantv_asr_notify(std::string &info);
+
 #endif
 
 

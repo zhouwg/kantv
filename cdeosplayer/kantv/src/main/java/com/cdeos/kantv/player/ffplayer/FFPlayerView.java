@@ -557,7 +557,10 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         };
 
         IMediaPlayer.OnTimedTextListener ijkPlayTimedTextListener = (mp, text) -> {
-            CDELog.j(TAG, "recv subtitle: " + text.getText());
+            CDELog.d(TAG, "recv subtitle: " + text.getText());
+            if (!CDEUtils.getTVASR())
+                return;
+
             if (text != null) {
                 subtitleManager.setInnerSub(text.getText());
             }
@@ -906,6 +909,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         mVideoView.setHudViewHolderVisibility(bLandScape ? View.VISIBLE : View.INVISIBLE);
                     }
 
+
                     @Override
                     public void setTVRecordingStatus(boolean bRecording) {
                         int recordCountsFromServer = CDEUtils.getRecordCountsFromServer();
@@ -920,7 +924,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         topBarView.hideItemView();
 
                         if (!mVideoView.isPlaying()) {
-                            Toast.makeText(getContext(), "record not supported", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported currently, pls check \"Playback Setting", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
@@ -940,7 +944,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         //TODO:kantv-record with Exoplayer engine is not finished currently,so disable it here
                         if ((CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) || (mSettings.getUsingMediaCodec())
                         ) {
-                            Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg or pls check FFmpeg configuration in \"Playback Setting", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }
@@ -972,6 +976,33 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                                         + " M， available space: " + diskFreeSize + " M ", Toast.LENGTH_SHORT).show();
                             } else {
                                 mVideoView.setEnableRecord(bRecording);
+                            }
+                        }
+                    }
+
+
+                    @Override
+                    public void setTVASRStatus(boolean bEnableASR) {
+                        CDELog.j(TAG, "bEnableASR:" + bEnableASR);
+                        topBarView.hideItemView();
+
+                        if (!mVideoView.isPlaying()) {
+                            Toast.makeText(getContext(), "ASR not supported", Toast.LENGTH_SHORT).show();
+                            topBarView.updateTVASRVisibility(false);
+                            return;
+                        }
+
+                        if ((CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine())
+                        ) {
+                            Toast.makeText(getContext(), "ASR not supported because playEngine is not FFmpeg", Toast.LENGTH_SHORT).show();
+                            topBarView.updateTVASRVisibility(false);
+                            return;
+                        }
+
+                        mVideoView.setEnableASR(bEnableASR);
+                        if (!bEnableASR) {
+                            if (subtitleManager != null) {
+                                subtitleManager.setInnerSub("");
                             }
                         }
                     }

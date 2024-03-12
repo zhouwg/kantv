@@ -158,7 +158,7 @@
     <string name="path_is_invalid">无效的路径</string>
     <string name="kantv_title">KanTV严选频道</string>
     <string name="kantv_test_warning">本页面仅为测试频道,其中很多频道可能无法访问或无法播放，请关注本APP主页的＂严选电视频道(为符合广电总局相关规定，仅提供英文频道，供英语学习或相关研究之用)或请关注本APP后续更新版本中的测试频道更新.\n\n本APP所有在线电视源均来自互联网，本APP仅为工具类软件，不提供在线电视内容制作．\n\n根据国家广电总局关于OTT TV相关规定,本APP仅供个人学习之用.</string>
-    <string name="asr_tip">本页面为ASR研究,基于whisper.cpp,ASR研究结果将用于本软件中在线电视(中文/英文)实时字幕生成</string>
+    <string name="asr_tip">ASR research(by GGML\'s whisper.cpp)</string>
     <string name="recording_under_development">录制功能开发中...</string>
 
     <string name="ASRstart">开始语音识别</string>
@@ -188,27 +188,26 @@
     <string name="network_content">网络串流</string>
     <string name="input_network_content">请输入要播放的视频地址(网络链接或本地路径)</string>
 
-    <string name="system_settings">系统设置</string>
-    <string name="playback_settings">播放设置</string>
-    <string name="record_settings">录制设置</string>
-    <string name="play_history">播放历史</string>
-    <string name="performance_bechmark">性能评测</string>
-    <string name="asr_settings">语音设置</string>
-    <string name="video_scan">扫描管理</string>
+    <string name="system_settings">System Setting</string>
+    <string name="playback_settings">Playback Setting</string>
+    <string name="record_settings">Record Setting</string>
+    <string name="play_history">Playback History</string>
+    <string name="performance_bechmark">Peroformance Benchmark</string>
+    <string name="asr_settings">ASR Setting</string>
+    <string name="video_scan">Video Scane</string>
     <string name="general_question">常见问题</string>
-    <string name="skin_nighttime">夜间模式</string>
-    <string name="skin_daytime">日间模式</string>
-    <string name="exit_app">退出应用</string>
+    <string name="skin_nighttime">Nighttime Mode</string>
+    <string name="skin_daytime">Daytime Mode</string>
+    <string name="exit_app">Exit App</string>
 
-    <string name="homepage">首页</string>
-    <string name="media">本地媒体</string>
-    <string name="localmedia">本地媒体</string>
-    <string name="EPG">自定义节目</string>
-    <string name="custom_playlist">自定义节目</string>
-    <string name="onlinetv">在线电视(严选外语节目)</string>
+    <string name="homepage">HOME</string>
+    <string name="localmedia">Media</string>
+    <string name="EPG">EPG</string>
+    <string name="custom_playlist">Custome Playlist</string>
+    <string name="onlinetv">Online TV</string>
     <string name="ASR">ASR</string>
-    <string name="ME">我</string>
-    <string name="personal_center">个人中心</string>
+    <string name="ME">ME</string>
+    <string name="personal_center">Person Center</string>
 
-    <string name="key_press_warning">再按一次退出应用</string>
+    <string name="key_press_warning">Exit app when press anykey</string>
 </resources>

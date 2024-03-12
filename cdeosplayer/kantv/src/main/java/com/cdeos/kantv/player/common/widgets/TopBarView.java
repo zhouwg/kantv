@@ -60,7 +60,6 @@ public class TopBarView extends FrameLayout implements View.OnClickListener{
         playerSettingIv = this.findViewById(R.id.player_settings_iv);
         playerSettingView = this.findViewById(R.id.player_setting_view);
 
-
         subtitleSettingIv = this.findViewById(R.id.subtitle_settings_iv);
         subtitleSettingView = this.findViewById(R.id.subtitle_setting_view);
 
@@ -164,6 +163,14 @@ public class TopBarView extends FrameLayout implements View.OnClickListener{
             tvRecordingIv.setVisibility(INVISIBLE);
             tvDiskFree.setVisibility(INVISIBLE);
             playerSettingView.updateUIStatus(false);
+        }
+    }
+
+    public void updateTVASRVisibility(boolean isASR) {
+        if (isASR) {
+            playerSettingView.updateASRUIStatus(true);
+        } else {
+            playerSettingView.updateASRUIStatus(false);
         }
     }
 

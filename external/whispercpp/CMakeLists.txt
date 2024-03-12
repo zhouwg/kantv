@@ -40,7 +40,8 @@ add_definitions(-D__ARM_NEON)
 #add_definitions(-DGGML_USE_ACCELERATE)
 #add_definitions(-DGGML_USE_CLBLAST)
 
-#weiguo,2024-03-11, mightbe slower when armv8/armv9 + simd is enabled
+#weiguo,2024-03-11,morning,     mightbe slower when armv8/armv9 + simd is enabled
+#weiguo,2024-03-11,17:41        confirmed that slower about 2x with optimized version
 #add_definitions(-DGGML_USE_OPENBLAS)
 
 add_definitions(-DNDEBUG)
@@ -49,19 +50,44 @@ add_definitions(-O3)
 #weiguo:2024-03-10
 #add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
-#both not supported with latest android-ndk-r26c
-#add_definitions(-march=armv9.2+simd)
-#add_definitions(-mcpu=cortex-x4)
-#only validated ok on Xiaomi 14
-add_definitions(-march=armv8+simd)
-add_definitions(-mcpu=cortex-a78)
 
-##SF(segment fault) or instruction exception
+#weiguo:2024-03-11
+#only validated ok on Xiaomi 14
+#work
+#add_definitions(-march=armv8-a+simd+fp)
+#work
+#add_definitions(-march=armv8.5-a)
+#work
+#add_definitions(-march=armv8.6-a)
+
+#works very well on Xiaomi 14 and got best ASR performance until now(less then 1 second)
+#add_definitions(-march=armv8.7-a)
+#add_definitions(-mcpu=cortex-x1)
+#add_definitions(-mtune=cortex-x1)
+
+#2024-3-12,14:45
+#ASR framework works well as expected validate on vivo phone(Android 10 + low-end qcom SoC)
+#might be works well on all mainstream Android phones
+add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
+
+#instruction exception
+#add_definitions(-march=armv8.8-a)
+#add_definitions(-mcpu=cortex-x2)
+#add_definitions(-mtune=cortex-x2)
+
+#instruction exception
 #add_definitions(-march=armv9+simd)
 #add_definitions(-mcpu=cortex-x3)
 
+#not supported with latest android-ndk-r26c
+#add_definitions(-march=armv9.2+simd)
+#add_definitions(-mcpu=cortex-x4)
+
+
+
 add_definitions(-mfloat-abi=hard -mfpu=neon-fp-armv8)
 #add_definitions(-fvisibility=hidden -fvisibility-inlines-hidden)
+#brings much side effect
 #add_definitions(-funsafe-math-optimizations)
 
 find_library(LOG_LIB log)

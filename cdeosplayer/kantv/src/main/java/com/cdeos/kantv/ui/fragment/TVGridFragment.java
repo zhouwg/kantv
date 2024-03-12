@@ -435,7 +435,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
             public void bindView(KANTVMediaGridAdapter.ViewHolder holder, KANTVMediaGridItem obj) {
                 try {
                     {
-                        CDELog.j(TAG, "load img from interl res");
+                        CDELog.d(TAG, "load img from interl res");
                         holder.setImageResource(gridItemImageID, obj.getItemId());
                     }
                     //holder.setText(gridItemTextID, obj.getItemName());

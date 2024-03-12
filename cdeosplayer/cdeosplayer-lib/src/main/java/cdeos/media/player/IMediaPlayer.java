@@ -141,6 +141,9 @@ public interface IMediaPlayer {
     void updateRecordingStatus(boolean bEnableRecord);
     boolean getEnableRecord();
 
+    void setEnableASR(boolean bEnableASR);
+    boolean getEnableASR();
+
     void setDurationDumpES(int durationDumpES);//per seconds
     String getVideoInfo();
     String getAudioInfo();

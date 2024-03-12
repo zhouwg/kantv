@@ -43,6 +43,7 @@ import com.cdeos.kantv.utils.interf.IBaseView;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import cdeos.media.player.CDEAssetLoader;
 import skin.support.SkinCompatManager;
 import skin.support.observe.SkinObservable;
 import skin.support.observe.SkinObserver;
@@ -366,6 +367,10 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity implements
         CDELog.j(TAG, "screen width x height（pixel)= : " + width + "x" + height);
         CDELog.j(TAG, "screen width x height (dp)   = : " + screenWidth + "x" + screenHeight);
         CDELog.j(TAG, "isRunningOnTV = " + CDEUtils.isRunningOnTV());
+
+        //for realtime subtitle demo with prebuilt android apk
+        String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
         if (CDEUtils.isRunningOnTV()) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);

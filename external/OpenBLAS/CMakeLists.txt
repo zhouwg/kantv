@@ -30,8 +30,13 @@ add_definitions(-O3)
 #add_definitions(-funsafe-math-optimizations)
 #add_definitions(-march=armv8.6-a+simd)
 #add_definitions(-mcpu=cortex-a78)
-add_definitions(-march=armv9+simd)
-add_definitions(-mcpu=cortex-x3)
+
+#add_definitions(-march=armv9+simd)
+#add_definitions(-mcpu=cortex-x3)
+add_definitions(-march=armv8.7-a)
+add_definitions(-mcpu=cortex-x1)
+add_definitions(-mtune=cortex-x1)
+
 add_definitions(-mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 option(BUILD_LAPACK_DEPRECATED "When building LAPACK, include also some older, deprecated routines" ON)

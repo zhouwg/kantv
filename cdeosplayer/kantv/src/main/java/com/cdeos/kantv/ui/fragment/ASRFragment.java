@@ -90,10 +90,10 @@
      Button _btnBenchmark;
 
      //keep sync with kantv_asr.h
-     private static final int BECHMARK_ASR = 0;
-     private static final int BECHMARK_MEMCPY = 1;
-     private static final int BECHMARK_MULMAT = 2;
-     private static final int BECHMARK_FULL = 3; //very slow on Android phone
+     private static final int BECHMARK_ASR      = 0;
+     private static final int BECHMARK_MEMCPY   = 1;
+     private static final int BECHMARK_MULMAT   = 2;
+     private static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
 
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
@@ -107,7 +107,7 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
-     private String ggmlModelFileName = "ggml-tiny.bin";
+     private String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
      private String ggmlSampleFileName = "jfk.wav";
 
      private Context mContext;
@@ -153,7 +153,7 @@
          _btnBenchmark = (Button) mActivity.findViewById(R.id.btnBenchmark);
 
 
-         //copy asset files to /sdcard
+         //copy asset files to /sdcard/kantv/
          //or just upload dependent files to /sdcard accordingly so the APK size would be smaller significantly
          CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
@@ -225,8 +225,8 @@
 
      /*
         <item>tiny</item>
-        <item>tiny.en</item>       good
-        <item>tiny.en-q5_1</item>  good
+        <item>tiny.en</item>
+        <item>tiny.en-q5_1</item>
         <item>tiny.en-q8_0</item>
         <item>tiny-q5_1</item>
         <item>base</item>
@@ -240,6 +240,26 @@
         <item>medium.en</item>
         <item>medium.en-q5_0</item>
         <item>large</item>
+
+ weiguo,2024-03-12,00:45, ASR performance on Xiaomi 14 with new optimization
+ model                    time(ms)
+ tiny                     764  774  758  765  886 770  796 772  798  868  897  860  885  882  861
+ tiny.en                  880  835  871  867  859 875  860 858  883  882  866  822  865  868  862
+ tiny.en-q5_1             860  842  898  861  900 900  854 796  866  900  909  882  914  896  905
+ tiny.en-q8_0             878  885  896  893  896 884  916 873  879  884  887  866  905  879  884
+ tiny-q5_1                857  883  884  904  880 906  902 849  909  869  870  885  763  773  787
+ base                     874  906  885  904  880 797  903 898  892  884  868  894  880  875  819
+ base.en                  877  833  915  810  892 892  806 857  876  871  883  893  885  897  893
+ base-q5_1                884  889  919  918  899 888  935 887  903  886  885  890  825
+ small                    799  878  903  868  879 890
+ small.en                 894  882  892  901  897
+ small.en-q5_1            867  900  889  919  912
+ small-q5_1               868  897  898  883  913
+ medium                   862  880  863  886  920 883
+ medium.en                887  898  881  888  877
+ medium.en-q5_0           888  916  924  894  854 873
+ large                    862  892  890  901  857 872
+
      */
          Spinner spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
          String[] arrayModelName = getResources().getStringArray(R.array.modelName);
@@ -342,7 +362,7 @@
 
 
                              if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
-                                 playAudioFile();
+                                 //playAudioFile();
                              }
 
                              CDELog.j(TAG, benchmarkTip);
@@ -488,7 +508,7 @@
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO_ASR_RESULT) {
-                 playAudioFile();
+                 //playAudioFile();
              }
 
          }
@@ -552,7 +572,7 @@
      private String getBenchmarkDesc(int benchmarkIndex) {
          switch (benchmarkIndex) {
              case BECHMARK_FULL:
-                 return "GGML whisper_encoder";
+                 return "GGML whisper_encode";
 
              case BECHMARK_MEMCPY:
                  return "GGML memcopy";

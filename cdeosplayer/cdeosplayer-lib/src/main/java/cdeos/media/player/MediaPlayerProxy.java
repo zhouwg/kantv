@@ -173,10 +173,16 @@ public class MediaPlayerProxy implements IMediaPlayer {
         mBackEndMediaPlayer.setEnableDumpAudioES(bEnable);
     }
 
-    //TODO
+
     @Override
     public void setEnableRecord(boolean bEnableRecord) {
         mBackEndMediaPlayer.setEnableRecord(bEnableRecord);
+    }
+
+
+    @Override
+    public void setEnableASR(boolean bEnableASR) {
+        mBackEndMediaPlayer.setEnableASR(bEnableASR);
     }
 
     @Override
@@ -184,9 +190,15 @@ public class MediaPlayerProxy implements IMediaPlayer {
         mBackEndMediaPlayer.updateRecordingStatus(bEnableRecord);
     }
 
-    //TODO
+
     @Override
     public boolean getEnableRecord() {
+        return false;
+    }
+
+
+    @Override
+    public boolean getEnableASR() {
         return false;
     }
 
