@@ -3,5 +3,5 @@ package com.cdeos.kantv.mvp.view;
 
 import com.cdeos.kantv.utils.interf.view.BaseMvpView;
 
-public interface ASRView extends BaseMvpView {
+public interface ASRResearchView extends BaseMvpView {
 }

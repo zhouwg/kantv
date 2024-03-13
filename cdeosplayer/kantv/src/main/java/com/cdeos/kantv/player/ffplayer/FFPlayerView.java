@@ -941,6 +941,12 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                             return;
                         }
 
+                        if (mVideoName.startsWith("kantv-asr")) {
+                            Toast.makeText(getContext(), "record not supported because it seems a saved ASR file", Toast.LENGTH_SHORT).show();
+                            topBarView.updateTVRecordingVisibility(false);
+                            return;
+                        }
+
                         if (mVideoUrl.startsWith("/storage/emulated")) {
                             //Toast.makeText(getContext(), "record not supported because it seems a local media file", Toast.LENGTH_SHORT).show();
                             //topBarView.updateTVRecordingVisibility(false);
@@ -968,7 +974,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         }
 
                         {
-                            //topBarView.updateTVRecordingVisibility(bRecording);
                             KANTVDRM instance = KANTVDRM.getInstance();
                             File sdcardFile = Environment.getExternalStorageDirectory();
                             String sdcardPath = sdcardFile.getAbsolutePath();
@@ -992,8 +997,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         CDELog.j(TAG, "bEnableASR:" + bEnableASR);
                         topBarView.hideItemView();
 
-                        if (!mVideoView.isPlaying()) {
-                            Toast.makeText(getContext(), "ASR not supported", Toast.LENGTH_SHORT).show();
+                        if (mVideoName.startsWith("kantv-asr")) {
+                            Toast.makeText(getContext(), "ASR not supported because it seems a saved ASR file", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVASRVisibility(false);
                             return;
                         }
@@ -1601,9 +1606,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
     private void stopASR() {
         if (mVideoView.getEnableASR()) {
             CDELog.j(TAG, "stop ASR");
-            KANTVDRM.getInstance().ANDROID_JNI_StopASR();
-            onASRStop();
             mVideoView.setEnableASR(false);
+            KANTVDRM.getInstance().ANDROID_JNI_StopASR();
         }
     }
 
@@ -1631,7 +1635,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         topBarView.updateTVASRVisibility(true);
 
         String tipInfo = "TV transcription will be launched.\n";
-        tipInfo += "transcription file would be saved to:" + CDEUtils.getASRSavedFileName();
+        tipInfo += "raw audio data would be saved to file for further usage:" + CDEUtils.getASRSavedFileName();
         showWarningDialog(mAttachActivity, tipInfo);
     }
 
@@ -1652,17 +1656,18 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         CDEUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
 
-        CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        CDELog.j(TAG, "saved raw audio data file:" + CDEUtils.getASRSavedFileName());
         File file = new File(CDEUtils.getASRSavedFileName());
         if (file.exists()) {
-            CDELog.j(TAG, "asr saved file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
-            Toast.makeText(getContext(), "TV transcription stopped，size of saved transcription file: "
+            CDELog.j(TAG, "saved raw audio data file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
+            Toast.makeText(getContext(), "TV transcription stopped，size of saved raw audio data file: "
                     + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
         } else {
             CDELog.j(TAG, "it shouldn't happen");
             Toast.makeText(getContext(), "TV transcription stopped", Toast.LENGTH_SHORT).show();
         }
 
+        //TODO:add thumbnail to saved raw audio data file
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
         intent.setData(uri);
@@ -1914,5 +1919,5 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         mAttachActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

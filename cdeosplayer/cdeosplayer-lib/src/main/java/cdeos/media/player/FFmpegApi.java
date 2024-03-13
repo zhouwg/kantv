@@ -19,5 +19,5 @@ package cdeos.media.player;
 public class FFmpegApi {
     public static native String av_base64_encode(byte in[]);
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

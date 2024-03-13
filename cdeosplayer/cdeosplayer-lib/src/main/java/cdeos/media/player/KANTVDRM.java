@@ -141,6 +141,6 @@ final public class KANTVDRM {
 
     public native int ANDROID_DRM_IsClearContent();
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 
 }

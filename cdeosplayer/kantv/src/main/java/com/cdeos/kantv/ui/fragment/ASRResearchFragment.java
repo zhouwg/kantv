@@ -51,9 +51,9 @@
 
  import com.cdeos.kantv.R;
  import com.cdeos.kantv.base.BaseMvpFragment;
- import com.cdeos.kantv.mvp.impl.ASRPresenterImpl;
- import com.cdeos.kantv.mvp.presenter.ASRPresenter;
- import com.cdeos.kantv.mvp.view.ASRView;
+ import com.cdeos.kantv.mvp.impl.ASRResearchPresenterImpl;
+ import com.cdeos.kantv.mvp.presenter.ASRResearchPresenter;
+ import com.cdeos.kantv.mvp.view.ASRResearchView;
  import com.cdeos.kantv.utils.Settings;
 
  import org.ggml.whispercpp.whispercpp;
@@ -78,11 +78,11 @@
  import cdeos.media.player.KANTVMgr;
 
 
- public class ASRFragment extends BaseMvpFragment<ASRPresenter> implements ASRView {
+ public class ASRResearchFragment extends BaseMvpFragment<ASRResearchPresenter> implements ASRResearchView {
      @BindView(R.id.ggmlLayout)
      LinearLayout layout;
 
-     private static final String TAG = ASRFragment.class.getName();
+     private static final String TAG = ASRResearchFragment.class.getName();
      TextView _txtASRInfo;
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
@@ -115,17 +115,17 @@
      private Settings mSettings;
 
      private KANTVMgr mKANTVMgr = null;
-     private ASRFragment.MyEventListener mEventListener = new ASRFragment.MyEventListener();
+     private ASRResearchFragment.MyEventListener mEventListener = new ASRResearchFragment.MyEventListener();
 
 
-     public static ASRFragment newInstance() {
-         return new ASRFragment();
+     public static ASRResearchFragment newInstance() {
+         return new ASRResearchFragment();
      }
 
      @NonNull
      @Override
-     protected ASRPresenter initPresenter() {
-         return new ASRPresenterImpl(this, this);
+     protected ASRResearchPresenter initPresenter() {
+         return new ASRResearchPresenterImpl(this, this);
      }
 
      @Override
@@ -609,4 +609,5 @@
          }
      }
 
+     public static native int kantv_anti_remove_rename_this_file();
  }

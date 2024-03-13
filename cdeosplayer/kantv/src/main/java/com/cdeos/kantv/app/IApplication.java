@@ -466,5 +466,5 @@ public class IApplication extends Application {
         CDELog.j(TAG, "init app cost time " + (endTime - startTime) + " milliseconds\n\n\n\n");
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

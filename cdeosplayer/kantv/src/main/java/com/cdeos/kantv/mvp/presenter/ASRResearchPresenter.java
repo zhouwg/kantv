@@ -5,6 +5,6 @@ import android.content.Context;
 import com.cdeos.kantv.utils.interf.presenter.BaseMvpPresenter;
 
 
-public interface ASRPresenter extends BaseMvpPresenter {
+public interface ASRResearchPresenter extends BaseMvpPresenter {
     void refreshVideo(Context context, boolean reScan);
 }

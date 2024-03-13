@@ -65,5 +65,5 @@
      public final static int KANTV_ERROR_ASR_WHISPERCPP_INTERNAL = 16;
      public final static int KANTV_ERROR_ASR_RESULT = 17;
 
-     public static native int kantv_anti_tamper();
+     public static native int kantv_anti_remove_rename_this_file();
  }

@@ -1,7 +1,7 @@
 #include "whisper.h"
 #include "cde_log.h"
 #include "cde_assert.h"
-#include "kantv_asr.h"
+#include "kantv-asr.h"
 
 #ifdef WHISPER_USE_COREML
 #include "coreml/whisper-encoder.h"

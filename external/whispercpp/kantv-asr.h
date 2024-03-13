@@ -28,15 +28,28 @@
 #define BECHMARK_FULL               3
 
 
-typedef const char* (*kantv_asr_callback)(void *opaque);
+typedef const char* (*kantv_asr_callback)(void * opaque);
 
 void kantv_asr_set_callback(kantv_asr_callback callback);
 
 kantv_asr_callback kantv_asr_get_callback(void);
 
-void kantv_asr_init(void);
+
+/**
+ * @param sz_saved_filename    NULL:  transcription
+ *                             other: transcription and save audio data to filename for further usage
+ *
+ *
+ */
+void kantv_asr_init(const char * sz_saved_filename, uint32_t n_channels, uint32_t n_sample_rate, uint32_t n_sample_format);
+
 void kantv_asr_finalize(void);
-void kantv_asr_notify_c(const char *info);
+
+void kantv_asr_start(void);
+
+void kantv_asr_stop(void);
+
+void kantv_asr_notify_c(const char *sz_info);
 
 #ifdef __cplusplus
     }
@@ -47,9 +60,8 @@ void kantv_asr_notify_c(const char *info);
 
 #include <string>
 
-void kantv_asr_notify(std::string &info);
+void kantv_asr_notify(std::string &str_info);
 
 #endif
-
 
 #endif

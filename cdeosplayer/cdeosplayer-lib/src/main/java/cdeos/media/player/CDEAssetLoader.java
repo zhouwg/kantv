@@ -113,5 +113,5 @@ public class CDEAssetLoader {
         return sbf.toString();
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

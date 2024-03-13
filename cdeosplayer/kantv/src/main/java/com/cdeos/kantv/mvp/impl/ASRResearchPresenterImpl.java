@@ -9,18 +9,18 @@ import android.os.Environment;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.cdeos.kantv.base.BaseMvpPresenterImpl;
-import com.cdeos.kantv.mvp.presenter.ASRPresenter;
-import com.cdeos.kantv.mvp.view.ASRView;
+import com.cdeos.kantv.mvp.presenter.ASRResearchPresenter;
+import com.cdeos.kantv.mvp.view.ASRResearchView;
 import org.greenrobot.eventbus.EventBus;
 
 import cdeos.media.player.CDELog;
 
 
-public class ASRPresenterImpl extends BaseMvpPresenterImpl<ASRView> implements ASRPresenter {
+public class ASRResearchPresenterImpl extends BaseMvpPresenterImpl<ASRResearchView> implements ASRResearchPresenter {
 
-    private static final String TAG = ASRPresenterImpl.class.getName();
+    private static final String TAG = ASRResearchPresenterImpl.class.getName();
 
-    public ASRPresenterImpl(ASRView view, LifecycleOwner lifecycleOwner) {
+    public ASRResearchPresenterImpl(ASRResearchView view, LifecycleOwner lifecycleOwner) {
         super(view, lifecycleOwner);
     }
 

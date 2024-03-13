@@ -557,5 +557,5 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
         adBuilder.show();
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

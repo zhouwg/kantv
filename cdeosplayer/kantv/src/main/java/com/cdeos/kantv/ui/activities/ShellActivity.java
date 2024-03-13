@@ -66,5 +66,5 @@ public class ShellActivity extends AppCompatActivity {
         return mActivity;
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }
