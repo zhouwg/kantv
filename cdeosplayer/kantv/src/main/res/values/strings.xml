@@ -2,12 +2,11 @@
 <resources>
 
     <string name="app_name">KanTV</string>
-
-    <string name="about_download_subtitle">网络字幕</string>
+    <string name="about_download_subtitle">network subtitle</string>
     <string name="folder_icon_resouces">Folder Icon</string>
     <string name="menu_favorite_string">favorite</string>
-    <string name="video_record">上次播放到</string>
-    <string name="video_skip">继续播放</string>
+    <string name="video_record">last playpos</string>
+    <string name="video_skip">continue play</string>
     <item name="tag_key_data" type="id"/>
     <item name="tag_key_position" type="id"/>
     <string name="app_fullname">Project KanTV</string>
@@ -48,8 +47,8 @@
     <string name="disable_audiotrack">disable audio</string>
     <string name="disable_videotrack">disable video</string>
     <string name="drminfo">drminfo</string>
-    <string name="decrypt">decrypt</string>
     <string name="encryptinfo">encryptinfo</string>
+    <string name="decrypt">decrypt</string>
     <string name="fps">fps</string>
     <string name="videoinfo">videoinfo</string>
     <string name="audioinfo">audioinfo</string>
@@ -139,7 +138,6 @@
     <string name="quit">Quit</string>
     <string name="devmode">Dev Mode</string>
 
-
     <string name="OK">OK</string>
     <string name="Cancel">Cancel</string>
     <string name="Update">Update</string>
@@ -211,7 +209,6 @@
     <string name="ASR">ASR</string>
     <string name="ME">Me</string>
     <string name="personal_center">Person Center</string>
-
     <string name="key_press_warning">Exit app when press anykey</string>
 
 </resources>

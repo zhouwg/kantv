@@ -58,7 +58,7 @@ public class FolderItem implements AdapterItem<FolderBean> {
         String title = CommonUtils.getFolderName(folder);
 
         folderTitle.setText(title);
-        fileNumber.setText(String.format("%s 视频", model.getFileNumber()));
+        fileNumber.setText(String.format("%s video", model.getFileNumber()));
 
         boolean isLastPlayFolder = false;
         String lastVideoPath = AppConfig.getInstance().getLastPlayVideo();

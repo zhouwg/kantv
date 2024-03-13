@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="当前："
+            android:text="Current："
             android:textColor="@color/text_gray"
             android:textSize="12sp" />
 
@@ -81,7 +81,7 @@
                 android:padding="10dp"
                 android:textColor="@color/text_black"
                 android:textSize="14sp"
-                android:text="默认根目录"/>
+                android:text="default directory"/>
 
             <TextView
                 android:id="@+id/extra_tv"
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
-                android:text="取消"
+                android:text="Cancel"
                 android:textColor="@color/immutable_text_pink"
                 android:textSize="14sp" />
 
@@ -116,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:padding="10dp"
-                android:text="确定"
+                android:text="OK"
                 android:textColor="@color/immutable_text_theme"
                 android:textSize="14sp" />
 

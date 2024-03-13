@@ -22,44 +22,35 @@ public class SubtitleParser{
     public TimedTextObject parser() {
         try {
             if (!StringUtils.isEmpty(subtitlePath)) {
-                //解析字幕文件
                 File subtitleFile = new File(subtitlePath);
                 if (subtitleFile.exists()) {
-                    //获取解析工具
                     TimedTextFileFormat format = SubtitleFormat.format(subtitlePath);
                     if (format != null) {
-                        //获取字幕对象
                         TimedTextObject subtitleObj = format.parseFile(subtitleFile);
                         if (subtitleObj != null && subtitleObj.captions.size() > 0) {
                             return subtitleObj;
                         }else {
-                            ToastUtils.showShort("解析字幕文件失败");
+                            ToastUtils.showShort("parse subtitle file failure");
                         }
                     } else {
-                        ToastUtils.showShort("字幕文件错误");
+                        ToastUtils.showShort("invalid subtitle file");
                     }
                 } else {
-                    ToastUtils.showShort("字幕文件不存在");
+                    ToastUtils.showShort("subtitle file not exist");
                 }
             } else {
-                ToastUtils.showShort("字幕文件地址错误：" + subtitlePath);
+                ToastUtils.showShort("invalid url of subtitle：" + subtitlePath);
             }
         } catch (FatalParsingException | IOException e) {
             e.printStackTrace();
-            ToastUtils.showShort("解析字幕文件失败");
+            ToastUtils.showShort("parse subtitle failure");
         } catch (UnsupportedCharsetException ex) {
             ex.printStackTrace();
-            ToastUtils.showShort("解析编码格式失败");
+            ToastUtils.showShort("parse subtitle failure");
         }
         return null;
     }
 
-//    使用兼容更多编码解析的库
-//    /**
-//     * 根据文件前两个字节获取编码格式
-//     *
-//     * 注：此处inputStream不能传入使用
-//     */
 //    private Charset getCharset(String filePath){
 //        String encoding = "UTF-8";
 //        InputStream inputStream = null;
@@ -83,10 +74,10 @@ public class SubtitleParser{
 //                    encoding = "ASCII";
 //                    break;
 //            }
-//            LogUtils.e("字幕文件编码格式为："+encoding);
+//            LogUtils.e("encode of subtitle file："+encoding);
 //        }catch (Exception e){
 //            e.printStackTrace();
-//            LogUtils.e("读取字幕编码格式失败："+e);
+//            LogUtils.e("parse subtitle failure："+e);
 //        }finally {
 //            try {
 //                if (bis != null)

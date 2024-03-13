@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <resources>
     <string name="pref_title_general">General</string>
 
@@ -24,7 +22,6 @@
     <string name="pref_title_enable_wiseplay">Enable WisePlay</string>
     <string name="pref_summary_enable_wiseplay"></string>
 
-
     <string name="pref_key_playerengine">pref.playerEngine</string>
     <string name="pref_title_player">Choose PlayEngine</string>
     <string-array name="pref_entries_player">
@@ -39,7 +36,6 @@
         <item>Using FFmpeg</item>
         <item>Using Google ExoPlayer</item>
     </string-array>
-
 
     <string name="pref_key_playerTroubleshooting">pref.playerEngineTroubleshooting</string>
     <string name="pref_title_playerTroubleshooting">Troubleshooting Mode</string>
@@ -71,7 +67,6 @@
         <item>English</item>
         <item>Chinese</item>
     </string-array>
-
 
     <string name="pref_key_voiceapi">pref.voiceapi</string>
     <string name="pref_title_voiceapi">Choose voice api</string>
@@ -193,13 +188,13 @@
     <string name="pref_title_epgupdate">Update EPG data</string>
     <string name="pref_summary_epgupdate"></string>
 
-    <string name="pref_key_cleanupcache">pref.cleanupcache</string>
-    <string name="pref_title_cleanupcache">Cleanup Cache</string>
-    <string name="pref_summary_cleanupcache">pleas restart app after cleanup cache</string>
-
     <string name="pref_key_closesplashpage">pref.close_splash_page</string>
     <string name="pref_title_closesplashpage">Close splash page</string>
     <string name="pref_summary_closespashpage"></string>
+
+    <string name="pref_key_cleanupcache">pref.cleanupcache</string>
+    <string name="pref_title_cleanupcache">Cleanup Cache</string>
+    <string name="pref_summary_cleanupcache">pleas restart app after cleanup cache</string>
 
     <string name="pref_key_rtmpserver">pref.rtmpserver</string>
     <string name="pref_title_rtmpserver">RTMP Server</string>
@@ -219,6 +214,7 @@
     <string name="pref_key_using_mediadatasource">pref.using_mediadatasource</string>
     <string name="pref_title_using_mediadatasource">Using MediaDataSource</string>
     <string name="pref_summary_using_mediadatasource"></string>
+
 
     <string name="pref_key_rtsp_tcp">pref.rtsp_tcp</string>
     <string name="pref_title_rtsp_tcp">Use TCP for rtsp</string>
@@ -247,12 +243,11 @@
 
     <string name="pref_key_dump_size">pref.dump_size</string>
     <string name="pref_title_dump_size">dump size</string>
-    <string name="pref_summary_dump_size" translatable="false">click to setting dump size(kbytes)</string>
+    <string name="pref_summary_dump_size">click to setting dump size(kbytes)</string>
 
-    <string name="pref_key_dump_counts" translatable="false">pref.dump_counts</string>
+    <string name="pref_key_dump_counts">pref.dump_counts</string>
     <string name="pref_title_dump_counts">dump counts</string>
     <string name="pref_summary_dump_counts">click to setting dump counts</string>
-
 
     <string name="pref_key_dump_mode">pref.dump_mode</string>
     <string name="pref_title_dump_mode">dump mode</string>
@@ -281,7 +276,6 @@
         <item>dump benchmark of decrypt to file</item>
     </string-array>
 
-
     <string name="pref_key_play_mode">pref.play_mode</string>
     <string name="pref_title_play_mode">play_mode</string>
     <string-array name="pref_entries_playmode">
@@ -299,6 +293,7 @@
         <item>loop play with content</item>
         <item>loop play with play list</item>
     </string-array>
+
 
 
     <string name="pref_title_about">About</string>
@@ -332,7 +327,6 @@
     <string name="pref_key_exitapp">pref.exitapp</string>
     <string name="pref_title_exitapp">Exit app </string>
     <string name="pref_summary_exitapp">click to exit app</string>
-
 
     <string name="pref_title_ASRmodel"></string>
     <string name="pref_key_downloadASRmodel">pref.downloadASRmodel</string>
@@ -394,16 +388,18 @@
     <string-array name="pref_entries_recordmode">
         <item>Video and Audio</item>
         <item>Video Only</item>
+        <item>Audio Only</item>
     </string-array>
     <string-array name="pref_entry_values_recordmode">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
     <string-array name="pref_entry_summaries_recordmode">
         <item>both video and audio data recorded</item>
         <item>only video data recorded</item>
+        <item>only audio data recorded</item>
     </string-array>
-
 
 
     <string name="pref_title_record">TV Record</string>
@@ -431,4 +427,3 @@
     <string name="pref_key_last_directory"></string>
 
 </resources>
-

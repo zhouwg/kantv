@@ -2,11 +2,11 @@
 <resources>
 
     <string name="app_name">KanTV</string>
-    <string name="about_download_subtitle">网络字幕</string>
+    <string name="about_download_subtitle">network subtitle</string>
     <string name="folder_icon_resouces">Folder Icon</string>
     <string name="menu_favorite_string">favorite</string>
-    <string name="video_record">上次播放到</string>
-    <string name="video_skip">继续播放</string>
+    <string name="video_record">last playpos</string>
+    <string name="video_skip">continue play</string>
     <item name="tag_key_data" type="id"/>
     <item name="tag_key_position" type="id"/>
     <string name="app_fullname">Project KanTV</string>

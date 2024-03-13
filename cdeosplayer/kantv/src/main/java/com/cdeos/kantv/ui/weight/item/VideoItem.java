@@ -42,23 +42,13 @@ public class VideoItem implements AdapterItem<VideoBean> {
     @BindView(R.id.item_layout)
     ConstraintLayout itemLayout;
 
-    /*
-    @BindView(R.id.bind_zimu_tv)
-    TextView bindZimuTv;
-     */
     @BindView(R.id.delete_video_tv)
     TextView deleteVideoTv;
 
-
-
-    @BindView(R.id.danmu_tips_tv)
-    TextView danmuTipsTv;
     @BindView(R.id.zimu_tips_tv)
     TextView zimuTipsTv;
     @BindView(R.id.swipe_menu_layout)
     EasySwipeMenuLayout swipeMenuLayout;
-    @BindView(R.id.remove_danmu_tv)
-    TextView removeDanmuTv;
     @BindView(R.id.remove_zimu_tv)
     TextView removeZimuTv;
 

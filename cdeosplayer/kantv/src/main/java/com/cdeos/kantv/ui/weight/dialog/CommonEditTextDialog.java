@@ -82,8 +82,8 @@ public class CommonEditTextDialog extends Dialog{
                 editText.setMaxLines(5);
                 break;
             case SEARCH_SUBTITLE:
-                titleTv.setText("搜索字幕");
-                editText.setHint("请输入视频名称");
+                titleTv.setText("search subtitle");
+                editText.setHint("pls input video name");
                 editText.setMaxLines(1);
                 break;
         }
@@ -122,7 +122,7 @@ public class CommonEditTextDialog extends Dialog{
             case SEARCH_SUBTITLE:
                 if (StringUtils.isEmpty(inputData)) {
                     inputLayout.setErrorEnabled(true);
-                    inputLayout.setError("视频名称不能为空");
+                    inputLayout.setError("video name can not empty");
                 } else if (listener != null) {
                     listener.onConfirm(inputData);
                     CommonEditTextDialog.this.dismiss();

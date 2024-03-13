@@ -448,11 +448,11 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
                         long playPos = 0;
 
                         if (!CDEUtils.isNetworkAvailable(mActivity)) {
-                            Toast.makeText(getContext(), "网络未连接", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "pls check network connection", Toast.LENGTH_LONG).show();
                             return;
                         }
                         if (CDEUtils.getNetworkType() == CDEUtils.NETWORK_MOBILE) {
-                            Toast.makeText(getContext(), "您正在使用手机流量播放在线视频", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "you are using 4G/5G network to watch online media", Toast.LENGTH_LONG).show();
                             //return;
                         }
 

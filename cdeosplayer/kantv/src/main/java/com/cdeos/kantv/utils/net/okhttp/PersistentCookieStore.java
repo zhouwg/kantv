@@ -81,7 +81,6 @@ public class PersistentCookieStore {
         LogUtils.i("cookies_save",url.host()+"_"+ TextUtils.join(",", cookieHashMap.keySet()));
         LogUtils.i("cookies_save",name+"_"+encodeCookie(new SerializableOkHttpCookies(cookie)));
 
-        //讲cookies持久化到本地
         SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
         prefsWriter.putString(url.host(), TextUtils.join(",", cookieHashMap.keySet()));
         prefsWriter.putString(name, encodeCookie(new SerializableOkHttpCookies(cookie)));
@@ -97,7 +96,6 @@ public class PersistentCookieStore {
                 cookies.put(host, new HashMap<String, Cookie>());
             }
             cookies.get(host).put(token, cookie);
-            //讲cookies持久化到本地
             SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
             prefsWriter.putString(host, token);
             prefsWriter.putString(token, encodeCookie(new SerializableOkHttpCookies(cookie)));

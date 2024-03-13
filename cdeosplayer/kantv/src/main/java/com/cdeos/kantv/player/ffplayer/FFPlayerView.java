@@ -18,6 +18,9 @@
 
 package com.cdeos.kantv.player.ffplayer;
 
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -97,6 +100,8 @@ import com.cdeos.kantv.player.subtitle.SubtitleParser;
 import com.cdeos.kantv.player.subtitle.SubtitleView;
 import com.cdeos.kantv.player.subtitle.util.TimedTextObject;
 import com.cdeos.kantv.utils.Settings;
+
+import org.ggml.whispercpp.whispercpp;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -597,6 +602,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 }
 
                 stopRecord();
+                stopASR();
 
                 stop();
                 mAttachActivity.finish();
@@ -1000,11 +1006,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         }
 
                         mVideoView.setEnableASR(bEnableASR);
-                        if (!bEnableASR) {
-                            if (subtitleManager != null) {
-                                subtitleManager.setInnerSub("");
-                            }
-                        }
                     }
                 })
                 .setOrientationAllow(allowOrientationChange);
@@ -1094,6 +1095,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         }
 
         stopRecord();
+        stopASR();
 
         CDELog.j(TAG, "isBackgroundEnabled:" + mVideoView.isBackgroundPlayEnabled());
         if (!mVideoView.isBackgroundPlayEnabled()) {
@@ -1253,6 +1255,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         bottomBarView.setPlayIvStatus(false);
         if (mVideoView.isPlaying()) {
             stopRecord();
+            stopASR();
             mVideoView.pause();
         }
     }
@@ -1506,7 +1509,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         CDELog.j(TAG, "recording start");
         if ((CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) || (mSettings.getUsingMediaCodec())
         ) {
-            Toast.makeText(getContext(), "当前播放器设置不支持录制", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "pls check playback setting", Toast.LENGTH_SHORT).show();
             topBarView.updateTVRecordingVisibility(false);
         } else {
             CDEUtils.setTVRecording(true);
@@ -1519,22 +1522,40 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             int recordMode = mSettings.getRecordMode();
             int recordFormat = mSettings.getRecordFormat();
             int recordCodec = mSettings.getRecordCodec();
-            String tipInfo = "Recording was launched."
-                    + "video resolution:" + videoWidth + "x" + videoHeight + "\n"
-                    + "video recording configuration:\n"
-                    + "record mode:" + CDEUtils.getRecordModeString(recordMode)
-                    + ",record format:" + CDEUtils.getRecordFormatString(recordFormat)
-                    + ",video codec:" + CDEUtils.getRecordCodecString(recordCodec)
-                    + ",max record file size: " + mSettings.getRecordSizeString() + " M bytes"
-                    + ", max record duration: " + mSettings.getRecordDurationString() + " minutes";
-
+            String tipInfo = "TV Recording will be launched.\n";
+            if (0 == recordMode) {
+                tipInfo = tipInfo + "video resolution:" + videoWidth + "x" + videoHeight + "\n"
+                        + "video recording configuration:\n"
+                        + "record mode:" + CDEUtils.getRecordModeString(recordMode)
+                        + ",file format:" + CDEUtils.getRecordFormatString(recordFormat)
+                        + ",video codec:" + CDEUtils.getVideoCodecString(recordCodec)
+                        + ",audio codec:" + "aac"
+                        + ",max record file size: " + mSettings.getRecordSizeString() + " M bytes"
+                        + ",max record duration: " + mSettings.getRecordDurationString() + " minutes";
+            } else if (1 == recordMode) {
+                tipInfo = tipInfo + "video resolution:" + videoWidth + "x" + videoHeight + "\n"
+                        + "video recording configuration:\n"
+                        + "record mode:" + CDEUtils.getRecordModeString(recordMode)
+                        + ",file format:" + CDEUtils.getRecordFormatString(recordFormat)
+                        + ",video codec:" + CDEUtils.getVideoCodecString(recordCodec)
+                        + ",max record file size: " + mSettings.getRecordSizeString() + " M bytes"
+                        + ",max record duration: " + mSettings.getRecordDurationString() + " minutes";
+            } else { // audio only
+                tipInfo = tipInfo + "video resolution:" + videoWidth + "x" + videoHeight + "\n"
+                        + "video recording configuration:\n"
+                        + "record mode:" + CDEUtils.getRecordModeString(recordMode)
+                        + ",file format:" + CDEUtils.getRecordFormatString(recordFormat)
+                        + ",audio codec:" + "aac"
+                        + ",max record file size: " + mSettings.getRecordSizeString() + " M bytes"
+                        + ",max record duration: " + mSettings.getRecordDurationString() + " minutes";
+            }
             CDELog.j(TAG, "record mode:" + recordMode);
-            if (videoWidth > 1920 || videoHeight > 1080) {
-                if (recordMode == 0) {
-                    tipInfo += "\n\n issues might be occurred because video resolution is above 1920 x 1080";
+            if (videoWidth > 1920 || videoHeight > 1080 || recordCodec != 0) {
+                if ((0 == recordMode) || (1 == recordMode)) {
+                    tipInfo += "\n\n A/V sync issue or other issue might be occurred during recording because video resolution is above 1920x1080 or video codec is not H264 or powerful phone is required";
                 }
             }
-            //Toast.makeText(getContext(), tipInfo, Toast.LENGTH_LONG).show();
+
             showWarningDialog(mAttachActivity, tipInfo);
             CDEUtils.umStartRecord(CDEUtils.getRecordingFileName());
         }
@@ -1562,7 +1583,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        //intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
         Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
         intent.setData(uri);
         if (getContext() != null)
@@ -1578,6 +1598,79 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         }
     }
 
+    private void stopASR() {
+        if (mVideoView.getEnableASR()) {
+            CDELog.j(TAG, "stop ASR");
+            KANTVDRM.getInstance().ANDROID_JNI_StopASR();
+            onASRStop();
+            mVideoView.setEnableASR(false);
+        }
+    }
+
+    //this is thread safety operation
+    private void onASRStart() {
+        CDELog.j(TAG, "ASR start");
+        if (CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) {
+            Toast.makeText(getContext(), "ASR only supported with FFmpeg engine currently", Toast.LENGTH_SHORT).show();
+            topBarView.updateTVASRVisibility(false);
+            CDEUtils.setTVASR(false);
+            return;
+        }
+
+        CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        //TODO: hardcode path, should be configured in "ASR Settings"
+        String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+        if (1 == mSettings.getASRMode()) {
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_PRESURETEST);
+        } else {
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_NORMAL);
+        }
+
+        CDEUtils.setTVASR(true);
+        topBarView.updateTVASRVisibility(true);
+
+        String tipInfo = "TV transcription will be launched.\n";
+        tipInfo += "transcription file would be saved to:" + CDEUtils.getASRSavedFileName();
+        showWarningDialog(mAttachActivity, tipInfo);
+    }
+
+
+    //this is thread safety operation
+    private void onASRStop() {
+        CDELog.j(TAG, "ASR stop");
+        if (!CDEUtils.getTVASR()) {
+            CDELog.j(TAG, "TV transcription not started, why called?");
+            return;
+        }
+
+        if (subtitleManager != null) {
+            subtitleManager.setInnerSub("");
+        }
+
+        whispercpp.asr_finalize();
+        CDEUtils.setTVASR(false);
+        topBarView.updateTVASRVisibility(false);
+
+        CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        File file = new File(CDEUtils.getASRSavedFileName());
+        if (file.exists()) {
+            CDELog.j(TAG, "asr saved file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
+            Toast.makeText(getContext(), "TV transcription stopped，size of saved transcription file: "
+                    + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
+        } else {
+            CDELog.j(TAG, "it shouldn't happen");
+            Toast.makeText(getContext(), "TV transcription stopped", Toast.LENGTH_SHORT).show();
+        }
+
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
+        intent.setData(uri);
+        if (getContext() != null)
+            getContext().sendBroadcast(intent);
+
+    }
+
 
     private void _switchStatus(int status) {
         CDELog.j(TAG, "status:" + status);
@@ -1585,6 +1678,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             case 5:
                 CDELog.j(TAG, "receive playback completed");
                 stopRecord();
+                stopASR();
                 break;
             case 1983:
                 CDELog.j(TAG, "recording start");
@@ -1608,6 +1702,12 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 break;
             case IMediaPlayer.MEDIA_INFO_RECORDING_STOP:
                 onRecordStop();
+                break;
+            case IMediaPlayer.MEDIA_INFO_ASR_START:
+                onASRStart();
+                break;
+            case IMediaPlayer.MEDIA_INFO_ASR_STOP:
+                onASRStop();
                 break;
             case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                 mOutsideListener.onAction(Constants.INTENT_PLAY_COMPLETE, 0);
@@ -1689,7 +1789,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                     }
                 }).start();
     }
-
 
 
     private void hideView(int hideType) {

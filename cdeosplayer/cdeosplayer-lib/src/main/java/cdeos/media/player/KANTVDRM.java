@@ -98,6 +98,7 @@ final public class KANTVDRM {
     public native String ANDROID_JNI_Benchmark(int type, int srcW, int srcH, int dstW, int dstH);
 
     public native void ANDROID_JNI_StopRecord();
+    public native void ANDROID_JNI_StopASR();
 
     public native int ANDROID_JNI_GetVideoWidth();
 

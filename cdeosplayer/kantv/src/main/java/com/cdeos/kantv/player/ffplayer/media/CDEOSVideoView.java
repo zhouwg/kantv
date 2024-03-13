@@ -683,21 +683,6 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     public void setEnableASR(boolean bEnableASR) {
         if (mMediaPlayer != null) {
             mMediaPlayer.setEnableASR(bEnableASR);
-            //TODO: not a good idea because it is a blocked operation. don't care it during PoC stage
-            if (bEnableASR) {
-                CDEUtils.setTVASR(true);
-                //TODO: hardcode path, should be configured in "ASR Settings"
-                String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
-                CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
-                if (1 == mSettings.getASRMode()) {
-                    whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_PRESURETEST);
-                } else {
-                    whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_NORMAL);
-                }
-            } else {
-                CDEUtils.setTVASR(false);
-                whispercpp.asr_finalize();
-            }
         } else {
             CDELog.j(TAG, "player not initialized");
         }
@@ -2269,7 +2254,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             builder.appendRow2(R.string.vdec, tmpString);
         }
         if (mMediaPlayer instanceof AndroidMediaPlayer) {
-            tmpString = "MediaCodec  " + mActivity.getBaseContext().getString(R.string.playengine) + ": " + "系统自带AndroidMediaPlayer";
+            tmpString = "MediaCodec  " + mActivity.getBaseContext().getString(R.string.playengine) + ": " + " AndroidMediaPlayer";
             tmpString = CDEUtils.convertLongString(tmpString, 30);
             builder.appendRow2(R.string.vdec, tmpString);
         }
@@ -2278,7 +2263,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             tmpString = CDEUtils.convertLongString(drmInfo, 30);
             builder.appendRow2(R.string.clear_content, tmpString);
         } else {
-            builder.appendRow2(R.string.clear_content, "清流");
+            builder.appendRow2(R.string.clear_content, "Clear Content");
         }
         builder.appendRow2(R.string.disable_audiotrack, (CDEUtils.getDisableAudioTrack() ? "YES" : "NO"));
         StringBuilder boardInfo = new StringBuilder();

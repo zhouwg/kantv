@@ -663,9 +663,9 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
 
 
     public long getPlayTime() {
-        DateFormat dateFormatterChina = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);//格式化输出
-        TimeZone timeZoneChina = TimeZone.getTimeZone("Asia/Shanghai");//获取时区
-        dateFormatterChina.setTimeZone(timeZoneChina);//设置系统时区
+        DateFormat dateFormatterChina = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+        TimeZone timeZoneChina = TimeZone.getTimeZone("Asia/Shanghai");
+        dateFormatterChina.setTimeZone(timeZoneChina);
 
         if (isPlaying()) {
             long curTime = System.currentTimeMillis();
@@ -1331,7 +1331,6 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     // No real default action so far.
                     return;
                 case MEDIA_TIMED_TEXT:
-                    CDELog.d(TAG, "subtitle coming");
                     if (msg.obj == null) {
                         player.notifyOnTimedText(null);
                     } else {
@@ -1349,11 +1348,15 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                             player.mVideoSarNum, player.mVideoSarDen);
                     break;
                 case MEDIA_INFO_RECORDING_START:
-                    CDELog.j(TAG, "args1:" + msg.arg1);
-                    CDELog.j(TAG, "args2:" + msg.arg2);
-                    CDELog.j(TAG, "recording file:" + (String) msg.obj);
                     CDEUtils.setRecordingFileName((String)msg.obj);
                     player.notifyOnInfo(MEDIA_INFO_RECORDING_START,0);
+                    break;
+                case MEDIA_INFO_ASR_START:
+                    CDEUtils.setASRSavedFileName((String)msg.obj);
+                    player.notifyOnInfo(MEDIA_INFO_ASR_START,0);
+                    break;
+                case MEDIA_INFO_ASR_STOP:
+                    player.notifyOnInfo(MEDIA_INFO_ASR_STOP,0);
                     break;
                 default:
                     CDELog.j(TAG, "Unknown message type " + msg.what);

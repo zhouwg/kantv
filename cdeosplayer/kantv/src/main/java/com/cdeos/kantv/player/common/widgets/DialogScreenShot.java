@@ -53,9 +53,9 @@ public class DialogScreenShot extends Dialog {
         shotSaveBt.setOnClickListener(v -> {
             String path = saveImage(bitmap);
             if (path == null) {
-                ToastUtils.showShort("保存截图失败");
+                ToastUtils.showShort("save screenshot failure");
             } else {
-                ToastUtils.showLong("保存成功：" + path);
+                ToastUtils.showLong("save screenshot succeed：" + path);
             }
             DialogScreenShot.this.dismiss();
         });

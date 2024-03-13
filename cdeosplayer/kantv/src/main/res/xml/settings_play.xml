@@ -51,30 +51,8 @@
             android:summary="@string/pref_summary_startplaypos"
             android:title="@string/pref_title_startplaypos"
             android:widgetLayout="@layout/my_checkbox" />
-
-
     </PreferenceCategory>
 
-
-    <PreferenceCategory
-        android:key="subtitle"
-        android:title="字幕设置">
-        <SwitchPreference
-            android:key="network_subtitle"
-            android:summary="打开视频时，自动匹配网络字幕"
-            android:title="开启网络字幕"
-            app:icon="@drawable/ic_player_setting_subtitle_load" />
-        <SwitchPreference
-            android:key="auto_load_network_subtitle"
-            android:summary="未绑定字幕时，加载视频匹配的网络字幕"
-            android:title="自动加载网络字幕"
-            app:icon="@drawable/ic_player_setting_subtitle_network" />
-        <SwitchPreference
-            android:key="auto_load_local_subtitle"
-            android:summary="未绑定字幕时，加载视频的本地同名字幕"
-            android:title="自动加载同名字幕"
-            app:icon="@drawable/ic_player_setting_subtitle_setting" />
-    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="drm"
@@ -112,7 +90,7 @@
 
         <SwitchPreference
             android:key="surface_renders"
-            android:summary="视频渲染性能更高，但不支持截图"
+            android:summary="better render peformance, but screeshot not support"
             android:title="SurfaceView"
             app:icon="@drawable/ic_player_setting_surface" />
 

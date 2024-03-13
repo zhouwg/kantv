@@ -348,13 +348,6 @@ public class IApplication extends Application {
         int recordFormat = mSettings.getRecordFormat();//default is mp4
         int recordCodec  = mSettings.getRecordCodec(); //default is h264
 
-        if (mSettings.getEnableRecordVideoES())
-            recordMode = 0;
-        if (mSettings.getEnableRecordAudioES())
-            recordMode = 1;
-        if (mSettings.getEnableRecordAudioES() && mSettings.getEnableRecordVideoES())
-            recordMode = 3;
-
         CDEUtils.setRecordConfig(CDEUtils.getDataPath(), recordMode, recordFormat, recordCodec, mSettings.getRecordDuration(), mSettings.getRecordSize());
         CDEUtils.setTVRecording(false);
 

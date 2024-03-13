@@ -100,7 +100,7 @@
                 android:id="@+id/chkEnableFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="编码视频帧保存为文件" />
+                android:text="save video frame to file" />
 
             <Button
                 android:id="@+id/btnEncodeBenchmark"

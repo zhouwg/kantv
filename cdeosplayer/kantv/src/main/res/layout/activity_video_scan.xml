@@ -48,7 +48,7 @@
             android:layout_centerVertical="true"
             android:layout_marginStart="12dp"
             android:padding="10dp"
-            android:text="扫描文件夹"
+            android:text="scan folder"
             android:textColor="@color/text_black"
             android:textSize="14sp" />
 
@@ -60,7 +60,7 @@
             android:layout_marginStart="7dp"
             android:layout_toEndOf="@+id/scan_folder_tv"
             android:padding="10dp"
-            android:text="扫描文件"
+            android:text="scan file"
             android:textColor="@color/text_black"
             android:textSize="14sp" />
 
@@ -73,7 +73,7 @@
             android:layout_toStartOf="@+id/add_tv"
             android:clickable="false"
             android:padding="10dp"
-            android:text="删除"
+            android:text="delete"
             android:textColor="@color/text_gray"
             android:textSize="14sp" />
 
@@ -86,7 +86,7 @@
             android:layout_marginEnd="12dp"
             android:clickable="false"
             android:padding="10dp"
-            android:text="添加"
+            android:text="add"
             android:textColor="@color/text_theme"
             android:textSize="14sp" />
 

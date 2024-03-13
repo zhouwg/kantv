@@ -1,4 +1,4 @@
-package com.cdeos.kantv.ui.activities.setting;
+package com.cdeos.kantv.ui.activities.personal;
 
 import android.content.Context;
 import android.view.View;

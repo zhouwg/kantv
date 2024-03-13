@@ -5039,13 +5039,16 @@ int whisper_full_with_state(
 
     const int seek_start = params.offset_ms/10;
     const int seek_end = params.duration_ms == 0 ? whisper_n_len_from_state(state) : seek_start + params.duration_ms/10;
+    LOGD("params.offset_ms %d\n", params.offset_ms);
+    LOGD("params.duration_ms %d\n", params.duration_ms);
+    LOGD("params.speed_up %d\n", params.speed_up);
 
     // if length of spectrogram is less than 1.0s (100 frames), then return
     // basically don't process anything that is less than 1.0s
     // see issue #39: https://github.com/ggerganov/whisper.cpp/issues/39
     if (seek_end < seek_start + (params.speed_up ? 50 : 100)) {
-        WHISPER_LOG_DEBUG("%s: input is too short - %d ms < 1000 ms\n", __func__, (seek_end - seek_start)*10);
-        return 0;
+        LOGW("%s: input is too short - %d ms < 1000 ms\n", __func__, (seek_end - seek_start)*10);
+        return -1;
     }
 
     // a set of temperatures to use
@@ -6710,7 +6713,6 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
 }
 
 
-
 //------------------------------------ added by zhou.weiguo -----------------------------------------
 //I should follow coding style of GGML
 
@@ -6745,13 +6747,16 @@ extern "C" {
 #include "libavutil/samplefmt.h"
 #include "libswresample/swresample.h"
 #if CONFIG_AVFILTER
-# include "libavfilter/avfilter.h"
-# include "libavfilter/buffersink.h"
-# include "libavfilter/buffersrc.h"
+#include "libavfilter/avfilter.h"
+#include "libavfilter/buffersink.h"
+#include "libavfilter/buffersrc.h"
 #endif
-
 }
+
+
+
 #define MAX_SAMPLE_SIZE  (256 * 1024)
+
 
 typedef struct {
     struct whisper_context * p_context;
@@ -6768,17 +6773,23 @@ typedef struct {
     pthread_mutex_t  mutex;
 } whisper_asr_context;
 
+
 static whisper_asr_context *p_asr_ctx   = NULL;
 
-static bool b_should_abort              = false;   //for exit benchmark
+//TODO: for abort time-consuming benchmark from UI layer. not works perfectly as expected
+static bool b_should_abort              = false;
 
 
 static const char * whisper_asr_callback(void * opaque);
-static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, int num_samples);
+static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, int num_samples);
 
+
+// =================================================================================================
 //
-// helper function
+// internal helper function
 //
+// =================================================================================================
+
 
 /**
  * @param file_name
@@ -6787,19 +6798,19 @@ static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, in
  *
  * @return  0  : ok , other return value means failed to read binary data from file
  */
-static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_t * p_datalen) {
+static int read_data_from_file(const char * sz_file_name, uint8_t ** pp_data, size_t * p_datalen) {
     int result          = 0;
     FILE* fp            = NULL;
     uint8_t * p_data    = NULL;
     uint32_t datalen    = 0;
 
-    if ((NULL == file_name) || (NULL == pp_data) || (NULL == p_datalen)) {
+    if ((NULL == sz_file_name) || (NULL == pp_data) || (NULL == p_datalen)) {
         result = -1;
     }
 
     if (0 == result) {
-        LOGGD("open file: %s", file_name);
-        fp = fopen(file_name, "rb");
+        LOGGD("open file: %s", sz_file_name);
+        fp = fopen(sz_file_name, "rb");
         if (NULL == fp) {
             result = -errno;
             LOGD("open file %s failed(reason:%s)", file_name, strerror(errno));
@@ -6811,7 +6822,7 @@ static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_
         datalen = (uint32_t) ftell(fp);
         LOGGD("file size %d\n", datalen);
         if (0 == datalen) {
-            LOGGW("pls check why size is zero of file %s\n", file_name);
+            LOGGW("pls check why size is zero of file %s\n", sz_file_name);
             result = -2;
         }
     }
@@ -6853,7 +6864,6 @@ static int read_data_from_file(const char * file_name, uint8_t ** pp_data, size_
 //2024-03-08, zhou.weiguo, integrate customized FFmpeg to whisper.cpp:
 //(1) it would be very important for PoC stage 3 in project KanTV(https://github.com/cdeos/kantv/issues/64)
 //(2) customized FFmpeg would/might be heavily used within customized whisper.cpp in the future
-
 
 
 //ffmpeg -i jfk.wav -ar 16000 -ac 1 -c:a pcm_s16le new.wav
@@ -7033,9 +7043,12 @@ static std::string whisper_get_time_string()
 }
 
 
+// =================================================================================================
 //
-// native function for whisper.cpp JNI / JNI helper function
+// native function for whisper.cpp JNI or JNI helper function
 //
+// =================================================================================================
+
 
 /**
  * @param model_path       /sdcard/kantv/ggml-xxxxx.bin
@@ -7044,8 +7057,8 @@ static std::string whisper_get_time_string()
  *
  * @return asr result which generated by whispercpp's inference
  */
-const char *whisper_transcribe_from_file(const char *model_path, const char *audio_path, int num_threads) {
-    struct whisper_context *context                 = nullptr;
+const char * whisper_transcribe_from_file(const char * sz_model_path, const char * sz_audio_path, int num_threads) {
+    struct whisper_context * context                = nullptr;
     struct whisper_full_params whisper_params;
     uint8_t * audio_data                            = NULL;
     size_t   audio_size                             = 0;
@@ -7059,29 +7072,31 @@ const char *whisper_transcribe_from_file(const char *model_path, const char *aud
     int64_t  t0_segment                             = 0;
     int64_t  t1_segment                             = 0;
     const char * text                               = NULL;
+
     //TODO: static variable should not be used in real project
     static std::string asr_result;
 
-    if ((NULL == model_path) || (NULL == audio_path)) {
+    if ((NULL == sz_model_path) || (NULL == sz_audio_path)) {
         LOGGW("pls check params");
         return NULL;
     }
 
-    LOGGI("mode path:   %s\n", model_path);
-    LOGGI("audio file:  %s\n", audio_path);
+    LOGGI("mode path:   %s\n", sz_model_path);
+    LOGGI("audio file:  %s\n", sz_audio_path);
     LOGGI("num threads: %d\n", num_threads);
 
     asr_result = "";
-    context = whisper_init_from_file(model_path);
+
+    context = whisper_init_from_file(sz_model_path);
     if (nullptr == context) {
         LOGGW("whisper_init_from_file failure, pls check why\n");
         result = -1;
         goto failure;
     }
 
-    result = read_data_from_file(audio_path, &audio_data, &audio_size);
+    result = read_data_from_file(sz_audio_path, &audio_data, &audio_size);
     if (0 != result) {
-        LOGGW("read data from file %s failure,pls check why?\n", audio_path);
+        LOGGW("read data from file %s failure,pls check why?\n", sz_audio_path);
         result = -2;
         goto failure;
     }
@@ -7273,16 +7288,16 @@ static int whisper_bench_full(const whisper_params & params) {
 }
 
 
-void whispercpp_bench(const char *model_path, int bench_type, int n_threads) {
+void whispercpp_bench(const char * sz_model_path, int n_bench_type, int n_threads) {
     whisper_params params;
 
     params.n_threads    = n_threads;
-    params.what         = bench_type;
-    params.model        = model_path;
+    params.what         = n_bench_type;
+    params.model        = sz_model_path;
     params.use_gpu      = false;
 
-    LOGGD("model path:%s\n", model_path);
-    switch (bench_type) {
+    LOGGD("model path:%s\n", sz_model_path);
+    switch (n_bench_type) {
         case BECHMARK_FULL: // whisper encode
             whisper_bench_full(params);
             break;
@@ -7304,9 +7319,12 @@ int whisper_get_cpu_core_counts() {
 }
 
 
+// =================================================================================================
 //
 // ASR for real-time subtitle in UI layer
 //
+// =================================================================================================
+
 
 //TODO: add return value and refine code, don't care it during PoC stage
  /**
@@ -7315,23 +7333,25 @@ int whisper_get_cpu_core_counts() {
   * @param num_threads
   * @param n_devmode            0: normal asr  1: pressure test
   */
-void whisper_asr_init(const char *model_path, int num_threads, int n_devmode) {
+void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode) {
      LOGGV("enter whisper_asr_init\n");
 
-     if ((NULL == model_path) || (n_devmode > 1)) {
+     if ((NULL == sz_model_path) || (n_devmode > 1)) {
          LOGGW("invalid param\n");
          return;
      }
 
-     LOGGV("model path:%s\n", model_path);
+     LOGGV("model path:%s\n", sz_model_path);
      LOGGV("thread counts:%d\n", num_threads);
      LOGGV("dev mode:%d\n", n_devmode);
 
      kantv_asr_callback pfn_asr_callback = whisper_asr_callback;
      kantv_asr_set_callback(pfn_asr_callback);
 
-     if (NULL != p_asr_ctx)
+     if (NULL != p_asr_ctx) {
+         LOGGW("whisper.cpp already initialized\n");
          return;
+     }
 
      if (NULL == p_asr_ctx) {
          p_asr_ctx = (whisper_asr_context *) malloc(sizeof(whisper_asr_context));
@@ -7347,7 +7367,7 @@ void whisper_asr_init(const char *model_path, int num_threads, int n_devmode) {
      p_asr_ctx->n_dev_mode = n_devmode;
 
      LOGGD("calling whisper_init_from_file");
-     p_asr_ctx->p_context = whisper_init_from_file(model_path);
+     p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
      if (nullptr == p_asr_ctx->p_context) {
          LOGGW("whisper_init_from_file failure, pls check why\n");
          free(p_asr_ctx);
@@ -7357,7 +7377,7 @@ void whisper_asr_init(const char *model_path, int num_threads, int n_devmode) {
      p_asr_ctx->p_context->no_timing = true;
      LOGGD("after calling whisper_init_from_file");
 
-     p_asr_ctx->p_params = (struct whisper_full_params *) malloc(sizeof(struct whisper_full_params));
+     p_asr_ctx->p_params = (struct whisper_full_params *)malloc(sizeof(struct whisper_full_params));
      CHECK(NULL != p_asr_ctx->p_params);
 
      struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
@@ -7383,8 +7403,10 @@ void whisper_asr_init(const char *model_path, int num_threads, int n_devmode) {
 void whisper_asr_finalize() {
     LOGGV("enter whisper_asr_finalize\n");
 
-    if (NULL == p_asr_ctx)
+    if (NULL == p_asr_ctx) {
+        LOGGW("whisper.cpp not initialized\n");
         return;
+    }
 
     free(p_asr_ctx->p_sample_buffer);
     free(p_asr_ctx->p_params);
@@ -7408,14 +7430,14 @@ void whisper_asr_finalize() {
  * @return asr result which generated by whispercpp's inference
  */
 static const char * whisper_asr_callback(void * opaque) {
-    size_t data_size = 0;
-    size_t resampled_data_size = 0;
-    const char *asr_result = NULL;
-    AVFrame *audioframe = NULL;
+    size_t data_size                = 0;
+    size_t resampled_data_size      = 0;
+    const char * asr_result         = NULL;
+    AVFrame * audioframe            = NULL;
 
-    size_t sample_size = 0;
-    uint8_t *p_sample = NULL;
-    int num_sample = 0;
+    size_t sample_size              = 0;
+    uint8_t * p_sample              = NULL;
+    int num_sample                  = 0;
 
     if (NULL == opaque)
         return NULL;
@@ -7424,7 +7446,7 @@ static const char * whisper_asr_callback(void * opaque) {
         return NULL;
 
     if (1 == p_asr_ctx->n_dev_mode) { //pressure test
-        std::string test_info;
+        static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
                     " First line:this is pressure test of whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n "
@@ -7436,9 +7458,9 @@ static const char * whisper_asr_callback(void * opaque) {
 
     pthread_mutex_lock(&p_asr_ctx->mutex);
 
-    audioframe = (AVFrame *) opaque;
-    p_sample = p_asr_ctx->p_sample_buffer;
-    num_sample = audioframe->nb_samples;
+    audioframe  = (AVFrame *) opaque;
+    p_sample    = p_asr_ctx->p_sample_buffer;
+    num_sample  = audioframe->nb_samples;
 
     data_size = av_samples_get_buffer_size(NULL, audioframe->channels, audioframe->nb_samples,
                                            static_cast<AVSampleFormat>(audioframe->format), 1);
@@ -7490,7 +7512,7 @@ static const char * whisper_asr_callback(void * opaque) {
  * @param num_samples
  * @return
  */
-static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, int num_samples) {
+static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, int num_samples) {
     if ((NULL == pf32_audio_buffer) || (num_samples < 1)) {
         LOGGW("pls check params\n");
         return NULL;
@@ -7505,25 +7527,26 @@ static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, in
     int64_t t1_segment                  = 0;
     int num_segments                    = 0;
 
-    std::string asr_result;
+    static std::string asr_result;
     asr_result = whisper_get_time_string() + "\n" +  "whisper.cpp inference is under development";
 
     begin_time = ggml_time_ms();
     whisper_reset_timings(p_asr_ctx->p_context);
     result = whisper_full(p_asr_ctx->p_context, *p_asr_ctx->p_params, pf32_audio_buffer, num_samples);
     if (0 != result) {
-        LOGGW("inference failure, pls check why?\n");
+        LOGW("inference failure, pls check why?\n");
         result = -1;
         goto failure;
     }
     end_time = ggml_time_ms();
     //LOGGI("inference cost %d ms\n", end_time - begin_time);
     whisper_print_timings(p_asr_ctx->p_context);
+
     num_segments = whisper_full_n_segments(p_asr_ctx->p_context);
     for (index = 0; index < num_segments; index++) {
         text = whisper_full_get_segment_text(p_asr_ctx->p_context, index);
         if (NULL == text) {
-            LOGGW("whisper_full_get_segment_text failure, pls check why\n");
+            LOGW("whisper_full_get_segment_text failure, pls check why\n");
             result = -2;
             goto failure;
         }
@@ -7538,10 +7561,12 @@ static const char * whisper_asr_audio_to_text(const float *pf32_audio_buffer, in
 
 failure:
     if (0 != result) {
-        return NULL;
+        asr_result = whisper_get_time_string() + "\n" +  "inference failure, pls check why?\n";
+        text = asr_result.c_str();
     }
 
     return text;
 }
+
 
 //------------------------------------ end added by zhou.weiguo -------------------------------------

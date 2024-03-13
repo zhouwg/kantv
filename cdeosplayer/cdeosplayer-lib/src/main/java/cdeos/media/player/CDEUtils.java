@@ -230,12 +230,13 @@ public class CDEUtils {
     private static int mDumpSize        = 1024; //default dump size is 1024 Kbytes
     private static int mDumpCounts      = 100; //default dump counts is 100 packets
 
-    private static int mRecordDuration              = 1; //default record duration is 1 minitues
+    private static int mRecordDuration              = 1;  //default record duration is 1 minitues
     private static int mRecordSize                  = 20; //default record size is 20 Mbytes
-    private static int mRecordMode                  = 0; //0:video, 1:audio, 2:video&audio
+    private static int mRecordMode                  = 0;  //0:video&audio, 1:video only, 2:audio only
     private static boolean mIsTVRecording           = false;
     private static boolean mIsTVASR                 = false;
     private static String  mRecordingFileName       = "";
+    private static String  mASRSavedFileName        = "";
     private static boolean mEnableRecordVideoES     = true;
     private static boolean mEnableRecordAudioES     = false;
     private static int mDiskThresholdFreeSize       = 500; // per Mbytes;
@@ -821,7 +822,7 @@ public class CDEUtils {
                     File.separator + "Android" + File.separator + "data" + File.separator + "com.cdeos.kantv" + File.separator + "files" + File.separator + "kantv";
         }
         DEVICE_ID_FILE_PATH = dataDirectoryPath + File.separator + DEVICE_ID_FILE_NAME;
-        CDELog.j(TAG, "DEVICE_ID_FILE_PATH: " + DEVICE_ID_FILE_PATH);
+        CDELog.d(TAG, "DEVICE_ID_FILE_PATH: " + DEVICE_ID_FILE_PATH);
         CDELog.j(TAG, "dataDirectoryPath: " + dataDirectoryPath);
 
         String dataFileName;
@@ -847,7 +848,7 @@ public class CDEUtils {
             timestampFile = new File(dataDirectoryPath, dataFileName);
             configFile = new File(dataDirectoryPath, "config.json");
             deviceIDFile = new File(DEVICE_ID_FILE_PATH);
-            CDELog.j(TAG, "timestamp file name:" + timestampFile.getName() + ",timestamp file path:" + timestampFile.getPath());
+            CDELog.d(TAG, "timestamp file name:" + timestampFile.getName() + ",timestamp file path:" + timestampFile.getPath());
             CDELog.j(TAG, "cfg file name:" + configFile.getName() + ",file path:" + configFile.getPath());
 
             if (!deviceIDFile.exists()) {
@@ -3724,6 +3725,8 @@ public class CDEUtils {
                 return " audio & video ";
             case 1:
                 return " video only";
+            case 2:
+                return " audio only";
             default:
                 return "Unknown record mode";
         }
@@ -3742,7 +3745,7 @@ public class CDEUtils {
     }
 
 
-    public static String getRecordCodecString(int recordCodec) {
+    public static String getVideoCodecString(int recordCodec) {
         switch (recordCodec) {
             case 0:
                 return "H264";
@@ -3765,6 +3768,14 @@ public class CDEUtils {
     }
     public static String getRecordingFileName() {
         return mRecordingFileName;
+    }
+
+    public static void setASRSavedFileName(String name) {
+        mASRSavedFileName = name;
+    }
+
+    public static String getASRSavedFileName() {
+        return mASRSavedFileName;
     }
 
     public static int getDiskThresholdFreeSize() {

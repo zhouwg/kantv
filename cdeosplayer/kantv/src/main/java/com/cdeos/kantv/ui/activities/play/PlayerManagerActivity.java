@@ -89,7 +89,7 @@ public class PlayerManagerActivity extends BaseMvcActivity {
                 }
             }
             if (TextUtils.isEmpty(videoPath)) {
-                ToastUtils.showShort("解析视频地址失败");
+                ToastUtils.showShort("parse url of video failure");
                 errorTv.setVisibility(View.VISIBLE);
             } else {
                 launchPlayerActivity();
@@ -122,7 +122,7 @@ public class PlayerManagerActivity extends BaseMvcActivity {
         }
 
         if (TextUtils.isEmpty(videoPath)) {
-            ToastUtils.showShort("解析视频地址失败: 空地址");
+            ToastUtils.showShort("parse url of video failur:empty url");
             errorTv.setVisibility(View.VISIBLE);
             return;
         }

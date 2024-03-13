@@ -72,23 +72,23 @@ public class LocalPlayHistoryItem implements AdapterItem<LocalPlayHistoryBean> {
 
         switch (model.getSourceOrigin()) {
             case PlayerManagerActivity.SOURCE_ORIGIN_LOCAL:
-                sourceOriginTv.setText("本地文件");
+                sourceOriginTv.setText("local file");
                 break;
             case PlayerManagerActivity.SOURCE_ORIGIN_OUTSIDE:
-                sourceOriginTv.setText("外部文件");
+                sourceOriginTv.setText("external file");
                 break;
             case PlayerManagerActivity.SOURCE_ORIGIN_REMOTE:
-                sourceOriginTv.setText("远程文件");
+                sourceOriginTv.setText("remote file");
                 break;
             case PlayerManagerActivity.SOURCE_ORIGIN_SMB:
-                sourceOriginTv.setText("局域网文件");
+                sourceOriginTv.setText("LAN file");
                 break;
             case PlayerManagerActivity.SOURCE_ORIGIN_STREAM:
             case PlayerManagerActivity.SOURCE_ONLINE_PREVIEW:
-                sourceOriginTv.setText("在线媒体");
+                sourceOriginTv.setText("online media");
                 break;
             default:
-                sourceOriginTv.setText("未知来源");
+                sourceOriginTv.setText("unknown source");
                 break;
         }
 

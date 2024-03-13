@@ -88,7 +88,7 @@ public class ImagePreviewActivity extends BaseMvcActivity {
                                    }
                                }))
                     .build()
-                    .show("确认下载图片？", "确定", "取消");
+                    .show("confirm download image file?", "OK", "Cancel");
 
             return true;
         });
@@ -140,10 +140,10 @@ public class ImagePreviewActivity extends BaseMvcActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.flush();
             fos.close();
-            ToastUtils.showLong("保存成功："+coverFile.getAbsolutePath());
+            ToastUtils.showLong("save succesful："+coverFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
-            ToastUtils.showShort("保存失败");
+            ToastUtils.showShort("save failure");
         }
     }
 

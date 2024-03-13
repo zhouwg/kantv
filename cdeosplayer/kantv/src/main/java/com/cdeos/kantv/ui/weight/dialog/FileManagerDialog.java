@@ -162,19 +162,15 @@ public class FileManagerDialog extends Dialog {
 
         switch (openType) {
             case SELECT_FOLDER:
-                titleTv.setText("选择文件夹");
+                titleTv.setText("select folder");
                 confirmTv.setVisibility(View.VISIBLE);
                 break;
-            case SELECT_DANMU:
-                titleTv.setText("选择本地弹幕文件");
-                confirmTv.setVisibility(View.GONE);
-                break;
             case SELECT_SUBTITLE:
-                titleTv.setText("选择本地字幕文件");
+                titleTv.setText("select local subtitle file");
                 confirmTv.setVisibility(View.GONE);
                 break;
             case SELECT_VIDEO:
-                titleTv.setText("选择视频文件");
+                titleTv.setText("select video file");
                 confirmTv.setVisibility(View.GONE);
                 break;
 

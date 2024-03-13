@@ -388,14 +388,17 @@
     <string-array name="pref_entries_recordmode">
         <item>Video and Audio</item>
         <item>Video Only</item>
+        <item>Audio Only</item>
     </string-array>
     <string-array name="pref_entry_values_recordmode">
         <item>0</item>
         <item>1</item>
+        <item>2</item>
     </string-array>
     <string-array name="pref_entry_summaries_recordmode">
         <item>both video and audio data recorded</item>
         <item>only video data recorded</item>
+        <item>only audio data recorded</item>
     </string-array>
 
 

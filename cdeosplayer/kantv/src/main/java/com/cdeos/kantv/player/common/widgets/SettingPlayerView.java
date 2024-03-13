@@ -171,10 +171,7 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
     }
 
     public void updateASRUIStatus(boolean isASR) {
-        CDELog.j(TAG, "isASR:" + isASR);
-        CDELog.j(TAG, "isASR:" + CDEUtils.getTVASR());
-
-        if (CDEUtils.getTVASR())
+        if (isASR)
             tvASRSw.setChecked(true);
         else
             tvASRSw.setChecked(false);

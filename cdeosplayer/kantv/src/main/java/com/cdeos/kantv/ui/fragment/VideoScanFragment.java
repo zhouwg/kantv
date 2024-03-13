@@ -14,7 +14,7 @@ import com.cdeos.kantv.bean.ScanFolderBean;
 import com.cdeos.kantv.mvp.impl.VideoScanFragmentPresenterImpl;
 import com.cdeos.kantv.mvp.presenter.VideoScanFragmentPresenter;
 import com.cdeos.kantv.mvp.view.VideoScanFragmentView;
-import com.cdeos.kantv.ui.activities.setting.ScanManagerActivity;
+import com.cdeos.kantv.ui.activities.personal.ScanManagerActivity;
 import com.cdeos.kantv.ui.weight.item.VideoScanItem;
 import com.cdeos.kantv.utils.interf.AdapterItem;
 

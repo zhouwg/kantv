@@ -35,7 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blankj.utilcode.util.ConvertUtils;
-import com.cdeos.kantv.ui.activities.setting.ScanManagerActivity;
+import com.cdeos.kantv.ui.activities.personal.ScanManagerActivity;
 import com.cdeos.kantv.ui.fragment.settings.SystemSettingFragment;
 import com.cdeos.kantv.ui.weight.SwitchThemeAnimView;
 import com.cdeos.kantv.utils.CommonUtils;

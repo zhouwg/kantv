@@ -184,7 +184,6 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                 }
             }
 
-
             if (key.contains("pref.record_thresholddisksize")) {
                 String recordSizeString = mSettings.getThresholddisksizeString();
                 CDELog.d(TAG, "threshold size: " + recordSizeString);

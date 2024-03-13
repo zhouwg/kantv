@@ -61,7 +61,7 @@ public class Constants {
     public static class DefaultConfig {
         private static final String TAG = DefaultConfig.class.getName();
 
-        public static final String SYSTEM_VIDEO_PATH = "系统视频";
+        public static final String SYSTEM_VIDEO_PATH = "System Video";
 
         public static String downloadPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/kantv";
 
