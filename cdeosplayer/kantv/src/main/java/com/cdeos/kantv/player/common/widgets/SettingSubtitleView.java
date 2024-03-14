@@ -306,11 +306,11 @@ public class SettingSubtitleView extends LinearLayout implements View.OnClickLis
     public void setSubtitleLoadStatus(boolean isLoad) {
         if (isLoad) {
             subtitleSwitch.setChecked(true);
-            subtitleLoadStatusTv.setText("（已加载）");
+            subtitleLoadStatusTv.setText("（loadded）");
             subtitleLoadStatusTv.setTextColor(CommonPlayerUtils.getResColor(getContext(), R.color.theme_color));
         } else {
             subtitleSwitch.setChecked(false);
-            subtitleLoadStatusTv.setText("（未加载）");
+            subtitleLoadStatusTv.setText("（unloadded）");
             subtitleLoadStatusTv.setTextColor(CommonPlayerUtils.getResColor(getContext(), R.color.text_red));
         }
     }

@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="10dp"
-            android:text="加载中..."
+            android:text="loading..."
             android:textColor="@color/immutable_text_white"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"

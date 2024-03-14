@@ -1797,7 +1797,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
     private void hideView(int hideType) {
-        //CDELog.j(TAG, "hide view");
         if (hideType == HIDE_VIEW_END_GESTURE) {
             if (mFlTouchLayout.getVisibility() == VISIBLE) {
                 mFlTouchLayout.setVisibility(GONE);

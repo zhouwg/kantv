@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2024-03-14, workaround to fix UI issue in low-end VIVO phone so tv record and tv transcription could be launched/tested at the same time -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginRight="40dp"
     android:background="@color/bg_video_view">
 
     <androidx.core.widget.NestedScrollView

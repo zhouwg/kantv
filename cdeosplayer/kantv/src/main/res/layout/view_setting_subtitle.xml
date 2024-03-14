@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2024-03-14, workaround to fix UI issue in low-end VIVO phone so tv record and tv transcription could be launched/tested at the same time -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginRight="40dp"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/bg_video_view">
 
@@ -30,7 +32,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="网络字幕"
+                    android:text="network subtitle"
                     android:textColor="@color/text_white"
                     android:textSize="16sp" />
 
@@ -44,7 +46,7 @@
                     android:paddingTop="3dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="3dp"
-                    android:text="选择"
+                    android:text="select"
                     android:textColor="@color/text_white"
                     android:textSize="14sp" />
 
@@ -61,7 +63,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="外挂字幕"
+                    android:text="external subtitle"
                     android:textColor="@color/text_white"
                     android:textSize="16sp" />
 
@@ -75,7 +77,7 @@
                     android:paddingTop="3dp"
                     android:paddingEnd="10dp"
                     android:paddingBottom="3dp"
-                    android:text="换源"
+                    android:text="change source"
                     android:textColor="@color/text_white"
                     android:textSize="14sp" />
 
@@ -94,7 +96,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="字幕状态"
+                    android:text="subtitle status"
                     android:textColor="@color/text_white"
                     android:textSize="14sp" />
 
@@ -105,7 +107,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="10dp"
                     android:layout_toEndOf="@id/subtitle_status_tips"
-                    android:text="(未加载)"
+                    android:text="(unload)"
                     android:textColor="@color/text_red"
                     android:textSize="12sp" />
 
@@ -136,7 +138,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="文字大小"
+                        android:text="font size"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -172,7 +174,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"
-                    android:text="时间调节"
+                    android:text="time adjustment"
                     android:textColor="@color/text_white"
                     android:textSize="14sp" />
 
@@ -243,7 +245,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="内置字幕"
+                    android:text="internal subtitle"
                     android:textColor="@color/text_white"
                     android:textSize="16sp" />
 
@@ -258,7 +260,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="字体大小"
+                        android:text="font size"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -285,7 +287,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginTop="10dp"
-                    android:text="背景色_字体色"
+                    android:text="color of background / font"
                     android:textColor="@color/text_white"
                     android:textSize="14sp" />
 
@@ -305,7 +307,7 @@
                         android:gravity="center"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:text="黑_白"
+                        android:text="black / white"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -317,7 +319,7 @@
                         android:gravity="center"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:text="白_黑"
+                        android:text="white / black"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -329,7 +331,7 @@
                         android:gravity="center"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:text="无_黑"
+                        android:text="none / black"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -341,7 +343,7 @@
                         android:gravity="center"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:text="无_白"
+                        android:text="none / white"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
 
@@ -353,7 +355,7 @@
                         android:gravity="center"
                         android:paddingTop="5dp"
                         android:paddingBottom="5dp"
-                        android:text="隐藏"
+                        android:text="hidden"
                         android:textColor="@color/text_white"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -370,7 +372,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="字幕流"
+                    android:text="subtitle track"
                     android:textColor="@color/text_white"
                     android:textSize="16sp" />
 

@@ -46,7 +46,7 @@ public class SkipTipView extends LinearLayout implements View.OnClickListener {
         findViewById(R.id.iv_cancel_skip).setOnClickListener(this);
 
         if (skipSubtitle) {
-            skipConfirmTv.setText("前往加载");
+            skipConfirmTv.setText("prepare load");
             skipConfirmTv.setTextColor(CommonPlayerUtils.getResColor(getContext(), R.color.theme_color));
         }
     }
@@ -54,7 +54,7 @@ public class SkipTipView extends LinearLayout implements View.OnClickListener {
     @SuppressLint("SetTextI18n")
     public void setSkipContent(int subtitleSize) {
         if (skipSubtitle) {
-            skipContentTv.setText("匹配到" + subtitleSize + "条在线字幕");
+            skipContentTv.setText("found " + subtitleSize + " online subtitle");
         }
     }
 
