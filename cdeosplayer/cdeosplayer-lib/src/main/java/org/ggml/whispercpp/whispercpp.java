@@ -8,6 +8,7 @@ public class whispercpp {
 
   public static final int WHISPER_ASR_MODE_NORMAL       = 0;
   public static final int WHISPER_ASR_MODE_PRESURETEST  = 1;
+  public static final int WHISPER_ASR_MODE_BECHMARK     = 2;
 
   public static native void asr_init(String strModelPath, int nThreadCounts, int nDevMode);
 

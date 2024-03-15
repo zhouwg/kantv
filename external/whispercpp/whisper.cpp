@@ -6768,6 +6768,7 @@ extern "C" {
 
 #define MAX_SAMPLE_SIZE  (1024 * 8 * 32)
 #define MAX_PATH_LEN     512
+#define MAX_WHISPER_IN_BUFFER_SIZE (1024 * 1024 * 8)
 
 class whisper_asr;
 
@@ -6778,7 +6779,7 @@ typedef struct {
     char  sz_model_path[MAX_PATH_LEN];
     size_t n_threads;
 
-    size_t n_dev_mode;                              // 0: normal transcription 1: ASR pressure test
+    size_t n_dev_mode;                              // 0: normal ASR transcription 1: ASR transcription pressure test 2: benchmark
     size_t n_benchmark_type;                        // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
     bool   b_use_gpu;
 
@@ -7193,13 +7194,6 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
 
     asr_result = "";
 
-    context = whisper_init_from_file(sz_model_path);
-    if (nullptr == context) {
-        LOGGW("whisper_init_from_file failure, pls check why\n");
-        result = -1;
-        goto failure;
-    }
-
     result = read_data_from_file(sz_audio_path, &audio_data, &audio_size);
     if (0 != result) {
         LOGGW("read data from file %s failure,pls check why?\n", sz_audio_path);
@@ -7215,59 +7209,98 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
     }
     LOGGD("float_sample_counts %d\n", float_sample_counts);
 
-    whisper_params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
-    whisper_params.print_realtime       = true;
-    whisper_params.print_progress       = true;
-    whisper_params.print_timestamps     = true;
-    whisper_params.print_special        = false;
-    whisper_params.translate            = false;
-    whisper_params.language             = "en";
-    whisper_params.n_threads            = num_threads;
-    whisper_params.offset_ms            = 0;
-    whisper_params.no_context           = true;
-    whisper_params.single_segment       = false;
-    whisper_reset_timings(context);
-
-    LOGGV("calling whisper_full\n");
-    begin_time = ggml_time_ms();
-    result = whisper_full(context, whisper_params, float_audio_data, float_sample_counts);
-    if (0 != result) {
-        LOGGW("inference failure, pls check why?\n");
-        result = -4;
-        goto failure;
-    }
-    LOGGI("whispercpp inference successfully\n");
-    whisper_print_timings(context);
-    num_segments = whisper_full_n_segments(context);
-    LOGGD("num_segments:%d\n", num_segments);
-    for (index = 0; index < num_segments; index++) {
-        text = whisper_full_get_segment_text(context, index);
-        if (NULL == text) {
-            LOGGW("whisper_full_get_segment_text failure, pls check why\n");
-            result = -5;
+    if (1) { //2024-03-15,16:28, validate whether whisper_asr_audio_to_text can works well as expected
+        /*
+         * the answer is YES and following statements were shown in logs:
+        03-15 16:27:53.064 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[0] = [_SOT_]
+        03-15 16:27:53.064 23180 23415 D KANTV   :
+        03-15 16:27:53.064 23180 23415 D KANTV   :
+        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[1] = [_LANG_en]
+        03-15 16:27:53.065 23180 23415 D KANTV   :
+        03-15 16:27:53.065 23180 23415 D KANTV   :
+        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[2] = [_TRANSCRIBE_]
+        03-15 16:27:53.065 23180 23415 D KANTV   :
+        03-15 16:27:53.065 23180 23415 D KANTV   :
+        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[3] = [_NOT_]
+         */
+        text = whisper_asr_audio_to_text(float_audio_data, float_sample_counts);
+        if (NULL != text) {
+            LOGGD("asr reulst:\n%s\n", text);
+            asr_result = text;
+#ifdef TARGET_ANDROID
+            kantv_asr_notify_benchmark(asr_result);
+#endif
+        } else {
+            LOGGD("whisper_asr_audio_to_text failed\n");
+            result = -1;
             goto failure;
         }
-        t0_segment = whisper_full_get_segment_t0(context, index);
-        t1_segment = whisper_full_get_segment_t1(context, index);
 
-        std::string cur_line = "";
-        LOGGV("text[%d]:[%s --> %s] %s\n",
-              index,
-              to_timestamp(t0_segment).c_str(),
-              to_timestamp(t1_segment).c_str(),
-              text);
-        cur_line += "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" + std::string(text);
-        asr_result += cur_line + "\n";
+    } else {
+        context = whisper_init_from_file(sz_model_path);
+        if (nullptr == context) {
+            LOGGW("whisper_init_from_file failure, pls check why\n");
+            result = -1;
+            goto failure;
+        }
+
+
+        whisper_params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+        whisper_params.print_realtime = true;
+        whisper_params.print_progress = true;
+        whisper_params.print_timestamps = true;
+        whisper_params.print_special = false;
+        whisper_params.translate = false;
+        whisper_params.language = "en";
+        whisper_params.n_threads = num_threads;
+        whisper_params.offset_ms = 0;
+        whisper_params.no_context = true;
+        whisper_params.single_segment = false;
+        whisper_reset_timings(context);
+
+        LOGGV("calling whisper_full\n");
+        begin_time = ggml_time_ms();
+        result = whisper_full(context, whisper_params, float_audio_data, float_sample_counts);
+        if (0 != result) {
+            LOGGW("inference failure, pls check why?\n");
+            result = -4;
+            goto failure;
+        }
+        LOGGI("whispercpp inference successfully\n");
+        whisper_print_timings(context);
+        num_segments = whisper_full_n_segments(context);
+        LOGGD("num_segments:%d\n", num_segments);
+        for (index = 0; index < num_segments; index++) {
+            text = whisper_full_get_segment_text(context, index);
+            if (NULL == text) {
+                LOGGW("whisper_full_get_segment_text failure, pls check why\n");
+                result = -5;
+                goto failure;
+            }
+            t0_segment = whisper_full_get_segment_t0(context, index);
+            t1_segment = whisper_full_get_segment_t1(context, index);
+
+            std::string cur_line = "";
+            LOGGV("text[%d]:[%s --> %s] %s\n",
+                  index,
+                  to_timestamp(t0_segment).c_str(),
+                  to_timestamp(t1_segment).c_str(),
+                  text);
+            cur_line +=
+                    "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
+                    std::string(text);
+            asr_result += cur_line + "\n";
 #ifdef TARGET_ANDROID
-        LOGGD("asr result:\n%s\n", cur_line.c_str());
-        kantv_asr_notify_benchmark(asr_result);
+            LOGGD("asr result:\n%s\n", cur_line.c_str());
+            kantv_asr_notify_benchmark(asr_result);
 #endif
+        }
+        end_time = ggml_time_ms();
+        LOGGI("inference cost %d ms\n", end_time - begin_time);
+        LOGGV("after calling whisper_full\n");
     }
-    end_time = ggml_time_ms();
-    LOGGI("inference cost %d ms\n", end_time - begin_time);
-    LOGGV("after calling whisper_full\n");
 
-    failure:
+failure:
     if (NULL != float_audio_data) {
         free(float_audio_data);
         float_audio_data = NULL;
@@ -7410,53 +7443,61 @@ public:
     }
 
     void threadPoll() {
-        buf_element_t *buf = NULL;
+        buf_element_t *buf      = NULL;
+        const char *asr_result  = NULL;
+        int64_t  n_begin_time   = 0LL;
+        int64_t  n_end_time     = 0LL;
+        int64_t  n_durtion      = 0LL;
+
+        _p_whisper_in           = _whisper_in;
+        _n_whisper_in_size      = 0;
+        _n_total_sample_counts  = 0;
+
+        n_begin_time  = ggml_time_us();
         while (1) {
             if (_b_exit_thread)
                 break;
 
+            n_durtion           = 0LL;
+
             buf = _asr_fifo->get(_asr_fifo);
             if (buf != NULL) {
                 memcpy(_whisper_in + _n_whisper_in_size, buf->mem, buf->size);
-                _p_whisper_in           += buf->size;
-                _n_whisper_in_size      += buf->size;
-                _n_total_sample_counts  += buf->samplecounts;
+                _p_whisper_in               += buf->size;
+                _n_whisper_in_size          += buf->size;
+                _n_total_sample_counts      += buf->samplecounts;
+                buf->free_buffer(buf);
+            }
 
 
                 //TODO:
                 // resample audio data
                 // VAD
-                // sanity check of audio data------should not be a partial audio data
+                // sanity check of audio data-------should not be a partial audio data
                 // reassemble audio data
                 // ...
                 //
-                // re-design data strucutre
+                n_end_time = ggml_time_us();
+                n_durtion  = (n_end_time - n_begin_time) / 1000;
 
-                // the following code works in realtime on Xiaomi 14(with enable special build optimization for Xiaomi 14)
-                // but not good on low-end VIVO phone
-                if (_n_whisper_in_size >= (8192 * 50)) {  //TODO: hardcode
+                if (n_durtion > 1001) {
+                    LOGGD("duration of data collection is %d milliseconds\n", n_durtion);
                     LOGGD("whisper_in_size %d\n", _n_whisper_in_size);
-                    LOGGD("toal_sample_counts %d\n", _n_total_sample_counts);
-                    auto a = std::chrono::steady_clock::now();
-                    kantv_inference_callback callback = kantv_inference_get_callback();
-                    if (NULL != callback) {
-                        const char *asr_result = NULL;
-                        asr_result = callback((const float *) _whisper_in, _n_total_sample_counts);
-                        if (NULL != asr_result) {
-                            LOGGD("asr_result\n%s\n", asr_result);
-                        }
-                    }
-                    auto b = std::chrono::steady_clock::now();
-                    std::chrono::milliseconds delta_in_millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(b - a);
-                    LOGGD("duration of inference is %d milliseconds\n", delta_in_millisecs.count());
+                    LOGGD("total_sample_counts %d\n", _n_total_sample_counts);
 
+
+                    //2024-03-15,17:31
+                    // TODO: dump _whisper_in to a wav file and verify whether input data is valid mono+f32 data?
+                    whisper_asr_audio_to_text(reinterpret_cast<const float *>(_whisper_in), _n_total_sample_counts);
+
+                    n_end_time              = ggml_time_us();
+                    n_begin_time            = n_end_time;
                     _p_whisper_in           = _whisper_in;
                     _n_whisper_in_size      = 0;
                     _n_total_sample_counts  = 0;
                 }
-                buf->free_buffer(buf);
-            }
-            std::this_thread::sleep_for(std::chrono::nanoseconds(10));
+
+                usleep(10);
         }
     }
 
@@ -7468,12 +7509,11 @@ public:
     }
 
 private:
-    std::mutex  _mutex;
     std::thread _thread_poll;
     bool        _b_exit_thread;
 
     int         _n_total_sample_counts;
-    uint8_t     _whisper_in[8 * 1024 * 1024];
+    uint8_t     _whisper_in[MAX_WHISPER_IN_BUFFER_SIZE];
     uint8_t     *_p_whisper_in;
     int         _n_whisper_in_size;
 
@@ -7509,7 +7549,7 @@ static const char * whisper_asr_callback(void * opaque) {
     if ((NULL == p_asr_ctx))
         return NULL;
 
-    if (1 == p_asr_ctx->n_dev_mode) { //pressure test
+    if (1 == p_asr_ctx->n_dev_mode) { //ASR pressure test
         static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
@@ -7518,6 +7558,10 @@ static const char * whisper_asr_callback(void * opaque) {
                     " third line:have fun with whisper.cpp\n"
                     "fourth line:we value your feedback and suggestion\n";
         return test_info.c_str();
+    }
+
+    if (2 == p_asr_ctx->n_dev_mode) { //benchmark
+        return NULL;
     }
 
     pthread_mutex_lock(&p_asr_ctx->mutex);
@@ -7618,6 +7662,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
 
     static std::string asr_result;
 
+
+    if (NULL == p_asr_ctx) {
+        LOGGW("pls check whether asr_ctx already initialized?\n");
+        return NULL;
+    }
+
     if ((NULL == pf32_audio_buffer) || (num_samples < 1)) {
         LOGGW("pls check params\n");
         return NULL;
@@ -7625,6 +7675,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
 
     if (1 == p_asr_ctx->n_dev_mode) { //pressure test, already handled in whisper_asr_callback
         return NULL;
+    }
+
+    if (2 == p_asr_ctx->n_dev_mode) {
+        //2024-03-15,16:24
+        //there is a special case:launch asr performance test in ASRResearchFragment.java
+        //and calling whisper_asr_audio_to_text() directly in whisper_transcribe_from_file
     }
 
     asr_result = whisper_get_time_string() + " Powered by whisper.cpp\n";
@@ -7684,12 +7740,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
   *
   * @param model_path
   * @param num_threads
-  * @param n_devmode            0: normal asr  1: pressure test
+  * @param n_devmode            0: normal asr  1: asr pressure test 2:benchmark
   */
 void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode) {
      LOGGV("enter whisper_asr_init\n");
 
-     if ((NULL == sz_model_path) || (n_devmode > 1)) {
+     if ((NULL == sz_model_path) || (n_devmode > 2)) {
          LOGGW("invalid param\n");
          return;
      }
@@ -7753,11 +7809,14 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      params.no_context              = true;
      params.single_segment          = true;
      params.no_timestamps           = params.single_segment;
+
      params.speed_up                = false;
-     params.debug_mode              = false;
-     params.tdrz_enable             = false;
-     params.suppress_blank          = true;
-     params.suppress_non_speech_tokens  = true;
+     params.debug_mode              = true;
+
+    //params.tdrz_enable                  = false;
+    //params.suppress_blank               = true;
+    //params.suppress_non_speech_tokens   = true;
+
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
      p_asr_ctx->p_asr->start();

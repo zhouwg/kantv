@@ -802,18 +802,18 @@ public class CDEUtils {
         String state = Environment.getExternalStorageState();
         CDELog.d(TAG, "state: " + state);
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            CDELog.j(TAG, "Android version > API22：Android 5.1 (Android L)Lollipop_MR1");
+            CDELog.d(TAG, "Android version > API22：Android 5.1 (Android L)Lollipop_MR1");
             if (!state.equals(Environment.MEDIA_MOUNTED)) {
-                CDELog.d(TAG, "can't read/write extern device");
+                CDELog.j(TAG, "can't read/write extern device");
                 return null;
             }
         } else {
-            CDELog.j(TAG, "Android version <= API22：Android 5.1 (Android L)Lollipop");
+            CDELog.d(TAG, "Android version <= API22：Android 5.1 (Android L)Lollipop");
         }
 
         File sdcardPath = Environment.getExternalStorageDirectory();
-        CDELog.j(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
-        CDELog.j(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()));
+        CDELog.d(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
+        CDELog.d(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()));
         String dataDirectoryPath = null;
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             dataDirectoryPath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "kantv" + File.separator;
@@ -823,7 +823,7 @@ public class CDEUtils {
         }
         DEVICE_ID_FILE_PATH = dataDirectoryPath + File.separator + DEVICE_ID_FILE_NAME;
         CDELog.d(TAG, "DEVICE_ID_FILE_PATH: " + DEVICE_ID_FILE_PATH);
-        CDELog.j(TAG, "dataDirectoryPath: " + dataDirectoryPath);
+        CDELog.d(TAG, "dataDirectoryPath: " + dataDirectoryPath);
 
         String dataFileName;
         File timestampFile = null;
@@ -835,10 +835,10 @@ public class CDEUtils {
         try {
             File directoryPath = new File(dataDirectoryPath);
             if (!directoryPath.exists()) {
-                CDELog.j(TAG, "create dir: " + dataDirectoryPath);
+                CDELog.d(TAG, "create dir: " + dataDirectoryPath);
                 directoryPath.mkdirs();
             } else {
-                CDELog.j(TAG, dataDirectoryPath + " already exist");
+                CDELog.d(TAG, dataDirectoryPath + " already exist");
             }
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
             SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
@@ -849,7 +849,7 @@ public class CDEUtils {
             configFile = new File(dataDirectoryPath, "config.json");
             deviceIDFile = new File(DEVICE_ID_FILE_PATH);
             CDELog.d(TAG, "timestamp file name:" + timestampFile.getName() + ",timestamp file path:" + timestampFile.getPath());
-            CDELog.j(TAG, "cfg file name:" + configFile.getName() + ",file path:" + configFile.getPath());
+            CDELog.d(TAG, "cfg file name:" + configFile.getName() + ",file path:" + configFile.getPath());
 
             if (!deviceIDFile.exists()) {
                 deviceIDFile.createNewFile();

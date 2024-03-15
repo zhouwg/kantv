@@ -23,6 +23,7 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
+ import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
  import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
@@ -297,7 +298,7 @@
                  return;
              }
 
-             whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);
+             whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
              if (benchmarkIndex == BECHMARK_ASR) {
                  //playAudioFile();
              }
@@ -364,7 +365,7 @@
 
 
                              if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
-                                 //playAudioFile();
+                                 playAudioFile();
                              }
 
                              CDELog.j(TAG, benchmarkTip);
