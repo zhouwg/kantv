@@ -28,11 +28,16 @@
 #define BECHMARK_FULL               3
 
 
-typedef const char* (*kantv_asr_callback)(void * opaque);
+typedef const char * ( * kantv_asr_callback)(void * opaque);
+typedef const char * ( * kantv_inference_callback)(const float * pf32_audio_buffer, int num_samples);
 
 void kantv_asr_set_callback(kantv_asr_callback callback);
 
+void kantv_inference_set_callback(kantv_inference_callback callback);
+
 kantv_asr_callback kantv_asr_get_callback(void);
+
+kantv_inference_callback kantv_inference_get_callback(void);
 
 
 /**
@@ -49,7 +54,16 @@ void kantv_asr_start(void);
 
 void kantv_asr_stop(void);
 
-void kantv_asr_notify_c(const char *sz_info);
+/**
+ * only used in ASRResearchFragment.java for benchmark
+ */
+void kantv_asr_notify_benchmark_c(const char * sz_info);
+
+/**
+ * used for realtime subtitle with online TV
+ * @param sz_info
+ */
+void kantv_asr_notify_c(const char * sz_info);
 
 #ifdef __cplusplus
     }
@@ -60,7 +74,10 @@ void kantv_asr_notify_c(const char *sz_info);
 
 #include <string>
 
-void kantv_asr_notify(std::string &str_info);
+/**
+ * only used in ASRResearchFragment.java for benchmark
+ */
+void kantv_asr_notify_benchmark(std::string &str_info);
 
 #endif
 

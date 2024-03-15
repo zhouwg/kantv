@@ -101,6 +101,14 @@ set_target_properties(kantvcore
         IMPORTED_LOCATION
         ${PREBUIT_LIB_PATH}/libkantv-core.so)
 
+add_library(kantvplay
+        SHARED
+        IMPORTED)
+
+set_target_properties(kantvplay
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUIT_LIB_PATH}/libkantv-play.so)
 
 add_library(openblas
         SHARED
@@ -118,7 +126,7 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    target_link_libraries(${target_name} ${LOG_LIB} kantvcore openblas android)
+    target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvplay openblas android)
 
 endfunction()
 

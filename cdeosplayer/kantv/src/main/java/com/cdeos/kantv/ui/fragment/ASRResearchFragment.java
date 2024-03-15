@@ -23,6 +23,7 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
+ import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -296,6 +297,7 @@
                  return;
              }
 
+             whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);
              if (benchmarkIndex == BECHMARK_ASR) {
                  //playAudioFile();
              }
@@ -549,6 +551,7 @@
                  mKANTVMgr.release();
                  mKANTVMgr = null;
              }
+             whispercpp.asr_finalize();
          } catch (Exception ex) {
              String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
              CDELog.j(TAG, "error occurred: " + errorMsg);

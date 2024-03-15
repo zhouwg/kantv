@@ -1623,12 +1623,12 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
         //TODO: hardcode path, should be configured in "ASR Settings"
-        String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        String ggmlModelFileName = "ggml-small.en.bin"; //31M
         CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
         if (1 == mSettings.getASRMode()) {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_PRESURETEST);
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);
         } else {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_NORMAL);
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_NORMAL);
         }
 
         CDEUtils.setTVASR(true);
