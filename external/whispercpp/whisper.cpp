@@ -27,6 +27,7 @@
 #include "ggml.h"
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
+#include "tinywav.h"
 
 #include <atomic>
 #include <algorithm>
@@ -6734,7 +6735,7 @@ extern "C" {
 #include <limits.h>
 #include <signal.h>
 #include <stdint.h>
-#include <stdatomic.h>
+//#include <stdatomic.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -6762,13 +6763,15 @@ extern "C" {
 #include "libavfilter/avfilter.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
+
+#include "tinywav.h"
 #endif
 }
 
 
 #define MAX_SAMPLE_SIZE  (1024 * 8 * 32)
 #define MAX_PATH_LEN     512
-#define MAX_WHISPER_IN_BUFFER_SIZE (1024 * 1024 * 8)
+#define MAX_WHISPER_IN_BUFFER_SIZE (1024 * 1024 * 5)
 
 class whisper_asr;
 
@@ -6787,12 +6790,14 @@ typedef struct {
 
     fifo_buffer_t   * asr_fifo;                      //fifo for ASR data producer-consumer
 
-    uint8_t * p_sample_buffer;                      // temp buffer for convert audio frame
     size_t   n_sample_size;
 
     struct SwrContext * swr_ctx;
 
-    uint8_t  p_audio_buffer[MAX_SAMPLE_SIZE];       // temp buffer for convert uncompressed audio frame to AV_SAMPLE_FMT_FLT to make whisper inference happy
+    uint8_t  p_sample_buffer[MAX_SAMPLE_SIZE];       // temp buffer for convert audio frame
+    uint8_t  p_audio_buffer[MAX_SAMPLE_SIZE];        // temp buffer for convert audio frame
+    bool     b_pre_convert;
+    bool     b_enable_dump_16k_data;
 
     class whisper_asr * p_asr;
 
@@ -6890,7 +6895,8 @@ static int read_data_from_file(const char * sz_file_name, uint8_t ** pp_data, si
 //(2) customized FFmpeg would/might be heavily used within customized whisper.cpp in the future
 
 
-//ffmpeg -i jfk.wav -ar 16000 -ac 1 -c:a pcm_s16le new.wav
+// ./ffmpeg  -i ./test.mp4 -ac 2 -ar 16000 test.wav
+// ./main  -m ./models/ggml-base.bin  -f ./test.wav
 //this is a reverse engineering hardcode function and should not be used in real project
 static float * convert_to_float(uint8_t * in_audio_data, size_t in_audio_size, size_t * out_sample_counts) {
     int result = 0;
@@ -7333,8 +7339,6 @@ static fifo_buffer_t  *whisper_asr_getfifo() {
 }
 
 
-
-
 // =================================================================================================
 //
 // JNI helper function for benchmark
@@ -7427,6 +7431,10 @@ public:
         _p_whisper_in               = _whisper_in;
         _n_whisper_in_size          = 0;
         _n_total_sample_counts      = 0;
+        _n_debug_counts             = 0;
+
+        _n_channels                 = 0;
+        _n_sample_rate              = 0;
 
         _b_exit_thread              = false;
 
@@ -7449,55 +7457,127 @@ public:
         int64_t  n_end_time     = 0LL;
         int64_t  n_durtion      = 0LL;
 
+        int result              = 0;
+        char sz_filename[256];
+
         _p_whisper_in           = _whisper_in;
         _n_whisper_in_size      = 0;
         _n_total_sample_counts  = 0;
+        _n_debug_counts         = 0LL;
+        _swr_ctx                = swr_alloc();
+        CHECK(NULL != _swr_ctx);
 
-        n_begin_time  = ggml_time_us();
+        memset(sz_filename, 0, 256);
+        _b_enable_dump_raw_data = true;
+        _b_enable_dump_16k_data = false;
+
+        n_begin_time = ggml_time_us();
         while (1) {
             if (_b_exit_thread)
                 break;
 
-            n_durtion           = 0LL;
+            n_durtion = 0LL;
 
             buf = _asr_fifo->get(_asr_fifo);
             if (buf != NULL) {
                 memcpy(_whisper_in + _n_whisper_in_size, buf->mem, buf->size);
-                _p_whisper_in               += buf->size;
-                _n_whisper_in_size          += buf->size;
-                _n_total_sample_counts      += buf->samplecounts;
+                _p_whisper_in += buf->size;
+                _n_whisper_in_size += buf->size;
+                _n_total_sample_counts += buf->samplecounts;
+                _n_channels = buf->channels;
+                _n_sample_rate = buf->samplerate;
+                _sample_format = buf->sampleformat;
                 buf->free_buffer(buf);
+            } else {
+                continue;
             }
 
+            //TODO:
+            // resample audio data
+            // VAD
+            // sanity check of audio data-------should not be a partial audio data
+            // reassemble audio data
+            // ...
+            //
+            n_end_time = ggml_time_us();
+            n_durtion = (n_end_time - n_begin_time) / 1000;
 
-                //TODO:
-                // resample audio data
-                // VAD
-                // sanity check of audio data-------should not be a partial audio data
-                // reassemble audio data
-                // ...
-                //
-                n_end_time = ggml_time_us();
-                n_durtion  = (n_end_time - n_begin_time) / 1000;
+            if (n_durtion > 2000) { // 2 seconds
+                LOGGD("duration of data collection is %d milliseconds\n", n_durtion);
+                LOGGD("whisper_in_size %d\n", _n_whisper_in_size);
+                LOGGD("total_sample_counts %d\n", _n_total_sample_counts);
 
-                if (n_durtion > 1001) {
-                    LOGGD("duration of data collection is %d milliseconds\n", n_durtion);
-                    LOGGD("whisper_in_size %d\n", _n_whisper_in_size);
-                    LOGGD("total_sample_counts %d\n", _n_total_sample_counts);
+                if (_b_enable_dump_raw_data) {
+                    //this dump file is ok
+                    snprintf(sz_filename, 256, "/sdcard/kantv/raw.wav");
+                    TinyWavSampleFormat twSF    = TW_FLOAT32;
+                    TinyWavChannelFormat twCF   = TW_INTERLEAVED;
+                    if (_sample_format == AV_SAMPLE_FMT_FLT)
+                        twSF = TW_FLOAT32;
+                    if (_sample_format == AV_SAMPLE_FMT_S16)
+                        twSF = TW_INT16;
 
+                    if (1 == _n_channels)
+                        twCF = TW_INLINE;
+                    if (2 == _n_channels)
+                        twCF = TW_INTERLEAVED;
 
-                    //2024-03-15,17:31
-                    // TODO: dump _whisper_in to a wav file and verify whether input data is valid mono+f32 data?
-                    whisper_asr_audio_to_text(reinterpret_cast<const float *>(_whisper_in), _n_total_sample_counts);
-
-                    n_end_time              = ggml_time_us();
-                    n_begin_time            = n_end_time;
-                    _p_whisper_in           = _whisper_in;
-                    _n_whisper_in_size      = 0;
-                    _n_total_sample_counts  = 0;
+                    tinywav_open_write(&_st_tinywav_raw, _n_channels, _n_sample_rate, twSF,twCF, sz_filename);
+                    tinywav_write_f(&_st_tinywav_raw, _whisper_in, _n_total_sample_counts);
+                    tinywav_close_write(&_st_tinywav_raw);
+                    LOGGD("dump raw audio data to file %s\n", sz_filename);
+                    
+                    _b_enable_dump_raw_data = false;
                 }
 
-                usleep(10);
+                LOGGD("_n_chnnels %d\n", _n_channels);
+                LOGGD("_n_sample_rate %d\n", _n_sample_rate);
+                LOGGD("_sample format %d(%s)\n", _sample_format, whisper_sampleformat_string(_sample_format));
+
+                if (1) {
+                    av_opt_set_int(_swr_ctx, "in_channel_count", _n_channels, 0);
+                    av_opt_set_int(_swr_ctx, "in_sample_rate", _n_sample_rate, 0);
+                    av_opt_set_sample_fmt(_swr_ctx, "in_sample_fmt", _sample_format, 0);
+                    av_opt_set_int(_swr_ctx, "out_channel_count", 1, 0);
+                    av_opt_set_int(_swr_ctx, "out_sample_rate", 16000, 0);
+                    av_opt_set_sample_fmt(_swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
+                    if ((result = swr_init(_swr_ctx)) < 0) {
+                        LOGGW("failed to initialize the resampling context\n");
+                        continue;
+                    }
+                    uint8_t *in_buf[] = {_whisper_in, NULL};
+                    result = swr_convert(_swr_ctx,
+                                         (uint8_t **) (&_u8_audio_buffer),
+                                         _n_total_sample_counts,
+                                         (const uint8_t **) (in_buf),
+                                         _n_total_sample_counts);
+
+                    if (result < 0) {
+                        LOGGW("resample failed\n");
+                    } else {
+                        if (_b_enable_dump_16k_data) {  //this dump file is invalid
+                            snprintf(sz_filename, 256, "/sdcard/kantv/16k_out.wav");
+                            tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_INT16, TW_INLINE, sz_filename);
+                            tinywav_write_f(&_st_tinywav_16k, _u8_audio_buffer, _n_total_sample_counts);
+                            tinywav_close_write(&_st_tinywav_16k);
+
+                            LOGGD("dump converted audio data to file %s\n", sz_filename);
+                            _b_enable_dump_16k_data = false;
+                        }
+                    }
+                }
+
+                //whisper_asr_audio_to_text(reinterpret_cast<const float *>(_whisper_in), _n_total_sample_counts);
+                LOGGD("after inference\n");
+
+                n_end_time = ggml_time_us();
+                n_begin_time = n_end_time;
+                _p_whisper_in = _whisper_in;
+                _n_whisper_in_size = 0;
+                _n_total_sample_counts = 0;
+            }
+
+            usleep(10);
         }
     }
 
@@ -7512,36 +7592,53 @@ private:
     std::thread _thread_poll;
     bool        _b_exit_thread;
 
+
+    int         _n_channels;
+    int         _n_sample_rate;
+
     int         _n_total_sample_counts;
     uint8_t     _whisper_in[MAX_WHISPER_IN_BUFFER_SIZE];
     uint8_t     *_p_whisper_in;
     int         _n_whisper_in_size;
 
+    int64_t     _n_debug_counts;
+
     fifo_buffer_t *_asr_fifo;
+    struct SwrContext * _swr_ctx;
+    enum AVSampleFormat _sample_format;
+
+    uint8_t     _u8_audio_buffer[MAX_WHISPER_IN_BUFFER_SIZE * 2];
+    TinyWav     _st_tinywav_raw;
+    TinyWav     _st_tinywav_16k;
+    bool        _b_enable_dump_raw_data;
+    bool        _b_enable_dump_16k_data;
 };
 
 
 // TODO: remove the mutex
 /**
  *
- * @param  opaque          uncompressed pcm data presented as AVFrame
+ * @param  opaque          uncompressed pcm data, presented as AVFrame
  *
  * @return always NULL, or "tip information" in pressure test mode
  *
- * this function should not do time-consuming operation, otherwise unexpected behaviour would happen
+ * this function should NOT do time-consuming operation, otherwise unexpected behaviour would happen
  *
  *
  */
 static const char * whisper_asr_callback(void * opaque) {
-    size_t data_size                = 0;
-    size_t resampled_data_size      = 0;
-    const char * asr_result         = NULL;
-    AVFrame * audioframe            = NULL;
-
+    size_t frame_size               = 0;
     size_t sample_size              = 0;
-    uint8_t * p_sample              = NULL;
-    int num_sample                  = 0;
+    size_t samples_size             = 0;
+
+    AVFrame * audioframe            = NULL;
+    fifo_t *  asr_fifo              = NULL;
+
+    uint8_t * p_samples             = NULL;
+    int num_samples                 = 0;
     int result                      = 0;
+    enum AVSampleFormat sample_format;
+
 
     if (NULL == opaque)
         return NULL;
@@ -7567,78 +7664,109 @@ static const char * whisper_asr_callback(void * opaque) {
     pthread_mutex_lock(&p_asr_ctx->mutex);
 
     audioframe  = (AVFrame *) opaque;
-    p_sample    = p_asr_ctx->p_sample_buffer;
-    num_sample  = audioframe->nb_samples;
+    p_samples   = p_asr_ctx->p_sample_buffer;
+    num_samples = audioframe->nb_samples;
 
-    data_size = av_samples_get_buffer_size(NULL, audioframe->channels, audioframe->nb_samples,
+    frame_size = av_samples_get_buffer_size(NULL, audioframe->channels, audioframe->nb_samples,
                                            static_cast<AVSampleFormat>(audioframe->format), 1);
-    LOGI("Audio AVFrame(size %d): "
-         "nb_samples %d, sample_rate %d, channels %d, channel_layout %d, "
-         "format 0x%x(%s), pts %lld,"
-         "pitches[0] %d, pitches[1] %d, pitches[2] %d, "
-         "pixels[0] %p, pixels[1] %p, pixels[2] %p \n",
-         data_size,
-         audioframe->nb_samples, audioframe->sample_rate, audioframe->channels,
-         audioframe->channel_layout,
-         audioframe->format, whisper_sampleformat_string(audioframe->format), audioframe->pts,
-         audioframe->linesize[0], audioframe->linesize[1], audioframe->linesize[2],
-         audioframe->data[0], audioframe->data[1], audioframe->data[2]
-    );
-    data_size = av_get_bytes_per_sample(static_cast<AVSampleFormat>(audioframe->format));
 
+    LOGD("Audio AVFrame(size %d): "
+          "nb_samples %d, sample_rate %d, channels %d, channel_layout %d, "
+          "format 0x%x(%s), pts %lld,"
+          "pitches[0] %d, pitches[1] %d, pitches[2] %d, "
+          "pixels[0] %p, pixels[1] %p, pixels[2] %p \n",
+          frame_size,
+          audioframe->nb_samples, audioframe->sample_rate, audioframe->channels,
+          audioframe->channel_layout,
+          audioframe->format, whisper_sampleformat_string(audioframe->format), audioframe->pts,
+          audioframe->linesize[0], audioframe->linesize[1], audioframe->linesize[2],
+          audioframe->data[0], audioframe->data[1], audioframe->data[2]
+    );
+
+    sample_size = av_get_bytes_per_sample(static_cast<AVSampleFormat>(audioframe->format));
+    p_samples   = p_asr_ctx->p_sample_buffer;
     if (av_sample_fmt_is_planar(static_cast<AVSampleFormat>(audioframe->format))) {
         for (int i = 0; i < audioframe->nb_samples; i++) {
             for (int ch = 0; ch < audioframe->channels; ch++) {
-                memcpy(p_sample, audioframe->data[ch] + data_size * i, data_size);
-                p_sample     += data_size;
-                sample_size  += data_size;
+                memcpy(p_samples, audioframe->data[ch] + sample_size * i, sample_size);
+                p_samples       += sample_size;
+                samples_size    += sample_size;
             }
         }
     } else {
-        memcpy(p_sample, audioframe->data[0], audioframe->linesize[0]);
-        sample_size = audioframe->linesize[0];
+        memcpy(p_samples, audioframe->data[0], audioframe->linesize[0]);
+        samples_size = audioframe->linesize[0];
     }
+    p_samples = p_asr_ctx->p_sample_buffer; //reset pointer
 
-    enum AVSampleFormat sampleformat = av_get_packed_sample_fmt(static_cast<AVSampleFormat>(audioframe->format));
-    CHECK(sampleformat == AV_SAMPLE_FMT_FLT);
+    sample_format = av_get_packed_sample_fmt(static_cast<AVSampleFormat>(audioframe->format));
+    CHECK(sample_format == AV_SAMPLE_FMT_FLT);//make whisper happy
+    CHECK(samples_size == num_samples * sizeof(float) * audioframe->channels);
 
 
-    av_opt_set_int(p_asr_ctx->swr_ctx, "in_channel_count", audioframe->channels, 0);
-    av_opt_set_int(p_asr_ctx->swr_ctx, "in_sample_rate", audioframe->sample_rate, 0);
-    av_opt_set_sample_fmt(p_asr_ctx->swr_ctx, "in_sample_fmt", static_cast<AVSampleFormat>(audioframe->format), 0);
-    av_opt_set_int(p_asr_ctx->swr_ctx, "out_channel_count", 1, 0);
-    av_opt_set_int(p_asr_ctx->swr_ctx, "out_sample_rate", 16000, 0);
-    av_opt_set_sample_fmt(p_asr_ctx->swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
-    if ((result = swr_init(p_asr_ctx->swr_ctx)) < 0) {
-        LOGGW("failed to initialize the resampling context\n");
-    }
+    if (p_asr_ctx->b_pre_convert) { //not work as expected
+        av_opt_set_int(p_asr_ctx->swr_ctx, "in_channel_count", audioframe->channels, 0);
+        av_opt_set_int(p_asr_ctx->swr_ctx, "in_sample_rate", audioframe->sample_rate, 0);
+        av_opt_set_sample_fmt(p_asr_ctx->swr_ctx, "in_sample_fmt", static_cast<AVSampleFormat>(audioframe->format), 0);
+        av_opt_set_int(p_asr_ctx->swr_ctx, "out_channel_count", 1, 0);
+        av_opt_set_int(p_asr_ctx->swr_ctx, "out_sample_rate", 16000, 0);
+        av_opt_set_sample_fmt(p_asr_ctx->swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
+        if ((result = swr_init(p_asr_ctx->swr_ctx)) < 0) {
+            LOGGW("failed to initialize the resampling context\n");
+        }
+        uint8_t *out_buf[] = {p_asr_ctx->p_audio_buffer, NULL};
+        result = swr_convert(p_asr_ctx->swr_ctx,
+                             (uint8_t **)(out_buf),
+                             audioframe->nb_samples,
+                             (const uint8_t **) (audioframe->data),
+                             audioframe->nb_samples);
+        if (result < 0) {
+            LOGGW("resample failed\n");
+        }
 
-    num_sample = audioframe->nb_samples;
-    memset(p_asr_ctx->p_audio_buffer, 0, MAX_SAMPLE_SIZE);
-    result = swr_convert(p_asr_ctx->swr_ctx,
-                         (uint8_t**)(&p_asr_ctx->p_audio_buffer),
-                         num_sample,
-                         (const uint8_t**)audioframe->data,
-                         num_sample);
-    if (result < 0) {
-        LOGGW("resample failed\n");
-        return NULL;
-    }
-
-    fifo_t *asr_fifo = whisper_asr_getfifo();
-    if (NULL != asr_fifo) {
-        buf_element_t *buf = asr_fifo->buffer_try_alloc(asr_fifo);
-        if (NULL != buf) {
-            memcpy(buf->mem, p_asr_ctx->p_audio_buffer, num_sample * sizeof(float));
-            buf->size           = num_sample * sizeof(float);
-            buf->samplecounts   = audioframe->nb_samples;
-            asr_fifo->put(asr_fifo, buf);
+        if (p_asr_ctx->b_enable_dump_16k_data) {
+            char sz_filename[256];
+            TinyWav _st_tinywav_16k;
+            snprintf(sz_filename, 256, "/sdcard/kantv/16k_in.wav");
+            tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_FLOAT32, TW_INLINE, sz_filename);
+            tinywav_write_f(&_st_tinywav_16k, p_asr_ctx->p_audio_buffer, audioframe->nb_samples);
+            tinywav_close_write(&_st_tinywav_16k);
+            LOGGD("dump pre-convert 16k audio data to file %s\n", sz_filename);
+            p_asr_ctx->b_enable_dump_16k_data = false;
+        }
+        p_samples = p_asr_ctx->p_audio_buffer; //attention here
+        asr_fifo = whisper_asr_getfifo();
+        if (NULL != asr_fifo) {
+            buf_element_t *buf = asr_fifo->buffer_try_alloc(asr_fifo);
+            if (NULL != buf) {
+                memcpy(buf->mem, p_samples, samples_size);
+                buf->size           = 4 * audioframe->nb_samples;
+                buf->samplecounts   = audioframe->nb_samples;
+                buf->channels       = 1;
+                buf->samplerate     = 16000;
+                buf->sampleformat   = AV_SAMPLE_FMT_FLT;
+                asr_fifo->put(asr_fifo, buf);
+            }
+        }
+    } else {
+        asr_fifo = whisper_asr_getfifo();
+        if (NULL != asr_fifo) {
+            buf_element_t *buf = asr_fifo->buffer_try_alloc(asr_fifo);
+            if (NULL != buf) {
+                memcpy(buf->mem, p_samples, samples_size);
+                buf->size           = samples_size;
+                buf->samplecounts   = audioframe->nb_samples;
+                buf->channels       = audioframe->channels;
+                buf->samplerate     = audioframe->sample_rate;
+                buf->sampleformat   = static_cast<AVSampleFormat>(sample_format);
+                asr_fifo->put(asr_fifo, buf);
+            }
         }
     }
 
     pthread_mutex_unlock(&p_asr_ctx->mutex);
 
-    return asr_result;
+    return NULL;
 }
 
 
@@ -7669,7 +7797,7 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     }
 
     if ((NULL == pf32_audio_buffer) || (num_samples < 1)) {
-        LOGGW("pls check params\n");
+        //LOGGW("pls check params\n");
         return NULL;
     }
 
@@ -7711,11 +7839,11 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
                 "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
                 std::string(text) + "\n";
         LOGGD("asr result:\n%s\n", asr_result.c_str());
-        kantv_asr_notify_c(asr_result.c_str());
+        //kantv_asr_notify_c(asr_result.c_str());
     }
     text = asr_result.c_str();
 
-    failure:
+failure:
     if (0 != result) {
         asr_result = whisper_get_time_string() + "\n" +  "inference failure, pls check why?\n";
         text = asr_result.c_str();
@@ -7778,9 +7906,6 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
 
      p_asr_ctx->p_asr = new whisper_asr();
 
-     p_asr_ctx->p_sample_buffer = (uint8_t *) malloc(MAX_SAMPLE_SIZE);
-     CHECK(NULL != p_asr_ctx->p_sample_buffer);
-
      p_asr_ctx->swr_ctx = swr_alloc();
      CHECK(NULL != p_asr_ctx->swr_ctx);
 
@@ -7807,7 +7932,7 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      params.n_threads               = num_threads;
      params.offset_ms               = 0;
      params.no_context              = true;
-     params.single_segment          = true;
+     params.single_segment          = false;
      params.no_timestamps           = params.single_segment;
 
      params.speed_up                = false;
@@ -7819,7 +7944,12 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
-     p_asr_ctx->p_asr->start();
+     if (0 == p_asr_ctx->n_dev_mode) {
+
+         p_asr_ctx->p_asr->start();
+     }
+
+     p_asr_ctx->b_pre_convert = p_asr_ctx->b_enable_dump_16k_data = false;
 
      pthread_mutex_unlock(&p_asr_ctx->mutex);
      LOGGV("leave kantv_asr_init\n");
@@ -7836,11 +7966,12 @@ void whisper_asr_finalize() {
     }
 
     LOGGD("stop asr thread\n");
-    p_asr_ctx->p_asr->stop();
+    if (0 == p_asr_ctx->n_dev_mode) {
+        p_asr_ctx->p_asr->stop();
+    }
     LOGGD("after stop asr thread\n");
 
     p_asr_ctx->asr_fifo->destroy(p_asr_ctx->asr_fifo);
-    free(p_asr_ctx->p_sample_buffer);
     free(p_asr_ctx->p_params);
 
     whisper_free(p_asr_ctx->p_context);

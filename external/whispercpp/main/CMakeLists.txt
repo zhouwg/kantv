@@ -1,11 +1,11 @@
 # Copyright (c) 2024- KanTV Authors. All Rights Reserved.
 
-# Description: build whispercpp's bench tool for target x86-linux and target Android
+# Description: build whispercpp's main tool for target x86-linux
 
 
 cmake_minimum_required(VERSION 3.10)
 
-project(whisperbench)
+project(whispermain)
 set(CMAKE_VERBOSE_MAKEFILE on  )
 
 set(TARGET             ${TARGET_NAME})
@@ -44,7 +44,7 @@ ENDIF()
 
 include_directories(${WHISPERCPP_PATH}/)
 
-add_executable(${TARGET} bench.cpp
+add_executable(${TARGET} main.cpp
     ${WHISPERCPP_PATH}/cde_log.c
     ${WHISPERCPP_PATH}/ggml.c
     ${WHISPERCPP_PATH}/ggml-alloc.c
