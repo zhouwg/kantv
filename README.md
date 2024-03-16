@@ -12,12 +12,12 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Watch encrypted live stream(Google Widevine, Huawei WisePlay, ChinaDRM......)
 
-- Real-time English subtitle for online TV by great&excellent&amazing<a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a>(PoC finished and Xiaomi 14 or other powerful Android mobile phone IS HIGHLY required for this feature otherwise unexpected behaviour would happen)
+- Real-time English subtitle for online TV by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(PoC finished on Xiaomi 14. Xiaomi 14 or other powerful Android mobile phone IS HIGHLY required for this feature otherwise unexpected behaviour would happen)
 
 - UI refactor
 
 
-- Android turn-key project(/customized/secondary software development activity could be done by Android Studio IDE)
+- Android turn-key project(customized/secondary software development activity could be done by Android Studio IDE)
 
 
 
