@@ -157,7 +157,7 @@
                      <li> online TV record and online TV transcription can work at the same time for the first time</li>
                      <li> save audio data to file when transcription was launched for further usage/scenario </li>
                      <li> move some key-point codes to upper layer in customized whisper.cpp for purpose of referenced by AI experts or other programmers</li>
-                     <li> implmement TV subtitle for online TV by great whisper.cpp for the first time(NOT realtime)</li>
+                     <li> implmement AI subtitle for online TV by great whisper.cpp for the first time(NOT realtime and bugfix is required)</li>
                  </ul>
 
 
