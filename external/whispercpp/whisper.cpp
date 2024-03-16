@@ -7456,6 +7456,7 @@ public:
         int64_t  n_begin_time   = 0LL;
         int64_t  n_end_time     = 0LL;
         int64_t  n_durtion      = 0LL;
+        uint8_t  *p_samples     = NULL;
 
         int result              = 0;
         char sz_filename[256];
@@ -7468,10 +7469,12 @@ public:
         CHECK(NULL != _swr_ctx);
 
         memset(sz_filename, 0, 256);
+
         _b_enable_dump_raw_data = true;
-        _b_enable_dump_16k_data = false;
+        _b_enable_dump_16k_data = true;
 
         n_begin_time = ggml_time_us();
+
         while (1) {
             if (_b_exit_thread)
                 break;
@@ -7481,24 +7484,17 @@ public:
             buf = _asr_fifo->get(_asr_fifo);
             if (buf != NULL) {
                 memcpy(_whisper_in + _n_whisper_in_size, buf->mem, buf->size);
-                _p_whisper_in += buf->size;
-                _n_whisper_in_size += buf->size;
-                _n_total_sample_counts += buf->samplecounts;
-                _n_channels = buf->channels;
-                _n_sample_rate = buf->samplerate;
-                _sample_format = buf->sampleformat;
+                _p_whisper_in           += buf->size;
+                _n_whisper_in_size      += buf->size;
+                _n_total_sample_counts  += buf->samplecounts;
+                _n_channels             = buf->channels;
+                _n_sample_rate          = buf->samplerate;
+                _sample_format          = buf->sampleformat;
                 buf->free_buffer(buf);
             } else {
                 continue;
             }
 
-            //TODO:
-            // resample audio data
-            // VAD
-            // sanity check of audio data-------should not be a partial audio data
-            // reassemble audio data
-            // ...
-            //
             n_end_time = ggml_time_us();
             n_durtion = (n_end_time - n_begin_time) / 1000;
 
@@ -7512,6 +7508,7 @@ public:
                     snprintf(sz_filename, 256, "/sdcard/kantv/raw.wav");
                     TinyWavSampleFormat twSF    = TW_FLOAT32;
                     TinyWavChannelFormat twCF   = TW_INTERLEAVED;
+
                     if (_sample_format == AV_SAMPLE_FMT_FLT)
                         twSF = TW_FLOAT32;
                     if (_sample_format == AV_SAMPLE_FMT_S16)
@@ -7526,7 +7523,7 @@ public:
                     tinywav_write_f(&_st_tinywav_raw, _whisper_in, _n_total_sample_counts);
                     tinywav_close_write(&_st_tinywav_raw);
                     LOGGD("dump raw audio data to file %s\n", sz_filename);
-                    
+
                     _b_enable_dump_raw_data = false;
                 }
 
@@ -7546,8 +7543,9 @@ public:
                         continue;
                     }
                     uint8_t *in_buf[] = {_whisper_in, NULL};
+                    p_samples = _u8_audio_buffer;
                     result = swr_convert(_swr_ctx,
-                                         (uint8_t **) (&_u8_audio_buffer),
+                                         (uint8_t **) (&p_samples),
                                          _n_total_sample_counts,
                                          (const uint8_t **) (in_buf),
                                          _n_total_sample_counts);
@@ -7555,9 +7553,24 @@ public:
                     if (result < 0) {
                         LOGGW("resample failed\n");
                     } else {
-                        if (_b_enable_dump_16k_data) {  //this dump file is invalid
+                        LOGGD("out samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                        int left = _n_total_sample_counts - result;
+                        while (left > 0) { //attention here
+                            p_samples += (result * sizeof(float));
+                            result = swr_convert(_swr_ctx,
+                                                 (uint8_t **) (&p_samples),
+                                                 _n_total_sample_counts,
+                                                 NULL,
+                                                 0);
+                            LOGGD("out samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                            if (0 == result) {
+                                break;
+                            }
+                        }
+                        if (_b_enable_dump_16k_data) {  //2024-03-16,13:05, finally, this dump file is also ok
+                            memset(sz_filename, 0, 256);
                             snprintf(sz_filename, 256, "/sdcard/kantv/16k_out.wav");
-                            tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_INT16, TW_INLINE, sz_filename);
+                            tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_FLOAT32, TW_INLINE, sz_filename);
                             tinywav_write_f(&_st_tinywav_16k, _u8_audio_buffer, _n_total_sample_counts);
                             tinywav_close_write(&_st_tinywav_16k);
 
@@ -7567,7 +7580,8 @@ public:
                     }
                 }
 
-                //whisper_asr_audio_to_text(reinterpret_cast<const float *>(_whisper_in), _n_total_sample_counts);
+                p_samples = _u8_audio_buffer;
+                whisper_asr_audio_to_text(reinterpret_cast<const float *>(p_samples), _n_total_sample_counts);
                 LOGGD("after inference\n");
 
                 n_end_time = ggml_time_us();
@@ -7579,6 +7593,8 @@ public:
 
             usleep(10);
         }
+
+        swr_free(&_swr_ctx);
     }
 
     void stop() {
@@ -7972,6 +7988,12 @@ void whisper_asr_finalize() {
     LOGGD("after stop asr thread\n");
 
     p_asr_ctx->asr_fifo->destroy(p_asr_ctx->asr_fifo);
+
+
+    swr_free(&p_asr_ctx->swr_ctx);
+
+    delete p_asr_ctx->p_asr;
+
     free(p_asr_ctx->p_params);
 
     whisper_free(p_asr_ctx->p_context);
