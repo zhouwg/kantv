@@ -362,7 +362,7 @@ Licensed under LGPLv2.1 or later
 ```
 Copyright (c) 2021 - 2023 Project KanTV
 
-Copyright (c) 2024 -  Authors of project KanTV
+Copyright (c) 2024 -  Authors of Project KanTV
 
 Licensed under Apachev2.0 or later
 ```
