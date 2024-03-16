@@ -487,7 +487,7 @@ public class CDEUtils {
                     xml = EntityUtils.toString(httpEntity, "UTF-8");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    CDELog.j(TAG, "getXmlFromUrl failed:" + e.getMessage());
+                    CDELog.d(TAG, "getXmlFromUrl failed:" + e.getMessage());
                 }
                 return xml;
             } else {
@@ -500,10 +500,10 @@ public class CDEUtils {
                     in.read(fileContent);
                     in.close();
                 } catch (FileNotFoundException e) {
-                    CDELog.j(TAG, "getXmlFromUrl failed:" + e.getMessage());
+                    CDELog.d(TAG, "getXmlFromUrl failed:" + e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
-                    CDELog.j(TAG, "getXmlFromUrl failed:" + e.getMessage());
+                    CDELog.d(TAG, "getXmlFromUrl failed:" + e.getMessage());
                 }
 
                 try {
@@ -583,7 +583,7 @@ public class CDEUtils {
                 EPGXmlParser parser = new EPGXmlParser();
                 Document doc = parser.getDomElement(xml);
                 if (doc == null) {
-                    CDELog.j(TAG, "xml parse failed");
+                    CDELog.d(TAG, "xml parse failed");
                     return null;
                 }
                 NodeList nl = doc.getElementsByTagName("entry");
@@ -673,7 +673,7 @@ public class CDEUtils {
 
                         if (uriElement != null) {
                             href = uriElement.getFirstChild().getNodeValue();
-                            CDELog.j(TAG, "href:" + href);
+                            CDELog.d(TAG, "href:" + href);
 
                             if (href != null) {
                                 if (href.contains("mpd")) {
@@ -700,7 +700,7 @@ public class CDEUtils {
                                     contentTypeString = "file";
                                 }
                             } else {
-                                CDELog.j(TAG, "href is null");
+                                CDELog.d(TAG, "href is null");
                                 contentTypeString = "file";
                             }
                             CDELog.d(TAG, "content type:" + contentTypeString);
@@ -708,7 +708,7 @@ public class CDEUtils {
                     }
 
                     if (title == null) {
-                        CDELog.j(TAG, "parse failed:can't find element title in xml content");
+                        CDELog.d(TAG, "parse failed:can't find element title in xml content");
                         title = "invalid";
                     }
                     if (moviePoster == null) {
@@ -763,7 +763,7 @@ public class CDEUtils {
 
                     CDEContentDescriptor descriptor = null;
                     if (moviePoster.length() > 0) {
-                        //CDELog.j(TAG, "url:" + href);
+                        //CDELog.d(TAG, "url:" + href);
                         descriptor = new CDEContentDescriptor(
                                 title,
                                 href,
@@ -780,7 +780,7 @@ public class CDEUtils {
                     descriptors.add(descriptor);
                 }
             } catch (Exception e) {
-                CDELog.j(TAG, "getContentDescriptors failed:" + e.getMessage());
+                CDELog.d(TAG, "getContentDescriptors failed:" + e.getMessage());
                 descriptors.clear();
                 return null;
             }
@@ -804,7 +804,7 @@ public class CDEUtils {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             CDELog.d(TAG, "Android version > API22：Android 5.1 (Android L)Lollipop_MR1");
             if (!state.equals(Environment.MEDIA_MOUNTED)) {
-                CDELog.j(TAG, "can't read/write extern device");
+                CDELog.d(TAG, "can't read/write extern device");
                 return null;
             }
         } else {
@@ -867,16 +867,16 @@ public class CDEUtils {
             //out.write(bytesArray);
             //out.flush();
             //out.close();
-            // CDELog.j(TAG, "create kantv timestamp file success: " + timestampFile.getAbsolutePath());
+            // CDELog.d(TAG, "create kantv timestamp file success: " + timestampFile.getAbsolutePath());
             //} else {
-            //    CDELog.j(TAG, "kantv timestamp file already exist: " + timestampFile.getAbsolutePath());
+            //    CDELog.d(TAG, "kantv timestamp file already exist: " + timestampFile.getAbsolutePath());
             //}
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            CDELog.j(TAG, "create kantv timestamp file failed: " + e.toString());
+            CDELog.d(TAG, "create kantv timestamp file failed: " + e.toString());
         } catch (IOException e) {
             e.printStackTrace();
-            CDELog.j(TAG, "create kantv timestamp file failed: " + e.toString());
+            CDELog.d(TAG, "create kantv timestamp file failed: " + e.toString());
         }
 
         return dataDirectoryPath;
@@ -1048,7 +1048,7 @@ public class CDEUtils {
             }
 
         } catch (SocketException e) {
-            CDELog.j(TAG, "can't get ip: " + e.toString());
+            CDELog.d(TAG, "can't get ip: " + e.toString());
         }
 
         return null;
@@ -1070,7 +1070,7 @@ public class CDEUtils {
                 }
             }
         } catch (SocketException e) {
-            CDELog.j(TAG, "can't get ip: " + e.toString());
+            CDELog.d(TAG, "can't get ip: " + e.toString());
         }
         return null;
     }
@@ -1096,14 +1096,14 @@ public class CDEUtils {
         String ip = null;
         ConnectivityManager connectivityManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            CDELog.j(TAG, "SDK_INT < Android Q");
+            CDELog.d(TAG, "SDK_INT < Android Q");
             try {
                 if (connectivityManager != null) {
                     NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
                     if ((activeNetworkInfo != null) && activeNetworkInfo.isConnected()) {
-                        CDELog.j(TAG, "network info: " + activeNetworkInfo.getExtraInfo());
+                        CDELog.d(TAG, "network info: " + activeNetworkInfo.getExtraInfo());
                         if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                            CDELog.j(TAG, "wifi network");
+                            CDELog.d(TAG, "wifi network");
                             setNetworkType(NETWORK_WIFI);
                             WifiManager wifiManager = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
                             if (wifiManager != null) {
@@ -1112,26 +1112,26 @@ public class CDEUtils {
                                     int ipAddress = wifiInfo.getIpAddress();
                                     if (ipAddress != 0) {
                                         ip = IPIntToString(ipAddress);
-                                        CDELog.j(TAG, "ip: " + ip);
+                                        CDELog.d(TAG, "ip: " + ip);
                                         setNetworkIP(ip);
                                     }
                                 }
                             }
                         }
                         if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-                            CDELog.j(TAG, "mobile network");
+                            CDELog.d(TAG, "mobile network");
                             ip = getMobileIP();
                             if (ip != null) {
-                                CDELog.j(TAG, "ip: " + ip);
+                                CDELog.d(TAG, "ip: " + ip);
                                 setNetworkIP(ip);
                             }
                             setNetworkType(NETWORK_MOBILE);
                         }
                         if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_ETHERNET) {
-                            CDELog.j(TAG, "LAN network");
+                            CDELog.d(TAG, "LAN network");
                             ip = getLANIP();
                             if (ip != null) {
-                                CDELog.j(TAG, "ip: " + ip);
+                                CDELog.d(TAG, "ip: " + ip);
                                 setNetworkIP(ip);
                             }
                             setNetworkType(NETWORK_LAN);
@@ -1148,13 +1148,13 @@ public class CDEUtils {
                 return false;
             }
         } else {
-            CDELog.j(TAG, "SDK_INT >= Android Q");
+            CDELog.d(TAG, "SDK_INT >= Android Q");
             try {
             NetworkCapabilities networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
             if (networkCapabilities == null) {
                 CDELog.d(TAG, "network is not connected, pls check");
             } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                CDELog.j(TAG, "wifi network");
+                CDELog.d(TAG, "wifi network");
                 setNetworkType(NETWORK_WIFI);
                 WifiManager wifiManager = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
                 if (wifiManager != null) {
@@ -1163,24 +1163,24 @@ public class CDEUtils {
                         int ipAddress = wifiInfo.getIpAddress();
                         if (ipAddress != 0) {
                             ip = IPIntToString(ipAddress);
-                            CDELog.j(TAG, "ip: " + ip);
+                            CDELog.d(TAG, "ip: " + ip);
                             setNetworkIP(ip);
                         }
                     }
                 }
             } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                CDELog.j(TAG, "mobile network");
+                CDELog.d(TAG, "mobile network");
                 setNetworkType(NETWORK_MOBILE);
                 ip = getMobileIP();
                 if (ip != null) {
-                    CDELog.j(TAG, "ip: " + ip);
+                    CDELog.d(TAG, "ip: " + ip);
                     setNetworkIP(ip);
                 }
             } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                CDELog.j(TAG, "LAN network");
+                CDELog.d(TAG, "LAN network");
                 ip = getLANIP();
                 if (ip != null) {
-                    CDELog.j(TAG, "ip: " + ip);
+                    CDELog.d(TAG, "ip: " + ip);
                     setNetworkIP(ip);
                 }
                 setNetworkType(NETWORK_LAN);
@@ -1203,7 +1203,7 @@ public class CDEUtils {
     }
 
     public static void dumpDeviceInfo() {
-        CDELog.j(TAG, "******** Android build informations******\n");
+        CDELog.d(TAG, "******** Android build informations******\n");
         addBuildField("BOARD", Build.BOARD);
         addBuildField("BOOTLOADER", Build.BOOTLOADER);
         addBuildField("BRAND", Build.BRAND);
@@ -1223,12 +1223,12 @@ public class CDEUtils {
         addBuildField("USER", Build.USER);
         addBuildField("ANDROID SDK", String.valueOf(android.os.Build.VERSION.SDK_INT));
         addBuildField("OS Version", android.os.Build.VERSION.RELEASE);
-        CDELog.j(TAG, "******************************************\n");
+        CDELog.d(TAG, "******************************************\n");
 
     }
 
     private static void addBuildField(String name, String value) {
-        CDELog.j(TAG, "  " + name + ": " + value + "\n");
+        CDELog.d(TAG, "  " + name + ": " + value + "\n");
     }
 
     public static String bytesToBinaryString(byte[] var0) {
@@ -1379,7 +1379,7 @@ public class CDEUtils {
                 }
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "can't get mac : " + e.toString());
+            CDELog.d(TAG, "can't get mac : " + e.toString());
         }
         return "unknown";
     }
@@ -1391,11 +1391,11 @@ public class CDEUtils {
                 TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                 String deviceId = telephonyManager.getDeviceId();
                 if (!TextUtils.isEmpty(deviceId) && !INVALID_DEVICE_ID.equals(deviceId)) {
-                    CDELog.j(TAG, "IMEI: " + deviceId);
+                    CDELog.d(TAG, "IMEI: " + deviceId);
                     return deviceId;
                 }
             } catch (Exception e) {
-                CDELog.j(TAG, "can't get IMEI : " + e.toString());
+                CDELog.d(TAG, "can't get IMEI : " + e.toString());
                 return "";
             }
         }
@@ -1411,13 +1411,13 @@ public class CDEUtils {
         if (context != null) {
             try {
                 String androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-                CDELog.j(TAG, "android id : " + androidId);
+                CDELog.d(TAG, "android id : " + androidId);
                 if (!TextUtils.isEmpty(androidId) && !INVALID_ANDROID_ID.equals(androidId)) {
                     return androidId;
                 }
 
             } catch (Exception e) {
-                CDELog.j(TAG, "can't get AndroidID : " + e.toString());
+                CDELog.d(TAG, "can't get AndroidID : " + e.toString());
                 return "unknown";
             }
         }
@@ -1427,7 +1427,7 @@ public class CDEUtils {
 
     public static String getRandomUUID() {
         String uuid = UUID.randomUUID().toString();
-        CDELog.j(TAG, "random uuid : " + uuid);
+        CDELog.d(TAG, "random uuid : " + uuid);
         return uuid;
     }
 
@@ -1470,10 +1470,10 @@ public class CDEUtils {
         }
 
         if (sb.length() == 0) {
-            CDELog.j(TAG, "can not get device unique id");
+            CDELog.d(TAG, "can not get device unique id");
             throw new RuntimeException("can not get device unique id");
         }
-        CDELog.j(TAG, "deviceID string: " + sb.toString());
+        CDELog.d(TAG, "deviceID string: " + sb.toString());
         mUniqueID = getMD5(sb.toString());
          */
 
@@ -1705,7 +1705,7 @@ public class CDEUtils {
 
 
     public static void setKANTVServer(String kantvserver) {
-        CDELog.j(TAG, "set kantv server to :" + kantvserver);
+        CDELog.d(TAG, "set kantv server to :" + kantvserver);
 
         mKANTVServer = kantvserver;
     }
@@ -1755,7 +1755,7 @@ public class CDEUtils {
     }
 
     public static void setApiGatewayServerUrl(String apiGatewayServerUrl) {
-        CDELog.j(TAG, "set API gateway server to :" + apiGatewayServerUrl);
+        CDELog.d(TAG, "set API gateway server to :" + apiGatewayServerUrl);
         mApiGatewayServerUrl = apiGatewayServerUrl;
     }
 
@@ -1764,7 +1764,7 @@ public class CDEUtils {
     }
 
     public static void setEpgUpdatedStatus(CDEMediaType mediaType, boolean bUpdatedStatus) {
-        CDELog.j(TAG, "set " + mediaType.toString() + " epgUpdatedStatus to:" + bUpdatedStatus);
+        CDELog.d(TAG, "set " + mediaType.toString() + " epgUpdatedStatus to:" + bUpdatedStatus);
         if (MEDIA_TV == mediaType) {
             mTVEpgUpdatedStatus = bUpdatedStatus;
         } else if (MEDIA_RADIO == mediaType) {
@@ -1876,7 +1876,7 @@ public class CDEUtils {
 
     public static void setTroubleshootingMode(int troubleshootingMode) {
         if (troubleshootingMode >= TROUBLESHOOTING_MODE_MAX) {
-            CDELog.j(TAG, "invalid troubleshooting mode: " + troubleshootingMode);
+            CDELog.d(TAG, "invalid troubleshooting mode: " + troubleshootingMode);
         }
         mTroubleshootingMode = troubleshootingMode;
     }
@@ -1935,40 +1935,40 @@ public class CDEUtils {
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             //Integer.parseInt(bufferedReader.readLine());
             if (bufferedReader.readLine() == null) {
-                CDELog.j(TAG, command + " success");
+                CDELog.d(TAG, command + " success");
             } else {
-                CDELog.j(TAG, command + " failed");
-                CDELog.j(TAG, "command result:" + bufferedReader.readLine());
+                CDELog.d(TAG, command + " failed");
+                CDELog.d(TAG, "command result:" + bufferedReader.readLine());
             }
         } catch (IOException e) {
             e.printStackTrace();
-            CDELog.j(TAG, "error: " + e.toString());
+            CDELog.d(TAG, "error: " + e.toString());
         }
     }
 
     @Deprecated
     public static int getProp(String command) {
         try {
-            CDELog.j(TAG, "command: " + command);
+            CDELog.d(TAG, "command: " + command);
             Process process = Runtime.getRuntime().exec(command);
             InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             if (bufferedReader == null) {
-                CDELog.j(TAG, command + " failed");
+                CDELog.d(TAG, command + " failed");
                 return -1;
             }
             String commandResult = bufferedReader.readLine();
             if (commandResult == null) {
-                CDELog.j(TAG, command + " failed");
+                CDELog.d(TAG, command + " failed");
                 return -1;
             } else {
-                CDELog.j(TAG, "command result: " + commandResult);
-                CDELog.j(TAG, command + " return: " + Integer.parseInt(commandResult));
+                CDELog.d(TAG, "command result: " + commandResult);
+                CDELog.d(TAG, command + " return: " + Integer.parseInt(commandResult));
                 return Integer.parseInt(commandResult);
             }
         } catch (IOException e) {
             e.printStackTrace();
-            CDELog.j(TAG, "error: " + e.toString());
+            CDELog.d(TAG, "error: " + e.toString());
             return -1;
         }
     }
@@ -1980,20 +1980,20 @@ public class CDEUtils {
 
 
     public static void setDevMode(String assetPath, boolean bDevMode, int dumpMode, int playEngine, int dumpDuration, int dumpSize, int dumpCounts) {
-        CDELog.j(TAG, "set dev mode: " + bDevMode + " , dump mode: " + dumpMode + " , play engine: " + playEngine + " , drm system: " + getDrmName(getDrmScheme())
+        CDELog.d(TAG, "set dev mode: " + bDevMode + " , dump mode: " + dumpMode + " , play engine: " + playEngine + " , drm system: " + getDrmName(getDrmScheme())
                 + " , dump duration: " + dumpDuration + " , dump size: " + dumpSize + " , dump counts: " + dumpCounts);
         mKANTVDRM.ANDROID_JNI_SetDevMode(assetPath, bDevMode, dumpMode, playEngine, CDEUtils.getDrmScheme(), dumpDuration, dumpSize, dumpCounts);
     }
 
     public static void setDevMode(String assetPath, boolean bDevMode, int dumpMode, int playEngine, int drmScheme, int dumpDuration, int dumpSize, int dumpCounts) {
-        CDELog.j(TAG, "set dev mode: " + bDevMode + " , dump mode: " + dumpMode + " , play engine: " + playEngine + " , drm system: " + getDrmName(drmScheme)
+        CDELog.d(TAG, "set dev mode: " + bDevMode + " , dump mode: " + dumpMode + " , play engine: " + playEngine + " , drm system: " + getDrmName(drmScheme)
                 + " , dump duration: " + dumpDuration + " , dump size: " + dumpSize + " , dump counts: " + dumpCounts);
         mKANTVDRM.ANDROID_JNI_SetDevMode(assetPath, bDevMode, dumpMode, playEngine, drmScheme, dumpDuration, dumpSize, dumpCounts);
     }
 
 
     public static void setRecordConfig(String recordPath, int recordMode, int recordFormat, int recordVideoCodec, int recordMaxDuration, int recordMaxSize) {
-        CDELog.j(TAG, "record path " + recordPath + ", record mode: " + recordMode + " , record video codec: " + recordVideoCodec + " ,record format: " + recordFormat
+        CDELog.d(TAG, "record path " + recordPath + ", record mode: " + recordMode + " , record video codec: " + recordVideoCodec + " ,record format: " + recordFormat
                 + " , record duration: " + recordMaxDuration + " , record size: " + recordMaxSize);
         mKANTVDRM.ANDROID_JNI_SetRecordConfig(recordPath, recordMode, recordFormat, recordVideoCodec, recordMaxDuration, recordMaxSize);
     }
@@ -2007,7 +2007,7 @@ public class CDEUtils {
         CDELog.d(TAG, "set decrypt mode to " + decryptMode + " (" + getDecryptModeString(decryptMode) + ")");
 
         if ((decryptMode != DECRYPT_NONE) && (decryptMode != DECRYPT_SOFT) && (decryptMode != DECRYPT_TEE_NONSVP) && (decryptMode != DECRYPT_TEE_SVP) && (decryptMode != DECRYPT_TEE)) {
-            CDELog.j(TAG, "invalid decrypt mode: " + decryptMode);
+            CDELog.d(TAG, "invalid decrypt mode: " + decryptMode);
             return;
         }
         mDecryptMode = decryptMode;
@@ -2109,7 +2109,7 @@ public class CDEUtils {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            CDELog.j(TAG, "error occoured: " + ex.toString());
+            CDELog.d(TAG, "error occoured: " + ex.toString());
         }
 
         return result;
@@ -2141,7 +2141,7 @@ public class CDEUtils {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            CDELog.j(TAG, "error occoured: " + ex.toString());
+            CDELog.d(TAG, "error occoured: " + ex.toString());
         }
 
         return result;
@@ -2327,14 +2327,14 @@ public class CDEUtils {
                 destFile.createNewFile();
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "error: " + e.toString());
+            CDELog.d(TAG, "error: " + e.toString());
             e.printStackTrace();
         }
     }
 
     public static int getRandomNumberInRange(int min, int max) {
         if (min >= max) {
-            CDELog.j(TAG, "invalid param");
+            CDELog.d(TAG, "invalid param");
             return 0;
         }
 
@@ -2349,7 +2349,7 @@ public class CDEUtils {
 
     public static long getPlaybackBeginTime() {
         if (mBeginPlaybackTime == 0) {
-            CDELog.j(TAG, "it shouldn't happen, perfGetPlaybackBeginTime should be called firstly");
+            CDELog.d(TAG, "it shouldn't happen, perfGetPlaybackBeginTime should be called firstly");
         }
         return mBeginPlaybackTime;
     }
@@ -2360,7 +2360,7 @@ public class CDEUtils {
     }
     public static long getRecordBeginTime() {
         if (mBeginRecordTime == 0) {
-            CDELog.j(TAG, "it shouldn't happen, perfGetRecordBeginTime should be called firstly");
+            CDELog.d(TAG, "it shouldn't happen, perfGetRecordBeginTime should be called firstly");
         }
         return mBeginRecordTime;
     }
@@ -2534,7 +2534,7 @@ public class CDEUtils {
         CDELog.d(TAG, "set drm scheme to " + drmScheme + " (" + getDrmName(drmScheme) + ")");
 
         if (drmScheme > DRM_SCHEME_MAX || drmScheme < 0) {
-            CDELog.j(TAG, "invalid drm scheme: " + drmScheme);
+            CDELog.d(TAG, "invalid drm scheme: " + drmScheme);
             return;
         }
         mDrmScheme = drmScheme;
@@ -2567,7 +2567,7 @@ public class CDEUtils {
     }
 
     public static void setEncryptScheme(int encryptScheme) {
-        CDELog.j(TAG, "set encrypt scheme to " + encryptScheme + " (" + getEncryptSchemeName(encryptScheme) + ")");
+        CDELog.d(TAG, "set encrypt scheme to " + encryptScheme + " (" + getEncryptSchemeName(encryptScheme) + ")");
         mEncryptScheme = encryptScheme;
     }
 
@@ -2652,7 +2652,7 @@ public class CDEUtils {
             return result;
         } catch (Exception e) {
             System.out.println("exception:" + e.toString());
-            CDELog.j(TAG, "AES_CBC failed:" + e.toString());
+            CDELog.d(TAG, "AES_CBC failed:" + e.toString());
         }
         return null;
     }
@@ -2669,10 +2669,10 @@ public class CDEUtils {
         try {
             byte[] base64Content = Base64.decode(base64String.getBytes(), Base64.NO_WRAP);
             String tmpString = new String(base64Content, "utf-8");
-            CDELog.j(TAG, "base64 decode: " + base64String + " ====> " + tmpString);
+            CDELog.d(TAG, "base64 decode: " + base64String + " ====> " + tmpString);
             return tmpString;
         } catch (Exception e) {
-            CDELog.j(TAG, "base64Decode error:" + e.toString());
+            CDELog.d(TAG, "base64Decode error:" + e.toString());
         }
         return "unknown base64 content";
     }
@@ -2685,7 +2685,7 @@ public class CDEUtils {
             outputChannel = new FileOutputStream(dest).getChannel();
             outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
         } catch (IOException ex) {
-            CDELog.j(TAG, "copy file failed: " + ex.toString());
+            CDELog.d(TAG, "copy file failed: " + ex.toString());
         } finally {
             inputChannel.close();
             outputChannel.close();
@@ -2693,8 +2693,8 @@ public class CDEUtils {
     }
 
     public static void copyFile(String srcFilePath, String destFilePath) {
-        CDELog.j(TAG, "src path: " + srcFilePath);
-        CDELog.j(TAG, "dst path: " + destFilePath);
+        CDELog.d(TAG, "src path: " + srcFilePath);
+        CDELog.d(TAG, "dst path: " + destFilePath);
         InputStream inStream = null;
         FileOutputStream outStream = null;
         try {
@@ -2711,7 +2711,7 @@ public class CDEUtils {
                 outStream.write(buf, 0, bytesRead);
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "error: " + e.toString());
+            CDELog.d(TAG, "error: " + e.toString());
             e.printStackTrace();
         } finally {
             close(inStream);
@@ -2724,11 +2724,11 @@ public class CDEUtils {
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
         File file = null;
-        CDELog.j(TAG, "filePath:" + filePath + ",fileName:" + fileName);
+        CDELog.d(TAG, "filePath:" + filePath + ",fileName:" + fileName);
         try {
 
             file = new File(filePath + fileName);
-            CDELog.j(TAG, "full file name:" + file.getAbsolutePath());
+            CDELog.d(TAG, "full file name:" + file.getAbsolutePath());
             if (!file.getParentFile().exists()) {
                 file.getParentFile().mkdirs();
             }
@@ -2737,14 +2737,14 @@ public class CDEUtils {
             bos.write(bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            CDELog.j(TAG, "failed:" + e.toString());
+            CDELog.d(TAG, "failed:" + e.toString());
         } finally {
             if (bos != null) {
                 try {
                     bos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    CDELog.j(TAG, "failed:" + e.toString());
+                    CDELog.d(TAG, "failed:" + e.toString());
                 }
             }
             if (fos != null) {
@@ -2752,7 +2752,7 @@ public class CDEUtils {
                     fos.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                    CDELog.j(TAG, "failed:" + e.toString());
+                    CDELog.d(TAG, "failed:" + e.toString());
                 }
             }
         }
@@ -2769,7 +2769,7 @@ public class CDEUtils {
                 closeable.close();
             }
         } catch (IOException e) {
-            CDELog.j(TAG, e.toString());
+            CDELog.d(TAG, e.toString());
         }
     }
 
@@ -2850,53 +2850,53 @@ public class CDEUtils {
         long handleEndTime = 0;
 
         if (epgUrl == null) {
-            CDELog.j(TAG, "epg url is empty");
+            CDELog.d(TAG, "epg url is empty");
             return null;
         }
         File epgLocalFile = null;
         if (epgUrl.startsWith("http://")) {
             handleBeginTime = System.currentTimeMillis();
-            CDELog.j(TAG, "iptv url:" + epgUrl);
+            CDELog.d(TAG, "iptv url:" + epgUrl);
             int index = epgUrl.lastIndexOf('/');
             if (index == -1) {
-                CDELog.j(TAG, "error, pls check");
+                CDELog.d(TAG, "error, pls check");
                 return null;
             }
 
             String epgFileName = epgUrl.substring(index + 1);
-            CDELog.j(TAG, "epgFileName:" + epgFileName);
+            CDELog.d(TAG, "epgFileName:" + epgFileName);
             Uri uri = Uri.parse(epgUrl);
             epgLocalFile = new File(CDEUtils.getDataPath(mContext), epgFileName);
-            CDELog.j(TAG, "epgLocalFile: " + epgLocalFile.getAbsolutePath());
+            CDELog.d(TAG, "epgLocalFile: " + epgLocalFile.getAbsolutePath());
             //if (!epgLocalFile.exists())
             if (true) {
                 int downloadResult = mKANTVDRM.ANDROID_JNI_DownloadFile(uri.toString(), epgLocalFile.getAbsolutePath());
-                CDELog.j(TAG, "download file " + epgLocalFile.getAbsolutePath() + " result:" + downloadResult);
+                CDELog.d(TAG, "download file " + epgLocalFile.getAbsolutePath() + " result:" + downloadResult);
                 if (0 != downloadResult) {
-                    CDELog.j(TAG, "can't download url" + epgUrl);
+                    CDELog.d(TAG, "can't download url" + epgUrl);
                     return null;
                 }
             } else {
-                CDELog.j(TAG, "iptv epg file exist" + epgLocalFile.getAbsolutePath());
+                CDELog.d(TAG, "iptv epg file exist" + epgLocalFile.getAbsolutePath());
             }
             handleEndTime = System.currentTimeMillis();
 
-            CDELog.j(TAG, "download iptv epg data cost: " + (handleEndTime - handleBeginTime) + " milliseconds");
+            CDELog.d(TAG, "download iptv epg data cost: " + (handleEndTime - handleBeginTime) + " milliseconds");
 
-            CDELog.j(TAG, "epg download successfully");
+            CDELog.d(TAG, "epg download successfully");
         } else {
             epgLocalFile = new File(epgUrl);
         }
         try {
             File file = new File(epgLocalFile.getAbsolutePath());
             int fileLength = (int) file.length();
-            CDELog.j(TAG, "file len:" + fileLength);
+            CDELog.d(TAG, "file len:" + fileLength);
             byte[] fileContent = new byte[fileLength];
             FileInputStream in = new FileInputStream(file);
             in.read(fileContent);
             in.close();
             file.delete();
-            CDELog.j(TAG, "file length:" + fileLength);
+            CDELog.d(TAG, "file length:" + fileLength);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(fileContent);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             Queue<String> extraLines = new ArrayDeque<>();
@@ -2904,8 +2904,8 @@ public class CDEUtils {
 
             try {
                 if (!checkPlaylistHeader(reader)) {
-                    CDELog.j(TAG, "it shouldn't happen, pls check why?");
-                    CDELog.j(TAG, "Input does not start with the #EXTM3U header.");
+                    CDELog.d(TAG, "it shouldn't happen, pls check why?");
+                    CDELog.d(TAG, "Input does not start with the #EXTM3U header.");
                     file.delete();
                     return null;
                 }
@@ -2917,49 +2917,49 @@ public class CDEUtils {
                     String url = null;
                     CDEContentDescriptor descriptor = null;
                     line = line.trim();
-                    //CDELog.j(TAG, "line=" + line);
+                    //CDELog.d(TAG, "line=" + line);
                     if (line.isEmpty()) {
                         // Do nothing.
-                        CDELog.j(TAG, "line is empty");
+                        CDELog.d(TAG, "line is empty");
                     } else if (line.startsWith(TAG_MEDIA_DURATION)) {
-                        //CDELog.j(TAG, "line=" + line);
+                        //CDELog.d(TAG, "line=" + line);
                         int commaIndex = line.lastIndexOf(',');
                         if (commaIndex != -1) {
                             name = line.substring(commaIndex + 1);
-                            //CDELog.j(TAG, "name=" + name);
+                            //CDELog.d(TAG, "name=" + name);
                         }
                         String[] tokens = line.split(" ");
                         if ((tokens != null) && (tokens.length > 3)) {
-                            CDELog.j(TAG, "tokens counts:" + tokens.length);
+                            CDELog.d(TAG, "tokens counts:" + tokens.length);
                             tvglogoURL = tokens[2];
                             groupTitle = tokens[3];
                         } else {
-                            CDELog.j(TAG, "tokens counts:" + tokens.length);
-                            CDELog.j(TAG, "sepcial line:" + line);
+                            CDELog.d(TAG, "tokens counts:" + tokens.length);
+                            CDELog.d(TAG, "sepcial line:" + line);
                             if (2 == tokens.length) {
-                                CDELog.j(TAG, "customized epg");
+                                CDELog.d(TAG, "customized epg");
                                 name = tokens[1];
-                                CDELog.j(TAG, "name:" + name);
+                                CDELog.d(TAG, "name:" + name);
                             }
                         }
 
 
                         line = reader.readLine();
                         line = line.trim();
-                        CDELog.j(TAG, "line=" + line);
+                        CDELog.d(TAG, "line=" + line);
                         if (line.startsWith("/")) {
                             url = "http://" + CDEUtils.getKANTVServer() + line;
-                            CDELog.j(TAG, "customized epg:" + url);
+                            CDELog.d(TAG, "customized epg:" + url);
                         } else {
                             //url = line.trim();
                             url = line;
                         }
                         if (line.startsWith("#EXTVLCOPT")) {
-                            CDELog.j(TAG, "skip this line=" + line);
+                            CDELog.d(TAG, "skip this line=" + line);
                             line = reader.readLine();
                             url = line.trim();
                         }
-                        //CDELog.j(TAG, "url=" + url);
+                        //CDELog.d(TAG, "url=" + url);
                         if ((name != null) && (url != null)) {
                             descriptor = new CDEContentDescriptor(tvglogoURL, groupTitle, name, url);
                             descriptors.add(descriptor);
@@ -2967,27 +2967,27 @@ public class CDEUtils {
                         //extraLines.add(line);
 
                     } else if (line.startsWith("#EXTVLCOPT")) {
-                        CDELog.j(TAG, "skip this line=" + line);
+                        CDELog.d(TAG, "skip this line=" + line);
                     } else {
                         //extraLines.add(line);
-                        CDELog.j(TAG, "line=" + line);
-                        CDELog.j(TAG, "should not happened");
+                        CDELog.d(TAG, "line=" + line);
+                        CDELog.d(TAG, "should not happened");
                     }
                 }
             } finally {
-                CDELog.j(TAG, "end parse");
+                CDELog.d(TAG, "end parse");
                 CDEUtils.closeQuietly(reader);
             }
         } catch (IOException ex) {
-            CDELog.j(TAG, "failed to handle file:" + epgLocalFile.getAbsolutePath() + ",reason:" + ex.toString());
+            CDELog.d(TAG, "failed to handle file:" + epgLocalFile.getAbsolutePath() + ",reason:" + ex.toString());
             return null;
         }
 
 
-        CDELog.j(TAG, "iptv items:" + descriptors.size());
+        CDELog.d(TAG, "iptv items:" + descriptors.size());
         handleEndTime = System.currentTimeMillis();
 
-        CDELog.j(TAG, "load iptv epg data cost: " + (handleEndTime - handleBeginTime) + " milliseconds");
+        CDELog.d(TAG, "load iptv epg data cost: " + (handleEndTime - handleBeginTime) + " milliseconds");
 
         return descriptors;
     }
@@ -3089,7 +3089,7 @@ public class CDEUtils {
             responseReader.close();
             result = sb.toString().toLowerCase();
         } catch (IOException ex) {
-            CDELog.j(TAG, "error:" + ex.toString());
+            CDELog.d(TAG, "error:" + ex.toString());
         }
         return result;
     }
@@ -3100,7 +3100,7 @@ public class CDEUtils {
         if (-1 == dotIndex)
             return false;
         String fileExtension = fileName.substring(dotIndex + 1);
-        //CDELog.j(TAG, "fileExtension: " + fileExtension);
+        //CDELog.d(TAG, "fileExtension: " + fileExtension);
         if (fileExtension.contains("dat"))
             return false;
 
@@ -3130,10 +3130,10 @@ public class CDEUtils {
             case "ts":
             case "swf":
             //case "m3u8":
-                //CDELog.j(TAG, "filename " + fileName + " is media file");
+                //CDELog.d(TAG, "filename " + fileName + " is media file");
                 return true;
             default:
-                //CDELog.j(TAG, "filename " + fileName + " is not media file");
+                //CDELog.d(TAG, "filename " + fileName + " is not media file");
                 return false;
         }
     }
@@ -3168,9 +3168,9 @@ public class CDEUtils {
             CDEUtils.setKANTVUpdateAPKUrl(updateApkUrl);
             CDEUtils.setKANTVUpdateVersionUrl(updateApkVersionUrl);
             CDEUtils.setKanTVUMServer(updateUMUrl);
-            CDELog.j(TAG, "modify kantv update apk url:" + CDEUtils.getKANTVUpdateAPKUrl());
-            CDELog.j(TAG, "modify kantv update apk version url:" + CDEUtils.getKANTVUpdateVersionUrl());
-            CDELog.j(TAG, "modify kantv UM url:" + CDEUtils.getKanTVUMServer());
+            CDELog.d(TAG, "modify kantv update apk url:" + CDEUtils.getKANTVUpdateAPKUrl());
+            CDELog.d(TAG, "modify kantv update apk version url:" + CDEUtils.getKANTVUpdateVersionUrl());
+            CDELog.d(TAG, "modify kantv UM url:" + CDEUtils.getKanTVUMServer());
         }
     }
 
@@ -3190,8 +3190,8 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3200,13 +3200,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3225,8 +3225,8 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3235,13 +3235,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3263,15 +3263,15 @@ public class CDEUtils {
                     + "\"videoTitle\": \"" + videoTitle.trim() + "\","
                     + "\"videoPath\": \"" + videoPath.trim() + "\""
                     + "}";
-            CDELog.j(TAG, "device unique id:" + CDEUtils.getUniqueID());
+            CDELog.d(TAG, "device unique id:" + CDEUtils.getUniqueID());
 
             JSONObject jsonObject = JSON.parseObject(userMonitorData);
-            CDELog.j(TAG, "jsonObject: " + jsonObject);
+            CDELog.d(TAG, "jsonObject: " + jsonObject);
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3280,13 +3280,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3315,9 +3315,9 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "um url:" + url);
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "um url:" + url);
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3326,13 +3326,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3350,15 +3350,15 @@ public class CDEUtils {
                     + "\"startRecordTimeString\":\"" + startRecordTimeString + "\","
                     + "\"recordFileName\": \"" + recordingFileName.trim() + "\""
                     + "}";
-            CDELog.j(TAG, "device unique id:" + CDEUtils.getUniqueID());
+            CDELog.d(TAG, "device unique id:" + CDEUtils.getUniqueID());
 
             JSONObject jsonObject = JSON.parseObject(userMonitorData);
-            CDELog.j(TAG, "jsonObject: " + jsonObject);
+            CDELog.d(TAG, "jsonObject: " + jsonObject);
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3367,13 +3367,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
 
         CDEUtils.umUpdateRecordInfo();
@@ -3404,8 +3404,8 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3414,13 +3414,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3445,8 +3445,8 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3455,13 +3455,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3482,8 +3482,8 @@ public class CDEUtils {
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3492,25 +3492,25 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
                 JSONObject jsonResultObject = JSON.parseObject(new String(dataEntity.getData()));
                 int recordCounts = jsonResultObject.getInteger("recordCounts");
                 int isPaidUser   = jsonResultObject.getInteger("isPaidUser");
                 int maxCounts = jsonResultObject.getInteger("maxCounts");
-                CDELog.j(TAG, "server return record counts:" + recordCounts);
-                CDELog.j(TAG, "server return isPaidUser:" + isPaidUser);
-                CDELog.j(TAG, "server return maxCounts:" + maxCounts);
+                CDELog.d(TAG, "server return record counts:" + recordCounts);
+                CDELog.d(TAG, "server return isPaidUser:" + isPaidUser);
+                CDELog.d(TAG, "server return maxCounts:" + maxCounts);
                 setRecordCountsFromServer(recordCounts);
                 setIsPaidUser((1 == isPaidUser) ? true : false);
 
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
             long endTime   = System.currentTimeMillis();
-            CDELog.j(TAG, "getrecordinfo cost time " + (endTime - startTime) + " milliseconds\n\n\n\n");
+            CDELog.d(TAG, "getrecordinfo cost time " + (endTime - startTime) + " milliseconds\n\n\n\n");
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
             setRecordCountsFromServer(0);
             setIsPaidUser(false);
         }
@@ -3551,15 +3551,15 @@ public class CDEUtils {
                     + "\"benchmarkDurations\": \"" + benchmarkDurationsInMillseconds + "\","
                     + "\"benchmarkDurationPerItem\": \"" + durationPerItemInSeconds + "\""
                     + "}";
-            CDELog.j(TAG, "device unique id:" + CDEUtils.getUniqueID());
+            CDELog.d(TAG, "device unique id:" + CDEUtils.getUniqueID());
 
             JSONObject jsonObject = JSON.parseObject(userMonitorData);
-            CDELog.j(TAG, "jsonObject: " + jsonObject);
+            CDELog.d(TAG, "jsonObject: " + jsonObject);
             int requestBodyLength = userMonitorData.length();
             byte[] requestBody = userMonitorData.getBytes();
             String url = getKanTVUMServer();
-            CDELog.j(TAG, "http post request to: " + url);
-            CDELog.j(TAG, "http post content: " + new String(requestBody));
+            CDELog.d(TAG, "http post request to: " + url);
+            CDELog.d(TAG, "http post content: " + new String(requestBody));
 
             if (isDisableUM())
                 return;
@@ -3568,13 +3568,13 @@ public class CDEUtils {
             CDEDataEntity dataEntity = new CDEDataEntity();
             int result = chinaDRM.ANDROID_JNI_HttpPost(url, null, requestBody, requestBodyLength, dataEntity);
             if (dataEntity != null && dataEntity.getData() != null) {
-                CDELog.j(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
+                CDELog.d(TAG, "http post response: http code:" + dataEntity.getResult() + ", content:" + new String(dataEntity.getData()));
             }
             if (result != 0) {
-                CDELog.j(TAG, "http post to " + url + " failed");
+                CDELog.d(TAG, "http post to " + url + " failed");
             }
         } catch (Exception e) {
-            CDELog.j(TAG, "UM failed:" + e.toString());
+            CDELog.d(TAG, "UM failed:" + e.toString());
         }
     }
 
@@ -3802,10 +3802,10 @@ public class CDEUtils {
     public static String getDeviceSerial() {
         if (!TextUtils.isEmpty(Build.SERIAL)) {
             String deviceSerial = Build.SERIAL + Build.HOST + Build.FINGERPRINT;
-            CDELog.j(TAG, "device info : " + deviceSerial);
+            CDELog.d(TAG, "device info : " + deviceSerial);
             return deviceSerial;
         }
-        CDELog.j(TAG, "can't get device serial");
+        CDELog.d(TAG, "can't get device serial");
         return "";
     }
 
@@ -3828,7 +3828,7 @@ public class CDEUtils {
         }
         catch (Exception e)
         {
-            CDELog.j(TAG, "exception occurred");
+            CDELog.d(TAG, "exception occurred");
         }
         return res;
     }

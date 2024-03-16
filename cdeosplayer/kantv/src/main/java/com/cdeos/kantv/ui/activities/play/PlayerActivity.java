@@ -101,7 +101,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
         CDEUtils.perfGetPlaybackBeginTime();
 
 
-        CDELog.j(TAG, "ffplayer view");
+        CDELog.d(TAG, "ffplayer view");
         mPlayer = new FFPlayerView(this);
         setContentView((FFPlayerView) mPlayer);
 
@@ -142,8 +142,8 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
         episodeId = playParam.getEpisodeId();
         sourceOrigin = playParam.getSourceOrigin();
 
-        CDELog.j(TAG, "video path:" + videoPath);
-        CDELog.j(TAG, "video name:" + videoTitle);
+        CDELog.d(TAG, "video path:" + videoPath);
+        CDELog.d(TAG, "video name:" + videoTitle);
 
         subtitleDownloadPath = AppConfig.getInstance().getDownloadFolder()
                 + com.cdeos.kantv.utils.Constants.DefaultConfig.subtitleFolder;
@@ -158,9 +158,9 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
 
 
     private void initPlayer() {
-        CDELog.j(TAG, "init player: playengine:" + mSettings.getPlayerEngine());
+        CDELog.d(TAG, "init player: playengine:" + mSettings.getPlayerEngine());
 
-        CDELog.j(TAG, "init ff player");
+        CDELog.d(TAG, "init ff player");
         initFFmpegPlayer();
 
 
@@ -251,11 +251,11 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
                 && TextUtils.isEmpty(zimuPath);
         boolean autoLoadNetworkSubtitle = AppConfig.getInstance().isAutoLoadNetworkSubtitle()
                 && TextUtils.isEmpty(zimuPath);
-        CDELog.j(TAG, "video path:" + videoPath);
-        CDELog.j(TAG, "video name:" + videoTitle);
-        CDELog.j(TAG, "FFmpegMediaPlayer.loadLibrariesOnce");
+        CDELog.d(TAG, "video path:" + videoPath);
+        CDELog.d(TAG, "video name:" + videoTitle);
+        CDELog.d(TAG, "FFmpegMediaPlayer.loadLibrariesOnce");
         FFmpegMediaPlayer.loadLibrariesOnce(null);
-        CDELog.j(TAG, "after FFmpegMediaPlayer.loadLibrariesOnce");
+        CDELog.d(TAG, "after FFmpegMediaPlayer.loadLibrariesOnce");
 
         ffPlayerView
                 .setOnInfoListener(onOutsideListener)
@@ -293,7 +293,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
         CDEUtils.umStopPlayback(videoTitle, videoPath);
 
         if (mSettings.getPlayMode() != CDEUtils.PLAY_MODE_NORMAL) {
-            CDELog.j(TAG, "send event");
+            CDELog.d(TAG, "send event");
             EventBus.getDefault().post(new SendMsgEvent("PlaybackStop" + "_KANTV_" +
                     mSettings.getPlayMode() + "_KANTV_" + videoTitle.trim() + "_KANTV_" + videoPath.trim()));
         }
@@ -316,7 +316,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        CDELog.j(TAG, "keyCode: " + keyCode);
+        CDELog.d(TAG, "keyCode: " + keyCode);
         return mPlayer.onKeyDown(keyCode, event) || super.onKeyDown(keyCode, event);
     }
 

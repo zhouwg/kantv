@@ -12,24 +12,35 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Watch encrypted live stream(Google Widevine, Huawei WisePlay, ChinaDRM......)
 
-- Real-time English subtitle for online TV by excellent&amazing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a>  (not finished)  
+- Real-time English subtitle for online TV by great&excellent&amazing<a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a>(PoC finished and Xiaomi 14 or other powerful Android mobile phone IS HIGHLY required for this feature otherwise unexpected behaviour would happen)
 
 - UI refactor
 
-- Android turn-key project(follow steps here would get same result on **any mainstream Android phone** to my local dev envs and Xiaomi 14 is required for feature of realtime English subtitle with online English TV)
+
+- Android turn-key project(/customized/secondary software development activity could be done by Android Studio IDE)
+
+
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for AI experts to study AI tech for video & audio
+- Well-maintained "workbench" for AI R&D activites
 
   <ul>
 
-    <li>Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like <a href="https://github.com/ggerganov/whisper.cpp">GGML's whisper.cpp</a>) in "real application" </li>
+    <li>Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like <a href="https://github.com/ggerganov/whisper.cpp">GGML's whisper.cpp</a>) in real scenario </li>
+
+    <li>Well-maintained "workbench" for software programmer to learning AI technology in real scenario
+
     <li>...</li>
 
   </ul>
 
+
 - Android **turn-key project** for software programmers who was interested in device-side AI application on **Android**-based device
+
+
+- Give back to open source community after got/learnt a lot from open source community
+
 
 
 ### How to build project
@@ -85,7 +96,7 @@ echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
 ```
 
 - bazel
-  
+
   download ![bazel-3.1.0](https://github.com/bazelbuild/bazel/releases?page=5) and install bazel manually
 
 ```
@@ -100,10 +111,10 @@ bazel is **NOT** used currently but put it here for further usage in the future.
 - Android NDK & Android Studio
 
   download and install Android Studio and Android NDK manually
-  
+
   [Android Studio 4.2.1](https://developer.android.google.cn/studio)
-  
-  
+
+
   [Android NDK-r26c](https://developer.android.com/ndk/downloads)
 
 
@@ -111,7 +122,7 @@ bazel is **NOT** used currently but put it here for further usage in the future.
 
   ```
   ls /opt/kantv-toolchain/android-ndk-r26c
-  
+
   ```
 
 
@@ -128,7 +139,7 @@ set shiftwidth=4
 set softtabstop=4
 set noundofile
 set nobackup
-set fileformat=unix 
+set fileformat=unix
 set undodir=~/.undodir
 set cindent
 set cinoptions=(0
@@ -215,9 +226,9 @@ Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/rel
 
 ### Roadmap
 
-- real-time English subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- real-time English subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- real-time Chinese subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- real-time Chinese subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
@@ -245,7 +256,7 @@ The computing power and network bandwidth of default kantvserver is very low due
    audio.wav  ->                       http(s)://local_http_server/kantv/deepspeech/audio.wav
    deepspeech-0.9.3-models.tflite ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.tflite
    deepspeech-0.9.3-models.scorer ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.scorer
-  
+
 
    something for whisper.cpp      ->   http(s)://local_http_server/kantv/whisper/something
 
@@ -309,35 +320,41 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Acknowledgement
 
-Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg && whisper.cpp and other excellent projects. 
+Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg && whisper.cpp and other excellent projects.
 
 Project KanTV has used/tried following open-source projects(list in here is not incomplete):
 <ul>
-  <li><a href="https://github.com/torvalds/linux"     target="_blank">Linux</a></li>
-  <li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
- 	<li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
-  <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
-  <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
- 	<li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
- 	<li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
- 	<li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
- 	<li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>
-  <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
- 	<li><a href="https://github.com/fraunhoferhhi/vvenc" target="_blank" rel="noopener">VVenc</a></li>
- 	<li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
- 	<li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
- 	<li><a href="https://aomedia.org/" target="_blank" rel="noopener">AOM-AV1</a></li>
- 	<li><a href="https://opencv.org/" target="_blank" rel="noopener">OpenCV</a></li>
- 	<li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
- 	<li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
-  <li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
- 	<li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
- 	<li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
-  <li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
-  <li><a href="https://github.com/OpenMathLib/OpenBLAS" target="_blank">OpenBLAS</a></li>
- 	<li>......</li>
+     <li><a href="https://github.com/torvalds/linux"     target="_blank">Linux</a></li>
+     <li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
+     <li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
+     <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
+
+     <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
+     <li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
+     <li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
+     <li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
+     <li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
+     <li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
+     <li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
+     <li><a href="https://github.com/mhroth/tinywav/" target="_blank" rel="noopener">tinywav</a></li>
+
+     <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>
+     <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
+     <li><a href="https://github.com/fraunhoferhhi/vvenc" target="_blank" rel="noopener">VVenc</a></li>
+     <li><a href="https://aomedia.org/" target="_blank" rel="noopener">AOM-AV1</a></li>
+     <li><a href="https://opencv.org/" target="_blank" rel="noopener">OpenCV</a></li>
+     <li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
+     <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
+
+     <li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
+     <li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
+     <li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
+     <li><a href="https://github.com/OpenMathLib/OpenBLAS" target="_blank">OpenBLAS</a></li>
+
+     <li>......</li>
 </ul>
- 
+
+
 ### License
 
 ```
@@ -346,10 +363,13 @@ Licensed under LGPLv2.1 or later
 ```
 
 ```
-Copyright (c) 2021 -  Authors of project KanTV
+Copyright (c) 2021 - 2023 Project KanTV
+
+Copyright (c) 2024 -  Authors of project KanTV
 
 Licensed under Apachev2.0 or later
 ```
 
 ### Commercial Use
+
 Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.

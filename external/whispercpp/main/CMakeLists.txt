@@ -1,6 +1,8 @@
 # Copyright (c) 2024- KanTV Authors. All Rights Reserved.
 
-# Description: build whispercpp's main tool for target x86-linux
+# Description: build whispercpp's main tool for target x86
+
+# TODO: not work currently
 
 
 cmake_minimum_required(VERSION 3.10)

@@ -338,7 +338,7 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity implements
         CDELog.j(TAG, "wifi mac:" + CDEUtils.getWifiMac());
         CDEUtils.generateUniqueID(this);
         CDELog.j(TAG, "device unique id: " + CDEUtils.getUniqueID());
-        CDELog.j(TAG, "device unique id string: " + CDEUtils.getUniqueIDString());
+        CDELog.d(TAG, "device unique id string: " + CDEUtils.getUniqueIDString());
         try {
             WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
             WifiInfo info = wifi.getConnectionInfo();

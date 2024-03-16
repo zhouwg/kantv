@@ -109,8 +109,8 @@ public class PlayerManagerActivity extends BaseMvcActivity {
 
         sourceOrigin = openIntent.getIntExtra("source_origin", SOURCE_ORIGIN_LOCAL);
 
-        CDELog.j(TAG, "video title:" + videoTitle);
-        CDELog.j(TAG, "video url:" + videoPath);
+        CDELog.d(TAG, "video title:" + videoTitle);
+        CDELog.d(TAG, "video url:" + videoPath);
 
 
         if (Intent.ACTION_VIEW.equals(openIntent.getAction())) {
@@ -154,7 +154,7 @@ public class PlayerManagerActivity extends BaseMvcActivity {
         playParam.setSourceOrigin(sourceOrigin);
 
 
-        CDELog.j(TAG, "start player activity");
+        CDELog.d(TAG, "start player activity");
         Intent intent = new Intent(this, PlayerActivity.class);
         intent.putExtra("video_data", playParam);
         this.startActivity(intent);

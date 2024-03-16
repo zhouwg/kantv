@@ -6724,7 +6724,7 @@ static void whisper_log_callback_default(ggml_log_level level, const char * text
 }
 
 
-//------------------------------------ added by zhou.weiguo since 03-05-2024(2024-03-05) -----------------------------------------
+//------------------------------------ added by zhou.weiguo(https://github.com/zhouwg) since 03-05-2024(2024-03-05) -----------------------------------------
 //for PoC(https://github.com/cdeos/kantv/issues/64) in project KanTV
 //
 //I should follow coding style of GGML
@@ -6796,12 +6796,14 @@ typedef struct {
 
     uint8_t  p_sample_buffer[MAX_SAMPLE_SIZE];       // temp buffer for convert audio frame
     uint8_t  p_audio_buffer[MAX_SAMPLE_SIZE];        // temp buffer for convert audio frame
-    bool     b_pre_convert;
-    bool     b_enable_dump_16k_data;
 
-    class whisper_asr * p_asr;
+    class whisper_asr * p_asr;                       // attention memory leak, smart pointer should not be used here for performance consideration
 
     pthread_mutex_t  mutex;
+
+    //only for troubleshooting issue
+    bool     b_pre_convert;
+    bool     b_enable_dump_16k_data;
 } whisper_asr_context;
 
 static whisper_asr_context *p_asr_ctx   = NULL;
@@ -7422,7 +7424,7 @@ void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_
 //
 // ASR for real-time subtitle in UI layer
 //
-// the folllowing code is just for PoC of realtime subtitle with online TV and SHOULD NOT be used in real project
+// the following code is just for PoC of realtime subtitle with online TV and SHOULD NOT be used in real project
 // =================================================================================================
 class whisper_asr {
 public:
@@ -7431,7 +7433,6 @@ public:
         _p_whisper_in               = _whisper_in;
         _n_whisper_in_size          = 0;
         _n_total_sample_counts      = 0;
-        _n_debug_counts             = 0;
 
         _n_channels                 = 0;
         _n_sample_rate              = 0;
@@ -7464,14 +7465,15 @@ public:
         _p_whisper_in           = _whisper_in;
         _n_whisper_in_size      = 0;
         _n_total_sample_counts  = 0;
-        _n_debug_counts         = 0LL;
+
         _swr_ctx                = swr_alloc();
         CHECK(NULL != _swr_ctx);
 
         memset(sz_filename, 0, 256);
 
-        _b_enable_dump_raw_data = true;
-        _b_enable_dump_16k_data = true;
+        //only for troubleshooting issue
+        _b_enable_dump_raw_data = false;
+        _b_enable_dump_16k_data = false;
 
         n_begin_time = ggml_time_us();
 
@@ -7499,9 +7501,9 @@ public:
             n_durtion = (n_end_time - n_begin_time) / 1000;
 
             if (n_durtion > 2000) { // 2 seconds
-                LOGGD("duration of data collection is %d milliseconds\n", n_durtion);
-                LOGGD("whisper_in_size %d\n", _n_whisper_in_size);
-                LOGGD("total_sample_counts %d\n", _n_total_sample_counts);
+                LOGGD("duration of audio data gathering is: %d milliseconds\n", n_durtion);
+                LOGGD("size of gathered audio data: %d\n", _n_whisper_in_size);
+                LOGGD("total audio sample counts %d\n", _n_total_sample_counts);
 
                 if (_b_enable_dump_raw_data) {
                     //this dump file is ok
@@ -7527,68 +7529,63 @@ public:
                     _b_enable_dump_raw_data = false;
                 }
 
-                LOGGD("_n_chnnels %d\n", _n_channels);
-                LOGGD("_n_sample_rate %d\n", _n_sample_rate);
-                LOGGD("_sample format %d(%s)\n", _sample_format, whisper_sampleformat_string(_sample_format));
 
-                if (1) {
-                    av_opt_set_int(_swr_ctx, "in_channel_count", _n_channels, 0);
-                    av_opt_set_int(_swr_ctx, "in_sample_rate", _n_sample_rate, 0);
-                    av_opt_set_sample_fmt(_swr_ctx, "in_sample_fmt", _sample_format, 0);
-                    av_opt_set_int(_swr_ctx, "out_channel_count", 1, 0);
-                    av_opt_set_int(_swr_ctx, "out_sample_rate", 16000, 0);
-                    av_opt_set_sample_fmt(_swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
-                    if ((result = swr_init(_swr_ctx)) < 0) {
-                        LOGGW("failed to initialize the resampling context\n");
-                        continue;
-                    }
-                    uint8_t *in_buf[] = {_whisper_in, NULL};
-                    p_samples = _u8_audio_buffer;
+                av_opt_set_int(_swr_ctx, "in_channel_count", _n_channels, 0);
+                av_opt_set_int(_swr_ctx, "in_sample_rate", _n_sample_rate, 0);
+                av_opt_set_sample_fmt(_swr_ctx, "in_sample_fmt", _sample_format, 0);
+                av_opt_set_int(_swr_ctx, "out_channel_count", 1, 0);
+                av_opt_set_int(_swr_ctx, "out_sample_rate", 16000, 0);
+                av_opt_set_sample_fmt(_swr_ctx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
+                if ((result = swr_init(_swr_ctx)) < 0) {
+                    LOGGW("failed to initialize the resampling context\n");
+                    continue;
+                }
+
+                uint8_t *in_buf[] = {_whisper_in, NULL};
+                p_samples = _u8_audio_buffer;
+                result = swr_convert(_swr_ctx,
+                                     (uint8_t **) (&p_samples),
+                                     _n_total_sample_counts,
+                                     (const uint8_t **) (in_buf),
+                                     _n_total_sample_counts);
+
+                if (result < 0) {
+                    LOGGW("resample failed, pls check why?\n");
+                    continue;
+                }
+
+                LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                while (1) {
+                    p_samples += (result * sizeof(float));
                     result = swr_convert(_swr_ctx,
                                          (uint8_t **) (&p_samples),
                                          _n_total_sample_counts,
-                                         (const uint8_t **) (in_buf),
-                                         _n_total_sample_counts);
-
-                    if (result < 0) {
-                        LOGGW("resample failed\n");
-                    } else {
-                        LOGGD("out samples:%d, total samples:%d \n", result, _n_total_sample_counts);
-                        int left = _n_total_sample_counts - result;
-                        while (left > 0) { //attention here
-                            p_samples += (result * sizeof(float));
-                            result = swr_convert(_swr_ctx,
-                                                 (uint8_t **) (&p_samples),
-                                                 _n_total_sample_counts,
-                                                 NULL,
-                                                 0);
-                            LOGGD("out samples:%d, total samples:%d \n", result, _n_total_sample_counts);
-                            if (0 == result) {
-                                break;
-                            }
-                        }
-                        if (_b_enable_dump_16k_data) {  //2024-03-16,13:05, finally, this dump file is also ok
-                            memset(sz_filename, 0, 256);
-                            snprintf(sz_filename, 256, "/sdcard/kantv/16k_out.wav");
-                            tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_FLOAT32, TW_INLINE, sz_filename);
-                            tinywav_write_f(&_st_tinywav_16k, _u8_audio_buffer, _n_total_sample_counts);
-                            tinywav_close_write(&_st_tinywav_16k);
-
-                            LOGGD("dump converted audio data to file %s\n", sz_filename);
-                            _b_enable_dump_16k_data = false;
-                        }
+                                         NULL,
+                                         0);
+                    LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                    if (0 == result) {
+                        break;
                     }
+                }
+
+                if (_b_enable_dump_16k_data) {  //2024-03-16,13:05, finally, this dump file is also ok and then ASR subtitle is ok
+                    memset(sz_filename, 0, 256);
+                    snprintf(sz_filename, 256, "/sdcard/kantv/16k_out.wav");
+                    tinywav_open_write(&_st_tinywav_16k, 1, 16000, TW_FLOAT32, TW_INLINE, sz_filename);
+                    tinywav_write_f(&_st_tinywav_16k, _u8_audio_buffer, _n_total_sample_counts);
+                    tinywav_close_write(&_st_tinywav_16k);
+                    LOGGD("dump converted audio data to file %s\n", sz_filename);
+                    _b_enable_dump_16k_data = false;
                 }
 
                 p_samples = _u8_audio_buffer;
                 whisper_asr_audio_to_text(reinterpret_cast<const float *>(p_samples), _n_total_sample_counts);
-                LOGGD("after inference\n");
 
-                n_end_time = ggml_time_us();
-                n_begin_time = n_end_time;
-                _p_whisper_in = _whisper_in;
-                _n_whisper_in_size = 0;
-                _n_total_sample_counts = 0;
+                n_end_time              = ggml_time_us();
+                n_begin_time            = n_end_time;
+                _p_whisper_in           = _whisper_in;
+                _n_whisper_in_size      = 0;
+                _n_total_sample_counts  = 0;
             }
 
             usleep(10);
@@ -7608,22 +7605,26 @@ private:
     std::thread _thread_poll;
     bool        _b_exit_thread;
 
-
     int         _n_channels;
     int         _n_sample_rate;
 
     int         _n_total_sample_counts;
+
+    //buffer for gather sufficient audio data ( > 1 seconds)
+    uint8_t     * _p_whisper_in;
     uint8_t     _whisper_in[MAX_WHISPER_IN_BUFFER_SIZE];
-    uint8_t     *_p_whisper_in;
     int         _n_whisper_in_size;
 
-    int64_t     _n_debug_counts;
+    //temp buffer for resample audio data in _whisper_in from stero + f32 + 48KHz to mono + f32 + 16kHz for purpose of make whispercpp happy
+    uint8_t     _u8_audio_buffer[MAX_WHISPER_IN_BUFFER_SIZE * 2];
 
-    fifo_buffer_t *_asr_fifo;
+
+    fifo_buffer_t * _asr_fifo;
     struct SwrContext * _swr_ctx;
     enum AVSampleFormat _sample_format;
 
-    uint8_t     _u8_audio_buffer[MAX_WHISPER_IN_BUFFER_SIZE * 2];
+
+    //only for troubleshooting issue
     TinyWav     _st_tinywav_raw;
     TinyWav     _st_tinywav_16k;
     bool        _b_enable_dump_raw_data;
@@ -7666,10 +7667,9 @@ static const char * whisper_asr_callback(void * opaque) {
         static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
-                    " First line:this is pressure test of whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n "
-                    "second line:thanks for your interesting in whisper.cpp\n"
-                    " third line:have fun with whisper.cpp\n"
-                    "fourth line:we value your feedback and suggestion\n";
+                    " First line:this is ASR pressure test powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n "
+                    "second line:thanks for your interesting in project KanTV(https://github.com/cdeos/kantv)\n"
+                    " third line:have fun with great and amazing whisper.cpp\n";
         return test_info.c_str();
     }
 
@@ -7720,7 +7720,7 @@ static const char * whisper_asr_callback(void * opaque) {
     CHECK(samples_size == num_samples * sizeof(float) * audioframe->channels);
 
 
-    if (p_asr_ctx->b_pre_convert) { //not work as expected
+    if (p_asr_ctx->b_pre_convert) { //only for troubleshooting issue, not work as expected
         av_opt_set_int(p_asr_ctx->swr_ctx, "in_channel_count", audioframe->channels, 0);
         av_opt_set_int(p_asr_ctx->swr_ctx, "in_sample_rate", audioframe->sample_rate, 0);
         av_opt_set_sample_fmt(p_asr_ctx->swr_ctx, "in_sample_fmt", static_cast<AVSampleFormat>(audioframe->format), 0);
@@ -7737,7 +7737,10 @@ static const char * whisper_asr_callback(void * opaque) {
                              (const uint8_t **) (audioframe->data),
                              audioframe->nb_samples);
         if (result < 0) {
-            LOGGW("resample failed\n");
+            LOGGW("resample failed, pls check why?\n");
+            pthread_mutex_unlock(&p_asr_ctx->mutex);
+
+            return NULL;
         }
 
         if (p_asr_ctx->b_enable_dump_16k_data) {
@@ -7750,8 +7753,9 @@ static const char * whisper_asr_callback(void * opaque) {
             LOGGD("dump pre-convert 16k audio data to file %s\n", sz_filename);
             p_asr_ctx->b_enable_dump_16k_data = false;
         }
-        p_samples = p_asr_ctx->p_audio_buffer; //attention here
-        asr_fifo = whisper_asr_getfifo();
+
+        p_samples   = p_asr_ctx->p_audio_buffer; //attention here
+        asr_fifo    = whisper_asr_getfifo();
         if (NULL != asr_fifo) {
             buf_element_t *buf = asr_fifo->buffer_try_alloc(asr_fifo);
             if (NULL != buf) {
@@ -7765,6 +7769,7 @@ static const char * whisper_asr_callback(void * opaque) {
             }
         }
     } else {
+        //normal logic
         asr_fifo = whisper_asr_getfifo();
         if (NULL != asr_fifo) {
             buf_element_t *buf = asr_fifo->buffer_try_alloc(asr_fifo);
@@ -7818,6 +7823,7 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     }
 
     if (1 == p_asr_ctx->n_dev_mode) { //pressure test, already handled in whisper_asr_callback
+        //LOGGW("are you in ASR pressure test mode?\n");
         return NULL;
     }
 
@@ -7827,18 +7833,19 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
         //and calling whisper_asr_audio_to_text() directly in whisper_transcribe_from_file
     }
 
-    asr_result = whisper_get_time_string() + " Powered by whisper.cpp\n";
+    asr_result = whisper_get_time_string() + " AI subtitle powered by whisper.cpp\n";
 
     begin_time = ggml_time_ms();
     whisper_reset_timings(p_asr_ctx->p_context);
     result = whisper_full(p_asr_ctx->p_context, *p_asr_ctx->p_params, pf32_audio_buffer, num_samples);
     if (0 != result) {
-        LOGW("inference failure, pls check why?\n");
+        LOGW("whisper inference failure, pls check why?\n");
         result = -1;
         goto failure;
     }
     end_time = ggml_time_ms();
-    LOGGI("inference cost %d ms\n", end_time - begin_time);
+
+    LOGGW("whisper inference cost %d ms\n", end_time - begin_time);
     whisper_print_timings(p_asr_ctx->p_context);
 
     num_segments = whisper_full_n_segments(p_asr_ctx->p_context);
@@ -7851,17 +7858,23 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
         }
         t0_segment = whisper_full_get_segment_t0(p_asr_ctx->p_context, index);
         t1_segment = whisper_full_get_segment_t1(p_asr_ctx->p_context, index);
+        /*
         asr_result +=
                 "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
                 std::string(text) + "\n";
+                */
+        asr_result += std::string(text);
+        result = 0;
+
         LOGGD("asr result:\n%s\n", asr_result.c_str());
-        //kantv_asr_notify_c(asr_result.c_str());
+        kantv_asr_notify_c(asr_result.c_str());
     }
+
     text = asr_result.c_str();
 
 failure:
     if (0 != result) {
-        asr_result = whisper_get_time_string() + "\n" +  "inference failure, pls check why?\n";
+        asr_result = whisper_get_time_string() + "\n" +  "whisper inference failure, pls check why?\n";
         text = asr_result.c_str();
     }
 
@@ -7920,9 +7933,9 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      p_asr_ctx->asr_fifo = fifo_new("asr_fifo", 1200, 1024 * 8 * 20);
      CHECK(NULL != p_asr_ctx->asr_fifo);
 
-     p_asr_ctx->p_asr = new whisper_asr();
+     p_asr_ctx->p_asr = new whisper_asr();  // attention memory leak
 
-     p_asr_ctx->swr_ctx = swr_alloc();
+     p_asr_ctx->swr_ctx = swr_alloc();      // attention memory leak
      CHECK(NULL != p_asr_ctx->swr_ctx);
 
      p_asr_ctx->n_dev_mode = n_devmode;
@@ -7938,30 +7951,29 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      CHECK(NULL != p_asr_ctx->p_params);
 
      struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
-     params.print_realtime          = true;
+     params.print_realtime          = false;
      params.print_progress          = false;
-     params.print_timestamps        = true;
-     params.print_special           = true;
+     params.print_timestamps        = false;
+     params.print_special           = false;
      params.translate               = false; //first step is transcription, the second step is English -> Chinese
      //params.initial_prompt        = "hello,whisper.cpp";
      params.language                = "en";
      params.n_threads               = num_threads;
      params.offset_ms               = 0;
      params.no_context              = true;
-     params.single_segment          = false;
-     params.no_timestamps           = params.single_segment;
+     params.single_segment          = true;
+     params.no_timestamps           = true;
 
      params.speed_up                = false;
      params.debug_mode              = true;
 
-    //params.tdrz_enable                  = false;
-    //params.suppress_blank               = true;
-    //params.suppress_non_speech_tokens   = true;
+     //params.tdrz_enable                  = false;//whisper complain failed to compute log mel spectrogram when this flag was enabled
+     params.suppress_blank               = true;
+     params.suppress_non_speech_tokens   = true;
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
-     if (0 == p_asr_ctx->n_dev_mode) {
-
+     if (0 == p_asr_ctx->n_dev_mode) {   // ASR normal mode: TV transcription
          p_asr_ctx->p_asr->start();
      }
 
@@ -7982,7 +7994,7 @@ void whisper_asr_finalize() {
     }
 
     LOGGD("stop asr thread\n");
-    if (0 == p_asr_ctx->n_dev_mode) {
+    if (0 == p_asr_ctx->n_dev_mode) { // ASR normal mode: TV transcription
         p_asr_ctx->p_asr->stop();
     }
     LOGGD("after stop asr thread\n");
@@ -8005,4 +8017,4 @@ void whisper_asr_finalize() {
 
     LOGGV("leave whisper_asr_finalize\n");
 }
-//------------------------------------ end added by zhou.weiguo -------------------------------------
+//------------------------------------ end added by zhou.weiguo(https://github.com/zhouwg) -------------------------------------

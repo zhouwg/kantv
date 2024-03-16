@@ -83,7 +83,7 @@
                     android:textColor="@color/text_white"
                     android:layout_centerVertical="true"
                     android:textSize="14sp"
-                    android:text="ASR"/>
+                    android:text="AI subtitle"/>
 
                 <Switch
                     android:id="@+id/tv_asr_sw"

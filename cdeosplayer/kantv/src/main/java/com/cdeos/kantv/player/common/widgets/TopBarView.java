@@ -70,7 +70,7 @@ public class TopBarView extends FrameLayout implements View.OnClickListener{
 
         playerSettingIv.setOnClickListener(this);
 
-        CDELog.j(TAG, "isRecording:" + CDEUtils.getTVRecording());
+        CDELog.d(TAG, "isRecording:" + CDEUtils.getTVRecording());
         if (CDEUtils.getTVRecording()) {
             tvRecordingIv.setVisibility(VISIBLE);
             tvDiskFree.setVisibility(VISIBLE);
@@ -132,11 +132,11 @@ public class TopBarView extends FrameLayout implements View.OnClickListener{
         KANTVDRM instance = KANTVDRM.getInstance();
         File sdcardFile = Environment.getExternalStorageDirectory();
         String sdcardPath = sdcardFile.getAbsolutePath();
-        CDELog.j(TAG, "sdcard path:" + sdcardPath);
+        CDELog.d(TAG, "sdcard path:" + sdcardPath);
         int diskFreeSize = instance.ANDROID_JNI_GetDiskFreeSize(sdcardPath);
         int diskTotalSize = instance.ANDROID_JNI_GetDiskSize(sdcardPath);
-        CDELog.j(TAG, "disk free:" + diskFreeSize + "MB");
-        CDELog.j(TAG, "disk total:" + diskTotalSize + "MB");
+        CDELog.d(TAG, "disk free:" + diskFreeSize + "MB");
+        CDELog.d(TAG, "disk total:" + diskTotalSize + "MB");
         tvDiskFree.setText(Integer.toString(diskFreeSize) + "/" + Integer.toString(diskTotalSize) + "M");
     }
 

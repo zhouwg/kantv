@@ -147,7 +147,18 @@
                      <li> add some technical docs to prepared empty directory doc </li>
                      <li> refine regular codes and prepare for coding work of implement real-time English subtitle for online English TV</li>
                  </ul>
-             
+
+- v1.3.2 2024-03-16,
+                 <ul>
+                     <li> ASR performance improved from 2 secs to 0.8 sec on Xiaomi 14 by special build optimization after study ARM's tech doc </li>
+                     <li> coding work of data path: UI <----> JNI <----> whisper.cpp <----> kantv-play <----> kantv-core </li>
+                     <li> UI language is now mightbe totally in English for purpose of more easier for open source community </li>
+                     <li> audio-only record mode is supported for the first time</li>
+                     <li> online TV record and online TV transcription can work at the same time for the first time</li>
+                     <li> save audio data to file when transcription was launched for further usage/scenario </li>
+                     <li> move some key-point codes to upper layer in customized whisper.cpp for purpose of referenced by AI experts or other programmers</li>
+                     <li> implmement TV subtitle for online TV by great whisper.cpp for the first time(NOT realtime)</li>
+                 </ul>
 
 
 ### Screenshots(一些屏幕截图）

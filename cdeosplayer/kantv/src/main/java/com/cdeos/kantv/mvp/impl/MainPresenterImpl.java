@@ -51,7 +51,7 @@ public class MainPresenterImpl extends BaseMvpPresenterImpl<MainView> implements
 
     @Override
     public void initScanFolder() {
-        CDELog.j(TAG, "******** init scan folder ******\n");
+        CDELog.d(TAG, "******** init scan folder ******\n");
 
         DataBaseManager.getInstance()
                 .selectTable("scan_folder")
@@ -67,6 +67,6 @@ public class MainPresenterImpl extends BaseMvpPresenterImpl<MainView> implements
                                 .postExecute();
                     }
                 });
-        CDELog.j(TAG, "******************************************\n");
+        CDELog.d(TAG, "******************************************\n");
     }
 }

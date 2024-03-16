@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+
+# Description: build whispercpp's main tool for target x86
+#
+# TODO: not work currently
+
+
 set -e
 
 TARGET=bench

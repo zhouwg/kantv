@@ -550,7 +550,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         if (mSettings.getPlayerEngine() == CDEUtils.PV_PLAYERENGINE__Exoplayer) {
             KANTVDRMManager.closePlaybackService();
         }
-        CDELog.j(TAG, "end playback");
+        CDELog.d(TAG, "end playback");
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -647,14 +647,14 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     public void setHudViewHolderVisibility(int visibility) {
         if (mHudViewHolder != null) {
             CDELog.d(TAG, "dev_mode: " + mSettings.getDevMode());
-            CDELog.j(TAG, "release_mode: " + CDEUtils.getReleaseMode());
+            CDELog.d(TAG, "release_mode: " + CDEUtils.getReleaseMode());
             mSettings.updateUILang(mActivity);
             if (visibility == View.VISIBLE) {
                 mHudViewHolder.setVisibility(View.VISIBLE);
             } else if (visibility == View.INVISIBLE) {
                 mHudViewHolder.setVisibility(View.INVISIBLE);
             } else {
-                CDELog.j(TAG, "invalid visibility mode : " + visibility);
+                CDELog.d(TAG, "invalid visibility mode : " + visibility);
             }
            
             if (CDEUtils.getDisableVideoTrack())
@@ -669,7 +669,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         if (mMediaPlayer != null) {
             mMediaPlayer.setEnableRecord(bEnableRecord);
         } else {
-            CDELog.j(TAG, "player not initialized");
+            CDELog.d(TAG, "player not initialized");
         }
     }
 
@@ -684,7 +684,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         if (mMediaPlayer != null) {
             mMediaPlayer.setEnableASR(bEnableASR);
         } else {
-            CDELog.j(TAG, "player not initialized");
+            CDELog.d(TAG, "player not initialized");
         }
     }
 
@@ -862,16 +862,16 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                             CDELog.d(TAG, "MEDIA_INFO_VIDEO_TRACK_LAGGING:");
                             break;
                         case IMediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
-                            CDELog.j(TAG, "MEDIA_INFO_VIDEO_RENDERING_START");
+                            CDELog.d(TAG, "MEDIA_INFO_VIDEO_RENDERING_START");
                             CDEUtils.perfGetRenderedTimeOfFirstVideoFrame();
                             if (mSettings.getPlayMode() != CDEUtils.PLAY_MODE_NORMAL) {
                                 CDELog.d(TAG, "loop play elapse time:" + CDEUtils.perfGetLoopPlayElapseTime() / 1000 + " secs");
-                                CDELog.j(TAG, "loop play elapse time:" + CDEUtils.perfGetLoopPlayElapseTimeString());
-                                CDELog.j(TAG, "loop play counts:" + CDEUtils.perfGetLoopPlayCounts());
-                                CDELog.j(TAG, "loop play error counts:" + CDEUtils.perfGetLoopPlayErrorCounts());
+                                CDELog.d(TAG, "loop play elapse time:" + CDEUtils.perfGetLoopPlayElapseTimeString());
+                                CDELog.d(TAG, "loop play counts:" + CDEUtils.perfGetLoopPlayCounts());
+                                CDELog.d(TAG, "loop play error counts:" + CDEUtils.perfGetLoopPlayErrorCounts());
                             }
                            
-                            CDELog.j(TAG, "duration of first video frame was rendered:" + (CDEUtils.perfGetFirstVideoFrameTime()) + " millisecs");
+                            CDELog.d(TAG, "duration of first video frame was rendered:" + (CDEUtils.perfGetFirstVideoFrameTime()) + " millisecs");
                             stopUIBuffering();
                             
                             if (!CDEUtils.getReleaseMode() && mSettings.getDevMode()) {
@@ -880,16 +880,16 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
-                            CDELog.j(TAG, "MEDIA_INFO_BUFFERING_START");
+                            CDELog.d(TAG, "MEDIA_INFO_BUFFERING_START");
                             String status = getResources().getString(R.string.buffering);
                             startUIBuffering(status);
                             break;
                         case IMediaPlayer.MEDIA_INFO_BUFFERING_END:
-                            CDELog.j(TAG, "MEDIA_INFO_BUFFERING_END");
+                            CDELog.d(TAG, "MEDIA_INFO_BUFFERING_END");
                             stopUIBuffering();
                             break;
                         case IMediaPlayer.MEDIA_INFO_NETWORK_BANDWIDTH:
-                            CDELog.j(TAG, "MEDIA_INFO_NETWORK_BANDWIDTH: " + arg2);
+                            CDELog.d(TAG, "MEDIA_INFO_NETWORK_BANDWIDTH: " + arg2);
                             break;
                         case IMediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
                             CDELog.d(TAG, "MEDIA_INFO_BAD_INTERLEAVING:");
@@ -927,7 +927,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                                 mRenderView.setVideoRotation(arg2);
                             break;
                         case IMediaPlayer.MEDIA_INFO_AUDIO_RENDERING_START:
-                            CDELog.j(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
+                            CDELog.d(TAG, "MEDIA_INFO_AUDIO_RENDERING_START:");
                             stopUIBuffering();
 
                             if (mMediaPlayer.isPlaying()) {
@@ -956,17 +956,17 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                         CDEUtils.perfUpdateLoopPlayErrorCounts();
                     }
                     
-                    CDELog.j(TAG, "Error: " + framework_err + "," + impl_err);
+                    CDELog.d(TAG, "Error: " + framework_err + "," + impl_err);
                     if ((CDEUtils.isRunningOnAmlogicBox() && (framework_err == -38) && (0 == impl_err))) {
-                        CDELog.j(TAG, "\n\n\n");
-                        CDELog.j(TAG, "=======================================");
-                        CDELog.j(TAG, "|");
-                        CDELog.j(TAG, "|");
-                        CDELog.j(TAG, "workaround with this issue");
-                        CDELog.j(TAG, "|");
-                        CDELog.j(TAG, "|");
-                        CDELog.j(TAG, "=======================================");
-                        CDELog.j(TAG, "\n\n\n");
+                        CDELog.d(TAG, "\n\n\n");
+                        CDELog.d(TAG, "=======================================");
+                        CDELog.d(TAG, "|");
+                        CDELog.d(TAG, "|");
+                        CDELog.d(TAG, "workaround with this issue");
+                        CDELog.d(TAG, "|");
+                        CDELog.d(TAG, "|");
+                        CDELog.d(TAG, "=======================================");
+                        CDELog.d(TAG, "\n\n\n");
                         return true;
                     }
                     mCurrentState = STATE_ERROR;
@@ -1094,7 +1094,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             return;
         }
 
-        CDELog.j(TAG, "bind surface holder");
+        CDELog.d(TAG, "bind surface holder");
         holder.bindToMediaPlayer(mp);
     }
 
@@ -1124,7 +1124,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         public void onSurfaceCreated(@NonNull IRenderView.ISurfaceHolder holder, int width, int height) {
             CDELog.d(TAG, "onSurfaceCreated");
             if (holder.getRenderView() != mRenderView) {
-                CDELog.j(TAG, "onSurfaceCreated: unmatched render callback\n");
+                CDELog.d(TAG, "onSurfaceCreated: unmatched render callback\n");
                 return;
             }
 
@@ -1138,7 +1138,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         @Override
         public void onSurfaceDestroyed(@NonNull IRenderView.ISurfaceHolder holder) {
             if (holder.getRenderView() != mRenderView) {
-                CDELog.j(TAG, "onSurfaceDestroyed: unmatched render callback\n");
+                CDELog.d(TAG, "onSurfaceDestroyed: unmatched render callback\n");
                 return;
             }
             
@@ -1153,9 +1153,9 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     }
     
     public void release(boolean cleartargetstate) {
-        CDELog.j(TAG, "enter release");
+        CDELog.d(TAG, "enter release");
         if (mMediaPlayer != null) {
-            CDELog.j(TAG, "not released");
+            CDELog.d(TAG, "not released");
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -1167,13 +1167,13 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             AudioManager am = (AudioManager) mAppContext.getSystemService(Context.AUDIO_SERVICE);
             am.abandonAudioFocus(null);
         } else {
-            CDELog.j(TAG, "already released");
+            CDELog.d(TAG, "already released");
         }
-        CDELog.j(TAG, "leave release");
+        CDELog.d(TAG, "leave release");
     }
 
     public void destroy() {
-        CDELog.j(TAG, "destroy");
+        CDELog.d(TAG, "destroy");
         release(true);
     }
 
@@ -1229,10 +1229,10 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         CDELog.d(TAG, "dev_mode: " + mSettings.getDevMode());
         boolean bEnableDevMode = (!mSettings.getDevMode());
         if (bEnableDevMode) {
-            CDELog.j(TAG, "enter dev mode");
+            CDELog.d(TAG, "enter dev mode");
             //Toast.makeText(mActivity,   "enter dev mode", Toast.LENGTH_SHORT).show();
         } else {
-            CDELog.j(TAG, "exit dev mode");
+            CDELog.d(TAG, "exit dev mode");
             //Toast.makeText(mActivity,   "exit dev mode", Toast.LENGTH_SHORT).show();
         }
 
@@ -1240,11 +1240,11 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         editor.putBoolean(keyDevMode, bEnableDevMode);
         editor.commit();
 
-        CDELog.j(TAG, "dump mode " + mSettings.getDumpMode());
-        CDELog.j(TAG, "dev  mode " + mSettings.getDevMode());
-        CDELog.j(TAG, "dump duration " + CDEUtils.getDumpDuration());
-        CDELog.j(TAG, "play engine " + mSettings.getPlayerEngine());
-        CDELog.j(TAG, "drm scheme " + CDEUtils.getDrmSchemeName());
+        CDELog.d(TAG, "dump mode " + mSettings.getDumpMode());
+        CDELog.d(TAG, "dev  mode " + mSettings.getDevMode());
+        CDELog.d(TAG, "dump duration " + CDEUtils.getDumpDuration());
+        CDELog.d(TAG, "play engine " + mSettings.getPlayerEngine());
+        CDELog.d(TAG, "drm scheme " + CDEUtils.getDrmSchemeName());
         if (bEnableDevMode) {
             setHudViewHolderVisibility(View.VISIBLE);
         } else {
@@ -1264,7 +1264,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 keyCode != KeyEvent.KEYCODE_CALL &&
                 keyCode != KeyEvent.KEYCODE_ENDCALL;
         
-        CDELog.j(TAG, "keyCode:" + keyCode);
+        CDELog.d(TAG, "keyCode:" + keyCode);
         
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             exitLoopPlayMode();
@@ -1482,27 +1482,27 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
         if (videoInfo != null) {
             tmpString = CDEUtils.convertLongString(videoInfo, 30);
-            CDELog.j(TAG, "videoInfo:" + tmpString);
+            CDELog.d(TAG, "videoInfo:" + tmpString);
             if (videoInfo.contains("unknown"))
                 isPureAudioContent = true;
         } else {
-            CDELog.j(TAG, "is pure audio content");
+            CDELog.d(TAG, "is pure audio content");
             isPureAudioContent = true;
         }
 
         if (audioInfo != null) {
             tmpString = CDEUtils.convertLongString(audioInfo, 30);
         } else {
-            CDELog.j(TAG, "is pure video content");
+            CDELog.d(TAG, "is pure video content");
         }
 
 
         if ((videoInfo != null) && (audioInfo != null)) {
-            CDELog.j(TAG, "videoinfo :" + videoInfo);
-            CDELog.j(TAG, "audioInfo :" + audioInfo);
+            CDELog.d(TAG, "videoinfo :" + videoInfo);
+            CDELog.d(TAG, "audioInfo :" + audioInfo);
             if (videoInfo.contains("unknown")) {
                 if (audioInfo.contains("unknown")) {
-                    CDELog.j(TAG, "special case, pls check");
+                    CDELog.d(TAG, "special case, pls check");
                     //TODO
                     //stopPlayback();
                     //mCurrentState = STATE_ERROR;
@@ -1622,7 +1622,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             return;
 
         if ((mMediaPlayer != null) && (mMediaPlayer instanceof AndroidMediaPlayer)) {
-            CDELog.j(TAG, "AndroidMediaPlayer is using, becareful");
+            CDELog.d(TAG, "AndroidMediaPlayer is using, becareful");
         }
 
         if (isInPlaybackState()) {
@@ -1725,9 +1725,9 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     }
 
     public boolean toggleFullscreen_old() {
-        CDELog.j(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
-        CDELog.j(TAG, "current aspect:" + mCurrentAspectRatio);
-        CDELog.j(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
+        CDELog.d(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
+        CDELog.d(TAG, "current aspect:" + mCurrentAspectRatio);
+        CDELog.d(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
         if (mEnableFullscreen && (mPreviousAspectRatioIndex != IRenderView.AR_ASPECT_FILL_PARENT)) {
             mEnableFullscreen = true;
             mPreviousAspectRatioIndex = IRenderView.AR_ASPECT_FILL_PARENT;
@@ -1746,18 +1746,18 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         }
 
         mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
-        CDELog.j(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
-        CDELog.j(TAG, "current aspect:" + mCurrentAspectRatio);
-        CDELog.j(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
+        CDELog.d(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
+        CDELog.d(TAG, "current aspect:" + mCurrentAspectRatio);
+        CDELog.d(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
         if (mRenderView != null)
             mRenderView.setAspectRatio(mCurrentAspectRatio);
         return mEnableFullscreen;
     }
 
     public boolean toggleFullscreen() {
-        CDELog.j(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
-        CDELog.j(TAG, "current aspect:" + mCurrentAspectRatio);
-        CDELog.j(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
+        CDELog.d(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
+        CDELog.d(TAG, "current aspect:" + mCurrentAspectRatio);
+        CDELog.d(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
         mPreviousAspectRatioIndex = mCurrentAspectRatioIndex;
         if (!mEnableFullscreen) {
             mEnableFullscreen = true;
@@ -1769,9 +1769,9 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             mCurrentAspectRatioIndex = IRenderView.AR_ASPECT_WRAP_CONTENT;
             mCurrentAspectRatio = s_allAspectRatio[mCurrentAspectRatioIndex];
         }
-        CDELog.j(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
-        CDELog.j(TAG, "current aspect:" + mCurrentAspectRatio);
-        CDELog.j(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
+        CDELog.d(TAG, "current aspect index: " + mCurrentAspectRatioIndex);
+        CDELog.d(TAG, "current aspect:" + mCurrentAspectRatio);
+        CDELog.d(TAG, "prev aspect index:" + mPreviousAspectRatioIndex);
         if (mRenderView != null)
             mRenderView.setAspectRatio(mCurrentAspectRatio);
         return mEnableFullscreen;
@@ -1783,7 +1783,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
     public boolean toggleLandscape() {
         mEnableLandscape = !mEnableLandscape;
-        CDELog.j(TAG, "toggle land scape");
+        CDELog.d(TAG, "toggle land scape");
         if (mActivity == null)
             return false;
 
@@ -1833,8 +1833,8 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         if (mAllRenders.isEmpty())
             mAllRenders.add(RENDER_SURFACE_VIEW);
         mCurrentRender = mAllRenders.get(mCurrentRenderIndex);
-        CDELog.j(TAG, "current render index:" + mCurrentRenderIndex);
-        CDELog.j(TAG, "current render:" + mCurrentRender);
+        CDELog.d(TAG, "current render index:" + mCurrentRenderIndex);
+        CDELog.d(TAG, "current render:" + mCurrentRender);
         setRender(mCurrentRender);
     }
 
@@ -1904,7 +1904,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
     public IMediaPlayer createPlayer(int playerEngineType) {
         IMediaPlayer mediaPlayer = null;
-        CDELog.j(TAG, "playEngine: " + playerEngineType);
+        CDELog.d(TAG, "playEngine: " + playerEngineType);
         if ((0 == playerEngineType) && CDEUtils.isRunningOnAmlogicBox()) {
             playerEngineType = CDEUtils.PV_PLAYERENGINE__AndroidMediaPlayer;
         }
@@ -1916,11 +1916,11 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 mediaPlayer = cdeExoMediaPlayer;
               
                 if (mSettings.getTEEEnabled()) {
-                    CDELog.j(TAG, "using TEE");
+                    CDELog.d(TAG, "using TEE");
                     CDEUtils.setDecryptMode(CDEUtils.DECRYPT_TEE);
                     mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_TEE);
                 } else {
-                    CDELog.j(TAG, "not using TEE");
+                    CDELog.d(TAG, "not using TEE");
                     CDEUtils.setDecryptMode(CDEUtils.DECRYPT_SOFT);
                     mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_SOFT);
                 }
@@ -2026,7 +2026,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                     }
 
                     String pixelFormat = mSettings.getPixelFormat();
-                    CDELog.j(TAG, "pixelFormat:" + pixelFormat); //is empty
+                    CDELog.d(TAG, "pixelFormat:" + pixelFormat);
                     if (TextUtils.isEmpty(pixelFormat)) {
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", FFmpegMediaPlayer.SDL_FCC_RV32);
                     } else {
@@ -2072,11 +2072,11 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     private void initBackground() {
         mEnableBackgroundPlay = mSettings.getEnableBackgroundPlay();
         if (mEnableBackgroundPlay) {
-            CDELog.j(TAG, "enable background play");
+            CDELog.d(TAG, "enable background play");
             MediaPlayerService.intentToStart(getContext());
             mMediaPlayer = MediaPlayerService.getMediaPlayer();
         } else {
-            CDELog.j(TAG, "disable background play");
+            CDELog.d(TAG, "disable background play");
         }
     }
 

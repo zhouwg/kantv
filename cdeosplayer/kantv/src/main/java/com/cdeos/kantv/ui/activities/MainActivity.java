@@ -131,21 +131,21 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     @Override
                     public void onNext(Boolean granted) {
                         if (granted) {
-                            CDELog.j(TAG, "init scan folder");
+                            CDELog.d(TAG, "init scan folder");
                             presenter.initScanFolder();
                             if (LocalMediaFragment != null) {
                                 LocalMediaFragment.initVideoData();
                             }
                         } else {
                             ToastUtils.showLong("can't scan video because required permission was not granted");
-                            CDELog.j(TAG, "can't scan video because required permission was not granted");
+                            CDELog.d(TAG, "can't scan video because required permission was not granted");
                         }
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        CDELog.j(TAG, "error: " + e.toString());
+                        CDELog.d(TAG, "error: " + e.toString());
                     }
 
                     @Override
@@ -179,7 +179,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     @Override
     public void initListener() {
         navigationView.setOnNavigationItemSelectedListener(item -> {
-            CDELog.j(TAG, "item id: " + item.getItemId());
+            CDELog.d(TAG, "item id: " + item.getItemId());
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     setTitle(mActivity.getBaseContext().getString(R.string.onlinetv));
@@ -218,9 +218,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        CDELog.j(TAG, "keyCode:" + keyCode);
+        CDELog.d(TAG, "keyCode:" + keyCode);
         if (!CDEUtils.getCouldExitApp()) {
-            CDELog.j(TAG, "can't exit app at the moment");
+            CDELog.d(TAG, "can't exit app at the moment");
             return false;
         }
 
@@ -325,7 +325,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
         if (previousFragment != null) {
             String fragmentName = previousFragment.getClass().getName();
             if (fragmentName.contains("ASRResearchFragment")) {
-                CDELog.j(TAG, "release ASR resource");
+                CDELog.d(TAG, "release ASR resource");
                 asrFragment.release();
             }
         }

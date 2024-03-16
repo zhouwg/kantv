@@ -134,35 +134,35 @@ public class SettingPlayerView extends LinearLayout implements View.OnClickListe
         orientationChangeSw.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isAllowScreenOrientation = isChecked;
             listener.setOrientationStatus(isChecked);
-            CDELog.j(TAG, "isAllowScreenOrientation:" + isAllowScreenOrientation);
+            CDELog.d(TAG, "isAllowScreenOrientation:" + isAllowScreenOrientation);
         });
 
 
         landscapeChangeSw.setOnCheckedChangeListener((buttonView, isChecked) -> {
            listener.setLandscapeStatus(isChecked);
-           CDELog.j(TAG, "landscape changed:" + isChecked);
+           CDELog.d(TAG, "landscape changed:" + isChecked);
         });
 
         tvRecordingSw.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            CDELog.j(TAG, "tv recording:" + isChecked);
+            CDELog.d(TAG, "tv recording:" + isChecked);
             listener.setTVRecordingStatus(isChecked);
         });
-        CDELog.j(TAG, "isRecording:" + CDEUtils.getTVRecording());
+        CDELog.d(TAG, "isRecording:" + CDEUtils.getTVRecording());
         //if (CDEUtils.getTVRecording())
         //    tvRecordingSw.setChecked(true);
         //else
          //   tvRecordingSw.setChecked(false);
         tvASRSw.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            CDELog.j(TAG, "tv ASR status:" + isChecked);
+            CDELog.d(TAG, "tv ASR status:" + isChecked);
             listener.setTVASRStatus(isChecked);
         });
-        CDELog.j(TAG, "isASR enabled:" + CDEUtils.getTVASR());
+        CDELog.d(TAG, "isASR enabled:" + CDEUtils.getTVASR());
         setPlayerSpeedView(3);
     }
 
     public void updateUIStatus(boolean isRecording) {
-        CDELog.j(TAG, "isRecording:" + isRecording);
-        CDELog.j(TAG, "isRecording:" + CDEUtils.getTVRecording());
+        CDELog.d(TAG, "isRecording:" + isRecording);
+        CDELog.d(TAG, "isRecording:" + CDEUtils.getTVRecording());
         if (CDEUtils.getTVRecording())
             tvRecordingSw.setChecked(true);
         else
