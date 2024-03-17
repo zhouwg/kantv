@@ -63,14 +63,15 @@ add_definitions(-O3)
 
 #works very well on Xiaomi 14 and got best ASR performance until now(less then 1 second)
 #highly required for realtime subitle feature
+#following special build optimization ONLY validated ok on Xiaomi 14
 add_definitions(-march=armv8.7-a)
 add_definitions(-mcpu=cortex-x1)
 add_definitions(-mtune=cortex-x1)
 
 #2024-3-12,14:45
 #ASR framework works well as expected validate on vivo phone(Android 10 + low-end qcom SoC)
-#might be works well on all mainstream Android phones
-#BUT not work with realtime subtitle feature(app would crash)
+#might be works well on ALL mainstream Android phones
+#but NOT work with realtime subtitle feature(app would crash)
 #add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 #instruction exception
