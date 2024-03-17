@@ -7792,7 +7792,6 @@ static const char * whisper_asr_callback(void * opaque) {
 
 
 
-// TODO: not work as expected because of unknown reason
 /**
  *
  * @param pf32_audio_buffer           audio data with mono channel + float 32 + 160000 sample rate to make whisper.cpp happy
