@@ -3,14 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory android:title="@string/pref_title_general">
-        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
-            android:entries="@@array/pref_entries_player"
-            android:entryValues="@array/pref_entry_values_player"
-            android:key="@string/pref_key_playerengine"
-            android:persistent="true"
-            android:title="@string/pref_title_player"
-            app:entrySummaries="@array/pref_entry_summaries_player" />
+
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -27,13 +20,6 @@
             android:persistent="true"
             android:summary="@string/pref_summary_using_media_codec"
             android:title="@string/pref_title_using_media_codec" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="@string/pref_key_using_ffmpeg_codec"
-            android:persistent="true"
-            android:summary="@string/pref_summary_using_ffmpeg_codec"
-            android:title="@string/pref_title_using_ffmpeg_codec" />
 
 
         <CheckBoxPreference
@@ -55,42 +41,12 @@
 
 
     <PreferenceCategory
-        android:key="drm"
-        android:title="@string/pref_title_multidrm">
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="@string/pref_key_enable_wiseplay"
-            android:persistent="true"
-            android:summary="@string/pref_summary_enable_wiseplay"
-            android:title="@string/pref_title_enable_wiseplay" />
-
-        <EditTextPreference
-            android:defaultValue="http://www.cde-os.com:8888/wiseplay/getlicense"
-            android:enabled="true"
-            android:key="@string/pref_key_apigateway"
-            android:persistent="true"
-            android:summary="@string/pref_summary_apigateway"
-            android:title="@string/pref_title_apigateway"
-            android:widgetLayout="@layout/my_checkbox" />
-
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:disableDependentsState="true"
-            android:key="@string/pref_key_using_tee"
-            android:persistent="true"
-            android:summary="@string/pref_summary_using_tee"
-            android:title="@string/pref_title_using_tee" />
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:key="debug"
-        android:title="@string/pref_title_debug">
+        android:title="Debug/Expert">
 
         <SwitchPreference
             android:key="surface_renders"
-            android:summary="better render peformance, but screeshot not support"
+            android:summary="better render peformance, but screenshot not support"
             android:title="SurfaceView"
             app:icon="@drawable/ic_player_setting_surface" />
 

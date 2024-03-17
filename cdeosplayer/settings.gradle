@@ -6,7 +6,6 @@ println '@settings.gradle ExoPlayer2Prefix：'  +  ExoPlayer2Prefix
 
 
 include ':cdeosplayer-lib'
-include ':cdeosplayer-exo2'
 include ':kantv'
 
 
@@ -18,29 +17,6 @@ if (!gradle.ext.has('exoplayerSettingsDir')) {
     gradle.ext.exoplayerSettingsDir =
             new File(rootDir.toString()).getCanonicalPath()
 }
-
-
-include modulePrefix + 'library-common'
-include modulePrefix + 'library-core'
-include modulePrefix + 'library-hls'
-include modulePrefix + 'library-extractor'
-include modulePrefix + 'library-dash'
-include modulePrefix + 'library-ui'
-
-
-project(modulePrefix + 'library-common').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/common')
-project(modulePrefix + 'library-core').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/core')
-project(modulePrefix + 'library-hls').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/hls')
-project(modulePrefix + 'library-extractor').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/extractor')
-project(modulePrefix + 'library-dash').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/dash')
-project(modulePrefix + 'library-ui').projectDir = new File(rootDir, 'cdeosplayer-exo2/library/ui')
-
-include modulePrefix + 'extension-cronet'
-include modulePrefix + 'extension-ffmpeg'
-
-
-project(modulePrefix + 'extension-cronet').projectDir = new File(rootDir, 'cdeosplayer-exo2/extensions/cronet')
-project(modulePrefix + 'extension-ffmpeg').projectDir = new File(rootDir, 'cdeosplayer-exo2/extensions/ffmpeg')
 
 
 gradle.addBuildListener(new BuildListener() {

@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
-import cdeos.media.exo2.CDEOSExo2MediaPlayer;
 import cdeos.media.player.AndroidMediaPlayer;
 import cdeos.media.player.IMediaPlayer;
 import cdeos.media.player.CDELog;
@@ -191,23 +190,6 @@ public class InfoHudViewHolder {
                     }
                     tmpString = CDEUtils.convertLongString(tmpString, 30);
                     setRowValue(R.string.mi_resolution, tmpString);
-
-                    if (mMediaPlayer instanceof CDEOSExo2MediaPlayer) {
-                        tmpString = mMediaPlayer.getVideoDecoderName() + "  " +  mActivity.getBaseContext().getString(R.string.playengine) + ": " + "ExoPlayer";
-                        tmpString = CDEUtils.convertLongString(tmpString, 30);
-                        setRowValue(R.string.vdec, tmpString);
-                    }
-                    if (mMediaPlayer instanceof AndroidMediaPlayer) {
-                        tmpString = mMediaPlayer.getVideoDecoderName() + "  "  + mActivity.getBaseContext().getString(R.string.playengine) + ": " + "AndroidMediaPlayer";
-                        tmpString = CDEUtils.convertLongString(tmpString, 30);
-                        setRowValue(R.string.vdec, tmpString);
-                    }
-
-                    if (mMediaPlayer instanceof CDEOSExo2MediaPlayer) {
-                        long bitRate = mMediaPlayer.getBitRate();
-                        CDELog.d(TAG, "bandwidth: " + bitRate);
-                        setRowValue(R.string.bandwidth, String.format(Locale.US, "%.2f Mb/s", bitRate / 1024f / 1024f));
-                    }
 
                     if (mMediaPlayer instanceof FFmpegMediaPlayer) {
                         int vdec = mp.getVideoDecoder();

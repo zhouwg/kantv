@@ -1,9 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="cdeos.media.exo2">
-    <application android:allowBackup="true"
-        android:supportsRtl="true">
-    </application>
-    <uses-sdk tools:overrideLibrary="cdeos.media.player"/>
-
-</manifest>

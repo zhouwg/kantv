@@ -51,17 +51,6 @@ function build_jni
 }
 
 
-function build_OpenBLAS
-{
-    cd ${PROJECT_ROOT_PATH}/external/OpenBLAS
-    show_pwd
-    echo "build OpenBLAS for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode"
-    ./build.sh
-
-    cd -
-}
-
-
 function build_whispercpp
 {
     cd ${PROJECT_ROOT_PATH}/external/whispercpp
@@ -75,7 +64,7 @@ function build_whispercpp
 
 function build_thirdparty()
 {
-    third_parties=" OpenBLAS whispercpp "
+    third_parties=" whispercpp "
 
     cd ${PROJECT_ROOT_PATH}/external/
     for item in ${third_parties};do

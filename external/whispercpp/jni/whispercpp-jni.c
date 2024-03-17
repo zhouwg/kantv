@@ -8,6 +8,7 @@
 
 #include "cde_log.h"
 #include "kantv-asr.h"
+#include "whispercpp-jni.h"
 
 #define UNUSED(x) (void)(x)
 

@@ -207,25 +207,26 @@ public class PlaySettingFragment extends BaseSettingsFragment {
         }
 
         for (String key : keySetOfInvisiblePreferenceOnExoPlayerEnable) {
-            if (findPreference(key) != null)
-                findPreference(key).setVisible(!isExoPlayer);
+            if (findPreference(key) != null) {
+                //findPreference(key).setVisible(!isExoPlayer);
+            }
         }
 
         CDELog.d(TAG, "dev  mode " + mSettings.getDevMode());
         if (!mSettings.getDevMode()) {
             PreferenceCategory pcSUBTITLE =  (PreferenceCategory) findPreference("subtitle");
             if (pcSUBTITLE != null) {
-                pcSUBTITLE.setVisible(false);
+                //pcSUBTITLE.setVisible(false);
             }
 
             PreferenceCategory pcDRM =  (PreferenceCategory) findPreference("drm");
             if (pcDRM != null) {
-                pcDRM.setVisible(false);
+                //pcDRM.setVisible(false);
             }
 
             PreferenceCategory pcDEBUG =  (PreferenceCategory) findPreference("debug");
             if (pcDEBUG != null) {
-                pcDEBUG.setVisible(false);
+                //pcDEBUG.setVisible(false);
             }
         }
 

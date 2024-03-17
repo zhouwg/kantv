@@ -156,57 +156,6 @@
                      <li> audio-only record mode is supported for the first time</li>
                      <li> online TV record and online TV transcription can work at the same time for the first time</li>
                      <li> save audio data to file when transcription was launched for further usage/scenario </li>
-                     <li> move some key-point codes to upper layer in customized whisper.cpp for purpose of referenced by AI experts or other programmers</li>
-                     <li> implmement AI subtitle for online TV by great whisper.cpp for the first time(NOT realtime and bugfix is required)</li>
+                     <li> rename kantv_anti_tamper to kantv_anti_remove_rename_this_file to avoid confusion or misunderstanding</li>
+                     <li> implmement AI English subtitle for English online TV by great whisper.cpp for the first time(NOT real "real-time" and bugfix is required)</li>
                  </ul>
-
-
-### Screenshots(一些屏幕截图）
-
-English UI(英文界面，海外地区默认为英文界面）
--------------------------------------------------------------
-![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
-![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
-![990238413](https://github.com/zhouwg/kantv/assets/6889919/44054d57-0149-4d45-8762-46ec80682c66)
-
-
-![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
-
-
-
-![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
-
-![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
-
-![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
-![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
-
-Chinese UI（中文界面，国内默认为中文界面）
--------------------------------------------------------------
-
-![Screenshot_20240301_000319_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48ebec5-4942-4e93-9e3a-a8626d553e9e)
-![Screenshot_20240301_000324_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/66185ef2-f7e0-4b0f-b01b-ab097167bf8b)
-![Screenshot_20240301_000330_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c0f6a0a0-f150-4126-876a-021465406819)
-![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
-![Screenshot_20240301_114203_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/adbff52c-c0fb-48dd-85c9-4e740c736d7a)
-![Screenshot_20240301_114210_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c48bff82-ed27-47cc-aeee-bc3183707690)
-![Screenshot_20240301_000403_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/ebdaa2b6-d177-40c0-9d31-1e583088dd5b)
-![Screenshot_20240301_000410_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/c9ec41fc-e3f3-4088-8e6b-5de12145e562)
-
-
-
-![371274193](https://github.com/zhouwg/kantv/assets/6889919/b189260b-6011-4c18-a3c0-cd55c2a36b8f)
-
-![1398616229](https://github.com/zhouwg/kantv/assets/6889919/e798b58c-554c-443f-ad76-59f795760ed5)
-
-![1476549041](https://github.com/zhouwg/kantv/assets/6889919/badae664-c864-4d84-87a4-f3d5636c4ff6)
-
-
-![1109625356](https://github.com/zhouwg/kantv/assets/6889919/829a88d1-a021-4766-a3fc-c65265cc3fdc)
-
-
-![Screenshot_20240222_111241_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/5762ce61-3e4a-4cbf-988f-65e7910a616d)
-
-![Screenshot_20240222_111248_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/7a8c110d-5f8a-47a8-8018-a5c9d0e1d30a)
-
-![Screenshot_20240222_111326_com cdeos player4tv](https://github.com/zhouwg/kantv/assets/6889919/2794894b-1911-465c-a274-cfff9b116e40)

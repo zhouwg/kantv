@@ -3,14 +3,7 @@ package com.cdeos.kantv.player.common.utils;
 import android.text.TextUtils;
 
 import com.blankj.utilcode.util.StringUtils;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.util.MimeTypes;
+
 
 
 import java.util.ArrayList;
@@ -71,6 +64,7 @@ public class TrackInfoUtils {
         }
     }
 
+    /*
     public void initTrackInfo(DefaultTrackSelector trackSelector, TrackSelectionArray trackSelections){
         subTrackList.clear();
         audioTrackList.clear();
@@ -128,6 +122,7 @@ public class TrackInfoUtils {
             }
         }
     }
+    */
 
     public List<TrackInfoBean> getAudioTrackList() {
         return audioTrackList;

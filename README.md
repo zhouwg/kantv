@@ -1,16 +1,14 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on Kan(aka "Watch/Listen" in English) online TV for **Android-based device**，derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many/much enhancements:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many/much enhancements:
 
-- Watch online TV and local media (by customized ![FFmpeg](https://github.com/cdeos/FFmpeg) and Exoplayer with updated version:FFmpeg 6.1, Exoplayer 2.15, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>, source code of customized Exoplayer(based on my ![previous study in Exoplayer](https://github.com/google/ExoPlayer/pull/2921)) could be found within source code of this project)
+- Watch online TV and local media (by customized ![FFmpeg](https://github.com/cdeos/FFmpeg):FFmpeg 6.1, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
 
 - Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
 - Set up a custom playlist and then use this software to watch the content of the custom playlist
 
 - Performance benchmark for Android-based mobile phone
-
-- Watch encrypted live stream(Google Widevine, Huawei WisePlay, ChinaDRM......)
 
 - Real-time English subtitle for online TV by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(PoC finished on Xiaomi 14. Xiaomi 14 or other powerful Android mobile phone IS HIGHLY required for this feature otherwise unexpected behaviour would happen)
 
@@ -95,19 +93,6 @@ echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
 
 ```
 
-- bazel
-
-  download ![bazel-3.1.0](https://github.com/bazelbuild/bazel/releases?page=5) and install bazel manually
-
-```
-  wget https://github.com/bazelbuild/bazel/releases/download/3.1.0/bazel-3.1.0-linux-x86_64
-```
-```
-  sudo ./bazel-3.1.0-installer-linux-x86_64.sh
-```
-
-bazel is **NOT** used currently but put it here for further usage in the future. Of course, **this step could be skipped** accordingly.
-
 - Android NDK & Android Studio
 
   download and install Android Studio and Android NDK manually
@@ -163,7 +148,7 @@ cd kantv
 git checkout master
 ```
 
-For C/C++ developers,
+For C/C++ developers or **AI experts**,
 
 ```
 git clone --recurse-submodules https://github.com/cdeos/kantv.git
@@ -173,9 +158,9 @@ git checkout master
 
 #### Build all dependent native codes
 
-modify <a href="https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
+modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
 
-pay attention <a href="https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/CMakeLists.txt#L71">here and modify it accordingly</a> if target Android device is NOT Xiaomi 14
+pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if target Android device is NOT Xiaomi 14
 
 ```
 . build/envsetup.sh
@@ -189,9 +174,9 @@ time ./build-all.sh
 
 - Build APK from source code by Android Studio IDE manually
 
-  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L159) which affect the running of the ASR demo and the size of the generated APK.
+  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/cdeos/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L159) which affect the running of the ASR demo and the size of the generated APK.
 
-- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
+- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
 
 
 ### Run Android APK on real Android phone
@@ -201,6 +186,7 @@ This apk follows the principles of '**minimum permissions**' and '**do not colle
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
 
+<hr>
 The following is some English snapshots.
 
 ![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
@@ -213,12 +199,22 @@ The following is some English snapshots.
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
 
+![1743987771](https://github.com/cdeos/kantv/assets/6889919/2c9268e2-aa4b-498b-b457-707ce4584c5d)
 
-![Screenshot_20240301_000602_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/e3c6b89d-b1cf-42d8-87d0-f4a45074ebba)
+
+
 ![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
+![1305129729](https://github.com/cdeos/kantv/assets/6889919/527de216-19a4-4c2d-915c-1d4b888fe2c1)
 
-Other English and Chinese snapshots could be found in ![release directory](https://github.com/cdeos/kantv/tree/master/release).
+![517175602](https://github.com/cdeos/kantv/assets/6889919/dc0a21bc-d7d3-4c9b-b6da-01ad338d6d7b)
+
+![991182277](https://github.com/cdeos/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
+
+<hr>
+here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+
+https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
 
 
 ### ChangeLog
@@ -228,15 +224,13 @@ Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/rel
 
 ### Roadmap
 
-- real-time English subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- improve real-time English subtitle performance with utilize hardware AI engine in Android device
 
 - real-time Chinese subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
-- bugfix in UI layer
-
-- UI refactor and “align to" UI in China's most popular and successful app WeChat(learn from WeChat)
+- bugfix
 
 - ...
 
@@ -251,18 +245,17 @@ The computing power and network bandwidth of default kantvserver is very low due
 
 ![1370107702](https://github.com/zhouwg/kantv/assets/6889919/1e994269-28be-4513-9f74-3973269b8832)
 
- - upload required files to local http server like this(dependent files for DeepSpeech could be found <a href="https://github.com/mozilla/DeepSpeech/releases/tag/v0.9.3">here</a>)
+ - upload required files to local http server like this(dependent files for whisper.cpp could be found at GGML's official website)
 ```
    apk ->                              http(s)://local_http_server/kantv/apk/kantv-latest.apk
    apk version ->                      http(s)://local_http_server/kantv/apk/kantv-version.txt
-   audio.wav  ->                       http(s)://local_http_server/kantv/deepspeech/audio.wav
-   deepspeech-0.9.3-models.tflite ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.tflite
-   deepspeech-0.9.3-models.scorer ->   http(s)://local_http_server/kantv/deepspeech/deepspeech-0.9.3-models.scorer
+   jfk.wav     ->                      http(s)://local_http_server/kantv/ggml/jfk.wav
+   ggml-tiny-q5_1.bin                  http(s)://local_http_server/kantv/ggml/ggml-tiny-q5_1.bin
+   ...
+   ...
+   ...
 
 
-   something for whisper.cpp      ->   http(s)://local_http_server/kantv/whisper/something
-
-   something for paddlespeech     ->   http(s)://local_http_server/kantv/paddlespeech/something
 ```
 
 ### How to create customized playlist for kantv apk
@@ -332,9 +325,7 @@ Project KanTV has used/tried following open-source projects(list in here is not 
      <li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
      <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
      <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
-     <li><a href="https://github.com/google/ExoPlayer" target="_blank" rel="noopener">ExoPlayer</a></li>
      <li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
-     <li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">DeepSpeech</a></li>
      <li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
      <li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
      <li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
@@ -348,8 +339,6 @@ Project KanTV has used/tried following open-source projects(list in here is not 
      <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
      <li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
      <li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
-     <li><a href="https://github.com/PaddlePaddle/PaddleSpeech" target="_blank" rel="noopener">PaddleSpeech</a></li>
-     <li><a href="https://github.com/OpenMathLib/OpenBLAS" target="_blank">OpenBLAS</a></li>
      <li>......</li>
 </ul>
 

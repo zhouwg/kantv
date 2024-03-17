@@ -1,8 +1,6 @@
 package com.cdeos.kantv.player.common.widgets;
 
-
-
-import static com.google.android.exoplayer2.ui.CaptionStyleCompat.EDGE_TYPE_NONE;
+import static com.cdeos.kantv.player.common.widgets.CaptionStyleCompat.EDGE_TYPE_NONE;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -23,11 +21,11 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.cdeos.kantv.R;
 import com.cdeos.kantv.player.common.adapter.StreamAdapter;
 
 import com.cdeos.kantv.player.common.utils.CommonPlayerUtils;
+import com.cdeos.kantv.player.common.widgets.CaptionStyleCompat;
 
 import java.util.ArrayList;
 import java.util.List;

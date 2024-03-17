@@ -1,9 +1,3 @@
-[submodule "DeepSpeech"]
-	path = external/DeepSpeech
-	url = https://github.com/cdeos/DeepSpeech
 [submodule "FFmpeg"]
 	path = external/FFmpeg
 	url = https://github.com/cdeos/FFmpeg
-[submodule "external/gstreamer"]
-	path = external/gstreamer
-	url = https://github.com/cdeos/gstreamer

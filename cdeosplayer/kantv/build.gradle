@@ -110,8 +110,6 @@ def skin_support_version = "4.0.5"
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    //implementation files('libs/PaddlePredictor.jar')
-
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.material:material:1.2.0-rc01'
@@ -125,8 +123,6 @@ dependencies {
     implementation "androidx.core:core:1.3.0"
     implementation "androidx.viewpager:viewpager:1.0.0"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
-    implementation project(path: ':library-core')
-    implementation project(path: ':library-ui')
 
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
@@ -195,13 +191,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
     implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
 
-    implementation project(modulePrefix + 'library-core')
-    implementation project(modulePrefix + 'library-hls')
-    implementation project(modulePrefix + 'library-dash')
-    implementation project(modulePrefix + 'library-ui')
-    implementation project(modulePrefix + 'library-common')
-    implementation project(modulePrefix + 'extension-cronet')
-    api project(':cdeosplayer-exo2')
     api project(':cdeosplayer-lib')
 }
 

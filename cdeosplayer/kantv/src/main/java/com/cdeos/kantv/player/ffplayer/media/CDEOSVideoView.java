@@ -57,7 +57,6 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-import cdeos.media.exo2.CDEOSExo2MediaPlayer;
 import cdeos.media.player.AndroidMediaPlayer;
 import cdeos.media.player.CDELibraryLoader;
 import cdeos.media.player.KANTVDRM;
@@ -568,10 +567,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         try {
             CDELog.d(TAG, "play engine " + mSettings.getPlayerEngine());
             mMediaPlayer = createPlayer(mSettings.getPlayerEngine());
-            if (mMediaPlayer instanceof CDEOSExo2MediaPlayer) {
-                mIsExoplayer = true;
-            }
-            
+
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
@@ -590,9 +586,6 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
                 CDELog.d(TAG, "set url: " + mUri);
                 if (mSeekWhenPrepared != 0) {
-                    if (mMediaPlayer instanceof CDEOSExo2MediaPlayer) {
-                        mMediaPlayer.seekTo(mSeekWhenPrepared);
-                    }
                 }
                 mMediaPlayer.setDataSource(mAppContext, mUri, mHeaders);
             } else {
@@ -1913,57 +1906,6 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         CDELog.d(TAG, "disableAudio:" + CDEUtils.getDisableAudioTrack());
         CDELog.d(TAG, "disableVideo:" + CDEUtils.getDisableVideoTrack());
         switch (playerEngineType) {
-            case CDEUtils.PV_PLAYERENGINE__Exoplayer: {
-                CDEOSExo2MediaPlayer cdeExoMediaPlayer = new CDEOSExo2MediaPlayer(mActivity, mAppContext);
-                mediaPlayer = cdeExoMediaPlayer;
-              
-                if (mSettings.getTEEEnabled()) {
-                    CDELog.d(TAG, "using TEE");
-                    CDEUtils.setDecryptMode(CDEUtils.DECRYPT_TEE);
-                    mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_TEE);
-                } else {
-                    CDELog.d(TAG, "not using TEE");
-                    CDEUtils.setDecryptMode(CDEUtils.DECRYPT_SOFT);
-                    mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_SOFT);
-                }
-                
-                if (mDrmScheme != null && (!mDrmScheme.isEmpty())) {
-                    CDEUtils.setDrmSchemeName(mDrmScheme);
-                }
-                if (mDrmLicenseURL != null && (!mDrmLicenseURL.isEmpty())) {
-                    CDEUtils.setDrmLicenseURL(mDrmLicenseURL);
-                }
-                if (mIsLive) {
-                    CDEUtils.setHLSPlaylistType(CDEUtils.PLAYLIST_TYPE_LIVE);
-                } else {
-                    CDEUtils.setHLSPlaylistType(CDEUtils.PLAYLIST_TYPE_VOD);
-                }
-                mediaPlayer.setDisableAudioTrack(CDEUtils.getDisableAudioTrack());
-                mediaPlayer.setDisableVideoTrack(CDEUtils.getDisableVideoTrack());
-                mediaPlayer.setEnableDumpVideoES(CDEUtils.getEnableDumpVideoES());
-                mediaPlayer.setEnableDumpAudioES(CDEUtils.getEnableDumpAudioES());
-                mediaPlayer.setDurationDumpES(CDEUtils.getDumpDuration());
-            }
-            break;
-            case CDEUtils.PV_PLAYERENGINE__AndroidMediaPlayer: {
-                AndroidMediaPlayer androidMediaPlayer = new AndroidMediaPlayer();
-                mediaPlayer = androidMediaPlayer;
-                if (CDEUtils.isRunningOnAmlogicBox()) {
-                    CDELog.d(TAG, "using TEE");
-                    CDEUtils.setDecryptMode(CDEUtils.DECRYPT_TEE);
-                    mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_TEE);
-                } else {
-                    CDELog.d(TAG, "not using TEE");
-                    CDEUtils.setDecryptMode(CDEUtils.DECRYPT_NONE);
-                    mediaPlayer.setDecryptMode(CDEUtils.DECRYPT_NONE);
-                }
-                mediaPlayer.setDisableAudioTrack(CDEUtils.getDisableAudioTrack());
-                mediaPlayer.setDisableVideoTrack(CDEUtils.getDisableVideoTrack());
-                mediaPlayer.setEnableDumpVideoES(CDEUtils.getEnableDumpVideoES());
-                mediaPlayer.setEnableDumpAudioES(CDEUtils.getEnableDumpAudioES());
-                mediaPlayer.setDurationDumpES(CDEUtils.getDumpDuration());
-            }
-            break;
             case CDEUtils.PV_PLAYERENGINE__FFmpeg:
             default: {
                 FFmpegMediaPlayer ffMediaPlayer = null;

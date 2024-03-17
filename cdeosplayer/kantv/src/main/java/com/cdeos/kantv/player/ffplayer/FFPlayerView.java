@@ -64,17 +64,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.LogUtils;
 import com.blankj.utilcode.util.SPUtils;
 import com.blankj.utilcode.util.StringUtils;
 import com.blankj.utilcode.util.ToastUtils;
+import com.cdeos.kantv.player.common.widgets.CaptionStyleCompat;
 import com.cdeos.kantv.player.ffplayer.media.VoisePlayingIcon;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.ui.CaptionStyleCompat;
 import com.cdeos.kantv.R;
 
 import com.cdeos.kantv.player.common.listener.PlayerViewListener;
@@ -109,8 +103,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-import cdeos.media.exo2.CDEOSExo2MediaPlayer;
 import cdeos.media.player.KANTVDRM;
 import cdeos.media.player.IMediaPlayer;
 import cdeos.media.player.CDELog;
@@ -574,6 +566,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         IMediaPlayer.OnTrackChangeListener ijkPlayTrackChangeListener = (mp, trackSelector, trackGroups, trackSelections) -> {
             CDELog.d(TAG, "on track changed listener");
+            /*
             if ((mp != null) && (mp instanceof CDEOSExo2MediaPlayer)) {
                 CDELog.j(TAG, "track change");
                 TrackInfoUtils trackInfoUtils = new TrackInfoUtils();
@@ -588,6 +581,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 topBarView.getSubtitleSettingView().setSubtitleTrackList(subtitleTrackList);
                 topBarView.getPlayerSettingView().setAudioTrackList(audioTrackList);
             }
+            */
         };
 
 
@@ -787,80 +781,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                     .init();
         }
 
-
-        if (mSettings.getPlayerEngine() == CDEUtils.PV_PLAYERENGINE__Exoplayer) {
-            topBarView.getSubtitleSettingView()
-                    .initSubtitleTextSize(subtitleTextSizeProgress)
-                    .setExoPlayerType()
-                    .initListener(new SettingSubtitleView.SettingSubtitleListener() {
-                        @Override
-                        public void selectTrack(TrackInfoBean trackInfo, boolean isAudio) {
-                            CDELog.j(TAG, "select track: " + trackInfo.getName());
-                            IMediaPlayer player = mVideoView.getPlayer();
-                            CDELog.j(TAG, "player is: " + player);
-                            if ((player != null) && (player instanceof CDEOSExo2MediaPlayer)) {
-                                player.selectTrack(trackInfo, isAudio);
-                            }
-                        }
-
-                        @Override
-                        public void deselectTrack(TrackInfoBean trackInfoBean, boolean isAudio) {
-
-                        }
-
-                        @Override
-                        public void setSubtitleSwitch(Switch switchView, boolean isChecked) {
-                            if (!topBarView.getSubtitleSettingView().isLoadSubtitle() && isChecked) {
-                                switchView.setChecked(false);
-                                Toast.makeText(getContext(), "subtitle was not loaded", Toast.LENGTH_LONG).show();
-                                //mVideoView.getSubtitleView().setVisibility(VISIBLE);
-                                subtitleManager.hideExSub();
-                                return;
-                            }
-                            if (isChecked) {
-                                subtitleManager.showExSub();
-                                //mVideoView.getSubtitleView().setVisibility(GONE);
-                                mHandler.sendEmptyMessage(MSG_UPDATE_SUBTITLE);
-                            } else {
-                                subtitleManager.hideExSub();
-                                //mVideoView.getSubtitleView().setVisibility(VISIBLE);
-                            }
-                        }
-
-                        @Override
-                        public void setSubtitleTextSize(int progress) {
-                            subtitleManager.setTextSizeProgress(progress);
-                            PlayerConfigShare.getInstance().setSubtitleTextSize(progress);
-                        }
-
-                        @Override
-                        public void setInterSubtitleSize(int progress) {
-                            float calcProgress = (float) progress;
-                            float textSize = (calcProgress / 100) * ConvertUtils.dp2px(36);
-                            //mVideoView.getSubtitleView().setFixedTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-                        }
-
-                        @Override
-                        public void setInterBackground(CaptionStyleCompat compat) {
-                            //mVideoView.getSubtitleView().setStyle(compat);
-                        }
-
-                        @Override
-                        public void setOpenSubtitleSelector() {
-                            pause();
-                            hideView(HIDE_VIEW_ALL);
-                            mOutsideListener.onAction(Constants.INTENT_OPEN_SUBTITLE, 0);
-                        }
-
-                        @Override
-                        public void onShowNetworkSubtitle() {
-                            hideView(HIDE_VIEW_ALL);
-                            if (mOutsideListener != null)
-                                mOutsideListener.onAction(Constants.INTENT_SELECT_SUBTITLE, 0);
-                        }
-                    })
-                    .init();
-        }
 
         if (mSettings.getPlayerEngine() == CDEUtils.PV_PLAYERENGINE__AndroidMediaPlayer) {
             CDELog.j(TAG, "subtitle not supported with AndroidMediaPlayer");

@@ -102,8 +102,8 @@
     <string name="pref_title_ffmpegplayer_video">Video: FFmpeg</string>
 
     <string name="pref_key_using_media_codec">pref.using_media_codec</string>
-    <string name="pref_title_using_media_codec">Using MediaCodec</string>
-    <string name="pref_summary_using_media_codec"></string>
+    <string name="pref_title_using_media_codec">Enable video hardware decoding </string>
+    <string name="pref_summary_using_media_codec">hardware decoding with MediaCodec</string>
 
     <string name="pref_key_using_ffmpeg_codec">pref.using_ffmpeg_codec</string>
     <string name="pref_title_using_ffmpeg_codec">Using FFmpeg Audio Decoder</string>
