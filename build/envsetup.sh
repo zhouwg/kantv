@@ -83,22 +83,20 @@ setup_env
 check_host
 check_ubuntu
 
+dump_global_envs
+
 if [ "${BUILD_TARGET}" == "android" ]; then
     check_ndk
 fi
 
-dump_global_envs
 
-
-    echo ""
-    echo "------------------------------------------------------------------------------------------"
-    echo -e "[*] to continue to build project KanTV for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls run\n"
-    echo ""
-    echo -e "./build-all.sh"
-    echo ""
-    echo ""
-    echo "in current pwd:  `pwd`"
-    echo "------------------------------------------------------------------------------------------"
-    echo ""
-
-
+echo ""
+echo "------------------------------------------------------------------------------------------"
+echo -e "[*] to continue to build project KanTV for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls run\n"
+echo ""
+echo -e "./build-all.sh"
+echo ""
+echo ""
+echo "in current pwd:  `pwd`"
+echo "------------------------------------------------------------------------------------------"
+echo ""

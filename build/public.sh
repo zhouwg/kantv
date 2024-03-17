@@ -91,6 +91,15 @@ function check_ndk()
         echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
         #exit 1
     fi
+
+    if [ ! -d ${ANDROID_NDK} ]; then
+        echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
+        #exit 1
+    fi
+
+    if [ ! -f ${ANDROID_NDK}/build/cmake/android.toolchain.cmake ]; then
+        echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
+    fi
 }
 
 
