@@ -36,7 +36,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.cdeos.kantv.ui.fragment.ASRFragment;
+import com.cdeos.kantv.ui.fragment.ASRResearchFragment;
 import com.cdeos.kantv.ui.fragment.TVGridFragment;
 import com.cdeos.kantv.utils.Settings;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -75,7 +75,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     private EPGListFragment epglistFragment;
     private PersonalFragment personalFragment;
     private BaseMvpFragment previousFragment;
-    private ASRFragment asrFragment;
+    private ASRResearchFragment asrFragment;
 
     private MenuItem  menuNetItem;
 
@@ -131,21 +131,21 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     @Override
                     public void onNext(Boolean granted) {
                         if (granted) {
-                            CDELog.j(TAG, "init scan folder");
+                            CDELog.d(TAG, "init scan folder");
                             presenter.initScanFolder();
                             if (LocalMediaFragment != null) {
                                 LocalMediaFragment.initVideoData();
                             }
                         } else {
                             ToastUtils.showLong("can't scan video because required permission was not granted");
-                            CDELog.j(TAG, "can't scan video because required permission was not granted");
+                            CDELog.d(TAG, "can't scan video because required permission was not granted");
                         }
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         e.printStackTrace();
-                        CDELog.j(TAG, "error: " + e.toString());
+                        CDELog.d(TAG, "error: " + e.toString());
                     }
 
                     @Override
@@ -179,7 +179,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     @Override
     public void initListener() {
         navigationView.setOnNavigationItemSelectedListener(item -> {
-            CDELog.j(TAG, "item id: " + item.getItemId());
+            CDELog.d(TAG, "item id: " + item.getItemId());
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     setTitle(mActivity.getBaseContext().getString(R.string.onlinetv));
@@ -201,7 +201,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
                 case R.id.navigation_asr:
                     setTitle(mActivity.getBaseContext().getString(R.string.ASR));
-                    switchFragment(ASRFragment.class);
+                    switchFragment(ASRResearchFragment.class);
                     menuNetItem.setVisible(false);
                     return true;
 
@@ -218,9 +218,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        CDELog.j(TAG, "keyCode:" + keyCode);
+        CDELog.d(TAG, "keyCode:" + keyCode);
         if (!CDEUtils.getCouldExitApp()) {
-            CDELog.j(TAG, "can't exit app at the moment");
+            CDELog.d(TAG, "can't exit app at the moment");
             return false;
         }
 
@@ -324,8 +324,8 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
         if (previousFragment != null) {
             String fragmentName = previousFragment.getClass().getName();
-            if (fragmentName.contains("ASRFragment")) {
-                CDELog.j(TAG, "release ASR resource");
+            if (fragmentName.contains("ASRResearchFragment")) {
+                CDELog.d(TAG, "release ASR resource");
                 asrFragment.release();
             }
         }
@@ -367,9 +367,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 getFragmentTransaction().show(epglistFragment).commit();
                 previousFragment = epglistFragment;
             }
-        } else if (clazz == ASRFragment.class) {
+        } else if (clazz == ASRResearchFragment.class) {
             if (asrFragment == null) {
-                asrFragment = ASRFragment.newInstance();
+                asrFragment = ASRResearchFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, asrFragment).commit();
             } else {
                 getFragmentTransaction().show(asrFragment).commit();
@@ -395,5 +395,5 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 .show();
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

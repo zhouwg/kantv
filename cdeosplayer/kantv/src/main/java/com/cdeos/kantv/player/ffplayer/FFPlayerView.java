@@ -529,7 +529,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         };
 
         IMediaPlayer.OnPreparedListener ijkPreparedCallback = iMediaPlayer -> {
-            CDELog.j(TAG, "on prepared listener");
+            CDELog.d(TAG, "on prepared listener");
             ITrackInfo[] info = mVideoView.getTrackInfo();
             if (info != null) {
                 int selectedAudioTrack = mVideoView.getSelectedTrack(IjkTrackInfo.MEDIA_TRACK_TYPE_AUDIO);
@@ -549,14 +549,14 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         };
 
         IMediaPlayer.OnErrorListener ijkErrorCallback = (iMediaPlayer, i, i1) -> {
-            CDELog.j(TAG, "on error listener");
+            CDELog.d(TAG, "on error listener");
             mOutsideListener.onAction(Constants.INTENT_PLAY_FAILED, 0);
             mLoadingView.setVisibility(GONE);
             return false;
         };
 
         IMediaPlayer.OnInfoListener ijkPlayInfoCallback = (iMediaPlayer, status, extra) -> {
-            CDELog.j(TAG, "on info listener");
+            CDELog.d(TAG, "on info listener");
             _switchStatus(status);
             return true;
         };
@@ -573,7 +573,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
         IMediaPlayer.OnTrackChangeListener ijkPlayTrackChangeListener = (mp, trackSelector, trackGroups, trackSelections) -> {
-            CDELog.j(TAG, "on track changed listener");
+            CDELog.d(TAG, "on track changed listener");
             if ((mp != null) && (mp instanceof CDEOSExo2MediaPlayer)) {
                 CDELog.j(TAG, "track change");
                 TrackInfoUtils trackInfoUtils = new TrackInfoUtils();
@@ -594,7 +594,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         TopBarView.TopBarListener topBarCallBack = new TopBarView.TopBarListener() {
             @Override
             public void onBack() {
-                CDELog.j(TAG, "onBack because back button on top view");
+                CDELog.d(TAG, "onBack because back button on top view");
 
                 if (CDEUtils.getTVRecording()) {
                     showWarningDialog(mAttachActivity, "under recording, pls stop recording before exit playback");
@@ -941,6 +941,12 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                             return;
                         }
 
+                        if (mVideoName.startsWith("kantv-asr")) {
+                            Toast.makeText(getContext(), "record not supported because it seems a saved ASR file", Toast.LENGTH_SHORT).show();
+                            topBarView.updateTVRecordingVisibility(false);
+                            return;
+                        }
+
                         if (mVideoUrl.startsWith("/storage/emulated")) {
                             //Toast.makeText(getContext(), "record not supported because it seems a local media file", Toast.LENGTH_SHORT).show();
                             //topBarView.updateTVRecordingVisibility(false);
@@ -968,7 +974,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         }
 
                         {
-                            //topBarView.updateTVRecordingVisibility(bRecording);
                             KANTVDRM instance = KANTVDRM.getInstance();
                             File sdcardFile = Environment.getExternalStorageDirectory();
                             String sdcardPath = sdcardFile.getAbsolutePath();
@@ -989,11 +994,11 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
                     @Override
                     public void setTVASRStatus(boolean bEnableASR) {
-                        CDELog.j(TAG, "bEnableASR:" + bEnableASR);
+                        CDELog.j(TAG, "enable ASR:" + bEnableASR);
                         topBarView.hideItemView();
 
-                        if (!mVideoView.isPlaying()) {
-                            Toast.makeText(getContext(), "ASR not supported", Toast.LENGTH_SHORT).show();
+                        if (mVideoName.startsWith("kantv-asr")) {
+                            Toast.makeText(getContext(), "ASR not supported because it seems a saved ASR file", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVASRVisibility(false);
                             return;
                         }
@@ -1212,9 +1217,9 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
     public void start() {
-        CDELog.j(TAG, "start");
-        CDELog.j(TAG, "manually start play position:" + CDEUtils.getStartPlayPos() + " minutes");
-        CDELog.j(TAG, "last play position: " + mPlayPos + " secs");
+        CDELog.d(TAG, "start");
+        CDELog.d(TAG, "manually start play position:" + CDEUtils.getStartPlayPos() + " minutes");
+        CDELog.d(TAG, "last play position: " + mPlayPos + " secs");
         if (CDEUtils.getStartPlayPos() != 0) {
             mPlayPos = CDEUtils.getStartPlayPos() * 60;
         }
@@ -1251,7 +1256,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
     public void pause() {
-        CDELog.j(TAG, "pause");
+        CDELog.d(TAG, "pause");
         bottomBarView.setPlayIvStatus(false);
         if (mVideoView.isPlaying()) {
             stopRecord();
@@ -1601,9 +1606,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
     private void stopASR() {
         if (mVideoView.getEnableASR()) {
             CDELog.j(TAG, "stop ASR");
-            KANTVDRM.getInstance().ANDROID_JNI_StopASR();
-            onASRStop();
             mVideoView.setEnableASR(false);
+            KANTVDRM.getInstance().ANDROID_JNI_StopASR();
         }
     }
 
@@ -1618,20 +1622,39 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         }
 
         CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+
         //TODO: hardcode path, should be configured in "ASR Settings"
-        String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        //String ggmlModelFileName = "ggml-small.en.bin";   // 466M
+        //String ggmlModelFileName = "ggml-tiny-q5_1.bin";    // 31M
+        //String ggmlModelFileName = "ggml-tiny.en-q5_1.bin";   // 31M
+        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     //42M, very good, about 500-700 ms
+        CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+        CDELog.j(TAG, "model: " + ggmlModelFileName);
+
+        File file = new File(CDEUtils.getDataPath() + ggmlModelFileName);
+        if (!file.exists()) {
+            CDELog.j(TAG, "GGML model file not found:" + file.getAbsolutePath());
+            Toast.makeText(getContext(), "GGML model file not found:" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            topBarView.updateTVASRVisibility(false);
+            CDEUtils.setTVASR(false);
+            return;
+        } else {
+            CDELog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());
+        }
+
+        //TODO: preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
         if (1 == mSettings.getASRMode()) {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_PRESURETEST);
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);
         } else {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts(), WHISPER_ASR_MODE_NORMAL);
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_NORMAL);
         }
 
         CDEUtils.setTVASR(true);
         topBarView.updateTVASRVisibility(true);
 
         String tipInfo = "TV transcription will be launched.\n";
-        tipInfo += "transcription file would be saved to:" + CDEUtils.getASRSavedFileName();
+        tipInfo += "raw audio data would be saved to file for further usage:" + CDEUtils.getASRSavedFileName();
         showWarningDialog(mAttachActivity, tipInfo);
     }
 
@@ -1652,17 +1675,18 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         CDEUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
 
-        CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        CDELog.j(TAG, "saved raw audio data file:" + CDEUtils.getASRSavedFileName());
         File file = new File(CDEUtils.getASRSavedFileName());
         if (file.exists()) {
-            CDELog.j(TAG, "asr saved file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
-            Toast.makeText(getContext(), "TV transcription stopped，size of saved transcription file: "
+            CDELog.j(TAG, "saved raw audio data file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
+            Toast.makeText(getContext(), "TV transcription stopped，size of saved raw audio data file: "
                     + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
         } else {
             CDELog.j(TAG, "it shouldn't happen");
             Toast.makeText(getContext(), "TV transcription stopped", Toast.LENGTH_SHORT).show();
         }
 
+        //TODO:add thumbnail to saved raw audio data file
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
         intent.setData(uri);
@@ -1673,7 +1697,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
     private void _switchStatus(int status) {
-        CDELog.j(TAG, "status:" + status);
+        CDELog.d(TAG, "status:" + status);
         switch (status) {
             case 5:
                 CDELog.j(TAG, "receive playback completed");
@@ -1792,7 +1816,6 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
 
     private void hideView(int hideType) {
-        //CDELog.j(TAG, "hide view");
         if (hideType == HIDE_VIEW_END_GESTURE) {
             if (mFlTouchLayout.getVisibility() == VISIBLE) {
                 mFlTouchLayout.setVisibility(GONE);
@@ -1914,5 +1937,5 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         mAttachActivity.requestWindowFeature(Window.FEATURE_NO_TITLE);
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

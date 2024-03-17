@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 //borrow from AOSP
-#if  defined(ANDROID) || defined(__ANDROID__)
+#if  1//defined(ANDROID) || defined(__ANDROID__)
 #define CONDITION(cond)                         (__builtin_expect((cond) != 0, 0))
 #define __android_second(dummy, second, ...)    second
 #define __android_rest(first, ...)              , ## __VA_ARGS__
@@ -96,6 +96,8 @@ extern "C" {
 
 #define LITERAL_TO_STRING_INTERNAL(x)    #x
 #define LITERAL_TO_STRING(x) LITERAL_TO_STRING_INTERNAL(x)
+
+
 
 #ifndef __IRSA_DEBUG__
 #define CHECK(condition) (condition)

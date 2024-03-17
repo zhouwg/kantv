@@ -200,9 +200,9 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
         @Override
         public void loadLibrary(String libName) throws UnsatisfiedLinkError, SecurityException {
             //System.loadLibrary(libName);
-            CDELog.j(TAG, "load library:" + libName);
+            CDELog.d(TAG, "load library:" + libName);
             CDELibraryLoader.load(libName);
-            CDELog.j(TAG, "after load library:" + libName);
+            CDELog.d(TAG, "after load library:" + libName);
         }
     };
 
@@ -214,13 +214,13 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                 if (libLoader == null)
                     libLoader = sLocalLibLoader;
 
-                CDELog.j(TAG, "load library kantv-play-jni");
+                CDELog.d(TAG, "load library kantv-play-jni");
                 libLoader.loadLibrary("kantv-play-jni");
-                CDELog.j(TAG, "after load library kantv-play-jni");
+                CDELog.d(TAG, "after load library kantv-play-jni");
 
-                CDELog.j(TAG, "load library kantv-play");
+                CDELog.d(TAG, "load library kantv-play");
                 libLoader.loadLibrary("kantv-play");
-                CDELog.j(TAG, "after load library kantv-play");
+                CDELog.d(TAG, "after load library kantv-play");
 
                 mIsLibLoaded = true;
             }
@@ -261,16 +261,16 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
     }
 
     private void initPlayer(IjkLibLoader libLoader) {
-        CDELog.j(TAG, "initPlayer");
+        CDELog.d(TAG, "initPlayer");
         loadLibrariesOnce(libLoader);
         initNativeOnce();
 
         //TODO
         try {
             CDELibraryLoader.load("whispercpp");
-            CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+            CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
         } catch (Exception e) {
-            CDELog.j(TAG, "failed to initialize whispercpp jni");
+            CDELog.d(TAG, "failed to initialize whispercpp jni");
             return;
         }
 
@@ -588,24 +588,24 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     switch (trackType) {
                         case ITrackInfo.MEDIA_TRACK_TYPE_VIDEO:
                             if (mDisableVideoTrack) {
-                                CDELog.j(TAG, "disable video track");
+                                CDELog.d(TAG, "disable video track");
                                 deselectTrack(index);
                             }
                             break;
                         case ITrackInfo.MEDIA_TRACK_TYPE_AUDIO:
                             if (mDisableAudioTrack) {
-                                CDELog.j(TAG, "disable audio track");
+                                CDELog.d(TAG, "disable audio track");
                                 deselectTrack(index);
                             }
                             break;
                         case ITrackInfo.MEDIA_TRACK_TYPE_SUBTITLE:
-                            CDELog.j(TAG, "found subtitle track");
+                            CDELog.d(TAG, "found subtitle track");
                             break;
                         case ITrackInfo.MEDIA_TRACK_TYPE_METADATA:
-                            CDELog.j(TAG, "found metadata");
+                            CDELog.d(TAG, "found metadata");
                             break;
                         case ITrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT:
-                            CDELog.j(TAG, "found timedtext");
+                            CDELog.d(TAG, "found timedtext");
                         default:
                             break;
                     }
@@ -905,7 +905,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
 
     @Override
     public void setDurationDumpES(int durationDumpES) {
-        CDELog.j(TAG, "duration is : " + durationDumpES);
+        CDELog.d(TAG, "duration is : " + durationDumpES);
         mDurationDumpES = durationDumpES;
         _setDurationDumpES(mDurationDumpES);
     }
@@ -1313,7 +1313,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     return;
 
                 case MEDIA_ERROR:
-                    CDELog.j(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                    CDELog.d(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
                     if (!player.notifyOnError(msg.arg1, msg.arg2)) {
                         player.notifyOnCompletion();
                     }
@@ -1323,10 +1323,10 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                 case MEDIA_INFO:
                     switch (msg.arg1) {
                         case MEDIA_INFO_VIDEO_RENDERING_START:
-                            CDELog.j(TAG, "Info: MEDIA_INFO_VIDEO_RENDERING_START\n");
+                            CDELog.d(TAG, "Info: MEDIA_INFO_VIDEO_RENDERING_START\n");
                             break;
                     }
-                    CDELog.j(TAG, "args1:" + msg.arg1);
+                    CDELog.d(TAG, "args1:" + msg.arg1);
                     player.notifyOnInfo(msg.arg1, msg.arg2);
                     // No real default action so far.
                     return;
@@ -1359,7 +1359,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     player.notifyOnInfo(MEDIA_INFO_ASR_STOP,0);
                     break;
                 default:
-                    CDELog.j(TAG, "Unknown message type " + msg.what);
+                    CDELog.d(TAG, "Unknown message type " + msg.what);
             }
         }
     }
@@ -1604,5 +1604,5 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
 
     public static native void native_setLogLevel(int level);
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

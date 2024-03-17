@@ -20,6 +20,7 @@ set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/ggml-quants.c
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
         ${WHISPERCPP_SRC_DIR}/cde_log.c
+        ${WHISPERCPP_SRC_DIR}/tinywav.c
         ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni.c
         )
 
@@ -61,14 +62,17 @@ add_definitions(-O3)
 #add_definitions(-march=armv8.6-a)
 
 #works very well on Xiaomi 14 and got best ASR performance until now(less then 1 second)
-#add_definitions(-march=armv8.7-a)
-#add_definitions(-mcpu=cortex-x1)
-#add_definitions(-mtune=cortex-x1)
+#highly required for realtime subitle feature
+#following special build optimization ONLY validated ok on Xiaomi 14
+add_definitions(-march=armv8.7-a)
+add_definitions(-mcpu=cortex-x1)
+add_definitions(-mtune=cortex-x1)
 
 #2024-3-12,14:45
 #ASR framework works well as expected validate on vivo phone(Android 10 + low-end qcom SoC)
-#might be works well on all mainstream Android phones
-add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
+#might be works well on ALL mainstream Android phones
+#but NOT work with realtime subtitle feature(app would crash)
+#add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 #instruction exception
 #add_definitions(-march=armv8.8-a)
@@ -85,7 +89,7 @@ add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 
 
-add_definitions(-mfloat-abi=hard -mfpu=neon-fp-armv8)
+#add_definitions(-mfloat-abi=hard -mfpu=neon-fp-armv8)
 #add_definitions(-fvisibility=hidden -fvisibility-inlines-hidden)
 #brings much side effect
 #add_definitions(-funsafe-math-optimizations)
@@ -101,6 +105,14 @@ set_target_properties(kantvcore
         IMPORTED_LOCATION
         ${PREBUIT_LIB_PATH}/libkantv-core.so)
 
+add_library(kantvplay
+        SHARED
+        IMPORTED)
+
+set_target_properties(kantvplay
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUIT_LIB_PATH}/libkantv-play.so)
 
 add_library(openblas
         SHARED
@@ -118,7 +130,7 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    target_link_libraries(${target_name} ${LOG_LIB} kantvcore openblas android)
+    target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvplay openblas android)
 
 endfunction()
 

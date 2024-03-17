@@ -4,10 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
+    <!-- 2024-03-14, workaround to fix UI issue in low-end VIVO phone so tv record and tv transcription could be launched/tested at the same time -->
     <LinearLayout
         android:id="@+id/top_bar_ll"
         android:layout_width="match_parent"
         android:layout_height="@dimen/control_bar_height"
+        android:layout_marginRight="40dp"
         android:background="@color/bg_video_view"
         android:gravity="center_vertical"
         android:orientation="horizontal"

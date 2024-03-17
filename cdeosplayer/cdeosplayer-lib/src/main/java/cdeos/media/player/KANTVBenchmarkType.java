@@ -59,5 +59,5 @@ public class KANTVBenchmarkType
     public static final int AV_PIX_FMT_ABGR=27;      ///< packed ABGR 8:8:8:8, 32bpp, ABGRABGR...
     public static final int AV_PIX_FMT_BGRA=28;      ///< packed BGRA 8:8:8:8, 32bpp, BGRABGRA...
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

@@ -37,5 +37,5 @@ public class CDEX509TrustManager implements X509TrustManager {
         return new X509Certificate[0];
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

@@ -127,7 +127,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
         layoutUI(mActivity);
 
         endTime = System.currentTimeMillis();
-        CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
+        CDELog.d(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
     }
 
     @Override
@@ -146,9 +146,9 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
     public void onResume() {
         super.onResume();
         if (mEPGDataLoadded) {
-            CDELog.j(TAG, "epg data already loadded");
+            CDELog.d(TAG, "epg data already loadded");
         } else {
-            CDELog.j(TAG, "epg data not loadded");
+            CDELog.d(TAG, "epg data not loadded");
             loadEPGData();
             mEPGDataLoadded = true;
             layoutUI(mActivity);
@@ -200,16 +200,16 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
         mContentList.clear();
 
         if (xmlRemoteFile.exists()) {
-            CDELog.j(TAG, "new remote epg file exist: " + xmlRemoteFile.getAbsolutePath());
+            CDELog.d(TAG, "new remote epg file exist: " + xmlRemoteFile.getAbsolutePath());
             usingRemoteEPG = true;
             String xmlLoaddedFileName = xmlRemoteFile.getAbsolutePath();
-            CDELog.j(TAG, "load epg from file: " + xmlLoaddedFileName + " which download from Master EPG server:" + CDEUtils.getKANTVMasterServer());
+            CDELog.d(TAG, "load epg from file: " + xmlLoaddedFileName + " which download from Master EPG server:" + CDEUtils.getKANTVMasterServer());
 
             {
                 beginTime = System.currentTimeMillis();
                 File file = new File(xmlLoaddedFileName);
                 int fileLength = (int) file.length();
-                CDELog.j(TAG,"encrypted file len:" + fileLength);
+                CDELog.d(TAG,"encrypted file len:" + fileLength);
 
                 try {
 
@@ -217,75 +217,75 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                     FileInputStream in = new FileInputStream(file);
                     in.read(fileContent);
                     in.close();
-                    CDELog.j(TAG, "encrypted file length:" + fileLength);
+                    CDELog.d(TAG, "encrypted file length:" + fileLength);
                     if (fileLength < 2) {
-                        CDELog.j(TAG, "shouldn't happen, pls check encrypted epg data");
+                        CDELog.d(TAG, "shouldn't happen, pls check encrypted epg data");
                         return;
                     }
                     byte[] paddingInfo = new byte[2];
                     paddingInfo[0] = 0;
                     paddingInfo[1] = 0;
                     System.arraycopy(fileContent, 0, paddingInfo, 0, 2);
-                    CDELog.j(TAG, "padding len:" + Arrays.toString(paddingInfo));
-                    CDELog.j(TAG, "padding len:" + (int)paddingInfo[0]);
-                    CDELog.j(TAG, "padding len:" + (int)paddingInfo[1]);
+                    CDELog.d(TAG, "padding len:" + Arrays.toString(paddingInfo));
+                    CDELog.d(TAG, "padding len:" + (int)paddingInfo[0]);
+                    CDELog.d(TAG, "padding len:" + (int)paddingInfo[1]);
                     nPaddingLen = (((paddingInfo[0] & 0xFF) << 8) | (paddingInfo[1] & 0xFF));
-                    CDELog.j(TAG, "padding len:" + nPaddingLen);
+                    CDELog.d(TAG, "padding len:" + nPaddingLen);
 
                     byte[] payload = new byte[fileLength - 2];
                     System.arraycopy(fileContent, 2, payload, 0, fileLength - 2);
 
 
-                    CDELog.j(TAG, "encrypted file length:" + fileLength);
+                    CDELog.d(TAG, "encrypted file length:" + fileLength);
                     mKANTVDRM.ANDROID_JNI_Decrypt(payload, fileLength - 2, dataEntity, KANTVJNIDecryptBuffer.getDirectBuffer());
-                    CDELog.j(TAG, "decrypted data length:" + dataEntity.getDataLength());
+                    CDELog.d(TAG, "decrypted data length:" + dataEntity.getDataLength());
                     if (dataEntity.getData() != null) {
-                        CDELog.j(TAG, "decrypted ok");
+                        CDELog.d(TAG, "decrypted ok");
                     } else {
-                        CDELog.j(TAG, "decrypted failed");
+                        CDELog.d(TAG, "decrypted failed");
                     }
 
-                    CDELog.j(TAG, "load encryted epg data ok now");
+                    CDELog.d(TAG, "load encryted epg data ok now");
                     endTime = System.currentTimeMillis();
-                    CDELog.j(TAG, "load encrypted epg data cost: " + (endTime - beginTime) + " milliseconds");
+                    CDELog.d(TAG, "load encrypted epg data cost: " + (endTime - beginTime) + " milliseconds");
                     realPayload = new byte[dataEntity.getDataLength() - nPaddingLen];
                     System.arraycopy(dataEntity.getData(), 0, realPayload, 0,dataEntity.getDataLength() - nPaddingLen);
                     if (!CDEUtils.getReleaseMode()) {
                         CDEUtils.bytesToFile(realPayload, Environment.getExternalStorageDirectory().getAbsolutePath() + "/kantv/", "download_tv_decrypt_debug.xml");
                         File sdcardPath = Environment.getExternalStorageDirectory();
-                        CDELog.j(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
-                        CDELog.j(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()) + "MBytes");
+                        CDELog.d(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
+                        CDELog.d(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()) + "MBytes");
                     }
                 } catch (Exception ex) {
-                    CDELog.j(TAG, "load epg failed:" + ex.toString());
+                    CDELog.d(TAG, "load epg failed:" + ex.toString());
                     usingRemoteEPG = false;
                 }
 
             }
             mContentList = CDEUtils.EPGXmlParser.getContentDescriptors(realPayload);
             if ((mContentList == null) || (0 == mContentList.size())) {
-                CDELog.j(TAG, "failed to parse xml file:" + xmlLoaddedFileName);
+                CDELog.d(TAG, "failed to parse xml file:" + xmlLoaddedFileName);
                 usingRemoteEPG = false;
             } else {
-                CDELog.j(TAG, "ok to parse xml file:" + xmlLoaddedFileName);
-                CDELog.j(TAG, "epg items: " + mContentList.size());
+                CDELog.d(TAG, "ok to parse xml file:" + xmlLoaddedFileName);
+                CDELog.d(TAG, "epg items: " + mContentList.size());
             }
         } else {
-            CDELog.j(TAG, "no remote epg file exist:" + xmlRemoteFile.getAbsolutePath());
+            CDELog.d(TAG, "no remote epg file exist:" + xmlRemoteFile.getAbsolutePath());
         }
 
         if (!usingRemoteEPG) {
-            CDELog.j(TAG,"load internal encrypted epg data");
-            CDELog.j(TAG, "encryptedEPGFileName: " + encryptedEPGFileName);
+            CDELog.d(TAG,"load internal encrypted epg data");
+            CDELog.d(TAG, "encryptedEPGFileName: " + encryptedEPGFileName);
             CDEAssetLoader.copyAssetFile(mContext, encryptedEPGFileName, CDEAssetLoader.getDataPath(mContext) + encryptedEPGFileName);
-            CDELog.j(TAG, "encrypted asset path:" + CDEAssetLoader.getDataPath(mContext) + encryptedEPGFileName);//asset path:/data/data/com.cdeos.player/kantv.bin
+            CDELog.d(TAG, "encrypted asset path:" + CDEAssetLoader.getDataPath(mContext) + encryptedEPGFileName);//asset path:/data/data/com.cdeos.player/kantv.bin
             try {
                 File file = new File(CDEAssetLoader.getDataPath(mContext) + encryptedEPGFileName);
                 int fileLength = (int) file.length();
-                CDELog.j(TAG,"encrypted file len:" + fileLength);
+                CDELog.d(TAG,"encrypted file len:" + fileLength);
 
                 if (fileLength < 2) {
-                    CDELog.j(TAG, "shouldn't happen, pls check encrypted epg data");
+                    CDELog.d(TAG, "shouldn't happen, pls check encrypted epg data");
                     return;
                 }
 
@@ -299,58 +299,58 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                 paddingInfo[0] = 0;
                 paddingInfo[1] = 0;
                 System.arraycopy(fileContent, 0, paddingInfo, 0, 2);
-                CDELog.j(TAG, "padding len:" + Arrays.toString(paddingInfo));
-                CDELog.j(TAG, "padding len:" + (int)paddingInfo[0]);
-                CDELog.j(TAG, "padding len:" + (int)paddingInfo[1]);
+                CDELog.d(TAG, "padding len:" + Arrays.toString(paddingInfo));
+                CDELog.d(TAG, "padding len:" + (int)paddingInfo[0]);
+                CDELog.d(TAG, "padding len:" + (int)paddingInfo[1]);
                 nPaddingLen = (((paddingInfo[0] & 0xFF) << 8) | (paddingInfo[1] & 0xFF));
-                CDELog.j(TAG, "padding len:" + nPaddingLen);
+                CDELog.d(TAG, "padding len:" + nPaddingLen);
 
                 byte[] payload = new byte[fileLength - 2];
                 System.arraycopy(fileContent, 2, payload, 0, fileLength - 2);
 
-                CDELog.j(TAG, "encrypted file length:" + fileLength);
+                CDELog.d(TAG, "encrypted file length:" + fileLength);
                 mKANTVDRM.ANDROID_JNI_Decrypt(payload, fileLength - 2, dataEntity, KANTVJNIDecryptBuffer.getDirectBuffer());
-                CDELog.j(TAG, "decrypted data length:" + dataEntity.getDataLength());
+                CDELog.d(TAG, "decrypted data length:" + dataEntity.getDataLength());
                 if (dataEntity.getData() != null) {
-                    CDELog.j(TAG, "decrypted ok");
+                    CDELog.d(TAG, "decrypted ok");
                 } else {
-                    CDELog.j(TAG, "decrypted failed");
+                    CDELog.d(TAG, "decrypted failed");
                 }
             } catch (FileNotFoundException e) {
-                CDELog.j(TAG, "load encrypted epg data failed:" + e.getMessage());
+                CDELog.d(TAG, "load encrypted epg data failed:" + e.getMessage());
                 return;
             } catch (IOException e) {
                 e.printStackTrace();
-                CDELog.j(TAG, "load encryted epg data failed:" + e.getMessage());
+                CDELog.d(TAG, "load encryted epg data failed:" + e.getMessage());
                 return;
             }
-            CDELog.j(TAG, "load encryted epg data ok now");
+            CDELog.d(TAG, "load encryted epg data ok now");
             endTime = System.currentTimeMillis();
-            CDELog.j(TAG, "load encrypted epg data cost: " + (endTime - beginTime) + " milliseconds");
+            CDELog.d(TAG, "load encrypted epg data cost: " + (endTime - beginTime) + " milliseconds");
             realPayload = new byte[dataEntity.getDataLength() - nPaddingLen];
             System.arraycopy(dataEntity.getData(), 0, realPayload, 0,dataEntity.getDataLength() - nPaddingLen);
             if (!CDEUtils.getReleaseMode()) {
                 CDEUtils.bytesToFile(realPayload, Environment.getExternalStorageDirectory().getAbsolutePath() + "/kantv/", "tv_decrypt_debug.xml");
                 File sdcardPath = Environment.getExternalStorageDirectory();
-                CDELog.j(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
-                CDELog.j(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()));
+                CDELog.d(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
+                CDELog.d(TAG, "sdcard free size:" + mKANTVDRM.ANDROID_JNI_GetDiskFreeSize(sdcardPath.getAbsolutePath()));
             }
 
             mContentList = CDEUtils.EPGXmlParser.getContentDescriptors(realPayload);
             if ((mContentList == null) || (0 == mContentList.size())) {
-                CDELog.j(TAG, "xml parse failed");
+                CDELog.d(TAG, "xml parse failed");
                 return;
             }
-            CDELog.j(TAG, "content counts:" + mContentList.size());
+            CDELog.d(TAG, "content counts:" + mContentList.size());
         }
 
 
-        CDELog.j(TAG, "epg items: " + mContentList.size());
-        CDELog.j(TAG, "epg items: " + mContentList.size());
+        CDELog.d(TAG, "epg items: " + mContentList.size());
+        CDELog.d(TAG, "epg items: " + mContentList.size());
 
         if (CDEMediaType.MEDIA_TV == mMediaType) {
             {
-                CDELog.j(TAG, "load tv logos from internal resources");
+                CDELog.d(TAG, "load tv logos from internal resources");
                 Resources res = mActivity.getResources();
 
                 if (true) {
@@ -365,19 +365,19 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                             posterName = posterName.trim();
                             resName = posterName.substring(0, posterName.indexOf('.'));
                         } else {
-                            CDELog.j(TAG, "can't find poster name, pls check epg data");
+                            CDELog.d(TAG, "can't find poster name, pls check epg data");
                         }
                         String title      = descriptor.getName();
                         title = title.trim();
                         String url        = descriptor.getUrl();
                         url = url.trim();
-                        //CDELog.j(TAG, "real resource name:" + resName);
-                        //CDELog.j(TAG, "url:" + url );
-                        //CDELog.j(TAG, "title:" + title);
-                        //CDELog.j(TAG, "poster:" + posterName);
+                        //CDELog.d(TAG, "real resource name:" + resName);
+                        //CDELog.d(TAG, "url:" + url );
+                        //CDELog.d(TAG, "title:" + title);
+                        //CDELog.d(TAG, "poster:" + posterName);
                         resID = res.getIdentifier(resName, "mipmap", mActivity.getPackageName());
                         if (resID == 0) {
-                            CDELog.j(TAG, "can't find resource name:" + posterName);
+                            CDELog.d(TAG, "can't find resource name:" + posterName);
                             resID = res.getIdentifier("test", "mipmap", mActivity.getPackageName());
                         }
                         mData.add(new KANTVMediaGridItem(resID, title));
@@ -406,7 +406,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                     mData.add(new KANTVMediaGridItem(R.mipmap.bbc, "BBC sports"));
                     mData.add(new KANTVMediaGridItem(R.mipmap.cri, "China Radio"));
                 }
-                CDELog.j(TAG, "load internal resource counts:" + mData.size());
+                CDELog.d(TAG, "load internal resource counts:" + mData.size());
             }
         }
     }
@@ -440,7 +440,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                     }
                     //holder.setText(gridItemTextID, obj.getItemName());
                 } catch (Exception ex) {
-                    CDELog.j(TAG, "error: " + ex.toString());
+                    CDELog.d(TAG, "error: " + ex.toString());
                 }
             }
         };
@@ -461,7 +461,7 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                 CDEUtils.perfGetPlaybackBeginTime();
                 CDELog.d(TAG, "beginPlaybackTime: " + CDEUtils.perfGetPlaybackBeginTime());
                 KANTVMediaGridItem item = (KANTVMediaGridItem) parent.getItemAtPosition(position);
-                CDELog.j(TAG, "item position" + position);
+                CDELog.d(TAG, "item position" + position);
                 CDEContentDescriptor descriptor = mContentList.get(position);
                 String name = descriptor.getName();
                 String url = descriptor.getUrl();
@@ -474,24 +474,24 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
                 CDELog.d(TAG, "url:" + url.trim());
                 CDELog.d(TAG, "mediaType: " + mMediaType.toString());
                 if (descriptor.getIsProtected()) {
-                    CDELog.j(TAG, "drm scheme:" + drmScheme);
-                    CDELog.j(TAG, "drm license url:" + drmLicenseURL);
+                    CDELog.d(TAG, "drm scheme:" + drmScheme);
+                    CDELog.d(TAG, "drm license url:" + drmLicenseURL);
                 } else {
-                    CDELog.j(TAG, "clear content");
+                    CDELog.d(TAG, "clear content");
                 }
                 if (isLive) {
-                    CDELog.j(TAG, "live content");
+                    CDELog.d(TAG, "live content");
                 } else {
-                    CDELog.j(TAG, "vod content");
+                    CDELog.d(TAG, "vod content");
                 }
-                CDELog.j(TAG, "Program： " + item.getItemName() + " ,url:" + url + " ,name:" + name.trim() + " ,mediaType:" + mMediaType.toString());
+                CDELog.d(TAG, "Program： " + item.getItemName() + " ,url:" + url + " ,name:" + name.trim() + " ,mediaType:" + mMediaType.toString());
 
 
                 if (descriptor.getIsProtected()) {
-                    CDELog.j(TAG, "drm scheme:" + drmScheme);
-                    CDELog.j(TAG, "drm license url:" + drmLicenseURL);
+                    CDELog.d(TAG, "drm scheme:" + drmScheme);
+                    CDELog.d(TAG, "drm license url:" + drmLicenseURL);
                 } else {
-                    CDELog.j(TAG, "clear content");
+                    CDELog.d(TAG, "clear content");
                 }
                 CDELog.d(TAG, "mediaType: " + mMediaType.toString());
 
@@ -503,5 +503,5 @@ public class TVGridFragment extends BaseMvpFragment<TVGridPresenter> implements 
         });
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

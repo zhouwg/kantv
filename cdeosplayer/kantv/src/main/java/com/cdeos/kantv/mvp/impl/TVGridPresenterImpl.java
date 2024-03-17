@@ -25,33 +25,33 @@ public class TVGridPresenterImpl extends BaseMvpPresenterImpl<TVGridView> implem
 
     @Override
     public void init() {
-        CDELog.j(TAG, "init");
+        CDELog.d(TAG, "init");
     }
 
     @Override
     public void process(Bundle savedInstanceState) {
-        CDELog.j(TAG, "process");
+        CDELog.d(TAG, "process");
     }
 
     @Override
     public void resume() {
-        CDELog.j(TAG, "resume");
+        CDELog.d(TAG, "resume");
     }
 
     @Override
     public void pause() {
-        CDELog.j(TAG, "pause");
+        CDELog.d(TAG, "pause");
     }
 
     @Override
     public void destroy() {
-        CDELog.j(TAG, "destroy");
+        CDELog.d(TAG, "destroy");
     }
 
 
     @Override
     public void refreshVideo(Context context, boolean reScan) {
-        CDELog.j(TAG, "refreshVideo");
+        CDELog.d(TAG, "refreshVideo");
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
         if (context != null)

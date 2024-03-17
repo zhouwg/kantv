@@ -7,7 +7,7 @@
 #include "ggml.h"
 
 #include "cde_log.h"
-#include "kantv_asr.h"
+#include "kantv-asr.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -31,13 +31,13 @@ Java_org_ggml_whispercpp_whispercpp_set_1benchmark_1status(JNIEnv *env, jclass c
     UNUSED(env);
     UNUSED(clazz);
 
-    whisper_set_ggml_mul_mat_status((int) b_exit_benchmark);
+    whisper_set_benchmark_status((int) b_exit_benchmark);
 }
 
 
 JNIEXPORT jstring JNICALL
 Java_org_ggml_whispercpp_whispercpp_bench(JNIEnv *env, jclass clazz, jstring model_path,
-                                          jstring audio_path, jint bench_type, jint num_threads) {
+                                       jstring audio_path, jint bench_type, jint num_threads) {
     UNUSED(clazz);
 
     const char *sz_model_path = NULL;
@@ -70,29 +70,11 @@ Java_org_ggml_whispercpp_whispercpp_bench(JNIEnv *env, jclass clazz, jstring mod
     if (0 == num_threads)
         num_threads = 1;
 
-    switch (bench_type) {
-        case BECHMARK_MEMCPY: // memcpy
-        case BECHMARK_MULMAT: // mulmat
-        case BECHMARK_FULL:   // whisper encode
-            whispercpp_bench(sz_model_path, bench_type, num_threads);
-            break;
-        case BECHMARK_ASR: // asr
-            bench_result = whisper_transcribe_from_file(sz_model_path, sz_audio_path, num_threads);
-            break;
-        default:
-            break;
-    }
+    whisper_bench(sz_model_path, sz_audio_path, bench_type, num_threads);
 
     if (BECHMARK_ASR == bench_type) { // asr
-        if (NULL == bench_result) {
-            LOGGW("failed to get asr result, pls check why?");
-            goto failure;
-        } else {
-            LOGGD("asr result:\n%s\n", bench_result);
-            //dont't do this and just return "asr_result" even get correct asr result because I'll try to do everything in native layer
-            //sz_bench_result = bench_result;
-            sz_bench_result = "asr_result";
-        }
+        //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
+        sz_bench_result = "asr_result";
     }
 
 failure:

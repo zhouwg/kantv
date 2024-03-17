@@ -46,7 +46,7 @@ final public class KANTVMgr
 
     public void release()
     {
-        CDELog.j(TAG, "[Java] release");
+        CDELog.d(TAG, "[Java] release");
         native_release();
     }
 
@@ -240,5 +240,5 @@ final public class KANTVMgr
         }
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

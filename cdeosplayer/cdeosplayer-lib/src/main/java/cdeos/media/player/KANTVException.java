@@ -86,5 +86,5 @@ public class KANTVException extends Exception
         return internalCode;
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

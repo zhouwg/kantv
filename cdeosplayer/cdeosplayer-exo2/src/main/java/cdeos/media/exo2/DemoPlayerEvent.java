@@ -190,5 +190,5 @@ public class DemoPlayerEvent implements DemoPlayer.Listener, DemoPlayer.InfoList
         return TIME_FORMAT.format((timeMs) / 1000f);
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }

@@ -1,6 +1,7 @@
 *.jar
 *.so
 *.a
+*.wav
 
 out
 build

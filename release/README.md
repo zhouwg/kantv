@@ -121,7 +121,7 @@
 
 - v1.2.5 build time(编译时间):2024-02-27 try to migrate some personal projects to github from Feb 22,2024 after experienced too much in recently months.
 
-- v1.2.6 build time(编译时间):2024-02-29 prepare for migrate kantv to github(add clean-room white-box anti-tamper codes in native layer, add ASR in main UI because ASR is important for an open source project(将语音研究又添加到了主界面，因为对于本开源项目尤其是专业AI开发者而言，语音研究比较重要。所以现在主界面又有5个按纽))
+- v1.2.6 build time(编译时间):2024-02-29 prepare for migrate kantv to github(add clean-room white-box anti-remove-rename codes in native layer, add ASR in main UI because ASR is important for an open source project(将语音研究又添加到了主界面，因为对于本开源项目尤其是专业AI开发者而言，语音研究比较重要。所以现在主界面又有5个按纽))
 
 - v1.2.7 2024-03-01, 00:30(Beijing Time) prepare for migrate kantv to github(remove SoftwareHistoryActivity.java and CommonQuestionActivity.java because it's highly personalized and not important for an open source project， and then adjust UI accordingly). I hope v1.2.8 could be available in github in next few days(because 8,aka HanZi "发", means lucky in Chinese).
 
@@ -147,7 +147,18 @@
                      <li> add some technical docs to prepared empty directory doc </li>
                      <li> refine regular codes and prepare for coding work of implement real-time English subtitle for online English TV</li>
                  </ul>
-             
+
+- v1.3.2 2024-03-16,
+                 <ul>
+                     <li> ASR performance improved from 2 secs to 0.8 sec on Xiaomi 14 by special build optimization after study ARM's tech doc </li>
+                     <li> coding work of data path: UI <----> JNI <----> whisper.cpp <----> kantv-play <----> kantv-core </li>
+                     <li> UI language is now mightbe totally in English for purpose of more easier for open source community </li>
+                     <li> audio-only record mode is supported for the first time</li>
+                     <li> online TV record and online TV transcription can work at the same time for the first time</li>
+                     <li> save audio data to file when transcription was launched for further usage/scenario </li>
+                     <li> move some key-point codes to upper layer in customized whisper.cpp for purpose of referenced by AI experts or other programmers</li>
+                     <li> implmement AI subtitle for online TV by great whisper.cpp for the first time(NOT realtime and bugfix is required)</li>
+                 </ul>
 
 
 ### Screenshots(一些屏幕截图）

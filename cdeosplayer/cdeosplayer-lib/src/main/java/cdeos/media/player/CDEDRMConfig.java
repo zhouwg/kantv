@@ -29,5 +29,5 @@ public class CDEDRMConfig {
         return this.provisionUrl;
     }
 
-    public static native int kantv_anti_tamper();
+    public static native int kantv_anti_remove_rename_this_file();
 }
