@@ -1622,9 +1622,27 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         }
 
         CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+
         //TODO: hardcode path, should be configured in "ASR Settings"
-        //String ggmlModelFileName = "ggml-small.en.bin"; //31M
-        String ggmlModelFileName = "ggml-small.en.bin";   //466M
+        //String ggmlModelFileName = "ggml-small.en.bin";   // 466M
+        //String ggmlModelFileName = "ggml-tiny-q5_1.bin";    // 31M
+        //String ggmlModelFileName = "ggml-tiny.en-q5_1.bin";   // 31M
+        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     //42M, very good, about 500-700 ms
+        CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+        CDELog.j(TAG, "model: " + ggmlModelFileName);
+
+        File file = new File(CDEUtils.getDataPath() + ggmlModelFileName);
+        if (!file.exists()) {
+            CDELog.j(TAG, "GGML model file not found:" + file.getAbsolutePath());
+            Toast.makeText(getContext(), "GGML model file not found:" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            topBarView.updateTVASRVisibility(false);
+            CDEUtils.setTVASR(false);
+            return;
+        } else {
+            CDELog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());
+        }
+
+        //TODO: preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
         if (1 == mSettings.getASRMode()) {
             whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);

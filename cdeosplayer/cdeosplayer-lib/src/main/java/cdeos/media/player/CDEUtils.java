@@ -379,8 +379,11 @@ public class CDEUtils {
 
     private static boolean mIsOfflineDRM = false;
 
-    private static int mScreenWidth     = 768;
-    private static int mScreenHeight    = 1024;
+    private static int mScreenWidth     = 1024;
+    private static int mScreenHeight    = 768;
+
+    private static int mVideoWidth     = 640;
+    private static int mVideoHeight    = 360;
 
     public static void setAPKForTV(boolean isAPKForTV) {
         mIsAPKForTV = isAPKForTV;
@@ -397,10 +400,26 @@ public class CDEUtils {
     public static int getScreenWidth() {
         return mScreenWidth;
     }
-
-    public static int getmScreenHeight() {
+    public static int getScreenHeight() {
         return mScreenHeight;
     }
+
+
+    public static void setVideoWidth(int width) {
+        mVideoWidth = width;
+    }
+
+    public static void setVideoHeight(int height) {
+        mVideoHeight = height;
+    }
+
+    public static int getVideoWidth() {
+        return mVideoWidth;
+    }
+    public static int getVideoHeight() {
+        return mVideoHeight;
+    }
+
 
     //FIXME
     public static boolean isRunningOnTV() {

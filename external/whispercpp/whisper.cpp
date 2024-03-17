@@ -7500,7 +7500,7 @@ public:
             n_end_time = ggml_time_us();
             n_durtion = (n_end_time - n_begin_time) / 1000;
 
-            if (n_durtion > 2000) { // 2 seconds
+            if (n_durtion > 1000) { // 1 seconds, very good on Xiaomi 14, about 500-700 ms with GGML model ggml-tiny.en-q8_0.bin
                 LOGGD("duration of audio data gathering is: %d milliseconds\n", n_durtion);
                 LOGGD("size of gathered audio data: %d\n", _n_whisper_in_size);
                 LOGGD("total audio sample counts %d\n", _n_total_sample_counts);
@@ -7965,11 +7965,11 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      params.no_timestamps           = true;
 
      params.speed_up                = false;
-     params.debug_mode              = true;
+     params.debug_mode              = false;
 
      //params.tdrz_enable                  = false;//whisper complain failed to compute log mel spectrogram when this flag was enabled
-     params.suppress_blank               = true;
-     params.suppress_non_speech_tokens   = true;
+     //params.suppress_blank               = true;
+     //params.suppress_non_speech_tokens   = true;
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
@@ -8017,4 +8017,15 @@ void whisper_asr_finalize() {
 
     LOGGV("leave whisper_asr_finalize\n");
 }
+
+/*
+I think complicated or modern C++ syntax should NOT be used for such performance-sensitive
+ application unless you're a C++ master like Georgi Gerganov.
+ my mean is that just like pure C implementation in FFmpeg or in
+ [ggml](https://github.com/ggerganov/ggml): simple / static data structure should be
+ considered for such performance-sensitive application, memory leak should be considered
+ carefully at the same time. [ggml](https://github.com/ggerganov/ggml)/[whispercpp](https://github.com/ggerganov/whisper.cpp) 's success
+ on Xiaomi 14 proves C/C++ language is still a very very very powerful programming language.
+
+*/
 //------------------------------------ end added by zhou.weiguo(https://github.com/zhouwg) -------------------------------------

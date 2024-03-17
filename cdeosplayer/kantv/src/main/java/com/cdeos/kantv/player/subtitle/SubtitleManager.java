@@ -80,26 +80,20 @@ public class SubtitleManager {
     private List<Caption> searchSubtitle(long duration) {
         List<Caption> captionList = new ArrayList<>();
         try {
-            //最小时间
             long min = subtitleData.captions.firstKey();
             long max = subtitleData.captions.lastKey();
-            //时间大于最小时间才开始解析
             if (duration > min) {
-                //10秒前的key
                 long start = duration - 10 * 1000 < min
                         ? subtitleData.captions.firstKey()
                         : subtitleData.captions.lowerKey(duration - 10 * 1000);
-                //截取10秒前到结尾的所有字幕
                 SortedMap<Long, Caption> temp = subtitleData.captions.subMap(start, max);
                 for (Long key1 : temp.keySet()) {
                     Caption caption = temp.get(key1);
                     if (caption == null)
                         return null;
-                    //开始时间小于当前时间，结束时间大于当前时间， 放宽1ms
                     if (duration - caption.start.getMseconds() >= -1 && duration <= caption.end.getMseconds()) {
                         captionList.add(caption);
                     }
-                    //减少查找时间，从开始大于当前时间开始break， 放宽1ms
                     if (caption.start.getMseconds() > duration + 1) {
                         break;
                     }

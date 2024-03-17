@@ -22,7 +22,9 @@ public class SubtitleUtils {
             return;
         }
 
-        if (isTopSubtitle){
+        //if (isTopSubtitle)
+        if (true) //modify on 2024-03-16 for real-time subtitle demo
+        {
             subtitleView.setTopTexts(subtitleTexts);
         } else {
             subtitleView.setBottomTexts(subtitleTexts);

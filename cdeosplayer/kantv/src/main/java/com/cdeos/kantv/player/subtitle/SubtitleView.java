@@ -30,7 +30,8 @@ public class SubtitleView extends View {
 
     private static final float DEFAULT_STOKE_SIZE = 2f;
 
-    private static final int DEFAULT_TEXT_COLOR = Color.WHITE;
+    //private static final int DEFAULT_TEXT_COLOR = Color.WHITE;
+    private static final int DEFAULT_TEXT_COLOR = Color.BLUE; //modify on 2024-03-16 for real-time subtitle demo
 
     private static final int DEFAULT_STOKE_COLOR = Color.BLACK;
 

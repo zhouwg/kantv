@@ -1109,6 +1109,8 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
             mSurfaceWidth = w;
             mSurfaceHeight = h;
+            CDEUtils.setVideoWidth(w);
+            CDEUtils.setVideoHeight(h);
             boolean isValidState = (mTargetState == STATE_PLAYING);
             boolean hasValidSize = !mRenderView.shouldWaitForResize() || (mVideoWidth == w && mVideoHeight == h);
             if (mMediaPlayer != null && isValidState && hasValidSize) {
