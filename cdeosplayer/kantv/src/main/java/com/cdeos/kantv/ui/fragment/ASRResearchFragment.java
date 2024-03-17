@@ -156,7 +156,7 @@
 
 
          //copy asset files to /sdcard/kantv/
-         //or just upload dependent files to /sdcard accordingly so the APK size would be smaller significantly
+         //or just upload dependent files to /sdcard/kantv/ accordingly so the APK size would be smaller significantly
          CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
