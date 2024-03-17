@@ -175,6 +175,8 @@ git checkout master
 
 modify <a href="https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
 
+pay attention <a href="https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/CMakeLists.txt#L71">here and modify it accordingly</a> if target Android device is NOT Xiaomi 14
+
 ```
 . build/envsetup.sh
 
