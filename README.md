@@ -189,7 +189,7 @@ time ./build-all.sh
 
 - Build APK from source code by Android Studio IDE manually
 
-  Please attention ![some source codes in ASRFragment.java](https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRFragment.java#L155) which affect the running of the ASR demo and the size of the generated APK.
+  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L159) which affect the running of the ASR demo and the size of the generated APK.
 
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the size of the prebuilt APK is about 90M because it contains **dependent model file of DeepSpeech** for purpose of make ASR demo happy).
 
