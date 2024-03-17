@@ -8016,15 +8016,4 @@ void whisper_asr_finalize() {
 
     LOGGV("leave whisper_asr_finalize\n");
 }
-
-/*
-I think complicated or modern C++ syntax should NOT be used for such performance-sensitive
- application unless you're a C++ master like Georgi Gerganov.
- my mean is that just like pure C implementation in FFmpeg or in
- [ggml](https://github.com/ggerganov/ggml): simple / static data structure should be
- considered for such performance-sensitive application, memory leak should be considered
- carefully at the same time. [ggml](https://github.com/ggerganov/ggml)/[whispercpp](https://github.com/ggerganov/whisper.cpp) 's success
- on Xiaomi 14 proves C/C++ language is still a very very very powerful programming language.
-
-*/
 //------------------------------------ end added by zhou.weiguo(https://github.com/zhouwg) -------------------------------------
