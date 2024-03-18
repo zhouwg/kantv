@@ -161,9 +161,7 @@
                  </ul>
 
 - v1.3.3 2024-03-18,
-
                  <ul>
                     <li>switch to Project Whispercpp-Android successfully according to roadmap after finsihed PoC #64</li>
                     <li>this is the new baseline for new Project KanTV(aka Project Whispercpp-Android)</li>
                  </ul>
-
