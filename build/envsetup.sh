@@ -65,7 +65,6 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
-export LOCAL_BAZEL_PATH=${HOME_PATH}/.cache/bazel/_bazel_${BUILD_USER}/d483cd2a2d9204cb5bb4d870c2729238
 export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 
 

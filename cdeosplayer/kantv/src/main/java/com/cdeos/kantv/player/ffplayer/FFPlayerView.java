@@ -1543,12 +1543,24 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
 
-        //TODO: hardcode path, should be configured in "ASR Settings"
-        //String ggmlModelFileName = "ggml-small.en.bin";   // 466M
-        //String ggmlModelFileName = "ggml-tiny-q5_1.bin";    // 31M
+        //String ggmlModelFileName = "ggml-small.en.bin";       // 466M
+        //String ggmlModelFileName = "ggml-tiny-q5_1.bin";      // 31M
         //String ggmlModelFileName = "ggml-tiny.en-q5_1.bin";   // 31M
-        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     //42M, very good, about 500-700 ms
-        CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     // 42M, very good, about 500-700 ms
+        String userChooseModelName = CDEUtils.getGGMLModeString(mSettings.getGGMLMode());
+        String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
+        CDELog.j(TAG, "ggml model name of user's choose:" + userChooseModelFileName);
+
+        if (!ggmlModelFileName.equals(userChooseModelFileName)) {
+            CDELog.j(TAG, "pls choose GGML model :" + ggmlModelFileName);
+            Toast.makeText(getContext(), "pls choose GGML model: " + ggmlModelFileName, Toast.LENGTH_SHORT).show();
+            topBarView.updateTVASRVisibility(false);
+            CDEUtils.setTVASR(false);
+            CDEUtils.showMsgBox(mAttachActivity, "pls choose GGML model: " + ggmlModelFileName);
+            return;
+        }
+
+        ggmlModelFileName = userChooseModelFileName;
         CDELog.j(TAG, "model: " + ggmlModelFileName);
 
         File file = new File(CDEUtils.getDataPath() + ggmlModelFileName);
@@ -1557,6 +1569,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             Toast.makeText(getContext(), "GGML model file not found:" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
             topBarView.updateTVASRVisibility(false);
             CDEUtils.setTVASR(false);
+            CDEUtils.showMsgBox(mAttachActivity, "GGML model file not found:" + file.getAbsolutePath());
             return;
         } else {
             CDELog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());

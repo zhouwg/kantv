@@ -159,7 +159,7 @@
     <string name="kantv_test_warning">The following TV channels only used for learning purpose</string>
 
     <string name="recording_under_development">The feature of TV record is under development</string>
-    <string name="asr_tip">ASR research(by GGML\'s whisper.cpp)</string>
+    <string name="asr_tip">ASR(Automatic Speech Recognition) research(by GGML\'s whisper.cpp)</string>
 
     <string name="ASRstart">start ASR</string>
     <string name="TTSstart">start TTS</string>

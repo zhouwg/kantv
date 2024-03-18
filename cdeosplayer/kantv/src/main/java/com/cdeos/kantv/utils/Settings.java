@@ -76,6 +76,18 @@ public class Settings {
         }
     }
 
+    public int getGGMLMode() {
+        String key = mAppContext.getString(R.string.pref_key_ggmlmodel);
+        String value = mSharedPreferences.getString(key, "0");
+        try {
+            return Integer.valueOf(value).intValue();
+        } catch (NumberFormatException e) {
+            CDELog.j(TAG, "exception occurred");
+            return 0;
+        }
+    }
+
+
     public int getUILang() {
         String key = "pref.lang";
         String value = mSharedPreferences.getString(key, "0");
@@ -235,7 +247,7 @@ public class Settings {
 
     public boolean getDevMode() {
         String key = mAppContext.getString(R.string.pref_key_dev_mode);
-        return mSharedPreferences.getBoolean(key, false);
+        return mSharedPreferences.getBoolean(key, true);
     }
 
     public int getDumpMode() {

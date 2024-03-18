@@ -200,7 +200,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     return true;
 
                 case R.id.navigation_asr:
-                    setTitle(mActivity.getBaseContext().getString(R.string.ASR));
+                    setTitle("ASR Research");
                     switchFragment(ASRResearchFragment.class);
                     menuNetItem.setVisible(false);
                     return true;

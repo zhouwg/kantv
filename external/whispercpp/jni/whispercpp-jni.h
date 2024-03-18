@@ -38,10 +38,14 @@ extern "C" {
     int          whisper_get_cpu_core_counts(void);
     void         whisper_set_benchmark_status(int b_exit_benchmark);
     void         whisper_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
+    const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
     // JNI helper function for ASR
     void         whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
     void         whisper_asr_finalize(void);
+
+
+
 
 
 #ifdef __cplusplus

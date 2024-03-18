@@ -39,6 +39,8 @@ tags
 
 *.wasm
 *.tmp
+*.tesc
+*.comp
 
 *.a
 *.so
@@ -48,6 +50,7 @@ tags
 *.swp
 *.hprof
 .travis.yml
+
 
 out
 out.*

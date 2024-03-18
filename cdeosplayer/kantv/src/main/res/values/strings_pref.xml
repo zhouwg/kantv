@@ -99,6 +99,66 @@
     </string-array>
 
 
+
+
+    <string name="pref_key_ggmlmodel">pref.ggmlmodel</string>
+    <string name="pref_title_ggmlmodel">Choose GGML model</string>
+    <string-array name="pref_entries_ggmlmodel">
+        <item>tiny</item>
+        <item>tiny.en</item>
+        <item>tiny.en-q5_1</item>
+        <item>tiny.en-q8_0</item>
+        <item>tiny-q5_1</item>
+        <item>base</item>
+        <item>base.en</item>
+        <item>base-q5_1</item>
+        <item>small</item>
+        <item>small.en</item>
+        <item>small.en-q5_1</item>
+        <item>small-q5_1</item>
+        <item>medium</item>
+        <item>medium.en</item>
+        <item>medium.en-q5_0</item>
+        <item>large</item>
+    </string-array>
+    <string-array name="pref_entry_values_ggmlmodel">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_ggmlmodel">
+            <item>tiny</item>
+            <item>tiny.en</item>
+            <item>tiny.en-q5_1</item>
+            <item>tiny.en-q8_0</item>
+            <item>tiny-q5_1</item>
+            <item>base</item>
+            <item>base.en</item>
+            <item>base-q5_1</item>
+            <item>small</item>
+            <item>small.en</item>
+            <item>small.en-q5_1</item>
+            <item>small-q5_1</item>
+            <item>medium</item>
+            <item>medium.en</item>
+            <item>medium.en-q5_0</item>
+            <item>large</item>
+    </string-array>
+
+
     <string name="pref_title_ffmpegplayer_video">Video: FFmpeg</string>
 
     <string name="pref_key_using_media_codec">pref.using_media_codec</string>
@@ -277,7 +337,7 @@
     </string-array>
 
     <string name="pref_key_play_mode">pref.play_mode</string>
-    <string name="pref_title_play_mode">play_mode</string>
+    <string name="pref_title_play_mode">Playmode with Playlist</string>
     <string-array name="pref_entries_playmode">
         <item>normal mode</item>
         <item>loop play with content</item>
@@ -299,7 +359,7 @@
     <string name="pref_title_about">About</string>
     <string name="pref_key_version">pref.version</string>
     <string name="pref_title_version">Current Version</string>
-    <string name="pref_summary_version">1.3.2</string>
+    <string name="pref_summary_version">1.3.3</string>
 
     <string name="pref_key_versionhistory">pref.versionhistory</string>
     <string name="pref_title_versionhistory">Version history</string>
@@ -332,6 +392,11 @@
     <string name="pref_key_downloadASRmodel">pref.downloadASRmodel</string>
     <string name="pref_title_downloadASRmodel">Download ASR model</string>
     <string name="pref_summary_downloadASRmodel">Download ASR model</string>
+
+    <string name="pref_title_GGMLmodel"></string>
+    <string name="pref_key_downloadGGMLmodel">pref.downloadGGMLmodel</string>
+    <string name="pref_title_downloadGGMLmodel">Download GGML model</string>
+    <string name="pref_summary_downloadGGMLmodel">Download GGML model</string>
 
     <string name="pref_title_TTSmodel"></string>
     <string name="pref_key_downloadTTSmodel">pref.downloadTTSmodel</string>

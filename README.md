@@ -34,12 +34,7 @@ Some goals of this project are:
   </ul>
 
 
-
-- Whisper.cpp learning/study/secondary software development activity could be done <b>without GFW issue</b>(source code of upstream whisper.cpp would be updated irregularly and dependent audio files and GGML model files are all available/ready) for programmers/researchers from Mainland China
-
-
-
-- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), all AI research activitiy(algorithm improvement, model training, model generation......) could be done by Android Studio IDE very easily
+- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE very easily
 
 - Android <b>turn-key project</b> for software programmers who was interested in device-side AI application or customized/secondary software development activity on **Android**-based device
 
@@ -197,23 +192,27 @@ The following is some English snapshots.
 
 ![1404139451](https://github.com/cdeos/kantv/assets/6889919/3acfef49-0fa7-4f09-887c-affc32f746ae)
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
-![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
+![794969608](https://github.com/cdeos/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
 
 
 
 ![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
+![154248860](https://github.com/cdeos/kantv/assets/6889919/071ac55c-a5d7-4bd6-aece-83cbc8a487ff)
 
 
-![1743987771](https://github.com/cdeos/kantv/assets/6889919/2c9268e2-aa4b-498b-b457-707ce4584c5d)
-
-
-
+![1118975128](https://github.com/cdeos/kantv/assets/6889919/ef2b256c-02fb-4318-a430-b4cd15ed5b44)
 ![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
-![1305129729](https://github.com/cdeos/kantv/assets/6889919/527de216-19a4-4c2d-915c-1d4b888fe2c1)
 
-![517175602](https://github.com/cdeos/kantv/assets/6889919/dc0a21bc-d7d3-4c9b-b6da-01ad338d6d7b)
+
+![1506058604](https://github.com/cdeos/kantv/assets/6889919/ce230909-6fb6-4f3a-bd1d-b771beceb3a2)
+
+
+![1891464007](https://github.com/cdeos/kantv/assets/6889919/c3b1347e-5d49-4951-bef0-fa9890941bfb)
+
+![448033741](https://github.com/cdeos/kantv/assets/6889919/98d67b08-330f-4b97-bf96-2e1037bdc3a2)
+
 
 ![991182277](https://github.com/cdeos/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
 

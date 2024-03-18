@@ -15,182 +15,169 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
-package com.cdeos.kantv.ui.fragment.settings;
+ package com.cdeos.kantv.ui.fragment.settings;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Toast;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.content.SharedPreferences;
+ import android.os.Bundle;
+ import android.preference.PreferenceManager;
+ import android.view.View;
+ import android.view.WindowManager;
+ import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.preference.CheckBoxPreference;
-import androidx.preference.Preference;
-
-
-import com.cdeos.kantv.ui.activities.ShellActivity;
-import com.cdeos.kantv.utils.Settings;
-import com.cdeos.kantv.R;
-import com.cdeos.kantv.ui.activities.WebViewActivity;
-
-import java.io.File;
-
-import cdeos.media.player.CDELog;
-import cdeos.media.player.CDEUtils;
+ import androidx.annotation.NonNull;
+ import androidx.annotation.Nullable;
+ import androidx.preference.CheckBoxPreference;
+ import androidx.preference.Preference;
 
 
-public class VoiceSettingFragment extends BaseSettingsFragment {
-    private static final String TAG = VoiceSettingFragment.class.getName();
-    private static ShellActivity mActivity;
-    private Context mContext;
-    private Context mAppContext;
-    private SharedPreferences mSharedPreferences;
-    private Settings mSettings;
+ import com.cdeos.kantv.ui.activities.ShellActivity;
+ import com.cdeos.kantv.utils.Settings;
+ import com.cdeos.kantv.R;
+ import com.cdeos.kantv.ui.activities.WebViewActivity;
+
+ import java.io.File;
+
+ import cdeos.media.player.CDELog;
+ import cdeos.media.player.CDEUtils;
 
 
-    @Override
-    public String getTitle() {
-        return mActivity.getBaseContext().getString(R.string.asr_settings);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
+ public class VoiceSettingFragment extends BaseSettingsFragment {
+     private static final String TAG = VoiceSettingFragment.class.getName();
+     private static ShellActivity mActivity;
+     private Context mContext;
+     private Context mAppContext;
+     private SharedPreferences mSharedPreferences;
+     private Settings mSettings;
 
 
-    @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
-        mActivity = ShellActivity.getInstance();
-        mAppContext = mActivity.getApplicationContext();
-        mSettings = new Settings(mAppContext);
-        mContext = mActivity.getBaseContext();
-        mSettings.updateUILang(mActivity);
+     @Override
+     public String getTitle() {
+         return mActivity.getBaseContext().getString(R.string.asr_settings);
+     }
 
-        addPreferencesFromResource(R.xml.settings_voice);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
-
-        CDELog.j(TAG, "dev mode:" + mSettings.getDevMode());
-        if (!mSettings.getDevMode()) {
-            if (findPreference("pref.voiceapi") != null) {
-                findPreference("pref.voiceapi").setEnabled(true);
-            }
-        }
+     @Override
+     public void onAttach(Context context) {
+         super.onAttach(context);
+     }
 
 
-    }
+     @Override
+     public void onCreatePreferences(Bundle bundle, String s) {
+         mActivity = ShellActivity.getInstance();
+         mAppContext = mActivity.getApplicationContext();
+         mSettings = new Settings(mAppContext);
+         mContext = mActivity.getBaseContext();
+         mSettings.updateUILang(mActivity);
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+         addPreferencesFromResource(R.xml.settings_voice);
+         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
 
-        if (findPreference("pref.voiceapi") != null) {
-            findPreference("pref.voiceapi").setOnPreferenceClickListener(preference -> {
-                CDEUtils.showMsgBox(mActivity, "This feature not implmented currently");
-                return false;
-            });
-        }
-    }
-
-
-    @Override
-    public void onDisplayPreferenceDialog(Preference preference) {
-        super.onDisplayPreferenceDialog(preference);
-    }
-
-    @Override
-    public void onResume() {
-        mSharedPreferences.registerOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        mSharedPreferences.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
-        super.onPause();
-    }
+         CDELog.j(TAG, "dev mode:" + mSettings.getDevMode());
+         //NPU or dedicated hardware AI engine in Android device not supported currently
+         if (!mSettings.getDevMode()) {
+             if (findPreference("pref.voiceapi") != null) {
+                 findPreference("pref.voiceapi").setEnabled(true);
+             }
+         }
 
 
-    private SharedPreferences.OnSharedPreferenceChangeListener mSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            CDELog.j(TAG, "key : " + key);
-        }
-    };
+     }
+
+     @Override
+     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+         super.onViewCreated(view, savedInstanceState);
+
+         if (findPreference("pref.voiceapi") != null) {
+             findPreference("pref.voiceapi").setOnPreferenceClickListener(preference -> {
+                 CDEUtils.showMsgBox(mActivity, "This feature not implemented currently");
+                 return false;
+             });
+         }
+     }
 
 
-    @Override
-    public boolean onPreferenceTreeClick(Preference preference) {
-        String key = preference.getKey();
-        CDELog.j(TAG, "key : " + key);
-        if (preference instanceof CheckBoxPreference) {
-            CDELog.d(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getBoolean(key, false));
-        }
+     @Override
+     public void onDisplayPreferenceDialog(Preference preference) {
+         super.onDisplayPreferenceDialog(preference);
+     }
 
-        //TODO: focus on GGML's model
-        if (key.contains("downloadASRmodel")) {
-            CDELog.j(TAG, "download ASR model");
-            WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
-            attributes.screenBrightness = 1.0f;
-            mActivity.getWindow().setAttributes(attributes);
-            mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+     @Override
+     public void onResume() {
+         mSharedPreferences.registerOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
+         super.onResume();
+     }
 
-            String asrAudioFileName = CDEUtils.getDataPath(mContext) + "audio.wav";
-            String asrModelFileName = CDEUtils.getDataPath(mContext) + "deepspeech-0.9.3-models.tflite";
-            File asrAudioFile = new File(asrAudioFileName);
-            File asrModelFile = new File(asrModelFileName);
-            if (
-                    (asrAudioFile == null) || (!asrAudioFile.exists())
-                            || (asrModelFile == null) || (!asrModelFile.exists())
-            ) {
-                DownloadModel manager = new DownloadModel(mActivity);
-                manager.setTitle("begin download ASR model");
-                manager.setModeName("ASR");
-                manager.setModeName("deepspeech", "audio.wav", "deepspeech-0.9.3-models.tflite");
-                manager.showUpdateDialog();
-            } else {
-                Toast.makeText(mContext, "ASR model file already exist", Toast.LENGTH_SHORT).show();
-            }
+     @Override
+     public void onPause() {
+         mSharedPreferences.unregisterOnSharedPreferenceChangeListener(mSharedPreferenceChangeListener);
+         super.onPause();
+     }
 
 
-        }
-
-        if (key.contains("downloadTTSmodel")) {
-            CDELog.j(TAG, "download TTS model");
-            WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
-            attributes.screenBrightness = 1.0f;
-            mActivity.getWindow().setAttributes(attributes);
-            mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-            String ttsModelFileName1 = CDEUtils.getDataPath(mContext) + "mb_melgan_csmsc_arm.nb";
-            String ttsModelFileName2 = CDEUtils.getDataPath(mContext) + "fastspeech2_csmsc_arm.nb";
-            File ttsModelFile1 = new File(ttsModelFileName1);
-            File ttsModelFile2 = new File(ttsModelFileName2);
-            if (
-                    (ttsModelFile1 == null) || (!ttsModelFile1.exists())
-                            || (ttsModelFile2 == null) || (!ttsModelFile2.exists())
-            ) {
-
-                DownloadModel manager = new DownloadModel(mActivity);
-                manager.setTitle("begin download TTS model");
-                manager.setModeName("TTS");
-                manager.setModeName("paddlespeech", "mb_melgan_csmsc_arm.nb", "fastspeech2_csmsc_arm.nb");
-                manager.showUpdateDialog();
-            } else {
-                Toast.makeText(mContext, "TTS model file already exist", Toast.LENGTH_SHORT).show();
-            }
-
-        }
-
-        if (key.contains("pref.asrmode")) {
-            CDELog.j(TAG, "asrmode: "  + mSettings.getASRMode());
-        }
+     private SharedPreferences.OnSharedPreferenceChangeListener mSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+         @Override
+         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+             CDELog.j(TAG, "key : " + key);
+         }
+     };
 
 
-        return true;
-    }
-}
+     @Override
+     public boolean onPreferenceTreeClick(Preference preference) {
+         String key = preference.getKey();
+         CDELog.j(TAG, "key : " + key);
+         if (preference instanceof CheckBoxPreference) {
+             CDELog.d(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getBoolean(key, false));
+         }
+
+         //TODO: focus on GGML's model
+         if (key.contains("pref.ggmlmodel")) {
+             CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
+             CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
+         }
+
+         if (key.contains("pref.downloadGGMLmodel")) {
+             CDELog.j(TAG, "download GGML model");
+             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
+             attributes.screenBrightness = 1.0f;
+             mActivity.getWindow().setAttributes(attributes);
+             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+             String asrAudioFileName = CDEUtils.getDataPath() + "jfk.wav";
+             //String asrModelFileName = CDEUtils.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin";
+             String userChooseModelName = CDEUtils.getGGMLModeString(mSettings.getGGMLMode());
+             CDELog.j(TAG, "ggml model name of user choose:" + userChooseModelName);
+             String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
+             File asrAudioFile = new File(asrAudioFileName);
+             File asrModelFile = new File(CDEUtils.getDataPath() + userChooseModelFileName);
+             CDELog.j(TAG, "asrAudioFile:" + asrAudioFile.getAbsolutePath());
+             CDELog.j(TAG, "asrModeFile:" + asrModelFile.getAbsolutePath());
+             if (
+                     (asrAudioFile == null) || (!asrAudioFile.exists())
+                             || (asrModelFile == null) || (!asrModelFile.exists())
+             ) {
+                 DownloadModel manager = new DownloadModel(mActivity);
+                 manager.setTitle("begin download GGML model");
+                 manager.setModeName("ASR");
+                 manager.setModeName("GGML", "jfk.wav", userChooseModelFileName);
+                 manager.showUpdateDialog();
+             } else {
+                 CDELog.j(TAG, "GGML model file already exist: " + CDEUtils.getDataPath() + userChooseModelFileName);
+                 Toast.makeText(mContext, "GGML model file already exist: " + CDEUtils.getDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
+                 CDEUtils.showMsgBox(mActivity, "GGML model file already exist: " + CDEUtils.getDataPath() + userChooseModelFileName);
+             }
+
+
+         }
+
+
+         if (key.contains("pref.asrmode")) {
+             CDELog.j(TAG, "asrmode: " + mSettings.getASRMode());
+         }
+
+
+         return true;
+     }
+ }

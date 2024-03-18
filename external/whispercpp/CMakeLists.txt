@@ -48,15 +48,15 @@ add_definitions(-O3)
 # the below build optimization might be works well on ALL mainstream Android phones
 # but NOT work with realtime subtitle feature(app would crash)
 # so it's default enabled
-add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
+#add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 #weiguo:2024-03-11
 # the below special build optimization ONLY validated ok on Xiaomi 14
 # works very well on Xiaomi 14 and got best ASR performance until now(less then 1 second)
 # manully enable it for Xiaomi 14
-#add_definitions(-march=armv8.7-a)
-#add_definitions(-mcpu=cortex-x1)
-#add_definitions(-mtune=cortex-x1)
+add_definitions(-march=armv8.7-a)
+add_definitions(-mcpu=cortex-x1)
+add_definitions(-mtune=cortex-x1)
 
 find_library(LOG_LIB log)
 

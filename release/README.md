@@ -159,3 +159,9 @@
                      <li> rename kantv_anti_tamper to kantv_anti_remove_rename_this_file to avoid confusion or misunderstanding</li>
                      <li> implmement AI English subtitle for English online TV by great whisper.cpp for the first time(NOT real "real-time" and bugfix is required)</li>
                  </ul>
+
+- v1.3.3 2024-03-18,
+                 <ul>
+                    <li>switch to Project Whispercpp-Android successfully according to roadmap after finsihed <a href="https://github.com/cdeos/kantv/issues/64">POC</a></li>
+                    <li>this is the new baseline for new Project KanTV(aka Project Whispercpp-Android)</li>
+                 </ul>
