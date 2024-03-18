@@ -37,12 +37,23 @@
             android:summary="@string/pref_summary_startplaypos"
             android:title="@string/pref_title_startplaypos"
             android:widgetLayout="@layout/my_checkbox" />
+
+        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:enabled="true"
+            android:entries="@@array/pref_entries_playmode"
+            android:entryValues="@array/pref_entry_values_playmode"
+            android:key="@string/pref_key_play_mode"
+            android:persistent="true"
+            android:title="@string/pref_title_play_mode"
+            app:entrySummaries="@array/pref_entry_summaries_playmode" />
+
     </PreferenceCategory>
 
 
     <PreferenceCategory
-        android:key="debug"
-        android:title="Debug/Expert">
+        android:key="expert"
+        android:title="Expert">
 
         <SwitchPreference
             android:key="surface_renders"
@@ -64,16 +75,6 @@
             android:summary="@string/pref_summary_enable_texture_view"
             android:title="@string/pref_title_enable_texture_view" />
 
-        <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
-            android:enabled="true"
-            android:entries="@@array/pref_entries_playmode"
-            android:entryValues="@array/pref_entry_values_playmode"
-            android:key="@string/pref_key_play_mode"
-            android:persistent="true"
-            android:title="@string/pref_title_play_mode"
-            app:entrySummaries="@array/pref_entry_summaries_playmode" />
-
         <CheckBoxPreference
             android:defaultValue="false"
             android:disableDependentsState="true"
@@ -89,8 +90,11 @@
             android:persistent="true"
             android:summary="@string/pref_summary_disable_video"
             android:title="@string/pref_title_disable_video" />
+    </PreferenceCategory>
 
-
+    <PreferenceCategory
+        android:key="debug"
+        android:title="Debug">
         <com.cdeos.kantv.ui.fragment.settings.IjkListPreference
             android:defaultValue="0"
             android:enabled="false"

@@ -128,7 +128,7 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                 mWidgetDumpMode.setEnabled(true);
         } else {
             if (mWidgetDumpMode != null)
-                mWidgetDumpMode.setEnabled(false);
+                mWidgetDumpMode.setEnabled(true);
         }
 
         if (mWidgetBackgroundPlay != null) {
