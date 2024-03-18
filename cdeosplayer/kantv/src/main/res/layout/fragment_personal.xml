@@ -182,7 +182,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="8dp"
-                    android:text="@string/asr_settings"
+                    android:text="ASR Setting"
                     android:textColor="@color/text_black"
                     android:textSize="12sp" />
             </LinearLayout>

@@ -119,16 +119,16 @@ public class PlaySettingFragment extends BaseSettingsFragment {
         mWidgetDumpCounts = (EditTextPreference)findPreference("pref.dump_counts");
         mWidgetUsingFFmpegCodec = (CheckBoxPreference)findPreference("pref.using_ffmpeg_codec");
         mWidgetDumpMode  = (IjkListPreference)findPreference("pref.dump_mode");
-        mWidgetAutoLoadNetwork = findPreference("auto_load_network_subtitle");
+        mWidgetAutoLoadNetwork = findPreference("auto_load_network_subtitle");//replaced with AI subtitle from 03-17-2024
 
-        CDELog.d(TAG, "dev  mode " + mSettings.getDevMode());
+        CDELog.j(TAG, "dev  mode " + mSettings.getDevMode());
 
         if (mSettings.getDevMode()) {
             if (mWidgetDumpMode != null)
                 mWidgetDumpMode.setEnabled(true);
         } else {
             if (mWidgetDumpMode != null)
-                mWidgetDumpMode.setEnabled(true);
+                mWidgetDumpMode.setEnabled(false);
         }
 
         if (mWidgetBackgroundPlay != null) {
@@ -216,17 +216,17 @@ public class PlaySettingFragment extends BaseSettingsFragment {
         if (!mSettings.getDevMode()) {
             PreferenceCategory pcSUBTITLE =  (PreferenceCategory) findPreference("subtitle");
             if (pcSUBTITLE != null) {
-                //pcSUBTITLE.setVisible(false);
+                pcSUBTITLE.setVisible(false);
             }
 
             PreferenceCategory pcDRM =  (PreferenceCategory) findPreference("drm");
             if (pcDRM != null) {
-                //pcDRM.setVisible(false);
+                pcDRM.setVisible(false);
             }
 
             PreferenceCategory pcDEBUG =  (PreferenceCategory) findPreference("debug");
             if (pcDEBUG != null) {
-                //pcDEBUG.setVisible(false);
+                pcDEBUG.setVisible(false);
             }
         }
 

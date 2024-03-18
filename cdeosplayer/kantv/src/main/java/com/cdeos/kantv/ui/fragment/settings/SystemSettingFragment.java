@@ -96,6 +96,7 @@ public class SystemSettingFragment extends BaseSettingsFragment {
     private CheckBoxPreference mWidgetUsingFFmpegCodec;
     private EditTextPreference mWidgetRecordTime;
     private EditTextPreference mWidgetRecordSize;
+    private CheckBoxPreference mWidgetDevMode;
 
     @Override
     public String getTitle() {
@@ -133,13 +134,22 @@ public class SystemSettingFragment extends BaseSettingsFragment {
         mWidgetApiGatewayServer = (EditTextPreference) findPreference("pref.apigateway");
         mWidgetRecordSize = (EditTextPreference) findPreference("pref.record_size");
         mWidgetRecordTime = (EditTextPreference) findPreference("pref.record_time");
+        mWidgetDevMode = (CheckBoxPreference) findPreference("pref.dev_mode");
 
         mWidgetEPGServer.setText(CDEUtils.getKANTVServer());
         CDELog.j(TAG, "dev mode:" + mSettings.getDevMode());
         CDELog.d(TAG, "customized EPG Server Url:" + CDEUtils.getKANTVServer());
-        CDELog.j(TAG, "epg enabled: " + mSettings.getEPGEnabled());
+        CDELog.d(TAG, "epg enabled: " + mSettings.getEPGEnabled());
         CDELog.j(TAG, "close_splash_page: " + mSettings.isCloseSplashPage());
         CDELog.j(TAG, "close_splash_page: " + AppConfig.getInstance().isCloseSplashPage());
+
+        if (mSettings.getDevMode()) {
+            if (mWidgetDevMode != null)
+                mWidgetDevMode.setChecked(true);
+        } else {
+            if (mWidgetDevMode != null)
+                mWidgetDevMode.setChecked(false);
+        }
     }
 
     @Override

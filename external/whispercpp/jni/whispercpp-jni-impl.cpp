@@ -101,7 +101,6 @@ extern "C" {
 
 // forward function declaration
 static bool whisper_abort_callback(void * data);
-static const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
 
 //------------------------------------ added by zhou.weiguo(https://github.com/zhouwg) since 03-05-2024(2024-03-05) -----------------------------------------
@@ -354,7 +353,7 @@ failure:
 }
 
 
-static const char * whisper_get_ggml_type_str(enum ggml_type wtype) {
+const char * whisper_get_ggml_type_str(enum ggml_type wtype) {
     switch (wtype) {
         case GGML_TYPE_Q4_0:
             return "GGML_TYPE_Q4_0";
@@ -451,6 +450,7 @@ static int whisper_bench_full() {
 
     struct whisper_context * ctx = whisper_init_from_file_with_params(p_asr_ctx->sz_model_path, cparams);
     LOGGD("system_info: n_threads = %d / %d | %s\n", p_asr_ctx->n_threads, std::thread::hardware_concurrency(), whisper_print_system_info());
+    kantv_asr_notify_benchmark_c("start whisper bench full");
     if (ctx == nullptr) {
         LOGGW("error: failed to initialize whisper context\n");
         return 2;
@@ -461,6 +461,8 @@ static int whisper_bench_full() {
         LOGGW("error: failed to set mel: %d\n", ret);
         return 3;
     }
+
+    kantv_asr_notify_benchmark_c("start whisper_encode");
     // heat encoder
     if (int ret = whisper_encode(ctx, 0, p_asr_ctx->n_threads) != 0) {
         LOGGW("error: failed to encode: %d\n", ret);
@@ -470,6 +472,7 @@ static int whisper_bench_full() {
     whisper_token tokens[512];
     memset(tokens, 0, sizeof(tokens));
 
+    kantv_asr_notify_benchmark_c("start whisper_decode");
     // prompt heat
     if (int ret = whisper_decode(ctx, tokens, 256, 0, p_asr_ctx->n_threads) != 0) {
         LOGGW("error: failed to decode: %d\n", ret);
@@ -573,20 +576,7 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
     }
     LOGGD("float_sample_counts %d\n", float_sample_counts);
 
-    if (1) { //2024-03-15,16:28, validate whether whisper_asr_audio_to_text can works well as expected
-        /*
-         * the answer is YES and following statements were shown in logs:
-        03-15 16:27:53.064 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[0] = [_SOT_]
-        03-15 16:27:53.064 23180 23415 D KANTV   :
-        03-15 16:27:53.064 23180 23415 D KANTV   :
-        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[1] = [_LANG_en]
-        03-15 16:27:53.065 23180 23415 D KANTV   :
-        03-15 16:27:53.065 23180 23415 D KANTV   :
-        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[2] = [_TRANSCRIBE_]
-        03-15 16:27:53.065 23180 23415 D KANTV   :
-        03-15 16:27:53.065 23180 23415 D KANTV   :
-        03-15 16:27:53.065 23180 23415 D KANTV   : [whisper.cpp, whisper_full_with_state, 5296]: whisper_full_with_state: prompt[3] = [_NOT_]
-         */
+    if (0) { //2024-03-15,16:28, validate whether whisper_asr_audio_to_text can works well as expected
         text = whisper_asr_audio_to_text(float_audio_data, float_sample_counts);
         if (NULL != text) {
             LOGGD("asr reulst:\n%s\n", text);
@@ -607,7 +597,6 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
             result = -1;
             goto failure;
         }
-
 
         whisper_params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
         whisper_params.print_realtime = true;
@@ -631,7 +620,7 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
             goto failure;
         }
         LOGGI("whispercpp inference successfully\n");
-        whisper_print_timings(context);
+        //whisper_print_timings(context);
         num_segments = whisper_full_n_segments(context);
         LOGGD("num_segments:%d\n", num_segments);
         for (index = 0; index < num_segments; index++) {
@@ -1201,7 +1190,7 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     end_time = ggml_time_ms();
 
     LOGGW("whisper inference cost %d ms\n", end_time - begin_time);
-    whisper_print_timings(p_asr_ctx->p_context);
+    //whisper_print_timings(p_asr_ctx->p_context);
 
     num_segments = whisper_full_n_segments(p_asr_ctx->p_context);
     for (index = 0; index < num_segments; index++) {

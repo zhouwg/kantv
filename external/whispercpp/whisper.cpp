@@ -1,5 +1,13 @@
 #include "whisper.h"
 
+#ifdef TARGET_ANDROID
+#include "kantv-asr.h"
+#include "cde_log.h"
+#include "whispercpp-jni.h"
+
+#include <sstream>
+#endif
+
 #ifdef WHISPER_USE_COREML
 #include "coreml/whisper-encoder.h"
 #endif
@@ -3780,6 +3788,10 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
 void whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
 
+#ifdef TARGET_ANDROID
+    std::ostringstream timing;
+#endif
+
     WHISPER_LOG_INFO("\n");
     WHISPER_LOG_INFO("%s:     load time = %8.2f ms\n", __func__, ctx->t_load_us / 1000.0f);
     if (ctx->state != nullptr) {
@@ -3797,8 +3809,28 @@ void whisper_print_timings(struct whisper_context * ctx) {
         WHISPER_LOG_INFO("%s:   decode time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_decode_us, n_decode, 1e-3f * ctx->state->t_decode_us / n_decode);
         WHISPER_LOG_INFO("%s:   batchd time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_batchd_us, n_batchd, 1e-3f * ctx->state->t_batchd_us / n_batchd);
         WHISPER_LOG_INFO("%s:   prompt time = %8.2f ms / %5d runs (%8.2f ms per run)\n", __func__, 1e-3f * ctx->state->t_prompt_us, n_prompt, 1e-3f * ctx->state->t_prompt_us / n_prompt);
+
+#ifdef TARGET_ANDROID
+        timing << "\n" << "   load time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  (ctx->t_load_us / 1000.0f) << " ms";
+        timing << "\n" << "   fallbacks  = " << std::setw(3)  << (ctx->state->n_fail_p) << " p / " << (ctx->state->n_fail_h) << " h";
+        timing << "\n" << "    mel time  = " << std::setw(10) << std::fixed <<  std::setprecision(2)<< (ctx->state->t_mel_us / 1000.0f)  << " ms";
+        timing << "\n" << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_sample_us) << " ms / " << n_sample << " runs (" << (1e-3f * ctx->state->t_sample_us / n_sample) << " ms per run)";
+        timing << "\n" << " encode time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_encode_us) << " ms / " << n_encode << " runs (" << (1e-3f * ctx->state->t_encode_us / n_sample) << " ms per run)";
+        timing << "\n" << " decode time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_decode_us) << " ms / " << n_decode << " runs (" << (1e-3f * ctx->state->t_decode_us / n_sample) << " ms per run)";
+        timing << "\n" << " batchd time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_batchd_us) << " ms / " << n_batchd << " runs (" << (1e-3f * ctx->state->t_batchd_us / n_sample) << " ms per run)";
+        timing << "\n" << " prompt time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (1e-3f * ctx->state->t_prompt_us) << " ms / " << n_prompt << " runs (" << (1e-3f * ctx->state->t_prompt_us / n_sample) << " ms per run)";
+#endif
+
     }
     WHISPER_LOG_INFO("%s:    total time = %8.2f ms\n", __func__, (t_end_us - ctx->t_start_us)/1000.0f);
+
+#ifdef TARGET_ANDROID
+    timing << "\n" << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((t_end_us - ctx->t_start_us) / 1000.0f) << " ms";
+
+    std::string result = timing.str();
+    kantv_asr_notify_benchmark(result); //TODO: only works for ASRFragment.java
+#endif
+
 }
 
 void whisper_reset_timings(struct whisper_context * ctx) {
@@ -6037,6 +6069,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
     s = "";
     char strbuf[256];
 
+#ifdef TARGET_ANDROID
+    kantv_asr_notify_benchmark_c("calling ggml_time_init");
+#endif
+
     ggml_time_init();
 
     size_t n    = 20;
@@ -6073,6 +6109,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n", (double) (n*size)/(tsum*1e9));
         s += strbuf;
 
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(s);
+#endif
+
         // needed to prevent the compiler from optimizing the memcpy away
         {
             for (size_t i = 0; i < size; i++) sum += dst[i];
@@ -6107,6 +6147,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
 
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n", (double) (n*size)/(tsum*1e9));
         s += strbuf;
+
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(s);
+#endif
 
         // needed to prevent the compiler from optimizing the memcpy away
         {
@@ -6160,6 +6204,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n", (double) (n*size)/(tsum*1e9), k);
         s += strbuf;
 
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(s);
+#endif
+
         // needed to prevent the compiler from optimizing the memcpy away
         {
             for (size_t i = 0; i < size; i++) sum += dst[i];
@@ -6171,6 +6219,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
 
     snprintf(strbuf, sizeof(strbuf), "sum:    %f\n", sum);
     s += strbuf;
+
+#ifdef TARGET_ANDROID
+    kantv_asr_notify_benchmark(s);
+#endif
 
     return s.c_str();
 }
@@ -6184,6 +6236,15 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
     static std::string s;
     s = "";
     char strbuf[256];
+
+#ifdef TARGET_ANDROID
+    static std::string tipString;
+    tipString = "";
+
+    tipString += "calling ggml_time_init";
+    kantv_asr_notify_benchmark_c("calling ggml_time_init");
+    kantv_asr_notify_benchmark(tipString);
+#endif
 
     ggml_time_init();
 
@@ -6201,6 +6262,11 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
     // when F16 is used, there is an extra work buffer of size N*N*sizeof(float)
     std::vector<uint8_t> buf(3llu*N_max*N_max*sizeof(float) + 3*ggml_tensor_overhead() + ggml_graph_overhead());
     std::vector<uint8_t> work;
+
+#ifdef TARGET_ANDROID
+    tipString += "\nprepare matrix";
+    kantv_asr_notify_benchmark(tipString);
+#endif
 
     // put a bunch of random data in the buffer
     for (size_t i = 0; i < buf.size(); i++) buf[i] = i;
@@ -6262,6 +6328,16 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
             for (int i = 0; i < n_max; ++i) {
                 const int64_t t0 = ggml_time_us();
 
+#ifdef TARGET_ANDROID
+                tipString = "calling ggml_graphic_compute_helper:\n";
+                tipString += "j= " + std::to_string(j) + "(matrix dimension = " + std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
+                             + ",k=" + std::to_string(k) + "(ggml quant type=" + std::string(whisper_get_ggml_type_str(static_cast<ggml_type>(wtype))) + ")"
+                             + ",i=" + std::to_string(i) + "\n";
+
+                kantv_asr_notify_benchmark(tipString);
+                //LOGGI("%s\n", tipString.c_str());
+#endif
+
                 ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
 
                 const int64_t t1 = ggml_time_us();
@@ -6293,6 +6369,12 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
         snprintf(strbuf, sizeof(strbuf), "%4zu x %4zu: F16  %7.1f GFLOPS (%3d runs) | F32  %7.1f GFLOPS (%3d runs)\n",
                 N, N, s_fp16, n_fp16, s_fp32, n_fp32);
         s += strbuf;
+
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(s);
+        LOGGI("%s\n", s.c_str());
+#endif
+
     }
 
     return s.c_str();

@@ -272,6 +272,8 @@
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                  CDELog.j(TAG, "model:" + arrayModelName[position]);
                  strModeName = arrayModelName[position];
+
+                 CDELog.j(TAG, "strModeName:" + strModeName);
              }
 
              @Override
@@ -282,10 +284,12 @@
 
 
          _btnBenchmark.setOnClickListener(v -> {
+             CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
 
              String selectModeFileName = "ggml-" + strModeName + ".bin";
              String selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
              File selectModeFile = new File(selectModelFilePath);
              displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
              if (!selectModeFile.exists()) {
@@ -297,8 +301,9 @@
                  showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
-
-             whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
+             ggmlModelFileName = selectModeFileName;
+             CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
+             whispercpp.asr_init(CDEUtils.getDataPath() + selectModeFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
              if (benchmarkIndex == BECHMARK_ASR) {
                  //playAudioFile();
              }
