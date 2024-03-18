@@ -1,27 +1,28 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with many/much enhancements:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with much enhancements and new features:
 
-- Watch online TV and local media (by customized ![FFmpeg](https://github.com/cdeos/FFmpeg):FFmpeg 6.1, source code of customized FFmpeg could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
 
-- Record online TV to automatically generate videos (usable for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
+- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
+
+- Record online TV's video content for gather video data which might be required of/useful for AI R&D activity
+
+- Record online TV's audio content for gather audio data which might be required of/useful for AI R&D activity
 
 - Set up a custom playlist and then use this software to watch the content of the custom playlist
 
 - Performance benchmark for Android-based mobile phone
 
-- Real-time English subtitle for online TV by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(PoC finished on Xiaomi 14. Xiaomi 14 or other powerful Android mobile phone IS HIGHLY required for this feature otherwise unexpected behaviour would happen)
+- Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/cdeos/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
-- UI refactor
-
-
-- Android turn-key project(customized/secondary software development activity could be done by Android Studio IDE)
+- UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
 
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for AI R&D activites
+- Well-maintained "workbench" for device-side AI R&D activites on <b>Android</b>-based device
 
   <ul>
 
@@ -29,15 +30,20 @@ Some goals of this project are:
 
     <li>Well-maintained "workbench" for software programmer to learning AI technology in real scenario
 
-    <li>...</li>
 
   </ul>
 
 
-- Android **turn-key project** for software programmers who was interested in device-side AI application on **Android**-based device
+
+- Whisper.cpp learning/study/secondary software development activity could be done <b>without GFW issue</b>(source code of upstream whisper.cpp would be updated irregularly and dependent audio files and GGML model files are all available/ready) for programmers/researchers from Mainland China
 
 
-- Give back to open source community after got/learnt a lot from open source community
+
+- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), all AI research activitiy(algorithm improvement, model training, model generation......) could be done by Android Studio IDE very easily
+
+- Android <b>turn-key project</b> for software programmers who was interested in device-side AI application or customized/secondary software development activity on **Android**-based device
+
+- Watch English online-TV(aka OTT TV) with real-time English subtitle for non-native English speakers learning English(listening and reading)
 
 
 
@@ -97,7 +103,7 @@ echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
 
   download and install Android Studio and Android NDK manually
 
-  [Android Studio 4.2.1](https://developer.android.google.cn/studio)
+  [Android Studio 4.2.1 or latest Android Studio](https://developer.android.google.cn/studio)
 
 
   [Android NDK-r26c](https://developer.android.com/ndk/downloads)
@@ -140,7 +146,7 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 #### Fetch source codes
 
-For Android APP/APK developers,
+For Android APP/APK programmers or **AI experts**,
 
 ```
 git clone https://github.com/cdeos/kantv.git
@@ -148,7 +154,7 @@ cd kantv
 git checkout master
 ```
 
-For C/C++ developers or **AI experts**,
+For C/C++ programmers,
 
 ```
 git clone --recurse-submodules https://github.com/cdeos/kantv.git
@@ -189,7 +195,7 @@ This apk follows the principles of '**minimum permissions**' and '**do not colle
 <hr>
 The following is some English snapshots.
 
-![Screenshot_20240301_000503_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/07653f3d-1e7a-4208-a3d8-90b3aecc30b4)
+![1404139451](https://github.com/cdeos/kantv/assets/6889919/3acfef49-0fa7-4f09-887c-affc32f746ae)
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
 ![1210108450](https://github.com/cdeos/kantv/assets/6889919/9f82c290-2ed6-444c-98d4-ef840cdd9083)
 

@@ -1,9 +1,6 @@
 apply from: 'config.gradle'
 
 println '@settings enter-----------------'
-println '@settings.gradle ExoPlayer2Enabled：' +  ExoPlayer2Enabled
-println '@settings.gradle ExoPlayer2Prefix：'  +  ExoPlayer2Prefix
-
 
 include ':cdeosplayer-lib'
 include ':kantv'
@@ -13,10 +10,6 @@ gradle.ext.exoplayerRoot = settingsDir
 def rootDir = gradle.ext.exoplayerRoot
 println 'rootDir：' + rootDir
 println 'modulePrefix：' +  modulePrefix
-if (!gradle.ext.has('exoplayerSettingsDir')) {
-    gradle.ext.exoplayerSettingsDir =
-            new File(rootDir.toString()).getCanonicalPath()
-}
 
 
 gradle.addBuildListener(new BuildListener() {
@@ -29,8 +22,6 @@ gradle.addBuildListener(new BuildListener() {
     void projectsLoaded(Gradle var1) {
         println 'gradle.rootProject：' + gradle.rootProject
         println 'rootDir：' + rootDir
-        println 'gradle.ext.exoplayerRoot：'         +  gradle.ext.exoplayerRoot
-        println 'gradle.ext.exoplayerSettingsDir：'  +  gradle.ext.exoplayerSettingsDir
         println 'modulePrefix：' +  modulePrefix
 
     }

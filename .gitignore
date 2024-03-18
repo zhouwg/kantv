@@ -50,6 +50,7 @@ tags
 .travis.yml
 
 out
+out.*
 build
 
 *.mp4

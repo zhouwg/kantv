@@ -13,6 +13,4 @@
 // limitations under the License.
 ext {
     modulePrefix = ':'
-    ExoPlayer2Enabled = 'yes'
-    ExoPlayer2Prefix  = "cdeosplayer-exo2"
 }

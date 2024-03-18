@@ -1,8 +1,11 @@
-*.jar
 *.so
 *.a
 *.wav
+*.o
+*.bin
+out/
+out.*/
 
-out
-build
-models
+main
+bench
+quantize

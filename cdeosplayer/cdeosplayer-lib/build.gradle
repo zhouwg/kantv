@@ -10,7 +10,6 @@ android {
     // http://tools.android.com/tech-docs/new-build-system/tips
     //noinspection GroovyAssignabilityCheck
     compileSdkVersion project.ext.compileSdkVersion
-    //noinspection GroovyAssignabilityCheck
     buildToolsVersion project.ext.buildToolsVersion
 
     useLibrary'org.apache.http.legacy'
@@ -22,6 +21,7 @@ android {
         minSdkVersion project.ext.minSdkVersion
         targetSdkVersion project.ext.targetSdkVersion
     }
+
     buildTypes {
         release {
             minifyEnabled false

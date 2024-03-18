@@ -43,20 +43,21 @@ function build_kantvcore
 }
 
 
-function build_jni
-{
-    cd ${PROJECT_ROOT_PATH}
-    show_pwd
-    echo "build jni for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode"
-}
-
-
-function build_whispercpp
+function build_whispercpp_x86
 {
     cd ${PROJECT_ROOT_PATH}/external/whispercpp
     show_pwd
-    echo "build whispercpp for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode"
-    ./build.sh
+
+    echo ""
+    echo ""
+    echo -e "------------------------------------------------------------------------------------------\n"
+
+    echo -e "${TEXT_BLUE}build whispercpp regular tool for target x86${TEXT_RESET}"
+    make
+
+    echo ""
+    echo ""
+    echo -e "------------------------------------------------------------------------------------------\n"
 
     cd -
 }
@@ -64,13 +65,31 @@ function build_whispercpp
 
 function build_thirdparty()
 {
-    third_parties=" whispercpp "
+    third_parties=" FFmpeg "
 
     cd ${PROJECT_ROOT_PATH}/external/
     for item in ${third_parties};do
         cd ${PROJECT_ROOT_PATH}/external/${item}/
-        echo "build ${item} in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
-        ./build.sh
+        echo "build thirdparty ${item} in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
+        if [ -f build.sh ]; then
+            ./build.sh
+        fi
+        cd ${PROJECT_ROOT_PATH}/external/
+    done
+
+    cd ${PROJECT_ROOT_PATH}
+}
+
+
+function build_jni()
+{
+    jni_libs=" whispercpp "
+
+    cd ${PROJECT_ROOT_PATH}/external/
+    for item in ${jni_libs};do
+        cd ${PROJECT_ROOT_PATH}/external/${item}/
+        echo "build Android JNI lib${item}.so in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
+        ./build-android-jni-lib.sh
         cd ${PROJECT_ROOT_PATH}/external/
     done
 
@@ -88,9 +107,6 @@ function build_nativelibs_1
     build_ffmpeg
     build_kantvcore
     build_jni
-
-    build_OpenBLAS
-    build_whispercpp
 }
 
 
@@ -98,9 +114,11 @@ function build_nativelibs
 {
     build_ffmpeg
     build_kantvcore
-    build_jni
 
     build_thirdparty
+    build_jni
+
+    build_whispercpp_x86
 }
 
 
