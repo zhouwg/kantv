@@ -533,6 +533,4 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
             }
         }
     }
-
-    public static native int kantv_anti_remove_rename_this_file();
 }

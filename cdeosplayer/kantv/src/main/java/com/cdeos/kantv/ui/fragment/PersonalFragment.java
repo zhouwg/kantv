@@ -28,20 +28,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blankj.utilcode.util.ConvertUtils;
-import com.cdeos.kantv.ui.activities.personal.ScanManagerActivity;
 import com.cdeos.kantv.ui.fragment.settings.SystemSettingFragment;
-import com.cdeos.kantv.ui.weight.SwitchThemeAnimView;
-import com.cdeos.kantv.utils.CommonUtils;
 import com.cdeos.kantv.R;
 import com.cdeos.kantv.base.BaseMvpFragment;
-import com.cdeos.kantv.bean.event.UpdateFragmentEvent;
 import com.cdeos.kantv.mvp.impl.PersonalFragmentPresenterImpl;
 import com.cdeos.kantv.mvp.presenter.PersonalFragmentPresenter;
 import com.cdeos.kantv.mvp.view.PersonalFragmentView;
@@ -51,34 +45,22 @@ import com.cdeos.kantv.ui.activities.personal.BenchmarkActivity;
 import com.cdeos.kantv.ui.activities.personal.LocalPlayHistoryActivity;
 import com.cdeos.kantv.ui.fragment.settings.PlaySettingFragment;
 import com.cdeos.kantv.ui.fragment.settings.RecordSettingFragment;
-import com.cdeos.kantv.ui.fragment.settings.VoiceSettingFragment;
+import com.cdeos.kantv.ui.fragment.settings.ASRSettingFragment;
 import com.cdeos.kantv.ui.weight.ProgressView;
 import com.cdeos.kantv.utils.Settings;
-import org.greenrobot.eventbus.EventBus;
 
 
-import butterknife.BindView;
 import butterknife.OnClick;
 import cdeos.media.player.CDELog;
 import cdeos.media.player.CDEUtils;
-import skin.support.SkinCompatManager;
-import skin.support.utils.SkinPreference;
 
 
-public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter> implements PersonalFragmentView {
-    @BindView(R.id.skin_iv)
-    ImageView skinIv;
-    @BindView(R.id.skin_tv)
-    TextView skinTv;
-
+ public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter> implements PersonalFragmentView {
     private Activity mActivity;
     private Settings mSettings;
     private Context mContext;
     WebView mWebView;
     private ProgressView progressView;
-    //not used since migrate to github
-    ImageView mImageView;
-    TextView mTextView;
 
     private static final String TAG = PersonalFragment.class.getName();
 
@@ -172,8 +154,8 @@ public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter>
 
     @OnClick({
             R.id.system_setting_ll,R.id.play_setting_ll, R.id.record_setting_ll,
-            R.id.local_history_ll, R.id.peformance_benchmark_ll, R.id.asr_setting_ll, R.id.media_scan_ll,
-            R.id.skin_ll, R.id.exit_app_ll
+            R.id.local_history_ll, R.id.peformance_benchmark_ll, R.id.asr_setting_ll,
+            R.id.exit_app_ll
     })
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -197,13 +179,9 @@ public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter>
 
             case R.id.asr_setting_ll:
                 Bundle voice = new Bundle();
-                voice.putString("fragment", VoiceSettingFragment.class.getName());
+                voice.putString("fragment", ASRSettingFragment.class.getName());
                 launchActivity(ShellActivity.class, voice);
                 break;
-
-            case R.id.media_scan_ll:
-               launchActivity(ScanManagerActivity.class);
-               break;
 
             case R.id.peformance_benchmark_ll:
                 launchActivity(BenchmarkActivity.class);
@@ -213,48 +191,12 @@ public class PersonalFragment extends BaseMvpFragment<PersonalFragmentPresenter>
                 launchActivity(LocalPlayHistoryActivity.class);
                 break;
 
-            case R.id.skin_ll:
-                switchSkin();
-                break;
-
             case R.id.exit_app_ll:
                 CDEUtils.exitAPK(mActivity);
                 break;
         }
     }
 
-
-    private void switchSkin() {
-
-        EventBus.getDefault().post(UpdateFragmentEvent.updatePlay(LocalMediaFragment.UPDATE_DATABASE_DATA));
-        SwitchThemeAnimView.create((Activity) mActivity, skinIv).setDuration(800).start();
-        if (isLoadedSkin()) {
-            SkinCompatManager.getInstance()
-                    .restoreDefaultTheme();
-            skinIv.setImageResource(R.mipmap.ic_skin_dark);
-            skinTv.setTextColor(CommonUtils.getResColor(R.color.immutable_text_black));
-            skinTv.setText(mActivity.getBaseContext().getText(R.string.skin_nighttime));
-        } else {
-            SkinCompatManager.getInstance()
-                    .loadSkin("night", SkinCompatManager.SKIN_LOADER_STRATEGY_BUILD_IN);
-            skinIv.setImageResource(R.mipmap.ic_skin_light);
-            skinTv.setTextColor(CommonUtils.getResColor(R.color.immutable_text_orange));
-            skinTv.setText(mActivity.getBaseContext().getText(R.string.skin_daytime));
-        }
-    }
-
-
-    private boolean isLoadedSkin() {
-        switch (SkinPreference.getInstance().getSkinStrategy()) {
-            case SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS:
-            case SkinCompatManager.SKIN_LOADER_STRATEGY_BUILD_IN:
-            case SkinCompatManager.SKIN_LOADER_STRATEGY_PREFIX_BUILD_IN:
-                return true;
-            case SkinCompatManager.SKIN_LOADER_STRATEGY_NONE:
-            default:
-                return false;
-        }
-    }
 
     @Override
     public void onDestroy() {

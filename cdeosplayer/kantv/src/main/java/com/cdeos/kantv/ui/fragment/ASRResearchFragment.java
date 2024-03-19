@@ -24,6 +24,7 @@
  package com.cdeos.kantv.ui.fragment;
 
  import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
+ import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
  import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;

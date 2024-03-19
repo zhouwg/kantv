@@ -1358,6 +1358,12 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                 case MEDIA_INFO_ASR_STOP:
                     player.notifyOnInfo(MEDIA_INFO_ASR_STOP,0);
                     break;
+                case MEDIA_INFO_ASR_START_NORMAL:
+                    player.notifyOnInfo(MEDIA_INFO_ASR_START_NORMAL,0);
+                    break;
+                case MEDIA_INFO_ASR_STOP_NORMAL:
+                    player.notifyOnInfo(MEDIA_INFO_ASR_STOP_NORMAL,0);
+                    break;
                 default:
                     CDELog.d(TAG, "Unknown message type " + msg.what);
             }

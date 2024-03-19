@@ -132,7 +132,7 @@
      private static String mApiGatewayServerUrl = "http://www.cde-os.com:8888/wiseplay/getlicense";
      private static String mLocalEMS = "http://192.168.0.200:81/ems";
 
-     private static String mKANTVAPKVersion = "1.2.8";
+     private static String mKANTVAPKVersion = "1.3.3";
      private static KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
 
      public static final String INVALID_DEVICE_ID = "000000000000000";
@@ -252,6 +252,13 @@
      private static boolean mIsPermissionGranted = false;
      private static boolean mUsingFFmpegCodec = true;
      private static boolean mIsAPKForTV = false;
+
+     public static final int  ASR_MODE_NORMAL       = 0;     // transcription
+     public static final int  ASR_MODE_PRESURETEST  = 1;     // pressure test of asr subsystem
+     public static final int  ASR_MODE_BECHMARK     = 2;     // asr peformance benchamrk
+     public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
+
+     private static int       mASRMode = ASR_MODE_NORMAL;
 
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
 
@@ -2016,6 +2023,11 @@
          CDELog.d(TAG, "record path " + recordPath + ", record mode: " + recordMode + " , record video codec: " + recordVideoCodec + " ,record format: " + recordFormat
                  + " , record duration: " + recordMaxDuration + " , record size: " + recordMaxSize);
          mKANTVDRM.ANDROID_JNI_SetRecordConfig(recordPath, recordMode, recordFormat, recordVideoCodec, recordMaxDuration, recordMaxSize);
+     }
+
+     public static void setASRConfig(String engineName, String modelPath, int asrThreadCounts, int asrMode) {
+         CDELog.j(TAG, "model path " + modelPath + ", asrThreadCounts: " + asrThreadCounts + " , asrMode: " + asrMode);
+         mKANTVDRM.ANDROID_JNI_SetASRConfig(engineName, modelPath, asrThreadCounts, asrMode);
      }
 
      public static KANTVDRM getKANTVDRMInstance() {
@@ -3908,6 +3920,27 @@
              case 15:
                  return "large";
 
+             default:
+                 return "unknown";
+         }
+     }
+
+
+     public int getASRMode() {
+         return mASRMode;
+     }
+
+
+     public String getASRModeString( int asrMode) {
+         switch (asrMode) {
+             case ASR_MODE_NORMAL:
+                 return "ASR_MODE_NORMAL";
+             case ASR_MODE_PRESURETEST:
+                 return "ASR_MODE_PRESURETEST";
+             case ASR_MODE_BECHMARK:
+                 return "ASR_MODE_BENCHAMRK";
+             case ASR_MODE_TRANSCRIPTION_RECORD:
+                 return "ASR_MODE_TRANSCRIPTION_RECORD";
              default:
                  return "unknown";
          }

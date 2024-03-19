@@ -22,7 +22,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for device-side AI R&D activites on <b>Android</b>-based device
+- Well-maintained "workbench" for device-side AI R&D activity on <b>Android</b>-based device
 
   <ul>
 
@@ -34,7 +34,7 @@ Some goals of this project are:
   </ul>
 
 
-- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE very easily
+- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
 - Android <b>turn-key project</b> for software programmers who was interested in device-side AI application or customized/secondary software development activity on **Android**-based device
 
@@ -190,14 +190,21 @@ This apk follows the principles of '**minimum permissions**' and '**do not colle
 <hr>
 The following is some English snapshots.
 
-![1404139451](https://github.com/cdeos/kantv/assets/6889919/3acfef49-0fa7-4f09-887c-affc32f746ae)
+![1314307315](https://github.com/cdeos/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
+
+
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
+
+![539122400](https://github.com/cdeos/kantv/assets/6889919/e8670c3d-938c-4993-8b41-595dcc89897c)
+
 ![794969608](https://github.com/cdeos/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
 
+![631715309](https://github.com/cdeos/kantv/assets/6889919/86447fa3-1656-40fd-9e38-1d6471cc5478)
+![1369354807](https://github.com/cdeos/kantv/assets/6889919/7f38f930-15f7-4e03-ace6-5b9d201ab19e)
 
 
-![Screenshot_20240301_114116_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/10224799-cdf8-46f7-acd0-6df64f0fc674)
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
+
 ![154248860](https://github.com/cdeos/kantv/assets/6889919/071ac55c-a5d7-4bd6-aece-83cbc8a487ff)
 
 
@@ -206,12 +213,13 @@ The following is some English snapshots.
 
 
 
-![1506058604](https://github.com/cdeos/kantv/assets/6889919/ce230909-6fb6-4f3a-bd1d-b771beceb3a2)
+![1966093505](https://github.com/cdeos/kantv/assets/6889919/44e6d6c7-0ebb-41c0-a576-9f7457e0dd23)
 
+![1179733910](https://github.com/cdeos/kantv/assets/6889919/eb6ff245-3f04-4689-b998-2b6b06dec432)
 
-![1891464007](https://github.com/cdeos/kantv/assets/6889919/c3b1347e-5d49-4951-bef0-fa9890941bfb)
+![2138671817](https://github.com/cdeos/kantv/assets/6889919/513a0676-d2f3-464b-be50-436eabd99715)
 
-![448033741](https://github.com/cdeos/kantv/assets/6889919/98d67b08-330f-4b97-bf96-2e1037bdc3a2)
+![1634808790](https://github.com/cdeos/kantv/assets/6889919/f69ca9a7-5d25-46da-a160-ab00ff059db9)
 
 
 ![991182277](https://github.com/cdeos/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
@@ -344,6 +352,7 @@ Project KanTV has used/tried following open-source projects(list in here is not 
      <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
      <li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
      <li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
+     <li><a href="https://github.com/nihui/ruapu" target="_blank" rel="noopener">RUAPU</a></li>
      <li>......</li>
 </ul>
 

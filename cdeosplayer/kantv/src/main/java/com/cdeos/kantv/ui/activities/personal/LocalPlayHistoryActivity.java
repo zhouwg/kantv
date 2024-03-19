@@ -193,6 +193,4 @@ public class LocalPlayHistoryActivity extends BaseMvcActivity {
         menuDeleteAllItem.setVisible(true);
         return super.onCreateOptionsMenu(menu);
     }
-
-    public static native int kantv_anti_remove_rename_this_file();
 }

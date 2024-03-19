@@ -15,6 +15,7 @@ obj/
 
 
 local.properties
+project.properties
 
 .idea
 .gradle

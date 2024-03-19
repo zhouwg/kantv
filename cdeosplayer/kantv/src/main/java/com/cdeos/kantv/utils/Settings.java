@@ -67,7 +67,7 @@ public class Settings {
 
     public int getASRMode() {
         String key = mAppContext.getString(R.string.pref_key_asrmode);
-        String value = mSharedPreferences.getString(key, "0");
+        String value = mSharedPreferences.getString(key, "0"); //normal transcription
         try {
             return Integer.valueOf(value).intValue();
         } catch (NumberFormatException e) {
@@ -76,14 +76,26 @@ public class Settings {
         }
     }
 
-    public int getGGMLMode() {
-        String key = mAppContext.getString(R.string.pref_key_ggmlmodel);
-        String value = mSharedPreferences.getString(key, "0");
+    public int getASRThreadCounts() {
+        String key = mAppContext.getString(R.string.pref_key_asrthreadcounts);
+        String value = mSharedPreferences.getString(key, "3"); // thread counts 4
         try {
             return Integer.valueOf(value).intValue();
         } catch (NumberFormatException e) {
             CDELog.j(TAG, "exception occurred");
-            return 0;
+            return 3;
+        }
+    }
+
+
+    public int getGGMLMode() {
+        String key = mAppContext.getString(R.string.pref_key_ggmlmodel);
+        String value = mSharedPreferences.getString(key, "3"); //tiny.en-q8_0
+        try {
+            return Integer.valueOf(value).intValue();
+        } catch (NumberFormatException e) {
+            CDELog.j(TAG, "exception occurred");
+            return 3;
         }
     }
 

@@ -351,6 +351,16 @@ public class IApplication extends Application {
         CDEUtils.setRecordConfig(CDEUtils.getDataPath(), recordMode, recordFormat, recordCodec, mSettings.getRecordDuration(), mSettings.getRecordSize());
         CDEUtils.setTVRecording(false);
 
+        int asrMode   = mSettings.getASRMode();  //default is normal transcription
+        int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
+        CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
+        CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
+        String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
+        CDELog.j(TAG, "modelPath:" + modelPath);
+        CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
+        CDEUtils.setTVASR(false);
+
+
         int thresoldsize = Integer.valueOf(mSettings.getThresholddisksize());
         CDELog.j(TAG, "thresold disk size:" + thresoldsize + "MBytes");
         CDEUtils.setDiskThresholdFreeSize(thresoldsize);

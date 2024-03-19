@@ -1532,7 +1532,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
     }
 
     //this is thread safety operation
-    private void onASRStart() {
+    private void onASRStart(int asrMode) {
         CDELog.j(TAG, "ASR start");
         if (CDEUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) {
             Toast.makeText(getContext(), "ASR only supported with FFmpeg engine currently", Toast.LENGTH_SHORT).show();
@@ -1541,7 +1541,9 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             return;
         }
 
-        CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        if (asrMode == CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+            CDELog.j(TAG, "asr saved filename:" + CDEUtils.getASRSavedFileName());
+        }
 
         //String ggmlModelFileName = "ggml-small.en.bin";       // 466M
         //String ggmlModelFileName = "ggml-tiny-q5_1.bin";      // 31M
@@ -1577,23 +1579,25 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         //TODO: preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
-        if (1 == mSettings.getASRMode()) {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_PRESURETEST);
+        if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
         } else {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_NORMAL);
+            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
         }
 
         CDEUtils.setTVASR(true);
         topBarView.updateTVASRVisibility(true);
 
         String tipInfo = "TV transcription will be launched.\n";
-        tipInfo += "raw audio data would be saved to file for further usage:" + CDEUtils.getASRSavedFileName();
+        if (asrMode == CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+            tipInfo += "raw audio data would be saved to file for further usage:" + CDEUtils.getASRSavedFileName();
+        }
         showWarningDialog(mAttachActivity, tipInfo);
     }
 
 
     //this is thread safety operation
-    private void onASRStop() {
+    private void onASRStop(int asrMode) {
         CDELog.j(TAG, "ASR stop");
         if (!CDEUtils.getTVASR()) {
             CDELog.j(TAG, "TV transcription not started, why called?");
@@ -1607,24 +1611,29 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         whispercpp.asr_finalize();
         CDEUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
+        if (asrMode == CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+            CDELog.j(TAG, "saved raw audio data file:" + CDEUtils.getASRSavedFileName());
+            File file = new File(CDEUtils.getASRSavedFileName());
+            if (file.exists()) {
+                CDELog.j(TAG, "saved raw audio data file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
+                Toast.makeText(getContext(), "TV transcription stopped，size of saved raw audio data file: "
+                        + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
+            } else {
+                CDELog.j(TAG, "it shouldn't happen");
+                Toast.makeText(getContext(), "TV transcription stopped", Toast.LENGTH_SHORT).show();
+            }
 
-        CDELog.j(TAG, "saved raw audio data file:" + CDEUtils.getASRSavedFileName());
-        File file = new File(CDEUtils.getASRSavedFileName());
-        if (file.exists()) {
-            CDELog.j(TAG, "saved raw audio data file " + CDEUtils.getASRSavedFileName() + ", size:" + file.length() + " bytes");
-            Toast.makeText(getContext(), "TV transcription stopped，size of saved raw audio data file: "
-                    + CDEUtils.formattedSize(file.length()), Toast.LENGTH_LONG).show();
+
+            //TODO:add thumbnail to saved raw audio data file
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
+            intent.setData(uri);
+            if (getContext() != null)
+                getContext().sendBroadcast(intent);
         } else {
-            CDELog.j(TAG, "it shouldn't happen");
+            CDELog.j(TAG, "TV transcription stopped");
             Toast.makeText(getContext(), "TV transcription stopped", Toast.LENGTH_SHORT).show();
         }
-
-        //TODO:add thumbnail to saved raw audio data file
-        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath()));
-        intent.setData(uri);
-        if (getContext() != null)
-            getContext().sendBroadcast(intent);
 
     }
 
@@ -1661,11 +1670,19 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                 onRecordStop();
                 break;
             case IMediaPlayer.MEDIA_INFO_ASR_START:
-                onASRStart();
+                onASRStart(mSettings.getASRMode());
                 break;
             case IMediaPlayer.MEDIA_INFO_ASR_STOP:
-                onASRStop();
+                onASRStop(mSettings.getASRMode());
                 break;
+
+            case IMediaPlayer.MEDIA_INFO_ASR_START_NORMAL:
+                onASRStart(mSettings.getASRMode());
+                break;
+            case IMediaPlayer.MEDIA_INFO_ASR_STOP_NORMAL:
+                onASRStop(mSettings.getASRMode());
+                break;
+
             case IMediaPlayer.MEDIA_INFO_BUFFERING_START:
                 mOutsideListener.onAction(Constants.INTENT_PLAY_COMPLETE, 0);
                 mIsIjkPlayerReady = false;

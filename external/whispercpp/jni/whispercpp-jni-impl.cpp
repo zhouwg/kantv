@@ -17,6 +17,8 @@
  * in derived project
  */
 
+#define RUAPU_IMPLEMENTATION
+#include "ruapu.h"
 
 #include "whisper.h"
 
@@ -576,7 +578,7 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
     }
     LOGGD("float_sample_counts %d\n", float_sample_counts);
 
-    if (0) { //2024-03-15,16:28, validate whether whisper_asr_audio_to_text can works well as expected
+    if (0) { //2024-03-15,16:28, validate whether whisper_asr_audio_to_text can works well as expected during PoC stage
         text = whisper_asr_audio_to_text(float_audio_data, float_sample_counts);
         if (NULL != text) {
             LOGGD("asr reulst:\n%s\n", text);
@@ -1166,12 +1168,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
         return NULL;
     }
 
-    if (1 == p_asr_ctx->n_dev_mode) { //pressure test, already handled in whisper_asr_callback
+    if (1 == p_asr_ctx->n_dev_mode) { //ASR pressure test, already handled in whisper_asr_callback
         //LOGGW("are you in ASR pressure test mode?\n");
         return NULL;
     }
 
-    if (2 == p_asr_ctx->n_dev_mode) {
+    if (2 == p_asr_ctx->n_dev_mode) { //ASR benchmark
         //2024-03-15,16:24
         //there is a special case:launch asr performance test in ASRResearchFragment.java
         //and calling whisper_asr_audio_to_text() directly in whisper_transcribe_from_file
@@ -1250,6 +1252,16 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
          LOGGW("invalid param\n");
          return;
      }
+
+
+     // dynamic ISA dectect by RUAPU
+     ruapu_init();
+     const char* const* supported = ruapu_rua();
+     while (*supported) {
+         LOGGD("%s\n", *supported);
+         supported++;
+     }
+
 
      LOGGV("model path:%s\n", sz_model_path);
      LOGGV("thread counts:%d\n", num_threads);

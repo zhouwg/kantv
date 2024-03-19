@@ -198,64 +198,6 @@
             android:weightSum="3">
 
             <LinearLayout
-                android:id="@+id/media_scan_ll"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="1dp"
-                android:layout_marginEnd="2dp"
-                android:layout_weight="1"
-                android:background="@color/item_bg_color"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/scan_iv"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@mipmap/ic_personal_scan" />
-
-                <TextView
-                    android:id="@+id/scan_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/video_scan"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/skin_ll"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="1dp"
-                android:layout_marginEnd="2dp"
-                android:layout_weight="1"
-                android:background="@color/item_bg_color"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/skin_iv"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_gravity="center_horizontal"
-                    android:src="@mipmap/ic_skin_dark" />
-
-                <TextView
-                    android:id="@+id/skin_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/skin_nighttime"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <LinearLayout
                 android:id="@+id/exit_app_ll"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"

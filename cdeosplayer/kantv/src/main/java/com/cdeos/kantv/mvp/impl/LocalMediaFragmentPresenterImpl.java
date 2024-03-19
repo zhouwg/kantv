@@ -393,7 +393,7 @@ public class LocalMediaFragmentPresenterImpl extends BaseMvpPresenterImpl<LocalM
                                 .param("file_id", videoBean.get_id())
                                 .executeAsync();
                     } else {
-                        CDELog.j(TAG, "can't save to db");
+                        CDELog.d(TAG, "can't save to db");
                     }
                 });
     }

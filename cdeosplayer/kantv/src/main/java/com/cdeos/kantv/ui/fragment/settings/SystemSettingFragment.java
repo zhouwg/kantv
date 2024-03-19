@@ -331,8 +331,6 @@ public class SystemSettingFragment extends BaseSettingsFragment {
                                 editor.commit();
                                 mWidgetTEEEnabled.setChecked(false);
                             }
-                        } else {
-                            CDELog.j(TAG, "not running on amlogic box");
                         }
                     }
                     KANTVDRMManager.stop();
@@ -578,7 +576,6 @@ public class SystemSettingFragment extends BaseSettingsFragment {
                         long beginTime = 0;
                         long endTime = 0;
                         beginTime = System.currentTimeMillis();
-                        //JNIDecryptBuffer dataEntity = JNIDecryptBuffer.getInstance();
                         KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
                         File file = new File(xmlLoaddedFileName);
                         int fileLength = (int) file.length();
