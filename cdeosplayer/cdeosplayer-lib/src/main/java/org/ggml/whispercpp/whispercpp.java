@@ -10,9 +10,13 @@ public class whispercpp {
   public static final int WHISPER_ASR_MODE_PRESURETEST  = 1;
   public static final int WHISPER_ASR_MODE_BECHMARK     = 2;
 
-  public static native void asr_init(String strModelPath, int nThreadCounts, int nDevMode);
+  public static native int asr_init(String strModelPath, int nThreadCounts, int nASRMode);
 
   public static native void asr_finalize();
+
+  public static native void asr_start();
+  public static native void asr_stop();
+  public static native int asr_reset(String strModelPath, int nThreadCounts, int nASRMode);
 
   public static native String get_systeminfo();
 

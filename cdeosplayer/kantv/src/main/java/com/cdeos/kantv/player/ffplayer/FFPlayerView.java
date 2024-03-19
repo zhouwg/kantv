@@ -1577,12 +1577,18 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             CDELog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());
         }
 
-        //TODO: preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
-        CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
-        if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+        if (CDEUtils.getASRSubsystemInit()) {
+            if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
+                whispercpp.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+            } else {
+                whispercpp.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+            }
+            whispercpp.asr_start();
         } else {
-            whispercpp.asr_init(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+            topBarView.updateTVASRVisibility(false);
+            CDEUtils.setTVASR(false);
+            CDEUtils.showMsgBox(mAttachActivity, "ASR subsystem not initialized, pls check why");
+            return;
         }
 
         CDEUtils.setTVASR(true);
@@ -1608,7 +1614,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             subtitleManager.setInnerSub("");
         }
 
-        whispercpp.asr_finalize();
+        whispercpp.asr_stop();
+        //whispercpp.asr_finalize();
         CDEUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
         if (asrMode == CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD) {

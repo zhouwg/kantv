@@ -514,9 +514,8 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 }
             }
 
-
-            //TODO: potential bug here,don't care it during PoC stage
-            whispercpp.asr_finalize();
+            whispercpp.asr_stop();
+            //whispercpp.asr_finalize();
             setEnableASR(false);
             CDEUtils.setTVASR(false);
 

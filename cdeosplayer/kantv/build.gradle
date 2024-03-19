@@ -38,11 +38,16 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+
     externalNativeBuild {
         cmake {
+            version "3.22.1" //make llamacpp happy
             path "../../external/whispercpp/CMakeLists.txt"
         }
     }
+
+
 
     //weiguo:2024-03-10, attention here
     //ndkVersion '21.1.6352462'

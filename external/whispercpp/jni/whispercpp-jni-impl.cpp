@@ -124,7 +124,7 @@ typedef struct {
     char  sz_model_path[MAX_PATH_LEN];
     size_t n_threads;
 
-    size_t n_dev_mode;                              // 0: normal ASR transcription 1: ASR transcription pressure test 2: benchmark
+    size_t n_asr_mode;                              // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
     size_t n_benchmark_type;                        // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
     bool   b_use_gpu;
 
@@ -946,6 +946,7 @@ public:
         if (_thread_poll.joinable()) {
             _thread_poll.join();
         }
+        _b_exit_thread = false;
     }
 
 private:
@@ -1010,7 +1011,7 @@ static const char * whisper_asr_callback(void * opaque) {
     if ((NULL == p_asr_ctx))
         return NULL;
 
-    if (1 == p_asr_ctx->n_dev_mode) { //ASR pressure test
+    if (1 == p_asr_ctx->n_asr_mode) { //ASR pressure test
         static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
@@ -1020,11 +1021,11 @@ static const char * whisper_asr_callback(void * opaque) {
         return test_info.c_str();
     }
 
-    if (2 == p_asr_ctx->n_dev_mode) { //benchmark
+    if (2 == p_asr_ctx->n_asr_mode) { //benchmark
         return NULL;
     }
 
-    pthread_mutex_lock(&p_asr_ctx->mutex);
+    //pthread_mutex_lock(&p_asr_ctx->mutex);
 
     audioframe  = (AVFrame *) opaque;
     p_samples   = p_asr_ctx->p_sample_buffer;
@@ -1067,6 +1068,7 @@ static const char * whisper_asr_callback(void * opaque) {
     CHECK(samples_size == num_samples * sizeof(float) * audioframe->channels);
 
 
+    /*
     if (p_asr_ctx->b_pre_convert) { //only for troubleshooting issue, not work as expected
         av_opt_set_int(p_asr_ctx->swr_ctx, "in_channel_count", audioframe->channels, 0);
         av_opt_set_int(p_asr_ctx->swr_ctx, "in_sample_rate", audioframe->sample_rate, 0);
@@ -1089,6 +1091,7 @@ static const char * whisper_asr_callback(void * opaque) {
 
             return NULL;
         }
+
 
         if (p_asr_ctx->b_enable_dump_16k_data) {
             char sz_filename[256];
@@ -1115,7 +1118,7 @@ static const char * whisper_asr_callback(void * opaque) {
                 asr_fifo->put(asr_fifo, buf);
             }
         }
-    } else {
+    } else */{
         //normal logic
         asr_fifo = whisper_asr_getfifo();
         if (NULL != asr_fifo) {
@@ -1132,7 +1135,7 @@ static const char * whisper_asr_callback(void * opaque) {
         }
     }
 
-    pthread_mutex_unlock(&p_asr_ctx->mutex);
+    //pthread_mutex_unlock(&p_asr_ctx->mutex);
 
     return NULL;
 }
@@ -1168,12 +1171,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
         return NULL;
     }
 
-    if (1 == p_asr_ctx->n_dev_mode) { //ASR pressure test, already handled in whisper_asr_callback
+    if (1 == p_asr_ctx->n_asr_mode) { //ASR pressure test, already handled in whisper_asr_callback
         //LOGGW("are you in ASR pressure test mode?\n");
         return NULL;
     }
 
-    if (2 == p_asr_ctx->n_dev_mode) { //ASR benchmark
+    if (2 == p_asr_ctx->n_asr_mode) { //ASR benchmark
         //2024-03-15,16:24
         //there is a special case:launch asr performance test in ASRResearchFragment.java
         //and calling whisper_asr_audio_to_text() directly in whisper_transcribe_from_file
@@ -1233,24 +1236,26 @@ failure:
 // =================================================================================================
 //
 // JNI helper function for asr
-// the folllowing code is just for PoC of realtime subtitle with online TV and SHOULD NOT be used in real project
+// the following code is just for PoC of realtime subtitle with online TV and SHOULD NOT be used in real project
 //
 // =================================================================================================
 
 
-//TODO: add return value and refine code, don't care it during PoC stage
  /**
   *
   * @param model_path
   * @param num_threads
-  * @param n_devmode            0: normal asr  1: asr pressure test 2:benchmark
+  * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
   */
-void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode) {
+int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      LOGGV("enter whisper_asr_init\n");
+     int result         = 0;
 
-     if ((NULL == sz_model_path) || (n_devmode > 2)) {
+     struct whisper_full_params params;
+
+     if ((NULL == sz_model_path) || (n_asrmode > 3)) {
          LOGGW("invalid param\n");
-         return;
+         return 1;
      }
 
 
@@ -1264,8 +1269,8 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
 
 
      LOGGV("model path:%s\n", sz_model_path);
-     LOGGV("thread counts:%d\n", num_threads);
-     LOGGV("dev mode:%d\n", n_devmode);
+     LOGGV("thread counts:%d\n", n_threads);
+     LOGGV("asr mode:%d\n", n_asrmode);
 
      kantv_asr_callback pfn_asr_callback = whisper_asr_callback;
      kantv_asr_set_callback(pfn_asr_callback);
@@ -1274,39 +1279,61 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      kantv_inference_set_callback(pfn_inference_callback);
 
      if (NULL != p_asr_ctx) {
-         LOGGW("whisper.cpp already initialized\n");
-         return;
+         LOGGW("asr instance already initialized\n");
+         return 2;
      }
 
      if (NULL == p_asr_ctx) {
          p_asr_ctx = (whisper_asr_context *) malloc(sizeof(whisper_asr_context));
+         if (NULL == p_asr_ctx) {
+             return 3;
+         }
      }
-     CHECK(NULL != p_asr_ctx);
+     memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
+     memcpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
 
-     pthread_mutex_init(&p_asr_ctx->mutex, NULL);
-     pthread_mutex_lock(&p_asr_ctx->mutex);
+     result  = pthread_mutex_init(&p_asr_ctx->mutex, NULL);
+     if (result != 0) {
+         result = 4;
+         goto failure;
+     }
 
      p_asr_ctx->asr_fifo = fifo_new("asr_fifo", 1200, 1024 * 8 * 20);
-     CHECK(NULL != p_asr_ctx->asr_fifo);
+     if (NULL == p_asr_ctx->asr_fifo) {
+         result = 5;
+         goto failure;
+     }
 
-     p_asr_ctx->p_asr = new whisper_asr();  // attention memory leak
+     p_asr_ctx->p_asr = new (std::nothrow)whisper_asr();  // attention memory leak
+     if (NULL == p_asr_ctx->p_asr) {
+         result = 6;
+         goto failure;
+     }
 
      p_asr_ctx->swr_ctx = swr_alloc();      // attention memory leak
-     CHECK(NULL != p_asr_ctx->swr_ctx);
+     if (NULL == p_asr_ctx->swr_ctx) {
+         result  = 7;
+         goto failure;
+     }
 
-     p_asr_ctx->n_dev_mode = n_devmode;
+     p_asr_ctx->n_asr_mode = n_asrmode;
+     p_asr_ctx->n_threads  = n_threads;
 
      LOGGD("calling whisper_init_from_file");
      p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
-     CHECK(NULL != p_asr_ctx->p_context);
-
-     //p_asr_ctx->p_context->no_timing = true;
+     if (nullptr == p_asr_ctx->p_context) {
+         result = 8;
+         goto failure;
+     }
      LOGGD("after calling whisper_init_from_file");
 
      p_asr_ctx->p_params = (struct whisper_full_params *)malloc(sizeof(struct whisper_full_params));
-     CHECK(NULL != p_asr_ctx->p_params);
+     if (NULL == p_asr_ctx->p_params) {
+         result = 9;
+         goto failure;
+     }
 
-     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
+     params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
      params.print_realtime          = false;
      params.print_progress          = false;
      params.print_timestamps        = false;
@@ -1314,7 +1341,7 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
      params.translate               = false; //first step is transcription, the second step is English -> Chinese
      //params.initial_prompt        = "hello,whisper.cpp";
      params.language                = "en";
-     params.n_threads               = num_threads;
+     params.n_threads               = n_threads;;
      params.offset_ms               = 0;
      params.no_context              = true;
      params.single_segment          = true;
@@ -1329,18 +1356,43 @@ void whisper_asr_init(const char * sz_model_path, int num_threads, int n_devmode
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
-     if (0 == p_asr_ctx->n_dev_mode) {   // ASR normal mode: TV transcription
-         p_asr_ctx->p_asr->start();
-     }
-
      p_asr_ctx->b_pre_convert = p_asr_ctx->b_enable_dump_16k_data = false;
 
-     pthread_mutex_unlock(&p_asr_ctx->mutex);
+
+
      LOGGV("leave kantv_asr_init\n");
+
+     return result;
+
+failure:
+
+     if (nullptr != p_asr_ctx->p_context) {
+         whisper_free(p_asr_ctx->p_context);
+     }
+
+     if (NULL != p_asr_ctx->swr_ctx) {
+         swr_free(&p_asr_ctx->swr_ctx);
+     }
+
+     if (NULL != p_asr_ctx->p_asr)
+        delete p_asr_ctx->p_asr;
+
+     if (NULL != p_asr_ctx->asr_fifo) {
+         p_asr_ctx->asr_fifo->destroy(p_asr_ctx->asr_fifo);
+     }
+
+     if (4 != result)
+         pthread_mutex_destroy(&p_asr_ctx->mutex);
+
+     if (NULL != p_asr_ctx) {
+         free(p_asr_ctx);
+     }
+     p_asr_ctx = NULL;
+
+     return result;
  }
 
 
-//TODO: refine code, don't care it during PoC stage
 void whisper_asr_finalize() {
     LOGGV("enter whisper_asr_finalize\n");
 
@@ -1348,23 +1400,15 @@ void whisper_asr_finalize() {
         LOGGW("whisper.cpp not initialized\n");
         return;
     }
-
-    LOGGD("stop asr thread\n");
-    if (0 == p_asr_ctx->n_dev_mode) { // ASR normal mode: TV transcription
-        p_asr_ctx->p_asr->stop();
-    }
-    LOGGD("after stop asr thread\n");
-
-    p_asr_ctx->asr_fifo->destroy(p_asr_ctx->asr_fifo);
-
+    whisper_free(p_asr_ctx->p_context);
 
     swr_free(&p_asr_ctx->swr_ctx);
 
     delete p_asr_ctx->p_asr;
 
-    free(p_asr_ctx->p_params);
+    p_asr_ctx->asr_fifo->destroy(p_asr_ctx->asr_fifo);
 
-    whisper_free(p_asr_ctx->p_context);
+    free(p_asr_ctx->p_params);
 
     pthread_mutex_destroy(&p_asr_ctx->mutex);
 
@@ -1374,3 +1418,64 @@ void whisper_asr_finalize() {
     LOGGV("leave whisper_asr_finalize\n");
 }
 //------------------------------------ end added by zhou.weiguo(https://github.com/zhouwg) -------------------------------------
+
+
+void whisper_asr_start() {
+    LOGGD("start asr thread\n");
+
+    if ((0 == p_asr_ctx->n_asr_mode) || (3 == p_asr_ctx->n_asr_mode)) { // normal transcription  || normal transcription + audio recording
+        p_asr_ctx->p_asr->start();
+    }
+    kantv_inference_set_callback(whisper_asr_audio_to_text);
+    LOGGD("after start asr thread\n");
+}
+
+
+void whisper_asr_stop() {
+    LOGGD("stop asr thread\n");
+
+    if ((0 == p_asr_ctx->n_asr_mode) || (3 == p_asr_ctx->n_asr_mode)) { // normal transcription || normal transcription + audio recording
+        p_asr_ctx->p_asr->stop();
+    }
+    kantv_inference_set_callback(NULL);
+    LOGGD("after stop asr thread\n");
+}
+
+
+int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode) {
+    int result = 0;
+
+    LOGGD("enter asr reset\n");
+    if (NULL == p_asr_ctx) {
+        LOGGW("asr instance already initialized\n");
+        return 1;
+    }
+
+    if ((NULL == sz_model_path) || (n_threads <= 0)) {
+        LOGGW("invalid param\n");
+        return 2;
+    }
+
+    if (0 != memcmp(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path))) {
+        LOGGD("re-init whispercpp instance\n");
+        if (nullptr != p_asr_ctx->p_context) {
+            whisper_free(p_asr_ctx->p_context);
+        }
+        p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
+        memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
+        memcpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
+    } else {
+        LOGGD("using cached whispercpp instance\n");
+    }
+
+    if (nullptr == p_asr_ctx->p_context) {
+        result = 3;
+    } else {
+        p_asr_ctx->n_threads            = n_threads;
+        p_asr_ctx->p_params->n_threads  = n_threads;
+        p_asr_ctx->n_asr_mode           = n_asrmode;
+    }
+
+    LOGGD("leave asr reset\n");
+    return result;
+}

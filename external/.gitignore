@@ -3,6 +3,7 @@ DeepSpeech/
 gstreamer/
 ncnn/
 CLBlast/
+llamacpp/
 
 
 *.a

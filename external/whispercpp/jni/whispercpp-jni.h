@@ -41,11 +41,12 @@ extern "C" {
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
     // JNI helper function for ASR
-    void         whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
+    int          whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
     void         whisper_asr_finalize(void);
 
-
-
+    void         whisper_asr_start(void);
+    void         whisper_asr_stop(void);
+    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
 
 
 #ifdef __cplusplus

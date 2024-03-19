@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(WHISPERCPP_SRC_DIR ${CMAKE_SOURCE_DIR}/)
 set(PREBUIT_LIB_PATH ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUIT_INC_PATH ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
+set(LLAMACPP_SRC_DIR ${CMAKE_SOURCE_DIR}/llamacpp/)
 
 set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/ggml.c
@@ -26,6 +27,7 @@ set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni-impl.cpp
         )
 
+
 message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
 message("PREBUIT_INC_PATH     : ${PREBUIT_INC_PATH}")
 message("PREBUIT_LIB_PATH     : ${PREBUIT_LIB_PATH}")
@@ -33,6 +35,7 @@ message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
 message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")
 message("LOCAL_WHISPERCPP_PATH: ${LOCAL_WHISPERCPP_PATH}")
+message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
 
 include_directories(${WHISPERCPP_SRC_DIR}/)
 include_directories(${WHISPERCPP_SRC_DIR}/jni)
@@ -43,6 +46,8 @@ add_definitions(-D__ARM_NEON)
 
 add_definitions(-DNDEBUG)
 add_definitions(-O3)
+
+#add_subdirectory(${LLAMACPP_SRC_DIR})
 
 #weiguo:2024-03-10
 # the below build optimization might be works well on ALL mainstream Android phones

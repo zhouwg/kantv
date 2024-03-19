@@ -56,6 +56,7 @@
  import org.apache.http.conn.util.InetAddressUtils;
  import org.apache.http.impl.client.DefaultHttpClient;
  import org.apache.http.util.EntityUtils;
+ import org.ggml.whispercpp.whispercpp;
  import org.w3c.dom.Document;
  import org.w3c.dom.Element;
  import org.w3c.dom.Node;
@@ -261,6 +262,8 @@
      private static int       mASRMode = ASR_MODE_NORMAL;
 
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
+
+     private static AtomicBoolean mASRSubsystemInit = new AtomicBoolean(false);
 
      //borrow from Google Exoplayer
      /**
@@ -3170,6 +3173,10 @@
      }
 
      public static void exitAPK(Activity activity) {
+         if (CDEUtils.getASRSubsystemInit()) {
+             whispercpp.asr_finalize();
+         }
+
          umExitApp();
 
          if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 21) {
@@ -3944,6 +3951,15 @@
              default:
                  return "unknown";
          }
+     }
+
+
+     public static void setASRSubsystemInit(boolean bEnabled) {
+         mASRSubsystemInit.set(bEnabled);
+     }
+
+     public static boolean getASRSubsystemInit() {
+         return mASRSubsystemInit.get();
      }
 
      public static native int kantv_anti_remove_rename_this_file();

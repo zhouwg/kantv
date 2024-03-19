@@ -195,7 +195,7 @@ The following is some English snapshots.
 
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
 
-![539122400](https://github.com/cdeos/kantv/assets/6889919/e8670c3d-938c-4993-8b41-595dcc89897c)
+![127402405](https://github.com/cdeos/kantv/assets/6889919/e01da442-3eda-4fff-b771-0c485316416c)
 
 ![794969608](https://github.com/cdeos/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
 

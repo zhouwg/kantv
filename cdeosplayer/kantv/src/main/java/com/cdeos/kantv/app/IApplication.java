@@ -1,5 +1,8 @@
 package com.cdeos.kantv.app;
 
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
@@ -34,6 +37,8 @@ import com.cdeos.kantv.utils.database.DataBaseManager;
 import com.cdeos.kantv.utils.net.okhttp.CookiesManager;
 import com.cdeos.kantv.player.common.utils.PlayerConfigShare;
 
+import org.ggml.whispercpp.whispercpp;
+
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -43,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
 import cdeos.media.player.CDEAssetLoader;
+import cdeos.media.player.CDELibraryLoader;
 import cdeos.media.player.CDELog;
 import cdeos.media.player.CDEUtils;
 import cdeos.media.player.KANTVDRM;
@@ -118,8 +124,8 @@ public class IApplication extends Application {
     }
 
 
-    public static Handler getMainHandler(){
-        if (mainHandler == null){
+    public static Handler getMainHandler() {
+        if (mainHandler == null) {
             mainHandler = new Handler(Looper.getMainLooper());
         }
         return mainHandler;
@@ -134,7 +140,7 @@ public class IApplication extends Application {
     }
 
 
-    public static ExecutorService getSqlThreadPool(){
+    public static ExecutorService getSqlThreadPool() {
         if (sqlExecutor == null) {
             sqlExecutor = Executors.newSingleThreadExecutor();
         }
@@ -239,7 +245,7 @@ public class IApplication extends Application {
         String configString = CDEAssetLoader.readTextFromFile(CDEAssetLoader.getDataPath(mContext) + "config.json");
         JSONObject jsonObject = JSON.parseObject(configString);
         CDELog.j(TAG, "Config: kantvServer: " + jsonObject.getString("kantvServer"));
-        CDELog.j(TAG, "Config: rtmpServer: "  + jsonObject.getString("rtmpServerUrl"));
+        CDELog.j(TAG, "Config: rtmpServer: " + jsonObject.getString("rtmpServerUrl"));
         CDELog.j(TAG, "Config: provision URL: " + jsonObject.getString("provisionUrl"));
         CDELog.d(TAG, "Config: usingTEE: " + jsonObject.getString("usingTEE"));
         CDELog.d(TAG, "Config: troubleshootingMode: " + jsonObject.getString("troubleshootingMode"));
@@ -344,22 +350,38 @@ public class IApplication extends Application {
         CDELog.j(TAG, "enable dump audio es: " + CDEUtils.getEnableDumpAudioES());
         CDELog.j(TAG, "continued playback  : " + mSettings.getContinuedPlayback());
 
-        int recordMode   = mSettings.getRecordMode();  //default is both video & audio
+        int recordMode = mSettings.getRecordMode();  //default is both video & audio
         int recordFormat = mSettings.getRecordFormat();//default is mp4
-        int recordCodec  = mSettings.getRecordCodec(); //default is h264
+        int recordCodec = mSettings.getRecordCodec(); //default is h264
 
         CDEUtils.setRecordConfig(CDEUtils.getDataPath(), recordMode, recordFormat, recordCodec, mSettings.getRecordDuration(), mSettings.getRecordSize());
         CDEUtils.setTVRecording(false);
 
-        int asrMode   = mSettings.getASRMode();  //default is normal transcription
+        int asrMode = mSettings.getASRMode();  //default is normal transcription
         int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
         CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
         CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
         String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
         CDELog.j(TAG, "modelPath:" + modelPath);
-        CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
-        CDEUtils.setTVASR(false);
 
+        //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
+        try {
+            CDELibraryLoader.load("whispercpp");
+            CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+            CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+            if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
+                whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+            } else {
+                whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+            }
+            CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
+            CDEUtils.setTVASR(false);
+            CDEUtils.setASRSubsystemInit(true);
+        } catch (Exception e) {
+            CDELog.j(TAG, "********************************************\n");
+            CDELog.j(TAG, " pls check why failed to initialize whispercpp jni: " + e.toString() + "\n");
+            CDELog.j(TAG, "********************************************\n");
+        }
 
         int thresoldsize = Integer.valueOf(mSettings.getThresholddisksize());
         CDELog.j(TAG, "thresold disk size:" + thresoldsize + "MBytes");
@@ -396,7 +418,7 @@ public class IApplication extends Application {
         }
 
 
-        String rtmpServerUrl =  jsonObject.getString("rtmpServerUrl");
+        String rtmpServerUrl = jsonObject.getString("rtmpServerUrl");
         if (rtmpServerUrl != null) {
             CDELog.j(TAG, "rtmpServerUrl: " + rtmpServerUrl);
             key = mContext.getString(R.string.pref_key_rtmpserver);
@@ -425,9 +447,9 @@ public class IApplication extends Application {
             CDEUtils.setDrmScheme(CDEUtils.DRM_SCHEME_CHINADRM);
         }
         CDEUtils.setApiGatewayServerUrl(mSettings.getApiGatewayServerUrl());
-        CDELog.j(TAG,     "API gateway          : " + CDEUtils.getApiGatewayServerUrl());
+        CDELog.j(TAG, "API gateway          : " + CDEUtils.getApiGatewayServerUrl());
         CDEUtils.setNginxServerUrl(mSettings.getNginxServerUrl());
-        CDELog.j(TAG,     "nginx               : " + CDEUtils.getNginxServerUrl());
+        CDELog.j(TAG, "nginx               : " + CDEUtils.getNginxServerUrl());
         CDEUtils.setEnableMultiDRM(mSettings.getEnableWisePlay());
         CDEUtils.setEnableWisePlay(mSettings.getEnableWisePlay());
         CDELog.j(TAG, "enable WisePlay         : " + CDEUtils.getEnableWisePlay());
@@ -472,7 +494,7 @@ public class IApplication extends Application {
         //step-7
         CDEUtils.umLauchApp();
 
-        long endTime   = System.currentTimeMillis();
+        long endTime = System.currentTimeMillis();
         CDELog.j(TAG, "init app cost time " + (endTime - startTime) + " milliseconds\n\n\n\n");
     }
 

@@ -265,15 +265,6 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
         loadLibrariesOnce(libLoader);
         initNativeOnce();
 
-        //TODO
-        try {
-            CDELibraryLoader.load("whispercpp");
-            CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
-        } catch (Exception e) {
-            CDELog.d(TAG, "failed to initialize whispercpp jni");
-            return;
-        }
-
         //should I put it in another better place?
         mBeginTime = System.currentTimeMillis();
 

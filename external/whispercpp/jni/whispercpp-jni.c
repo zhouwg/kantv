@@ -32,10 +32,9 @@
 #define UNUSED(x) (void)(x)
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_get_1systeminfo(
-        JNIEnv *env, jobject thiz
-) {
-    UNUSED(thiz);
+Java_org_ggml_whispercpp_whispercpp_get_1systeminfo(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+
     LOGGD("enter getSystemInfo");
     const char *sysinfo = whisper_print_system_info();
     jstring string = (*env)->NewStringUTF(env, sysinfo);
@@ -120,29 +119,32 @@ Java_org_ggml_whispercpp_whispercpp_get_1cpu_1core_1counts(JNIEnv *env, jclass c
 }
 
 
-//TODO: not a good idea, just skip this during PoC stage
-JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint num_threads, jint n_devmode) {
+JNIEXPORT jint JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode) {
     UNUSED(clazz);
 
+    int result  = 0;
     const char *sz_model_path = NULL;
 
     sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
     if (NULL == sz_model_path) {
+        result = 1;
         LOGGW("JNI failure, pls check why?");
         goto failure;
     }
 
     LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("thread counts:%d\n", num_threads);
-    LOGGV("dev mode:%d\n", n_devmode);
+    LOGGV("thread counts:%d\n", n_threads);
+    LOGGV("asr mode:%d\n", n_asrmode);
 
-    whisper_asr_init(sz_model_path, num_threads, n_devmode);
+    result = whisper_asr_init(sz_model_path, n_threads, n_asrmode);
 
 failure:
     if (NULL != sz_model_path) {
         (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
     }
+
+    return result;
 }
 
 
@@ -153,3 +155,50 @@ Java_org_ggml_whispercpp_whispercpp_asr_1finalize(JNIEnv *env, jclass clazz) {
 
     whisper_asr_finalize();
 }
+
+JNIEXPORT jint JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
+                                               jint n_thread_counts, jint n_asrmode) {
+    UNUSED(clazz);
+
+    int result  = 0;
+    const char *sz_model_path = NULL;
+
+    sz_model_path = (*env)->GetStringUTFChars(env, str_model_path, NULL);
+    if (NULL == sz_model_path) {
+        result = 1;
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    LOGGV("model path:%s\n", sz_model_path);
+    LOGGV("thread counts:%d\n", n_thread_counts);
+    LOGGV("asr mode:%d\n", n_asrmode);
+
+    result = whisper_asr_reset(sz_model_path, n_thread_counts, n_asrmode);
+
+failure:
+    if (NULL != sz_model_path) {
+        (*env)->ReleaseStringUTFChars(env, str_model_path, sz_model_path);
+    }
+
+    return result;
+}
+
+
+JNIEXPORT void JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1start(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+    UNUSED(clazz);
+
+    whisper_asr_start();
+}
+
+JNIEXPORT void JNICALL
+Java_org_ggml_whispercpp_whispercpp_asr_1stop(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+    UNUSED(clazz);
+
+    whisper_asr_stop();
+}
+
