@@ -259,9 +259,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
  **English** is preferred in this project. thanks for cooperation and understanding.
 
-【updated on 03-20-2024】statement once again:**English** is preferred in this project after seeing below post from the Linux kernel community:
-
-<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>
+【updated on 03-20-2024】statement once again:**English** is preferred in this project after seeing below post from the Linux kernel community:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>
 
 
 ### Docs
