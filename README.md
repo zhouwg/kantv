@@ -248,7 +248,7 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 - bugfix in JNI layer(C/C++)
 
-- ...
+- seek volunteer programmer to participate in project's development
 
 
 ### Contribution
