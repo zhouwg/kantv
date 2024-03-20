@@ -1,3 +1,0 @@
-[submodule "FFmpeg"]
-	path = external/FFmpeg
-	url = https://github.com/cdeos/FFmpeg
