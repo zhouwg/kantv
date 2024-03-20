@@ -2,7 +2,7 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with much enhancements and new features:
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found in directory external/ffmpeg or ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
