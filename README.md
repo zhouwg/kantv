@@ -2,7 +2,7 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with much enhancements and new features:
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found in directory external/ffmpeg or ![here](https://github.com/cdeos/FFmpeg) according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>)
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
@@ -251,11 +251,9 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 Be sure to review the [opening issues](https://github.com/cdeos/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/cdeos/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/cdeos/kantv/issues/1).
 
-Report issue in various Android-based phone or even submit PR to this project is great welcomed.
+Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
 
- **English** is preferred in this project. thanks for cooperation and understanding.
- 
-【updated on 03-20-2024】statement once again:**English** is preferred in this project after seeing below post from the Linux kernel community:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>
+ **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
 
 
 ### Docs
