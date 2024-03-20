@@ -251,11 +251,9 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 Be sure to review the [opening issues](https://github.com/cdeos/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/cdeos/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/cdeos/kantv/issues/1).
 
-Report issue in various Android-based phone or even submit PR to this project is great welcomed.
+Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
 
- **English** is preferred in this project. thanks for cooperation and understanding.
- 
-【updated on 03-20-2024】statement once again:**English** is preferred in this project after seeing below post from the Linux kernel community:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>
+ **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
 
 
 ### Docs
