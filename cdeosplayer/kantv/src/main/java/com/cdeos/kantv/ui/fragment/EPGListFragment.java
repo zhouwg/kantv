@@ -182,13 +182,14 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
         CDEUtils.copyAssetFile(mContext, localTestEPGUrl, CDEUtils.getDataPath(mContext) + "/test.m3u");
         File fileLocalTestEPGUrl = new File(CDEUtils.getDataPath(mContext) + "/test.m3u");
         CDELog.j(TAG, "remote epg url:" + remoteEPGUrl);
+        /*
         mIPTVContentList = CDEUtils.loadIPTVProgram(mContext, remoteEPGUrl);
 
         if ((mIPTVContentList != null) && (mIPTVContentList.size() > 0)) {
             CDELog.j(TAG, "iptv item size:" + mIPTVContentList.size());
             mContentList = mIPTVContentList;
             CDELog.j(TAG, "program item size:" + mContentList.size());
-        } else if (fileLocalTestEPGUrl.exists()) {
+        } else */if (fileLocalTestEPGUrl.exists()) {
             CDELog.j(TAG, "using local epg file:" + CDEUtils.getDataPath(mContext) + "/test.m3u");
             mIPTVContentList = CDEUtils.loadIPTVProgram(mContext, CDEUtils.getDataPath(mContext) + "/test.m3u");
             mContentList = mIPTVContentList;
