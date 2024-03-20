@@ -264,9 +264,9 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Docs
 
-- [How to setup customized KanTV server in local dev env](./doc/how-to-setup-customized-kantvserver-in-local.md)
-- [How to create customized playlist for kantv apk](./doc/how-to-create-customized-playlist-in-cloud-server.md)
-- [Acknowledgement](./doc/acknowledgement.md)
+- [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
+- [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
+- [Acknowledgement](./docs/acknowledgement.md)
 - How to integrate proprietary codes with project KanTV for proprietary R&D activity
 
 For AI expert who want to integrate **proprietary codes**(which contains IPR and consists of Java/JNI/native...) to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/cdeos/kantv/issues/74">How to integrate proprietary codes for proprietary R&D activity</a>
