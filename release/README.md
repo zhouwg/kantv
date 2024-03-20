@@ -165,3 +165,10 @@
                     <li>switch to Project Whispercpp-Android successfully according to roadmap after finsihed <a href="https://github.com/cdeos/kantv/issues/64">POC</a></li>
                     <li>this is the new baseline for new Project KanTV(aka Project Whispercpp-Android)</li>
                  </ul>
+
+- v1.3.4 2024-03-20,
+                 <ul>
+                    <li>whispercpp configuration in UI and applied in online-TV transcription dynamically</li>
+                    <li>pre-load GGML model and initialize ASR-subsystem as early as possible for performance consideration</li>
+                    <li>regular cleanup/refine files/codes/README</li>
+                 </ul>
