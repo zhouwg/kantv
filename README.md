@@ -195,7 +195,7 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 ----
 
 <details>
-  <summary>some English snapshots</summary>
+  <summary>some English screenshots</summary>
   <ol>
     
  ![1314307315](https://github.com/cdeos/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
