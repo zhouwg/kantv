@@ -188,9 +188,17 @@ This apk follows the principles of '**minimum permissions**' and '**do not colle
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
 
 <hr>
-The following is some English snapshots.
+here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![1314307315](https://github.com/cdeos/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
+https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
+
+----
+
+<details>
+  <summary>some English snapshots</summary>
+  <ol>
+    
+ ![1314307315](https://github.com/cdeos/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
 
 
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
@@ -224,10 +232,8 @@ The following is some English snapshots.
 
 ![991182277](https://github.com/cdeos/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
 
-<hr>
-here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
-
-https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
+  </ol>
+</details>
 
 
 ### ChangeLog
@@ -235,7 +241,7 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/release/README.md">here</a>.
 
 
-### Roadmap
+### Hot topics
 
 - improve real-time English subtitle performance with utilize hardware AI engine in Android device
 
@@ -243,71 +249,22 @@ Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/rel
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
-- bugfix
+- bugfix in UI layer(Java)
+
+- bugfix in JNI layer(C/C++)
 
 - ...
 
 
-### How to setup customized KanTV server in local development env
-
-The computing power and network bandwidth of default kantvserver is very low due to insufficient fund, so setup a local End-2-End development env is strongly recommended.
-
- - setup a http server(by apache or nginx) in local development env
-
- - modify kant server address in app
-
-![1370107702](https://github.com/zhouwg/kantv/assets/6889919/1e994269-28be-4513-9f74-3973269b8832)
-
- - upload required files to local http server like this(dependent files for whisper.cpp could be found at GGML's official website)
-```
-   apk ->                              http(s)://local_http_server/kantv/apk/kantv-latest.apk
-   apk version ->                      http(s)://local_http_server/kantv/apk/kantv-version.txt
-   jfk.wav     ->                      http(s)://local_http_server/kantv/ggml/jfk.wav
-   ggml-tiny-q5_1.bin                  http(s)://local_http_server/kantv/ggml/ggml-tiny-q5_1.bin
-   ...
-   ...
-   ...
 
 
-```
 
-### How to create customized playlist for kantv apk
+### Docs
 
-- create **test.m3u**(recommend name and it's hardcoded in source code) like this:
-
-```
-  #EXTM3U
-  #EXTINF:-1,hls
-  http(s)://local_http_server/kantv/media/test.hls
-  #EXTINF:-1,dash
-  http(s)://local_http_server/kantv/media/test.dash
-  #EXTINF:-1,rtmp
-  http(s)://local_http_server/kantv/media/test.rtmp
-  #EXTINF:-1,webrtc
-  http(s)://local_http_server/kantv/media/test.rtc
-  #EXTINF:-1,hevc(h265)
-  http(s)://local_http_server/kantv/media/test.hevc
-  #EXTINF:-1,h266
-  http(s)://local_http_server/kantv/media/test.h266
-  #EXTINF:-1,av1
-  http(s)://local_http_server/kantv/media/test.av1
-  #EXTINF:-1,testvideo-1 (pls attention following path is start with /)
-  /test.mp4
-  #EXTINF:-1,testvideo-2
-  /video/test.ts
-
-```
-
-or just fetch favourite playlist from <a href="https://github.com/iptv-org/iptv">IPTV</a> and rename it to test.m3u(pls attention that users/developers from Mainland China should review <a href="https://github.com/cdeos/kantv/issues/27">this issue</a>)
-
- - upload test.m3u to local http server like this
-
-```
- test.m3u                  ->   http(s)://local_http_server/kantv/epg/test.m3u
-```
-
-
-### How to integrate proprietary codes with project KanTV for proprietary R&D activity
+- [How to setup customized KanTV server in local dev env](./doc/how-to-setup-customized-kantvserver-in-local.md)
+- [How to create customized playlist for kantv apk](./doc/how-to-create-customized-playlist-in-cloud-server.md)
+- [Acknowledgement](./doc/acknowledgement.md)
+- How to integrate proprietary codes with project KanTV for proprietary R&D activity
 
 For AI expert who want to integrate **proprietary codes**(which contains IPR and consists of Java/JNI/native...) to customized/derived project of KanTV, Please refer to this opening issue <a href="https://github.com/cdeos/kantv/issues/74">How to integrate proprietary codes for proprietary R&D activity</a>
 
@@ -326,36 +283,9 @@ Report issue in various Android-based phone or even submit PR to this project is
 
  **English** is preferred in this project. thanks for cooperation and understanding.
 
-### Acknowledgement
+【03-20-2024】After seeing below post from the Linux kernel community, statement once again:**English** is preferred in this project. thanks for cooperation and understanding.
 
-Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg && whisper.cpp and other excellent projects.
-
-Project KanTV has used/tried following open-source projects(list in here is not incomplete):
-
-<ul>
-     <li><a href="https://github.com/torvalds/linux"     target="_blank">Linux</a></li>
-     <li><a href="https://blog.google/products/android/" target="_blank" rel="noopener">Android</a></li>
-     <li><a href="http://ffmpeg.org/" target="_blank" rel="noopener">FFmpeg</a></li>
-     <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">whisper.cpp</a></li>
-     <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">ijkplayer</a></li>
-     <li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
-     <li><a href="https://github.com/deniskropp/DirectFB" target="_blank" rel="noopener">DirectFB</a></li>
-     <li><a href="https://www.libsdl.org/" target="_blank" rel="noopener">SDL</a></li>
-     <li><a href="https://gstreamer.freedesktop.org/" target="_blank" rel="noopener">GStreamer</a></li>
-     <li><a href="https://github.com/mhroth/tinywav/" target="_blank" rel="noopener">tinywav</a></li>
-     <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-AV1</a></li>
-     <li><a href="https://www.intel.com/content/www/us/en/developer/articles/technical/scalable-video-technology.html" target="_blank" rel="noopener">SVT-HEVC</a></li>
-     <li><a href="https://github.com/fraunhoferhhi/vvenc" target="_blank" rel="noopener">VVenc</a></li>
-     <li><a href="https://aomedia.org/" target="_blank" rel="noopener">AOM-AV1</a></li>
-     <li><a href="https://opencv.org/" target="_blank" rel="noopener">OpenCV</a></li>
-     <li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
-     <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent/ncnn</a></li>
-     <li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">ShakaPackager</a></li>
-     <li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
-     <li><a href="https://github.com/nihui/ruapu" target="_blank" rel="noopener">RUAPU</a></li>
-     <li>......</li>
-</ul>
-
+https://github.com/torvalds/linux/pull/818
 
 ### License
 
