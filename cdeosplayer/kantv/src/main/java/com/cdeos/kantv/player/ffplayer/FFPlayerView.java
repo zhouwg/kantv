@@ -1575,6 +1575,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             return;
         } else {
             CDELog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());
+            CDELog.j(TAG, "thread counts:" + mSettings.getASRThreadCounts());
         }
 
         if (CDEUtils.getASRSubsystemInit()) {
