@@ -1397,7 +1397,7 @@ void whisper_asr_finalize() {
     LOGGV("enter whisper_asr_finalize\n");
 
     if (NULL == p_asr_ctx) {
-        LOGGW("whisper.cpp not initialized\n");
+        LOGGW("whisper.cpp not initialized or already finalized\n");
         return;
     }
     whisper_free(p_asr_ctx->p_context);
