@@ -366,17 +366,24 @@ public class IApplication extends Application {
 
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         try {
+            int result = 0;
             CDELibraryLoader.load("whispercpp");
             CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+                result = whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
             } else {
-                whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+                result = whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
             }
             CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             CDEUtils.setTVASR(false);
-            CDEUtils.setASRSubsystemInit(true);
+            if (0 == result) {
+                CDEUtils.setASRSubsystemInit(true);
+            } else {
+                CDELog.j(TAG, "********************************************\n");
+                CDELog.j(TAG, " pls check why failed to initialize whispercpp jni\n");
+                CDELog.j(TAG, "********************************************\n");
+            }
         } catch (Exception e) {
             CDELog.j(TAG, "********************************************\n");
             CDELog.j(TAG, " pls check why failed to initialize whispercpp jni: " + e.toString() + "\n");
@@ -384,13 +391,13 @@ public class IApplication extends Application {
         }
 
         int thresoldsize = Integer.valueOf(mSettings.getThresholddisksize());
-        CDELog.j(TAG, "thresold disk size:" + thresoldsize + "MBytes");
+        CDELog.j(TAG, "threshold disk size:" + thresoldsize + "MBytes");
         CDEUtils.setDiskThresholdFreeSize(thresoldsize);
 
         tmpString = jsonObject.getString("kantvServer");
         if (tmpString != null) {
             CDELog.j(TAG, "kantv server in config.json is:" + tmpString);
-            CDELog.j(TAG, "kantv server in msettings:" + mSettings.getKANTVServer());
+            CDELog.j(TAG, "kantv server in settings:" + mSettings.getKANTVServer());
 
             if (tmpString.equals(mSettings.getKANTVServer())) {
                 CDEUtils.updateKANTVServer(tmpString);

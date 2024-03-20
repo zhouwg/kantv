@@ -1423,6 +1423,11 @@ void whisper_asr_finalize() {
 void whisper_asr_start() {
     LOGGD("start asr thread\n");
 
+    if ((NULL == p_asr_ctx) || (NULL == p_asr_ctx->p_asr)) {
+        LOGGW("pls check why asr subsystem not initialized\n");
+        return;
+    }
+
     if ((0 == p_asr_ctx->n_asr_mode) || (3 == p_asr_ctx->n_asr_mode)) { // normal transcription  || normal transcription + audio recording
         p_asr_ctx->p_asr->start();
     }
@@ -1433,6 +1438,11 @@ void whisper_asr_start() {
 
 void whisper_asr_stop() {
     LOGGD("stop asr thread\n");
+
+    if ((NULL == p_asr_ctx) || (NULL == p_asr_ctx->p_asr)) {
+        LOGGW("pls check why asr subsystem not initialized\n");
+        return;
+    }
 
     if ((0 == p_asr_ctx->n_asr_mode) || (3 == p_asr_ctx->n_asr_mode)) { // normal transcription || normal transcription + audio recording
         p_asr_ctx->p_asr->stop();
@@ -1454,6 +1464,10 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode) 
     if ((NULL == sz_model_path) || (n_threads <= 0)) {
         LOGGW("invalid param\n");
         return 2;
+    }
+
+    if (nullptr == p_asr_ctx->p_context) {
+        LOGGW("it should not happen, pls check why?\n");
     }
 
     if (0 != memcmp(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path))) {
