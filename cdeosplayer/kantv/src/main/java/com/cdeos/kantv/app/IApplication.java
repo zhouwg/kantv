@@ -370,6 +370,7 @@ public class IApplication extends Application {
             CDELibraryLoader.load("whispercpp");
             CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
+            CDELog.j(TAG, "thread counts:" + mSettings.getASRThreadCounts());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
                 result = whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
             } else {
