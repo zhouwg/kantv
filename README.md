@@ -244,8 +244,6 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 - participate in improvement of ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Android device and feedback to upstream
 
-- seek volunteer programmer to participate in project's development
-
 
 ### Contribution
 
@@ -277,7 +275,9 @@ With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software
 
 I don't have a oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here. 
 
-Still, if you do decide to sponsor me, the money will most likely go towards buying various high-end powerful Android phone and pay for Cloud Server. Thanks!
+Still, if you do decide to sponsor me, the money will most likely go towards buying various high-end powerful Android phone and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
+
+Thanks!
 
 ### ChangeLog
 
