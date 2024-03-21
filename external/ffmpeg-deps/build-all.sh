@@ -9,6 +9,23 @@
 # Description: build script to build third-party FFmpeg dependent libraries
 
 
+if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
+    echo "pwd is `pwd`"
+    echo "pls run . build/envsetup in project's toplevel directory firstly"
+    exit 1
+fi
+
+. ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
+
+show_pwd
+
+if [ "x${BUILD_TARGET}" != "xlinux" ]; then
+    echo "pwd is `pwd`"
+    echo "pls set export BUILD_TARGET=linux in project's toplevel build/envsetup.sh firstly"
+    exit 1
+fi
+
+
 cd ${PROJECT_ROOT_PATH}/external/ffmpeg-deps
 
 

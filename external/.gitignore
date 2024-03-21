@@ -8,3 +8,6 @@ llamacpp/
 *.a
 *.so
 *.o
+config.log
+config.status
+configure~
