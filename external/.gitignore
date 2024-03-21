@@ -11,3 +11,6 @@ llamacpp/
 config.log
 config.status
 configure~
+Makefile
+libpng-config
+libpng12-config
