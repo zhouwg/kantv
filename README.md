@@ -264,11 +264,20 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [Acknowledgement](./docs/acknowledgement.md)
 
 
-### Support
+### Supportive
 
 - Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
 
+### Sponsor
+
+In Sep 2022, after I left my last employer, I became a full-time personal programmer. started writing some code for solving some technical problems in project KanTV(which was launched on 05/2021 personally) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature on 12/2023 - something I did not expect at all.
+
+With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access Google accordingly......), the project grew and now I want to seek external resource to help this personal project growing.
+
+I don't have a oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here. 
+
+Still, if you do decide to sponsor me, the money will most likely go towards buying various high-end powerful Android phone and pay for Cloud Server. Thanks!
 
 ### ChangeLog
 
