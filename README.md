@@ -244,8 +244,6 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 - participate in improvement of ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Android device and feedback to upstream
 
-- seek volunteer programmer to participate in project's development
-
 
 ### Contribution
 
@@ -263,12 +261,24 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/cdeos/kantv/issues/74)
 - [Acknowledgement](./docs/acknowledgement.md)
 
-
-### Support
-
 - Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
 
+### Sponsorship
+
+In Sep 2022, after I left my last employer(a branch of an American IT company in Beijing), I became a full-time personal programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature on 12/2023, I implmented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 - something I did not expect at all.
+
+I have to say I heard whisper.cpp too late.if there is no GFW, I would heard Georgi Gerganov's great whisper.cpp earlier.of course there are many programmers and AI researchers from China heard wishiper.cpp very earlier, this is also the fact.
+
+With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access github more stably and Google is available accordingly......), the project grew and now I want to seek external resource to help this project growing.
+
+I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you mind that pls ignore this sponsorship info), thanks for your understanding.
+
+![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
+
+Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development, or sponorship to the great project ggml&whisper.cpp by personal channel(through third party individual in EU).
+
+Thanks!
 
 ### ChangeLog
 
