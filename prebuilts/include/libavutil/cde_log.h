@@ -1,4 +1,5 @@
-/* Copyright (C) zhou.weiguo, 2015-2021  All rights reserved.
+/*
+ * Copyright (C) zhou.weiguo, 2015-2021  All rights reserved.
  *
  * Copyright (c) Project KanTV. 2021-2023. All rights reserved.
  *

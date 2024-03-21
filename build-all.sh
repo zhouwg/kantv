@@ -126,9 +126,8 @@ function build_kantv_apk()
 {
     echo ""
     echo "------------------------------------------------------------------------------------------"
-    echo -e "[*] to continue to build project KanTV for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls\n"
+    echo -e "[*] to continue to build project KanTV Android APK for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls\n"
     echo ""
-    echo -e "${PROJECT_BUILD_SCRIPT}"
     echo -e "${TEXT_BLUE}build KanTV apk by latest Android Studio IDE ${TEXT_RESET}\n"
     echo ""
     echo ""
@@ -170,13 +169,25 @@ function do_buildandroid()
 }
 
 
+function do_buildlinux()
+{
+    cd ${PROJECT_ROOT_PATH}/external/ffmpeg-deps
+    ./clean-all.sh
+    ./build-all.sh
+    cd ${PROJECT_ROOT_PATH}/external/ffmpeg
+    ./clean-all.sh
+    ./build-ffmpeg-x86.sh
+}
+
+
 function dump_usage()
 {
     echo "Usage:"
     echo "  $0 clean"
-    echo "  $0 buildandroid"
-    echo "  $0 buildios"
-    echo "  $0 buildwasm"
+    echo "  $0 android"
+    echo "  $0 linux"
+    echo "  $0 ios"
+    echo "  $0 wasm"
     echo -e "\n\n\n"
 }
 
@@ -216,16 +227,16 @@ case "$user_command" in
     clean)
         do_clean
     ;;
-    buildandroid)
-        export BUILD_TARGET=android
+    android)
         do_buildandroid
     ;;
-    buildios)
-        export BUILD_TARGET=ios
+    linux)
+        do_buildlinux
+    ;;
+    ios)
         do_buildios
     ;;
-    buildwasm)
-        export BUILD_TARGET=wasm
+    wasm)
         do_buildwasm
     ;;
     *)
@@ -236,8 +247,9 @@ esac
 }
 
 
+
 if [ $# == 0 ]; then
-    user_command="buildandroid"
+    user_command="android"
 else
     user_command=$1
 fi
@@ -246,4 +258,5 @@ build_init
 
 #read -p "Press any key to continue..."
 
+unset $user_command
 main $user_command

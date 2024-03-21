@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+  <Type Name="vvdec::Area">
+    <DisplayString>{{x = {x}, y = {y}, width = {width}, height = {height}}}</DisplayString>
+  </Type>
+
+  <Type Name="vvdec::CompArea">
+    <DisplayString Condition="compID == COMPONENT_Y">{{(Y) x = {x}, y = {y}, width = {width}, height = {height}}}</DisplayString>
+    <DisplayString Condition="compID == COMPONENT_Cb">{{(Cb) x = {x}, y = {y}, width = {width}, height = {height}}}</DisplayString>
+    <DisplayString Condition="compID == COMPONENT_Cr">{{(Cr) x = {x}, y = {y}, width = {width}, height = {height}}}</DisplayString>
+    <DisplayString Condition="compID >= MAX_NUM_COMPONENT">invalid</DisplayString>
+  </Type>
+  
+  <Type Name="vvdec::UnitArea">
+    <DisplayString Condition="blocks._size > 0 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width > 0">{{x = {((vvdec::CompArea*) blocks._arr)->x}, y = {((vvdec::CompArea*) blocks._arr)->y}, width = {((vvdec::CompArea*) blocks._arr)->width}, height = {((vvdec::CompArea*) blocks._arr)->height}}}</DisplayString>
+    <DisplayString Condition="blocks._size > 1 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width == 0">{{(chroma) x = {((vvdec::CompArea*) blocks._arr)[1].x}, y = {((vvdec::CompArea*) blocks._arr)[1].y}, width = {((vvdec::CompArea*) blocks._arr)[1].width}, height = {((vvdec::CompArea*) blocks._arr)[1].height}}}</DisplayString>
+    <DisplayString Condition="blocks._size == 0">{{empty}}</DisplayString>
+    <Expand>
+      <Synthetic Name="[format]" Condition="chromaFormat == CHROMA_400">
+        <DisplayString>400</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[format]" Condition="chromaFormat == CHROMA_420">
+        <DisplayString>420</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[format]" Condition="chromaFormat == CHROMA_422">
+        <DisplayString>422</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[format]" Condition="chromaFormat == CHROMA_444">
+        <DisplayString>444</DisplayString>
+      </Synthetic>
+      <Synthetic Name="[format]" Condition="chromaFormat > CHROMA_444">
+        <DisplayString>invalid</DisplayString>
+      </Synthetic>
+      <ArrayItems>
+        <Size>blocks._size</Size>
+        <ValuePointer>((vvdec::CompArea*) blocks._arr)</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="vvdec::AreaBuf&lt;*&gt;">
+    <DisplayString>{{width = {width}, heigth = {height}, stride = {stride}}}</DisplayString>
+  </Type>
+
+  <Type Name="vvdec::CodingUnit">
+    <DisplayString Condition="blocks._size > 0 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width > 0">{{CU: x = {((vvdec::CompArea*) blocks._arr)->x}, y = {((vvdec::CompArea*) blocks._arr)->y}, width = {((vvdec::CompArea*) blocks._arr)->width}, height = {((vvdec::CompArea*) blocks._arr)->height}}}</DisplayString>
+    <DisplayString Condition="blocks._size > 1 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width == 0">{{(chroma) CU: x = {((vvdec::CompArea*) blocks._arr)[1].x}, y = {((vvdec::CompArea*) blocks._arr)[1].y}, width = {((vvdec::CompArea*) blocks._arr)[1].width}, height = {((vvdec::CompArea*) blocks._arr)[1].height}}}</DisplayString>
+    <DisplayString Condition="blocks._size == 0">{{empty CU}}</DisplayString>
+  </Type>
+  <Type Name="vvdec::TransformUnit">
+    <DisplayString Condition="blocks._size > 0 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width > 0">{{TU: x = {((vvdec::CompArea*) blocks._arr)->x}, y = {((vvdec::CompArea*) blocks._arr)->y}, width = {((vvdec::CompArea*) blocks._arr)->width}, height = {((vvdec::CompArea*) blocks._arr)->height}}}</DisplayString>
+    <DisplayString Condition="blocks._size > 1 &amp;&amp; ((vvdec::CompArea*) blocks._arr)->width == 0">{{(chroma) TU: x = {((vvdec::CompArea*) blocks._arr)[1].x}, y = {((vvdec::CompArea*) blocks._arr)[1].y}, width = {((vvdec::CompArea*) blocks._arr)[1].width}, height = {((vvdec::CompArea*) blocks._arr)[1].height}}}</DisplayString>
+    <DisplayString Condition="blocks._size == 0">{{empty TU}}</DisplayString>
+  </Type>
+  
+</AutoVisualizer>

@@ -44,9 +44,12 @@ Some goals of this project are:
 
 ### How to build project
 
-#### prerequisites
+<details>
+  <summary><b>Prerequisites</b></summary>
 
-- Host OS information:
+  <ol>
+
+    Host OS information:
 
 ```
 uname -a
@@ -73,6 +76,8 @@ sudo apt-get install spawn-fcgi -y
 sudo apt-get install u-boot-tools -y
 sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
+sudo apt-get install nasm -y
+sudo apt-get install yasm -y
 
 sudo dpkg --add-architecture i386
 sudo apt-get install lib32z1 -y
@@ -138,10 +143,13 @@ match ForbiddenWhitespace /\s\+$\|\t/
 autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
 ```
+  </ol>
+</details>
+
+
+
 
 #### Fetch source codes
-
-For Android APP/APK programmers or **AI experts**,
 
 ```
 git clone https://github.com/cdeos/kantv.git
@@ -149,26 +157,19 @@ cd kantv
 git checkout master
 ```
 
-For C/C++ programmers,
-
-```
-git clone --recurse-submodules https://github.com/cdeos/kantv.git
-cd kantv
-git checkout master
-```
-
-#### Build all dependent native codes
+#### Build native codes
 
 modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
 
-pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if target Android device is NOT Xiaomi 14
+pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
+
+TIP: This project is actually NOT a Java/Android APP project and it's a quite complex/complicated software project for beginners and a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
 
 ```
 . build/envsetup.sh
 
-time ./build-all.sh
 ```
-
+![Screenshot from 2024-03-21 21-41-41](https://github.com/zhouwg/kantv/assets/6889919/3e13946f-596b-44be-9716-5793ce0c7263)
 
 
 #### Build Android APK
@@ -266,17 +267,16 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Sponsorship
 
-In Sep 2022, after I left my last employer(a branch of an American IT company in Beijing), I became a full-time personal programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature on 12/2023, I implmented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 - something I did not expect at all.
+In Sep 2022, after I left my last employer, I became a no-paid/freelancer programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature for Android phone on 12/2023, I implmented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14(a very powerful Android phone)</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 after I heard whisper.cpp recently - something I did not expect at all.
 
-I have to say I heard whisper.cpp too late.if there is no GFW, I would heard Georgi Gerganov's great whisper.cpp earlier.of course there are many programmers and AI researchers from China heard wishiper.cpp very earlier, this is also the fact.
 
-With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access github more stably and Google is available accordingly......), the project grew and now I want to seek external resource to help this project growing.
+With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy(it's well-known that it's not easy to access github stablly and Google is not available for us......), the project grew and now I want to seek external resource to help this project growing.
 
-I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you mind that pls ignore this sponsorship info), thanks for your understanding.
+I think I could not create Github Sponsors account currently and that I only have a WeChat Pay account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you MIND that pls ignore this sponsorship info), thanks for your understanding.
 
 ![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
 
-Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development, or sponorship to the great project ggml&whisper.cpp by personal channel(through third party individual in EU).
+Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) for device-side AI software development activity and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
 
 Thanks!
 
@@ -302,4 +302,4 @@ Licensed under Apachev2.0 or later
 
 ### Commercial Use
 
-Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.
+Project KanTV was almost/completely done by myself in the past 2+ years and <b>NO</b> IPR concern/risk(some parts with IPR risk have been carefully checked/<b>removed</b> accordingly because I had been received good IPR compliance training in MNC company). Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.

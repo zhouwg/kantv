@@ -1,0 +1,20 @@
+include(ExternalProject)
+#/property:Configuration=${CMAKE_BUILD_TYPE} ${CMAKE_BINARY_DIR}/libaom/src/DepLibAom-build/
+ExternalProject_Add(DepLibAom
+    PREFIX "${CMAKE_BINARY_DIR}/libaom"
+    GIT_REPOSITORY "https://github.com/Cidana-Developers/aom.git"
+    GIT_TAG av1-normative
+    GIT_SHALLOW 1
+    CMAKE_ARGS
+        ${CUSTOM_CONFIG}
+        -DCONFIG_INSPECTION=1
+        -DENABLE_TESTS=0
+        -DCONFIG_AV1_ENCODER=0
+        -DENABLE_DOCS=0
+        -DENABLE_EXAMPLES=0
+        -DENABLE_TESTDATA=0
+        -DENABLE_TOOLS=0
+        -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+        -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        -DCMAKE_RUNTIME_OUTPUT_DIRECTORY=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    INSTALL_COMMAND "")

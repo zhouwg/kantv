@@ -4,12 +4,18 @@ gstreamer/
 ncnn/
 CLBlast/
 llamacpp/
-ff-deps/
-ffdeps/
-ffmepg-deps/
-
-
-ffmpeg-6.1
 
 *.a
 *.so
+*.o
+config.log
+config.status
+configure~
+Makefile
+libpng-config
+libpng12-config
+
+whispercpp/bench
+whispercpp/main
+whispercpp/quantize
+

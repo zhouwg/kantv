@@ -25,7 +25,6 @@
 #include "whisper.h"
 #include "ggml.h"
 
-#include "cde_log.h"
 #include "kantv-asr.h"
 #include "whispercpp-jni.h"
 

@@ -1,0 +1,8 @@
+configure.log
+example
+example64
+libz.a
+minigzip
+minigzip64
+zconf.h
+Makefile

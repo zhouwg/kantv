@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-
+#include "libavutil/cde_log.h"
 
 #ifdef __cplusplus
 extern "C" {

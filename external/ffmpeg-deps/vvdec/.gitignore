@@ -1,0 +1,27 @@
+# Default top-level .gitignore, please review.
+dec.yuv
+rec.yuv
+str.bin
+/bin/
+/build/
+core
+/deploy/
+/download/
+/ext/
+/install/
+/lib/
+*.creator.user
+*.sdf
+*.suo
+.vs/
+.vscode/
+/build-linux
+*.yuv
+.*.sw?
+/seqs/
+#.*
+.project
+.cproject
+/Testing/
+/out/
+/CMakeSettings.json

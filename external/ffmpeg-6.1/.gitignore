@@ -1,0 +1,62 @@
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+*.version
+*.orig
+*.pdb
+
+# Executables
+*.exe
+*.out
+*.app
+
+ffmpeg
+ffmpeg_g
+ffplay
+ffplay_g
+ffprobe
+ffprobe_g
+
+# Build directory
+out
+
+libavcodec/bsf_list.c
+libavcodec/parser_list.c
+libavcodec/codec_list.c
+libavdevice/indev_list.c
+libavdevice/outdev_list.c
+libavfilter/filter_list.c
+libavformat/demuxer_list.c
+libavformat/muxer_list.c
+libavformat/protocol_list.c
+libavutil/avconfig.h
+libavutil/ffversion.h
+
+config.h
+config.asm
+config_components.h
+doc/config.texi

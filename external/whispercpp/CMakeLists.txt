@@ -21,7 +21,6 @@ set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/ggml-quants.c
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
-        ${WHISPERCPP_SRC_DIR}/jni/cde_log.c
         ${WHISPERCPP_SRC_DIR}/jni/tinywav.c
         ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni.c
         ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni-impl.cpp

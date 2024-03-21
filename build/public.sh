@@ -27,7 +27,27 @@ function show_pwd()
 
 function setup_env
 {
+if [ "${BUILD_TARGET}" == "android" ]; then
+    export PROJECT_NAME=KanTV-android
+    #export BUILD_ARCHS="arm64-v8a armeabi-v7a"
+    export BUILD_ARCHS="arm64-v8a"
+    export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
+    export PROJECT_BUILD_COMMAND="./build-all.sh android"
+fi
+
+if [ "${BUILD_TARGET}" == "linux" ]; then
+    export PROJECT_NAME=KanTV-linux
+    export BUILD_ARCHS="x86"
+    export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
+    export PROJECT_BUILD_COMMAND="./build-all.sh linux"
+fi
+
 if [ "${BUILD_TARGET}" == "wasm" ]; then
+    export PROJECT_NAME=KanTV-wasm
+    export BUILD_ARCHS="wasm"
+    export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
+    export PROJECT_BUILD_COMMAND="./build-all.sh wasm"
+
     export EMSDK=${KANTV_TOOLCHAIN_PATH}/emsdk
     export NODEJS_ROOT_PATH=${KANTV_TOOLCHAIN_PATH}/nodejs
     export EM_CONFIG=${EMSDK}/.emscripten
@@ -41,6 +61,10 @@ fi
 
 
 if [ "${BUILD_TARGET}" == "ios" ]; then
+    export PROJECT_NAME=KanTV-ios
+    export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
+    export PROJECT_BUILD_COMMAND="./build-all.sh ios"
+
     export XCODE_SELECT=/usr/bin/xcode-select
     #export BUILD_ARCHS="armv7 arm64 i386 x86_64"
     export BUILD_ARCHS="arm64"
@@ -115,8 +139,8 @@ function check_ubuntu()
         if [ ${host_os} == "Ubuntu20.04.2" ]; then
             echo -e "${TEXT_BLUE}host os is Ubuntu 20.04.2${TEXT_RESET}\n"
         else
-            echo -e "${TEXT_RED}host os is ${host_os}, not Ubuntu 20.04.2${TEXT_RESET}\n"
-            echo -e "${TEXT_RED}this script only validated ok on host Ubuntu 20.04 x86_64 LTS at the moment${TEXT_RESET}\n"
+            echo -e "${TEXT_RED}host os is ${host_os}${TEXT_RESET}\n"
+            echo -e "${TEXT_RED}this script validated ok on host Ubuntu 20.04 x86_64 LTS at the moment${TEXT_RESET}\n"
             #exit 1
             return 1
         fi
@@ -129,17 +153,26 @@ function check_ubuntu()
 
 function check_emsdk()
 {
-    if [ ! -d ${EMSDK} ]; then
-        echo -e "${TEXT_RED}${EMSDK} not exist, pls check...${TEXT_RESET}"
-        #exit 1
+    if [ $BUILD_TARGET == "wasm" ]; then
+        if [ ! -d ${EMSDK} ]; then
+            echo -e "${TEXT_RED}${EMSDK} not exist, pls check...${TEXT_RESET}"
+            #exit 1
+        else
+            echo -e "${TEXT_RED}${EMSDK} exist${TEXT_RESET}"
+        fi
     fi
 }
 
 
 function check_xcode()
 {
-    if [ $BUILD_TARGET == "ios" ]; then
-        echo -e "${TEXT_BLUE}check xcode...${TEXT_RESET}\n"
+    if [ ${BUILD_TARGET} = "ios" ]; then
+        echo -e "${TEXT_BLUE}check xcode for target ios...${TEXT_RESET}\n"
+        if [  -z ${XCODE_SELECT} ]; then
+            echo -e "${TEXT_RED}${XCODE_SELECT} not exist, pls check...${TEXT_RESET}\n"
+            #exit 1
+        fi
+
         if [ ! -f ${XCODE_SELECT} ]; then
             echo -e "${TEXT_RED}${XCODE_SELECT} not exist, pls check...${TEXT_RESET}\n"
             #exit 1
@@ -224,6 +257,7 @@ function dump_global_envs()
     echo -e "PROJECT_BRANCH:       ${PROJECT_BRANCH}"
     echo -e "PROJECT_HOME_PATH:    ${PROJECT_HOME_PATH}"
     echo -e "PROJECT_ROOT_PATH:    ${PROJECT_ROOT_PATH}"
+    echo -e "FF_PREFIX:            ${FF_PREFIX}"
     echo -e "KANTV_TOOLCHAIN_PATH: ${KANTV_TOOLCHAIN_PATH}"
     echo -e "host cpu counts:      ${HOST_CPU_COUNTS}"
 
