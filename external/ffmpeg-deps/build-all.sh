@@ -29,7 +29,7 @@ fi
 cd ${PROJECT_ROOT_PATH}/external/ffmpeg-deps
 
 
-ffmpeg_deps=" x264 x265/source aom libwebp svt vvenc vvdec freetype fribidi harfbuzz libpng"
+ffmpeg_deps=" x264 x265/source aom libwebp svt vvenc vvdec freetype fribidi harfbuzz "
 
 echo "BUILD_TARGET: ${BUILD_TARGET}"
 
