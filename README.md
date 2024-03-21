@@ -272,9 +272,11 @@ I have to say I heard whisper.cpp too late.if there is no GFW, I would heard Geo
 
 With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then acess github more stably and Google is available accordingly......), the project grew and now I want to seek external resource to help this personal project growing.
 
-I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay，thanks for your understanding.
+I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and you mind that pls ignore this sponsorship info), thanks for your understanding.
 
-Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
+![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
+
+Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development, or sponorshipt to the great project whisper.cpp by special personal channel.
 
 Thanks!
 
