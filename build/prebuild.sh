@@ -21,6 +21,8 @@ sudo apt-get install spawn-fcgi -y
 sudo apt-get install u-boot-tools -y
 sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
+sudo apt-get install nasm -y
+sudo apt-get install yasm -y
 
 sudo dpkg --add-architecture i386
 sudo apt-get install lib32z1 -y

@@ -26,19 +26,28 @@ export BUILD_HOST=Linux
 
 #export BUILD_TARGET=ios
 #export BUILD_TARGET=wasm
+export BUILD_TARGET=linux
 export BUILD_TARGET=android
 
 export PROJECT_NAME=KanTV
 export PROJECT_BUILD_TYPE=debug
 export PROJECT_BUILD_TYPE=release
 #export BUILD_ARCHS="arm64-v8a armeabi-v7a"
+
+if [ "${BUILD_TARGET}" == "android" ]; then
 export BUILD_ARCHS="arm64-v8a"
+fi
+
+if [ "${BUILD_TARGET}" == "linux" ]; then
+export BUILD_ARCHS="x86"
+fi
 
 export HOME_PATH=$(env | grep ^HOME= | cut -c 6-)
 export PROJECT_HOME_PATH=`pwd`
 export PROJECT_BRANCH=`git branch | grep "*" | cut -f 2 -d ' ' `
 export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
 export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
+export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
 
 
 export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp

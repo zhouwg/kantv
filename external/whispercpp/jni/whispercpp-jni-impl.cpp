@@ -22,9 +22,6 @@
 
 #include "whisper.h"
 
-#include "cde_log.h"
-#include "cde_assert.h"
-
 #include "kantv-asr.h"
 #include "whispercpp-jni.h"
 
@@ -91,6 +88,8 @@ extern "C" {
 #include "libavutil/samplefmt.h"
 #include "libswresample/swresample.h"
 #include "libavutil/myfifo.h"
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
 
 #if CONFIG_AVFILTER
 #include "libavfilter/avfilter.h"
