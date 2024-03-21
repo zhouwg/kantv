@@ -10,7 +10,6 @@
 #
 #
 
-
 export TEXT_BLACK=" \033[30m "
 export TEXT_RED="   \033[31m "
 export TEXT_GREEN=" \033[32m "
@@ -26,21 +25,21 @@ export BUILD_HOST=Linux
 
 #export BUILD_TARGET=ios
 #export BUILD_TARGET=wasm
-export BUILD_TARGET=linux
+#export BUILD_TARGET=linux
+#default is KanTV-android
 export BUILD_TARGET=android
 
-export PROJECT_NAME=KanTV
+export PROJECT_NAME=KanTV-android
 export PROJECT_BUILD_TYPE=debug
+
+#default is release
 export PROJECT_BUILD_TYPE=release
-#export BUILD_ARCHS="arm64-v8a armeabi-v7a"
 
 if [ "${BUILD_TARGET}" == "android" ]; then
-export BUILD_ARCHS="arm64-v8a"
+    #export BUILD_ARCHS="arm64-v8a armeabi-v7a"
+    export BUILD_ARCHS="arm64-v8a"
 fi
 
-if [ "${BUILD_TARGET}" == "linux" ]; then
-export BUILD_ARCHS="x86"
-fi
 
 export HOME_PATH=$(env | grep ^HOME= | cut -c 6-)
 export PROJECT_HOME_PATH=`pwd`
@@ -49,8 +48,6 @@ export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
 export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
 
-
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 
 #modify following lines to adapt to local dev envs
 #export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/toolchain
@@ -74,8 +71,12 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
+
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 
+export KANTV_PROJECTS="kantv-android kantv-linux kantv-ios kantv-wasm"
+export KANTV_PROJECTS_DEBUG="kantv-android-debug"
 
 
 
@@ -87,24 +88,229 @@ if [ $? != 0 ]; then
 fi
 
 
-setup_env
 check_host
-check_ubuntu
-
-dump_global_envs
-
-if [ "${BUILD_TARGET}" == "android" ]; then
-    check_ndk
-fi
 
 
-echo ""
+# clear this variable.  It will be built up again when the vendorsetup.sh
+# files are included at the end of this file.
+unset LUNCH_MENU_CHOICES
+function add_lunch_combo()
+{
+    local new_combo=$1
+    local c
+    for c in ${LUNCH_MENU_CHOICES[@]} ; do
+        if [ "$new_combo" = "$c" ] ; then
+            return
+        fi
+    done
+    LUNCH_MENU_CHOICES=(${LUNCH_MENU_CHOICES[@]} $new_combo)
+}
+
+
+for prj in ${KANTV_PROJECTS};do
+    echo -e "  ${prj}"
+    add_lunch_combo ${prj}
+done
+
+for prj in ${KANTV_PROJECTS_DEBUG};do
+    echo -e "  ${prj}"
+    add_lunch_combo ${prj}
+done
+
+
+echo -e "\n"
 echo "------------------------------------------------------------------------------------------"
-echo -e "[*] to continue to build project KanTV for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls run\n"
-echo ""
-echo -e "./build-all.sh"
-echo ""
-echo ""
-echo "in current pwd:  `pwd`"
+echo -e "[*] to continue to build project, pls run\n"
+echo -e "lunch\n"
 echo "------------------------------------------------------------------------------------------"
-echo ""
+echo -e "\n"
+
+
+function destroy_build_var_cache()
+{
+    #unset FF_PREFIX
+    #unset BUILD_TARGET
+    local v
+    for v in $cached_vars; do
+      unset var_cache_$v
+    done
+    unset cached_vars
+}
+
+
+function print_lunch_menu()
+{
+    local uname=$(uname)
+    echo
+    echo "You're building on" $uname
+    echo
+    echo "Lunch menu... pick a combo:"
+
+    local i=1
+    local choice
+    for choice in ${LUNCH_MENU_CHOICES[@]}
+    do
+        echo "     $i. $choice"
+        i=$(($i+1))
+    done
+
+    echo
+}
+
+
+function lunch()
+{
+    destroy_build_var_cache
+
+    local debug
+    local answer
+
+    debug=1
+
+    if [ "$1" ] ; then
+        answer=$1
+    else
+        print_lunch_menu
+
+        echo -n "Which would you like? [kantv-android] "
+        read answer
+    fi
+
+    local selection=
+
+    if [ ${debug} -eq 1 ]; then
+        echo "answer: ${answer}"
+    fi
+
+    if [ -z "$answer" ]
+    then
+        selection=kantv
+    elif (echo -n $answer | grep -q -e "^[0-9][0-9]*$")
+    then
+        if [ $answer -le ${#LUNCH_MENU_CHOICES[@]} ]
+        then
+            selection=${LUNCH_MENU_CHOICES[$(($answer-1))]}
+        fi
+    else
+        selection=$answer
+    fi
+
+    local project
+    project=${selection}
+
+
+    if [ ${debug} -eq 1 ]; then
+        echo "project: ${selection}"
+        echo "selection: ${selection}"
+    fi
+
+    local product
+    local variant_and_version
+    local variant
+    local version
+    product=${selection%%-*} # trim everything after first dash
+    variant_and_version=${selection#*-} # trim everything up to first dash
+
+    if [ ${debug} -eq 1 ]; then
+        echo "product: ${product}"
+        echo "variant_and_version: ${variant_and_version}"
+    fi
+
+    if [ "$variant_and_version" != "$selection" ]; then
+        variant=${variant_and_version%%-*}
+        if [ "$variant" != "$variant_and_version" ]; then
+            version=${variant_and_version#*-}
+        fi
+    fi
+
+    if [ -z "$product" ]
+    then
+        echo
+        echo "invalid lunch combo: $selection"
+        return 1
+    fi
+
+    if [ ${debug} -eq 1 ]; then
+        echo "project name: ${project}"
+        echo "target_product: ${product}"
+        echo "target_build_variant: ${variant}"
+        echo "target_build_type: ${version}"
+    fi
+
+    if [ "x${version}" != "x" ]; then
+        export PROJECT_BUILD_TYPE=${version}
+    else
+        export PROJECT_BUILD_TYPE=release
+    fi
+
+
+    if [ "x${project}" != "x" ]; then
+        if [ "${project}" == "kantv-android" ]; then
+            export BUILD_TARGET=android
+        elif [ "${project}" == "kantv-linux" ]; then
+            export BUILD_TARGET=linux
+        elif [ "${project}" == "kantv-ios" ]; then
+            export BUILD_TARGET=ios
+        elif [ "${project}" == "kantv-wasm" ]; then
+            export BUILD_TARGET=wasm
+        else
+            export BUILD_TARGET=android
+        fi
+
+        setup_env
+
+        if [ ${debug} -eq 1 ]; then
+            echo "build target: ${BUILD_TARGET}"
+            echo "project build command:${PROJECT_BUILD_COMMAND}"
+        fi
+    else
+        echo
+        echo -e "${TEXT_RED}invalid lunch combo: $selection ${TEXT_RESET}\n"
+        return 1
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo -e "${TEXT_RED}invalid lunch combo: $selection ${TEXT_RESET}\n"
+        return 1
+    fi
+
+
+
+    dump_global_envs
+
+    case "${BUILD_TARGET}" in
+        android)
+            check_ndk
+        ;;
+        ios)
+            check_xcode
+        ;;
+        wasm)
+            check_emsdk
+        ;;
+        linux)
+            check_ubuntu
+        ;;
+        *)
+            echo "unknown target ${BUILD_TARGET}"
+        ;;
+    esac
+
+
+    echo ""
+
+    echo ""
+
+    echo ""
+    echo ""
+    echo "------------------------------------------------------------------------------------------"
+    echo -e "[*] to continue to build project kantv-${BUILD_TARGET} for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls run\n"
+    echo ""
+    echo -e "${PROJECT_BUILD_COMMAND}"
+    echo ""
+    echo ""
+    echo "in current pwd:  `pwd`"
+    echo "------------------------------------------------------------------------------------------"
+    echo ""
+    echo ""
+}
