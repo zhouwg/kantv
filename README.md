@@ -273,7 +273,7 @@ In Sep 2022, after I left my last employer, I became a full-time personal progra
 
 With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access Google accordingly......), the project grew and now I want to seek external resource to help this personal project growing.
 
-I don't have a oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here. 
+I don't have a oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay，thanks for your understanding.
 
 Still, if you do decide to sponsor me, the money will most likely go towards buying various high-end powerful Android phone and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
 
