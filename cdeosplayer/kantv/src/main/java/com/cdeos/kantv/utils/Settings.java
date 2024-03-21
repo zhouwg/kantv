@@ -78,12 +78,12 @@ public class Settings {
 
     public int getASRThreadCounts() {
         String key = mAppContext.getString(R.string.pref_key_asrthreadcounts);
-        String value = mSharedPreferences.getString(key, "3"); // thread counts 4
+        String value = mSharedPreferences.getString(key, "3"); // actual thread counts is 3 + 1 = 4
         try {
-            return Integer.valueOf(value).intValue();
+            return Integer.valueOf(value).intValue() + 1;
         } catch (NumberFormatException e) {
             CDELog.j(TAG, "exception occurred");
-            return 3;
+            return 4;
         }
     }
 

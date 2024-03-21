@@ -120,37 +120,18 @@
          @Override
          public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
              CDELog.j(TAG, "key : " + key);
-             if (key.contains("pref.asrmode")) {
+             if (
+                 (key.contains("pref.asrmode"))
+                 || (key.contains("pref.asrthreadcounts"))
+                 || (key.contains("pref.ggmlmodel"))
+             ) {
                  CDELog.j(TAG, "asrmode: " + mSettings.getASRMode());
                  CDELog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts());
                  CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
                  CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
                  String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
                  CDELog.j(TAG, "modelPath:" + modelPath);
-                 CDEUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts() + 1, mSettings.getASRMode());
-             }
-
-             if (key.contains("pref.asrthreadcounts")) {
-                 CDELog.j(TAG, "asrmode: " + mSettings.getASRMode());
-                 CDELog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts() + 1);
-                 CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
-                 CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
-                 String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
-                 CDELog.j(TAG, "modelPath:" + modelPath);
-                 CDEUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts() + 1, mSettings.getASRMode());
-             }
-
-
-             if (key.contains("pref.ggmlmodel")) {
-                 CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
-                 CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
-                 CDELog.j(TAG, "asrmode: " + mSettings.getASRMode());
-                 CDELog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts());
-                 CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
-                 CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
-                 String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
-                 CDELog.j(TAG, "modelPath:" + modelPath);
-                 CDEUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts() + 1, mSettings.getASRMode());
+                 CDEUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
              }
          }
      };

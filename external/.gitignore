@@ -4,7 +4,12 @@ gstreamer/
 ncnn/
 CLBlast/
 llamacpp/
+ff-deps/
+ffdeps/
+ffmepg-deps/
 
+
+ffmpeg-6.1
 
 *.a
 *.so
