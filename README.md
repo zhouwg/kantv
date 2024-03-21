@@ -269,7 +269,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Sponsor
 
-In Sep 2022, after I left my last employer, I became a full-time personal programmer. started writing some code for solving some technical problems in project KanTV(which was launched on 05/2021 personally) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature on 12/2023 - something I did not expect at all.
+In Sep 2022, after I left my last employer(a branch of an American company in Beijing), I became a full-time personal programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature on 12/2023 - something I did not expect at all.
 
 With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access Google accordingly......), the project grew and now I want to seek external resource to help this personal project growing.
 
