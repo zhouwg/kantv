@@ -172,3 +172,8 @@
                     <li>pre-load GGML model and initialize ASR-subsystem as early as possible for performance consideration</li>
                     <li>regular cleanup/refine files/codes/README</li>
                  </ul>
+
+- v1.3.5 2024-03-23,
+                 <ul>
+                    <li>import customized FFmpeg-6.1 to project kantv, target x86 works fine</li>
+                 </ul>

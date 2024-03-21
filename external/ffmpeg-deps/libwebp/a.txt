@@ -1,0 +1,942 @@
+build libwebp.a for target android with build type Debug
+remove out directory in /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp
+build shared libs for ARCH : x86
+ARCH : x86
+-- The C compiler identification is unknown
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- prefix path: /home/weiguo/kantv-record/out
+-- WEBP DEPLIBS: 
+-- Performing Test HAVE_BUILTIN_BSWAP16
+-- Performing Test HAVE_BUILTIN_BSWAP16 - Success
+-- Performing Test HAVE_BUILTIN_BSWAP32
+-- Performing Test HAVE_BUILTIN_BSWAP32 - Success
+-- Performing Test HAVE_BUILTIN_BSWAP64
+-- Performing Test HAVE_BUILTIN_BSWAP64 - Success
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Could NOT find OpenGL (missing: OPENGL_opengl_LIBRARY OPENGL_glx_LIBRARY) 
+-- Performing Test HAVE_MATH_LIBRARY
+-- Performing Test HAVE_MATH_LIBRARY - Failed
+-- Adding -lm flag.
+-- Could NOT find ZLIB (missing: ZLIB_LIBRARY) (found version "1.2.11")
+-- Could NOT find PNG (missing: PNG_LIBRARY PNG_PNG_INCLUDE_DIR) 
+-- Could NOT find JPEG (missing: JPEG_LIBRARY) (found version "80")
+-- TIFF is disabled when statically linking.
+-- Could NOT find GIF (missing: GIF_LIBRARY) (found version "5.1.9")
+-- Looking for include file GLUT/glut.h
+-- Looking for include file GLUT/glut.h - not found
+-- Looking for include file GL/glut.h
+-- Looking for include file GL/glut.h - not found
+-- Looking for include file OpenGL/glut.h
+-- Looking for include file OpenGL/glut.h - not found
+-- Looking for include file shlwapi.h
+-- Looking for include file shlwapi.h - not found
+-- Looking for include file unistd.h
+-- Looking for include file unistd.h - found
+-- Looking for include file wincodec.h
+-- Looking for include file wincodec.h - not found
+-- Looking for include file windows.h
+-- Looking for include file windows.h - not found
+-- Performing Test WEBP_HAVE_FLAG_SSE41
+-- Performing Test WEBP_HAVE_FLAG_SSE41 - Failed
+-- Performing Test WEBP_HAVE_FLAG_SSE41
+-- Performing Test WEBP_HAVE_FLAG_SSE41 - Success
+-- Performing Test WEBP_HAVE_FLAG_SSE2
+-- Performing Test WEBP_HAVE_FLAG_SSE2 - Success
+-- Performing Test WEBP_HAVE_FLAG_MIPS32
+-- Performing Test WEBP_HAVE_FLAG_MIPS32 - Failed
+-- Performing Test WEBP_HAVE_FLAG_MIPS32
+-- Performing Test WEBP_HAVE_FLAG_MIPS32 - Failed
+-- Performing Test WEBP_HAVE_FLAG_MIPS_DSP_R2
+-- Performing Test WEBP_HAVE_FLAG_MIPS_DSP_R2 - Failed
+-- Performing Test WEBP_HAVE_FLAG_MIPS_DSP_R2
+-- Performing Test WEBP_HAVE_FLAG_MIPS_DSP_R2 - Failed
+-- Performing Test HAS_COMPILE_FLAG
+-- Performing Test HAS_COMPILE_FLAG - Failed
+-- Performing Test WEBP_HAVE_FLAG_NEON
+-- Performing Test WEBP_HAVE_FLAG_NEON - Failed
+-- Performing Test WEBP_HAVE_FLAG_NEON
+-- Performing Test WEBP_HAVE_FLAG_NEON - Failed
+-- Performing Test WEBP_HAVE_FLAG_MSA
+-- Performing Test WEBP_HAVE_FLAG_MSA - Failed
+-- Performing Test WEBP_HAVE_FLAG_MSA
+-- Performing Test WEBP_HAVE_FLAG_MSA - Failed
+-- Performing Test HAS_COMPILE_FLAG
+-- Performing Test HAS_COMPILE_FLAG - Failed
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- WEBP DEPLIBS: Threads::Threads;m
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86
+/usr/bin/cmake -S/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -B/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/progress.marks
+make -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecode.dir/build.make CMakeFiles/webpdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdecode.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpdecode
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecode.dir/build.make CMakeFiles/webpdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[  0%] Building C object CMakeFiles/webpdecode.dir/src/dec/alpha_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/alpha_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/alpha_dec.c
+[  1%] Building C object CMakeFiles/webpdecode.dir/src/dec/buffer_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/buffer_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/buffer_dec.c
+[  1%] Building C object CMakeFiles/webpdecode.dir/src/dec/frame_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/frame_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/frame_dec.c
+[  2%] Building C object CMakeFiles/webpdecode.dir/src/dec/idec_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/idec_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/idec_dec.c
+[  3%] Building C object CMakeFiles/webpdecode.dir/src/dec/io_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/io_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/io_dec.c
+[  3%] Building C object CMakeFiles/webpdecode.dir/src/dec/quant_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/quant_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/quant_dec.c
+[  4%] Building C object CMakeFiles/webpdecode.dir/src/dec/tree_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/tree_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/tree_dec.c
+[  4%] Building C object CMakeFiles/webpdecode.dir/src/dec/vp8_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/vp8_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/vp8_dec.c
+[  5%] Building C object CMakeFiles/webpdecode.dir/src/dec/vp8l_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/vp8l_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/vp8l_dec.c
+[  6%] Building C object CMakeFiles/webpdecode.dir/src/dec/webp_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdecode.dir/src/dec/webp_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dec/webp_dec.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[  6%] Built target webpdecode
+make -f CMakeFiles/webputils.dir/build.make CMakeFiles/webputils.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webputils.dir/DependInfo.cmake --color=
+Scanning dependencies of target webputils
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webputils.dir/build.make CMakeFiles/webputils.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[  7%] Building C object CMakeFiles/webputils.dir/src/utils/bit_reader_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/bit_reader_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/bit_reader_utils.c
+[  8%] Building C object CMakeFiles/webputils.dir/src/utils/color_cache_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/color_cache_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/color_cache_utils.c
+[  8%] Building C object CMakeFiles/webputils.dir/src/utils/filters_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/filters_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/filters_utils.c
+[  9%] Building C object CMakeFiles/webputils.dir/src/utils/huffman_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/huffman_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/huffman_utils.c
+[ 10%] Building C object CMakeFiles/webputils.dir/src/utils/palette.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/palette.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/palette.c
+[ 10%] Building C object CMakeFiles/webputils.dir/src/utils/quant_levels_dec_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/quant_levels_dec_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/quant_levels_dec_utils.c
+[ 11%] Building C object CMakeFiles/webputils.dir/src/utils/rescaler_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/rescaler_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/rescaler_utils.c
+[ 11%] Building C object CMakeFiles/webputils.dir/src/utils/random_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/random_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/random_utils.c
+[ 12%] Building C object CMakeFiles/webputils.dir/src/utils/thread_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/thread_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/thread_utils.c
+[ 13%] Building C object CMakeFiles/webputils.dir/src/utils/utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/utils.c
+[ 13%] Building C object CMakeFiles/webputils.dir/src/utils/bit_writer_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/bit_writer_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/bit_writer_utils.c
+[ 14%] Building C object CMakeFiles/webputils.dir/src/utils/huffman_encode_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/huffman_encode_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/huffman_encode_utils.c
+[ 14%] Building C object CMakeFiles/webputils.dir/src/utils/quant_levels_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputils.dir/src/utils/quant_levels_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/quant_levels_utils.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 14%] Built target webputils
+make -f CMakeFiles/webpdsp.dir/build.make CMakeFiles/webpdsp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdsp.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpdsp
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdsp.dir/build.make CMakeFiles/webpdsp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 15%] Building C object CMakeFiles/webpdsp.dir/src/dsp/alpha_processing.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing.c
+[ 15%] Building C object CMakeFiles/webpdsp.dir/src/dsp/cpu.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/cpu.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/cpu.c
+[ 16%] Building C object CMakeFiles/webpdsp.dir/src/dsp/dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec.c
+[ 17%] Building C object CMakeFiles/webpdsp.dir/src/dsp/dec_clip_tables.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/dec_clip_tables.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_clip_tables.c
+[ 17%] Building C object CMakeFiles/webpdsp.dir/src/dsp/filters.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/filters.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/filters.c
+[ 18%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/lossless.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless.c
+[ 18%] Building C object CMakeFiles/webpdsp.dir/src/dsp/rescaler.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/rescaler.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/rescaler.c
+[ 19%] Building C object CMakeFiles/webpdsp.dir/src/dsp/upsampling.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/upsampling.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling.c
+[ 20%] Building C object CMakeFiles/webpdsp.dir/src/dsp/yuv.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/yuv.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv.c
+[ 20%] Building C object CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing_sse41.c
+[ 21%] Building C object CMakeFiles/webpdsp.dir/src/dsp/dec_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/dec_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_sse41.c
+[ 21%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/lossless_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_sse41.c
+[ 22%] Building C object CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling_sse41.c
+[ 23%] Building C object CMakeFiles/webpdsp.dir/src/dsp/yuv_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/yuv_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv_sse41.c
+[ 23%] Building C object CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing_sse2.c
+[ 24%] Building C object CMakeFiles/webpdsp.dir/src/dsp/dec_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/dec_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_sse2.c
+[ 24%] Building C object CMakeFiles/webpdsp.dir/src/dsp/filters_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/filters_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/filters_sse2.c
+[ 25%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/lossless_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_sse2.c
+[ 26%] Building C object CMakeFiles/webpdsp.dir/src/dsp/rescaler_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/rescaler_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/rescaler_sse2.c
+[ 26%] Building C object CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling_sse2.c
+[ 27%] Building C object CMakeFiles/webpdsp.dir/src/dsp/yuv_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/yuv_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv_sse2.c
+[ 28%] Building C object CMakeFiles/webpdsp.dir/src/dsp/cost.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/cost.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/cost.c
+[ 28%] Building C object CMakeFiles/webpdsp.dir/src/dsp/enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/enc.c
+[ 29%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_enc.c
+[ 29%] Building C object CMakeFiles/webpdsp.dir/src/dsp/ssim.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdsp.dir/src/dsp/ssim.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/ssim.c
+[ 30%] Building C object CMakeFiles/webpdsp.dir/src/dsp/cost_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/cost_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/cost_sse2.c
+[ 31%] Building C object CMakeFiles/webpdsp.dir/src/dsp/enc_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/enc_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/enc_sse2.c
+[ 31%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_enc_sse2.c
+[ 32%] Building C object CMakeFiles/webpdsp.dir/src/dsp/ssim_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdsp.dir/src/dsp/ssim_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/ssim_sse2.c
+[ 32%] Building C object CMakeFiles/webpdsp.dir/src/dsp/enc_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/enc_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/enc_sse41.c
+[ 33%] Building C object CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_enc_sse41.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 33%] Built target webpdsp
+make -f CMakeFiles/sharpyuv.dir/build.make CMakeFiles/sharpyuv.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/sharpyuv.dir/DependInfo.cmake --color=
+Scanning dependencies of target sharpyuv
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/sharpyuv.dir/build.make CMakeFiles/sharpyuv.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 34%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_sse2.c
+[ 34%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_neon.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_neon.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_neon.c
+[ 35%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_cpu.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_cpu.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_cpu.c
+[ 36%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_csp.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_csp.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_csp.c
+[ 36%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_dsp.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_dsp.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_dsp.c
+[ 37%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_gamma.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_gamma.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_gamma.c
+[ 38%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_risk_table.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_risk_table.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv_risk_table.c
+[ 38%] Building C object CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/sharpyuv/sharpyuv.c
+[ 39%] Linking C static library libsharpyuv.a
+/usr/bin/cmake -P CMakeFiles/sharpyuv.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/sharpyuv.dir/link.txt --verbose=1
+/usr/bin/ar qc libsharpyuv.a  CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_sse2.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_neon.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_cpu.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_csp.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_dsp.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_gamma.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv_risk_table.c.o CMakeFiles/sharpyuv.dir/sharpyuv/sharpyuv.c.o
+/usr/bin/ranlib libsharpyuv.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 39%] Built target sharpyuv
+make -f CMakeFiles/webpencode.dir/build.make CMakeFiles/webpencode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpencode.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpencode
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpencode.dir/build.make CMakeFiles/webpencode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 39%] Building C object CMakeFiles/webpencode.dir/src/enc/alpha_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/alpha_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/alpha_enc.c
+[ 40%] Building C object CMakeFiles/webpencode.dir/src/enc/analysis_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/analysis_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/analysis_enc.c
+[ 41%] Building C object CMakeFiles/webpencode.dir/src/enc/backward_references_cost_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/backward_references_cost_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/backward_references_cost_enc.c
+[ 41%] Building C object CMakeFiles/webpencode.dir/src/enc/backward_references_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/backward_references_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/backward_references_enc.c
+[ 42%] Building C object CMakeFiles/webpencode.dir/src/enc/config_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/config_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/config_enc.c
+[ 42%] Building C object CMakeFiles/webpencode.dir/src/enc/cost_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/cost_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/cost_enc.c
+[ 43%] Building C object CMakeFiles/webpencode.dir/src/enc/filter_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/filter_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/filter_enc.c
+[ 44%] Building C object CMakeFiles/webpencode.dir/src/enc/frame_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/frame_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/frame_enc.c
+[ 44%] Building C object CMakeFiles/webpencode.dir/src/enc/histogram_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/histogram_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/histogram_enc.c
+[ 45%] Building C object CMakeFiles/webpencode.dir/src/enc/iterator_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/iterator_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/iterator_enc.c
+[ 46%] Building C object CMakeFiles/webpencode.dir/src/enc/near_lossless_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/near_lossless_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/near_lossless_enc.c
+[ 46%] Building C object CMakeFiles/webpencode.dir/src/enc/picture_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/picture_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/picture_enc.c
+[ 47%] Building C object CMakeFiles/webpencode.dir/src/enc/picture_csp_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/picture_csp_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/picture_csp_enc.c
+[ 47%] Building C object CMakeFiles/webpencode.dir/src/enc/picture_psnr_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/picture_psnr_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/picture_psnr_enc.c
+[ 48%] Building C object CMakeFiles/webpencode.dir/src/enc/picture_rescale_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/picture_rescale_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/picture_rescale_enc.c
+[ 49%] Building C object CMakeFiles/webpencode.dir/src/enc/picture_tools_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/picture_tools_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/picture_tools_enc.c
+[ 49%] Building C object CMakeFiles/webpencode.dir/src/enc/predictor_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/predictor_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/predictor_enc.c
+[ 50%] Building C object CMakeFiles/webpencode.dir/src/enc/quant_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/quant_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/quant_enc.c
+[ 50%] Building C object CMakeFiles/webpencode.dir/src/enc/syntax_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/syntax_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/syntax_enc.c
+[ 51%] Building C object CMakeFiles/webpencode.dir/src/enc/token_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/token_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/token_enc.c
+[ 52%] Building C object CMakeFiles/webpencode.dir/src/enc/tree_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/tree_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/tree_enc.c
+[ 52%] Building C object CMakeFiles/webpencode.dir/src/enc/vp8l_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/vp8l_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/vp8l_enc.c
+[ 53%] Building C object CMakeFiles/webpencode.dir/src/enc/webp_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpencode.dir/src/enc/webp_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/enc/webp_enc.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 53%] Built target webpencode
+make -f CMakeFiles/webp.dir/build.make CMakeFiles/webp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webp.dir/DependInfo.cmake --color=
+Scanning dependencies of target webp
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webp.dir/build.make CMakeFiles/webp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 53%] Linking C static library libwebp.a
+/usr/bin/cmake -P CMakeFiles/webp.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webp.dir/link.txt --verbose=1
+/usr/bin/ar qc libwebp.a  CMakeFiles/webpdecode.dir/src/dec/alpha_dec.c.o CMakeFiles/webpdecode.dir/src/dec/buffer_dec.c.o CMakeFiles/webpdecode.dir/src/dec/frame_dec.c.o CMakeFiles/webpdecode.dir/src/dec/idec_dec.c.o CMakeFiles/webpdecode.dir/src/dec/io_dec.c.o CMakeFiles/webpdecode.dir/src/dec/quant_dec.c.o CMakeFiles/webpdecode.dir/src/dec/tree_dec.c.o CMakeFiles/webpdecode.dir/src/dec/vp8_dec.c.o CMakeFiles/webpdecode.dir/src/dec/vp8l_dec.c.o CMakeFiles/webpdecode.dir/src/dec/webp_dec.c.o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing.c.o CMakeFiles/webpdsp.dir/src/dsp/cpu.c.o CMakeFiles/webpdsp.dir/src/dsp/dec.c.o CMakeFiles/webpdsp.dir/src/dsp/dec_clip_tables.c.o CMakeFiles/webpdsp.dir/src/dsp/filters.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless.c.o CMakeFiles/webpdsp.dir/src/dsp/rescaler.c.o CMakeFiles/webpdsp.dir/src/dsp/upsampling.c.o CMakeFiles/webpdsp.dir/src/dsp/yuv.c.o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/dec_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/yuv_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/alpha_processing_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/dec_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/filters_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/rescaler_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/upsampling_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/yuv_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/cost.c.o CMakeFiles/webpdsp.dir/src/dsp/enc.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc.c.o CMakeFiles/webpdsp.dir/src/dsp/ssim.c.o CMakeFiles/webpdsp.dir/src/dsp/cost_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/enc_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/ssim_sse2.c.o CMakeFiles/webpdsp.dir/src/dsp/enc_sse41.c.o CMakeFiles/webpdsp.dir/src/dsp/lossless_enc_sse41.c.o CMakeFiles/webpencode.dir/src/enc/alpha_enc.c.o CMakeFiles/webpencode.dir/src/enc/analysis_enc.c.o CMakeFiles/webpencode.dir/src/enc/backward_references_cost_enc.c.o CMakeFiles/webpencode.dir/src/enc/backward_references_enc.c.o CMakeFiles/webpencode.dir/src/enc/config_enc.c.o CMakeFiles/webpencode.dir/src/enc/cost_enc.c.o CMakeFiles/webpencode.dir/src/enc/filter_enc.c.o CMakeFiles/webpencode.dir/src/enc/frame_enc.c.o CMakeFiles/webpencode.dir/src/enc/histogram_enc.c.o CMakeFiles/webpencode.dir/src/enc/iterator_enc.c.o CMakeFiles/webpencode.dir/src/enc/near_lossless_enc.c.o CMakeFiles/webpencode.dir/src/enc/picture_enc.c.o CMakeFiles/webpencode.dir/src/enc/picture_csp_enc.c.o CMakeFiles/webpencode.dir/src/enc/picture_psnr_enc.c.o CMakeFiles/webpencode.dir/src/enc/picture_rescale_enc.c.o CMakeFiles/webpencode.dir/src/enc/picture_tools_enc.c.o CMakeFiles/webpencode.dir/src/enc/predictor_enc.c.o CMakeFiles/webpencode.dir/src/enc/quant_enc.c.o CMakeFiles/webpencode.dir/src/enc/syntax_enc.c.o CMakeFiles/webpencode.dir/src/enc/token_enc.c.o CMakeFiles/webpencode.dir/src/enc/tree_enc.c.o CMakeFiles/webpencode.dir/src/enc/vp8l_enc.c.o CMakeFiles/webpencode.dir/src/enc/webp_enc.c.o CMakeFiles/webputils.dir/src/utils/bit_reader_utils.c.o CMakeFiles/webputils.dir/src/utils/color_cache_utils.c.o CMakeFiles/webputils.dir/src/utils/filters_utils.c.o CMakeFiles/webputils.dir/src/utils/huffman_utils.c.o CMakeFiles/webputils.dir/src/utils/palette.c.o CMakeFiles/webputils.dir/src/utils/quant_levels_dec_utils.c.o CMakeFiles/webputils.dir/src/utils/rescaler_utils.c.o CMakeFiles/webputils.dir/src/utils/random_utils.c.o CMakeFiles/webputils.dir/src/utils/thread_utils.c.o CMakeFiles/webputils.dir/src/utils/utils.c.o CMakeFiles/webputils.dir/src/utils/bit_writer_utils.c.o CMakeFiles/webputils.dir/src/utils/huffman_encode_utils.c.o CMakeFiles/webputils.dir/src/utils/quant_levels_utils.c.o
+/usr/bin/ranlib libwebp.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 53%] Built target webp
+make -f CMakeFiles/webpdemux.dir/build.make CMakeFiles/webpdemux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdemux.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpdemux
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdemux.dir/build.make CMakeFiles/webpdemux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 54%] Building C object CMakeFiles/webpdemux.dir/src/demux/anim_decode.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpdemux.dir/src/demux/anim_decode.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/demux/anim_decode.c
+[ 54%] Building C object CMakeFiles/webpdemux.dir/src/demux/demux.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpdemux.dir/src/demux/demux.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/demux/demux.c
+[ 55%] Linking C static library libwebpdemux.a
+/usr/bin/cmake -P CMakeFiles/webpdemux.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpdemux.dir/link.txt --verbose=1
+/usr/bin/ar qc libwebpdemux.a  CMakeFiles/webpdemux.dir/src/demux/anim_decode.c.o CMakeFiles/webpdemux.dir/src/demux/demux.c.o
+/usr/bin/ranlib libwebpdemux.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 55%] Built target webpdemux
+make -f CMakeFiles/imageioutil.dir/build.make CMakeFiles/imageioutil.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imageioutil.dir/DependInfo.cmake --color=
+Scanning dependencies of target imageioutil
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imageioutil.dir/build.make CMakeFiles/imageioutil.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 56%] Building C object CMakeFiles/imageioutil.dir/imageio/imageio_util.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imageioutil.dir/imageio/imageio_util.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/imageio_util.c
+[ 56%] Linking C static library libimageioutil.a
+/usr/bin/cmake -P CMakeFiles/imageioutil.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/imageioutil.dir/link.txt --verbose=1
+/usr/bin/ar qc libimageioutil.a  CMakeFiles/imageioutil.dir/imageio/imageio_util.c.o
+/usr/bin/ranlib libimageioutil.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 56%] Built target imageioutil
+make -f CMakeFiles/exampleutil.dir/build.make CMakeFiles/exampleutil.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/exampleutil.dir/DependInfo.cmake --color=
+Scanning dependencies of target exampleutil
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/exampleutil.dir/build.make CMakeFiles/exampleutil.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 57%] Building C object CMakeFiles/exampleutil.dir/examples/example_util.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/exampleutil.dir/examples/example_util.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/example_util.c
+[ 57%] Linking C static library libexampleutil.a
+/usr/bin/cmake -P CMakeFiles/exampleutil.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/exampleutil.dir/link.txt --verbose=1
+/usr/bin/ar qc libexampleutil.a  CMakeFiles/exampleutil.dir/examples/example_util.c.o
+/usr/bin/ranlib libexampleutil.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 57%] Built target exampleutil
+make -f CMakeFiles/imagedec.dir/build.make CMakeFiles/imagedec.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imagedec.dir/DependInfo.cmake --color=
+Scanning dependencies of target imagedec
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imagedec.dir/build.make CMakeFiles/imagedec.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 58%] Building C object CMakeFiles/imagedec.dir/imageio/image_dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/image_dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/image_dec.c
+[ 59%] Building C object CMakeFiles/imagedec.dir/imageio/jpegdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/jpegdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/jpegdec.c
+[ 59%] Building C object CMakeFiles/imagedec.dir/imageio/metadata.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/metadata.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/metadata.c
+[ 60%] Building C object CMakeFiles/imagedec.dir/imageio/pngdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/pngdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/pngdec.c
+[ 60%] Building C object CMakeFiles/imagedec.dir/imageio/pnmdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/pnmdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/pnmdec.c
+[ 61%] Building C object CMakeFiles/imagedec.dir/imageio/tiffdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/tiffdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/tiffdec.c
+[ 62%] Building C object CMakeFiles/imagedec.dir/imageio/webpdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/webpdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/webpdec.c
+[ 62%] Building C object CMakeFiles/imagedec.dir/imageio/wicdec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imagedec.dir/imageio/wicdec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/wicdec.c
+[ 63%] Linking C static library libimagedec.a
+/usr/bin/cmake -P CMakeFiles/imagedec.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/imagedec.dir/link.txt --verbose=1
+/usr/bin/ar qc libimagedec.a  CMakeFiles/imagedec.dir/imageio/image_dec.c.o CMakeFiles/imagedec.dir/imageio/jpegdec.c.o CMakeFiles/imagedec.dir/imageio/metadata.c.o CMakeFiles/imagedec.dir/imageio/pngdec.c.o CMakeFiles/imagedec.dir/imageio/pnmdec.c.o CMakeFiles/imagedec.dir/imageio/tiffdec.c.o CMakeFiles/imagedec.dir/imageio/webpdec.c.o CMakeFiles/imagedec.dir/imageio/wicdec.c.o
+/usr/bin/ranlib libimagedec.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 63%] Built target imagedec
+make -f CMakeFiles/extras.dir/build.make CMakeFiles/extras.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/extras.dir/DependInfo.cmake --color=
+Scanning dependencies of target extras
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/extras.dir/build.make CMakeFiles/extras.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 64%] Building C object CMakeFiles/extras.dir/extras/extras.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/extras.dir/extras/extras.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/extras/extras.c
+[ 65%] Building C object CMakeFiles/extras.dir/extras/quality_estimate.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/extras.dir/extras/quality_estimate.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/extras/quality_estimate.c
+[ 65%] Linking C static library libextras.a
+/usr/bin/cmake -P CMakeFiles/extras.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/extras.dir/link.txt --verbose=1
+/usr/bin/ar qc libextras.a  CMakeFiles/extras.dir/extras/extras.c.o CMakeFiles/extras.dir/extras/quality_estimate.c.o
+/usr/bin/ranlib libextras.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 65%] Built target extras
+make -f CMakeFiles/webp_quality.dir/build.make CMakeFiles/webp_quality.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webp_quality.dir/DependInfo.cmake --color=
+Scanning dependencies of target webp_quality
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webp_quality.dir/build.make CMakeFiles/webp_quality.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 66%] Building C object CMakeFiles/webp_quality.dir/extras/webp_quality.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webp_quality.dir/extras/webp_quality.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/extras/webp_quality.c
+[ 67%] Linking C executable webp_quality
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webp_quality.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/webp_quality.dir/extras/webp_quality.c.o  -o webp_quality  libexampleutil.a libimagedec.a libextras.a libimageioutil.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 67%] Built target webp_quality
+make -f CMakeFiles/get_disto.dir/build.make CMakeFiles/get_disto.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/get_disto.dir/DependInfo.cmake --color=
+Scanning dependencies of target get_disto
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/get_disto.dir/build.make CMakeFiles/get_disto.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 68%] Building C object CMakeFiles/get_disto.dir/extras/get_disto.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/get_disto.dir/extras/get_disto.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/extras/get_disto.c
+[ 68%] Linking C executable get_disto
+/usr/bin/cmake -E cmake_link_script CMakeFiles/get_disto.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/get_disto.dir/extras/get_disto.c.o  -o get_disto  libimagedec.a libimageioutil.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 68%] Built target get_disto
+make -f CMakeFiles/libwebpmux.dir/build.make CMakeFiles/libwebpmux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/libwebpmux.dir/DependInfo.cmake --color=
+Scanning dependencies of target libwebpmux
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/libwebpmux.dir/build.make CMakeFiles/libwebpmux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 69%] Building C object CMakeFiles/libwebpmux.dir/src/mux/anim_encode.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/libwebpmux.dir/src/mux/anim_encode.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/mux/anim_encode.c
+[ 69%] Building C object CMakeFiles/libwebpmux.dir/src/mux/muxedit.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/libwebpmux.dir/src/mux/muxedit.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/mux/muxedit.c
+[ 70%] Building C object CMakeFiles/libwebpmux.dir/src/mux/muxinternal.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/libwebpmux.dir/src/mux/muxinternal.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/mux/muxinternal.c
+[ 71%] Building C object CMakeFiles/libwebpmux.dir/src/mux/muxread.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/libwebpmux.dir/src/mux/muxread.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/mux/muxread.c
+[ 71%] Linking C static library libwebpmux.a
+/usr/bin/cmake -P CMakeFiles/libwebpmux.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/libwebpmux.dir/link.txt --verbose=1
+/usr/bin/ar qc libwebpmux.a  CMakeFiles/libwebpmux.dir/src/mux/anim_encode.c.o CMakeFiles/libwebpmux.dir/src/mux/muxedit.c.o CMakeFiles/libwebpmux.dir/src/mux/muxinternal.c.o CMakeFiles/libwebpmux.dir/src/mux/muxread.c.o
+/usr/bin/ranlib libwebpmux.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 71%] Built target libwebpmux
+make -f CMakeFiles/webpmux.dir/build.make CMakeFiles/webpmux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpmux.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpmux
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpmux.dir/build.make CMakeFiles/webpmux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 71%] Building C object CMakeFiles/webpmux.dir/examples/webpmux.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpmux.dir/examples/webpmux.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/webpmux.c
+[ 72%] Linking C executable webpmux
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpmux.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/webpmux.dir/examples/webpmux.c.o  -o webpmux  libexampleutil.a libimageioutil.a libwebpmux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 72%] Built target webpmux
+make -f CMakeFiles/img2webp.dir/build.make CMakeFiles/img2webp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/img2webp.dir/DependInfo.cmake --color=
+Scanning dependencies of target img2webp
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/img2webp.dir/build.make CMakeFiles/img2webp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 73%] Building C object CMakeFiles/img2webp.dir/examples/img2webp.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/img2webp.dir/examples/img2webp.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/img2webp.c
+[ 74%] Linking C executable img2webp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/img2webp.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/img2webp.dir/examples/img2webp.c.o  -o img2webp  libexampleutil.a libimagedec.a libimageioutil.a libwebp.a libwebpmux.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 74%] Built target img2webp
+make -f CMakeFiles/imageenc.dir/build.make CMakeFiles/imageenc.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imageenc.dir/DependInfo.cmake --color=
+Scanning dependencies of target imageenc
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imageenc.dir/build.make CMakeFiles/imageenc.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 75%] Building C object CMakeFiles/imageenc.dir/imageio/image_enc.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src  -pthread   -Wall -o CMakeFiles/imageenc.dir/imageio/image_enc.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/imageio/image_enc.c
+[ 75%] Linking C static library libimageenc.a
+/usr/bin/cmake -P CMakeFiles/imageenc.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/imageenc.dir/link.txt --verbose=1
+/usr/bin/ar qc libimageenc.a  CMakeFiles/imageenc.dir/imageio/image_enc.c.o
+/usr/bin/ranlib libimageenc.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 75%] Built target imageenc
+make -f CMakeFiles/dwebp.dir/build.make CMakeFiles/dwebp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/dwebp.dir/DependInfo.cmake --color=
+Scanning dependencies of target dwebp
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/dwebp.dir/build.make CMakeFiles/dwebp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 76%] Building C object CMakeFiles/dwebp.dir/examples/dwebp.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/dwebp.dir/examples/dwebp.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/dwebp.c
+[ 77%] Linking C executable dwebp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/dwebp.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/dwebp.dir/examples/dwebp.c.o  -o dwebp  libexampleutil.a libimagedec.a libimageenc.a libwebpdemux.a libimageioutil.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 77%] Built target dwebp
+make -f CMakeFiles/webputilsdecode.dir/build.make CMakeFiles/webputilsdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webputilsdecode.dir/DependInfo.cmake --color=
+Scanning dependencies of target webputilsdecode
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webputilsdecode.dir/build.make CMakeFiles/webputilsdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 78%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/bit_reader_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/bit_reader_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/bit_reader_utils.c
+[ 79%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/color_cache_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/color_cache_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/color_cache_utils.c
+[ 79%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/filters_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/filters_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/filters_utils.c
+[ 80%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/huffman_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/huffman_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/huffman_utils.c
+[ 80%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/palette.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/palette.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/palette.c
+[ 81%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/quant_levels_dec_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/quant_levels_dec_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/quant_levels_dec_utils.c
+[ 82%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/rescaler_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/rescaler_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/rescaler_utils.c
+[ 82%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/random_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/random_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/random_utils.c
+[ 83%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/thread_utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/thread_utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/thread_utils.c
+[ 84%] Building C object CMakeFiles/webputilsdecode.dir/src/utils/utils.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webputilsdecode.dir/src/utils/utils.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/utils/utils.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 84%] Built target webputilsdecode
+make -f CMakeFiles/webpdspdecode.dir/build.make CMakeFiles/webpdspdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdspdecode.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpdspdecode
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdspdecode.dir/build.make CMakeFiles/webpdspdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 85%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing.c
+[ 85%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/cpu.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/cpu.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/cpu.c
+[ 86%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/dec.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/dec.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec.c
+[ 86%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/dec_clip_tables.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/dec_clip_tables.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_clip_tables.c
+[ 87%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/filters.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/filters.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/filters.c
+[ 88%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/lossless.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/lossless.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless.c
+[ 88%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/rescaler.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/rescaler.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/rescaler.c
+[ 89%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/upsampling.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling.c
+[ 89%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/yuv.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -o CMakeFiles/webpdspdecode.dir/src/dsp/yuv.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv.c
+[ 90%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing_sse41.c
+[ 91%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_sse41.c
+[ 91%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_sse41.c
+[ 92%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling_sse41.c
+[ 93%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse41.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall -msse4.1 -o CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse41.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv_sse41.c
+[ 93%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/alpha_processing_sse2.c
+[ 94%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/dec_sse2.c
+[ 94%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/filters_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/filters_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/filters_sse2.c
+[ 95%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/lossless_sse2.c
+[ 96%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/rescaler_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/rescaler_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/rescaler_sse2.c
+[ 96%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/upsampling_sse2.c
+[ 97%] Building C object CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse2.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp  -pthread   -Wall   -o CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse2.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src/dsp/yuv_sse2.c
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Built target webpdspdecode
+make -f CMakeFiles/webpdecoder.dir/build.make CMakeFiles/webpdecoder.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdecoder.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpdecoder
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecoder.dir/build.make CMakeFiles/webpdecoder.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Linking C static library libwebpdecoder.a
+/usr/bin/cmake -P CMakeFiles/webpdecoder.dir/cmake_clean_target.cmake
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpdecoder.dir/link.txt --verbose=1
+/usr/bin/ar qc libwebpdecoder.a  CMakeFiles/webpdecode.dir/src/dec/alpha_dec.c.o CMakeFiles/webpdecode.dir/src/dec/buffer_dec.c.o CMakeFiles/webpdecode.dir/src/dec/frame_dec.c.o CMakeFiles/webpdecode.dir/src/dec/idec_dec.c.o CMakeFiles/webpdecode.dir/src/dec/io_dec.c.o CMakeFiles/webpdecode.dir/src/dec/quant_dec.c.o CMakeFiles/webpdecode.dir/src/dec/tree_dec.c.o CMakeFiles/webpdecode.dir/src/dec/vp8_dec.c.o CMakeFiles/webpdecode.dir/src/dec/vp8l_dec.c.o CMakeFiles/webpdecode.dir/src/dec/webp_dec.c.o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing.c.o CMakeFiles/webpdspdecode.dir/src/dsp/cpu.c.o CMakeFiles/webpdspdecode.dir/src/dsp/dec.c.o CMakeFiles/webpdspdecode.dir/src/dsp/dec_clip_tables.c.o CMakeFiles/webpdspdecode.dir/src/dsp/filters.c.o CMakeFiles/webpdspdecode.dir/src/dsp/lossless.c.o CMakeFiles/webpdspdecode.dir/src/dsp/rescaler.c.o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling.c.o CMakeFiles/webpdspdecode.dir/src/dsp/yuv.c.o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse41.c.o CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse41.c.o CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse41.c.o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse41.c.o CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse41.c.o CMakeFiles/webpdspdecode.dir/src/dsp/alpha_processing_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/dec_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/filters_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/lossless_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/rescaler_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/upsampling_sse2.c.o CMakeFiles/webpdspdecode.dir/src/dsp/yuv_sse2.c.o CMakeFiles/webputilsdecode.dir/src/utils/bit_reader_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/color_cache_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/filters_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/huffman_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/palette.c.o CMakeFiles/webputilsdecode.dir/src/utils/quant_levels_dec_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/rescaler_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/random_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/thread_utils.c.o CMakeFiles/webputilsdecode.dir/src/utils/utils.c.o
+/usr/bin/ranlib libwebpdecoder.a
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Built target webpdecoder
+make -f CMakeFiles/cwebp.dir/build.make CMakeFiles/cwebp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/cwebp.dir/DependInfo.cmake --color=
+Scanning dependencies of target cwebp
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/cwebp.dir/build.make CMakeFiles/cwebp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Building C object CMakeFiles/cwebp.dir/examples/cwebp.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/cwebp.dir/examples/cwebp.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/cwebp.c
+[ 98%] Linking C executable cwebp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cwebp.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/cwebp.dir/examples/cwebp.c.o  -o cwebp  libexampleutil.a libimagedec.a libwebp.a libimageioutil.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 98%] Built target cwebp
+make -f CMakeFiles/webpinfo.dir/build.make CMakeFiles/webpinfo.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpinfo.dir/DependInfo.cmake --color=
+Scanning dependencies of target webpinfo
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpinfo.dir/build.make CMakeFiles/webpinfo.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 98%] Building C object CMakeFiles/webpinfo.dir/examples/webpinfo.c.o
+/usr/bin/cc -DHAVE_CONFIG_H -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/src -I/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/src  -pthread   -Wall -o CMakeFiles/webpinfo.dir/examples/webpinfo.c.o   -c /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/examples/webpinfo.c
+[ 99%] Linking C executable webpinfo
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpinfo.dir/link.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/webpinfo.dir/examples/webpinfo.c.o  -o webpinfo  libexampleutil.a libimageioutil.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[100%] Built target webpinfo
+make[1]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+/usr/bin/cmake -E cmake_progress_start /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles 0
+/usr/bin/cmake -S/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp -B/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 --check-build-system CMakeFiles/Makefile.cmake 0
+/usr/bin/cmake -E cmake_progress_start /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/progress.marks
+make -f CMakeFiles/Makefile2 all
+make[1]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecode.dir/build.make CMakeFiles/webpdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdecode.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecode.dir/build.make CMakeFiles/webpdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpdecode.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[  6%] Built target webpdecode
+make -f CMakeFiles/webputils.dir/build.make CMakeFiles/webputils.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webputils.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webputils.dir/build.make CMakeFiles/webputils.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webputils.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 14%] Built target webputils
+make -f CMakeFiles/webpdsp.dir/build.make CMakeFiles/webpdsp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdsp.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdsp.dir/build.make CMakeFiles/webpdsp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpdsp.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 33%] Built target webpdsp
+make -f CMakeFiles/sharpyuv.dir/build.make CMakeFiles/sharpyuv.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/sharpyuv.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/sharpyuv.dir/build.make CMakeFiles/sharpyuv.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/sharpyuv.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 39%] Built target sharpyuv
+make -f CMakeFiles/webpencode.dir/build.make CMakeFiles/webpencode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpencode.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpencode.dir/build.make CMakeFiles/webpencode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpencode.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 53%] Built target webpencode
+make -f CMakeFiles/webp.dir/build.make CMakeFiles/webp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webp.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webp.dir/build.make CMakeFiles/webp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webp.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 53%] Built target webp
+make -f CMakeFiles/webpdemux.dir/build.make CMakeFiles/webpdemux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdemux.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdemux.dir/build.make CMakeFiles/webpdemux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpdemux.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 55%] Built target webpdemux
+make -f CMakeFiles/imageioutil.dir/build.make CMakeFiles/imageioutil.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imageioutil.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imageioutil.dir/build.make CMakeFiles/imageioutil.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/imageioutil.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 56%] Built target imageioutil
+make -f CMakeFiles/exampleutil.dir/build.make CMakeFiles/exampleutil.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/exampleutil.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/exampleutil.dir/build.make CMakeFiles/exampleutil.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/exampleutil.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 57%] Built target exampleutil
+make -f CMakeFiles/imagedec.dir/build.make CMakeFiles/imagedec.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imagedec.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imagedec.dir/build.make CMakeFiles/imagedec.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/imagedec.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 63%] Built target imagedec
+make -f CMakeFiles/extras.dir/build.make CMakeFiles/extras.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/extras.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/extras.dir/build.make CMakeFiles/extras.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/extras.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 65%] Built target extras
+make -f CMakeFiles/webp_quality.dir/build.make CMakeFiles/webp_quality.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webp_quality.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webp_quality.dir/build.make CMakeFiles/webp_quality.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webp_quality.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 67%] Built target webp_quality
+make -f CMakeFiles/get_disto.dir/build.make CMakeFiles/get_disto.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/get_disto.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/get_disto.dir/build.make CMakeFiles/get_disto.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/get_disto.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 68%] Built target get_disto
+make -f CMakeFiles/libwebpmux.dir/build.make CMakeFiles/libwebpmux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/libwebpmux.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/libwebpmux.dir/build.make CMakeFiles/libwebpmux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/libwebpmux.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 71%] Built target libwebpmux
+make -f CMakeFiles/webpmux.dir/build.make CMakeFiles/webpmux.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpmux.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpmux.dir/build.make CMakeFiles/webpmux.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpmux.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 72%] Built target webpmux
+make -f CMakeFiles/img2webp.dir/build.make CMakeFiles/img2webp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/img2webp.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/img2webp.dir/build.make CMakeFiles/img2webp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/img2webp.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 74%] Built target img2webp
+make -f CMakeFiles/imageenc.dir/build.make CMakeFiles/imageenc.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/imageenc.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/imageenc.dir/build.make CMakeFiles/imageenc.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/imageenc.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 75%] Built target imageenc
+make -f CMakeFiles/dwebp.dir/build.make CMakeFiles/dwebp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/dwebp.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/dwebp.dir/build.make CMakeFiles/dwebp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/dwebp.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 77%] Built target dwebp
+make -f CMakeFiles/webputilsdecode.dir/build.make CMakeFiles/webputilsdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webputilsdecode.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webputilsdecode.dir/build.make CMakeFiles/webputilsdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webputilsdecode.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 84%] Built target webputilsdecode
+make -f CMakeFiles/webpdspdecode.dir/build.make CMakeFiles/webpdspdecode.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdspdecode.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdspdecode.dir/build.make CMakeFiles/webpdspdecode.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpdspdecode.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Built target webpdspdecode
+make -f CMakeFiles/webpdecoder.dir/build.make CMakeFiles/webpdecoder.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpdecoder.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpdecoder.dir/build.make CMakeFiles/webpdecoder.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpdecoder.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 97%] Built target webpdecoder
+make -f CMakeFiles/cwebp.dir/build.make CMakeFiles/cwebp.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/cwebp.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/cwebp.dir/build.make CMakeFiles/cwebp.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/cwebp.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[ 98%] Built target cwebp
+make -f CMakeFiles/webpinfo.dir/build.make CMakeFiles/webpinfo.dir/depend
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+cd /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 && /usr/bin/cmake -E cmake_depends "Unix Makefiles" /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86 /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles/webpinfo.dir/DependInfo.cmake --color=
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpinfo.dir/build.make CMakeFiles/webpinfo.dir/build
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[2]: Nothing to be done for 'CMakeFiles/webpinfo.dir/build'.
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+[100%] Built target webpinfo
+make[1]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+/usr/bin/cmake -E cmake_progress_start /home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86/CMakeFiles 0
+make -f CMakeFiles/Makefile2 preinstall
+make[1]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpmux.dir/build.make CMakeFiles/webpmux.dir/preinstall
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Linking C executable CMakeFiles/CMakeRelink.dir/webpmux
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpmux.dir/relink.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/webpmux.dir/examples/webpmux.c.o  -o CMakeFiles/CMakeRelink.dir/webpmux  libexampleutil.a libimageioutil.a libwebpmux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/img2webp.dir/build.make CMakeFiles/img2webp.dir/preinstall
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Linking C executable CMakeFiles/CMakeRelink.dir/img2webp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/img2webp.dir/relink.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/img2webp.dir/examples/img2webp.c.o  -o CMakeFiles/CMakeRelink.dir/img2webp  libexampleutil.a libimagedec.a libimageioutil.a libwebp.a libwebpmux.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/dwebp.dir/build.make CMakeFiles/dwebp.dir/preinstall
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Linking C executable CMakeFiles/CMakeRelink.dir/dwebp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/dwebp.dir/relink.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/dwebp.dir/examples/dwebp.c.o  -o CMakeFiles/CMakeRelink.dir/dwebp  libexampleutil.a libimagedec.a libimageenc.a libwebpdemux.a libimageioutil.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/cwebp.dir/build.make CMakeFiles/cwebp.dir/preinstall
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Linking C executable CMakeFiles/CMakeRelink.dir/cwebp
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cwebp.dir/relink.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/cwebp.dir/examples/cwebp.c.o  -o CMakeFiles/CMakeRelink.dir/cwebp  libexampleutil.a libimagedec.a libwebp.a libimageioutil.a libwebpdemux.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make -f CMakeFiles/webpinfo.dir/build.make CMakeFiles/webpinfo.dir/preinstall
+make[2]: Entering directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Linking C executable CMakeFiles/CMakeRelink.dir/webpinfo
+/usr/bin/cmake -E cmake_link_script CMakeFiles/webpinfo.dir/relink.txt --verbose=1
+/usr/bin/cc  -pthread   CMakeFiles/webpinfo.dir/examples/webpinfo.c.o  -o CMakeFiles/CMakeRelink.dir/webpinfo  libexampleutil.a libimageioutil.a libwebp.a libsharpyuv.a -lpthread -lm 
+make[2]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+make[1]: Leaving directory '/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp/out/x86'
+Install the project...
+/usr/bin/cmake -P cmake_install.cmake
+-- Install configuration: "Debug"
+-- Installing: /home/weiguo/kantv-record/out/lib/pkgconfig/libsharpyuv.pc
+-- Installing: /home/weiguo/kantv-record/out/lib/libsharpyuv.a
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/sharpyuv/sharpyuv.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/sharpyuv/sharpyuv_csp.h
+-- Installing: /home/weiguo/kantv-record/out/lib/pkgconfig/libwebpdecoder.pc
+-- Installing: /home/weiguo/kantv-record/out/lib/pkgconfig/libwebp.pc
+-- Installing: /home/weiguo/kantv-record/out/lib/pkgconfig/libwebpdemux.pc
+-- Installing: /home/weiguo/kantv-record/out/bin/dwebp
+-- Installing: /home/weiguo/kantv-record/out/bin/cwebp
+-- Installing: /home/weiguo/kantv-record/out/lib/pkgconfig/libwebpmux.pc
+-- Installing: /home/weiguo/kantv-record/out/bin/img2webp
+-- Installing: /home/weiguo/kantv-record/out/bin/webpinfo
+-- Installing: /home/weiguo/kantv-record/out/bin/webpmux
+-- Installing: /home/weiguo/kantv-record/out/lib/libwebpdecoder.a
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/decode.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/types.h
+-- Installing: /home/weiguo/kantv-record/out/lib/libwebp.a
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/decode.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/encode.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/types.h
+-- Installing: /home/weiguo/kantv-record/out/lib/libwebpdemux.a
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/decode.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/demux.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/mux_types.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/types.h
+-- Installing: /home/weiguo/kantv-record/out/lib/libwebpmux.a
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/mux.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/mux_types.h
+-- Up-to-date: /home/weiguo/kantv-record/out/include/webp/types.h
+-- Installing: /home/weiguo/kantv-record/out/share/WebP/cmake/WebPTargets.cmake
+-- Installing: /home/weiguo/kantv-record/out/share/WebP/cmake/WebPTargets-debug.cmake
+-- Installing: /home/weiguo/kantv-record/out/share/WebP/cmake/WebPConfigVersion.cmake
+-- Installing: /home/weiguo/kantv-record/out/share/WebP/cmake/WebPConfig.cmake
+-- Up-to-date: /home/weiguo/kantv-record/out/share/man/man1/cwebp.1
+-- Up-to-date: /home/weiguo/kantv-record/out/share/man/man1/dwebp.1
+-- Up-to-date: /home/weiguo/kantv-record/out/share/man/man1/img2webp.1
+-- Up-to-date: /home/weiguo/kantv-record/out/share/man/man1/webpmux.1
+-- Up-to-date: /home/weiguo/kantv-record/out/share/man/man1/webpinfo.1
+/home/weiguo/kantv-record/ffmpeg-6.1/external/libwebp

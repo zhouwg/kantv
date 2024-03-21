@@ -1,0 +1,13 @@
+FFmpeg/
+DeepSpeech/
+gstreamer/
+ncnn/
+CLBlast/
+llamacpp/
+
+uavs3e/version.h
+uavs3d/version.h
+
+
+*.a
+*.so

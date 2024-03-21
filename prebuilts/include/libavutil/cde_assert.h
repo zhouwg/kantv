@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 //borrow from AOSP
-#if  defined(ANDROID) || defined(__ANDROID__)
+#if  1//defined(ANDROID) || defined(__ANDROID__)
 #define CONDITION(cond)                         (__builtin_expect((cond) != 0, 0))
 #define __android_second(dummy, second, ...)    second
 #define __android_rest(first, ...)              , ## __VA_ARGS__
@@ -45,7 +45,7 @@ extern "C" {
 
 
 #ifndef LOG_ALWAYS_FATAL_IF
-#ifndef __IRSA_DEBUG__
+#ifndef KANTV_DEBUG
 #define LOG_ALWAYS_FATAL_IF(cond, ...) \
             ( (CONDITION(cond)) \
             ? ((void)LOGE(__VA_ARGS__)) \
@@ -59,7 +59,7 @@ extern "C" {
 #endif
 
 #ifndef LOG_ALWAYS_FATAL
-#ifndef __IRSA_DEBUG__
+#ifndef KANTV_DEBUG
 #define LOG_ALWAYS_FATAL(...) \
             ((void)LOGE(__VA_ARGS__))
 #else
@@ -69,7 +69,7 @@ extern "C" {
 #endif
 
 
-#ifndef __IRSA_DEBUG__
+#ifndef KANTV_DEBUG
 #ifndef LOG_FATAL_IF
 #define LOG_FATAL_IF(cond, ...) ((void)0)
 #endif
@@ -97,7 +97,9 @@ extern "C" {
 #define LITERAL_TO_STRING_INTERNAL(x)    #x
 #define LITERAL_TO_STRING(x) LITERAL_TO_STRING_INTERNAL(x)
 
-#ifndef __IRSA_DEBUG__
+
+
+#ifndef KANTV_DEBUG
 #define CHECK(condition) (condition)
 
 #else
@@ -111,7 +113,7 @@ extern "C" {
 #endif
 
 
-#ifndef __IRSA_DEBUG__
+#ifndef KANTV_DEBUG
 #define TRESPASS() ((void)0)
 #else
 #define TRESPASS() \

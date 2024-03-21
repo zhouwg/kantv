@@ -1,0 +1,14 @@
+# @configure_input@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE_NAME@
+Description: Unicode Bidirectional Algorithm Library
+Version: @VERSION@
+Libs: -L${libdir} -lfribidi
+@ENABLE_SHARED_TRUE@Cflags: -I${includedir}/@PACKAGE@
+@ENABLE_SHARED_TRUE@CFLAGS.private: @FRIBIDI_CPPFLAGS@
+@ENABLE_SHARED_FALSE@Cflags: -I${includedir}/@PACKAGE@ @FRIBIDI_CPPFLAGS@

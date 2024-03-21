@@ -224,6 +224,7 @@ function dump_global_envs()
     echo -e "PROJECT_BRANCH:       ${PROJECT_BRANCH}"
     echo -e "PROJECT_HOME_PATH:    ${PROJECT_HOME_PATH}"
     echo -e "PROJECT_ROOT_PATH:    ${PROJECT_ROOT_PATH}"
+    echo -e "FF_PREFIX:            ${FF_PREFIX}"
     echo -e "KANTV_TOOLCHAIN_PATH: ${KANTV_TOOLCHAIN_PATH}"
     echo -e "host cpu counts:      ${HOST_CPU_COUNTS}"
 
