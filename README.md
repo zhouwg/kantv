@@ -159,7 +159,7 @@ git checkout master
 
 #### Build native codes
 
-modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L46">build/envsetup.sh</a> accordingly before launch build
+modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L52">build/envsetup.sh</a> accordingly before launch build
 
 pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
@@ -260,6 +260,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
 - [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/cdeos/kantv/issues/74)
+- [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 
 - Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
@@ -267,7 +268,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Sponsorship
 
-In Sep 2022, after I left my last employer, I became a no-paid/freelancer programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature for Android phone on 12/2023, I implmented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14(a very powerful Android phone)</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 after I heard whisper.cpp recently - something I did not expect at all.
+In Sep 2022, after I left my last employer, I became a no-paid/freelancer programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature for Android phone on 12/2023, I implemented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14(a very powerful Android phone)</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 after I heard whisper.cpp recently - something I did not expect at all.
 
 
 With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy(it's well-known that it's not easy to access github stablly and Google is not available for us......), the project grew and now I want to seek external resource to help this project growing.

@@ -65,16 +65,21 @@ function build_whispercpp_x86
 
 function build_thirdparty()
 {
-    third_parties=" FFmpeg "
+    third_parties=" ffmpeg-android-build "
 
     cd ${PROJECT_ROOT_PATH}/external/
+
     for item in ${third_parties};do
-        cd ${PROJECT_ROOT_PATH}/external/${item}/
-        echo "build thirdparty ${item} in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
-        if [ -f build.sh ]; then
-            ./build.sh
+        if [ -d ${PROJECT_ROOT_PATH}/external/${item} ]; then
+            cd ${PROJECT_ROOT_PATH}/external/${item}/
+            echo "build thirdparty ${item} in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
+            if [ -f build.sh ]; then
+                ./build.sh
+            fi
+            cd ${PROJECT_ROOT_PATH}/external/
+        else
+            echo -e "${TEXT_RED}dir not exist:${PROJECT_ROOT_PATH}/external/${item}${TEXT_RESET}\n"
         fi
-        cd ${PROJECT_ROOT_PATH}/external/
     done
 
     cd ${PROJECT_ROOT_PATH}
@@ -118,7 +123,7 @@ function build_nativelibs
     build_thirdparty
     build_jni
 
-    build_whispercpp_x86
+
 }
 
 
@@ -177,6 +182,9 @@ function do_buildlinux()
     cd ${PROJECT_ROOT_PATH}/external/ffmpeg
     ./clean-all.sh
     ./build-ffmpeg-x86.sh
+
+    cd ${PROJECT_ROOT_PATH}/
+    build_whispercpp_x86
 }
 
 

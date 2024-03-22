@@ -41,7 +41,7 @@ openssl speed -engine uadk -async_jobs 1 -evp md5
 
 openssl speed -engine uadk -async_jobs 1 -evp aes-128-cbc
 
-openssl speed -engine uadk -elapsed rsa2048 // 如下例子
+openssl speed -engine uadk -elapsed rsa2048
 
 openssl speed -engine uadk -elapsed -async_jobs 1 rsa2048
 
