@@ -54,9 +54,6 @@
 #include <random>
 #include <functional>
 
-
-
-
 extern "C" {
 #include <inttypes.h>
 #include <math.h>
@@ -122,6 +119,9 @@ typedef struct {
 
     char  sz_model_path[MAX_PATH_LEN];
     size_t n_threads;
+
+    //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
+    size_t n_decoding_mode;         // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
 
     size_t n_asr_mode;                              // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
     size_t n_benchmark_type;                        // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
@@ -846,7 +846,9 @@ public:
             n_end_time = ggml_time_us();
             n_durtion = (n_end_time - n_begin_time) / 1000;
 
-            if (n_durtion > 1000) { // 1 seconds, very good on Xiaomi 14, about 500-700 ms with GGML model ggml-tiny.en-q8_0.bin
+            // 1 second, very good on Xiaomi 14, about 500-700 ms with GGML model ggml-tiny.en-q8_0.bin
+            // 0.8 second with new method(adjust audio_context dynamically) would cause app crash suddenly or produce sketchy/incorrect/repeat tokens
+            if (n_durtion > 900) {
                 LOGGD("duration of audio data gathering is: %d milliseconds\n", n_durtion);
                 LOGGD("size of gathered audio data: %d\n", _n_whisper_in_size);
                 LOGGD("total audio sample counts %d\n", _n_total_sample_counts);
@@ -1185,6 +1187,21 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
 
     begin_time = ggml_time_ms();
     whisper_reset_timings(p_asr_ctx->p_context);
+
+    //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
+    p_asr_ctx->p_params->max_tokens        = 256;
+    p_asr_ctx->p_params->temperature_inc   = 0.0f;
+    p_asr_ctx->p_params->audio_ctx         = std::min(1500, (int)ceil((double)num_samples / (double)(320.0)) + 16);
+    if (WHISPER_SAMPLING_GREEDY == p_asr_ctx->n_decoding_mode) {
+        p_asr_ctx->p_params->strategy = WHISPER_SAMPLING_GREEDY;
+        p_asr_ctx->p_params->greedy.best_of = 1;//https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
+    } else {
+        p_asr_ctx->p_params->strategy               = WHISPER_SAMPLING_BEAM_SEARCH;
+        p_asr_ctx->p_params->beam_search.beam_size  = 5;//https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
+        p_asr_ctx->p_params->greedy.best_of         = 5;
+    }
+    //LOGGD("decoding_mode=%d, audio_ctx=%d\n", p_asr_ctx->n_decoding_mode, p_asr_ctx->p_params->audio_ctx);
+
     result = whisper_full(p_asr_ctx->p_context, *p_asr_ctx->p_params, pf32_audio_buffer, num_samples);
     if (0 != result) {
         LOGW("whisper inference failure, pls check why?\n");
@@ -1349,9 +1366,19 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      params.speed_up                = false;
      params.debug_mode              = false;
 
+     params.audio_ctx               = 0;
+
+     params.suppress_blank              = false;
+     //params.suppress_non_speech_tokens  = true;
+     //params.language                    = "en";
+
+     //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
+     p_asr_ctx->n_decoding_mode         = WHISPER_SAMPLING_GREEDY;
+
+
      //params.tdrz_enable                  = false;//whisper complain failed to compute log mel spectrogram when this flag was enabled
      //params.suppress_blank               = true;
-     //params.suppress_non_speech_tokens   = true;
+     params.suppress_non_speech_tokens   = true;
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
