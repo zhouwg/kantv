@@ -165,7 +165,7 @@ function lunch()
     local debug
     local answer
 
-    debug=1
+    debug=0
 
     if [ "$1" ] ; then
         answer=$1

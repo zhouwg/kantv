@@ -118,7 +118,7 @@ function build_nativelibs
     build_thirdparty
     build_jni
 
-    build_whispercpp_x86
+
 }
 
 
@@ -177,6 +177,9 @@ function do_buildlinux()
     cd ${PROJECT_ROOT_PATH}/external/ffmpeg
     ./clean-all.sh
     ./build-ffmpeg-x86.sh
+
+    cd ${PROJECT_ROOT_PATH}/
+    build_whispercpp_x86
 }
 
 
