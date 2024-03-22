@@ -219,9 +219,9 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 ### Hot topics
 
-- improve real-time English subtitle performance with utilize hardware AI engine in Android device
+- improve real-time English subtitle performance and stability(for example:utilize hardware AI engine in Android device)
 
-- real-time Chinese subtitle for online English TV on Xiaomi 14(because it contains a very powerful mobile SoC) by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
