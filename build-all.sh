@@ -55,8 +55,24 @@ function build_whispercpp_x86
     echo -e "${TEXT_BLUE}build whispercpp regular tool for target x86${TEXT_RESET}"
     make
 
+    if [ -f main ]; then
+        /bin/cp -fv main     ${FF_PREFIX}/bin/
+    fi
+
+    if [ -f bench ]; then
+        /bin/cp -fv bench    ${FF_PREFIX}/bin/
+    fi
+
+    if [ -f quantize ]; then
+        /bin/cp -fv quantize ${FF_PREFIX}/bin/
+    fi
+
     echo ""
     echo ""
+    echo -e "------------------------------------------------------------------------------------------\n"
+    echo ""
+    echo ""
+    ls -l ${FF_PREFIX}/bin/
     echo -e "------------------------------------------------------------------------------------------\n"
 
     cd -

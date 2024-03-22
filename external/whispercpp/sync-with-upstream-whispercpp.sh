@@ -34,7 +34,7 @@ echo -e  "local    whispercpp path: ${LOCAL_WHISPERCPP_PATH}\n"
 echo -e  "sync source code on ${SYNC_TIME}\n\n"
 
 #the following method borrow from bench-all.sh in GGML's project whisper.cpp
-WHISPERCPP_SRCS=(ggml-alloc.c  ggml-backend.c  ggml.c  ggml-quants.c whisper.cpp)
+WHISPERCPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml.c ggml.h ggml-quants.c ggml-quants.h whisper.cpp whisper.h)
 for file in "${WHISPERCPP_SRCS[@]}"; do
     /bin/cp -fv ${UPSTREAM_WHISPERCPP_PATH}/$file ${LOCAL_WHISPERCPP_PATH}/$file
 done

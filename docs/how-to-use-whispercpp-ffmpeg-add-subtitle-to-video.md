@@ -38,7 +38,7 @@ MarginV=5
 2. extract audio content from video
 
 ```
-ffmpeg  -i /home/weiguo/kantv-record-MP4-H264-20240308-142616.mp4 -ac 2 -ar 16000 kantv-record-MP4-H264-20240308-142616.wav
+./ffmpeg  -i /home/weiguo/kantv-record-MP4-H264-20240308-142616.mp4 -ac 2 -ar 16000 kantv-record-MP4-H264-20240308-142616.wav
 ```
 
 3. generate srt subtitle file by powerful whisper.cpp

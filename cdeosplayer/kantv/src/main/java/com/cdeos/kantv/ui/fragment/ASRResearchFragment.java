@@ -189,7 +189,7 @@
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n");
+         _txtGGMLInfo.append("Powered by whisper.cpp(fff24a0148fe194df4997a738eeceddd724959c3,Thu Mar 21 22:23:30 2024)(https://github.com/ggerganov/whisper.cpp)\n");
 
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
@@ -304,7 +304,7 @@
              }
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
-             whispercpp.asr_init(CDEUtils.getDataPath() + selectModeFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
+             whispercpp.asr_reset(CDEUtils.getDataPath() + selectModeFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
              if (benchmarkIndex == BECHMARK_ASR) {
                  //playAudioFile();
              }
@@ -558,7 +558,6 @@
                  mKANTVMgr.release();
                  mKANTVMgr = null;
              }
-             whispercpp.asr_finalize();
          } catch (Exception ex) {
              String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
              CDELog.j(TAG, "error occurred: " + errorMsg);
