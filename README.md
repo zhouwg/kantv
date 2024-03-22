@@ -20,7 +20,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp))
+- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario
 
 - Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
