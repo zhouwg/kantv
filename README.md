@@ -6,11 +6,9 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
-- Record online TV's video content for gather video data which might be required of/useful for AI R&D activity
+- Record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- Record online TV's audio content for gather audio data which might be required of/useful for AI R&D activity
-
-- Set up a custom playlist and then use this software to watch the content of the custom playlist
+- Set up a customized playlist and then use this software to watch the content of the customized playlist for personal need
 
 - Performance benchmark for Android-based mobile phone
 
@@ -22,21 +20,9 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for device-side AI R&D activity on <b>Android</b>-based device
-
-  <ul>
-
-    <li>Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like <a href="https://github.com/ggerganov/whisper.cpp">GGML's whisper.cpp</a>) in real scenario </li>
-
-    <li>Well-maintained "workbench" for software programmer to learning AI technology in real scenario
-
-
-  </ul>
-
+- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like <a href="https://github.com/ggerganov
 
 - Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
-
-- Android <b>turn-key project</b> for software programmers who was interested in device-side AI application or customized/secondary software development activity on **Android**-based device
 
 - Watch English online-TV(aka OTT TV) with real-time English subtitle for non-native English speakers learning English(listening and reading)
 
@@ -163,7 +149,7 @@ modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L52
 
 pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
-TIP: This project is actually NOT a Java/Android APP project and it's a quite complex/complicated software project for beginners and a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
+TIP: a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
 
 ```
 . build/envsetup.sh
@@ -266,21 +252,6 @@ Report issue in various Android-based phone or even submit PR to this project is
 - Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 - feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
 
-### Sponsorship
-
-In Sep 2022, after I left my last employer, I became a no-paid/freelancer programmer. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature for Android phone on 12/2023, I implemented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14(a very powerful Android phone)</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 after I heard whisper.cpp recently - something I did not expect at all.
-
-
-With personal time/effort(personal purchase a Dell PC and Xiaomi 14 for software development activity, personal purchase Cloud Server for setup a dedicated proxy(it's well-known that it's not easy to access github stablly and Google is not available for us......), the project grew and now I want to seek external resource to help this project growing.
-
-I think I could not create Github Sponsors account currently and that I only have a WeChat Pay account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you MIND that pls ignore this sponsorship info), thanks for your understanding.
-
-![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
-
-Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](./docs/high-end-android-phone.md) for device-side AI software development activity and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
-
-Thanks!
-
 ### ChangeLog
 
 Changelog could be found <a href="https://github.com/cdeos/kantv/blob/master/release/README.md">here</a>.
@@ -303,4 +274,4 @@ Licensed under Apachev2.0 or later
 
 ### Commercial Use
 
-Project KanTV was almost/completely done by myself in the past 2+ years and <b>NO</b> IPR concern/risk(some parts with IPR risk have been carefully checked/<b>removed</b> accordingly because I had been received good IPR compliance training in MNC company). Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.
+Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.
