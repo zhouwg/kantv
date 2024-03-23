@@ -19,7 +19,7 @@ Project KanTV was almost/completely done by myself since 05-2021 and NO IPR conc
 - What's the relationship between kantv and whisper.cpp
 
 
-Project KanTV has NO relationship with whisper.cpp but only use source code of whisper.cpp as ASR engine.
+Project KanTV has NO or NO personal relationship with whisper.cpp but only use source code of whisper.cpp as ASR engine.
 
 But, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
 
