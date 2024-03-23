@@ -1,0 +1,60 @@
+
+- Should I use/reference kantv in my project?
+
+Project KanTV is a personal/hobby project. There are no guarantees that the implementation is correct and bug-free.
+
+If you plan to use kantv in your own project, keep in mind the above.
+
+My advice is to not put all your eggs into the kantv basket although I wish you could feed your need by use/reference this project.
+
+<hr>
+
+- Is there any IPR concern/risk in kantv?
+
+Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee in MNC company).
+
+
+<hr>
+
+- What's the relationship between kantv and whisper.cpp
+
+
+Project KanTV has NO or NO personal relationship with whisper.cpp but only use source code of whisper.cpp as ASR engine.
+
+But, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
+
+
+<hr>
+
+
+- Could I contact to you by e-mail?
+
+  * Please do not send e-mail to me for technical/non-technical question. Public technical discussion on github is preferred
+
+  * Feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits
+
+  The official webserver of <a href="http://www.cde-os.com/">www.cde-os.com</a> has migrated/redirected to Github Pages and the original e-mail server(a highly customized Qmail-based mail server) was terminated accordingly due to various reasons(one is save money) and no longer maintained since 03-22-2024. at the same time, cdeos-org in Github was closed accordingly.
+
+<hr>
+
+
+- Can I sponsor to project KanTV
+
+In Sep 2022, after I left my last employer, I became a no-paid/freelancer programmer because of various/complex reason. started writing some code for solving some technical problems in a personal project KanTV(which was launched on 05/2021) and also for practicing my C/C++/Java programming. Just for fun, I implemented online-TV recording feature for Android phone on 12/2023, I implmented a <a href="https://github.com/zhouwg/kantv/issues/64">device-side AI PoC on Xiaomi 14</a> by the great&excellent&amazaing <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> on 03/2024 - something I did not expect at all.
+
+I have to say I heard whisper.cpp too late.if there is no GFW(I had been spent about RMB10000( ~= USD 1400) to fix network issue caused by GFW since 2019), I would heard Georgi Gerganov's great whisper.cpp earlier.of course there are many programmers and AI researchers from China heard wishiper.cpp very earlier, this is also the fact.
+
+Any programmer from Mainland China whom see this comment shouldn't misunderstand above sentence because I really have NO negative thoughts of my great country because I think I'm familiar with <a href="https://en.wikipedia.org/wiki/History_of_the_Ming_dynasty">History of the Ming dynasty</a> and I understand running a big&complex country is not easy. BUT, I also don't like GFW at the same time because I respect the fact.
+
+With personal time/effort(personal purchase a Dell PC on May 2021(about RMB12000 ~= USD 1700) and Xiaomi 14 on Feb 2024 for software development activity, personal purchase Cloud Server for setup a dedicated proxy to cross the GFW and then access github more stably and Google is available accordingly......), the project grew and I'm glad to see external resource to help this project growing(although I did <b>NOT</b> have much expectation because I <b>saw</b> the situation of the <a href="https://github.com/ggerganov">great whisper.cpp&ggml</a> and I understand the real-world).
+
+I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you mind that pls ignore this sponsorship info), thanks for your understanding. Of course,I will list received sponsorship and usage of sponsorship irregularly <b>if</b> there is.
+
+![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
+
+Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](https://github.com/zhouwg/kantv/blob/master/docs/high-end-android-phone.md) for device-side AI software development activity and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
+
+Contribute PR/codes is the best sponsorship to project KanTV.Thanks.
+
+
+Have fun with the great FFmpeg and the great whisper.cpp
