@@ -149,7 +149,7 @@ modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L52
 
 pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
-TIP: a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
+a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
 
 ```
 . build/envsetup.sh
@@ -248,9 +248,9 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/cdeos/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
 - [Acknowledgement](./docs/acknowledgement.md)
+- [F.A.Q](./docs/FAQ.md)
 
-- Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
-- feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits.
+
 
 ### ChangeLog
 

@@ -1,6 +1,26 @@
 /*
  * Copyright (c) 2024- KanTV Authors. All Rights Reserved.
  *
+ * Copyright (c) zhou.weiguo(zhouwg2000@gmail.com), this clean-room implementation is for
+ *
+ * PoC(https://github.com/zhouwg/kantv/issues/64) in project KanTV. the initial implementation was done
+ *
+ * from 03-05-2024 to 03-16-2024. the initial implementation could be found at:
+ *
+ * https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/whisper.cpp#L6727
+
+ * https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/whisper.h#L620
+
+ * https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/jni/whispercpp-jni.c
+
+ * https://github.com/cdeos/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/cdeosplayer-lib/src/main/java/org/ggml/whispercpp/whispercpp.java
+ *
+ *
+ * in short, it a very concise implementation and the method here is never seen in any other similar
+ *
+ * (whisper.cpp related) open-source project before 03-05-2024.
+ *
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +33,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * The above statement and notice must be included in corresponding files
- * in derived project
+ * The above statement and notice must be included in corresponding files in derived project
  */
 
 #define RUAPU_IMPLEMENTATION
@@ -96,20 +115,11 @@ extern "C" {
 
 }
 
+#define MAX_PATH_LEN                    512
 
-// forward function declaration
-static bool whisper_abort_callback(void * data);
+#define MAX_SAMPLE_SIZE                 (1024 * 8 * 32)
 
-
-//------------------------------------ added by zhou.weiguo(https://github.com/zhouwg) since 03-05-2024(2024-03-05) -----------------------------------------
-//for PoC(https://github.com/cdeos/kantv/issues/64) in project KanTV
-//
-//I should follow coding style of GGML
-
-
-#define MAX_SAMPLE_SIZE  (1024 * 8 * 32)
-#define MAX_PATH_LEN     512
-#define MAX_WHISPER_IN_BUFFER_SIZE (1024 * 1024 * 5)
+#define MAX_WHISPER_IN_BUFFER_SIZE      (1024 * 1024 * 5)
 
 class whisper_asr;
 
@@ -121,7 +131,7 @@ typedef struct {
     size_t n_threads;
 
     //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
-    size_t n_decoding_mode;         // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
+    size_t n_decoding_mode;                         // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
 
     size_t n_asr_mode;                              // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
     size_t n_benchmark_type;                        // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
@@ -847,8 +857,8 @@ public:
             n_durtion = (n_end_time - n_begin_time) / 1000;
 
             // 1 second, very good on Xiaomi 14, about 500-700 ms with GGML model ggml-tiny.en-q8_0.bin
-            // 0.8 second with new method(adjust audio_context dynamically) would cause app crash suddenly or produce sketchy/incorrect/repeat tokens
-            if (n_durtion > 900) {
+            // 300 -900 ms are both ok with latest upstream whisper.cpp(as of 03-22-2024), but whisper.cpp would produce sketchy/incorrect/repeat tokens
+            if (n_durtion > 300) {
                 LOGGD("duration of audio data gathering is: %d milliseconds\n", n_durtion);
                 LOGGD("size of gathered audio data: %d\n", _n_whisper_in_size);
                 LOGGD("total audio sample counts %d\n", _n_total_sample_counts);
@@ -902,7 +912,7 @@ public:
                     continue;
                 }
 
-                LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                //LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
                 while (1) {
                     p_samples += (result * sizeof(float));
                     result = swr_convert(_swr_ctx,
@@ -910,7 +920,7 @@ public:
                                          _n_total_sample_counts,
                                          NULL,
                                          0);
-                    LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
+                    //LOGGD("got resampled samples:%d, total samples:%d \n", result, _n_total_sample_counts);
                     if (0 == result) {
                         break;
                     }
@@ -981,7 +991,6 @@ private:
 };
 
 
-// TODO: remove the mutex
 /**
  *
  * @param  opaque          uncompressed pcm data, presented as AVFrame
@@ -1012,7 +1021,7 @@ static const char * whisper_asr_callback(void * opaque) {
     if ((NULL == p_asr_ctx))
         return NULL;
 
-    if (1 == p_asr_ctx->n_asr_mode) { //ASR pressure test
+    if (1 == p_asr_ctx->n_asr_mode) { //ASR pressure test during online-TV playback
         static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
@@ -1022,14 +1031,13 @@ static const char * whisper_asr_callback(void * opaque) {
         return test_info.c_str();
     }
 
-    if (2 == p_asr_ctx->n_asr_mode) { //benchmark
+    if (2 == p_asr_ctx->n_asr_mode) { //ASR benchmark in standalone ASRResearchFragment.java
         return NULL;
     }
 
-    //pthread_mutex_lock(&p_asr_ctx->mutex);
+    //pthread_mutex_lock(&p_asr_ctx->mutex); // remove the mutex since 03-19-2024, crash would happen before 03-19 without mutex
 
     audioframe  = (AVFrame *) opaque;
-    p_samples   = p_asr_ctx->p_sample_buffer;
     num_samples = audioframe->nb_samples;
 
     frame_size = av_samples_get_buffer_size(NULL, audioframe->channels, audioframe->nb_samples,
@@ -1136,7 +1144,7 @@ static const char * whisper_asr_callback(void * opaque) {
         }
     }
 
-    //pthread_mutex_unlock(&p_asr_ctx->mutex);
+    //pthread_mutex_unlock(&p_asr_ctx->mutex); // remove the mutex since 03-19-2024, crash would happen before 03-19 without mutex
 
     return NULL;
 }
@@ -1188,19 +1196,34 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     begin_time = ggml_time_ms();
     whisper_reset_timings(p_asr_ctx->p_context);
 
-    //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
+    //03-20-2024, ref:https://github.com/futo-org/whisper-acft
     p_asr_ctx->p_params->max_tokens        = 256;
     p_asr_ctx->p_params->temperature_inc   = 0.0f;
-    p_asr_ctx->p_params->audio_ctx         = std::min(1500, (int)ceil((double)num_samples / (double)(320.0)) + 16);
+    //03-22-2024, don't use this new fine-tune method because it will brings side-effect:app crash randomly
+    //p_asr_ctx->p_params->audio_ctx         = std::min(1500, (int)ceil((double)num_samples / (double)(320.0)) + 16);
+
+    //replaced with default value, ref: https://github.com/ggerganov/whisper.cpp/blob/master/whisper.h#L499
+    p_asr_ctx->p_params->audio_ctx         = 0;
+
+    //p_asr_ctx->p_params->initial_prompt    = "\" English online TV \"";
+    /*
+    p_asr_ctx->p_params->abort_callback_user_data = p_asr_ctx;
+    p_asr_ctx->p_params->abort_callback = [](void * user_data) -> bool {
+        auto *asr_ctx = reinterpret_cast<whisper_asr_context*>(user_data);
+        return true;
+    };
+    */
+
+    p_asr_ctx->n_decoding_mode  = WHISPER_SAMPLING_GREEDY;
     if (WHISPER_SAMPLING_GREEDY == p_asr_ctx->n_decoding_mode) {
         p_asr_ctx->p_params->strategy = WHISPER_SAMPLING_GREEDY;
-        p_asr_ctx->p_params->greedy.best_of = 1;//https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
+        p_asr_ctx->p_params->greedy.best_of         = 1;    //ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
     } else {
         p_asr_ctx->p_params->strategy               = WHISPER_SAMPLING_BEAM_SEARCH;
-        p_asr_ctx->p_params->beam_search.beam_size  = 5;//https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
+        p_asr_ctx->p_params->beam_search.beam_size  = 5;    //ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L265
         p_asr_ctx->p_params->greedy.best_of         = 5;
     }
-    //LOGGD("decoding_mode=%d, audio_ctx=%d\n", p_asr_ctx->n_decoding_mode, p_asr_ctx->p_params->audio_ctx);
+    LOGGD("decoding_mode=%d, audio_ctx=%d\n", p_asr_ctx->n_decoding_mode, p_asr_ctx->p_params->audio_ctx);
 
     result = whisper_full(p_asr_ctx->p_context, *p_asr_ctx->p_params, pf32_audio_buffer, num_samples);
     if (0 != result) {
@@ -1211,7 +1234,7 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     end_time = ggml_time_ms();
 
     LOGGW("whisper inference cost %d ms\n", end_time - begin_time);
-    //whisper_print_timings(p_asr_ctx->p_context);
+    //whisper_print_timings(p_asr_ctx->p_context); // DO NOT uncomment this line
 
     num_segments = whisper_full_n_segments(p_asr_ctx->p_context);
     for (index = 0; index < num_segments; index++) {
@@ -1275,7 +1298,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      }
 
 
-     // dynamic ISA dectect by RUAPU
+     // dynamic ISA dectect by RUAPU, prepare for SIMD optimization on Android device. but not used currently
      ruapu_init();
      const char* const* supported = ruapu_rua();
      while (*supported) {
@@ -1356,7 +1379,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      params.print_special           = false;
      params.translate               = false; //first step is transcription, the second step is English -> Chinese
      //params.initial_prompt        = "hello,whisper.cpp";
-     params.language                = "en";
+     //params.language                = "en";
      params.n_threads               = n_threads;;
      params.offset_ms               = 0;
      params.no_context              = true;
@@ -1365,28 +1388,24 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
 
      params.speed_up                = false;
      params.debug_mode              = false;
-
      params.audio_ctx               = 0;
 
      params.suppress_blank              = false;
-     //params.suppress_non_speech_tokens  = true;
-     //params.language                    = "en";
+     params.suppress_non_speech_tokens  = false;
 
-     //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
-     p_asr_ctx->n_decoding_mode         = WHISPER_SAMPLING_GREEDY;
+     //03-20-2024, ref:https://github.com/futo-org/whisper-acft
+     p_asr_ctx->n_decoding_mode         = WHISPER_SAMPLING_BEAM_SEARCH;
 
 
      //params.tdrz_enable                  = false;//whisper complain failed to compute log mel spectrogram when this flag was enabled
      //params.suppress_blank               = true;
-     params.suppress_non_speech_tokens   = true;
+     //params.suppress_non_speech_tokens   = true;
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 
      p_asr_ctx->b_pre_convert = p_asr_ctx->b_enable_dump_16k_data = false;
 
-
-
-     LOGGV("leave kantv_asr_init\n");
+     LOGGV("leave whisper_asr_init\n");
 
      return result;
 
