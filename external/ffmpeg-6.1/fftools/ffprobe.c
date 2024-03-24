@@ -4158,6 +4158,7 @@ int main(int argc, char **argv)
         goto end;
     }
 #endif
+    av_log_set_level(AV_LOG_TRACE);
     av_log_set_flags(AV_LOG_SKIP_REPEATED);
 
     options = real_options;

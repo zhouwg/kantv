@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# Copyright (c) zhou.weiguo(zhouwg2000@gmail.com). 2021-2023. All rights reserved.
-
-# Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-
-# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+# Copyright (c) 2021-2023, zhou.weiguo(zhouwg2000@gmail.com)
+# Copyright (c) 2021-2023, Project KanTV
+# Copyright (c) 2024- KanTV Authors
 
 # Description: public script functions for entire project
 #

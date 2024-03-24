@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# Copyright (c) zhou.weiguo(zhouwg2000@gmail.com). 2021-2023. All rights reserved.
-
-# Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-
-# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+# Copyright (c) 2021-2023, zhou.weiguo(zhouwg2000@gmail.com)
+# Copyright (c) 2021-2023, Project KanTV
+# Copyright (c) 2024- KanTV Authors
 
 # Description: configure project's compilation environment
 #
@@ -21,19 +19,26 @@ export TEXT_RESET=" \033[0m  "
 export BUILD_USER=$(whoami)
 export BUILD_TIME=`date +"%Y-%m-%d-%H-%M-%S"`
 
-export BUILD_HOST=Linux
-
+#target iOS must be built on MacOS
+#export BUILD_HOST=Mac
 #export BUILD_TARGET=ios
-#export BUILD_TARGET=wasm
-#export BUILD_TARGET=linux
-#default is KanTV-android
-export BUILD_TARGET=android
+#export PROJECT_NAME=KanTV-ios
 
-export PROJECT_NAME=KanTV-android
+export BUILD_HOST=Linux
+#export BUILD_TARGET=wasm
+#export PROJECT_NAME=KanTV-wasm
+
+#export BUILD_TARGET=android
+#export PROJECT_NAME=KanTV-android
+#default is release for target android
+#export PROJECT_BUILD_TYPE=release
+
+#default target is linux
+export BUILD_TARGET=linux
+export PROJECT_NAME=KanTV-linux
+#default is debug for target linux to purpose of troubleshooting
 export PROJECT_BUILD_TYPE=debug
 
-#default is release
-export PROJECT_BUILD_TYPE=release
 
 if [ "${BUILD_TARGET}" == "android" ]; then
     #export BUILD_ARCHS="arm64-v8a armeabi-v7a"
@@ -75,7 +80,7 @@ export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
 export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 
-export KANTV_PROJECTS="kantv-android kantv-linux kantv-ios kantv-wasm"
+export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios kantv-wasm"
 export KANTV_PROJECTS_DEBUG="kantv-android-debug"
 
 
@@ -122,6 +127,9 @@ echo -e "\n"
 echo "------------------------------------------------------------------------------------------"
 echo -e "[*] to continue to build project, pls run\n"
 echo -e "lunch\n"
+echo -e "[*] or\n"
+echo -e "./build-all.sh\n"
+echo -e "[*] for default target linux\n"
 echo "------------------------------------------------------------------------------------------"
 echo -e "\n"
 
@@ -165,7 +173,7 @@ function lunch()
     local debug
     local answer
 
-    debug=0
+    debug=1
 
     if [ "$1" ] ; then
         answer=$1
@@ -247,6 +255,8 @@ function lunch()
     if [ "x${project}" != "x" ]; then
         if [ "${project}" == "kantv-android" ]; then
             export BUILD_TARGET=android
+        elif [ "${project}" == "kantv-android-debug" ]; then
+            export BUILD_TARGET=android
         elif [ "${project}" == "kantv-linux" ]; then
             export BUILD_TARGET=linux
         elif [ "${project}" == "kantv-ios" ]; then
@@ -254,7 +264,8 @@ function lunch()
         elif [ "${project}" == "kantv-wasm" ]; then
             export BUILD_TARGET=wasm
         else
-            export BUILD_TARGET=android
+            #default target is linux
+            export BUILD_TARGET=linux
         fi
 
         setup_env

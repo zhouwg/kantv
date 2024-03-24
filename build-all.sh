@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# Copyright (c) zhou.weiguo(zhouwg2000@gmail.com). 2021-2023. All rights reserved.
-
-# Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-
-# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+# Copyright (c) 2021-2023, zhou.weiguo(zhouwg2000@gmail.com)
+# Copyright (c) 2021-2023, Project KanTV
+# Copyright (c) 2024- KanTV Authors
 
 # Description: top level build script for entire project
 
@@ -199,8 +197,20 @@ function do_buildlinux()
     ./clean-all.sh
     ./build-ffmpeg-x86.sh
 
+    cd ${PROJECT_ROOT_PATH}/examples/ff_terminal
+    ./clean.sh
+    ./build.sh
+    cd ${PROJECT_ROOT_PATH}/examples/ff_encode
+    make clean
+    make
+    #make ff-encode happy
+    /bin/cp -fv ${FF_PREFIX}/bin/ffplay  ./
+    /bin/cp -fv ${FF_PREFIX}/bin/ffprobe ./
+
     cd ${PROJECT_ROOT_PATH}/
     build_whispercpp_x86
+
+
 }
 
 
@@ -273,7 +283,8 @@ esac
 
 
 if [ $# == 0 ]; then
-    user_command="android"
+    #default target is linux
+    user_command="linux"
 else
     user_command=$1
 fi

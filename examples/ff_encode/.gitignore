@@ -1,0 +1,6 @@
+*.ts
+*.mp4
+*.webp
+ffplay
+ffprobe
+ff_encode*
