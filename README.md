@@ -53,6 +53,7 @@ sudo apt-get update
 sudo apt-get install build-essential -y
 sudo apt-get install cmake -y
 sudo apt-get install curl -y
+sudo apt-get install wget -y
 sudo apt-get install python -y
 sudo apt-get install tcl expect -y
 sudo apt-get install nginx -y
@@ -82,6 +83,15 @@ sudo apt-get install indent -y
 pip3 install meson ninja
 
 echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
+
+```
+
+or run below script accordingly after fetch project's source code
+
+```
+
+./build/prebuild.sh
+
 
 ```
 
@@ -145,7 +155,7 @@ git checkout master
 
 #### Build native codes
 
-modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L59">build/envsetup.sh</a> accordingly before launch build
+modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
 
 pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
@@ -153,6 +163,9 @@ a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step
 
 ```
 . build/envsetup.sh
+
+(download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist)
+./build/prebuild-download.sh
 
 ```
 ![Screenshot from 2024-03-21 21-41-41](https://github.com/zhouwg/kantv/assets/6889919/3e13946f-596b-44be-9716-5793ce0c7263)
