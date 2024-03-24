@@ -145,7 +145,7 @@ git checkout master
 
 #### Build native codes
 
-modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L52">build/envsetup.sh</a> accordingly before launch build
+modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L59">build/envsetup.sh</a> accordingly before launch build
 
 pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 

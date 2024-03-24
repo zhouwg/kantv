@@ -1,7 +1,9 @@
 /*
- * Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+ * Copyright (c) 2024, zhou.weiguo(zhouwg2000@gmail.com)
  *
- * Copyright (c) zhou.weiguo(zhouwg2000@gmail.com), this clean-room implementation is for
+ * Copyright (c) 2024- KanTV Authors
+ *
+ * this clean-room implementation is for
  *
  * PoC(https://github.com/zhouwg/kantv/issues/64) in project KanTV. the initial implementation was done
  *
@@ -16,7 +18,7 @@
  * https://github.com/zhouwg/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/cdeosplayer-lib/src/main/java/org/ggml/whispercpp/whispercpp.java
  *
  *
- * in short, it a very concise implementation and the method here is never seen in any other similar
+ * in short, it's a very concise implementation and the method here is never seen in any other similar
  *
  * (whisper.cpp related) open-source project before 03-05-2024.
  *

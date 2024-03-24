@@ -13,11 +13,17 @@ message("FF_INC_PATH     : ${FF_INC_PATH}")
 message("FF_SRC_PATH     : ${FF_SRC_PATH}")
 message("FF_LIB_PATH     : ${FF_LIB_PATH}")
 
-add_executable(ff-terminal main.c fb.c ${FF_SRC_PATH}/libavutil/cde_log.c terminal/get_key.c terminal/terminal.c)
+add_executable(ff-terminal
+    main.c
+    fb.c
+    ${FF_SRC_PATH}/libavutil/cde_log.c
+    ${FF_SRC_PATH}/libavutil/get_key.c
+    ${FF_SRC_PATH}/libavutil/terminal.c
+)
 
 include_directories(${FF_INC_PATH}/)
+include_directories(${FF_INC_PATH}/libavutil/)
 include_directories(./)
-include_directories(./terminal)
 
 install(
         TARGETS

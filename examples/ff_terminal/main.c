@@ -17,11 +17,10 @@
 #include <inttypes.h>
 #include <linux/fb.h>
 
-#include "vkey.h"
+#include "libavutil/vkey.h"
+#include "libavutil/cde_log.h"
 
 #include "fb.h"
-
-#include "libavutil/cde_log.h"
 
 static void cleanup();
 static void doRender();
