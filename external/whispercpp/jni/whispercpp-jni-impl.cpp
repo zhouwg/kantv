@@ -133,13 +133,13 @@ typedef struct {
     size_t n_threads;
 
     //03-20-2024,referenced by:https://github.com/futo-org/whisper-acft
-    size_t n_decoding_mode;                         // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
+    size_t n_decoding_mode;                          // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
 
-    size_t n_asr_mode;                              // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    size_t n_benchmark_type;                        // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
+    size_t n_asr_mode;                               // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    size_t n_benchmark_type;                         // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
     bool   b_use_gpu;
 
-    bool   b_abort_benchmark;                       //TODO: for abort time-consuming benchmark from UI layer. not works perfectly as expected
+    bool   b_abort_benchmark;                        //TODO: for abort time-consuming benchmark from UI layer. not works perfectly as expected
 
     fifo_buffer_t   * asr_fifo;                      //fifo for ASR data producer-consumer
 
@@ -1204,8 +1204,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
     //03-22-2024, don't use this new fine-tune method because it will brings side-effect:app crash randomly
     //p_asr_ctx->p_params->audio_ctx         = std::min(1500, (int)ceil((double)num_samples / (double)(320.0)) + 16);
 
+
     //replaced with default value, ref: https://github.com/ggerganov/whisper.cpp/blob/master/whisper.h#L499
     p_asr_ctx->p_params->audio_ctx         = 0;
+
+    //03-24-2024, works ok/stable/good performance/... on Xiaomi 14
+    p_asr_ctx->p_params->audio_ctx = std::min(1500, (int)ceil((double)num_samples / (double)(32.0)) + 16);
 
     //p_asr_ctx->p_params->initial_prompt    = "\" English online TV \"";
     /*
@@ -1392,8 +1396,8 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      params.debug_mode              = false;
      params.audio_ctx               = 0;
 
-     params.suppress_blank              = false;
-     params.suppress_non_speech_tokens  = false;
+     params.suppress_blank              = true;
+     params.suppress_non_speech_tokens  = true;
 
      //03-20-2024, ref:https://github.com/futo-org/whisper-acft
      p_asr_ctx->n_decoding_mode         = WHISPER_SAMPLING_BEAM_SEARCH;
