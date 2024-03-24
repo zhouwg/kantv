@@ -16,12 +16,16 @@ Project KanTV was almost/completely done by myself since 05-2021 and NO IPR conc
 
 <hr>
 
-- What's the relationship between kantv and whisper.cpp
+- What's the relationship between kantv and whisper.cpp/GGML
 
+Project KanTV has NO or NO personal relationship with whisper.cpp/GGML but only use source code of whisper.cpp as ASR engine.
 
-Project KanTV has NO or NO personal relationship with whisper.cpp but only use source code of whisper.cpp as ASR engine.
+I heard whisper.cpp on Jan 2024 at the first time and just use it generate subtitle for original English short video which referenced in Chinese articles on personal WeChat public account, but I didn’t read the source code of whisper.cpp at that time. sadly, my personal WeChat public account was forcefully closed on 01-28-2024. after that, I [decided to migrate some personal software project to Github since 02-24-2024](https://github.com/zhouwg/kantv/blob/master/release/README.md#L122). I have to say that I really spent much time/efforts on personal WeChat public account for public interests or my country's interests before 02-24-2024.  
 
-But, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
+I have to say that life is like a box of chocolate, you never know what you’re going to get. I decided to start integrating the great whisper.cpp to this project since 03-05-2024 and I did it on 03-16-2024 finally. I have to say that I was touched with and motivated by the great open-source project whisper.cpp from 03-05-2024 to 03-22-2024.
+
+At the same time, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
+
 
 
 <hr>
