@@ -52,11 +52,15 @@ export PROJECT_BRANCH=`git branch | grep "*" | cut -f 2 -d ' ' `
 export PROJECT_ROOT_PATH=${PROJECT_HOME_PATH}
 export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
+#export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
+export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/prebuilts/toolchain
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 
 
-#modify following lines to adapt to local dev envs
-#export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/toolchain
-export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
+export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios kantv-wasm"
+export KANTV_PROJECTS_DEBUG="kantv-android-debug"
+
+
 #API21：Android 5.0 (Android L)Lollipop
 #API22：Android 5.1 (Android L)Lollipop
 #API23：Android 6.0 (Android M)Marshmallow
@@ -77,12 +81,9 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
 
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
-export UPSTREAM_WHISPERCPP_PATH=~/cdeos/whisper.cpp
 
-export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios kantv-wasm"
-export KANTV_PROJECTS_DEBUG="kantv-android-debug"
-
+#modify following lines to adapt to local dev envs
+export UPSTREAM_WHISPERCPP_PATH=~/whisper.cpp
 
 
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)

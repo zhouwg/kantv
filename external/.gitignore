@@ -1,4 +1,3 @@
-FFmpeg/
 DeepSpeech/
 gstreamer/
 ncnn/
@@ -8,14 +7,9 @@ llamacpp/
 *.a
 *.so
 *.o
-config.log
-config.status
-configure~
-Makefile
-libpng-config
-libpng12-config
 
 whispercpp/bench
 whispercpp/main
 whispercpp/quantize
 
+ffmpeg-android-build/

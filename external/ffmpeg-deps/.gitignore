@@ -1,13 +1,15 @@
-FFmpeg/
-DeepSpeech/
-gstreamer/
-ncnn/
-CLBlast/
-llamacpp/
-
 uavs3e/version.h
 uavs3d/version.h
 
+fribidi-1.0.13/libtool
 
+config.log
+config.status
+configure~
+Makefile
+libpng-config
+libpng12-config
+
+*.o
 *.a
 *.so

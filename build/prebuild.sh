@@ -12,6 +12,7 @@ sudo apt-get update
 sudo apt-get install build-essential -y
 sudo apt-get install cmake -y
 sudo apt-get install curl -y
+sudo apt-get install wget -y
 sudo apt-get install python -y
 sudo apt-get install tcl expect -y
 sudo apt-get install nginx -y

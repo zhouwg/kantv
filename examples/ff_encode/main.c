@@ -39,7 +39,8 @@
 #include "libavutil/vkey.h"
 
 
-#define STREAM_FRAME_RATE   5
+//attention: this value is depend on machine's performance heavily
+#define STREAM_FRAME_RATE   1
 
 #define STREAM_DURATION     10.0
 
@@ -48,6 +49,8 @@
 #define STREAM_PIX_FMT      AV_PIX_FMT_YUV420P /* default pix_fmt */
 
 static int                  g_pattern       = 0;
+static int                  g_codec         = 0;  //default codec is h264
+
 static struct SwsContext    *g_sws_context  = NULL;
 
 typedef struct OutputStream {
@@ -157,9 +160,8 @@ static void add_stream_by_codecid(OutputStream *ost, AVFormatContext *oc,
         ost->st->time_base = (AVRational){ 1, STREAM_FRAME_RATE };
         c->time_base       = ost->st->time_base;
 
-        c->gop_size      = 1;
-
-        c->pix_fmt       = STREAM_PIX_FMT;
+        c->gop_size        = 1;
+        c->pix_fmt         = STREAM_PIX_FMT;
 
         if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
             c->max_b_frames = 2;
@@ -245,14 +247,23 @@ static void add_stream_by_codecname(OutputStream *ost, AVFormatContext *oc,
         c->time_base       = ost->st->time_base;
 
         c->gop_size      = 1;
-        c->pix_fmt       = STREAM_PIX_FMT;
+
+        if (2 == g_codec) //make H266 encoder happy
+            c->pix_fmt   = AV_PIX_FMT_YUV420P10LE;
+        else
+            c->pix_fmt   = AV_PIX_FMT_YUV420P;
 
         if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
             c->max_b_frames = 2;
         }
+
         if (c->codec_id == AV_CODEC_ID_MPEG1VIDEO) {
             c->mb_decision = 2;
         }
+
+        if (4 == g_codec) //make Intel-AV1 encoder happy
+            av_opt_set(c->priv_data, "crf", "35", 0);
+
         break;
 
     default:
@@ -520,7 +531,7 @@ static void ffmpeg_encoder_set_frame_yuv_from_rgb(uint8_t *rgb, int width, int h
 }
 
 
-uint8_t* generate_rgb(AVFrame *frame, int width, int height, int pts, uint8_t *rgb) {
+static uint8_t* generate_rgb(AVFrame *frame, int width, int height, int pts, uint8_t *rgb) {
     int x, y, cur;
     rgb = realloc(rgb, 3 * sizeof(uint8_t) * height * width);
     for (y = 0; y < height; y++) {
@@ -666,7 +677,7 @@ static void showUsage()
         "Options:\n" \
         " -n <filename>   base file name of encoded file\n" \
         " -f <format>     container name(ts/mp4, codec webp is only valid for ts currently)\n" \
-        " -c <0/1/2/3>    codec: 0-h264 1-h265 2-av1 3-webp\n" \
+        " -c <0/1/2/3/4>  codec: 0 - h264 1 - h265 2 - h266 3 - AOM AV1 4 - Intel AV1  5 - webp\n" \
         " -p <0/1>        pattern: 0 1\n" \
         " ?/h print usage infomation\n\n"
     );
@@ -725,6 +736,8 @@ int main(int argc, char **argv) {
 
             case 'c':
                 codecid  = atoi(optarg);
+                g_codec  = codecid;
+
                 LOGGD("codecid %d\n", codecid);
                 switch (codecid) {
                     case 0:
@@ -736,10 +749,18 @@ int main(int argc, char **argv) {
                         break;
 
                     case 2:
-                        codec_name = "libaom-av1";
+                        codec_name = "libvvenc";
                         break;
 
                     case 3:
+                        codec_name = "libaom-av1";
+                        break;
+
+                    case 4:
+                        codec_name = "libsvtav1";
+                        break;
+
+                    case 5:
                         codec_name = "libwebp";
                         break;
 
