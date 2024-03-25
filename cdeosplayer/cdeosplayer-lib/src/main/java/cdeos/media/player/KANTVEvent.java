@@ -47,6 +47,12 @@
      public final static int KANTV_INFO_ASR_WHISPERCPP_INTERNAL = 20;
      public final static int KANTV_INFO_ASR_RESULT = 21;
 
+     public final static int KANTV_INFO_LLM_START = 30;
+     public final static int KANTV_INFO_LLM_STOP = 31;
+
+     public final static int KANTV_INFO_LLM_INIT = 40;
+     public final static int KANTV_INFO_LLM_FINALIZE = 41;
+
      public final static int KANTV_ERROR_PREVIEW_START = 0;
      public final static int KANTV_ERROR_PREVIEW_STOP = 1;
      public final static int KANTV_ERROR_SETPREVIEWDISPLAY = 2;

@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cdeos.kantv.ui.fragment.ASRResearchFragment;
+import com.cdeos.kantv.ui.fragment.LLMResearchFragment;
 import com.cdeos.kantv.ui.fragment.TVGridFragment;
 import com.cdeos.kantv.utils.Settings;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -72,10 +73,10 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
     private TVGridFragment homeFragment;
     private LocalMediaFragment LocalMediaFragment;
-    private EPGListFragment epglistFragment;
     private PersonalFragment personalFragment;
     private BaseMvpFragment previousFragment;
     private ASRResearchFragment asrFragment;
+    private LLMResearchFragment llmFragment;
 
     private MenuItem  menuNetItem;
 
@@ -164,8 +165,8 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 fragmentTransaction.remove(homeFragment);
             if (LocalMediaFragment != null)
                 fragmentTransaction.remove(LocalMediaFragment);
-            if (epglistFragment != null)
-                fragmentTransaction.remove(epglistFragment);
+            if (llmFragment != null)
+                fragmentTransaction.remove(llmFragment);
             if (personalFragment != null)
                 fragmentTransaction.remove(personalFragment);
             if (asrFragment != null)
@@ -193,9 +194,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     menuNetItem.setVisible(true);
                     return true;
 
-                case R.id.navigation_epglist:
-                    setTitle(mActivity.getBaseContext().getString(R.string.custom_playlist));
-                    switchFragment(EPGListFragment.class);
+                case R.id.navigation_llm:
+                    setTitle("LLM Research");
+                    switchFragment(LLMResearchFragment.class);
                     menuNetItem.setVisible(false);
                     return true;
 
@@ -273,7 +274,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             showWarningDialog(this, "can't running this app in emulator");
             navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
-            navigationView.getMenu().findItem(R.id.navigation_epglist).setEnabled(false);
+            navigationView.getMenu().findItem(R.id.navigation_llm).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_asr).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_personal).setEnabled(false);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -286,7 +287,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 showWarningDialog(this, "warning:the app seems running within debugger");
                 navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.navigation_epglist).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.navigation_llm).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_asr).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_personal).setEnabled(false);
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -358,14 +359,14 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 getFragmentTransaction().show(LocalMediaFragment).commit();
                 previousFragment = LocalMediaFragment;
             }
-        } else if (clazz == EPGListFragment.class) {
-            if (epglistFragment == null) {
-                epglistFragment = EPGListFragment.newInstance();
-                getFragmentTransaction().add(R.id.fragment_container, epglistFragment).commit();
-                previousFragment = epglistFragment;
+        } else if (clazz == LLMResearchFragment.class) {
+            if (llmFragment == null) {
+                llmFragment = LLMResearchFragment.newInstance();
+                getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
+                previousFragment = llmFragment;
             } else {
-                getFragmentTransaction().show(epglistFragment).commit();
-                previousFragment = epglistFragment;
+                getFragmentTransaction().show(llmFragment).commit();
+                previousFragment = llmFragment;
             }
         } else if (clazz == ASRResearchFragment.class) {
             if (asrFragment == null) {
