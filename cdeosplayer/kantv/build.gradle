@@ -24,8 +24,8 @@ android {
         //fix conflict between open source native libs and prebuilt proprietary native libs(IDE would complain more than one file was found)
         packagingOptions {
             pickFirst 'lib/arm64-v8a/libkantv-core.so'
+            pickFirst 'lib/arm64-v8a/libkantv-ffmpeg.so'
             pickFirst 'lib/arm64-v8a/libwhispercpp.so'
-            pickFirst 'lib/arm64-v8a/libkantv-play.so'
         }
 
         versionName project.ext.releaseVersion

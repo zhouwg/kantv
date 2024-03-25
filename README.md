@@ -1,8 +1,8 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/bilibili/ijkplayer) , with much enhancements and new features:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in real application / real complicated scenario(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android-based device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) , with much enhancements and new features:
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/cdeos/FFmpeg), source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
@@ -12,7 +12,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Performance benchmark for Android-based mobile phone
 
-- Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/cdeos/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
+- Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
 - UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
@@ -148,16 +148,16 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 #### Fetch source codes
 
 ```
-git clone https://github.com/cdeos/kantv.git
+git clone https://github.com/zhouwg/kantv.git
 cd kantv
 git checkout master
 ```
 
 #### Build native codes
 
-modify <a href="https://github.com/cdeos/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
+modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
 
-pay attention <a href="https://github.com/cdeos/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
+pay attention <a href="https://github.com/zhouwg/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step.
 
@@ -175,9 +175,9 @@ a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step
 
 - Build APK from source code by Android Studio IDE manually
 
-  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/cdeos/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L159) which affect the running of the ASR demo and the size of the generated APK.
+  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L159) which affect the running of the ASR demo and the size of the generated APK.
 
-- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/cdeos/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
+- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
 
 
 ### Run Android APK on real Android phone
@@ -190,7 +190,7 @@ This apk follows the principles of '**minimum permissions**' and '**do not colle
 <hr>
 here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
+https://github.com/zhouwg/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
 
 ----
 
@@ -198,33 +198,33 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
   <summary>some English screenshots</summary>
   <ol>
     
- ![1314307315](https://github.com/cdeos/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
+ ![1314307315](https://github.com/zhouwg/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
 
 ![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
 
-![127402405](https://github.com/cdeos/kantv/assets/6889919/e01da442-3eda-4fff-b771-0c485316416c)
+![127402405](https://github.com/zhouwg/kantv/assets/6889919/e01da442-3eda-4fff-b771-0c485316416c)
 
-![794969608](https://github.com/cdeos/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
+![794969608](https://github.com/zhouwg/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
 
-![631715309](https://github.com/cdeos/kantv/assets/6889919/86447fa3-1656-40fd-9e38-1d6471cc5478)
-![1369354807](https://github.com/cdeos/kantv/assets/6889919/7f38f930-15f7-4e03-ace6-5b9d201ab19e)
+![631715309](https://github.com/zhouwg/kantv/assets/6889919/86447fa3-1656-40fd-9e38-1d6471cc5478)
+![1369354807](https://github.com/zhouwg/kantv/assets/6889919/7f38f930-15f7-4e03-ace6-5b9d201ab19e)
 
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
-![154248860](https://github.com/cdeos/kantv/assets/6889919/071ac55c-a5d7-4bd6-aece-83cbc8a487ff)
+![154248860](https://github.com/zhouwg/kantv/assets/6889919/071ac55c-a5d7-4bd6-aece-83cbc8a487ff)
 
-![1118975128](https://github.com/cdeos/kantv/assets/6889919/ef2b256c-02fb-4318-a430-b4cd15ed5b44)
+![1118975128](https://github.com/zhouwg/kantv/assets/6889919/ef2b256c-02fb-4318-a430-b4cd15ed5b44)
 ![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
 
-![1966093505](https://github.com/cdeos/kantv/assets/6889919/44e6d6c7-0ebb-41c0-a576-9f7457e0dd23)
+![1966093505](https://github.com/zhouwg/kantv/assets/6889919/44e6d6c7-0ebb-41c0-a576-9f7457e0dd23)
 
-![1179733910](https://github.com/cdeos/kantv/assets/6889919/eb6ff245-3f04-4689-b998-2b6b06dec432)
+![1179733910](https://github.com/zhouwg/kantv/assets/6889919/eb6ff245-3f04-4689-b998-2b6b06dec432)
 
-![2138671817](https://github.com/cdeos/kantv/assets/6889919/513a0676-d2f3-464b-be50-436eabd99715)
+![2138671817](https://github.com/zhouwg/kantv/assets/6889919/513a0676-d2f3-464b-be50-436eabd99715)
 
-![1634808790](https://github.com/cdeos/kantv/assets/6889919/f69ca9a7-5d25-46da-a160-ab00ff059db9)
+![1634808790](https://github.com/zhouwg/kantv/assets/6889919/f69ca9a7-5d25-46da-a160-ab00ff059db9)
 
-![991182277](https://github.com/cdeos/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
+![991182277](https://github.com/zhouwg/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
 
   </ol>
 </details>
@@ -236,7 +236,7 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 - real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- integrate ![gstreamer](https://github.com/cdeos/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
+- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
 
 - bugfix in UI layer(Java)
 
@@ -247,7 +247,7 @@ https://github.com/cdeos/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b03
 
 ### Contribution
 
-Be sure to review the [opening issues](https://github.com/cdeos/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/cdeos/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/cdeos/kantv/issues/1).
+Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
 
 Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
 
@@ -258,7 +258,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 - [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
 - [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
-- [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/cdeos/kantv/issues/74)
+- [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)

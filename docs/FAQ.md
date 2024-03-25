@@ -13,6 +13,12 @@ My advice is to not put all your eggs into the kantv basket although I wish you 
 
 Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee in MNC company).
 
+<hr>
+- Are you good at real/hardcore AI tech?
+
+<b>NO</b>
+
+I know very very very little about real/hard-core AI tech. I'm just an ordinary Linux/Android system software programmer, I'm good at multimedia/streaming media tech.
 
 <hr>
 
@@ -27,17 +33,43 @@ I have to say that life is like a box of chocolate, you never know what you’re
 At the same time, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
 
 
+<hr>
+
+- Will you open source the source code of libkantv-core.so?
+
+<b>NO</b> or not currently
+
+The source code of KanTV Android APP has been completely open source, and the source code of libkantv-ffmpeg.so has also been completely open source. the <a href="https://github.com/zhouwg/kantv/issues/64">source code of whispercpp-JNI</a> also has been completely open source.
+
+
+One year later(on 03-23-2024), I read an article from <a href="https://changelog.com/podcast/532">https://changelog.com/podcast/532</a>
+
+A few days ago, I didn't understand why Georgi Gerganov open source such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit. I want to / have to say that Georgi Gerganov is a real great genius programmer. just my personal thoughts, this could/should/might NOT be happend in my country:
+
+<ul>
+<li>
+    English is the first barrier
+</li>
+<li>
+    Then the powerful GFW
+</li>
+<li>
+    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT......
+
+    I'm still looking for new job opportunities and don't want to quit the IT industry completely yet.
+</li>
+</ul>
 
 <hr>
 
 
 - Could I contact to you by e-mail?
 
-  * Please do not send e-mail to me for technical/non-technical question. Public technical discussion on github is preferred
+  * Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 
   * Feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits
 
-  The official webserver of <a href="http://www.cde-os.com/">www.cde-os.com</a> has migrated/redirected to Github Pages and the original e-mail server(a highly customized Qmail-based mail server) was terminated accordingly due to various reasons(one is save money) and no longer maintained since 03-22-2024. at the same time, cdeos-org in Github was closed accordingly.
+    The official webserver of <a href="http://www.cde-os.com/">www.cde-os.com</a> has migrated/redirected to Github Pages and the original e-mail server(a highly customized Qmail-based mail server) was terminated accordingly due to various reasons and no longer maintained since 03-22-2024. at the same time, cdeos-org in Github was closed accordingly.
 
 <hr>
 
