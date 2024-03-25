@@ -172,3 +172,14 @@
                     <li>pre-load GGML model and initialize ASR-subsystem as early as possible for performance consideration</li>
                     <li>regular cleanup/refine files/codes/README</li>
                  </ul>
+
+- v1.3.5 2024-03-25,
+                 <ul>
+                    <li>import customized FFmpeg6.1 to project KanTV--step1</li>
+                    <li>sync source code of whisper.cpp with upstream </li>
+                    <li>add ff_terminal and ff_encode to examples </li>
+                    <li>refine doc in readme or source file </li>
+                    <li>better performance with better stability after finetune with new method which introduced in https://github.com/ggerganov/whisper.cpp/issues/1951 </li>
+                    <li>prepare for step2 of import customized FFmpeg6.1 by new software architecuture</li>
+                    <li>move "EPG" to "Person Center" and add "LLM Research" to main UI </li>
+                 </ul>

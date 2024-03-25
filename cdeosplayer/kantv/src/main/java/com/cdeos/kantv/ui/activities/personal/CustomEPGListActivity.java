@@ -1,31 +1,17 @@
- /*
-  * Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-  *
-  * Copyright (c) 2024- KanTV Authors. All Rights Reserved.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
- package com.cdeos.kantv.ui.fragment;
+/*
+ * Copyright (C) 2019-2024 Project KanTV
+ * Copyright (C) zhouwg <zhouwg@cde-os.com>
 
-import android.annotation.SuppressLint;
+ */
+
+package com.cdeos.kantv.ui.activities.personal;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Environment;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.Button;
@@ -33,23 +19,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.cdeos.kantv.R;
-import com.cdeos.kantv.base.BaseMvpFragment;
-import com.cdeos.kantv.bean.event.SendMsgEvent;
-import com.cdeos.kantv.mvp.impl.EPGListPresenterImpl;
-import com.cdeos.kantv.mvp.presenter.EPGListPresenter;
-import com.cdeos.kantv.mvp.view.EPGListView;
+import com.cdeos.kantv.base.BaseMvcActivity;
+import com.cdeos.kantv.base.BaseRvAdapter;
+import com.cdeos.kantv.bean.FolderBean;
 import com.cdeos.kantv.player.common.utils.Constants;
 import com.cdeos.kantv.ui.activities.play.PlayerManagerActivity;
 import com.cdeos.kantv.utils.AppConfig;
 import com.cdeos.kantv.utils.Settings;
-
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,25 +38,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
-import cdeos.media.player.KANTVJNIDecryptBuffer;
-import cdeos.media.player.RecentMediaStorage;
-import cdeos.media.player.KANTVDRM;
 import cdeos.media.player.CDEAssetLoader;
 import cdeos.media.player.CDEContentDescriptor;
 import cdeos.media.player.CDELog;
 import cdeos.media.player.CDEMediaType;
 import cdeos.media.player.CDEUrlType;
 import cdeos.media.player.CDEUtils;
+import cdeos.media.player.KANTVDRM;
 import cdeos.media.player.KANTVDRMManager;
+import cdeos.media.player.KANTVJNIDecryptBuffer;
+import io.reactivex.disposables.Disposable;
 
 
-public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implements EPGListView {
-    private final static String TAG = EPGListFragment.class.getName();
-
-    @BindView(R.id.epg_list_layout)
+public class CustomEPGListActivity extends BaseMvcActivity {
+    @BindView(R.id.epg_list_layout_activity)
     LinearLayout layout;
 
+
     private CDEMediaType mMediaType = CDEMediaType.MEDIA_TV;
+    private final static String TAG = CustomEPGListActivity.class.getName();
     private List<CDEContentDescriptor> mContentList = new ArrayList<CDEContentDescriptor>();
     private List<CDEContentDescriptor> mIPTVContentList = new ArrayList<CDEContentDescriptor>();
     private boolean mTroubleshootingMode = false;
@@ -89,32 +67,33 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
 
     private boolean mEPGDataLoadded = false;
 
-    public static EPGListFragment newInstance() {
-        return new EPGListFragment();
-    }
 
-    @NonNull
-    @Override
-    protected EPGListPresenter initPresenter() {
-        return new EPGListPresenterImpl(this, this);
-    }
+    private BaseRvAdapter<FolderBean> adapter;
+    private Disposable permissionDis;
+    private boolean updateVideoFlag = false;
+
+
 
     @Override
-    protected int initPageLayoutId() {
-        return R.layout.fragment_epglist;
+    protected int initPageLayoutID() {
+        return R.layout.activity_custom_epglist;
     }
 
-    @SuppressLint("CheckResult")
     @Override
-    public void initView() {
+    public void initPageViewListener() {
+
+    }
+
+    @Override
+    public void initPageView() {
+        setTitle("Custom Playlist");
         long beginTime = 0;
         long endTime = 0;
         beginTime = System.currentTimeMillis();
 
-        mActivity = getActivity();
+        mActivity = this;
         mContext = mActivity.getBaseContext();
         mSettings = new Settings(mContext);
-        mSettings.updateUILang((AppCompatActivity) getActivity());
 
         loadEPGData();
         mEPGDataLoadded = true;
@@ -124,35 +103,23 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
         CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
     }
 
-    @Override
-    public void initListener() {
 
-    }
 
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
 
+    }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (mEPGDataLoadded) {
-            CDELog.d(TAG, "epg data already loaded");
-        } else {
-            CDELog.d(TAG, "epg data not loaded");
-            loadEPGData();
-            mEPGDataLoadded = true;
-            layoutUI(mActivity);
-        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mEPGDataLoadded = false;
     }
 
 
@@ -171,6 +138,7 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
             KANTVDRMManager.setMultiDrmInfo(CDEUtils.getDrmScheme());
         }
     }
+
 
 
     private void loadEPGData() {
@@ -347,6 +315,7 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
 
     }
 
+
     private void layoutUI(Activity activity) {
         layout.removeAllViews();
         Resources res = mActivity.getResources();
@@ -427,11 +396,11 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
                         long playPos = 0;
 
                         if (!CDEUtils.isNetworkAvailable(mActivity)) {
-                            Toast.makeText(getContext(), "pls check network connection", Toast.LENGTH_LONG).show();
+                            Toast.makeText(mActivity, "pls check network connection", Toast.LENGTH_LONG).show();
                             return;
                         }
                         if (CDEUtils.getNetworkType() == CDEUtils.NETWORK_MOBILE) {
-                            Toast.makeText(getContext(), "you are using 4G/5G network to watch online media", Toast.LENGTH_LONG).show();
+                            Toast.makeText(mActivity, "you are using 4G/5G network to watch online media", Toast.LENGTH_LONG).show();
                             //return;
                         }
 
@@ -473,9 +442,9 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
 
                         initPlayback();
 
-                        PlayerManagerActivity.launchPlayerStream(getContext(), name, url, 0, 0);
+                        PlayerManagerActivity.launchPlayerStream(mActivity, name, url, 0, 0);
 
-                        
+
                     }
                 });
                 layout.addView(contentButton);
@@ -512,4 +481,5 @@ public class EPGListFragment extends BaseMvpFragment<EPGListPresenter> implement
             }
         }
     }
+
 }

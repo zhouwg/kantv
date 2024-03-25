@@ -65,12 +65,6 @@
         </activity>
 
         <activity
-            android:name="com.cdeos.kantv.ui.activities.setting.ScanManagerActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|keyboardHidden|screenSize" >
-        </activity>
-
-        <activity
             android:name="com.cdeos.kantv.ui.activities.play.PlayerActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="landscape">
@@ -90,6 +84,12 @@
 
         <activity
             android:name="com.cdeos.kantv.ui.activities.personal.BenchmarkActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.cdeos.kantv.ui.activities.personal.CustomEPGListActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>

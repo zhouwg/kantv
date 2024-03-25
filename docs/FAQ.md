@@ -38,7 +38,7 @@ At the same time, I have to say that GGML's whisper.cpp is a real excellent and 
 
 - Will you open source the source code of libkantv-core.so?
 
-<b>NO</b> or not currently because I'm still try to looking for new job opportunities(prefer my previous employer ------ <a href="https://www.unisoc.com/en_us/">UniSoC</a> or MNC company(I have no expecatation because the world changed much since 2020), then Xiaomi or Bytedance , or continue to be freelancer-programmer) and don't want to quit the IT industry completely.
+<b>NO</b> or not currently because I'm still trying to find new job opportunities (prefer my previous employer ------ <a href="https://www.unisoc.com/en_us/">UniSoC</a> or MNC company(I have no expecatation because the world changed much since 2020), then Xiaomi or Bytedance , or continue to be freelancer-programmer) and don't want to quit the IT industry completely.
 
 The source code of KanTV Android APP has been completely open source, and the source code of libkantv-ffmpeg.so has also been completely open source. the <a href="https://github.com/zhouwg/kantv/issues/64">source code of whispercpp-JNI</a> also has been completely open source.
 
@@ -52,7 +52,7 @@ A few days ago, I didn't understand why Georgi Gerganov open source such a power
     English is the first barrier
 </li>
 <li>
-    Then the powerful GFW
+    The second is the powerful GFW
 </li>
 <li>
     The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT......
@@ -93,4 +93,4 @@ Still, if you do decide to sponsor me, the money will most likely go towards buy
 Contribute PR/codes is the best sponsorship to project KanTV.Thanks.
 
 
-Have fun with the great FFmpeg and the great whisper.cpp
+Have fun with the great FFmpeg and the great whisper.cpp and the great llama.cpp

@@ -12,14 +12,14 @@
 
 
     <item
-        android:id="@+id/navigation_epglist"
-        android:icon="@mipmap/ic_personal_scan"
-        android:title="@string/EPG"/>
-
-    <item
         android:id="@+id/navigation_asr"
         android:icon="@mipmap/ic_main_asr"
         android:title="@string/ASR" />
+
+    <item
+        android:id="@+id/navigation_llm"
+        android:icon="@mipmap/ic_personal_scan"
+        android:title="LLM"/>
 
     <item
         android:id="@+id/navigation_personal"
