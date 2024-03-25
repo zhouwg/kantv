@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blankj.utilcode.util.ConvertUtils;
+import com.cdeos.kantv.ui.activities.personal.CustomEPGListActivity;
 import com.cdeos.kantv.ui.fragment.settings.SystemSettingFragment;
 import com.cdeos.kantv.R;
 import com.cdeos.kantv.base.BaseMvpFragment;
@@ -155,7 +156,7 @@ import cdeos.media.player.CDEUtils;
     @OnClick({
             R.id.system_setting_ll,R.id.play_setting_ll, R.id.record_setting_ll,
             R.id.local_history_ll, R.id.peformance_benchmark_ll, R.id.asr_setting_ll,
-            R.id.exit_app_ll
+            R.id.custom_playlist_ll, R.id.exit_app_ll
     })
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -189,6 +190,10 @@ import cdeos.media.player.CDEUtils;
 
             case R.id.local_history_ll:
                 launchActivity(LocalPlayHistoryActivity.class);
+                break;
+
+            case R.id.custom_playlist_ll:
+                launchActivity(CustomEPGListActivity.class);
                 break;
 
             case R.id.exit_app_ll:
