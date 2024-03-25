@@ -4,15 +4,18 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
-- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
+- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- Record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
+- ASR(Automatic Speech Recognition, a sub-filed of AI) research by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
 
-- Set up a customized playlist and then use this software to watch the content of the customized playlist for personal need
+- LLM(Large Language Model, a sub-filed of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
 
-- Performance benchmark for Android-based mobile phone
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
+
+- Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
+
+- Performance benchmark for Android-based mobile phone for R&D activity
 
 - UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
@@ -20,12 +23,11 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 Some goals of this project are:
 
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario
+- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario on mobile device(Android)
 
-- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with regular Android software development), part of AI research activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
+- Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(Android)
 
-- Watch English online-TV(aka OTT TV) with real-time English subtitle for non-native English speakers learning English(listening and reading)
-
+- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with <b>regular Android software development</b>) focus on AI research activity, part of AI R&D activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### How to build project
@@ -197,17 +199,14 @@ https://github.com/zhouwg/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0
 <details>
   <summary>some English screenshots</summary>
   <ol>
-    
- ![1314307315](https://github.com/zhouwg/kantv/assets/6889919/3636c650-231c-43ab-a5bf-9612d891c39f)
 
-![Screenshot_20240301_000509_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/28d549ba-2fd5-434f-bf7a-b66d82d6dde3)
+  ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
+![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
+![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
+![880686930](https://github.com/zhouwg/kantv/assets/6889919/fb2add6c-94d1-42c5-83f7-a0d3b0ec9f9b)
+![2147012199](https://github.com/zhouwg/kantv/assets/6889919/2a2590f9-8343-4886-9ace-74a4880d9bed)
 
-![127402405](https://github.com/zhouwg/kantv/assets/6889919/e01da442-3eda-4fff-b771-0c485316416c)
-
-![794969608](https://github.com/zhouwg/kantv/assets/6889919/8e232f9a-7265-4c66-ba14-ab3df3d6d59b)
-
-![631715309](https://github.com/zhouwg/kantv/assets/6889919/86447fa3-1656-40fd-9e38-1d6471cc5478)
-![1369354807](https://github.com/zhouwg/kantv/assets/6889919/7f38f930-15f7-4e03-ace6-5b9d201ab19e)
+  
 
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
@@ -232,15 +231,15 @@ https://github.com/zhouwg/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0
 
 ### Hot topics
 
-- improve real-time English subtitle performance and stability(for example:utilize hardware AI engine in Android device)
+- improve <b>quality</b> and performance of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+
+- <a href="https://github.com/ggerganov/ggml/issues/771">adding native backend for Qualcomm mobile SoC</a>
 
 - real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- integrate ![gstreamer](https://github.com/zhouwg/gstreamer) to project KanTV(<a href="https://www.videolan.org/vlc/" target="_blank">VLC</a> is also excellent and gstreamer is more complicated than VLC but gstreamer was supported by many semiconductor companies. anyway, they are both born in/come from EU)
-
 - bugfix in UI layer(Java)
 
-- bugfix in JNI layer(C/C++)
+- bugfix in native layer(C/C++)
 
 - participate in improvement of ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Android device and feedback to upstream
 
