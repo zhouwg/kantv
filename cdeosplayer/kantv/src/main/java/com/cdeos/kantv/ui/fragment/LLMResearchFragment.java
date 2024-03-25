@@ -1,13 +1,5 @@
  /*
-  * Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-  *
-  * Copyright (c) 2024- KanTV Authors. All Rights Reserved.
-  *
-  * @author: zhou.weiguo
-  *
-  * @desc: implementation of PoC stage-2 for https://github.com/cdeos/kantv/issues/64
-  *
-  * @date: 03-08-2024(2024-03-08)
+  * Copyright (c) 2024- KanTV Author
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -23,9 +15,6 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_LLM_FINALIZE;
