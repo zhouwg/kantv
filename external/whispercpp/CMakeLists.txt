@@ -73,14 +73,14 @@ set_target_properties(kantvcore
         IMPORTED_LOCATION
         ${PREBUIT_LIB_PATH}/libkantv-core.so)
 
-add_library(kantvplay
+add_library(kantvffmpeg
         SHARED
         IMPORTED)
 
-set_target_properties(kantvplay
+set_target_properties(kantvffmpeg
         PROPERTIES
         IMPORTED_LOCATION
-        ${PREBUIT_LIB_PATH}/libkantv-play.so)
+        ${PREBUIT_LIB_PATH}/libkantv-ffmpeg.so)
 
 
 function(build_library target_name)
@@ -90,7 +90,7 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvplay android)
+    target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
 
 endfunction()
 

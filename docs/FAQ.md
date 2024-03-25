@@ -3,9 +3,7 @@
 
 Project KanTV is a personal/hobby project. There are no guarantees that the implementation is correct and bug-free.
 
-If you plan to use kantv in your own project, keep in mind the above.
-
-My advice is to not put all your eggs into the kantv basket although I wish you could feed your need by use/reference this project.
+If you plan to use kantv in your own project, keep in mind the above. although I wish you could feed your need by use/reference this project.
 
 <hr>
 
@@ -13,31 +11,65 @@ My advice is to not put all your eggs into the kantv basket although I wish you 
 
 Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee in MNC company).
 
+<hr>
+
+- Are you good at real/hardcore AI tech?
+
+<b>NO</b>
+
+I know very very very little about real/hard-core AI tech because I majored in economics at university and all computer-related knowledge was fully self-taught by library(I'm very poor at that time and I couldn't afford a PC). of course, I have not studied advanced mathematics or signal theory.
+
+The original author of whisper.cpp and llama.cpp is a real great genius programmer, but I'm just an ordinary Linux/Android system software programmer but I'm good at multimedia/streaming media tech.
 
 <hr>
 
-- What's the relationship between kantv and whisper.cpp/GGML
+- What's the relationship between kantv and GGML
 
-Project KanTV has NO or NO personal relationship with whisper.cpp/GGML but only use source code of whisper.cpp as ASR engine.
+Project KanTV has NO or NO personal relationship with GGML but use source code of whisper.cpp as ASR engine or llama.cpp as LLM engine since 03-05-2024.
 
-I heard whisper.cpp on Jan 2024 at the first time and just use it generate subtitle for original English short video which referenced in Chinese articles on personal WeChat public account, but I didn’t read the source code of whisper.cpp at that time. sadly, my personal WeChat public account was forcefully closed on 01-28-2024. after that, I [decided to migrate some personal software project to Github since 02-22-2024](https://github.com/zhouwg/kantv/blob/master/release/README.md#L122). I have to say that I really spent much time/efforts on personal WeChat public account for public interests or my country's interests before 02-22-2024.
+I heard whisper.cpp on Jan 2024 at the first time and just use it generate subtitle for original English short video which referenced in Chinese articles on personal WeChat public account, but I didn’t read the source code of whisper.cpp at that time. sadly, my personal WeChat public account was forcefully closed on 01-28-2024. after that, I [decided to migrate some personal software project to Github since 02-22-2024](https://github.com/zhouwg/kantv/blob/master/release/README.md#L122). I have to say that I really spent much time/efforts on personal WeChat public account before 02-22-2024.
 
 I have to say that life is like a box of chocolate, you never know what you’re going to get. I decided to start integrating the great whisper.cpp to this project since 03-05-2024 and I did it on 03-16-2024 finally. I have to say that I was touched with and motivated by the great open-source project whisper.cpp from 03-05-2024 to 03-22-2024.
 
 At the same time, I have to say that GGML's whisper.cpp is a real excellent and amazing open source AI project and very helpful for C/C++ programmer and the original author of GGML is the only person I know of who is AI expert and modern C++ master and familiar with both iOS(app / native ) and Android(app / native) and Linux(app / native) software development at the same time(I know a few programmers who are familiar with both iOS(app / dev) and Android (app / native) and Linux(app / native) software development but they also know very little about real AI tech) and I have to say that the original author of GGML made a huge contribution to our planet.
 
 
+<hr>
+
+- Will you open source the source code of libkantv-core.so?
+
+<b>NO</b> or not currently because I'm still try to looking for new job opportunities(prefer my previous employer ------ <a href="https://www.unisoc.com/en_us/">UniSoC</a> or MNC company(I have no expecatation because the world changed much since 2020), then Xiaomi or Bytedance , or continue to be freelancer-programmer) and don't want to quit the IT industry completely.
+
+The source code of KanTV Android APP has been completely open source, and the source code of libkantv-ffmpeg.so has also been completely open source. the <a href="https://github.com/zhouwg/kantv/issues/64">source code of whispercpp-JNI</a> also has been completely open source.
+
+
+One year later(on 03-23-2024), I read an article from <a href="https://changelog.com/podcast/532">https://changelog.com/podcast/532</a>
+
+A few days ago, I didn't understand why Georgi Gerganov open source such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit. I want to / have to say that Georgi Gerganov is a real great genius programmer. just my personal thoughts, this could/should/might NOT be happend in my country:
+
+<ul>
+<li>
+    English is the first barrier
+</li>
+<li>
+    Then the powerful GFW
+</li>
+<li>
+    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT......
+
+</li>
+</ul>
 
 <hr>
 
 
 - Could I contact to you by e-mail?
 
-  * Please do not send e-mail to me for technical/non-technical question. Public technical discussion on github is preferred
+  * Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
 
   * Feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits
 
-  The official webserver of <a href="http://www.cde-os.com/">www.cde-os.com</a> has migrated/redirected to Github Pages and the original e-mail server(a highly customized Qmail-based mail server) was terminated accordingly due to various reasons(one is save money) and no longer maintained since 03-22-2024. at the same time, cdeos-org in Github was closed accordingly.
+    The official webserver of <a href="http://www.cde-os.com/">www.cde-os.com</a> has migrated/redirected to Github Pages and the original e-mail server(a highly customized Qmail-based mail server) was terminated accordingly due to various reasons and no longer maintained since 03-22-2024. at the same time, cdeos-org in Github was closed accordingly.
 
 <hr>
 
