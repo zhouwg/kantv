@@ -38,7 +38,7 @@ At the same time, I have to say that GGML's whisper.cpp is a real excellent and 
 
 - Will you open source the source code of libkantv-core.so?
 
-<b>NO</b> or not currently because I'm still try to looking for new job opportunities and don't want to quit the IT industry completely.
+<b>NO</b> or not currently because I'm still try to looking for new job opportunities(prefer Xiaomi or Bytedance or continue to be freelancer-programmer) and don't want to quit the IT industry completely.
 
 The source code of KanTV Android APP has been completely open source, and the source code of libkantv-ffmpeg.so has also been completely open source. the <a href="https://github.com/zhouwg/kantv/issues/64">source code of whispercpp-JNI</a> also has been completely open source.
 
