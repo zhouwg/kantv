@@ -3,9 +3,7 @@
 
 Project KanTV is a personal/hobby project. There are no guarantees that the implementation is correct and bug-free.
 
-If you plan to use kantv in your own project, keep in mind the above.
-
-My advice is to not put all your eggs into the kantv basket although I wish you could feed your need by use/reference this project.
+If you plan to use kantv in your own project, keep in mind the above. although I wish you could feed your need by use/reference this project.
 
 <hr>
 
@@ -14,17 +12,20 @@ My advice is to not put all your eggs into the kantv basket although I wish you 
 Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee in MNC company).
 
 <hr>
+
 - Are you good at real/hardcore AI tech?
 
 <b>NO</b>
 
-I know very very very little about real/hard-core AI tech. I'm just an ordinary Linux/Android system software programmer, I'm good at multimedia/streaming media tech.
+I know very very very little about real/hard-core AI tech because I majored in economics at university and all computer-related knowledge was fully self-taught by library(I'm very poor at that time and I couldn't afford a PC). of course, I have not studied advanced mathematics or signal theory.
+
+The original author of whisper.cpp and llama.cpp is a real great genius programmer, but I'm just an ordinary Linux/Android system software programmer but I'm good at multimedia/streaming media tech.
 
 <hr>
 
-- What's the relationship between kantv and whisper.cpp/GGML
+- What's the relationship between kantv and GGML
 
-Project KanTV has NO or NO personal relationship with whisper.cpp/GGML but only use source code of whisper.cpp as ASR engine.
+Project KanTV has NO or NO personal relationship with GGML but use source code of whisper.cpp as ASR engine or llama.cpp as LLM engine since 03-05-2024.
 
 I heard whisper.cpp on Jan 2024 at the first time and just use it generate subtitle for original English short video which referenced in Chinese articles on personal WeChat public account, but I didn’t read the source code of whisper.cpp at that time. sadly, my personal WeChat public account was forcefully closed on 01-28-2024. after that, I [decided to migrate some personal software project to Github since 02-22-2024](https://github.com/zhouwg/kantv/blob/master/release/README.md#L122). I have to say that I really spent much time/efforts on personal WeChat public account for public interests or my country's interests before 02-22-2024.
 
