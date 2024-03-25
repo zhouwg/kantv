@@ -194,6 +194,11 @@ here is a short video to demostrate AI subtitle by running the great & excellent
 
 https://github.com/zhouwg/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
 
+<hr>
+better performance with better stability after finetune(sometimes whisper.cpp will produce meaningless repeat tokens) with new method which introduced in https://github.com/ggerganov/whisper.cpp/issues/1951
+
+https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
+
 ----
 
 <details>
