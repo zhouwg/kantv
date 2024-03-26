@@ -24,8 +24,7 @@
  package com.cdeos.kantv.ui.fragment;
 
  import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+ import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -91,12 +90,6 @@
      TextView _txtGGMLStatus;
 
      Button _btnBenchmark;
-
-     //keep sync with kantv_asr.h
-     private static final int BECHMARK_ASR      = 0;
-     private static final int BECHMARK_MEMCPY   = 1;
-     private static final int BECHMARK_MULMAT   = 2;
-     private static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
 
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
@@ -286,7 +279,7 @@
 
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
-             CDELog.j(TAG, "exec ggml benchmark: type: " + getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
+             CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
 
              String selectModeFileName = "ggml-" + strModeName + ".bin";
              String selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
@@ -299,7 +292,7 @@
              File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
 
              if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                 showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
+                 CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
              ggmlModelFileName = selectModeFileName;
@@ -311,7 +304,7 @@
 
              isBenchmarking.set(true);
 
-             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + getBenchmarkDesc(benchmarkIndex) + ")");
+             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ")");
 
              Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
 
@@ -359,7 +352,7 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String benchmarkTip = getBenchmarkDesc(benchmarkIndex) + "(model: " + strModeName
+                             String benchmarkTip = CDEUtils.getBenchmarkDesc(benchmarkIndex) + "(model: " + strModeName
                                      + " ,threads: " + nThreadCounts
                                      + " ) cost " + duration + " milliseconds";
                              benchmarkTip += "\n";
@@ -539,7 +532,7 @@
          } catch (KANTVException ex) {
              String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
              CDELog.j(TAG, "error occurred: " + errorMsg);
-             showMsgBox(mActivity, errorMsg);
+             CDEUtils.showMsgBox(mActivity, errorMsg);
              ex.printStackTrace();
          }
      }
@@ -566,35 +559,7 @@
      }
 
 
-     private void showMsgBox(Context context, String message) {
-         AlertDialog dialog = new AlertDialog.Builder(context).create();
-         dialog.setMessage(message);
-         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
-             public void onClick(DialogInterface dialog, int which) {
 
-             }
-         });
-         dialog.show();
-     }
-
-
-     private String getBenchmarkDesc(int benchmarkIndex) {
-         switch (benchmarkIndex) {
-             case BECHMARK_FULL:
-                 return "GGML whisper_encode";
-
-             case BECHMARK_MEMCPY:
-                 return "GGML memcopy";
-
-             case BECHMARK_MULMAT:
-                 return "GGML matrix multipy";
-
-             case BECHMARK_ASR:
-                 return "GGML ASR inference";
-         }
-
-         return "unknown";
-     }
 
      private void displayFileStatus(String sampleFilePath, String modelFilePath) {
          _txtGGMLStatus.setText("");

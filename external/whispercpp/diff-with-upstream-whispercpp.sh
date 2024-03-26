@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+# Copyright (c) 2024- KanTV Authors
 
 # Description: check difference between local whisper.cpp and upstream whisper.cpp
 #

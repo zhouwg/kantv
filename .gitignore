@@ -72,3 +72,5 @@ prebuilts/toolchain/emsdk/
 prebuilts/toolchain/*.zip
 prebuilts/toolchain/*.xz
 prebuilts/toolchain/*.gz
+
+core/

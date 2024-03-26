@@ -259,6 +259,12 @@
      public static final int  ASR_MODE_BECHMARK     = 2;     // asr peformance benchamrk
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
 
+     //keep sync with kantv_asr.h
+     public static final int BECHMARK_ASR      = 0;
+     public static final int BECHMARK_MEMCPY   = 1;
+     public static final int BECHMARK_MULMAT   = 2;
+     public static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
+
      private static int       mASRMode = ASR_MODE_NORMAL;
 
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
@@ -3889,6 +3895,25 @@
              }
          });
          dialog.show();
+     }
+
+
+     public static String getBenchmarkDesc(int benchmarkIndex) {
+         switch (benchmarkIndex) {
+             case BECHMARK_FULL:
+                 return "GGML whisper_encode";
+
+             case BECHMARK_MEMCPY:
+                 return "GGML memcopy";
+
+             case BECHMARK_MULMAT:
+                 return "GGML matrix multipy";
+
+             case BECHMARK_ASR:
+                 return "GGML ASR inference";
+         }
+
+         return "unknown";
      }
 
 

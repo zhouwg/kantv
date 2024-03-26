@@ -10,41 +10,48 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/pageInfo"
+            android:id="@+id/pageInfoLLM"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="LLM(Large Language Model) research(by GGML's llama.cpp)" />
 
         <LinearLayout
-            android:id="@+id/ggmlLayout"
+            android:id="@+id/ggmlLayoutLLM"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/ggmlLogo"
+                android:id="@+id/ggmlLogoLLM"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/llamacpp_logo" />
 
             <TextView
-                android:id="@+id/ggmlInfo"
+                android:id="@+id/ggmlInfoLLM"
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />
 
             <TextView
-                android:id="@+id/ggmlStatus"
+                android:id="@+id/ggmlStatusLLM"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="5dp"
                 android:text=" " />
 
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
             <TextView
                 android:id="@+id/llmInfo"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="5dp" />
 
         </LinearLayout>
