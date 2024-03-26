@@ -84,6 +84,7 @@ export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
 
 #modify following lines to adapt to local dev envs
 export UPSTREAM_WHISPERCPP_PATH=~/whisper.cpp
+export UPSTREAM_LLAMACPP_PATH=~/llama.cpp
 
 
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)

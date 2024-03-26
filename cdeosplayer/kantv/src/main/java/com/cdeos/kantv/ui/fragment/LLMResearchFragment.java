@@ -17,6 +17,9 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
+ import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
+ import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
+ import static cdeos.media.player.CDEUtils.SCREEN_ORIENTATION_PORTRAIT;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_LLM_FINALIZE;
@@ -31,11 +34,13 @@
  import android.content.res.Resources;
  import android.media.MediaPlayer;
  import android.os.Build;
+ import android.text.method.ScrollingMovementMethod;
  import android.view.View;
  import android.view.WindowManager;
  import android.widget.AdapterView;
  import android.widget.ArrayAdapter;
  import android.widget.Button;
+ import android.widget.EditText;
  import android.widget.LinearLayout;
  import android.widget.Spinner;
  import android.widget.TextView;
@@ -51,6 +56,8 @@
  import com.cdeos.kantv.mvp.presenter.LLMResearchPresenter;
  import com.cdeos.kantv.mvp.view.LLMResearchView;
  import com.cdeos.kantv.utils.Settings;
+
+ import org.ggml.whispercpp.whispercpp;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -80,30 +87,38 @@
      TextView _txtLLMInfo;
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
+     EditText _txtUserInput;
+     Button _btnInference;
 
-     Button _btnBenchmark;
-
-
-     private int nThreadCounts = 1;
+     private int nThreadCounts = 8;
      private int benchmarkIndex = 0;
-     private String strModeName = "tiny";
 
      private long beginTime = 0;
      private long endTime = 0;
      private long duration = 0;
      private String strBenchmarkInfo;
+     private String strUserInput = "how many days in this month?";
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
+     // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-13B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-GGUF
+
      // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
-     // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
+     // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
+
+     //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
      private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
 
      private Context mContext;
      private Activity mActivity;
      private Settings mSettings;
 
+     private KANTVMgr mKANTVMgr = null;
+     private LLMResearchFragment.MyEventListener mEventListener = new LLMResearchFragment.MyEventListener();
 
      public static LLMResearchFragment newInstance() {
          return new LLMResearchFragment();
@@ -138,22 +153,135 @@
          _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfoLLM);
          _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatusLLM);
 
+         //TODO: change to voice input, and then use whisper.cpp to convert it into text
+         _txtUserInput = (EditText) mActivity.findViewById(R.id.txtUserInput);
+
+         _btnInference = (Button) mActivity.findViewById(R.id.btnInference);
+
          _txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+         _txtLLMInfo.setMovementMethod(ScrollingMovementMethod.getInstance());
          displayFileStatus(CDEUtils.getDataPath() + ggmlModelFileName);
 
-         CDELog.j(TAG, "load LLM model");
+         try {
+             CDELibraryLoader.load("whispercpp");
+             CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+         } catch (Exception e) {
+             CDELog.j(TAG, "failed to initialize GGML jni");
+             return;
+         }
+
+         try {
+             initKANTVMgr();
+         } catch (Exception e) {
+             CDELog.j(TAG, "failed to initialize asr subsystem");
+             return;
+         }
+
+         CDELog.j(TAG, "load ggml's LLM model");
+         String systemInfo = whispercpp.llm_get_systeminfo();
          String phoneInfo = "Device info:" + "\n"
                  + "Brand:" + Build.BRAND + "\n"
                  + "Hardware:" + Build.HARDWARE + "\n"
                  + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
-                 + "Arch:" + Build.CPU_ABI ;
+                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by llama.cpp(https://github.com/ggerganov/llama.cpp)\n");
 
+         _btnInference.setOnClickListener(v -> {
+             String strPrompt = _txtUserInput.getText().toString();
+             if (strPrompt.isEmpty()) {
+                 //CDEUtils.showMsgBox(mActivity, "pls check your input");
+                 //return;
+                 //just for test
+                 strPrompt = strUserInput;
+             }
+             strPrompt = strPrompt.trim();
+             strUserInput = strPrompt;
+             CDELog.j(TAG, "User input: \n " + strUserInput);
+
+             CDELog.j(TAG, "strModeName:" + ggmlModelFileName);
+
+             String selectModeFileName = ggmlModelFileName;
+             String selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
+             File selectModeFile = new File(selectModelFilePath);
+             displayFileStatus(selectModelFilePath);
+             if (!selectModeFile.exists()) {
+                 CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
+             }
+
+             if (!selectModeFile.exists()) {
+                 CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file exist in /sdcard/kantv/");
+                 return;
+             }
+             ggmlModelFileName = selectModeFileName;
+             CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
+
+             isBenchmarking.set(true);
+
+             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+
+             _txtLLMInfo.setText("");
+             _btnInference.setEnabled(false);
+
+             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
+             attributes.screenBrightness = 1.0f;
+             mActivity.getWindow().setAttributes(attributes);
+             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+             launchGGMLBenchmarkThread();
+
+         });
 
          endTime = System.currentTimeMillis();
          CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
+     }
+
+     private final void launchGGMLBenchmarkThread() {
+         Thread workThread = new Thread(new Runnable() {
+             @RequiresApi(api = Build.VERSION_CODES.O)
+             @Override
+             public void run() {
+                 strBenchmarkInfo = "";
+
+                 while (isBenchmarking.get()) {
+                     beginTime = System.currentTimeMillis();
+                     _txtGGMLStatus.setText("LLAMA inference is progressing...");
+                     strBenchmarkInfo = whispercpp.llm_bench(
+                             CDEUtils.getDataPath() + ggmlModelFileName,
+                             strUserInput,
+                             benchmarkIndex,
+                             nThreadCounts);
+                     endTime = System.currentTimeMillis();
+                     duration = (endTime - beginTime);
+                     isBenchmarking.set(false);
+
+                     mActivity.runOnUiThread(new Runnable() {
+                         @Override
+                         public void run() {
+                             String benchmarkTip = "LLAMA inference " + "(model: " + ggmlModelFileName
+                                     + " ,threads: " + nThreadCounts
+                                     + " ) cost " + duration + " milliseconds";
+                             benchmarkTip += "\n";
+
+                             if (!strBenchmarkInfo.startsWith("unknown")) {
+                                 benchmarkTip += strBenchmarkInfo;
+                             }
+
+                             CDELog.j(TAG, benchmarkTip);
+                             _txtGGMLStatus.append(benchmarkTip);
+
+                             _btnInference.setEnabled(true);
+                         }
+                     });
+                 }
+
+
+             }
+         });
+         workThread.start();
+
      }
 
 
@@ -178,7 +306,6 @@
      }
 
 
-
      private void displayFileStatus(String modelFilePath) {
          _txtGGMLStatus.setText("");
          File modelFile = new File(modelFilePath);
@@ -189,4 +316,85 @@
              _txtGGMLStatus.append("model   file not exist: " + modelFile.getAbsolutePath());
          }
      }
+
+     protected class MyEventListener implements KANTVEventListener {
+
+         MyEventListener() {
+         }
+
+
+         @Override
+         public void onEvent(KANTVEventType eventType, int what, int arg1, int arg2, Object obj) {
+             String eventString = "got event from native layer: " + eventType.toString() + " (" + what + ":" + arg1 + " ) :" + (String) obj;
+             String content = (String) obj;
+
+             if (eventType.getValue() == KANTVEvent.KANTV_ERROR) {
+                 CDELog.j(TAG, "ERROR:" + eventString);
+                 _txtLLMInfo.setText("ERROR:" + content);
+             }
+
+             if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
+                 if ((arg1 == KANTV_INFO_ASR_STOP)
+                         || (arg1 == KANTV_INFO_ASR_FINALIZE)
+                 ) {
+                     return;
+                 }
+
+                 //CDELog.j(TAG, "content:" + content);
+                 if (content.startsWith("unknown")) {
+
+                 } else {
+                     if (content.startsWith("llama-timings")) {
+                         _txtGGMLStatus.setText("");
+                         _txtGGMLStatus.append(content);
+                     } else {
+                         _txtLLMInfo.append(content);
+                     }
+                 }
+             }
+         }
+     }
+
+
+     private void initKANTVMgr() {
+         if (mKANTVMgr != null) {
+             return;
+         }
+
+         try {
+             mKANTVMgr = new KANTVMgr(mEventListener);
+             if (mKANTVMgr != null) {
+                 mKANTVMgr.initASR();
+                 mKANTVMgr.startASR();
+             }
+             CDELog.j(TAG, "KANTVMgr version:" + mKANTVMgr.getMgrVersion());
+         } catch (KANTVException ex) {
+             String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
+             CDELog.j(TAG, "error occurred: " + errorMsg);
+             CDEUtils.showMsgBox(mActivity, errorMsg);
+             ex.printStackTrace();
+         }
+     }
+
+
+     public void release() {
+         if (mKANTVMgr == null) {
+             return;
+         }
+
+         try {
+             CDELog.j(TAG, "release");
+             {
+                 mKANTVMgr.finalizeASR();
+                 mKANTVMgr.stopASR();
+                 mKANTVMgr.release();
+                 mKANTVMgr = null;
+             }
+         } catch (Exception ex) {
+             String errorMsg = "An exception was thrown because:\n" + " " + ex.getMessage();
+             CDELog.j(TAG, "error occurred: " + errorMsg);
+             ex.printStackTrace();
+         }
+     }
+
  }

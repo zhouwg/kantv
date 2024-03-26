@@ -6,9 +6,9 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- ASR(Automatic Speech Recognition, a sub-filed of AI) research by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
+- ASR(Automatic Speech Recognition, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
 
-- LLM(Large Language Model, a sub-filed of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
+- LLM(Large Language Model, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
 
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
@@ -27,7 +27,7 @@ Some goals of this project are:
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(Android)
 
-- Android <b>turn-key project</b> for AI experts(whom mightbe not familiar with <b>regular Android software development</b>) focus on AI research activity, part of AI R&D activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
+- Android <b>turn-key project</b> for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on device-side AI R&D activity, part of AI R&D activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### How to build project
@@ -150,24 +150,38 @@ autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 #### Fetch source codes
 
 ```
+
 git clone https://github.com/zhouwg/kantv.git
+
 cd kantv
+
 git checkout master
+
+cd kantv
+
 ```
+
+#### Configure local development environment
+
+ - download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist
+
+```
+
+./build/prebuild-download.sh
+
+```
+
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
+
+ - moidfy <a href="https://github.com/zhouwg/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+
 
 #### Build native codes
 
-modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
-
-pay attention <a href="https://github.com/zhouwg/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">here and modify it accordingly</a> if build-target is kantv-android and running Android device is NOT Xiaomi 14
-
-(TIP: a VERY powerful Linux PC / Linux workstation is HIGHLY recommended for this step)
-
 ```
+
 . build/envsetup.sh
 
-(download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist)
-./build/prebuild-download.sh
 
 ```
 ![Screenshot from 2024-03-21 21-41-41](https://github.com/zhouwg/kantv/assets/6889919/3e13946f-596b-44be-9716-5793ce0c7263)
@@ -184,7 +198,7 @@ pay attention <a href="https://github.com/zhouwg/kantv/blob/master/external/whis
 
 ### Run Android APK on real Android phone
 
-The UI Layer of Project KanTV(this Android APK) is designed for R&D activity. and follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
+The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
@@ -201,15 +215,17 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
+![778994889](https://github.com/zhouwg/kantv/assets/6889919/ef554f25-a7a5-4bd3-8db8-368af6e45702)
+
 <details>
-  <summary>some English screenshots</summary>
+  <summary>some other screenshots</summary>
   <ol>
 
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
 ![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
-![880686930](https://github.com/zhouwg/kantv/assets/6889919/fb2add6c-94d1-42c5-83f7-a0d3b0ec9f9b)
-![2147012199](https://github.com/zhouwg/kantv/assets/6889919/2a2590f9-8343-4886-9ace-74a4880d9bed)
+![778994889](https://github.com/zhouwg/kantv/assets/6889919/ef554f25-a7a5-4bd3-8db8-368af6e45702)
+![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
 
   
 
