@@ -1,6 +1,8 @@
  /*
   * Copyright (c) 2024- KanTV Author
   *
+  * 03-26-2024, weiguo, this is a skeleton/initial UI for study llama.cpp on Android phone
+  *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
   * You may obtain a copy of the License at
@@ -50,8 +52,6 @@
  import com.cdeos.kantv.mvp.view.LLMResearchView;
  import com.cdeos.kantv.utils.Settings;
 
- import org.ggml.whispercpp.whispercpp;
-
  import java.io.File;
  import java.io.FileNotFoundException;
  import java.io.IOException;
@@ -83,11 +83,6 @@
 
      Button _btnBenchmark;
 
-     //keep sync with kantv_asr.h
-     private static final int BECHMARK_ASR      = 0;
-     private static final int BECHMARK_MEMCPY   = 1;
-     private static final int BECHMARK_MULMAT   = 2;
-     private static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
 
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
@@ -101,6 +96,8 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
+     // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
      private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
 
      private Context mContext;
@@ -155,6 +152,7 @@
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by llama.cpp(https://github.com/ggerganov/llama.cpp)\n");
 
+         _txtGGMLInfo.setVisibility(View.VISIBLE);
 
          endTime = System.currentTimeMillis();
          CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");

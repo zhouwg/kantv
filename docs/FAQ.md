@@ -19,7 +19,7 @@ Project KanTV was almost/completely done by myself since 05-2021 and NO IPR conc
 
 I know very very very little about real/hard-core AI tech because I majored in economics at university and all computer-related knowledge was fully self-taught by library(I'm very poor at that time and I couldn't afford a PC). of course, I have not studied advanced mathematics or signal theory.
 
-The original author of whisper.cpp and llama.cpp is a real great genius programmer, but I'm just an ordinary Linux/Android system software programmer but I'm good at multimedia/streaming media tech.
+In short, I'm just an ordinary Linux/Android system software programmer(know something about iOS app development) but I'm good at streaming media tech and interested in study&practice AI tech in real-scenario on mobile device(Android or iOS).
 
 <hr>
 
@@ -45,7 +45,7 @@ The source code of KanTV Android APP has been completely open source, and the so
 
 One year later(on 03-23-2024), I read an article from <a href="https://changelog.com/podcast/532">https://changelog.com/podcast/532</a>
 
-A few days ago, I didn't understand why Georgi Gerganov open source such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit. I want to / have to say that Georgi Gerganov is a real great genius programmer. just my personal thoughts, this could/should/might NOT be happend in my country:
+A few days ago, I didn't understand why Georgi Gerganov open source such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit. I'd like to say that Georgi Gerganov is a real great genius programmer. just my personal thoughts, this could/should/might NOT be happend in my country:
 
 <ul>
 <li>

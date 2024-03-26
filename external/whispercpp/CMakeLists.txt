@@ -1,4 +1,6 @@
-# Copyright (c) 2024- KanTV Authors. All Rights Reserved.
+# Copyright (c) 2024, zhou.weiguo(zhouwg2000@gmail.com)
+
+# Copyright (c) 2024- KanTV Authors
 
 # Description: build libwhispercpp.so for target Android
 

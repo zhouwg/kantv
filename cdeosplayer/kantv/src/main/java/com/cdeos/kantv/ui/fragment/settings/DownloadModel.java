@@ -99,17 +99,22 @@
 
          CDELog.j(TAG, "engineName: " + engineName + " file:" + modelA);
          CDELog.j(TAG, "modelName: " + engineName + "  file:" + modelB);
-         /*
-         localModleFileA = CDEUtils.getDataPath(mContext) + modelFileNameA;
-         localModleFileB = CDEUtils.getDataPath(mContext) + modelFileNameB;
-         */
+
          //  /sdcardk/kantv/jfk.wav
          //  /sdcard/kantv/ggml-xxx.bin
          localModleFileA = CDEUtils.getDataPath() + modelFileNameA;
          localModleFileB = CDEUtils.getDataPath() + modelFileNameB;
 
+         // http://www.cde-os.com/kantv/ggml/jfk.wav, available
          remoteModleFileA = "http://" + CDEUtils.getKANTVMasterServer() + "/kantv/" + engineName + "/" + modelFileNameA;
-         remoteModleFileB = "http://" + CDEUtils.getKANTVMasterServer() + "/kantv/" + engineName + "/" + modelFileNameB;
+
+         // http://www.cde-os.com/kantv/ggml/ggml-***.bin, not available since 03-22-2024
+         // remoteModleFileB = "http://" + CDEUtils.getKANTVMasterServer() + "/kantv/" + engineName + "/" + modelFileNameB;
+         // replace with upstream url since 03-22-2024
+         // the GGML whispercpp model could be found at https://huggingface.co/ggerganov/whisper.cpp/tree/main
+         remoteModleFileB = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/" + modelFileNameB;
+
+         CDELog.j(TAG, "remote model url:" + remoteModleFileB);
      }
 
 
