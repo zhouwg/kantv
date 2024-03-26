@@ -10,6 +10,11 @@ Makefile
 libpng-config
 libpng12-config
 
+fribidi-1.0.13/test/unicode-conformance/Makefile
+fribidi-1.0.13/doc/Makefile
+fribidi-1.0.13/test/Makefile
+
+
 *.o
 *.a
 *.so

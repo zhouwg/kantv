@@ -15190,7 +15190,7 @@ void llama_print_timings(struct llama_context * ctx) {
 
     timing << "\n" << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (timings.t_sample_ms) << " ms / "
     << timings.n_sample << " runs (" << (timings.t_sample_ms / timings.n_sample) << " ms per token, "
-    << (1e-3f / timings.t_sample_ms * timings.n_sample) << " tokens per second)";
+    << (1e3 / timings.t_sample_ms * timings.n_sample) << " tokens per second)";
 
 
     timing << "\n" << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((timings.t_end_ms - timings.t_start_ms)) << " ms / "

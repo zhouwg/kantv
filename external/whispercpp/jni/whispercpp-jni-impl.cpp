@@ -704,6 +704,45 @@ static fifo_buffer_t  *whisper_asr_getfifo() {
     return p_asr_ctx->asr_fifo;
 }
 
+// 03-26-2024,
+// this function was referenced by this PR:https://github.com/ggerganov/llama.cpp/pull/5935/
+// double check although this special case has been handled at the JNI layer
+static bool is_valid_utf8(const char * string) {
+    if (!string) {
+        return true;
+    }
+
+    const unsigned char * bytes = (const unsigned char *)string;
+    int num;
+
+    while (*bytes != 0x00) {
+        if ((*bytes & 0x80) == 0x00) {
+            // U+0000 to U+007F
+            num = 1;
+        } else if ((*bytes & 0xE0) == 0xC0) {
+            // U+0080 to U+07FF
+            num = 2;
+        } else if ((*bytes & 0xF0) == 0xE0) {
+            // U+0800 to U+FFFF
+            num = 3;
+        } else if ((*bytes & 0xF8) == 0xF0) {
+            // U+10000 to U+10FFFF
+            num = 4;
+        } else {
+            return false;
+        }
+
+        bytes += 1;
+        for (int i = 1; i < num; ++i) {
+            if ((*bytes & 0xC0) != 0x80) {
+                return false;
+            }
+            bytes += 1;
+        }
+    }
+
+    return true;
+}
 
 // =================================================================================================
 //
@@ -1267,7 +1306,12 @@ static const char * whisper_asr_audio_to_text(const float * pf32_audio_buffer, i
         result = 0;
 
         LOGGD("asr result:\n%s\n", asr_result.c_str());
-        kantv_asr_notify_c(asr_result.c_str());
+        // 03-26-2024,
+        // this function was referenced by this PR:https://github.com/ggerganov/llama.cpp/pull/5935/
+        // double check although this special case has been handled at the JNI layer
+        if (is_valid_utf8(asr_result.c_str())) {
+            kantv_asr_notify_c(asr_result.c_str());
+        }
     }
 
     text = asr_result.c_str();
@@ -1563,17 +1607,17 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode) 
 
 #define log_tostr(var) log_var_to_string_impl(var).c_str()
 
-inline std::string log_var_to_string_impl(bool var)
+static inline std::string log_var_to_string_impl(bool var)
 {
     return var ? "true" : "false";
 }
 
-inline std::string log_var_to_string_impl(std::string var)
+static inline std::string log_var_to_string_impl(std::string var)
 {
     return var;
 }
 
-inline std::string log_var_to_string_impl(const std::vector<int> & var)
+static inline std::string log_var_to_string_impl(const std::vector<int> & var)
 {
     std::stringstream buf;
     buf << "[ ";
@@ -1596,7 +1640,7 @@ inline std::string log_var_to_string_impl(const std::vector<int> & var)
 }
 
 template <typename C, typename T>
-inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & tokens)
+static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & tokens)
 {
     std::stringstream buf;
     buf << "[ ";
@@ -2088,7 +2132,9 @@ int  llama_bench(const char *model_path, const char *prompt, int bench_type, int
                 const std::string token_str = llama_token_to_piece(ctx, id);
                 printf("%s", token_str.c_str());
 #ifdef TARGET_ANDROID
-                kantv_asr_notify_benchmark_c(token_str.c_str());
+                if (is_valid_utf8(token_str.c_str())) { //ref:https://github.com/ggerganov/llama.cpp/pull/5935/
+                    kantv_asr_notify_benchmark_c(token_str.c_str());
+                }
 #endif
 
                 if (embd.size() > 1) {
@@ -2151,23 +2197,16 @@ int  llama_bench(const char *model_path, const char *prompt, int bench_type, int
         }
     }
 
-    LOGGD("here\n");
     llama_print_timings(ctx);
-    LOGGD("here\n");
     if (ctx_guidance) {
-        LOGGD("here\n");
         llama_free(ctx_guidance);
-        LOGGD("here\n");
     }
 
-    LOGGD("here\n");
     llama_free(ctx);
     llama_free_model(model);
-    LOGGD("here\n");
 
     llama_sampling_free(ctx_sampling);
     llama_backend_free();
-    LOGGD("here\n");
 
     return 0;
 }

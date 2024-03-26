@@ -38,8 +38,8 @@ endif
 # Compile flags
 #
 
-CFLAGS   = -I.              -O3 -DNDEBUG -std=c11   -fPIC
-CXXFLAGS = -I. -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
+CFLAGS   = -I. -I./llamacpp              -O3 -DNDEBUG -std=c11   -fPIC
+CXXFLAGS = -I. -I./llamacpp -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
 LDFLAGS  =
 
 ifdef MACOSX_DEPLOYMENT_TARGET
@@ -313,21 +313,21 @@ $(info )
 # Build library
 #
 
-ggml.o: ggml.c ggml.h ggml-cuda.h
+ggml.o: ggml.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-alloc.o: ggml-alloc.c ggml.h ggml-alloc.h
+ggml-alloc.o: ggml-alloc.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-backend.o: ggml-backend.c ggml.h ggml-backend.h
+ggml-backend.o: ggml-backend.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-quants.o: ggml-quants.c ggml.h ggml-quants.h
+ggml-quants.o: ggml-quants.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
 WHISPER_OBJ += ggml.o ggml-alloc.o ggml-backend.o ggml-quants.o
 
-whisper.o: whisper.cpp whisper.h ggml.h ggml-cuda.h
+whisper.o: whisper.cpp whisper.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 ifndef WHISPER_COREML

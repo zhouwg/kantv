@@ -60,7 +60,7 @@ cp kantv-record-MP4-H264-20240308-142616.wav.srt 1.srt
 follow the steps in toplevel [README.md](https://github.com/zhouwg/kantv/blob/master/README.md) and generate FFmpeg & main from source code:
 ```
  . build/envsetup.sh
- lunch 2
+ lunch 1
  ./build-all linux
 ```
 

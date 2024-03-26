@@ -41,6 +41,4 @@ public class whispercpp {
 
 
     public static native String llm_bench(String modelPath, String prompt, int nBenchType, int nThreadCounts);
-
-    public static native String llm_inference(String modelPath, String prompt, int nBenchType, int nThreadCounts);
 }

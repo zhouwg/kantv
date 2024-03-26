@@ -173,7 +173,7 @@ cd kantv
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L85">build/envsetup.sh</a> accordingly before launch build
 
- - moidfy <a href="https://github.com/zhouwg/kantv/blob/master/external/whispercpp/CMakeLists.txt#L54">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - moidfy <a href="https://github.com/zhouwg/kantv/blob/master/external/whispercpp/CMakeLists.txt#L68">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes
@@ -184,7 +184,8 @@ cd kantv
 
 
 ```
-![Screenshot from 2024-03-21 21-41-41](https://github.com/zhouwg/kantv/assets/6889919/3e13946f-596b-44be-9716-5793ce0c7263)
+
+![Screenshot from 2024-03-26 21-03-37](https://github.com/zhouwg/kantv/assets/6889919/f0b8fcc1-89c3-4640-8be6-036a1e774a1a)
 
 
 #### Build Android APK
@@ -215,7 +216,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-![778994889](https://github.com/zhouwg/kantv/assets/6889919/ef554f25-a7a5-4bd3-8db8-368af6e45702)
+![1138378624](https://github.com/zhouwg/kantv/assets/6889919/985d3cc9-22ad-4bc8-9215-cdc7775a912b)
 
 <details>
   <summary>some other screenshots</summary>
@@ -224,7 +225,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
 ![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
-![778994889](https://github.com/zhouwg/kantv/assets/6889919/ef554f25-a7a5-4bd3-8db8-368af6e45702)
+![1138378624](https://github.com/zhouwg/kantv/assets/6889919/985d3cc9-22ad-4bc8-9215-cdc7775a912b)
 ![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
 
   
