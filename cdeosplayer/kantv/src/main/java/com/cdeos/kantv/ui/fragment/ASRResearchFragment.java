@@ -173,7 +173,7 @@
          }
 
          CDELog.j(TAG, "load ggml's whisper model");
-         String systemInfo = whispercpp.get_systeminfo();
+         String systemInfo = whispercpp.asr_get_systeminfo();
          String phoneInfo = "Device info:" + "\n"
                  + "Brand:" + Build.BRAND + "\n"
                  + "Hardware:" + Build.HARDWARE + "\n"
@@ -335,12 +335,12 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 whispercpp.set_benchmark_status(0);
+                 whispercpp.asr_set_benchmark_status(0);
 
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
-                     strBenchmarkInfo = whispercpp.bench(
+                     strBenchmarkInfo = whispercpp.asr_bench(
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              CDEUtils.getDataPath() + ggmlSampleFileName,
                              benchmarkIndex,
@@ -402,7 +402,7 @@
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
-                                 whispercpp.set_benchmark_status(1);
+                                 whispercpp.asr_set_benchmark_status(1);
                                  isBenchmarking.set(false);
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;

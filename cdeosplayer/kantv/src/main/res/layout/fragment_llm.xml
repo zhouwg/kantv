@@ -31,7 +31,7 @@
             <TextView
                 android:id="@+id/ggmlInfoLLM"
                 android:layout_width="match_parent"
-                android:layout_height="200dp" />
+                android:layout_height="210dp" />
 
             <TextView
                 android:id="@+id/ggmlStatusLLM"
@@ -48,10 +48,32 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <EditText
+                android:id="@+id/llmUserInput"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:gravity="top"
+                android:background="@drawable/textview_border"
+                android:text="Please input your question here:"
+                android:layout_marginTop="5dp"
+                />
+
+            <Button
+                android:id="@+id/btnInference"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/button_drawable"
+                android:text="Inference"
+                android:textAllCaps="false"
+                android:textColor="#ffffff" />
+
             <TextView
                 android:id="@+id/llmInfo"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:background="@drawable/textview_border"
+                android:scrollbars="vertical"
+                android:layout_height="300dp"
                 android:layout_marginTop="5dp" />
 
         </LinearLayout>

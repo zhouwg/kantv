@@ -5,7 +5,7 @@
 # Description: build libwhispercpp.so for target Android
 
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 
 project(whispercpp)
 set(CMAKE_VERBOSE_MAKEFILE on)
@@ -21,7 +21,12 @@ set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/ggml-alloc.c
         ${WHISPERCPP_SRC_DIR}/ggml-backend.c
         ${WHISPERCPP_SRC_DIR}/ggml-quants.c
+
+
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
+
+        ${LLAMACPP_SRC_DIR}/llama.cpp
+        ${LLAMACPP_SRC_DIR}/unicode.cpp
 
         ${WHISPERCPP_SRC_DIR}/jni/tinywav.c
         ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni.c
@@ -41,6 +46,9 @@ message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
 include_directories(${WHISPERCPP_SRC_DIR}/)
 include_directories(${WHISPERCPP_SRC_DIR}/jni)
 include_directories(${PREBUIT_INC_PATH}/)
+
+#re-use the ggml.h in subdirectory llamacpp/ggml.h to avoid NDK complain "error: redefinition of 'ggml_status'"
+include_directories(${LLAMACPP_SRC_DIR}/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)

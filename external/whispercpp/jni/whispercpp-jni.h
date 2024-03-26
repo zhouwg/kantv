@@ -37,6 +37,8 @@
  * The above statement and notice must be included in corresponding files in derived project
  */
 
+// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
+
 #ifndef WHISPER_JNI_H
 #define WHISPER_JNI_H
 

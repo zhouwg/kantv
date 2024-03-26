@@ -52,6 +52,8 @@
  import com.cdeos.kantv.mvp.view.LLMResearchView;
  import com.cdeos.kantv.utils.Settings;
 
+ import org.ggml.whispercpp.whispercpp;
+
  import java.io.File;
  import java.io.FileNotFoundException;
  import java.io.IOException;
@@ -96,7 +98,14 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
+     // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-13B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-GGUF
+
      // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
+
      // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
      private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
 
@@ -141,12 +150,21 @@
          _txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlModelFileName);
 
-         CDELog.j(TAG, "load LLM model");
+         try {
+             CDELibraryLoader.load("whispercpp");
+             CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+         } catch (Exception e) {
+             CDELog.j(TAG, "failed to initialize whispercpp jni");
+             return;
+         }
+
+         CDELog.j(TAG, "load ggml's LLM model");
+         String systemInfo = whispercpp.llm_get_systeminfo();
          String phoneInfo = "Device info:" + "\n"
                  + "Brand:" + Build.BRAND + "\n"
                  + "Hardware:" + Build.HARDWARE + "\n"
                  + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
-                 + "Arch:" + Build.CPU_ABI ;
+                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by llama.cpp(https://github.com/ggerganov/llama.cpp)\n");

@@ -17,13 +17,13 @@
  * in derived project
  */
 
-//TODO: re-write entire whispercpp-jni.c with standard Android JNI specification
-// interaction between kantv-core and whispercpp-jni
+// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
 
 #include <jni.h>
 
 #include "whisper.h"
-#include "ggml.h"
+
+#include "llamacpp/llama.h"
 
 #include "kantv-asr.h"
 #include "whispercpp-jni.h"
@@ -31,7 +31,7 @@
 #define UNUSED(x) (void)(x)
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_org_ggml_whispercpp_whispercpp_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
@@ -44,7 +44,7 @@ Java_org_ggml_whispercpp_whispercpp_get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_set_1benchmark_1status(JNIEnv *env, jclass clazz,
+Java_org_ggml_whispercpp_whispercpp_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
                                                            jint b_exit_benchmark) {
     UNUSED(env);
     UNUSED(clazz);
@@ -54,7 +54,7 @@ Java_org_ggml_whispercpp_whispercpp_set_1benchmark_1status(JNIEnv *env, jclass c
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_bench(JNIEnv *env, jclass clazz, jstring model_path,
+Java_org_ggml_whispercpp_whispercpp_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
                                        jstring audio_path, jint bench_type, jint num_threads) {
     UNUSED(clazz);
 
@@ -201,3 +201,15 @@ Java_org_ggml_whispercpp_whispercpp_asr_1stop(JNIEnv *env, jclass clazz) {
     whisper_asr_stop();
 }
 
+
+JNIEXPORT jstring JNICALL
+Java_org_ggml_whispercpp_whispercpp_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+    UNUSED(env);
+
+    LOGGD("enter getSystemInfo");
+    const char *sysinfo = llama_print_system_info();
+    jstring string = (*env)->NewStringUTF(env, sysinfo);
+    LOGGD("leave getSystemInfo");
+
+    return string;
+}
