@@ -37,6 +37,8 @@
  * The above statement and notice must be included in corresponding files in derived project
  */
 
+// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
+
 #ifndef WHISPER_JNI_H
 #define WHISPER_JNI_H
 
@@ -63,6 +65,9 @@ extern "C" {
     void         whisper_asr_start(void);
     void         whisper_asr_stop(void);
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
+
+    // JNI helper function for LLAMA
+    int         llama_bench(const char *model_path, const char *prompt, int bench_type, int num_threads);
 
 
 #ifdef __cplusplus
