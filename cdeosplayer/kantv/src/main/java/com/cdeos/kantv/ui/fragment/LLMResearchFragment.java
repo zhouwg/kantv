@@ -252,7 +252,7 @@
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
                      _txtGGMLStatus.setText("LLAMA inference is progressing...");
-                     strBenchmarkInfo = ggmljava.llm_bench(
+                     strBenchmarkInfo = ggmljava.llm_inference(
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              strUserInput,
                              benchmarkIndex,

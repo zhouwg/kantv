@@ -22,11 +22,6 @@
     extern "C" {
 #endif
 
-#define BECHMARK_ASR                0
-#define BECHMARK_MEMCPY             1
-#define BECHMARK_MULMAT             2
-#define BECHMARK_FULL               3
-
 
 typedef const char * ( * kantv_asr_callback)(void * opaque);
 typedef const char * ( * kantv_inference_callback)(const float * pf32_audio_buffer, int num_samples);

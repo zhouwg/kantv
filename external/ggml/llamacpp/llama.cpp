@@ -7,6 +7,7 @@
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
 
+#include "libavutil/cde_log.h"
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
 #include "ggml-jni.h"

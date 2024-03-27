@@ -25,6 +25,7 @@
 
  import static org.ggml.ggmljava.WHISPER_ASR_MODE_BECHMARK;
  import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
+ import static cdeos.media.player.CDEUtils.BECHMARK_FULL;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -152,8 +153,8 @@
 
          //copy asset files to /sdcard/kantv/
          //or just upload dependent files to /sdcard/kantv/ accordingly so the APK size would be smaller significantly
-         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
-         CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
+         //CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
+         //CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
@@ -281,11 +282,37 @@
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
+             String selectModeFileName = "";
+             String selectModelFilePath = "";
+             File selectModeFile = null;
+             boolean isLLMModel = false;
 
-             String selectModeFileName = "ggml-" + strModeName + ".bin";
-             String selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             //TODO: better method
+             //sanity check begin
+             if (strModeName.startsWith("llama")) {
+                 isLLMModel = true;
+             } else if (strModeName.startsWith("qwen")) {
+                 isLLMModel = true;
+             }
+             if (isLLMModel)
+                 selectModeFileName = strModeName + ".gguf";
+             else
+                 selectModeFileName = "ggml-" + strModeName + ".bin";
+
+
+             if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+             if ((!isLLMModel) && (benchmarkIndex == CDEUtils.BENCHMARK_LLM)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+
+             selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
              CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
-             File selectModeFile = new File(selectModelFilePath);
+             selectModeFile = new File(selectModelFilePath);
+
              displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
              if (!selectModeFile.exists()) {
                  CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
@@ -296,6 +323,9 @@
                  CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
+             //sanity check end
+
+             //reset default ggml model file name after sanity check
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
              ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
@@ -353,7 +383,7 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String benchmarkTip = CDEUtils.getBenchmarkDesc(benchmarkIndex) + "(model: " + strModeName
+                             String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + strModeName
                                      + " ,threads: " + nThreadCounts
                                      + " ) cost " + duration + " milliseconds";
                              benchmarkTip += "\n";
@@ -501,19 +531,17 @@
                      return;
                  }
 
+                 if (content.startsWith("reset")) {
+                     _txtASRInfo.setText("");
+                     return;
+                 }
 
-                 //CDELog.j(TAG, "content:" + content);
                  if (content.startsWith("unknown")) {
 
                  } else {
-                     _txtASRInfo.setText(content);
+                     _txtASRInfo.append(content);
                  }
              }
-
-             if (eventType.getValue() == KANTVEvent.KANTV_INFO_ASR_RESULT) {
-                 //playAudioFile();
-             }
-
          }
      }
 
@@ -558,8 +586,6 @@
              ex.printStackTrace();
          }
      }
-
-
 
 
      private void displayFileStatus(String sampleFilePath, String modelFilePath) {

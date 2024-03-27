@@ -6317,7 +6317,7 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
     char strbuf[256];
 
 #ifdef TARGET_ANDROID
-    kantv_asr_notify_benchmark_c("calling ggml_time_init");
+    kantv_asr_notify_benchmark_c("calling ggml_time_init\n");
 #endif
 
     ggml_time_init();
@@ -6354,11 +6354,11 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
         }
 
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n", (double) (n*size)/(tsum*1e9));
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
         s += strbuf;
 
-#ifdef TARGET_ANDROID
-        kantv_asr_notify_benchmark(s);
-#endif
 
         // needed to prevent the compiler from optimizing the memcpy away
         {
@@ -6393,11 +6393,11 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
         }
 
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n", (double) (n*size)/(tsum*1e9));
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
         s += strbuf;
 
-#ifdef TARGET_ANDROID
-        kantv_asr_notify_benchmark(s);
-#endif
 
         // needed to prevent the compiler from optimizing the memcpy away
         {
@@ -6449,11 +6449,11 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
         tsum += (t1 - t0)*1e-6;
 
         snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n", (double) (n*size)/(tsum*1e9), k);
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
         s += strbuf;
 
-#ifdef TARGET_ANDROID
-        kantv_asr_notify_benchmark(s);
-#endif
 
         // needed to prevent the compiler from optimizing the memcpy away
         {
@@ -6465,11 +6465,10 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
     }
 
     snprintf(strbuf, sizeof(strbuf), "sum:    %f\n", sum);
-    s += strbuf;
-
 #ifdef TARGET_ANDROID
-    kantv_asr_notify_benchmark(s);
+    kantv_asr_notify_benchmark_c(strbuf);
 #endif
+    s += strbuf;
 
     return s.c_str();
 }
@@ -6489,8 +6488,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
     tipString = "";
 
     tipString += "calling ggml_time_init";
-    kantv_asr_notify_benchmark_c("calling ggml_time_init");
-    kantv_asr_notify_benchmark(tipString);
+    kantv_asr_notify_benchmark_c("calling ggml_time_init\n");
 #endif
 
     ggml_time_init();
@@ -6512,7 +6510,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
 #ifdef TARGET_ANDROID
     tipString += "\nprepare matrix";
-    kantv_asr_notify_benchmark(tipString);
+    kantv_asr_notify_benchmark_c("prepare matrix\n");
 #endif
 
     // put a bunch of random data in the buffer
@@ -6576,6 +6574,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 const int64_t t0 = ggml_time_us();
 
 #ifdef TARGET_ANDROID
+                kantv_asr_notify_benchmark_c("reset");
                 tipString = "calling ggml_graphic_compute_helper:\n";
                 tipString += "j= " + std::to_string(j) + "(matrix dimension = " + std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
                              + ",k=" + std::to_string(k) + "(ggml quant type=" + std::string(whisper_get_ggml_type_str(static_cast<ggml_type>(wtype))) + ")"
@@ -6601,7 +6600,9 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
             s = ((2.0*N*N*N*n)/tsum)*1e-9;
         }
-
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c("reset");
+#endif
         // Q4_0 | Q4_1
         snprintf(strbuf, sizeof(strbuf), "%4zu x %4zu: Q4_0 %7.1f GFLOPS (%3d runs) | Q4_1 %7.1f GFLOPS (%3d runs)\n",
                 N, N, s_q4_0, n_q4_0, s_q4_1, n_q4_1);
