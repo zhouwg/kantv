@@ -46,7 +46,7 @@
 #include "llama.h"
 
 #include "kantv-asr.h"
-#include "whispercpp-jni.h"
+#include "ggml-jni.h"
 
 #include "tinywav.h"
 
@@ -1552,6 +1552,12 @@ void whisper_asr_stop() {
 }
 
 
+/**
+ *
+ * @param sz_model_path
+ * @param n_threads
+ * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+ */
 int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode) {
     int result = 0;
 
@@ -1681,7 +1687,7 @@ static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & token
  * @param n_threads             1 - 8
  * @return
 */
-int  llama_bench(const char *model_path, const char *prompt, int bench_type, int num_threads) {
+int  llama_bench(const char * model_path, const char * prompt, int bench_type, int num_threads) {
     llama_context           ** g_ctx;
     llama_model             ** g_model;
     gpt_params               * g_params;

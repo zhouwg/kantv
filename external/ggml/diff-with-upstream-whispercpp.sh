@@ -22,8 +22,8 @@ check_upstream_whispercpp
 check_local_whispercpp
 
 
-if [ "${REL_PATH}" != "whispercpp" ]; then
-    echo "current path is ${PWD}, it should be kantv/src/main/jni/whispercpp, pls check"
+if [ "${REL_PATH}" != "ggml" ]; then
+    echo "current path is ${PWD}, it should be kantv/external/ggml, pls check"
     #exit 1
 fi
 

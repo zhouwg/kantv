@@ -42,7 +42,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import org.ggml.whispercpp.whispercpp;
+import org.ggml.ggmljava;
 
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;

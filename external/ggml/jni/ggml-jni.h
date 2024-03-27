@@ -37,10 +37,8 @@
  * The above statement and notice must be included in corresponding files in derived project
  */
 
-// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
-
-#ifndef WHISPER_JNI_H
-#define WHISPER_JNI_H
+#ifndef KANTV_GGML_JNI_H
+#define KANTV_GGML_JNI_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -52,22 +50,58 @@ extern "C" {
 #endif
 
 
-    // JNI helper function for benchmark
+    // JNI helper function for whisper.cpp benchmark
     int          whisper_get_cpu_core_counts(void);
     void         whisper_set_benchmark_status(int b_exit_benchmark);
+    /**
+    *
+    * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
+    * @param sz_audio_path         /sdcard/kantv/jfk.wav
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode
+    * @param n_threads             1 - 8
+    * @return
+    */
     void         whisper_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
-    // JNI helper function for ASR
-    int          whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
+
+    // JNI helper function for ASR(whisper.cpp)
+    /**
+    * @param sz_model_path
+    * @param n_threads
+    * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    */
+    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
     void         whisper_asr_stop(void);
+    /**
+    * @param sz_model_path
+    * @param n_threads
+    * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    */
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
 
-    // JNI helper function for LLAMA
-    int         llama_bench(const char *model_path, const char *prompt, int bench_type, int num_threads);
+
+
+
+
+// =================================================================================================
+// trying to integrate llama.cpp from 03-26-2024
+// =================================================================================================
+
+
+    // JNI helper function for llama.cpp benchmark
+    /**
+    *
+    * @param sz_model_path         /sdcard/kantv/llama-2-7b-chat.Q4_K_M.gguf
+    * @param prompt
+    * @param bench_type            not used currently
+    * @param n_threads             1 - 8
+    * @return
+    */
+    int          llama_bench(const char * model_path, const char * prompt, int bench_type, int num_threads);
 
 
 #ifdef __cplusplus

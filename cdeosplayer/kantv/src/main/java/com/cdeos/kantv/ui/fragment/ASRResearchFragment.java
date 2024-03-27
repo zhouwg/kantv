@@ -23,7 +23,7 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
+ import static org.ggml.ggmljava.WHISPER_ASR_MODE_BECHMARK;
  import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
@@ -58,7 +58,8 @@
  import com.cdeos.kantv.mvp.view.ASRResearchView;
  import com.cdeos.kantv.utils.Settings;
 
- import org.ggml.whispercpp.whispercpp;
+
+ import org.ggml.ggmljava;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -158,10 +159,10 @@
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
          try {
-             CDELibraryLoader.load("whispercpp");
-             CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+             CDELibraryLoader.load("ggml-jni");
+             CDELog.j(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
          } catch (Exception e) {
-             CDELog.j(TAG, "failed to initialize whispercpp jni");
+             CDELog.j(TAG, "failed to initialize ggml jni");
              return;
          }
 
@@ -172,8 +173,8 @@
              return;
          }
 
-         CDELog.j(TAG, "load ggml's whisper model");
-         String systemInfo = whispercpp.asr_get_systeminfo();
+         CDELog.j(TAG, "load ggml's whispercpp info");
+         String systemInfo = ggmljava.asr_get_systeminfo();
          String phoneInfo = "Device info:" + "\n"
                  + "Brand:" + Build.BRAND + "\n"
                  + "Hardware:" + Build.HARDWARE + "\n"
@@ -297,7 +298,7 @@
              }
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
-             whispercpp.asr_reset(CDEUtils.getDataPath() + selectModeFileName, whispercpp.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
+             ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, WHISPER_ASR_MODE_BECHMARK);
              if (benchmarkIndex == BECHMARK_ASR) {
                  //playAudioFile();
              }
@@ -335,12 +336,12 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 whispercpp.asr_set_benchmark_status(0);
+                 ggmljava.asr_set_benchmark_status(0);
 
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
-                     strBenchmarkInfo = whispercpp.asr_bench(
+                     strBenchmarkInfo = ggmljava.asr_bench(
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              CDEUtils.getDataPath() + ggmlSampleFileName,
                              benchmarkIndex,
@@ -402,7 +403,7 @@
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
-                                 whispercpp.asr_set_benchmark_status(1);
+                                 ggmljava.asr_set_benchmark_status(1);
                                  isBenchmarking.set(false);
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;

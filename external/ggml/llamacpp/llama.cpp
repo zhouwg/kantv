@@ -9,7 +9,7 @@
 
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
-#include "whispercpp-jni.h"
+#include "ggml-jni.h"
 #endif
 
 #ifdef GGML_USE_CUDA

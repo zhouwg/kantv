@@ -16,9 +16,6 @@
  * The above statement and notice must be included in corresponding files
  * in derived project
  */
-
-// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
-
 #include <jni.h>
 
 #include "whisper.h"
@@ -26,12 +23,12 @@
 #include "llamacpp/llama.h"
 
 #include "kantv-asr.h"
-#include "whispercpp-jni.h"
+#include "ggml-jni.h"
 
 #define UNUSED(x) (void)(x)
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
@@ -44,7 +41,7 @@ Java_org_ggml_whispercpp_whispercpp_asr_1get_1systeminfo(JNIEnv *env, jclass cla
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
+Java_org_ggml_ggmljava_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
                                                            jint b_exit_benchmark) {
     UNUSED(env);
     UNUSED(clazz);
@@ -54,7 +51,7 @@ Java_org_ggml_whispercpp_whispercpp_asr_1set_1benchmark_1status(JNIEnv *env, jcl
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
+Java_org_ggml_ggmljava_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
                                        jstring audio_path, jint bench_type, jint num_threads) {
     UNUSED(clazz);
 
@@ -110,7 +107,7 @@ failure:
 
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_whispercpp_whispercpp_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -119,7 +116,7 @@ Java_org_ggml_whispercpp_whispercpp_get_1cpu_1core_1counts(JNIEnv *env, jclass c
 
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode) {
+Java_org_ggml_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -148,7 +145,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1finalize(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -156,7 +153,7 @@ Java_org_ggml_whispercpp_whispercpp_asr_1finalize(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
+Java_org_ggml_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
                                                jint n_thread_counts, jint n_asrmode) {
     UNUSED(clazz);
 
@@ -186,7 +183,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1start(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -194,7 +191,7 @@ Java_org_ggml_whispercpp_whispercpp_asr_1start(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT void JNICALL
-Java_org_ggml_whispercpp_whispercpp_asr_1stop(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -203,7 +200,7 @@ Java_org_ggml_whispercpp_whispercpp_asr_1stop(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_whispercpp_whispercpp_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_org_ggml_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
@@ -215,7 +212,7 @@ Java_org_ggml_whispercpp_whispercpp_llm_1get_1systeminfo(JNIEnv *env, jclass cla
 }
 
 JNIEXPORT jstring  JNICALL
-Java_org_ggml_whispercpp_whispercpp_llm_1bench(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
+Java_org_ggml_ggmljava_llm_1bench(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
                                                jint n_bench_type, jint n_thread_counts) {
     UNUSED(clazz);
 

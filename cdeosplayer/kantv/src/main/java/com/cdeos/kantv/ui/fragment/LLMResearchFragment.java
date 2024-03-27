@@ -17,7 +17,7 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
- import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_BECHMARK;
+ import static org.ggml.ggmljava.WHISPER_ASR_MODE_BECHMARK;
  import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
  import static cdeos.media.player.CDEUtils.SCREEN_ORIENTATION_PORTRAIT;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
@@ -57,7 +57,8 @@
  import com.cdeos.kantv.mvp.view.LLMResearchView;
  import com.cdeos.kantv.utils.Settings;
 
- import org.ggml.whispercpp.whispercpp;
+
+ import org.ggml.ggmljava;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -166,10 +167,10 @@
          displayFileStatus(CDEUtils.getDataPath() + ggmlModelFileName);
 
          try {
-             CDELibraryLoader.load("whispercpp");
-             CDELog.j(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+             CDELibraryLoader.load("ggml-jni");
+             CDELog.j(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
          } catch (Exception e) {
-             CDELog.j(TAG, "failed to initialize GGML jni");
+             CDELog.j(TAG, "failed to initialize ggml jni");
              return;
          }
 
@@ -180,8 +181,8 @@
              return;
          }
 
-         CDELog.j(TAG, "load ggml's LLAMA model");
-         String systemInfo = whispercpp.llm_get_systeminfo();
+         CDELog.j(TAG, "load ggml's LLAMACPP info");
+         String systemInfo = ggmljava.llm_get_systeminfo();
          String phoneInfo = "Device info:" + " "
                  + "Brand:" + Build.BRAND + " "
                  + "Hardware:" + Build.HARDWARE + " "
@@ -251,7 +252,7 @@
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
                      _txtGGMLStatus.setText("LLAMA inference is progressing...");
-                     strBenchmarkInfo = whispercpp.llm_bench(
+                     strBenchmarkInfo = ggmljava.llm_bench(
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              strUserInput,
                              benchmarkIndex,

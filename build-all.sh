@@ -41,16 +41,16 @@ function build_kantvcore
 }
 
 
-function build_whispercpp_x86
+function build_ggml_x86
 {
-    cd ${PROJECT_ROOT_PATH}/external/whispercpp
+    cd ${PROJECT_ROOT_PATH}/external/ggml
     show_pwd
 
     echo ""
     echo ""
     echo -e "------------------------------------------------------------------------------------------\n"
 
-    echo -e "${TEXT_BLUE}build whispercpp regular tool for target x86${TEXT_RESET}"
+    echo -e "${TEXT_BLUE}build ggml regular tool for target x86${TEXT_RESET}"
     make
 
     if [ -f main ]; then
@@ -102,7 +102,7 @@ function build_thirdparty()
 
 function build_jni()
 {
-    jni_libs=" whispercpp "
+    jni_libs=" ggml "
 
     cd ${PROJECT_ROOT_PATH}/external/
     for item in ${jni_libs};do
@@ -208,7 +208,7 @@ function do_buildlinux()
     /bin/cp -fv ${FF_PREFIX}/bin/ffprobe ./
 
     cd ${PROJECT_ROOT_PATH}/
-    build_whispercpp_x86
+    build_ggml_x86
 
 
 }

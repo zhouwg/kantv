@@ -56,7 +56,7 @@
  import org.apache.http.conn.util.InetAddressUtils;
  import org.apache.http.impl.client.DefaultHttpClient;
  import org.apache.http.util.EntityUtils;
- import org.ggml.whispercpp.whispercpp;
+ import org.ggml.ggmljava;
  import org.w3c.dom.Document;
  import org.w3c.dom.Element;
  import org.w3c.dom.Node;
@@ -3180,7 +3180,7 @@
 
      public static void exitAPK(Activity activity) {
          if (CDEUtils.getASRSubsystemInit()) {
-             whispercpp.asr_finalize();
+             ggmljava.asr_finalize();
          }
 
          umExitApp();
