@@ -110,8 +110,11 @@
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
      // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
 
+     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf
+
      //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
      private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
+     //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
 
      private Context mContext;
      private Activity mActivity;
@@ -179,14 +182,14 @@
 
          CDELog.j(TAG, "load ggml's LLM model");
          String systemInfo = whispercpp.llm_get_systeminfo();
-         String phoneInfo = "Device info:" + "\n"
-                 + "Brand:" + Build.BRAND + "\n"
-                 + "Hardware:" + Build.HARDWARE + "\n"
+         String phoneInfo = "Device info:" + " "
+                 + "Brand:" + Build.BRAND + " "
+                 + "Hardware:" + Build.HARDWARE + " "
                  + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Powered by llama.cpp(https://github.com/ggerganov/llama.cpp)\n");
+         _txtGGMLInfo.append("Powered by https://github.com/ggerganov/llama.cpp");
 
          _btnInference.setOnClickListener(v -> {
              String strPrompt = _txtUserInput.getText().toString();
@@ -220,7 +223,7 @@
 
              isBenchmarking.set(true);
 
-             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+             Toast.makeText(mContext, "GGML's LLAMA inference is launched", Toast.LENGTH_LONG).show();
 
              _txtLLMInfo.setText("");
              _btnInference.setEnabled(false);
@@ -349,6 +352,10 @@
                          _txtGGMLStatus.append(content);
                      } else {
                          _txtLLMInfo.append(content);
+
+                         int offset = _txtLLMInfo.getLineCount() * _txtLLMInfo.getLineHeight();
+                         if (offset > _txtLLMInfo.getHeight())
+                             _txtLLMInfo.scrollTo(0, offset - _txtLLMInfo.getHeight());
                      }
                  }
              }
