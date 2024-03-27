@@ -40,7 +40,7 @@ A few days ago, I didn't understand/have no idea why Georgi Gerganov open source
     The second is the powerful GFW
 </li>
 <li>
-    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT...... obviouly, I don’t want to quit the IT industry completely currently.
+    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT...... obviously, I don’t want to quit the IT industry completely currently.
 
 </li>
 </ul>
