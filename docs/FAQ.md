@@ -30,7 +30,7 @@ The source code of KanTV Android APP has been completely open source, and the so
 
 One year later(on 03-23-2024), I read an article from <a href="https://changelog.com/podcast/532">https://changelog.com/podcast/532</a>
 
-A few days ago, I didn't understand/have no idea why Georgi Gerganov open sourced such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit：I think it’s because he doesn’t have the pressure to survive in EU, so he can freely develop his hobbies and share them(if I also lived in the EU and didn't have any life pressure, I would not hesitate to open source the libkantv-core.so).
+A few days ago, I didn't understand/have no idea why Georgi Gerganov open sourced such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit：I think it’s because he doesn’t have the pressure to survive in EU, so he can freely develop his hobbies and share them(if I also didn't have any life pressure, I would not hesitate to open source the libkantv-core.so).
 
 I have to say that I was touched with/motivated by the great open source AI project Whisper.cpp from 03-05-2024 to 03-22-2024 after experienced hard time since 01-28-2024.
 
