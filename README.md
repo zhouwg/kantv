@@ -31,9 +31,7 @@ Some goals of this project are:
 
 ### Software architecture of KanTV
 
-
-![kantv-arch](https://github.com/zhouwg/kantv/assets/6889919/cde4bcfa-ad52-46c4-89c5-3943a518d2d9)
-
+![kantv-arch-without-wasm](https://github.com/zhouwg/kantv/assets/6889919/9e608c12-7744-426d-9579-9744acc22124)
 
 ### Software architecture of KanTV Android
 
@@ -194,7 +192,7 @@ cd kantv
 
 ```
 
-![Screenshot from 2024-03-26 21-03-37](https://github.com/zhouwg/kantv/assets/6889919/f0b8fcc1-89c3-4640-8be6-036a1e774a1a)
+![Screenshot from 2024-03-27 13-16-55](https://github.com/zhouwg/kantv/assets/6889919/187e11c9-6453-4d6f-9400-8818034e59b0)
 
 
 #### Build Android APK

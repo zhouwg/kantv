@@ -25,8 +25,6 @@ export BUILD_TIME=`date +"%Y-%m-%d-%H-%M-%S"`
 #export PROJECT_NAME=KanTV-ios
 
 export BUILD_HOST=Linux
-#export BUILD_TARGET=wasm
-#export PROJECT_NAME=KanTV-wasm
 
 #export BUILD_TARGET=android
 #export PROJECT_NAME=KanTV-android
@@ -57,7 +55,7 @@ export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/prebuilts/toolchain
 export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/whispercpp
 
 
-export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios kantv-wasm"
+export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios"
 export KANTV_PROJECTS_DEBUG="kantv-android-debug"
 
 
