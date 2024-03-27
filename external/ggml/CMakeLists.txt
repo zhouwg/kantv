@@ -7,7 +7,7 @@
 
 cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 
-project(whispercpp)
+project(ggml-jni)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_STANDARD 11)
 
@@ -28,9 +28,11 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
 
+
+        ${WHISPERCPP_SRC_DIR}/jni/ggml-jni.c
+        ${WHISPERCPP_SRC_DIR}/jni/ggml-jni-impl.cpp
+
         ${WHISPERCPP_SRC_DIR}/jni/tinywav.c
-        ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni.c
-        ${WHISPERCPP_SRC_DIR}/jni/whispercpp-jni-impl.cpp
         ${WHISPERCPP_SRC_DIR}/jni/sampling.cpp
         ${WHISPERCPP_SRC_DIR}/jni/common.cpp
         ${WHISPERCPP_SRC_DIR}/jni/grammar-parser.cpp
@@ -107,4 +109,4 @@ function(build_library target_name)
 
 endfunction()
 
-build_library("whispercpp")
+build_library("ggml-jni")

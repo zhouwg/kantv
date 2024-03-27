@@ -19,8 +19,8 @@
 
 package com.cdeos.kantv.player.ffplayer.media;
 
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
@@ -92,7 +92,7 @@ import java.util.regex.Pattern;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import org.ggml.whispercpp.whispercpp;
+import org.ggml.ggmljava;
 
 
 public class CDEOSVideoView extends FrameLayout implements MediaController.MediaPlayerControl {
@@ -514,8 +514,8 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 }
             }
 
-            whispercpp.asr_stop();
-            //whispercpp.asr_finalize();
+            ggmljava.asr_stop();
+            //ggmljava.asr_finalize();
             setEnableASR(false);
             CDEUtils.setTVASR(false);
 

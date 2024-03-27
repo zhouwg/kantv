@@ -37,10 +37,8 @@
  * The above statement and notice must be included in corresponding files in derived project
  */
 
-// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
-
-#ifndef WHISPER_JNI_H
-#define WHISPER_JNI_H
+#ifndef KANTV_GGML_JNI_H
+#define KANTV_GGML_JNI_H
 
 #include <stddef.h>
 #include <stdint.h>
@@ -52,13 +50,13 @@ extern "C" {
 #endif
 
 
-    // JNI helper function for benchmark
+    // JNI helper function for whisper.cpp benchmark
     int          whisper_get_cpu_core_counts(void);
     void         whisper_set_benchmark_status(int b_exit_benchmark);
     void         whisper_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
-    // JNI helper function for ASR
+    // JNI helper function for ASR(whisper.cpp)
     int          whisper_asr_init(const char *model_path, int num_threads, int n_devmode);
     void         whisper_asr_finalize(void);
 
@@ -66,7 +64,7 @@ extern "C" {
     void         whisper_asr_stop(void);
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
 
-    // JNI helper function for LLAMA
+    // JNI helper function for llama.cpp benchmark
     int         llama_bench(const char *model_path, const char *prompt, int bench_type, int num_threads);
 
 

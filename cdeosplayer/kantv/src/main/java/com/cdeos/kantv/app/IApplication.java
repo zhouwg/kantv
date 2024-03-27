@@ -1,7 +1,7 @@
 package com.cdeos.kantv.app;
 
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
 
 import android.annotation.TargetApi;
 import android.app.Application;
@@ -37,7 +37,7 @@ import com.cdeos.kantv.utils.database.DataBaseManager;
 import com.cdeos.kantv.utils.net.okhttp.CookiesManager;
 import com.cdeos.kantv.player.common.utils.PlayerConfigShare;
 
-import org.ggml.whispercpp.whispercpp;
+import org.ggml.ggmljava;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -367,13 +367,13 @@ public class IApplication extends Application {
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         try {
             int result = 0;
-            CDELibraryLoader.load("whispercpp");
-            CDELog.d(TAG, "cpu core counts:" + whispercpp.get_cpu_core_counts());
+            CDELibraryLoader.load("ggml-jni");
+            CDELog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
             } else {
-                result = whispercpp.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
             }
             CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             CDEUtils.setTVASR(false);
@@ -381,12 +381,12 @@ public class IApplication extends Application {
                 CDEUtils.setASRSubsystemInit(true);
             } else {
                 CDELog.j(TAG, "********************************************\n");
-                CDELog.j(TAG, " pls check why failed to initialize whispercpp jni\n");
+                CDELog.j(TAG, " pls check why failed to initialize ggml jni\n");
                 CDELog.j(TAG, "********************************************\n");
             }
         } catch (Exception e) {
             CDELog.j(TAG, "********************************************\n");
-            CDELog.j(TAG, " pls check why failed to initialize whispercpp jni: " + e.toString() + "\n");
+            CDELog.j(TAG, " pls check why failed to initialize ggml jni: " + e.toString() + "\n");
             CDELog.j(TAG, "********************************************\n");
         }
 

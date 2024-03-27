@@ -1,10 +1,10 @@
 // TODO: 03-05-2024, re-write entire whispercpp.java with standard Android JNI specification
 // TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
 
-package org.ggml.whispercpp;
+package org.ggml;
 
-public class whispercpp {
-    private static final String TAG = whispercpp.class.getName();
+public class ggmljava {
+    private static final String TAG = ggmljava.class.getName();
 
     public static final int WHISPER_ASR_MODE_NORMAL         = 0;
     public static final int WHISPER_ASR_MODE_PRESURETEST    = 1;

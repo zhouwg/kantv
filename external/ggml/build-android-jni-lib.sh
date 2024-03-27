@@ -4,12 +4,12 @@
 
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build libwhispercpp.so for target Android
+# Description: build libggml-jni.so for target Android
 #
 
 set -e
 
-TARGET=whispercpp
+TARGET=ggml-jni
 BUILD_TYPE=Release
 
 if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then

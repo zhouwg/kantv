@@ -2,7 +2,7 @@
 
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
-#include "whispercpp-jni.h"
+#include "ggml-jni.h"
 
 #include <sstream>
 #endif

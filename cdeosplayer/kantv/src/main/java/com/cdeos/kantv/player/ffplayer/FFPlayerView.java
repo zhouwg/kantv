@@ -18,8 +18,8 @@
 
 package com.cdeos.kantv.player.ffplayer;
 
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.whispercpp.whispercpp.WHISPER_ASR_MODE_PRESURETEST;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
+import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -95,7 +95,8 @@ import com.cdeos.kantv.player.subtitle.SubtitleView;
 import com.cdeos.kantv.player.subtitle.util.TimedTextObject;
 import com.cdeos.kantv.utils.Settings;
 
-import org.ggml.whispercpp.whispercpp;
+
+import org.ggml.ggmljava;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -1579,11 +1580,11 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         if (CDEUtils.getASRSubsystemInit()) {
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                whispercpp.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
             } else {
-                whispercpp.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
             }
-            whispercpp.asr_start();
+            ggmljava.asr_start();
         } else {
             topBarView.updateTVASRVisibility(false);
             CDEUtils.setTVASR(false);
@@ -1614,8 +1615,8 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             subtitleManager.setInnerSub("");
         }
 
-        whispercpp.asr_stop();
-        //whispercpp.asr_finalize();
+        ggmljava.asr_stop();
+        //ggmljava.asr_finalize();
         CDEUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
         if (asrMode == CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
