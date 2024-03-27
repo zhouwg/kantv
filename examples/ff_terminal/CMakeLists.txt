@@ -13,7 +13,7 @@ message("FF_INC_PATH     : ${FF_INC_PATH}")
 message("FF_SRC_PATH     : ${FF_SRC_PATH}")
 message("FF_LIB_PATH     : ${FF_LIB_PATH}")
 
-add_executable(ff-terminal
+add_executable(ff_terminal
     main.c
     fb.c
     ${FF_SRC_PATH}/libavutil/cde_log.c
@@ -27,7 +27,7 @@ include_directories(./)
 
 install(
         TARGETS
-        ff-terminal
+        ff_terminal
         RUNTIME DESTINATION
         ${CMAKE_INSTALL_PREFIX}/bin
 )

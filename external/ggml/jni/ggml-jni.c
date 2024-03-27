@@ -25,7 +25,7 @@
 #include "kantv-asr.h"
 #include "ggml-jni.h"
 
-#define UNUSED(x) (void)(x)
+#define UNUSED(x)       (void)(x)
 
 JNIEXPORT jstring JNICALL
 Java_org_ggml_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
@@ -77,7 +77,7 @@ Java_org_ggml_ggmljava_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
     LOGGV("bench type: %d\n", bench_type);
     LOGGV("thread counts:%d\n", num_threads);
 
-    if (bench_type > 3) {
+    if (bench_type > 5) {
         LOGGW("pls check bench type\n");
         goto failure;
     }
@@ -211,8 +211,9 @@ Java_org_ggml_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     return string;
 }
 
+
 JNIEXPORT jstring  JNICALL
-Java_org_ggml_ggmljava_llm_1bench(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
+Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
                                                jint n_bench_type, jint n_thread_counts) {
     UNUSED(clazz);
 
@@ -242,7 +243,7 @@ Java_org_ggml_ggmljava_llm_1bench(JNIEnv *env, jclass clazz, jstring model_path,
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llama_bench(sz_model_path, sz_prompt, n_bench_type, n_thread_counts);
+    result = llama_inference(sz_model_path, sz_prompt, n_bench_type, n_thread_counts);
 
 failure:
     if (NULL != sz_prompt) {
@@ -256,4 +257,23 @@ failure:
     jstring string = (*env)->NewStringUTF(env, sz_bench_result);
 
     return string;
+}
+
+
+void  ggml_jni_notify_c_impl(const char *format,  ...) {
+    static unsigned char s_ggml_jni_buf[JNI_BUF_LEN];
+
+    va_list va;
+    int len_content = 0;
+
+    memset(s_ggml_jni_buf, 0, JNI_BUF_LEN);
+
+    va_start(va, format);
+
+    len_content = vsnprintf(s_ggml_jni_buf, JNI_BUF_LEN, format, va);
+    snprintf(s_ggml_jni_buf + len_content, JNI_BUF_LEN - len_content, "\n");
+
+    kantv_asr_notify_benchmark_c(s_ggml_jni_buf);
+
+    va_end(va);
 }

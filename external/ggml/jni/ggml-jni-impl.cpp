@@ -469,7 +469,7 @@ static int whisper_bench_full() {
 
     struct whisper_context * ctx = whisper_init_from_file_with_params(p_asr_ctx->sz_model_path, cparams);
     LOGGD("system_info: n_threads = %d / %d | %s\n", p_asr_ctx->n_threads, std::thread::hardware_concurrency(), whisper_print_system_info());
-    kantv_asr_notify_benchmark_c("start whisper bench full");
+    kantv_asr_notify_benchmark_c("start whisper bench full\n");
     if (ctx == nullptr) {
         LOGGW("error: failed to initialize whisper context\n");
         return 2;
@@ -481,7 +481,7 @@ static int whisper_bench_full() {
         return 3;
     }
 
-    kantv_asr_notify_benchmark_c("start whisper_encode");
+    kantv_asr_notify_benchmark_c("start whisper_encode\n");
     // heat encoder
     if (int ret = whisper_encode(ctx, 0, p_asr_ctx->n_threads) != 0) {
         LOGGW("error: failed to encode: %d\n", ret);
@@ -491,7 +491,7 @@ static int whisper_bench_full() {
     whisper_token tokens[512];
     memset(tokens, 0, sizeof(tokens));
 
-    kantv_asr_notify_benchmark_c("start whisper_decode");
+    kantv_asr_notify_benchmark_c("start whisper_decode\n");
     // prompt heat
     if (int ret = whisper_decode(ctx, tokens, 256, 0, p_asr_ctx->n_threads) != 0) {
         LOGGW("error: failed to decode: %d\n", ret);
@@ -613,6 +613,7 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
         context = whisper_init_from_file(sz_model_path);
         if (nullptr == context) {
             LOGGW("whisper_init_from_file failure, pls check why\n");
+            GGML_JNI_NOTIFY("whisper_init_from_file failure, pls check why(pls check whether whispercpp model is valid)\n");
             result = -1;
             goto failure;
         }
@@ -662,10 +663,7 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
                     "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
                     std::string(text);
             asr_result += cur_line + "\n";
-#ifdef TARGET_ANDROID
             LOGGD("asr result:\n%s\n", cur_line.c_str());
-            kantv_asr_notify_benchmark(asr_result);
-#endif
         }
         end_time = ggml_time_ms();
         LOGGI("inference cost %d ms\n", end_time - begin_time);
@@ -687,9 +685,12 @@ failure:
         whisper_free(context);
     }
 
-    if (0 == result)
+    if (0 == result) {
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(asr_result);
+#endif
         return asr_result.c_str();
-    else
+    } else
         return NULL;
 }
 
@@ -769,7 +770,7 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr 1: memcpy 2: mulmat  3: full/whisper_encode
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA
  * @param n_threads             1 - 8
  * @return
 */
@@ -788,11 +789,13 @@ void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_
 
     LOGGD("model path:%s\n", sz_model_path);
 
-    p_asr_ctx->b_use_gpu                = false;        // TODO
+    p_asr_ctx->b_use_gpu                = false;        // TODO:not used currently
     p_asr_ctx->n_threads                = n_threads;
     p_asr_ctx->n_benchmark_type         = n_bench_type;
     memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
     strncpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
+
+    kantv_asr_notify_benchmark_c("reset");
 
     switch (n_bench_type) {
         case BECHMARK_ASR:
@@ -813,6 +816,14 @@ void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_
 
         case BECHMARK_FULL:
             whisper_bench_full();
+            break;
+
+        case BENCHMARK_MATRIX:
+            ggml_bench_matrix(n_threads);
+            break;
+
+        case BENCHMAKR_LLAMA:
+            ggml_bench_llama(sz_model_path, n_threads);
             break;
 
         default:
@@ -1687,7 +1698,7 @@ static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & token
  * @param n_threads             1 - 8
  * @return
 */
-int  llama_bench(const char * model_path, const char * prompt, int bench_type, int num_threads) {
+int  llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads) {
     llama_context           ** g_ctx;
     llama_model             ** g_model;
     gpt_params               * g_params;
@@ -2215,4 +2226,229 @@ int  llama_bench(const char * model_path, const char * prompt, int bench_type, i
     llama_backend_free();
 
     return 0;
+}
+
+
+static void ggml_graph_compute_helper(std::vector<uint8_t> & buf, ggml_cgraph * graph, int n_threads) {
+    struct ggml_cplan plan = ggml_graph_plan(graph, n_threads);
+
+    if (plan.work_size > 0) {
+        buf.resize(plan.work_size);
+        plan.work_data = buf.data();
+    }
+
+    ggml_graph_compute(graph, &plan);
+}
+
+
+static float tensor_sum_elements(const ggml_tensor * tensor) {
+    double sum = 0;
+    if (tensor->type == GGML_TYPE_F32) {
+        for (int j = 0; j < tensor->ne[1]; j++) {
+            for (int k = 0; k < tensor->ne[0]; k++) {
+                sum += ((float *) tensor->data)[j*tensor->ne[0] + k];
+            }
+        }
+    }
+    return sum;
+}
+
+
+static void tensor_dump(const ggml_tensor * tensor, const char * name) {
+    printf("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi) - ", name,
+            tensor->type, ggml_type_name(tensor->type),
+            tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
+    float sum = tensor_sum_elements(tensor);
+    printf("Sum of tensor %s is %6.2f\n", name, sum);
+}
+
+
+#define TENSOR_DUMP(tensor) tensor_dump(tensor, #tensor)
+
+struct benchmark_params_struct {
+    int32_t n_threads     = 1;
+    int32_t n_iterations  = 10;
+};
+
+void ggml_bench_matrix(int num_threads) {
+    struct benchmark_params_struct benchmark_params;
+
+    bool invalid_param = false;
+    std::string arg;
+
+    LOGGD("enter ggml_bench_matrix\n");
+
+    GGML_JNI_NOTIFY("Starting GGML matrix benchmark\n");
+
+    // create the ggml context
+    struct ggml_context * ctx;
+    //const int sizex = 4096;
+    //const int sizey = 11008;
+
+#undef VERBOSE_DEBUGGING
+#ifndef VERBOSE_DEBUGGING
+    const int sizey = 4096;
+    const int sizex = 11008;
+    const int sizez = 128;
+#else
+    /* Working - let's increase size */
+    const int sizey = 1;
+    const int sizex = (8*32);
+    const int sizez = 1;
+
+    /*const int sizey = 1;
+    const int sizex = 3*(8*32);
+    const int sizez = 1;*/
+#endif
+
+    GGML_JNI_NOTIFY("Memsize required = %i\n", sizex*sizex);
+
+    // TODO: perform the bench for all types or for a user specified type
+    const ggml_type qtype = GGML_TYPE_Q4_1;
+
+    size_t ctx_size = 0;
+    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
+    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
+    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizez);
+    ctx_size += ggml_row_size(qtype,         sizex*sizey);
+    ctx_size += ggml_row_size(qtype,         sizex*sizey);
+    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey); // BLAS
+    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey); // BLAS
+    ctx_size += 1024*1024*16;
+
+    GGML_JNI_NOTIFY("Allocating Memory of size %zi bytes, %zi MB\n",ctx_size, (ctx_size/1024/1024));
+
+    struct ggml_init_params params = {
+            /*.mem_size   =*/ ctx_size,
+            /*.mem_buffer =*/ NULL,
+            /* no_alloc   =*/ 0
+    };
+
+    ctx = ggml_init(params);
+    if (!ctx) {
+        LOGGW("%s: ggml_init() failed\n");
+        return;
+    }
+
+    GGML_JNI_NOTIFY("Creating new tensors\n");
+    // GGML_JNI_NOTIFY("Creating new tensor m1\n");
+    struct ggml_tensor * m11 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m11, 1.0f);
+
+    // GGML_JNI_NOTIFY("Creating new tensor m1\n");
+    struct ggml_tensor * m12 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m12, 1.5f);
+
+    // GGML_JNI_NOTIFY("Creating new tensor m2\n");
+    struct ggml_tensor * m2 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizez);
+    ggml_set_f32(m2, 2.0f);
+
+    GGML_JNI_NOTIFY("\n------ Test 1 - Matrix Mult via F32 code\n");
+    // GGML_JNI_NOTIFY("Creating new tensor m11xm2\n");
+    struct ggml_tensor * m11xm2 = ggml_mul_mat(ctx, m11, m2);
+
+    // GGML_JNI_NOTIFY("Creating compute graph\n");
+    struct ggml_cgraph * gf = ggml_new_graph(ctx);
+    ggml_build_forward_expand(gf, m11xm2);
+
+    GGML_JNI_NOTIFY("n_threads=%i\n", benchmark_params.n_threads);
+
+    TENSOR_DUMP(m11);
+    TENSOR_DUMP(m2);
+
+    std::vector<uint8_t> work_buffer;
+
+    ggml_graph_compute_helper(work_buffer, gf, benchmark_params.n_threads);
+
+    TENSOR_DUMP(gf->nodes[0]);
+
+    GGML_JNI_NOTIFY("\n------ Test 2 - Matrix Mult via %s code\n", ggml_type_name(qtype));
+
+    int32_t nelements = sizex*sizey;
+
+    // Set up a the benchmark matrices
+    // GGML_JNI_NOTIFY("Creating new tensor q11 & Running quantize\n");
+    struct ggml_tensor * q11 = ggml_new_tensor_2d(ctx, qtype, sizex, sizey);
+    ggml_quantize_chunk(qtype, (const float *) m11->data, q11->data, 0, nelements/m11->ne[0], m11->ne[0], nullptr);
+
+    // Set up a the compute graph
+    // GGML_JNI_NOTIFY("Creating new tensor q31\n");
+    struct ggml_tensor * q31 = ggml_mul_mat(ctx, q11, m2);
+
+    // GGML_JNI_NOTIFY("Creating compute graph\n");
+    struct ggml_cgraph * gf31 = ggml_new_graph(ctx);
+    ggml_build_forward_expand(gf31, q31);
+
+    // Set up a second graph computation to make sure we override the CPU cache lines
+    // GGML_JNI_NOTIFY("Creating new tensor q12 & Running quantize\n");
+    struct ggml_tensor * q12 = ggml_new_tensor_2d(ctx, qtype, sizex, sizey);
+    ggml_quantize_chunk(qtype, (const float *) m12->data, q12->data, 0, nelements/m12->ne[0], m12->ne[0], nullptr);
+
+    // GGML_JNI_NOTIFY("Creating new tensor q32\n");
+    struct ggml_tensor * q32 = ggml_mul_mat(ctx, q12, m2);
+
+    //GGML_JNI_NOTIFY("Creating compute graph\n");
+    struct ggml_cgraph * gf32 = ggml_new_graph(ctx);
+    ggml_build_forward_expand(gf32, q32);
+    GGML_JNI_NOTIFY("n_threads=%i\n", benchmark_params.n_threads);
+
+    const int dimx = sizex;
+    const int dimy = sizey;
+    const int dimz = sizez;
+    long long int flops_per_dot_product = dimy + dimy;
+    long long int flops_per_matrix = flops_per_dot_product * dimx * dimz; ;
+    GGML_JNI_NOTIFY("Matrix Multiplication of (%i,%i,%i) x (%i,%i,%i) - about %6.2f gFLOPS\n\n", sizex, sizey, 1, sizex, sizez, 1, 1.0f*flops_per_matrix / 1000 / 1000 / 1000);
+
+
+    // Let's use the F32 result from above as a reference for the quantized multiplication
+    float sum_of_F32_reference = tensor_sum_elements(gf->nodes[0]);
+
+    GGML_JNI_NOTIFY("Iteration;NThreads; SizeX; SizeY; SizeZ; Required_FLOPS; Elapsed_u_Seconds; gigaFLOPS\n");
+    GGML_JNI_NOTIFY("=====================================================================================\n");
+
+    double  gflops_sum = 0;
+    for (int i=0;i<benchmark_params.n_iterations ;i++) {
+
+        long long int start = ggml_time_us();
+        //GGML_JNI_NOTIFY("Running ggml_graph_compute\n");
+        ggml_graph_compute_helper(work_buffer, gf31, benchmark_params.n_threads);
+
+        long long int stop = ggml_time_us();
+        long long int usec = stop-start;
+        double gflops = (double)(flops_per_matrix)/usec/1000.0;
+        gflops_sum += gflops;
+        GGML_JNI_NOTIFY("%9i;%8i;%6i;%6i;%6i;%15lli;%18lli;%10.2f\n",
+               i,
+               benchmark_params.n_threads,
+               sizex, sizey, sizez, flops_per_matrix,
+               usec,gflops);
+
+#ifdef VERBOSE_DEBUGGING
+        TENSOR_DUMP("res",gf31.nodes[0])
+#endif
+
+        // Check that the matrix multiplication result is in the right ballpark
+        // We cannot use the exact value from the F32 multiplication because the quantizuation will be slightly different
+        float sum_of_Q4_result = tensor_sum_elements(gf31->nodes[0]);
+        float delta = std::abs(sum_of_Q4_result - sum_of_F32_reference);
+        float allowed_delta = (sum_of_F32_reference) / 1000 / 1000; //  Let's accept an epsilon of 10^-6
+
+        if (delta > allowed_delta)  {
+            GGML_JNI_NOTIFY("\nABORT - ERROR in Matrix Multiplication result - expected %6.2f, got %6.2f (delta %6.2f > allowed_delta %6.2f)\n",
+                   sum_of_F32_reference,
+                   sum_of_Q4_result,
+                   delta,
+                   allowed_delta
+            );
+            return;
+        }
+
+        // Running a different graph computation to make sure we override the CPU cache lines
+        ggml_graph_compute_helper(work_buffer, gf32, benchmark_params.n_threads);
+    }
+    GGML_JNI_NOTIFY("\n");
+    GGML_JNI_NOTIFY("Average%78.2f\n",gflops_sum/((double)benchmark_params.n_iterations));
+    GGML_JNI_NOTIFY("=====================================================================================\n");
+
+    LOGGD("leave ggml_bench_matrix\n");
 }

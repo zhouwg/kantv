@@ -264,6 +264,8 @@
      public static final int BECHMARK_MEMCPY   = 1;
      public static final int BECHMARK_MULMAT   = 2;
      public static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
+     public static final int BENCHMARK_MATRIX  = 4;
+     public static final int BENCHMARK_LLM     = 5;
 
      private static int       mASRMode = ASR_MODE_NORMAL;
 
@@ -3907,10 +3909,17 @@
                  return "GGML memcopy";
 
              case BECHMARK_MULMAT:
-                 return "GGML matrix multipy";
+                 return "GGML matrix multiply";
 
              case BECHMARK_ASR:
                  return "GGML ASR inference";
+
+             case BENCHMARK_MATRIX:
+                 return "GGML matrix";
+
+             case BENCHMARK_LLM:
+                 return "GGML LLAMA";
+
          }
 
          return "unknown";

@@ -30,7 +30,7 @@ public class ggmljava {
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxx.bin
      * @param audioPath     /sdcard/kantv/jfk.wav
-     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode
+     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4:matrix
      * @param nThreadCounts 1 - 8
      * @return
      */
@@ -40,5 +40,5 @@ public class ggmljava {
     public static native String llm_get_systeminfo();
 
 
-    public static native String llm_bench(String modelPath, String prompt, int nBenchType, int nThreadCounts);
+    public static native String llm_inference(String modelPath, String prompt, int nBenchType, int nThreadCounts);
 }

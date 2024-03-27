@@ -77,6 +77,8 @@
         <item>mempcpy</item>
         <item>mulmat</item>
         <item>full</item>
+        <item>matrix</item>
+        <item>llama</item>
     </string-array>
 
     <string-array name="threadCounts">
@@ -107,5 +109,7 @@
         <item>medium.en</item>
         <item>medium.en-q5_0</item>
         <item>large</item>
+        <item>llama-2-7b-chat.Q4_K_M</item>
+        <item>qwen1_5-1_8b-chat-q4_0</item>
     </string-array>
 </resources>

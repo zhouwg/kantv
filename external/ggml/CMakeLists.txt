@@ -36,6 +36,7 @@ set(SOURCE_FILES
         ${WHISPERCPP_SRC_DIR}/jni/sampling.cpp
         ${WHISPERCPP_SRC_DIR}/jni/common.cpp
         ${WHISPERCPP_SRC_DIR}/jni/grammar-parser.cpp
+        ${WHISPERCPP_SRC_DIR}/jni/llama-bench.cpp
         )
 
 

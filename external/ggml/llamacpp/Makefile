@@ -90,7 +90,7 @@ endif
 #
 
 # keep standard at C11 and C++11
-MK_CPPFLAGS  = -I. -Icommon
+MK_CPPFLAGS  = -I. -Icommon -I../../ffmpeg/
 MK_CFLAGS    = -std=c11   -fPIC
 MK_CXXFLAGS  = -std=c++11 -fPIC
 MK_NVCCFLAGS = -std=c++11
@@ -670,7 +670,7 @@ ggml-quants.o: ggml-quants.c ggml.h ggml-quants.h ggml-common.h
 unicode.o: unicode.cpp unicode.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-OBJS += ggml-alloc.o ggml-backend.o ggml-quants.o unicode.o
+OBJS += ggml-alloc.o ggml-backend.o ggml-quants.o unicode.o ../../ffmpeg/libavutil/cde_log.o
 
 llama.o: llama.cpp unicode.h ggml.h ggml-alloc.h ggml-backend.h ggml-cuda.h ggml-metal.h llama.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
