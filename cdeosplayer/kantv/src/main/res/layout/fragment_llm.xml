@@ -52,7 +52,7 @@
                 android:layout_height="50dp"
                 android:gravity="top"
                 android:background="@drawable/textview_border"
-                android:hint="how many days in this month?"
+                android:hint="how many days in March 2024?"
                 android:layout_marginTop="5dp"
                 />
 
