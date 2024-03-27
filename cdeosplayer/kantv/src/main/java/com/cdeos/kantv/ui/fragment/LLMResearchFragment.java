@@ -98,7 +98,7 @@
      private long endTime = 0;
      private long duration = 0;
      private String strBenchmarkInfo;
-     private String strUserInput = "how many days in this month?";
+     private String strUserInput = "how many days in March 2024?";
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;

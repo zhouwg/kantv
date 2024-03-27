@@ -15173,7 +15173,7 @@ void llama_print_timings(struct llama_context * ctx) {
 
 #ifdef TARGET_ANDROID
     std::ostringstream timing;
-    timing << "llama-timings:\n";
+    timing << "llama-timings:\t";
 #endif
 
     LOGGV("\n");
@@ -15187,16 +15187,21 @@ void llama_print_timings(struct llama_context * ctx) {
     LOGGV("%s:       total time = %10.2f ms / %5d tokens\n", __func__, (timings.t_end_ms - timings.t_start_ms), (timings.n_p_eval + timings.n_eval));
 
 #ifdef TARGET_ANDROID
-    timing << "\n" << "   load time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  (timings.t_load_ms) << " ms";
+    timing << "   load time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  (timings.t_load_ms) << " ms";
 
-    timing << "\n" << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (timings.t_sample_ms) << " ms / "
+    timing << "\n";
+    timing << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (timings.t_sample_ms) << " ms / "
     << timings.n_sample << " runs (" << (timings.t_sample_ms / timings.n_sample) << " ms per token, "
     << (1e3 / timings.t_sample_ms * timings.n_sample) << " tokens per second)";
+    timing << "\n";
 
+    timing << "prompt eval time = " << std::setw(10) << std::fixed <<  std::setprecision(2) << timings.t_p_eval_ms << " ms / "
+    << timings.n_p_eval << " tokens (" << (timings.t_p_eval_ms / timings.n_p_eval)  << " ms per token, " << (1e3 / timings.t_p_eval_ms * timings.n_p_eval)
+    << " tokens per second";
+    timing << "\n";
 
-    timing << "\n" << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((timings.t_end_ms - timings.t_start_ms)) << " ms / "
+    timing << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((timings.t_end_ms - timings.t_start_ms)) << " ms / "
     << (timings.n_p_eval + timings.n_eval) <<  "  tokens\n";
-
 
     std::string result = timing.str();
     kantv_asr_notify_benchmark(result);
