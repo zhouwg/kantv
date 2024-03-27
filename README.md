@@ -216,7 +216,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-![1138378624](https://github.com/zhouwg/kantv/assets/6889919/985d3cc9-22ad-4bc8-9215-cdc7775a912b)
+![1840268131](https://github.com/zhouwg/kantv/assets/6889919/403de66a-a375-4405-a9e6-9f330008dd6b)
 
 <details>
   <summary>some other screenshots</summary>
@@ -225,7 +225,9 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
 ![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
-![1138378624](https://github.com/zhouwg/kantv/assets/6889919/985d3cc9-22ad-4bc8-9215-cdc7775a912b)
+
+![1377769652](https://github.com/zhouwg/kantv/assets/6889919/c9e56c16-2821-4cef-ab2c-bc43a36af05a)
+
 ![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
 
   

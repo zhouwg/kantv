@@ -329,6 +329,12 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 CDELog.d(TAG, "release ASR resource");
                 asrFragment.release();
             }
+
+
+            if (fragmentName.contains("LLMResearchFragment")) {
+                CDELog.d(TAG, "release LLM resource");
+                llmFragment.release();
+            }
         }
 
 
