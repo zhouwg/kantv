@@ -27,6 +27,7 @@ set(SOURCE_FILES
 
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
+        ${LLAMACPP_SRC_DIR}/unicode-data.cpp
 
 
         ${WHISPERCPP_SRC_DIR}/jni/ggml-jni.c

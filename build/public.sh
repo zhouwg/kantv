@@ -236,6 +236,37 @@ fi
 }
 
 
+function check_upstream_llamacpp()
+{
+if [  -z ${UPSTREAM_LLAMACPP_PATH} ]; then
+    echo "pls set UPSTREAM_LLAMACPP_PATH properly"
+    echo "or run . build/envsetup.sh firstly"
+    exit 1
+fi
+
+
+if [ ! -d ${UPSTREAM_LLAMACPP_PATH} ]; then
+    echo "${UPSTREAM_LLAMACPP_PATH} not exist, pls check"
+    exit 1
+fi
+}
+
+
+function check_local_llamacpp()
+{
+if [ "x${LOCAL_LLAMACPP_PATH}" == "x" ]; then
+    echo "pls check LOCAL_LLAMACPP_PATH"
+    exit 1
+fi
+
+
+if [ ! -d ${LOCAL_LLAMACPP_PATH} ]; then
+    echo "${LOCAL_LLAMACPP_PATH} not exist, pls check"
+    exit 1
+fi
+}
+
+
 function dump_global_envs()
 {
     echo -e "\n"
@@ -265,6 +296,8 @@ function dump_global_envs()
     echo -e "${TEXT_RED}ANDROID_NDK:              ${ANDROID_NDK}${TEXT_RESET}"
     echo -e "LOCAL_WHISPERCPP_PATH:        ${LOCAL_WHISPERCPP_PATH}"
     echo -e "UPSTREAM_WHISPERCPP_PATH:     ${UPSTREAM_WHISPERCPP_PATH}"
+    echo -e "LOCAL_LLAMACPP_PATH:          ${LOCAL_LLAMACPP_PATH}"
+    echo -e "UPSTREAM_LLAMACPP_PATH:       ${UPSTREAM_LLAMACPP_PATH}"
     echo -e "\n"
     fi
 
