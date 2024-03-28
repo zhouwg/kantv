@@ -25,7 +25,7 @@ android {
         packagingOptions {
             pickFirst 'lib/arm64-v8a/libkantv-core.so'
             pickFirst 'lib/arm64-v8a/libkantv-ffmpeg.so'
-            pickFirst 'lib/arm64-v8a/libwhispercpp.so'
+            pickFirst 'lib/arm64-v8a/libggml-jni.so'
         }
 
         versionName project.ext.releaseVersion

@@ -103,19 +103,30 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
+     // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main
      // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
      // https://huggingface.co/TheBloke/Llama-2-13B-GGUF
      // https://huggingface.co/TheBloke/Llama-2-70B-GGUF
-
      // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
      // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
 
-     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf
+
+
+
+     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
+
+
+
+
+     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF
+     // https://huggingface.co/shaowenchen/baichuan2-7b-chat-gguf
+     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf // 4.61 GB
 
      //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
-     private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
-     //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
+     //private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
+     //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; // 1.1 GB
+     private String ggmlModelFileName = "blossom-v3-baichuan2-7b.Q4_K_M.gguf"; // 4.61 GB
 
      private Context mContext;
      private Activity mActivity;
