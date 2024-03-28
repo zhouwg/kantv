@@ -17,20 +17,20 @@ Project KanTV was almost/completely done by myself since 05-2021 and NO IPR conc
 
 <b>NO</b>
 
-I know very very very little about real/hard-core AI tech. In short, I'm just an ordinary Linux/Android system software programmer(know something about iOS app development) but I'm good at streaming media tech and interested in study&practice AI tech in real-scenario on mobile device(Android or iOS).
+I know very very very very very very little about real/hard-core AI tech. In short, I'm just an experienced Linux/Android system software programmer(know something about iOS app development) and I'm good at streaming media tech and very interested in study&practice AI tech in real-scenario on mobile device(Android or iOS).
 
 <hr>
 
 - Will you open source the source code of libkantv-core.so?
 
-<b>NO</b> or not currently.
+<b>NO</b>
 
 The source code of KanTV Android APP has been completely open source, and the source code of libkantv-ffmpeg.so has also been completely open source. the <a href="https://github.com/zhouwg/kantv/issues/64">source code of whispercpp-JNI</a> also has been completely open source.
 
 
 One year later(on 03-23-2024), I read an article from <a href="https://changelog.com/podcast/532">https://changelog.com/podcast/532</a>
 
-A few days ago, I didn't understand/have no idea why Georgi Gerganov open sourced such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit：I think it’s because he doesn’t have the pressure to survive in EU, so he can freely develop his hobbies and share them(if I also didn't have any life pressure, I would not hesitate to open source the libkantv-core.so).
+A few days ago, I didn't understand/have no idea why Georgi Gerganov open sourced such a powerful whisper.cpp and all these iOS/Android app are free. After reading this article, I think I understand a little bit：I think it’s because he doesn’t have the pressure to survive in EU, so he can freely develop his hobbies and share them.We live on the same earth but on different planes.
 
 I have to say that I was touched with/motivated by the great open source AI project Whisper.cpp from 03-05-2024 to 03-22-2024 after experienced hard time since 01-28-2024.
 
@@ -41,10 +41,10 @@ I'd like to say that Georgi Gerganov is a real great genius programmer. just my 
     English is the first barrier
 </li>
 <li>
-    The second is the powerful GFW
+    The second is the powerful GFW(I had been spent about RMB10000(about USD1600) in the past few years to fix network issue caused by GFW)
 </li>
 <li>
-    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT...... obviously, I don’t want to quit the IT industry completely currently.
+    The third is that in my country, people need to participate in heavily competition in order to survive, open source such a powerful whisper.cpp is equal to QUIT...... obviously, I don’t want to quit the IT industry completely currently
 
 </li>
 </ul>
@@ -54,22 +54,8 @@ I'd like to say that Georgi Gerganov is a real great genius programmer. just my 
 
 - Could I contact to you by e-mail?
 
-  * Please do not send e-mail to me for technical question. Public technical discussion on github is preferred.
+  * Please do not send e-mail to me for technical question. Public technical discussion on github is preferred
 
   * Feel free to submit issues or new features(focus on Android at the moment), volunteer support would be provided if time permits
 
-<hr>
-
-
-- Can I sponsor to project KanTV
-
-I don't have an oversea phone number and I could not create Github Sponsors account accordingly.I only have a Wechat account so I put my personal WeChat reward(aka "赞赏" in Chinese or "donation" in English) QR code here.In other words, sponsorship of this project can ONLY be done through WeChat Pay(it's also to comply China's compliance policy. a TIP here:many personal privacy information(include face identification) might be required/provided to open a WeChat/WeChat Pay account and as well-known we(include Tencent) are used to that because of China's compliance policy) and if you mind that pls ignore this sponsorship info), thanks for your understanding. Of course,I will list received sponsorship and usage of sponsorship irregularly <b>if</b> there is.
-
-![zhouwg-reward](https://github.com/zhouwg/kantv/assets/6889919/7832ef0e-1091-4a82-8f3a-eb78afae500b)
-
-Still, if you do decide to sponsor me, the money will most likely go towards buying [various high-end powerful Android phone](https://github.com/zhouwg/kantv/blob/master/docs/high-end-android-phone.md) for device-side AI software development activity and pay for Cloud Server, or buy some coffee or buy a meal to potential volunteer programmer to participate in project's development.
-
-Contribute PR/codes is the best sponsorship to project KanTV.Thanks.
-
-
-Have fun with the great FFmpeg and the great whisper.cpp and the great llama.cpp
+  * Have fun with the great FFmpeg and the great whisper.cpp and the great llama.cpp
