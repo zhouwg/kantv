@@ -95,7 +95,7 @@
                 android:id="@+id/btnBenchmark"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                android:layout_marginLeft="30dp"
+                android:layout_marginLeft="10dp"
                 android:background="@drawable/button_drawable"
                 android:text="Benchmark"
                 android:textAllCaps="false"

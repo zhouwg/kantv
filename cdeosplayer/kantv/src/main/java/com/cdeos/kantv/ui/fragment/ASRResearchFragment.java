@@ -184,7 +184,7 @@
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Powered by whisper.cpp(fff24a0148fe194df4997a738eeceddd724959c3,Thu Mar 21 22:23:30 2024)(https://github.com/ggerganov/whisper.cpp)\n");
+         _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n");
 
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
@@ -289,9 +289,13 @@
 
              //TODO: better method
              //sanity check begin
-             if (strModeName.startsWith("llama")) {
+             if (strModeName.contains("llama")) {
                  isLLMModel = true;
-             } else if (strModeName.startsWith("qwen")) {
+             } else if (strModeName.contains("qwen")) {
+                 isLLMModel = true;
+             } else if (strModeName.contains("baichuan")) {
+                 isLLMModel = true;
+             } else if (strModeName.contains("gemma")) {
                  isLLMModel = true;
              }
              if (isLLMModel)
@@ -320,7 +324,7 @@
              File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
 
              if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                 CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file and sample file(jfk.wav) exist in /sdcard/kantv/");
+                 CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file:" + selectModeFileName + " and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
              //sanity check end

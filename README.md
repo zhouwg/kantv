@@ -223,7 +223,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-![635425083](https://github.com/zhouwg/kantv/assets/6889919/bcf5103e-af44-4a82-bc9f-3a06e4265781)
+![1697162123](https://github.com/zhouwg/kantv/assets/6889919/d6b9ab54-ff27-43f7-b169-25c614ca3280)
 
 <details>
   <summary>some other screenshots</summary>
@@ -263,8 +263,6 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 ### Hot topics
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-
-- <a href="https://github.com/ggerganov/ggml/issues/771">adding native backend for Qualcomm mobile SoC(Qualcomm Snapdragon 8 Gen 3)</a>
 
 - real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
