@@ -29,9 +29,6 @@ Some goals of this project are:
 
 - Android <b>turn-key project</b> for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on device-side AI R&D activity, part of AI R&D activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
-### Software architecture of KanTV
-
-![kantv-arch-without-wasm](https://github.com/zhouwg/kantv/assets/6889919/43ccee5a-9f95-4686-8453-106ce4e4f297)
 
 ### Software architecture of KanTV Android
 
