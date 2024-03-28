@@ -111,5 +111,7 @@
         <item>large</item>
         <item>llama-2-7b-chat.Q4_K_M</item>
         <item>qwen1_5-1_8b-chat-q4_0</item>
+        <item>baichuan2-7b.Q4_K_M</item>
+        <item>gemma-2b.Q4_K_M</item>
     </string-array>
 </resources>

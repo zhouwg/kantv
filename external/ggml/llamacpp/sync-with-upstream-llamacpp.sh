@@ -34,7 +34,7 @@ echo -e  "local    llamacpp path: ${LOCAL_LLAMACPP_PATH}\n"
 echo -e  "sync source code on ${SYNC_TIME}\n\n"
 
 #the following method borrow from bench-all.sh in GGML's project whisper.cpp
-LLAMACPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml.c ggml.h ggml-quants.c ggml-quants.h llama.cpp llama.h unicode.h unicode.cpp unicode-data.h unicode-data.cpp)
+LLAMACPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml.c ggml.h ggml-quants.c ggml-quants.h llama.cpp llama.h unicode.h unicode.cpp unicode-data.h unicode-data.cpp ggml-common.h)
 for file in "${LLAMACPP_SRCS[@]}"; do
     /bin/cp -fv ${UPSTREAM_LLAMACPP_PATH}/$file ${LOCAL_LLAMACPP_PATH}/$file
 done

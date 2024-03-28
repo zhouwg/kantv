@@ -98,7 +98,8 @@
      private long endTime = 0;
      private long duration = 0;
      private String strBenchmarkInfo;
-     private String strUserInput = "how many days in March 2024?";
+     //private String strUserInput = "how many days in March 2024?";
+     private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words.";
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -112,21 +113,25 @@
      // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
 
 
-
-
      // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
-
-
 
 
      // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF
      // https://huggingface.co/shaowenchen/baichuan2-7b-chat-gguf
      // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf // 4.61 GB
 
+
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/tree/main
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q4_K_M.gguf  // 1.5 GB
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    // 2.67 GB
+
+
      //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
      //private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
      //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; // 1.1 GB
-     private String ggmlModelFileName = "blossom-v3-baichuan2-7b.Q4_K_M.gguf"; // 4.61 GB
+     //private String ggmlModelFileName = "baichuan2-7b.Q4_K_M.gguf"; // 4.61 GB
+     //private String ggmlModelFileName = "gemma-2b.Q4_K_M.gguf";  // 1.5 GB
+     private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
 
      private Context mContext;
      private Activity mActivity;
@@ -205,6 +210,8 @@
 
          _btnInference.setOnClickListener(v -> {
              String strPrompt = _txtUserInput.getText().toString();
+
+             //sanity check begin
              if (strPrompt.isEmpty()) {
                  //CDEUtils.showMsgBox(mActivity, "pls check your input");
                  //return;
@@ -230,6 +237,8 @@
                  CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file exist in /sdcard/kantv/");
                  return;
              }
+             //sanity check end
+
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
 

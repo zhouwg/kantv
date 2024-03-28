@@ -223,7 +223,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-![635425083](https://github.com/zhouwg/kantv/assets/6889919/bcf5103e-af44-4a82-bc9f-3a06e4265781)
+![1655737344](https://github.com/zhouwg/kantv/assets/6889919/bf296557-f715-4da4-9c2f-388dcf551a33)
 
 <details>
   <summary>some other screenshots</summary>

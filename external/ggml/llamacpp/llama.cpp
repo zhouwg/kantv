@@ -7,6 +7,11 @@
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
 
+#ifdef TARGET_ANDROID
+#include "kantv-asr.h"
+#include "ggml-jni.h"
+#endif
+
 #ifdef GGML_USE_CUDA
 #  include "ggml-cuda.h"
 #elif defined(GGML_USE_CLBLAST)
@@ -15617,15 +15622,41 @@ struct llama_timings llama_get_timings(struct llama_context * ctx) {
 void llama_print_timings(struct llama_context * ctx) {
     const llama_timings timings = llama_get_timings(ctx);
 
-    LLAMA_LOG_INFO("\n");
-    LLAMA_LOG_INFO("%s:        load time = %10.2f ms\n", __func__, timings.t_load_ms);
-    LLAMA_LOG_INFO("%s:      sample time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
-            __func__, timings.t_sample_ms, timings.n_sample, timings.t_sample_ms / timings.n_sample, 1e3 / timings.t_sample_ms * timings.n_sample);
-    LLAMA_LOG_INFO("%s: prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n",
-            __func__, timings.t_p_eval_ms, timings.n_p_eval, timings.t_p_eval_ms / timings.n_p_eval, 1e3 / timings.t_p_eval_ms * timings.n_p_eval);
-    LLAMA_LOG_INFO("%s:        eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
-            __func__, timings.t_eval_ms, timings.n_eval, timings.t_eval_ms / timings.n_eval, 1e3 / timings.t_eval_ms * timings.n_eval);
-    LLAMA_LOG_INFO("%s:       total time = %10.2f ms / %5d tokens\n", __func__, (timings.t_end_ms - timings.t_start_ms), (timings.n_p_eval + timings.n_eval));
+#ifdef TARGET_ANDROID
+    std::ostringstream timing;
+    timing << "llama-timings:\t";
+#endif
+
+    LOGGV("\n");
+    LOGGV("%s:        load time = %10.2f ms\n", __func__, timings.t_load_ms);
+    LOGGV("%s:      sample time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_sample_ms, timings.n_sample, timings.t_sample_ms / timings.n_sample, 1e3 / timings.t_sample_ms * timings.n_sample);
+    LOGGV("%s: prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_p_eval_ms, timings.n_p_eval, timings.t_p_eval_ms / timings.n_p_eval, 1e3 / timings.t_p_eval_ms * timings.n_p_eval);
+    LOGGV("%s:        eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_eval_ms, timings.n_eval, timings.t_eval_ms / timings.n_eval, 1e3 / timings.t_eval_ms * timings.n_eval);
+    LOGGV("%s:       total time = %10.2f ms / %5d tokens\n", __func__, (timings.t_end_ms - timings.t_start_ms), (timings.n_p_eval + timings.n_eval));
+
+#ifdef TARGET_ANDROID
+    timing << "   load time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  (timings.t_load_ms) << " ms";
+
+    timing << "\n";
+    timing << " sample time  = " << std::setw(10) << std::fixed <<  std::setprecision(2) << (timings.t_sample_ms) << " ms / "
+           << timings.n_sample << " runs (" << (timings.t_sample_ms / timings.n_sample) << " ms per token, "
+           << (1e3 / timings.t_sample_ms * timings.n_sample) << " tokens per second)";
+    timing << "\n";
+
+    timing << "prompt eval time = " << std::setw(10) << std::fixed <<  std::setprecision(2) << timings.t_p_eval_ms << " ms / "
+           << timings.n_p_eval << " tokens (" << (timings.t_p_eval_ms / timings.n_p_eval)  << " ms per token, " << (1e3 / timings.t_p_eval_ms * timings.n_p_eval)
+           << " tokens per second";
+    timing << "\n";
+
+    timing << "   total time = " << std::setw(10) << std::fixed <<  std::setprecision(2) <<  ((timings.t_end_ms - timings.t_start_ms)) << " ms / "
+           << (timings.n_p_eval + timings.n_eval) <<  "  tokens\n";
+
+    std::string result = timing.str();
+    kantv_asr_notify_benchmark(result);
+#endif
 }
 
 void llama_reset_timings(struct llama_context * ctx) {

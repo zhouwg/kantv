@@ -142,12 +142,14 @@ typedef struct {
     size_t n_decoding_mode;                          // 0:WHISPER_SAMPLING_GREEDY 1:WHISPER_SAMPLING_BEAM_SEARCH
 
     size_t n_asr_mode;                               // 0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    size_t n_benchmark_type;                         // what to benchmark: 0: asr, 1: memcpy 2: mulmat  3: whisper_encode/whisper full benchmark
-    bool   b_use_gpu;
+    size_t n_benchmark_type;                         // what to benchmark:
+                                                     // 0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA inference
 
-    bool   b_abort_benchmark;                        //TODO: for abort time-consuming benchmark from UI layer. not works perfectly as expected
+    bool   b_use_gpu;                                // TODO: not used on Android device currently, ref: https://github.com/ggerganov/ggml/issues/771
 
-    fifo_buffer_t   * asr_fifo;                      //fifo for ASR data producer-consumer
+    bool   b_abort_benchmark;                        // TODO: for abort time-consuming task from UI layer. not works as expected
+
+    fifo_buffer_t   * asr_fifo;                      // fifo for ASR data producer-consumer
 
     size_t   n_sample_size;
 
@@ -158,7 +160,7 @@ typedef struct {
 
     class whisper_asr * p_asr;                       // attention memory leak, smart pointer should not be used here for performance consideration
 
-    pthread_mutex_t  mutex;
+    pthread_mutex_t  mutex;                          // not used since 03-19-2024
 
     //only for troubleshooting issue
     bool     b_pre_convert;

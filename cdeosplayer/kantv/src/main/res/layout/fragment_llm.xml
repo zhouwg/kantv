@@ -49,10 +49,10 @@
             <EditText
                 android:id="@+id/txtUserInput"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:gravity="top"
                 android:background="@drawable/textview_border"
-                android:hint="how many days in March 2024?"
+                android:hint="introduce the movie Once Upon a Time in America briefly."
                 android:layout_marginTop="5dp"
                 />
 
