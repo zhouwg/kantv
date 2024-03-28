@@ -488,8 +488,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 //mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
 
-            if (!mSettings.getDevMode())
-            {
+            if (!mSettings.getDevMode()) {
                 if (!TextUtils.isEmpty(mVideoPath)) {
                     String regEx = "[`~!@#$%^&*()+=|{}:;\\\\[\\\\].<>/?~！@（）——+|{}【】‘；：”“’。，、？']";
                     String videoTitle = Pattern.compile(regEx).matcher(mVideoTitle).replaceAll("").trim();
@@ -648,9 +647,8 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             } else {
                 CDELog.d(TAG, "invalid visibility mode : " + visibility);
             }
-           
-            if (CDEUtils.getDisableVideoTrack())
-            {
+
+            if (CDEUtils.getDisableVideoTrack()) {
                 this.setBackgroundColor(0xFF00FF00);
             }
         }
@@ -737,12 +735,11 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                                 CDEUtils.setScreenOrientation(CDEUtils.SCREEN_ORIENTATION_LANDSCAPE);
                             }
                         }
-                        
+
                         if (CDEUtils.isRunningOnPhone()) {
                             mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                             CDEUtils.setScreenOrientation(CDEUtils.SCREEN_ORIENTATION_LANDSCAPE);
                         }
-
 
 
                         if ((mMediaPlayer != null) && (0 == mMediaPlayer.getDuration()) && (!mSettings.getDevMode())) {
@@ -765,7 +762,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
             mCurrentState = STATE_PREPARED;
             _notifyMediaStatus();
-            
+
             if (mMediaPlayer instanceof AndroidMediaPlayer) {
                 AndroidMediaPlayer amp = (AndroidMediaPlayer) mMediaPlayer;
                 amp.onPrepared();
@@ -862,10 +859,10 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                                 CDELog.d(TAG, "loop play counts:" + CDEUtils.perfGetLoopPlayCounts());
                                 CDELog.d(TAG, "loop play error counts:" + CDEUtils.perfGetLoopPlayErrorCounts());
                             }
-                           
-                            CDELog.d(TAG, "duration of first video frame was rendered:" + (CDEUtils.perfGetFirstVideoFrameTime()) + " millisecs");
+
+                            CDELog.j(TAG, "duration of first video frame was rendered:" + (CDEUtils.perfGetFirstVideoFrameTime()) + " millisecs");
                             stopUIBuffering();
-                            
+
                             if (!CDEUtils.getReleaseMode() && mSettings.getDevMode()) {
                                 setHudViewHolderVisibility(View.VISIBLE);
                             }
@@ -947,7 +944,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                     } else {
                         CDEUtils.perfUpdateLoopPlayErrorCounts();
                     }
-                    
+
                     CDELog.d(TAG, "Error: " + framework_err + "," + impl_err);
                     if ((CDEUtils.isRunningOnAmlogicBox() && (framework_err == -38) && (0 == impl_err))) {
                         CDELog.d(TAG, "\n\n\n");
@@ -1050,7 +1047,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             }
         }
     };
-    
+
 
     public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l) {
         mOnPreparedListener = l;
@@ -1076,7 +1073,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     public void setOnInfoListener(IMediaPlayer.OnInfoListener l) {
         mOnInfoListener = l;
     }
-    
+
     private void bindSurfaceHolder(IMediaPlayer mp, IRenderView.ISurfaceHolder holder) {
         if (mp == null)
             return;
@@ -1135,7 +1132,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 CDELog.d(TAG, "onSurfaceDestroyed: unmatched render callback\n");
                 return;
             }
-            
+
             mSurfaceHolder = null;
             releaseWithoutStop();
         }
@@ -1145,7 +1142,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         if (mMediaPlayer != null)
             mMediaPlayer.setDisplay(null);
     }
-    
+
     public void release(boolean cleartargetstate) {
         CDELog.d(TAG, "enter release");
         if (mMediaPlayer != null) {
@@ -1257,14 +1254,14 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                 keyCode != KeyEvent.KEYCODE_MENU &&
                 keyCode != KeyEvent.KEYCODE_CALL &&
                 keyCode != KeyEvent.KEYCODE_ENDCALL;
-        
+
         CDELog.d(TAG, "keyCode:" + keyCode);
-        
+
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             exitLoopPlayMode();
         }
 
-       
+
         if (keyCode == KeyEvent.KEYCODE_DPAD_UP) {
             if (isKeyFSMCleared()) {
                 //CDELog.d(TAG, "key up press, recv first up");
@@ -1307,12 +1304,12 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             clearKeyFSM();
             toggleDevMode();
         }
-  
+
 
         if (isInPlaybackState() && isKeyCodeSupported && mMediaController != null) {
             if (CDEUtils.isRunningOnTV()) {
                 if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN) {
-                  
+
                 }
             }
             if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK ||
@@ -1508,8 +1505,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
         }
 
 
-
-        if ((mAudioAnimatonView != null) && isPureAudioContent ) {
+        if ((mAudioAnimatonView != null) && isPureAudioContent) {
             CDELog.d(TAG, "start audio animation {");
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -1558,7 +1554,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
             tmpString = CDEUtils.convertLongString(audioInfo, 30);
         }
 
-        if ((mAudioAnimatonView != null) && isPureAudioContent ) {
+        if ((mAudioAnimatonView != null) && isPureAudioContent) {
             CDELog.d(TAG, "stop audio animation }");
             mActivity.runOnUiThread(new Runnable() {
                 @Override
@@ -1687,7 +1683,7 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
 
         return 0;
     }
-    
+
     private static final int[] s_allAspectRatio = {
             IRenderView.AR_ASPECT_FIT_PARENT,
             IRenderView.AR_ASPECT_FILL_PARENT,
@@ -1917,17 +1913,20 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                             ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "rtsp_transport", "tcp");
                         }
 
-                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", "100");
-                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "probsize", "10240");
+
+                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", "100");
+                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", "1");
+                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", "10240");
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "flush_packets", 1);
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0);
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 0);
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "fps", 30);
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_YV12);
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
-                        //ffMediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "max-buffer-size", 1024);
+                        ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 0);
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "fps", 30);
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", IjkMediaPlayer.SDL_FCC_YV12);
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
+                        //ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "max-buffer-size", 1024);
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 3);
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 1);
                     }
@@ -1980,13 +1979,25 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
                     } else {
                         ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "overlay-format", FFmpegMediaPlayer.SDL_FCC_RV16);
                     }
-
-                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 1);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "framedrop", 2);
+                    /*
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", "1");
                     ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "start-on-prepared", 0);
-
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "analyzemaxduration", "100");
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", "1024*64");
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_CODEC,  "skip_loop_filter", 48);
                     ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
-
-                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 48);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "flush_packets", 1);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 3);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "max-fps", 0);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_PLAYER, "fps", 30);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "max-buffer-size", 1024);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "max_delay", 0);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
+                    ffMediaPlayer.setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "dns_cache_clear", 1);
+                    */
                 }
 
                 mediaPlayer = (IMediaPlayer) ffMediaPlayer;
@@ -2073,7 +2084,6 @@ public class CDEOSVideoView extends FrameLayout implements MediaController.Media
     public int getSelectedTrack(int trackType) {
         return MediaPlayerCompat.getSelectedTrack(mMediaPlayer, trackType);
     }
-
 
 
     private boolean mIsUsingMediaCodec = true;

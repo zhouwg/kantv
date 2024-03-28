@@ -180,7 +180,7 @@ cd kantv
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L84">build/envsetup.sh</a> accordingly before launch build
 
- - moidfy <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L70">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L70">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes
