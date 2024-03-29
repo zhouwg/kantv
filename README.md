@@ -292,14 +292,9 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-this project is heavily depend on [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
+the AI part of this project is <b>heavily depend on</b> [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
 
 ### License
-
-```
-Copyright (c) 2017 Bilibili
-Licensed under LGPLv2.1 or later
-```
 
 ```
 Copyright (c) 2021 - 2023 Project KanTV
