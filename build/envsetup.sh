@@ -79,11 +79,17 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
+export ANDROID_NDK_ROOT=${ANDROID_NDK}
+export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
 
 #modify following lines to adapt to local dev envs
 export UPSTREAM_WHISPERCPP_PATH=~/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/llama.cpp
+export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
+export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
+export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
+export PYTHONPATH=${QNN_SDK_ROOT}/lib/python/:${PYTHONPATH}
 
 
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)

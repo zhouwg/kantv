@@ -1,7 +1,4 @@
-DeepSpeech/
 gstreamer/
-ncnn/
-CLBlast/
 
 *.a
 *.so

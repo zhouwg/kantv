@@ -772,7 +772,7 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
  * @param n_threads             1 - 8
  * @return
 */
@@ -826,6 +826,10 @@ void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_
 
         case BENCHMAKR_LLAMA:
             ggml_bench_llama(sz_model_path, n_threads);
+            break;
+
+        case BENCHMAKR_QNN:
+            qnn_sample_main(1, NULL); //TODO: not works on Xiaomi 14, just to make NDK happy
             break;
 
         default:

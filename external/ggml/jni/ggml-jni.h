@@ -44,6 +44,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "libavutil/cde_log.h"
+#include "ggml.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,6 +59,7 @@ extern "C" {
 #define BECHMARK_FULL               3
 #define BENCHMARK_MATRIX            4
 #define BENCHMAKR_LLAMA             5
+#define BENCHMAKR_QNN               6
 
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)
 
@@ -69,12 +71,14 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
     * @param n_threads             1 - 8
     * @return
     */
     //TODO: renamed to ggml_bench for purpose of unify whisper.cpp and llama.cpp
     void         whisper_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
+
+
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
 
@@ -119,6 +123,13 @@ extern "C" {
     void         ggml_bench_matrix(int num_threads);
 
     int          ggml_bench_llama(const char * sz_model_path, int num_threads);
+
+
+// =================================================================================================
+// PoC#121:Add Qualcomm mobile SoC native backend for GGML from 03-29-2024
+// =================================================================================================
+
+    int qnn_sample_main(int argc, char** argv);
 
 
 #ifdef __cplusplus

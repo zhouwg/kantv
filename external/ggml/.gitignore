@@ -4,6 +4,8 @@
 *.o
 *.bin
 out/
+obj/
+make/
 out.*/
 
 main

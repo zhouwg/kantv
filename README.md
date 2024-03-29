@@ -175,9 +175,32 @@ cd kantv
 
 ```
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L84">build/envsetup.sh</a> accordingly before launch build
+ - environment setup for QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L70">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ ```
+
+ . build/envsetup.sh
+
+ sudo bash ${QNN_SDK_ROOT}/bin/check-linux-dependency.sh
+
+ pip install tensorflow==2.10.1
+
+ pip install tflite==2.3.0
+
+ pip install pandas
+
+ export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
+
+
+ ${QNN_SDK_ROOT}/bin/envcheck -n
+
+ ${QNN_SDK_ROOT}/bin/envcheck -c
+
+ ```
+
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L86">build/envsetup.sh</a> accordingly before launch build
+
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L100">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes

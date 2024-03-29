@@ -30,7 +30,7 @@ public class ggmljava {
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxx.bin
      * @param audioPath     /sdcard/kantv/jfk.wav
-     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA
+     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
      * @param nThreadCounts 1 - 8
      * @return
      */
