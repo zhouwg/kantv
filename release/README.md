@@ -183,3 +183,11 @@
                     <li>prepare for step2 of import customized FFmpeg6.1 by new software architecuture</li>
                     <li>move "EPG" to "Person Center" and add "LLM Research" to main UI </li>
                  </ul>
+
+- v1.3.6 2024-03-29,
+                 <ul>
+                    <li>integrate ggml's magic llama.cpp to kantv</li>
+                    <li>unify JNI layer of whisper.cpp and llama.cpp as ggml-jni ------ step1</li>
+                    <li>use ggml-jni to validate/verify llama-2-7b,qwen1_5-1_8b, baichuan2-7b, gemma-2b models on Xiaomi 14</li>
+                    <li>regular cleanup/refine files/codes/README</li>
+                 </ul>
