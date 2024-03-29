@@ -8,7 +8,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - ASR(Automatic Speech Recognition, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
 
-- LLM(Large Language Model, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
+- LLM(Large Language Model, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> 
 
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
@@ -290,6 +290,10 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [F.A.Q](./docs/FAQ.md)
 
 
+### Special Acknowledgement
+
+this project is heavily depend on [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
+
 ### License
 
 ```
@@ -304,7 +308,3 @@ Copyright (c) 2024 -  Authors of Project KanTV
 
 Licensed under Apachev2.0 or later
 ```
-
-### Commercial Use
-
-Project KanTV is licensed under Apachev2.0 or later, so itself is free/open for commercial use.
