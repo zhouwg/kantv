@@ -1,1 +1,1 @@
-kantv 1.3.5 (based on customized FFmpeg 6.1, original whisper.cpp, original llama.cpp)
+kantv 1.3.6 (based on customized FFmpeg 6.1, original whisper.cpp, original llama.cpp)
