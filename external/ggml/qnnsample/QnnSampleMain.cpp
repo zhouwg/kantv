@@ -333,6 +333,7 @@ namespace qnn {
 
                 QNN_INFO("Model: %s", modelPath.c_str());
                 QNN_INFO("Backend: %s", backEndPath.c_str());
+                GGML_JNI_NOTIFY("Qualcomm QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) Backend: %s\n", backEndPath.c_str());
 
                 QnnFunctionPointers qnnFunctionPointers;
                 // Load backend and model .so and validate all the required function symbols are resolved
@@ -410,6 +411,7 @@ int qnn_sample_main(int argc, char **argv) {
         }
         QNN_INFO("qnn-sample-app build version: %s", qnn::tools::getBuildId().c_str());
         QNN_INFO("Backend        build version: %s", app->getBackendBuildId().c_str());
+        GGML_JNI_NOTIFY("QNN Backend        build version: %s", app->getBackendBuildId().c_str());
 
         if (sample_app::StatusCode::SUCCESS != app->initialize()) {
             return app->reportError("Initialization failure");

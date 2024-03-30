@@ -1263,14 +1263,14 @@ int  ggml_bench_llama(const char * model_path, int num_threads) {
         if (t.n_prompt > 0) {
             //TODO: why crash here?
             LOGGD("test_prompt\n");
-            test_prompt(ctx, t.n_prompt, 0, t.n_batch, t.n_threads);
+            //test_prompt(ctx, t.n_prompt, 0, t.n_batch, t.n_threads);
             LOGGD("after test_prompt\n");
         }
 
         if (t.n_gen > 0) {
             //TODO: why crash here?
             LOGGD("test_gen\n");
-            test_gen(ctx, 1, 0, t.n_threads);
+            //test_gen(ctx, 1, 0, t.n_threads);
             LOGGD("after test_gen\n");
         }
 

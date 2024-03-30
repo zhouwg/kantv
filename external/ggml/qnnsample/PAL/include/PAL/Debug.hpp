@@ -8,14 +8,19 @@
 
 #pragma once
 
-#define DEBUG_ON 0
+#include "ggml-jni.h"
+
+#define DEBUG_ON 1
 
 #if DEBUG_ON
+/*
 #define DEBUG_MSG(...)            \
   {                               \
     fprintf(stderr, __VA_ARGS__); \
     fprintf(stderr, "\n");        \
   }
+*/
+#define DEBUG_MSG LOGGD
 #else
 #define DEBUG_MSG(...)
 #endif

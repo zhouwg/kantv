@@ -62,6 +62,11 @@ extern "C" {
 #define BENCHMAKR_QNN               6
 #define BENCHMAKR_MAX               6
 
+#define BACKEND_CPU                 0
+#define BACKEND_GPU                 1
+#define BACKEND_DSP                 2
+#define BACKEND_MAX                 2
+
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)
 
 // JNI helper function for whisper.cpp benchmark
@@ -74,11 +79,12 @@ extern "C" {
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
     * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
     * @param n_threads             1 - 8
+    * @param n_backend_type        0: CPU  1: GPU  2: DSP
     * @return
     */
     // renamed to ggml_jni_bench for purpose of unify JNI layer of whisper.cpp and llama.cpp
     // and QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
-    void         ggml_jni_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
+    void         ggml_jni_bench(const char *model_path, const char *audio_path, int n_bench_type, int num_threads, int n_backend_type);
 
 
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);

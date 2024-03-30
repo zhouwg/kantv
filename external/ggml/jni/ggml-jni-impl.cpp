@@ -774,9 +774,10 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
  * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
  * @param n_threads             1 - 8
+ * @param n_backend_type        0: CPU  1: GPU  2: DSP
  * @return
 */
-void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads) {
+void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads, int n_backend_type) {
     int result = 0;
 
     if (NULL == p_asr_ctx) {
@@ -790,6 +791,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
     }
 
     LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("backend type:%d\n", n_backend_type);
 
     p_asr_ctx->b_use_gpu                = false;        // TODO:not used currently
     p_asr_ctx->n_threads                = n_threads;
@@ -829,7 +831,35 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             break;
 
         case BENCHMAKR_QNN:
-            qnn_sample_main(1, NULL); //TODO: not works on Xiaomi 14, just to make NDK happy
+            {
+                //TODO: this is a lazy method in PoC stage
+                int argc = 11;
+                char *qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnCpu.so";
+                switch (n_backend_type) {
+                    case 0:
+                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnCpu.so";
+                        break;
+                    case 1:
+                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnGpu.so";
+                        break;
+                    case 2:
+                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnDsp.so";
+                        break;
+                    default:
+                        LOGGW("backend type %d not supported\n", n_backend_type);
+                        break;
+                }
+
+                char *argv[] = {"qnn-net-run", "--backend", qnn_backend_lib,
+                                "--model", const_cast<char *>(sz_model_path),
+                                "--input_list", "/sdcard/kantv/raw_list.txt",
+                                "--output_dir", "/sdcard/kantv/qnn/",
+                                "--log_level", "info"
+                               };
+                //TODO:
+                // backend CPU works fine on Xiaomi14
+                qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
+            }
             break;
 
         default:

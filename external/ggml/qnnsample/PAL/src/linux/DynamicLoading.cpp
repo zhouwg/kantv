@@ -27,6 +27,11 @@ void *pal::dynamicloading::dlOpen(const char *filename, int flags) {
         realFlags |= RTLD_GLOBAL;
     }
 
+    if (NULL == filename) {
+        LOGGD("filename is empty\n");
+    } else {
+        LOGGD("filename %s\n", filename);
+    }
     return ::dlopen(filename, realFlags);
 }
 

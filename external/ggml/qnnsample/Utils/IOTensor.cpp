@@ -404,12 +404,15 @@ iotensor::StatusCode iotensor::IOTensor::tearDownTensors(Qnn_Tensor_t *tensors,
                                                          uint32_t tensorCount) {
     for (size_t tensorIdx = 0; tensorIdx < tensorCount; tensorIdx++) {
         QNN_DEBUG("freeing resources for tensor: %d", tensorIdx);
+        GGML_JNI_NOTIFY("freeing resources for tensor: %d", tensorIdx);
         if (nullptr != QNN_TENSOR_GET_DIMENSIONS(tensors[tensorIdx])) {
             QNN_DEBUG("freeing dimensions");
+            GGML_JNI_NOTIFY("freeing dimensions");
             free(QNN_TENSOR_GET_DIMENSIONS(tensors[tensorIdx]));
         }
         if (nullptr != QNN_TENSOR_GET_CLIENT_BUF(tensors[tensorIdx]).data) {
             QNN_DEBUG("freeing clientBuf.data");
+            GGML_JNI_NOTIFY("freeing clientBuf.data");
             free(QNN_TENSOR_GET_CLIENT_BUF(tensors[tensorIdx]).data);
         }
     }
@@ -424,11 +427,13 @@ iotensor::StatusCode iotensor::IOTensor::tearDownInputAndOutputTensors(Qnn_Tenso
                                                                        size_t numOutputTensors) {
     if (nullptr != inputs) {
         QNN_INFO("cleaning up resources for input tensors");
+        GGML_JNI_NOTIFY("cleaning up resources for input tensors");
         tearDownTensors(inputs, numInputTensors);
         inputs = nullptr;
     }
     if (nullptr != outputs) {
         QNN_INFO("cleaning up resources for output tensors");
+        GGML_JNI_NOTIFY("cleaning up resources for output tensors");
         tearDownTensors(outputs, numOutputTensors);
         outputs = nullptr;
     }
@@ -752,6 +757,7 @@ iotensor::StatusCode iotensor::IOTensor::writeOutputTensors(uint32_t graphIdx,
     }
     for (size_t outputIdx = 0; outputIdx < numOutputs; outputIdx++) {
         QNN_DEBUG("Writing output for outputIdx: %d", outputIdx);
+        GGML_JNI_NOTIFY("Writing output for outputIdx: %d", outputIdx);
         std::string outputFilePrefix;
         if (nullptr != QNN_TENSOR_GET_NAME(outputs[outputIdx]) &&
             strlen(QNN_TENSOR_GET_NAME(outputs[outputIdx])) > 0) {

@@ -11,12 +11,12 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_STANDARD 11)
 
 option(TARGET_XIAOMI14 "whether running device is Xiaomi 14"                                ON)
-option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"               OFF)
+option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"               ON)
 
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
 set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)
-set(PREBUIT_LIB_PATH            ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUIT_INC_PATH            ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
+set(PREBUILT_LIB_PATH            ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_INC_PATH            ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${CMAKE_SOURCE_DIR}/jni)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/)
 
@@ -75,8 +75,8 @@ set(SOURCE_FILES
 
 
 message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
-message("PREBUIT_INC_PATH     : ${PREBUIT_INC_PATH}")
-message("PREBUIT_LIB_PATH     : ${PREBUIT_LIB_PATH}")
+message("PREBUILT_INC_PATH     : ${PREBUILT_INC_PATH}")
+message("PREBUILT_LIB_PATH     : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
 message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")
@@ -86,7 +86,7 @@ message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
 include_directories(${WHISPERCPP_SRC_DIR}/)
 include_directories(${GGML_SRC_DIR}/)
 include_directories(${KANTV_GGMLJNI_SRC_DIR}/)
-include_directories(${PREBUIT_INC_PATH}/)
+include_directories(${PREBUILT_INC_PATH}/)
 
 #re-use the ggml.h in subdirectory llamacpp/ggml.h to avoid NDK complain "error: redefinition of 'ggml_status'"
 include_directories(${LLAMACPP_SRC_DIR}/)
@@ -119,6 +119,9 @@ endif()
 
 
 if (GGML_JNI_QNN)
+    file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
+
+    #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
 
 endif()
 
@@ -131,7 +134,7 @@ add_library(kantvcore
 set_target_properties(kantvcore
         PROPERTIES
         IMPORTED_LOCATION
-        ${PREBUIT_LIB_PATH}/libkantv-core.so)
+        ${PREBUILT_LIB_PATH}/libkantv-core.so)
 
 add_library(kantvffmpeg
         SHARED
@@ -140,7 +143,7 @@ add_library(kantvffmpeg
 set_target_properties(kantvffmpeg
         PROPERTIES
         IMPORTED_LOCATION
-        ${PREBUIT_LIB_PATH}/libkantv-ffmpeg.so)
+        ${PREBUILT_LIB_PATH}/libkantv-ffmpeg.so)
 
 
 function(build_library target_name)
@@ -150,7 +153,13 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
+    if (GGML_JNI_QNN)
+        file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
+        #target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android ${allQNNLibs})
+        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
+    else()
+        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
+    endif()
 
 endfunction()
 

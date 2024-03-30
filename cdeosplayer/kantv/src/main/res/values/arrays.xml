@@ -110,10 +110,16 @@
         <item>medium.en</item>
         <item>medium.en-q5_0</item>
         <item>large</item>
-        <item>llama-2-7b-chat.Q4_K_M</item>
-        <item>qwen1_5-1_8b-chat-q4_0</item>
-        <item>baichuan2-7b.Q4_K_M</item>
-        <item>gemma-2b.Q4_K_M</item>
+        <item>llama2-7b</item>
+        <item>qwen_8b</item>
+        <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
+        <item>Inception_v3</item>
+    </string-array>
+
+    <string-array name="backend">
+        <item>cpu</item>
+        <item>gpu</item>
+        <item>dsp</item>
     </string-array>
 </resources>

@@ -16,6 +16,7 @@
 #include <sstream>
 
 #include "ggml-jni.h"
+#include "kantv-asr.h"
 
 #include "QnnLog.h"
 

@@ -43,8 +43,29 @@ public class CDEAssetLoader {
         try {
             File destFile = new File(destFilePath);
 
-            if (destFile.exists())
+            if (destFile.exists()) {
+                // 03-30-2024 17:09:35.152 24446 24797 D KANTV   : [LogUtils.cpp, logStdoutCallback, 48]:
+                // 0.3ms [ ERROR ] Unable to load backend. pal::dynamicloading::dlError():
+                // dlopen failed: file offset for the library "/data/data/com.cdeos.kantv/libQnnCpu.so" >= file size: 0 >= 0
+
+
+                //03-30-2024 17:15:23.949 25507 25796 D KANTV   : [LogUtils.cpp, logStdoutCallback, 48]:
+                // 6.5ms [ ERROR ] Unable to load model. pal::dynamicloading::dlError():
+                // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
+                // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.cdeos.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
+                // is not accessible for the namespace "clns-4"
+
+                CDELog.j(TAG, "dst file already exist");
+                if (destFile.getAbsolutePath().contains("libQnnCpu")) {
+                    CDELog.j(TAG, "remove libQnnCpu.so");
+                    //destFile.delete();
+                }
+                if (destFile.getAbsolutePath().contains("libInception_v3")) {
+                    CDELog.j(TAG, "remove libInception_v3.so");
+                    //destFile.delete();
+                }
                 return;
+            }
 
             if (!destFile.exists()) {
                 destFile.createNewFile();

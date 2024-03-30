@@ -14,7 +14,7 @@
     <item
         android:id="@+id/navigation_asr"
         android:icon="@mipmap/ic_main_asr"
-        android:title="@string/ASR" />
+        android:title="AI" />
 
     <item
         android:id="@+id/navigation_llm"

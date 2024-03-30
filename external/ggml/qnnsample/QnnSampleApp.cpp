@@ -129,6 +129,9 @@ sample_app::StatusCode sample_app::QnnSampleApp::initialize() {
         QNN_INFO("Initializing logging in the backend. Callback: [%p], Log Level: [%d]",
                  logCallback,
                  logLevel);
+        GGML_JNI_NOTIFY("Initializing logging in the backend. Callback: [%p], Log Level: [%d]",
+                 logCallback,
+                 logLevel);
         if (QNN_SUCCESS !=
             m_qnnFunctionPointers.qnnInterface.logCreate(logCallback, logLevel, &m_logHandle)) {
             QNN_WARN("Unable to initialize logging in the backend.");
@@ -614,6 +617,7 @@ sample_app::StatusCode sample_app::QnnSampleApp::executeGraphs() {
                 }
                 if (StatusCode::SUCCESS == returnStatus) {
                     QNN_DEBUG("Successfully populated input tensors for graphIdx: %d", graphIdx);
+                    GGML_JNI_NOTIFY("Successfully populated input tensors for graphIdx: %d", graphIdx);
                     Qnn_ErrorHandle_t executeStatus = QNN_GRAPH_NO_ERROR;
                     executeStatus =
                             m_qnnFunctionPointers.qnnInterface.graphExecute(graphInfo.graph,
@@ -628,6 +632,8 @@ sample_app::StatusCode sample_app::QnnSampleApp::executeGraphs() {
                     }
                     if (StatusCode::SUCCESS == returnStatus) {
                         QNN_DEBUG("Successfully executed graphIdx: %d ", graphIdx);
+                        GGML_JNI_NOTIFY("Successfully executed graphIdx: %d ", graphIdx);
+
                         if (iotensor::StatusCode::SUCCESS !=
                             m_ioTensor.writeOutputTensors(graphIdx,
                                                           inputFileIndexOffset,
