@@ -110,7 +110,7 @@
             <TextView
                 android:id="@+id/asrInfo"
                 android:layout_width="match_parent"
-                android:layout_height="600dp"
+                android:layout_height="1200dp"
                 android:layout_marginTop="5dp" />
 
         </LinearLayout>

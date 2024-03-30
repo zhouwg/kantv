@@ -79,6 +79,7 @@
         <item>full</item>
         <item>matrix</item>
         <item>llama</item>
+        <item>qnn</item>
     </string-array>
 
     <string-array name="threadCounts">

@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "SampleApp.hpp"
+#include "ggml-jni.h"
 
 namespace qnn {
 namespace tools {
@@ -71,7 +72,8 @@ QnnLog_Level_t parseLogLevel(std::string logLevelString);
 
 void inline exitWithMessage(std::string &&msg, int code) {
   std::cerr << msg << std::endl;
-  std::exit(code);
+  //std::exit(code);
+  LOGGD("exitWithMessage:(code:%d)%s\n", code, msg.c_str());
 }
 
 }  // namespace sample_app

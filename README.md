@@ -13,6 +13,8 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
+- Running LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 by the magic llama.cpp
+
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
 - Performance benchmark for Android-based mobile phone for R&D activity
@@ -118,8 +120,14 @@ or run below script accordingly after fetch project's source code
 
   ```
 
+- Qualcomm QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
+
+
+  https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/introduction.html
+
 
 - vim settings
+
 
 borrow from http://ffmpeg.org/developer.html#Editor-configuration
 
@@ -189,8 +197,6 @@ cd kantv
 
  pip install pandas
 
- export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
-
 
  ${QNN_SDK_ROOT}/bin/envcheck -n
 
@@ -200,7 +206,7 @@ cd kantv
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L86">build/envsetup.sh</a> accordingly before launch build
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L100">whispercpp/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes

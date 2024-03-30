@@ -770,13 +770,13 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
 
 /**
  *
- * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
+ * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
  * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
  * @param n_threads             1 - 8
  * @return
 */
-void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads) {
+void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads) {
     int result = 0;
 
     if (NULL == p_asr_ctx) {

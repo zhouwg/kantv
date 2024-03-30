@@ -7,6 +7,7 @@
 //==============================================================================
 
 #include "LogUtils.hpp"
+#include "ggml-jni.h"
 
 void qnn::log::utils::logStdoutCallback(const char* fmt,
                                         QnnLog_Level_t level,
@@ -38,8 +39,15 @@ void qnn::log::utils::logStdoutCallback(const char* fmt,
   // To avoid interleaved messages
   {
     std::lock_guard<std::mutex> lock(sg_logUtilMutex);
-    fprintf(stdout, "%8.1fms [%-7s] ", ms, levelStr);
-    vfprintf(stdout, fmt, argp);
-    fprintf(stdout, "\n");
+
+    static unsigned char s_qnn_jni_buf[JNI_BUF_LEN];
+    int len_content = 0;
+    memset(s_qnn_jni_buf, 0, JNI_BUF_LEN);
+    len_content = vsnprintf(reinterpret_cast<char *const>(s_qnn_jni_buf), JNI_BUF_LEN, fmt, argp);
+    snprintf(reinterpret_cast<char *const>(s_qnn_jni_buf + len_content), JNI_BUF_LEN - len_content, "\n");
+    LOGGD("%8.1fms [%-7s] %s\n ", ms, levelStr, s_qnn_jni_buf);
+    //fprintf(stdout, "%8.1fms [%-7s] ", ms, levelStr);
+    //vfprintf(stdout, fmt, argp);
+    //fprintf(stdout, "\n");
   }
 }

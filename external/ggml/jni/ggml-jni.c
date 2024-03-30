@@ -18,7 +18,7 @@
  */
 #include <jni.h>
 
-#include "whisper.h"
+#include "whispercpp/whisper.h"
 
 #include "llamacpp/llama.h"
 
@@ -51,7 +51,7 @@ Java_org_ggml_ggmljava_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_ggmljava_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
+Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path,
                                        jstring audio_path, jint bench_type, jint num_threads) {
     UNUSED(clazz);
 
@@ -77,7 +77,7 @@ Java_org_ggml_ggmljava_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
     LOGGV("bench type: %d\n", bench_type);
     LOGGV("thread counts:%d\n", num_threads);
 
-    if (bench_type > 5) {
+    if (bench_type > BENCHMAKR_MAX) {
         LOGGW("pls check bench type\n");
         goto failure;
     }
@@ -85,7 +85,7 @@ Java_org_ggml_ggmljava_asr_1bench(JNIEnv *env, jclass clazz, jstring model_path,
     if (0 == num_threads)
         num_threads = 1;
 
-    whisper_bench(sz_model_path, sz_audio_path, bench_type, num_threads);
+    ggml_jni_bench(sz_model_path, sz_audio_path, bench_type, num_threads);
 
     if (BECHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer

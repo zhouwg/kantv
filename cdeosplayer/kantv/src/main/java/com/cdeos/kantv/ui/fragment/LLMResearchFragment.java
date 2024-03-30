@@ -17,13 +17,8 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
- import static org.ggml.ggmljava.WHISPER_ASR_MODE_BECHMARK;
- import static cdeos.media.player.CDEUtils.BECHMARK_ASR;
- import static cdeos.media.player.CDEUtils.SCREEN_ORIENTATION_PORTRAIT;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
- import static cdeos.media.player.KANTVEvent.KANTV_INFO_LLM_FINALIZE;
- import static cdeos.media.player.KANTVEvent.KANTV_INFO_LLM_STOP;
 
  import android.annotation.SuppressLint;
  import android.app.Activity;

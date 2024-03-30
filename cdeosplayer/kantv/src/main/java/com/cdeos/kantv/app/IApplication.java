@@ -1,8 +1,5 @@
 package com.cdeos.kantv.app;
 
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
-
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
@@ -269,7 +266,7 @@ public class IApplication extends Application {
                 CDELog.j(TAG, "no app version info in pref store");
             }
         } else {
-            CDELog.j(TAG, "can't find app version info in config file");
+            CDELog.j(TAG, "can't find app version info in config file, it should not happen, pls check why?\n");
         }
 
         String apkForTVString = jsonObject.getString("apkForTV");
@@ -371,9 +368,9 @@ public class IApplication extends Application {
             CDELog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST);
             }
             CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             CDEUtils.setTVASR(false);

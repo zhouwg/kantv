@@ -52,7 +52,7 @@ export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
 #export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
 export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/prebuilts/toolchain
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/ggml
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/ggml/whispercpp
 export LOCAL_LLAMACPP_PATH=${PROJECT_ROOT_PATH}/external/ggml/llamacpp
 
 
@@ -88,6 +88,7 @@ export UPSTREAM_WHISPERCPP_PATH=~/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/llama.cpp
 export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
 export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
+
 export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
 export PYTHONPATH=${QNN_SDK_ROOT}/lib/python/:${PYTHONPATH}
 

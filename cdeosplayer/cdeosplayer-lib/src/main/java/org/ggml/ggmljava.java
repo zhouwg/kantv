@@ -6,10 +6,6 @@ package org.ggml;
 public class ggmljava {
     private static final String TAG = ggmljava.class.getName();
 
-    public static final int WHISPER_ASR_MODE_NORMAL         = 0;
-    public static final int WHISPER_ASR_MODE_PRESURETEST    = 1;
-    public static final int WHISPER_ASR_MODE_BECHMARK       = 2;
-
     public static native int  asr_init(String strModelPath, int nThreadCounts, int nASRMode);
 
     public static native void asr_finalize();
@@ -28,13 +24,13 @@ public class ggmljava {
     public static native void asr_set_benchmark_status(int bExitBenchmark);
 
     /**
-     * @param modelPath     /sdcard/kantv/ggml-xxxxx.bin
+     * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
      * @param audioPath     /sdcard/kantv/jfk.wav
      * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
      * @param nThreadCounts 1 - 8
      * @return
      */
-    public static native String asr_bench(String modelPath, String audioPath, int nBenchType, int nThreadCounts);
+    public static native String ggml_bench(String modelPath, String audioPath, int nBenchType, int nThreadCounts);
 
 
     public static native String llm_get_systeminfo();

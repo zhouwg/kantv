@@ -13,6 +13,9 @@
 #include <cstring>
 #include <memory>
 #include <mutex>
+#include <sstream>
+
+#include "ggml-jni.h"
 
 #include "QnnLog.h"
 
@@ -39,6 +42,7 @@
     exit(EXIT_FAILURE);            \
   }
 
+#if 0
 #define QNN_WARN(fmt, ...) QNN_LOG_LEVEL(QNN_LOG_LEVEL_WARN, fmt, ##__VA_ARGS__)
 
 #define QNN_INFO(fmt, ...) QNN_LOG_LEVEL(QNN_LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
@@ -50,6 +54,20 @@
 #define QNN_FUNCTION_ENTRY_LOG QNN_LOG_LEVEL(QNN_LOG_LEVEL_VERBOSE, "Entering %s", __func__)
 
 #define QNN_FUNCTION_EXIT_LOG QNN_LOG_LEVEL(QNN_LOG_LEVEL_VERBOSE, "Returning from %s", __func__)
+#else
+
+#define QNN_WARN  LOGGW
+
+#define QNN_INFO  LOGGI
+
+#define QNN_DEBUG LOGGD
+
+#define QNN_VERBOSE LOGGV
+
+#define QNN_FUNCTION_ENTRY_LOG LOGGD("Entering %s", __func__)
+
+#define QNN_FUNCTION_EXIT_LOG  LOGGD("Returning from %s", __func__)
+#endif
 
 namespace qnn {
 namespace log {

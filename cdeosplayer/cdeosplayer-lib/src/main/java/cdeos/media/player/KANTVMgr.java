@@ -53,7 +53,7 @@ final public class KANTVMgr
 
     private boolean versionCheck()
     {
-        String javaVersion = KANTVVersion.KANTV_VERSION;
+        String javaVersion = CDEUtils.getKANTVAPKVersion();
         String nativeVersion = getVersion();
         CDELog.j(TAG, "[Java] JAR Version " + javaVersion);
         CDELog.j(TAG, "[Java] JNI Version " + nativeVersion);
@@ -76,7 +76,7 @@ final public class KANTVMgr
 
         if (!versionCheck())
         {
-            String javaVersion = KANTVVersion.KANTV_VERSION;
+            String javaVersion = CDEUtils.getKANTVAPKVersion();
             String nativeVersion = getVersion();
             String errorMsg = "JAR's version " + javaVersion + " does not match JNI's version: " + nativeVersion;
             CDELog.j(TAG, errorMsg);
