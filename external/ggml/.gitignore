@@ -3,11 +3,8 @@
 *.wav
 *.o
 *.bin
+
 out/
 obj/
 make/
 out.*/
-
-main
-bench
-quantize

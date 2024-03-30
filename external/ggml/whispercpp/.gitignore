@@ -1,0 +1,10 @@
+*.so
+*.a
+*.a
+*.o
+
+out/
+
+main
+bench
+quantize

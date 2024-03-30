@@ -43,7 +43,7 @@ function build_kantvcore
 
 function build_ggml_x86
 {
-    cd ${PROJECT_ROOT_PATH}/external/ggml
+    cd ${PROJECT_ROOT_PATH}/external/ggml/whispercpp
     show_pwd
 
     echo ""
@@ -65,6 +65,11 @@ function build_ggml_x86
         /bin/cp -fv quantize ${FF_PREFIX}/bin/
     fi
 
+    cd ${PROJECT_ROOT_PATH}/external/ggml/llamacpp
+    show_pwd
+    make
+
+    cd ${PROJECT_ROOT_PATH}/
     echo ""
     echo ""
     echo -e "------------------------------------------------------------------------------------------\n"

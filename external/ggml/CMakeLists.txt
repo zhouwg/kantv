@@ -4,17 +4,24 @@
 
 # Description: build libggml-jni.so for target Android
 
-
 cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
-
 project(ggml-jni)
+
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_STANDARD 11)
 
-set(WHISPERCPP_SRC_DIR ${CMAKE_SOURCE_DIR}/)
-set(PREBUIT_LIB_PATH ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUIT_INC_PATH ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
-set(LLAMACPP_SRC_DIR ${CMAKE_SOURCE_DIR}/llamacpp/)
+option(TARGET_XIAOMI14 "whether running device is Xiaomi 14"                                ON)
+option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"               OFF)
+
+#03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
+set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)
+set(PREBUIT_LIB_PATH            ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUIT_INC_PATH            ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
+set(KANTV_GGMLJNI_SRC_DIR       ${CMAKE_SOURCE_DIR}/jni)
+set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/)
+
+#03-26-2024, integrate llama.cpp to kantv
+set(LLAMACPP_SRC_DIR            ${CMAKE_SOURCE_DIR}/llamacpp/)
 
 #03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML
 set(QNN_INC_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/include/QNN)
@@ -28,10 +35,11 @@ include_directories(${QNN_SRC_DIR}/WrapperUtils)
 include_directories(${QNN_SRC_DIR}/PAL/include)
 
 set(SOURCE_FILES
-        ${WHISPERCPP_SRC_DIR}/ggml.c
-        ${WHISPERCPP_SRC_DIR}/ggml-alloc.c
-        ${WHISPERCPP_SRC_DIR}/ggml-backend.c
-        ${WHISPERCPP_SRC_DIR}/ggml-quants.c
+        #03-30-2024, upstream source code in llama.cpp is preferred
+        ${LLAMACPP_SRC_DIR}/ggml.c
+        ${LLAMACPP_SRC_DIR}/ggml-alloc.c
+        ${LLAMACPP_SRC_DIR}/ggml-backend.c
+        ${LLAMACPP_SRC_DIR}/ggml-quants.c
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
@@ -39,14 +47,14 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/unicode.cpp
         ${LLAMACPP_SRC_DIR}/unicode-data.cpp
 
-        ${WHISPERCPP_SRC_DIR}/jni/ggml-jni.c
-        ${WHISPERCPP_SRC_DIR}/jni/ggml-jni-impl.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
 
-        ${WHISPERCPP_SRC_DIR}/jni/tinywav.c
-        ${WHISPERCPP_SRC_DIR}/jni/sampling.cpp
-        ${WHISPERCPP_SRC_DIR}/jni/common.cpp
-        ${WHISPERCPP_SRC_DIR}/jni/grammar-parser.cpp
-        ${WHISPERCPP_SRC_DIR}/jni/llama-bench.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
+        ${KANTV_GGMLJNI_SRC_DIR}/sampling.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/common.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/grammar-parser.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/llama-bench.cpp
 
         ${QNN_SRC_DIR}/QnnSampleMain.cpp
         ${QNN_SRC_DIR}/QnnSampleApp.cpp
@@ -72,13 +80,12 @@ message("PREBUIT_LIB_PATH     : ${PREBUIT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
 message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")
-message("LOCAL_WHISPERCPP_PATH: ${LOCAL_WHISPERCPP_PATH}")
-message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
 message("QNN_INC_PATH         : ${QNN_INC_PATH}")
 message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
 
 include_directories(${WHISPERCPP_SRC_DIR}/)
-include_directories(${WHISPERCPP_SRC_DIR}/jni)
+include_directories(${GGML_SRC_DIR}/)
+include_directories(${KANTV_GGMLJNI_SRC_DIR}/)
 include_directories(${PREBUIT_INC_PATH}/)
 
 #re-use the ggml.h in subdirectory llamacpp/ggml.h to avoid NDK complain "error: redefinition of 'ggml_status'"
@@ -90,14 +97,7 @@ add_definitions(-D__ARM_NEON)
 add_definitions(-DNDEBUG)
 add_definitions(-O3)
 
-#add_subdirectory(${LLAMACPP_SRC_DIR})
-
-
-#weiguo:2024-03-10
-# the below build optimization might be works well on ALL mainstream Android phones
-# but NOT work with realtime subtitle feature(app would crash)
-# so it's default enabled
-#add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
+if (TARGET_XIAOMI14)
 
 #weiguo:2024-03-11
 # the below special build optimization ONLY validated ok on Xiaomi 14
@@ -106,6 +106,21 @@ add_definitions(-O3)
 add_definitions(-march=armv8.7-a)
 add_definitions(-mcpu=cortex-x1)
 add_definitions(-mtune=cortex-x1)
+
+else()
+
+#weiguo:2024-03-10
+# the below build optimization might be works well on ALL mainstream Android phones
+# but NOT work with realtime subtitle feature(app would crash)
+# so it's default enabled
+add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
+
+endif()
+
+
+if (GGML_JNI_QNN)
+
+endif()
 
 find_library(LOG_LIB log)
 

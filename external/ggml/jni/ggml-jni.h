@@ -60,6 +60,7 @@ extern "C" {
 #define BENCHMARK_MATRIX            4
 #define BENCHMAKR_LLAMA             5
 #define BENCHMAKR_QNN               6
+#define BENCHMAKR_MAX               6
 
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)
 
@@ -69,14 +70,15 @@ extern "C" {
     void         whisper_set_benchmark_status(int b_exit_benchmark);
     /**
     *
-    * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
+    * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
     * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
     * @param n_threads             1 - 8
     * @return
     */
-    //TODO: renamed to ggml_bench for purpose of unify whisper.cpp and llama.cpp
-    void         whisper_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
+    // renamed to ggml_jni_bench for purpose of unify JNI layer of whisper.cpp and llama.cpp
+    // and QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
+    void         ggml_jni_bench(const char *model_path, const char *audio_path, int bench_type, int num_threads);
 
 
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
@@ -112,7 +114,7 @@ extern "C" {
     // JNI helper function for llama.cpp
     /**
     *
-    * @param sz_model_path         /sdcard/kantv/llama-2-7b-chat.Q4_K_M.gguf
+    * @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
