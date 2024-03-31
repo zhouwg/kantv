@@ -259,7 +259,7 @@ public class Settings {
 
     public boolean getDevMode() {
         String key = mAppContext.getString(R.string.pref_key_dev_mode);
-        return mSharedPreferences.getBoolean(key, true);
+        return mSharedPreferences.getBoolean(key, false);
     }
 
     public int getDumpMode() {

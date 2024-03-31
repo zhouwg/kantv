@@ -15,8 +15,8 @@ option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"   
 
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
 set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)
-set(PREBUILT_LIB_PATH            ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUILT_INC_PATH            ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
+set(PREBUILT_LIB_PATH           ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_INC_PATH           ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${CMAKE_SOURCE_DIR}/jni)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/)
 
@@ -27,6 +27,7 @@ set(LLAMACPP_SRC_DIR            ${CMAKE_SOURCE_DIR}/llamacpp/)
 set(QNN_INC_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/lib/)
 set(QNN_SRC_DIR   ${CMAKE_SOURCE_DIR}/qnnsample/)
+
 include_directories(${QNN_INC_PATH}/)
 include_directories(${QNN_SRC_DIR}/)
 include_directories(${QNN_SRC_DIR}/Utils)
@@ -75,8 +76,8 @@ set(SOURCE_FILES
 
 
 message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
-message("PREBUILT_INC_PATH     : ${PREBUILT_INC_PATH}")
-message("PREBUILT_LIB_PATH     : ${PREBUILT_LIB_PATH}")
+message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
+message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
 message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")

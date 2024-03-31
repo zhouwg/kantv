@@ -24,8 +24,6 @@
  package com.cdeos.kantv.ui.fragment;
 
 
-
-
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -96,7 +94,7 @@
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
      private String strModeName = "tiny.en-q8_0";
-     private String strBackend  = "cpu";
+     private String strBackend = "cpu";
      private int backendIndex = 0; //CPU
 
      private long beginTime = 0;
@@ -111,7 +109,7 @@
      private ProgressDialog mProgressDialog;
 
      //private String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
-     String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
+     private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
      private String ggmlSampleFileName = "jfk.wav";
 
      private Context mContext;
@@ -326,11 +324,15 @@
                  return;
              }
 
-             selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             if (!isQNNModel)
+                 selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             else
+                 selectModelFilePath = CDEUtils.getDataPath(mContext) + selectModeFileName;
+
              CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
              selectModeFile = new File(selectModelFilePath);
-
              displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
+
              if (!selectModeFile.exists()) {
                  CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
              }

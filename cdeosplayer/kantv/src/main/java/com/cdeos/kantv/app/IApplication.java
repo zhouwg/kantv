@@ -238,6 +238,11 @@ public class IApplication extends Application {
         CDEUtils.copyAssetFile(mContext, "res/png1.png", CDEUtils.getDataPath(mContext) + "png1.png");
         CDEUtils.copyAssetFile(mContext, "res/png2.png", CDEUtils.getDataPath(mContext) + "png2.png");
         CDEUtils.copyAssetFile(mContext, "res/simhei.ttf", CDEUtils.getDataPath(mContext) + "simhei.ttf");
+        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
+        String ggmlSampleFileName = "jfk.wav";
+        CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
+        CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
+
         CDEAssetLoader.copyAssetFile(mContext, "config.json", CDEAssetLoader.getDataPath(mContext) + "config.json");
         String configString = CDEAssetLoader.readTextFromFile(CDEAssetLoader.getDataPath(mContext) + "config.json");
         JSONObject jsonObject = JSON.parseObject(configString);

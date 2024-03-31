@@ -854,10 +854,11 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                                 "--model", const_cast<char *>(sz_model_path),
                                 "--input_list", "/sdcard/kantv/raw_list.txt",
                                 "--output_dir", "/sdcard/kantv/qnn/",
-                                "--log_level", "info"
+                                "--log_level", "debug"
                                };
                 //TODO:
-                // backend CPU works fine on Xiaomi14
+                // problem occurs when switching back and forth between cpu backend and gpu backend
+                // dsp backend not work
                 qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
             }
             break;
@@ -1428,6 +1429,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      if (NULL == p_asr_ctx) {
          p_asr_ctx = (whisper_asr_context *) malloc(sizeof(whisper_asr_context));
          if (NULL == p_asr_ctx) {
+             LOGGW("initialize failure\n");
              return 3;
          }
      }
@@ -1437,24 +1439,28 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      result  = pthread_mutex_init(&p_asr_ctx->mutex, NULL);
      if (result != 0) {
          result = 4;
+         LOGGW("initialize failure\n");
          goto failure;
      }
 
      p_asr_ctx->asr_fifo = fifo_new("asr_fifo", 1200, 1024 * 8 * 20);
      if (NULL == p_asr_ctx->asr_fifo) {
          result = 5;
+         LOGGW("initialize failure\n");
          goto failure;
      }
 
      p_asr_ctx->p_asr = new (std::nothrow)whisper_asr();  // attention memory leak
      if (NULL == p_asr_ctx->p_asr) {
          result = 6;
+         LOGGW("initialize failure\n");
          goto failure;
      }
 
      p_asr_ctx->swr_ctx = swr_alloc();      // attention memory leak
      if (NULL == p_asr_ctx->swr_ctx) {
          result  = 7;
+         LOGGW("initialize failure\n");
          goto failure;
      }
 
@@ -1465,6 +1471,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
      if (nullptr == p_asr_ctx->p_context) {
          result = 8;
+         LOGGW("initialize failure\n");
          goto failure;
      }
      LOGGD("after calling whisper_init_from_file");
@@ -1472,6 +1479,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      p_asr_ctx->p_params = (struct whisper_full_params *)malloc(sizeof(struct whisper_full_params));
      if (NULL == p_asr_ctx->p_params) {
          result = 9;
+         LOGGW("initialize failure\n");
          goto failure;
      }
 
