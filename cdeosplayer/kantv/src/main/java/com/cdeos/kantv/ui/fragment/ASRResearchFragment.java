@@ -24,6 +24,7 @@
  package com.cdeos.kantv.ui.fragment;
 
 
+ import static org.ggml.ggmljava.GGML_JNI_OP_ADD;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -319,11 +320,11 @@
                  return;
              }
 
-             if (isQNNModel && (benchmarkIndex != CDEUtils.BENCHMARK_QNN)) {
+             if (isQNNModel && (benchmarkIndex < CDEUtils.BENCHMARK_QNN_SAMPLE)) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
-             if (!isQNNModel && (benchmarkIndex == CDEUtils.BENCHMARK_QNN)) {
+             if (!isQNNModel && (benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE)) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
@@ -403,7 +404,7 @@
                                  CDEUtils.getDataPath() + ggmlModelFileName,
                                  CDEUtils.getDataPath() + ggmlSampleFileName,
                                  benchmarkIndex,
-                                 nThreadCounts, 0);
+                                 nThreadCounts, 0, 0);
                      } else {
                          // avoid following issue
                          // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
@@ -413,7 +414,7 @@
                                  CDEUtils.getDataPath(mContext) + ggmlModelFileName,
                                  CDEUtils.getDataPath() + ggmlSampleFileName,
                                  benchmarkIndex,
-                                 nThreadCounts, backendIndex);
+                                 nThreadCounts, backendIndex, GGML_JNI_OP_ADD);
                      }
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);

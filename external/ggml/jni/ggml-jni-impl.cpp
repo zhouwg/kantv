@@ -80,6 +80,22 @@
 #include <regex>
 #include <random>
 #include <functional>
+#include <tuple>
+#include <queue>
+#include <unordered_map>
+#include <vector>
+
+//03-31-2024,18:00, for PoC https://github.com/zhouwg/kantv/issues/121
+#include "ggml-qnn.h"
+
+#include "QnnTypes.h"
+#include "QnnCommon.h"
+#include "QnnContext.h"
+#include "QnnBackend.h"
+#include "QnnGraph.h"
+#include "QnnProperty.h"
+#include "QnnTensor.h"
+#include "QnnInterface.h"
 
 extern "C" {
 #include <inttypes.h>
@@ -772,12 +788,13 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN matrix 8: QNN GGML
  * @param n_threads             1 - 8
  * @param n_backend_type        0: CPU  1: GPU  2: DSP
+ * @param n_op_type             type of matrix manipulate / GGML OP
  * @return
 */
-void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads, int n_backend_type) {
+void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads, int n_backend_type, int n_op_type) {
     int result = 0;
 
     if (NULL == p_asr_ctx) {
@@ -792,6 +809,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
 
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("backend type:%d\n", n_backend_type);
+    LOGGD("op type:%d\n", n_op_type);
 
     p_asr_ctx->b_use_gpu                = false;        // TODO:not used currently
     p_asr_ctx->n_threads                = n_threads;
@@ -830,7 +848,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             ggml_bench_llama(sz_model_path, n_threads);
             break;
 
-        case BENCHMAKR_QNN:
+        case BENCHMAKR_QNN_SAMPLE:
             {
                 //TODO: this is a lazy method in PoC stage
                 int argc = 11;
@@ -862,6 +880,14 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                 // dsp backend not work
                 qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
             }
+            break;
+
+        case BENCHMARK_QNN_MATRIX:
+            qnn_matrix(n_backend_type, n_op_type);
+            break;
+
+        case BENCHMARK_QNN_GGML:
+            qnn_ggml(n_backend_type, n_op_type);
             break;
 
         default:

@@ -59,13 +59,25 @@ extern "C" {
 #define BECHMARK_FULL               3
 #define BENCHMARK_MATRIX            4
 #define BENCHMAKR_LLAMA             5
-#define BENCHMAKR_QNN               6
-#define BENCHMAKR_MAX               6
+#define BENCHMAKR_QNN_SAMPLE        6
+#define BENCHMARK_QNN_MATRIX        7
+#define BENCHMARK_QNN_GGML          8
+#define BENCHMAKR_MAX               8
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
 #define BACKEND_DSP                 2
 #define BACKEND_MAX                 2
+
+    enum ggml_jni_op {
+        GGML_JNI_OP_NONE = 0,
+        GGML_JNI_OP_ADD,
+        GGML_JNI_OP_SUB,
+        GGML_JNI_OP_MUL,
+        GGML_JNI_OP_DIV,
+        GGML_JNI_OP_SUM,
+        GGML_JNI_OP_MUL_MAT
+    };
 
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)
 
@@ -77,14 +89,15 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN matrix 8: QNN GGML
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP
+    * @param n_op_type             type of matrix manipulate / GGML OP
     * @return
     */
     // renamed to ggml_jni_bench for purpose of unify JNI layer of whisper.cpp and llama.cpp
     // and QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
-    void         ggml_jni_bench(const char *model_path, const char *audio_path, int n_bench_type, int num_threads, int n_backend_type);
+    void         ggml_jni_bench(const char *model_path, const char *audio_path, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
 
 
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
@@ -138,6 +151,10 @@ extern "C" {
 // =================================================================================================
 
     int qnn_sample_main(int argc, char** argv);
+
+    int qnn_matrix(int n_backend_type, int n_op_type);
+
+    int qnn_ggml(int n_backend_type, int n_ggml_op_type);
 
 
 #ifdef __cplusplus

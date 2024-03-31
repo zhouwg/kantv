@@ -79,7 +79,9 @@
         <item>full</item>
         <item>matrix</item>
         <item>llama</item>
-        <item>qnn</item>
+        <item>qnn-sample</item>
+        <item>qnn-matrix</item>
+        <item>qnn-ggml</item>
     </string-array>
 
     <string-array name="threadCounts">
