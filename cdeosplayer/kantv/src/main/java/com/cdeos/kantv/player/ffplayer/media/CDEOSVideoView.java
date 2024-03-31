@@ -19,9 +19,6 @@
 
 package com.cdeos.kantv.player.ffplayer.media;
 
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
-
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;

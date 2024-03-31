@@ -52,7 +52,7 @@ export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
 #export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
 export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/prebuilts/toolchain
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/ggml
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/external/ggml/whispercpp
 export LOCAL_LLAMACPP_PATH=${PROJECT_ROOT_PATH}/external/ggml/llamacpp
 
 
@@ -79,6 +79,8 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
+export ANDROID_NDK_ROOT=${ANDROID_NDK}
+export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
 
 #modify following lines to adapt to local dev envs

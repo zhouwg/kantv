@@ -770,13 +770,13 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
 
 /**
  *
- * @param sz_model_path         /sdcard/kantv/ggml-xxxxx.bin
+ * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN
  * @param n_threads             1 - 8
  * @return
 */
-void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads) {
+void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads) {
     int result = 0;
 
     if (NULL == p_asr_ctx) {
@@ -826,6 +826,11 @@ void whisper_bench(const char * sz_model_path, const char *sz_audio_path, int n_
 
         case BENCHMAKR_LLAMA:
             ggml_bench_llama(sz_model_path, n_threads);
+            break;
+
+        case BENCHMAKR_QNN:
+            //03-31-2024,9:42, not available on kantv-1.3.6+
+            //qnn_sample_main(1, NULL); //TODO: not works on Xiaomi 14, just to make NDK happy
             break;
 
         default:
@@ -1394,6 +1399,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      if (NULL == p_asr_ctx) {
          p_asr_ctx = (whisper_asr_context *) malloc(sizeof(whisper_asr_context));
          if (NULL == p_asr_ctx) {
+             LOGGW("malloc failed\n");
              return 3;
          }
      }
@@ -1403,24 +1409,28 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      result  = pthread_mutex_init(&p_asr_ctx->mutex, NULL);
      if (result != 0) {
          result = 4;
+         LOGGW("failed\n");
          goto failure;
      }
 
      p_asr_ctx->asr_fifo = fifo_new("asr_fifo", 1200, 1024 * 8 * 20);
      if (NULL == p_asr_ctx->asr_fifo) {
          result = 5;
+         LOGGW("failed\n");
          goto failure;
      }
 
      p_asr_ctx->p_asr = new (std::nothrow)whisper_asr();  // attention memory leak
      if (NULL == p_asr_ctx->p_asr) {
          result = 6;
+         LOGGW("failed\n");
          goto failure;
      }
 
      p_asr_ctx->swr_ctx = swr_alloc();      // attention memory leak
      if (NULL == p_asr_ctx->swr_ctx) {
          result  = 7;
+         LOGGW("failed\n");
          goto failure;
      }
 
@@ -1431,6 +1441,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
      if (nullptr == p_asr_ctx->p_context) {
          result = 8;
+         LOGGW("failed\n");
          goto failure;
      }
      LOGGD("after calling whisper_init_from_file");
@@ -1438,6 +1449,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      p_asr_ctx->p_params = (struct whisper_full_params *)malloc(sizeof(struct whisper_full_params));
      if (NULL == p_asr_ctx->p_params) {
          result = 9;
+         LOGGW("failed\n");
          goto failure;
      }
 
@@ -1479,7 +1491,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      return result;
 
 failure:
-
+     LOGGW("init failed\n");
      if (nullptr != p_asr_ctx->p_context) {
          whisper_free(p_asr_ctx->p_context);
      }

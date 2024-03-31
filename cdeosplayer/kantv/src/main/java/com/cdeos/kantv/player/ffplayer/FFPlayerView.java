@@ -18,9 +18,6 @@
 
 package com.cdeos.kantv.player.ffplayer;
 
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_NORMAL;
-import static org.ggml.ggmljava.WHISPER_ASR_MODE_PRESURETEST;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -1580,9 +1577,9 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         if (CDEUtils.getASRSubsystemInit()) {
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_NORMAL);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL);
             } else {
-                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), WHISPER_ASR_MODE_PRESURETEST);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST);
             }
             ggmljava.asr_start();
         } else {

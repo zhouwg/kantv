@@ -1,7 +1,5 @@
-DeepSpeech/
 gstreamer/
-ncnn/
-CLBlast/
+qualcomm/
 
 *.a
 *.so
