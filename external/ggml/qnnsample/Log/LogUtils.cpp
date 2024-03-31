@@ -45,9 +45,9 @@ void qnn::log::utils::logStdoutCallback(const char* fmt,
     memset(s_qnn_jni_buf, 0, JNI_BUF_LEN);
     len_content = vsnprintf(reinterpret_cast<char *const>(s_qnn_jni_buf), JNI_BUF_LEN, fmt, argp);
     snprintf(reinterpret_cast<char *const>(s_qnn_jni_buf + len_content), JNI_BUF_LEN - len_content, "\n");
-    LOGGD("%8.1fms [%-7s] %s\n ", ms, levelStr, s_qnn_jni_buf);
-    if (level >= QNN_LOG_LEVEL_WARN) {
-      GGML_JNI_NOTIFY("%8.1fms [%-7s] %s\n ", ms, levelStr, s_qnn_jni_buf);
+    LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_qnn_jni_buf);
+    if (level <= QNN_LOG_LEVEL_INFO) {
+      GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_qnn_jni_buf);
     }
   }
 }

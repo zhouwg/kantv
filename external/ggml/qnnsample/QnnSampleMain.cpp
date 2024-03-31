@@ -204,6 +204,20 @@ namespace qnn {
                 std::string saveBinaryName;
                 QnnLog_Level_t logLevel{QNN_LOG_LEVEL_ERROR};
                 std::string systemLibraryPath;
+
+                //03-31-2024,weiguo, workaround to fix bug in QNN sample code
+                for (int i = 0; i < argc; i++)  {
+                    LOGGD("argv[%d]=%s\n",i , argv[i]);
+                }
+                backEndPath         = argv[2];
+                modelPath           = argv[4];
+                inputListPaths      = argv[6];
+                outputPath          = argv[8];
+                logLevel            = sample_app::parseLogLevel(argv[10]);
+
+                /* 03-31-2024,weiguo, there is an unknown bug in following code cause
+                 * problem when switching back and forth between cpu backend and gpu backend
+                 * so just comment them
                 while ((opt = pal::getOptLongOnly(argc, argv, "", s_longOptions, &longIndex)) !=
                        -1) {
                     switch (opt) {
@@ -218,10 +232,12 @@ namespace qnn {
 
                         case OPT_MODEL:
                             modelPath = pal::g_optArg;
+                            LOGGD("model path:%s\n", modelPath.c_str());
                             break;
 
                         case OPT_BACKEND:
                             backEndPath = pal::g_optArg;
+                            LOGGD("backend:%s\n", backEndPath.c_str());
                             break;
 
                         case OPT_INPUT_LIST:
@@ -300,6 +316,7 @@ namespace qnn {
                             showHelp();
                     }
                 }
+                */
 
                 if (!modelPath.empty()) {
                     if (!cachedBinaryPath.empty()) {

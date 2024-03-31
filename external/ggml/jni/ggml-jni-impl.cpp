@@ -850,6 +850,8 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                         break;
                 }
 
+                LOGGD("qnn_backend:%s\n", qnn_backend_lib);
+                LOGGD("qnn_model:%s\n", sz_model_path);
                 char *argv[] = {"qnn-net-run", "--backend", qnn_backend_lib,
                                 "--model", const_cast<char *>(sz_model_path),
                                 "--input_list", "/sdcard/kantv/raw_list.txt",
@@ -857,7 +859,6 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                                 "--log_level", "debug"
                                };
                 //TODO:
-                // problem occurs when switching back and forth between cpu backend and gpu backend
                 // dsp backend not work
                 qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
             }

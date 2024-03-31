@@ -161,13 +161,17 @@
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
 
+         //add the qnn binary files to facilitate other developers to reproduce the qnn sample on Qualcomm SoC based android phone(Xiaomi 14 is preferred)
          //qualcomm's dedicated model file
          CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
          //qualcomm's prebuilt QNN userspace library
          CDEAssetLoader.copyAssetFile(mContext, "libQnnCpu.so", CDEUtils.getDataPath(mContext) + "libQnnCpu.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
+         //qualcomm's prebuilt binary file
          CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
+         CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
+
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
