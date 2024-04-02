@@ -1,4 +1,5 @@
 gstreamer/
+qualcomm/
 
 *.a
 *.so

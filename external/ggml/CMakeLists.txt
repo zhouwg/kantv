@@ -8,7 +8,10 @@ cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 project(ggml-jni)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 option(TARGET_XIAOMI14 "whether running device is Xiaomi 14"                                ON)
 option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"               ON)
@@ -119,6 +122,19 @@ add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 endif()
 
+#add_compile_options("-Wall" "-Werror" "-Wno-sign-compare")
+add_compile_options("-Wall" "-Wno-sign-compare")
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_link_options("-s")
+    set(CMAKE_C_VISIBILITY_PRESET hidden)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    add_compile_options("-O3"
+            "-ffunction-sections"
+            "-fdata-sections"
+            "-frtti"
+            "-Wno-unused-command-line-argument")
+endif()
 
 if (GGML_JNI_QNN)
     file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
