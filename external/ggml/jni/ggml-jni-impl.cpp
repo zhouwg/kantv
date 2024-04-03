@@ -1531,6 +1531,11 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      params.suppress_blank              = true;
      params.suppress_non_speech_tokens  = true;
 
+     //ref: https://github.com/ggerganov/whisper.cpp/issues/1507
+     //reduce the maximum context size (--max-context). By default it is 224. Setting it to 64 or 32 can reduce the repetitions significantly. Setting it to 0 will most likely eliminate all repetitions, but the transcription quality can be affected because it will be losing the context from the previous transcript
+     params.n_max_text_ctx              = 224; //default value
+     //params.n_max_text_ctx              = 0;
+
      //03-20-2024, ref:https://github.com/futo-org/whisper-acft
      p_asr_ctx->n_decoding_mode         = WHISPER_SAMPLING_BEAM_SEARCH;
 

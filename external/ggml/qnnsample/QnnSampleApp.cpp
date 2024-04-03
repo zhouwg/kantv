@@ -202,6 +202,7 @@ sample_app::StatusCode sample_app::QnnSampleApp::terminateBackend() {
 sample_app::StatusCode sample_app::QnnSampleApp::registerOpPackages() {
     const size_t pathIdx = 0;
     const size_t interfaceProviderIdx = 1;
+    LOGGI("m_opPackagePaths: %d\n", m_opPackagePaths.size());
     for (auto const &opPackagePath : m_opPackagePaths) {
         std::vector<std::string> opPackage;
         split(opPackage, opPackagePath, ':');
@@ -269,6 +270,8 @@ sample_app::StatusCode sample_app::QnnSampleApp::freeContext() {
 // are expected to be read by the app.
 sample_app::StatusCode sample_app::QnnSampleApp::composeGraphs() {
     auto returnStatus = StatusCode::SUCCESS;
+    LOGGI("m_graphConfigsInfoCount %d\n", m_graphConfigsInfoCount);
+    LOGGI("m_graphConfigsInfo %p\n", m_graphConfigsInfo);
     if (qnn_wrapper_api::ModelError_t::MODEL_NO_ERROR !=
         m_qnnFunctionPointers.composeGraphsFnHandle(
                 m_backendHandle,
@@ -284,6 +287,7 @@ sample_app::StatusCode sample_app::QnnSampleApp::composeGraphs() {
         QNN_ERROR("Failed in composeGraphs()");
         returnStatus = StatusCode::FAILURE;
     }
+    LOGGI("m_graphsCount %d\n", m_graphsCount);
     return returnStatus;
 }
 

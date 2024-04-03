@@ -443,7 +443,11 @@ int qnn_sample_main(int argc, char **argv) {
             auto createDeviceStatus = app->createDevice();
             if (sample_app::StatusCode::SUCCESS != createDeviceStatus) {
                 return app->reportError("Device Creation failure");
+            } else {
+                LOGGI("create device successfully \n");
             }
+        } else {
+            LOGGW("device property not supported\n");
         }
 
         if (sample_app::StatusCode::SUCCESS != app->initializeProfiling()) {

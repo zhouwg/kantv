@@ -133,6 +133,38 @@ enum class ggml_qnn_profile_level {
 };
 
 
+enum class OutputDataType {
+    FLOAT_ONLY, NATIVE_ONLY, FLOAT_AND_NATIVE, INVALID
+};
+
+
+enum class InputDataType {
+    FLOAT, NATIVE, INVALID
+};
+
+
+typedef struct GraphInfo {
+    Qnn_GraphHandle_t graph;
+    char * graphName;
+    Qnn_Tensor_t * inputTensors;
+    uint32_t numInputTensors;
+    Qnn_Tensor_t * outputTensors;
+    uint32_t numOutputTensors;
+} GraphInfo_t;
+typedef GraphInfo_t * GraphInfoPtr_t;
+
+
+typedef struct GraphConfigInfo {
+    char * graphName;
+    const QnnGraph_Config_t ** graphConfigs;
+} GraphConfigInfo_t;
+
+
+typedef struct {
+    void * buffer;
+    uint64_t num_bytes;
+} buffer_blob_t;
+
 using pfn_rpc_mem_alloc                     = void * (*)(int, uint32_t, int);
 using pfn_rpc_mem_free                      = void (*)(void *);
 using pfn_rpc_mem_to_fd                     = int (*)(void *);
@@ -140,6 +172,11 @@ using pfn_rpc_mem_to_fd                     = int (*)(void *);
 using _pfn_QnnSaver_initialize              = decltype(QnnSaver_initialize);
 using _pfn_QnnInterface_getProviders        = decltype(QnnInterface_getProviders);
 using _pfn_QnnSystemInterface_getProviders  = decltype(QnnSystemInterface_getProviders);
+
+using PopulateInputTensorsRetType_t         = std::tuple<int, size_t, size_t>;
+using ReadBatchDataRetType_t                = std::tuple<int, size_t, size_t>;
+using ReadInputListRetType_t                = std::tuple<std::vector<std::vector<std::string>>, std::unordered_map<std::string, uint32_t>, bool>;
+using ReadInputListsRetType_t               = std::tuple<std::vector<std::vector<std::vector<std::string>>>, std::vector<std::unordered_map<std::string, uint32_t>>, bool>;
 
 
 inline int validateTensorVersion(Qnn_Tensor_t tensor) {
@@ -619,6 +656,10 @@ inline void setQnnTensorMemHandle(Qnn_Tensor_t* tensor, Qnn_MemHandle_t handle) 
 }
 
 
+
+
+
+
 // Accessors for QNN Op Config
 #define QNN_OP_CFG_GET_NAME(opConfig)         getQnnOpConfigName(opConfig)
 #define QNN_OP_CFG_GET_PACKAGE_NAME(opConfig) getQnnOpConfigPackageName(opConfig)
@@ -764,6 +805,73 @@ static int deepCopyQnnTensors(Qnn_Tensor_t &src, Qnn_Tensor_t &dst) {
     return err;
 }
 
+static bool deepCopyQnnTensorInfo(Qnn_Tensor_t *dst, const Qnn_Tensor_t *src) {
+    if (nullptr == dst || nullptr == src) {
+        LOGGW("Received nullptr");
+        return false;
+    }
+    // set tensor.version before using QNN_TENSOR_SET macros, as they require the version to be set
+    // to correctly assign values
+    dst->version = src->version;
+    const char *tensorName = QNN_TENSOR_GET_NAME(src);
+    if (!tensorName) {
+        QNN_TENSOR_SET_NAME(dst, nullptr);
+    } else {
+        QNN_TENSOR_SET_NAME(dst, strndup(tensorName, strlen(tensorName)));
+    }
+    QNN_TENSOR_SET_ID(dst, QNN_TENSOR_GET_ID(src));
+    QNN_TENSOR_SET_TYPE(dst, QNN_TENSOR_GET_TYPE(src));
+    QNN_TENSOR_SET_DATA_FORMAT(dst, QNN_TENSOR_GET_DATA_FORMAT(src));
+    QNN_TENSOR_SET_DATA_TYPE(dst, QNN_TENSOR_GET_DATA_TYPE(src));
+    Qnn_QuantizeParams_t qParams = QNN_QUANTIZE_PARAMS_INIT;
+    qParams.encodingDefinition = QNN_TENSOR_GET_QUANT_PARAMS(src).encodingDefinition;
+    qParams.quantizationEncoding = QNN_QUANTIZATION_ENCODING_UNDEFINED;
+    if (QNN_TENSOR_GET_QUANT_PARAMS(src).quantizationEncoding ==
+        QNN_QUANTIZATION_ENCODING_SCALE_OFFSET) {
+        qParams.quantizationEncoding = QNN_TENSOR_GET_QUANT_PARAMS(src).quantizationEncoding;
+        qParams.scaleOffsetEncoding = QNN_TENSOR_GET_QUANT_PARAMS(src).scaleOffsetEncoding;
+    } else if (QNN_TENSOR_GET_QUANT_PARAMS(src).quantizationEncoding ==
+               QNN_QUANTIZATION_ENCODING_AXIS_SCALE_OFFSET) {
+        qParams.quantizationEncoding = QNN_TENSOR_GET_QUANT_PARAMS(src).quantizationEncoding;
+        qParams.axisScaleOffsetEncoding.axis =
+                QNN_TENSOR_GET_QUANT_PARAMS(src).axisScaleOffsetEncoding.axis;
+        qParams.axisScaleOffsetEncoding.numScaleOffsets =
+                QNN_TENSOR_GET_QUANT_PARAMS(src).axisScaleOffsetEncoding.numScaleOffsets;
+        if (QNN_TENSOR_GET_QUANT_PARAMS(src).axisScaleOffsetEncoding.numScaleOffsets > 0) {
+            qParams.axisScaleOffsetEncoding.scaleOffset = (Qnn_ScaleOffset_t *) malloc(
+                    QNN_TENSOR_GET_QUANT_PARAMS(src).axisScaleOffsetEncoding.numScaleOffsets *
+                    sizeof(Qnn_ScaleOffset_t));
+            if (qParams.axisScaleOffsetEncoding.scaleOffset) {
+                for (size_t idx = 0;
+                     idx < QNN_TENSOR_GET_QUANT_PARAMS(src).axisScaleOffsetEncoding.numScaleOffsets;
+                     idx++) {
+                    qParams.axisScaleOffsetEncoding.scaleOffset[idx].scale =
+                            QNN_TENSOR_GET_QUANT_PARAMS(
+                                    src).axisScaleOffsetEncoding.scaleOffset[idx].scale;
+                    qParams.axisScaleOffsetEncoding.scaleOffset[idx].offset =
+                            QNN_TENSOR_GET_QUANT_PARAMS(
+                                    src).axisScaleOffsetEncoding.scaleOffset[idx].offset;
+                }
+            }
+        }
+    }
+    QNN_TENSOR_SET_QUANT_PARAMS(dst, qParams);
+    QNN_TENSOR_SET_RANK(dst, QNN_TENSOR_GET_RANK(src));
+    QNN_TENSOR_SET_DIMENSIONS(dst, nullptr);
+    if (QNN_TENSOR_GET_RANK(src) > 0) {
+        QNN_TENSOR_SET_DIMENSIONS(dst,
+                                  (uint32_t *) malloc(QNN_TENSOR_GET_RANK(src) * sizeof(uint32_t)));
+        if (QNN_TENSOR_GET_DIMENSIONS(dst)) {
+            memscpy(QNN_TENSOR_GET_DIMENSIONS(dst),
+                                   QNN_TENSOR_GET_RANK(src) * sizeof(uint32_t),
+                                   QNN_TENSOR_GET_DIMENSIONS(src),
+                                   QNN_TENSOR_GET_RANK(src) * sizeof(uint32_t));
+        }
+    }
+    return true;
+}
+
+
 static int freeQnnTensor(Qnn_Tensor_t &tensor) {
     int err = 0;
     VALIDATE_TENSOR_VERSION(tensor, err);
@@ -786,6 +894,334 @@ static int freeQnnTensors(Qnn_Tensor_t *&tensors, uint32_t numTensors) {
     return err;
 }
 
+
+static int freeGraphsInfo(GraphInfoPtr_t ** graphsInfo, uint32_t numGraphs) {
+    if (graphsInfo == nullptr || * graphsInfo == nullptr) {
+        return 1;
+    }
+
+    for (uint32_t i = 0; i < numGraphs; i++) {
+        free((*graphsInfo)[i]->graphName);
+        freeQnnTensors((*graphsInfo)[i]->inputTensors, (*graphsInfo)[i]->numInputTensors);
+        freeQnnTensors((*graphsInfo)[i]->outputTensors, (*graphsInfo)[i]->numOutputTensors);
+    }
+
+    free(**graphsInfo);
+    free(*graphsInfo);
+    *graphsInfo = nullptr;
+
+    return 0;
+}
+
+const std::map<Qnn_DataType_t, size_t> g_dataTypeToSize = {
+        {QNN_DATATYPE_INT_8,           1},
+        {QNN_DATATYPE_INT_16,          2},
+        {QNN_DATATYPE_INT_32,          4},
+        {QNN_DATATYPE_INT_64,          8},
+        {QNN_DATATYPE_UINT_8,          1},
+        {QNN_DATATYPE_UINT_16,         2},
+        {QNN_DATATYPE_UINT_32,         4},
+        {QNN_DATATYPE_UINT_64,         8},
+        {QNN_DATATYPE_FLOAT_16,        2},
+        {QNN_DATATYPE_FLOAT_32,        4},
+        {QNN_DATATYPE_FLOAT_64,        8},
+        {QNN_DATATYPE_SFIXED_POINT_8,  1},
+        {QNN_DATATYPE_SFIXED_POINT_16, 2},
+        {QNN_DATATYPE_SFIXED_POINT_32, 4},
+        {QNN_DATATYPE_UFIXED_POINT_8,  1},
+        {QNN_DATATYPE_UFIXED_POINT_16, 2},
+        {QNN_DATATYPE_UFIXED_POINT_32, 4},
+        {QNN_DATATYPE_BOOL_8,          1},
+};
+static std::tuple<int, size_t> getDataTypeSizeInBytes(Qnn_DataType_t dataType) {
+    if (g_dataTypeToSize.find(dataType) == g_dataTypeToSize.end()) {
+        LOGGW("Invalid qnn data type provided");
+        return std::make_tuple(1, 0);
+    }
+    return std::make_tuple(0, g_dataTypeToSize.find(dataType)->second);
+}
+
+
+static size_t calculateElementCount(std::vector<size_t> dims) {
+    if (dims.size() == 0) {
+        return 0;
+    }
+    return std::accumulate(dims.begin(), dims.end(), 1, std::multiplies<size_t>());
+}
+
+
+static std::tuple<int, size_t> calculateLength(std::vector<size_t> dims,
+                                                                   Qnn_DataType_t dataType) {
+    if (dims.size() == 0) {
+        LOGGW("dims.size() is zero");
+        return std::make_tuple(1, 0);
+    }
+    int  returnStatus = 0;
+    size_t length{0};
+    std::tie(returnStatus, length) = getDataTypeSizeInBytes(dataType);
+    if (0 != returnStatus) {
+        return std::make_tuple(returnStatus, 0);
+    }
+    length *= calculateElementCount(dims);
+    return std::make_tuple(0, length);
+}
+
+
+static ReadBatchDataRetType_t readBatchData(const std::vector<std::string> &filePaths,
+                                                         const size_t filePathsIndexOffset,
+                                                         const bool loopBackToStart,
+                                                         const std::vector<size_t> &dims,
+                                                         const Qnn_DataType_t dataType,
+                                                         uint8_t *buffer) {
+    if (nullptr == buffer) {
+        LOGGW("buffer is nullptr");
+        return std::make_tuple(1, 0, 0);
+    }
+    int err = 0;
+    size_t tensorLength{0};
+    std::tie(err, tensorLength) = calculateLength(dims, dataType);
+    if (0 != err) {
+        return std::make_tuple(err, 0, 0);
+    }
+    size_t numInputsCopied = 0;
+    size_t numBatchSize = 0;
+    size_t totalLength = 0;
+    size_t fileIndex = filePathsIndexOffset;
+    while (true) {
+        if (fileIndex >= filePaths.size()) {
+            if (loopBackToStart) {
+                fileIndex = fileIndex % filePaths.size();
+            } else {
+                numBatchSize += (tensorLength - totalLength) / (totalLength / numBatchSize);
+                // pad the vector with zeros
+                memset(buffer + totalLength, 0, (tensorLength - totalLength) * sizeof(char));
+                break;
+            }
+        }
+        std::ifstream in(filePaths[fileIndex], std::ifstream::binary);
+        if (!in) {
+            LOGGW("failed to open input file: %s", (filePaths[fileIndex]).c_str());
+            return std::make_tuple(1, numInputsCopied, numBatchSize);
+        }
+        in.seekg(0, in.end);
+        const size_t fileSize = in.tellg();
+        in.seekg(0, in.beg);
+        if ((tensorLength % fileSize) != 0 || fileSize > tensorLength || fileSize == 0) {
+            LOGGW(
+                    "Given input file %s with file size in bytes %d. If the model expects a batch size of "
+                    "one, the file size should match the tensor extent: %d bytes. If the model expects a "
+                    "batch size > 1, the file size should evenly divide the tensor extent: %d bytes.",
+                    filePaths[fileIndex].c_str(),
+                    fileSize,
+                    tensorLength,
+                    tensorLength);
+            return std::make_tuple(1, numInputsCopied, numBatchSize);
+        }
+        if (!in.read(reinterpret_cast<char *>(buffer + (numInputsCopied * fileSize)), fileSize)) {
+            LOGGW("Failed to read the contents of: %s", filePaths.front().c_str());
+            return std::make_tuple(1, numInputsCopied, numBatchSize);
+        }
+        totalLength += fileSize;
+        numInputsCopied += 1;
+        numBatchSize += 1;
+        fileIndex += 1;
+        if (totalLength >= tensorLength) {
+            break;
+        }
+    }
+    return std::make_tuple(0, numInputsCopied, numBatchSize);
+}
+
+
+static int writeBatchDataToFile(std::vector<std::string> fileDirs,
+                                                    std::string fileName,
+                                                    std::vector<size_t> dims,
+                                                    Qnn_DataType_t dataType,
+                                                    uint8_t *buffer,
+                                                    const size_t batchSize) {
+    if (nullptr == buffer) {
+        LOGGW("buffer is nullptr");
+        return 1;
+    }
+    int err = 0;
+    size_t length{0};
+    std::tie(err, length) = calculateLength(dims, dataType);
+    if (0 != err) {
+        return err;
+    }
+    auto outputSize = (length / batchSize);
+    for (size_t batchIndex = 0; batchIndex < fileDirs.size(); batchIndex++) {
+        std::string fileDir = fileDirs[batchIndex];
+        if (0 == mkdir(fileDir.c_str(), 0777)) {
+            LOGGW("Failed to create output directory: %s", fileDir.c_str());
+            return 1;
+        }
+        const std::string outputPath(fileDir + "/" + fileName);
+        std::ofstream os(outputPath, std::ofstream::binary);
+        if (!os) {
+            LOGGW("Failed to open output file for writing: %s", outputPath.c_str());
+            return 1;
+        }
+        for (size_t l = 0; l < outputSize; l++) {
+            size_t bufferIndex = l + (batchIndex * outputSize);
+            os.write(reinterpret_cast<char *>(&(*(buffer + bufferIndex))), 1);
+        }
+    }
+    return 0;
+}
+
+
+static int writeBinaryToFile(std::string fileDir,
+                                                 std::string fileName,
+                                                 uint8_t *buffer,
+                                                 size_t bufferSize) {
+    if (nullptr == buffer) {
+        LOGGW("buffer is nullptr");
+        return 1;
+    }
+    if (!mkdir(fileDir.c_str(), 0777)) {
+        LOGGW("Failed to create output directory: %s", fileDir.c_str());
+        return 1;
+    }
+    const std::string outputPath(fileDir + "/" + fileName);
+    std::ofstream os(outputPath, std::ofstream::binary);
+    if (!os) {
+        LOGGW("Failed to open output file for writing: %s", outputPath.c_str());
+        return 1;
+    }
+    os.write(reinterpret_cast<char *>(buffer), bufferSize);
+    return 0;
+}
+
+
+template<typename T_QuantType>
+int floatToTfN(
+        T_QuantType *out, float *in, int32_t offset, float scale, size_t numElements) {
+    static_assert(std::is_unsigned<T_QuantType>::value, "floatToTfN supports unsigned only!");
+
+    if (nullptr == out || nullptr == in) {
+        LOGGW("received a nullptr");
+        return 1;
+    }
+
+    size_t dataTypeSizeInBytes = sizeof(T_QuantType);
+    size_t bitWidth = dataTypeSizeInBytes * 8;;
+    double trueBitWidthMax = pow(2, bitWidth) - 1;
+    double encodingMin = offset * scale;
+    double encodingMax = (trueBitWidthMax + offset) * scale;
+    double encodingRange = encodingMax - encodingMin;
+
+    for (size_t i = 0; i < numElements; ++i) {
+        int quantizedValue = round(trueBitWidthMax * (in[i] - encodingMin) / encodingRange);
+        if (quantizedValue < 0)
+            quantizedValue = 0;
+        else if (quantizedValue > (int) trueBitWidthMax)
+            quantizedValue = (int) trueBitWidthMax;
+        out[i] = static_cast<T_QuantType>(quantizedValue);
+    }
+    return 0;
+}
+
+template int floatToTfN<uint8_t>(
+        uint8_t *out, float *in, int32_t offset, float scale, size_t numElements);
+
+template int floatToTfN<uint16_t>(
+        uint16_t *out, float *in, int32_t offset, float scale, size_t numElements);
+
+template<typename T_QuantType>
+int tfNToFloat(
+        float *out, T_QuantType *in, int32_t offset, float scale, size_t numElements) {
+    static_assert(std::is_unsigned<T_QuantType>::value, "tfNToFloat supports unsigned only!");
+
+    if (nullptr == out || nullptr == in) {
+        LOGGW("received a nullptr");
+        return 1;
+    }
+    for (size_t i = 0; i < numElements; i++) {
+        double quantizedValue = static_cast<double>(in[i]);
+        double offsetDouble = static_cast<double>(offset);
+        out[i] = static_cast<double>((quantizedValue + offsetDouble) * scale);
+    }
+    return 0;
+}
+
+template int tfNToFloat<uint8_t>(
+        float *out, uint8_t *in, int32_t offset, float scale, size_t numElements);
+
+template int tfNToFloat<uint16_t>(
+        float *out, uint16_t *in, int32_t offset, float scale, size_t numElements);
+
+template<typename T_QuantType>
+int castToFloat(float *out, T_QuantType *in, size_t numElements) {
+    if (nullptr == out || nullptr == in) {
+        LOGGW("Received a nullptr");
+        return 1;
+    }
+    for (size_t i = 0; i < numElements; i++) {
+        out[i] = static_cast<float>(in[i]);
+    }
+    return 0;
+}
+
+template int castToFloat<uint8_t>(float *out,
+                                                             uint8_t *in,
+                                                             size_t numElements);
+
+template int castToFloat<uint16_t>(float *out,
+                                                              uint16_t *in,
+                                                              size_t numElements);
+
+template int castToFloat<uint32_t>(float *out,
+                                                              uint32_t *in,
+                                                              size_t numElements);
+
+template int castToFloat<int8_t>(float *out,
+                                                            int8_t *in,
+                                                            size_t numElements);
+
+template int castToFloat<int16_t>(float *out,
+                                                             int16_t *in,
+                                                             size_t numElements);
+
+template int castToFloat<int32_t>(float *out,
+                                                             int32_t *in,
+                                                             size_t numElements);
+
+template<typename T_QuantType>
+int castFromFloat(T_QuantType *out, float *in, size_t numElements) {
+    if (nullptr == out || nullptr == in) {
+        LOGGW("received a nullptr");
+        return 1;
+    }
+    for (size_t i = 0; i < numElements; i++) {
+        out[i] = static_cast<T_QuantType>(in[i]);
+    }
+    return 0;
+}
+
+template int castFromFloat<uint8_t>(uint8_t *out,
+                                                               float *in,
+                                                               size_t numElements);
+
+template int castFromFloat<uint16_t>(uint16_t *out,
+                                                                float *in,
+                                                                size_t numElements);
+
+template int castFromFloat<uint32_t>(uint32_t *out,
+                                                                float *in,
+                                                                size_t numElements);
+
+template int castFromFloat<int8_t>(int8_t *out,
+                                                              float *in,
+                                                              size_t numElements);
+
+template int castFromFloat<int16_t>(int16_t *out,
+                                                               float *in,
+                                                               size_t numElements);
+
+template int castFromFloat<int32_t>(int32_t *out,
+                                                               float *in,
+                                                               size_t numElements);
 
 
 static intptr_t alignTo(size_t alignment, intptr_t offset) {
@@ -858,6 +1294,132 @@ static void ggml_qnn_create_directory(const std::string& path) {
         std::string err_msg = "failed to create " + subdir + " folder\n";
         LOGGW(err_msg.c_str());
     }
+}
+
+static std::string sanitizeTensorName(std::string name) {
+    std::string sanitizedName = std::regex_replace(name, std::regex("\\W+"), "_");
+    if (!std::isalpha(sanitizedName[0]) && sanitizedName[0] != '_') {
+        sanitizedName = "_" + sanitizedName;
+    }
+    return sanitizedName;
+}
+
+static void split(std::vector<std::string> &splitString,
+                       const std::string &tokenizedString,
+                       const char separator) {
+    splitString.clear();
+    std::istringstream tokenizedStringStream(tokenizedString);
+    while (!tokenizedStringStream.eof()) {
+        std::string value;
+        getline(tokenizedStringStream, value, separator);
+        if (!value.empty()) {
+            splitString.push_back(value);
+        }
+    }
+}
+static std::unordered_map<std::string, uint32_t> extractInputNameIndices(
+        const std::string &inputLine, const std::string &separator) {
+    std::vector<std::string> inputFilePaths;
+    std::unordered_map<std::string, uint32_t> inputNameToIndex;
+    split(inputFilePaths, inputLine, ' ');
+    size_t inputCount = 0;
+    for (uint32_t idx = 0; idx < inputFilePaths.size(); idx++) {
+        auto position = inputFilePaths[idx].find(separator);
+        if (position != std::string::npos) {
+            auto unsanitizedTensorName = inputFilePaths[idx].substr(0, position);
+            auto sanitizedTensorName = sanitizeTensorName(unsanitizedTensorName);
+            if (sanitizedTensorName != unsanitizedTensorName) {
+                inputNameToIndex[unsanitizedTensorName] = idx;
+            }
+            inputNameToIndex[sanitizedTensorName] = idx;
+            inputCount = inputCount + 1;
+        }
+    }
+    return inputCount == inputFilePaths.size() ? inputNameToIndex
+                                               : std::unordered_map<std::string, uint32_t>{};
+}
+
+
+static void parseInputFilePaths(std::vector<std::string> &inputFilePaths,
+                                     std::vector<std::string> &paths,
+                                     std::string separator) {
+    for (auto &inputInfo : inputFilePaths) {
+        auto position = inputInfo.find(separator);
+        if (position != std::string::npos) {
+            auto path = inputInfo.substr(position + separator.size());
+            paths.push_back(path);
+        } else {
+            paths.push_back(inputInfo);
+        }
+    }
+}
+
+
+static ReadInputListRetType_t readInputList(const std::string inputFileListPath) {
+    std::queue<std::string> lines;
+    std::ifstream fileListStream(inputFileListPath);
+    if (!fileListStream) {
+        LOGGW("failed to open input file: %s", inputFileListPath.c_str());
+        return std::make_tuple(std::vector<std::vector<std::string>>{},
+                               std::unordered_map<std::string, uint32_t>{},
+                               false);
+    }
+
+    std::string fileLine;
+    while (std::getline(fileListStream, fileLine)) {
+        if (fileLine.empty()) continue;
+        lines.push(fileLine);
+    }
+
+    if (!lines.empty() && lines.front().compare(0, 1, "#") == 0) {
+        lines.pop();
+    }
+
+    if (!lines.empty() && lines.front().compare(0, 1, "%") == 0) {
+        lines.pop();
+    }
+
+    std::string separator = ":=";
+    std::vector<std::vector<std::string>> filePathsList;
+    std::unordered_map<std::string, uint32_t> inputNameToIndex;
+    if (!lines.empty()) {
+        inputNameToIndex = extractInputNameIndices(lines.front(), separator);
+    }
+    while (!lines.empty()) {
+        std::vector<std::string> paths{};
+        std::vector<std::string> inputFilePaths;
+        split(inputFilePaths, lines.front(), ' ');
+        parseInputFilePaths(inputFilePaths, paths, separator);
+        filePathsList.reserve(paths.size());
+        for (size_t idx = 0; idx < paths.size(); idx++) {
+            if (idx >= filePathsList.size()) {
+                filePathsList.push_back(std::vector<std::string>());
+            }
+            filePathsList[idx].push_back(paths[idx]);
+        }
+        lines.pop();
+    }
+    return std::make_tuple(filePathsList, inputNameToIndex, true);
+}
+
+
+static ReadInputListsRetType_t readInputLists(
+        std::vector<std::string> inputFileListPaths) {
+    std::vector<std::vector<std::vector<std::string>>> filePathsLists;
+    std::vector<std::unordered_map<std::string, uint32_t>> inputNameToIndexMaps;
+    for (auto const &path : inputFileListPaths) {
+        bool readSuccess;
+        std::vector<std::vector<std::string>> filePathList;
+        std::unordered_map<std::string, uint32_t> inputNameToIndex;
+        std::tie(filePathList, inputNameToIndex, readSuccess) = readInputList(path);
+        if (!readSuccess) {
+            filePathsLists.clear();
+            return std::make_tuple(filePathsLists, inputNameToIndexMaps, false);
+        }
+        filePathsLists.push_back(filePathList);
+        inputNameToIndexMaps.push_back(inputNameToIndex);
+    }
+    return std::make_tuple(filePathsLists, inputNameToIndexMaps, true);
 }
 
 
@@ -967,11 +1529,911 @@ private:
 };
 
 
+class qnn_io_tensor {
+public:
+    int setupInputAndOutputTensors(Qnn_Tensor_t **inputs,
+                                          Qnn_Tensor_t **outputs,
+                                          GraphInfo_t graphInfo);
+
+    int  writeOutputTensors(uint32_t graphIdx,
+                                  size_t startIdx,
+                                  char *graphName,
+                                  Qnn_Tensor_t *outputs,
+                                  uint32_t numOutputs,
+                                  OutputDataType outputDatatype,
+                                  uint32_t graphsCount,
+                                  std::string outputPath,
+                                  size_t numInputFilesPopulated,
+                                  size_t outputBatchSize);
+
+    PopulateInputTensorsRetType_t populateInputTensors(
+            uint32_t graphIdx,
+            const std::vector<std::vector<std::string>> &filePathsVector,
+            const size_t filePathsIndexOffset,
+            const bool loopBackToStart,
+            const std::unordered_map<std::string, uint32_t> &inputNameToIndex,
+            Qnn_Tensor_t *inputs,
+            GraphInfo_t graphInfo,
+            InputDataType inputDataType);
+
+    int  tearDownInputAndOutputTensors(Qnn_Tensor_t *inputs,
+                                             Qnn_Tensor_t *outputs,
+                                             size_t numInputTensors,
+                                             size_t numOutputTensors);
+
+private:
+    PopulateInputTensorsRetType_t
+    populateInputTensor(const std::vector<std::string> &filePaths,
+                        const size_t filePathsIndexOffset,
+                        const bool loopBackToStart,
+                        Qnn_Tensor_t *input,
+                        InputDataType inputDataType);
+
+    PopulateInputTensorsRetType_t
+    readDataAndAllocateBuffer(const std::vector<std::string> &filePaths,
+                              const size_t filePathsIndexOffset,
+                              const bool loopBackToStart,
+                              std::vector<size_t> dims,
+                              Qnn_DataType_t dataType,
+                              uint8_t **bufferToCopy);
+
+    template<typename T>
+    int  allocateBuffer(T **buffer, size_t &elementCount);
+
+    int  convertToFloat(float **out, Qnn_Tensor_t *output);
+
+    int  convertAndWriteOutputTensorInFloat(Qnn_Tensor_t *output,
+                                                  std::vector<std::string> outputPaths,
+                                                  std::string fileName,
+                                                  size_t outputBatchSize);
+
+    int  writeOutputTensor(Qnn_Tensor_t *output,
+                                 std::vector<std::string> outputPaths,
+                                 std::string fileName,
+                                 size_t outputBatchSize);
+
+    int  allocateAndCopyBuffer(uint8_t **buffer, Qnn_Tensor_t *tensor);
+
+    int  tearDownTensors(Qnn_Tensor_t *tensors, uint32_t tensorCount);
+
+    int 
+    allocateBuffer(uint8_t **buffer, std::vector<size_t> dims, Qnn_DataType_t dataType);
+
+    int  copyFromFloatToNative(float *floatBuffer, Qnn_Tensor_t *tensor);
+
+    int  setupTensors(Qnn_Tensor_t **tensors, uint32_t tensorCount,
+                            Qnn_Tensor_t *tensorsInfo);
+
+    int fillDims(std::vector<size_t> &dims, uint32_t *inDimensions, uint32_t rank);
+};
+
+
+// Helper method to read data from files to a buffer.
+PopulateInputTensorsRetType_t qnn_io_tensor::readDataAndAllocateBuffer(
+        const std::vector<std::string> &filePaths,
+        const size_t filePathsIndexOffset,
+        const bool loopBackToStart,
+        std::vector<size_t> dims,
+        Qnn_DataType_t dataType,
+        uint8_t **bufferToCopy) {
+    int returnStatus = 0;
+    *bufferToCopy = nullptr;
+    returnStatus = allocateBuffer(bufferToCopy, dims, dataType);
+    size_t numFilesPopulated = 0;
+    size_t batchSize = 0;
+    int status = 0;
+    std::tie(status, numFilesPopulated, batchSize) =
+            readBatchData(filePaths,
+                                    filePathsIndexOffset,
+                                    loopBackToStart,
+                                    dims,
+                                    dataType,
+                                    reinterpret_cast<uint8_t *>(*bufferToCopy));
+    if (0 != status) {
+        LOGGD("readBatchData failure\n");
+        returnStatus = 1;
+    }
+    if (0 != returnStatus) {
+        if (nullptr != *bufferToCopy) {
+            free(*bufferToCopy);
+            *bufferToCopy = nullptr;
+        }
+    }
+    return {returnStatus, numFilesPopulated, batchSize};
+}
+
+
+// helper method to copy a float buffer, quantize it, and copy it to a tensor (Qnn_Tensor_t) buffer.
+int qnn_io_tensor::copyFromFloatToNative(float * floatBuffer, Qnn_Tensor_t * tensor) {
+    if (nullptr == floatBuffer || nullptr == tensor) {
+        LOGGW("copyFromFloatToNative(): received a nullptr");
+        return 1;
+    }
+
+    int returnStatus = 0;
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(tensor), QNN_TENSOR_GET_RANK(tensor));
+
+    switch (QNN_TENSOR_GET_DATA_TYPE(tensor)) {
+        case QNN_DATATYPE_UFIXED_POINT_8:
+            floatToTfN<uint8_t>(
+                    static_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                    floatBuffer,
+                    QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.offset,
+                    QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.scale,
+                    calculateElementCount(dims));
+            break;
+
+        case QNN_DATATYPE_UFIXED_POINT_16:
+            floatToTfN<uint16_t>(
+                    static_cast<uint16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                    floatBuffer,
+                    QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.offset,
+                    QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.scale,
+                    calculateElementCount(dims));
+            break;
+
+        case QNN_DATATYPE_UINT_8:
+            if ( 0  !=
+                castFromFloat<uint8_t>(
+                        static_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<uint8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UINT_16:
+            if ( 0  !=
+                castFromFloat<uint16_t>(
+                        static_cast<uint16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<uint16_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UINT_32:
+            if ( 0  !=
+                castFromFloat<uint32_t>(
+                        static_cast<uint32_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<uint32_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_8:
+            if ( 0  !=
+                castFromFloat<int8_t>(
+                        static_cast<int8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<int8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_16:
+            if ( 0  !=
+                castFromFloat<int16_t>(
+                        static_cast<int16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<int16_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_32:
+            if ( 0  !=
+                castFromFloat<int32_t>(
+                        static_cast<int32_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<int32_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_BOOL_8:
+            if ( 0  !=
+                castFromFloat<uint8_t>(
+                        static_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        floatBuffer,
+                        calculateElementCount(dims))) {
+                LOGGW("failure in castFromFloat<bool>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        default:
+            LOGGW("Datatype not supported yet!");
+            returnStatus =  1 ;
+            break;
+    }
+    return returnStatus;
+}
+
+
+// Helper method to populate an input tensor in the graph during execution.
+// It relies on reading data from files provided during app creation.
+PopulateInputTensorsRetType_t qnn_io_tensor::populateInputTensor(
+        const std::vector<std::string> &filePaths,
+        const size_t filePathsIndexOffset,
+        const bool loopBackToStart,
+        Qnn_Tensor_t *input,
+        InputDataType inputDataType) {
+    if (nullptr == input) {
+        LOGGW("input is nullptr");
+        return { 1 , 0, 0};
+    }
+
+    auto returnStatus =  0 ;
+    size_t numFilesPopulated = 0;
+    size_t batchSize = 0;
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(input), QNN_TENSOR_GET_RANK(input));
+
+    if (inputDataType == InputDataType::FLOAT &&
+        QNN_TENSOR_GET_DATA_TYPE(input) != QNN_DATATYPE_FLOAT_32) {
+        uint8_t *fileToBuffer = nullptr;
+        std::tie(returnStatus, numFilesPopulated, batchSize) =
+                readDataAndAllocateBuffer(filePaths,
+                                          filePathsIndexOffset,
+                                          loopBackToStart,
+                                          dims,
+                                          QNN_DATATYPE_FLOAT_32,
+                                          &fileToBuffer);
+        if ( 0  == returnStatus) {
+            LOGGD("readDataFromFileToBuffer successful");
+            returnStatus = copyFromFloatToNative(reinterpret_cast<float *>(fileToBuffer), input);
+        }
+        if (nullptr != fileToBuffer) {
+            free(fileToBuffer);
+            fileToBuffer = nullptr;
+        }
+    } else {
+        int status = 0;
+        std::tie(status, numFilesPopulated, batchSize) =
+                readBatchData(filePaths,
+                                        filePathsIndexOffset,
+                                        loopBackToStart,
+                                        dims,
+                                        QNN_TENSOR_GET_DATA_TYPE(input),
+                                        static_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(
+                                                input).data));
+        if ( 0  != status) {
+            LOGGW("failure in readBatchData");
+            returnStatus =  1 ;
+        }
+    }
+    return {returnStatus, numFilesPopulated, batchSize};
+}
+
+
+// Helper method to populate all input tensors during execution.
+PopulateInputTensorsRetType_t qnn_io_tensor::populateInputTensors(
+        uint32_t graphIdx,
+        const std::vector<std::vector<std::string>> &filePathsVector,
+        const size_t filePathsIndexOffset,
+        const bool loopBackToStart,
+        const std::unordered_map<std::string, uint32_t> &inputNameToIndex,
+        Qnn_Tensor_t *inputs,
+        GraphInfo_t graphInfo,
+        InputDataType inputDataType) {
+    LOGGD("populateInputTensors() graphIndx %d", graphIdx);
+    if (nullptr == inputs) {
+        LOGGW("inputs is nullptr");
+        return { 1 , 0, 0};
+    }
+    auto inputCount = graphInfo.numInputTensors;
+    if (filePathsVector.size() != inputCount) {
+        LOGGW(
+                "Incorrect amount of Input files for graphIdx: %d. Expected: %d, "
+                "received: %d",
+                graphIdx,
+                inputCount,
+                filePathsVector.size());
+        return { 1 , 0, 0};
+    }
+    size_t numFilesPopulated = 0;
+    size_t numBatchSize = 0;
+    for (size_t inputIdx = 0; inputIdx < inputCount; inputIdx++) {
+        size_t inputNameIdx = inputIdx;
+        LOGGD("index = %d input column index = %d", inputIdx, inputNameIdx);
+        std::string inputNodeName;
+        if (QNN_TENSOR_GET_NAME(graphInfo.inputTensors[inputIdx]))
+            inputNodeName = QNN_TENSOR_GET_NAME(graphInfo.inputTensors[inputIdx]);
+        if (!inputNodeName.empty() &&
+            inputNameToIndex.find(inputNodeName) != inputNameToIndex.end()) {
+            inputNameIdx = inputNameToIndex.at(inputNodeName);
+        }
+        int returnStatus = 0;
+        size_t currentInputNumFilesPopulated = 0;
+        size_t currentInputNumBatchSize = 0;
+        std::tie(returnStatus, currentInputNumFilesPopulated, currentInputNumBatchSize) =
+                populateInputTensor(filePathsVector[inputNameIdx],
+                                    filePathsIndexOffset,
+                                    loopBackToStart,
+                                    &(inputs[inputIdx]),
+                                    inputDataType);
+        if ( 0  != returnStatus) {
+            LOGGW("populateInputTensorFromFiles failed for input %s with index %d",
+                      inputNodeName.c_str(),
+                      inputIdx);
+            return { 1 , currentInputNumFilesPopulated, currentInputNumBatchSize};
+        }
+        if (inputIdx == 0) {
+            numFilesPopulated = currentInputNumFilesPopulated;
+            numBatchSize = currentInputNumBatchSize;
+        } else {
+            if (numFilesPopulated != currentInputNumFilesPopulated ||
+                numBatchSize != currentInputNumBatchSize) {
+                LOGGW(
+                        "Current input tensor with name: %s with index %d files populated = %d, batch size = %d"
+                        " does not match with expected files populated = %d, batch size = %d",
+                        inputNodeName.c_str(),
+                        inputIdx,
+                        currentInputNumFilesPopulated,
+                        currentInputNumBatchSize,
+                        numFilesPopulated,
+                        numBatchSize);
+                return { 1 , numFilesPopulated, numBatchSize};
+            }
+        }
+    }
+    return { 0 , numFilesPopulated, numBatchSize};
+}
+
+
+// Setup details for Qnn_Tensor_t for execution
+// based on information in Qnn_TensorWrapper_t provided by model.so.
+int qnn_io_tensor::setupTensors(Qnn_Tensor_t **tensors, uint32_t tensorCount, Qnn_Tensor_t *tensorWrappers) {
+    if (nullptr == tensorWrappers) {
+        LOGGW("tensorWrappers is nullptr");
+        return  1 ;
+    }
+    if (0 == tensorCount) {
+        LOGGI("tensor count is 0. Nothing to setup.");
+        return  0 ;
+    }
+    auto returnStatus =  0 ;
+    *tensors = (Qnn_Tensor_t *) calloc(1, tensorCount * sizeof(Qnn_Tensor_t));
+    if (nullptr == *tensors) {
+        LOGGW("mem alloc failed for *tensors");
+        returnStatus =  1 ;
+        return returnStatus;
+    }
+    for (size_t tensorIdx = 0; tensorIdx < tensorCount; tensorIdx++) {
+        Qnn_Tensor_t wrapperTensor = tensorWrappers[tensorIdx];
+        std::vector<size_t> dims;
+        fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(wrapperTensor),
+                 QNN_TENSOR_GET_RANK(wrapperTensor));
+        if ( 0  == returnStatus) {
+            LOGGD("allocateBuffer successful");
+            (*tensors)[tensorIdx] = QNN_TENSOR_INIT;
+            returnStatus =
+                    (deepCopyQnnTensorInfo(((*tensors) + tensorIdx), &wrapperTensor) ==
+                     true
+                     ?  0 
+                     :  1 );
+        }
+        if ( 0  == returnStatus) {
+            LOGGD("deepCopyQnnTensorInfo successful");
+            QNN_TENSOR_SET_MEM_TYPE(((*tensors) + tensorIdx), QNN_TENSORMEMTYPE_RAW);
+        }
+        Qnn_ClientBuffer_t clientBuffer = QNN_CLIENT_BUFFER_INIT;
+        returnStatus = allocateBuffer(reinterpret_cast<uint8_t **>(&clientBuffer.data),
+                                      dims,
+                                      QNN_TENSOR_GET_DATA_TYPE((*tensors) + tensorIdx));
+        int  datautilStatus = 0;
+        size_t length{0};
+        std::tie(datautilStatus, length) =
+                calculateLength(dims, QNN_TENSOR_GET_DATA_TYPE((*tensors) + tensorIdx));
+        if (datautilStatus !=  0 ) {
+            returnStatus =  1 ;
+        }
+        clientBuffer.dataSize = length;
+        QNN_TENSOR_SET_CLIENT_BUF(((*tensors) + tensorIdx), clientBuffer);
+        if ( 0  != returnStatus) {
+            LOGGW("Failure in setupTensors, cleaning up resources");
+            if (nullptr != (QNN_TENSOR_GET_CLIENT_BUF((*tensors) + tensorIdx)).data) {
+                free(QNN_TENSOR_GET_CLIENT_BUF((*tensors) + tensorIdx).data);
+            }
+            tearDownTensors(*tensors, tensorIdx);
+            *tensors = nullptr;
+            returnStatus =  1 ;
+            LOGGW("Failure in setupTensors, done cleaning up resources");
+            return returnStatus;
+        }
+    }
+    return returnStatus;
+}
+
+
+// Setup details for all input and output tensors for graph execution.
+int qnn_io_tensor::setupInputAndOutputTensors(
+        Qnn_Tensor_t **inputs, Qnn_Tensor_t **outputs, GraphInfo_t graphInfo) {
+    auto returnStatus =  0 ;
+    if ( 0  !=
+        setupTensors(inputs, graphInfo.numInputTensors, (graphInfo.inputTensors))) {
+        LOGGW("Failure in setting up input tensors");
+        returnStatus =  1 ;
+    }
+    if ( 0  !=
+        setupTensors(outputs, graphInfo.numOutputTensors, (graphInfo.outputTensors))) {
+        LOGGW("Failure in setting up output tensors");
+        returnStatus =  1 ;
+    }
+    if ( 0  != returnStatus) {
+        LOGGW("Failure in setupInputAndOutputTensors, cleaning up resources");
+        if (nullptr != *inputs) {
+            LOGGD("cleaning up input tensors");
+            tearDownTensors(*inputs, graphInfo.numInputTensors);
+            *inputs = nullptr;
+        }
+        if (nullptr != *outputs) {
+            LOGGD("cleaning up output tensors");
+            tearDownTensors(*outputs, graphInfo.numOutputTensors);
+            *outputs = nullptr;
+        }
+        LOGGW("Failure in setupInputAndOutputTensors, done cleaning up resources");
+    }
+    return returnStatus;
+}
+
+
+// Clean up all tensors related data after execution.
+int qnn_io_tensor::tearDownTensors(Qnn_Tensor_t *tensors,
+                                                         uint32_t tensorCount) {
+    for (size_t tensorIdx = 0; tensorIdx < tensorCount; tensorIdx++) {
+        LOGGD("freeing resources for tensor: %d", tensorIdx);
+        GGML_JNI_NOTIFY("freeing resources for tensor: %d", tensorIdx);
+        if (nullptr != QNN_TENSOR_GET_DIMENSIONS(tensors[tensorIdx])) {
+            LOGGD("freeing dimensions");
+            GGML_JNI_NOTIFY("freeing dimensions");
+            free(QNN_TENSOR_GET_DIMENSIONS(tensors[tensorIdx]));
+        }
+        if (nullptr != QNN_TENSOR_GET_CLIENT_BUF(tensors[tensorIdx]).data) {
+            LOGGD("freeing clientBuf.data");
+            GGML_JNI_NOTIFY("freeing clientBuf.data");
+            free(QNN_TENSOR_GET_CLIENT_BUF(tensors[tensorIdx]).data);
+        }
+    }
+    free(tensors);
+    return  0 ;
+}
+
+
+// Clean up all input and output tensors after execution.
+int qnn_io_tensor::tearDownInputAndOutputTensors(Qnn_Tensor_t *inputs,
+                                                                       Qnn_Tensor_t *outputs,
+                                                                       size_t numInputTensors,
+                                                                       size_t numOutputTensors) {
+    if (nullptr != inputs) {
+        LOGGD("cleaning up resources for input tensors");
+        GGML_JNI_NOTIFY("cleaning up resources for input tensors");
+        tearDownTensors(inputs, numInputTensors);
+        inputs = nullptr;
+    }
+    if (nullptr != outputs) {
+        LOGGD("cleaning up resources for output tensors");
+        GGML_JNI_NOTIFY("cleaning up resources for output tensors");
+        tearDownTensors(outputs, numOutputTensors);
+        outputs = nullptr;
+    }
+    return  0 ;
+}
+
+
+// Helper method to allocate a buffer.
+int qnn_io_tensor::allocateBuffer(uint8_t **buffer, std::vector<size_t> dims, Qnn_DataType_t dataType) {
+    size_t elementCount = calculateElementCount(dims);
+    auto returnStatus =  0 ;
+    switch (dataType) {
+        case QNN_DATATYPE_FLOAT_32:
+            LOGGD("allocating float buffer");
+            returnStatus =
+                    allocateBuffer < float > (reinterpret_cast<float **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_UINT_8:
+        case QNN_DATATYPE_UFIXED_POINT_8:
+            LOGGD("allocating uint8_t buffer");
+            returnStatus =
+                    allocateBuffer < uint8_t > (reinterpret_cast<uint8_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_UINT_16:
+        case QNN_DATATYPE_UFIXED_POINT_16:
+            LOGGD("allocating uint16_t buffer");
+            returnStatus = allocateBuffer < uint16_t >
+                           (reinterpret_cast<uint16_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_UINT_32:
+            LOGGD("allocating uint32_t buffer");
+            returnStatus = allocateBuffer < uint32_t >
+                           (reinterpret_cast<uint32_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_INT_8:
+            LOGGD("allocating int8_t buffer");
+            returnStatus =
+                    allocateBuffer < int8_t > (reinterpret_cast<int8_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_INT_16:
+            LOGGD("allocating int16_t buffer");
+            returnStatus =
+                    allocateBuffer < int16_t > (reinterpret_cast<int16_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_INT_32:
+            LOGGD("allocating int32_t buffer");
+            returnStatus =
+                    allocateBuffer < int32_t > (reinterpret_cast<int32_t **>(buffer), elementCount);
+            break;
+
+        case QNN_DATATYPE_BOOL_8:
+            LOGGD("allocating bool buffer");
+            returnStatus =
+                    allocateBuffer < uint8_t > (reinterpret_cast<uint8_t **>(buffer), elementCount);
+            break;
+
+        default:
+            LOGGW("Datatype not supported yet!");
+            returnStatus =  1 ;
+            break;
+    }
+    return returnStatus;
+}
+
+
+// Helper method to allocate a buffer.
+template<typename T>
+int qnn_io_tensor::allocateBuffer(T **buffer, size_t &elementCount) {
+    LOGGD("ElementCount: %d, sizeof(T): %d, total size: %d",
+              elementCount,
+              sizeof(T),
+              elementCount * sizeof(T));
+    *buffer = (T *) malloc(elementCount * sizeof(T));
+    if (nullptr == *buffer) {
+        LOGGW("mem alloc failed for *buffer");
+        return  1 ;
+    }
+    return  0 ;
+}
+
+
+// Convert data to float or de-quantization. This is used when
+// user requests for float output and the model produces
+// non-float output.
+int qnn_io_tensor::convertToFloat(float **out, Qnn_Tensor_t *tensor) {
+    if (nullptr == tensor) {
+        LOGGW("tensors is nullptr");
+        return  1 ;
+    }
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(tensor), QNN_TENSOR_GET_RANK(tensor));
+    auto returnStatus =  0 ;
+    size_t elementCount = calculateElementCount(dims);
+    returnStatus = allocateBuffer<float>(out, elementCount);
+    if ( 0  != returnStatus) {
+        LOGGW("failure in allocateBuffer<float>");
+        return returnStatus;
+    }
+    switch (QNN_TENSOR_GET_DATA_TYPE(tensor)) {
+        case QNN_DATATYPE_UFIXED_POINT_8:
+            if ( 0  !=
+                tfNToFloat<uint8_t>(
+                        *out,
+                        reinterpret_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.offset,
+                        QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.scale,
+                        elementCount)) {
+                LOGGW("failure in tfNToFloat<uint8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UFIXED_POINT_16:
+            if ( 0  !=
+                tfNToFloat<uint16_t>(
+                        *out,
+                        reinterpret_cast<uint16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.offset,
+                        QNN_TENSOR_GET_QUANT_PARAMS(tensor).scaleOffsetEncoding.scale,
+                        elementCount)) {
+                LOGGW("failure in tfNToFloat<uint8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UINT_8:
+            if ( 0  !=
+                castToFloat<uint8_t>(
+                        *out,
+                        reinterpret_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<uint8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UINT_16:
+            if ( 0  !=
+                castToFloat<uint16_t>(
+                        *out,
+                        reinterpret_cast<uint16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<uint16_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_UINT_32:
+            if ( 0  !=
+                castToFloat<uint32_t>(
+                        *out,
+                        reinterpret_cast<uint32_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<uint32_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_8:
+            if ( 0  !=
+                castToFloat<int8_t>(
+                        *out,
+                        reinterpret_cast<int8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<int8_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_16:
+            if ( 0  !=
+                castToFloat<int16_t>(
+                        *out,
+                        reinterpret_cast<int16_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<int16_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_INT_32:
+            if ( 0  !=
+                castToFloat<int32_t>(
+                        *out,
+                        reinterpret_cast<int32_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<int32_t>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        case QNN_DATATYPE_BOOL_8:
+            if ( 0  !=
+                castToFloat<uint8_t>(
+                        *out,
+                        reinterpret_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(tensor).data),
+                        elementCount)) {
+                LOGGW("failure in castToFloat<bool>");
+                returnStatus =  1 ;
+            }
+            break;
+
+        default:
+            LOGGW("datatype not supported yet!");
+            returnStatus =  1 ;
+            break;
+    }
+    if ( 0  != returnStatus) {
+        LOGGD("freeing *out");
+        if (*out != nullptr) {
+            free(*out);
+            *out = nullptr;
+        }
+    }
+    return returnStatus;
+}
+
+
+// Helper method to convert Output tensors to float and write them
+// out to files.
+int qnn_io_tensor::convertAndWriteOutputTensorInFloat(
+        Qnn_Tensor_t *output,
+        std::vector<std::string> outputPaths,
+        std::string fileName,
+        size_t outputBatchSize) {
+    if (nullptr == output) {
+        LOGGW("output is nullptr");
+        return  1 ;
+    }
+
+    auto returnStatus =  0 ;
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(output), QNN_TENSOR_GET_RANK(output));
+    float *floatBuffer = nullptr;
+    returnStatus = convertToFloat(&floatBuffer, output);
+    if ( 0  != returnStatus) {
+        LOGGW("failure in convertToFloat");
+        return  1 ;
+    }
+    uint8_t *bufferToWrite = reinterpret_cast<uint8_t *>(floatBuffer);
+    if ( 0  !=
+        writeBatchDataToFile(
+                outputPaths, fileName, dims, QNN_DATATYPE_FLOAT_32, bufferToWrite,
+                outputBatchSize)) {
+        LOGGW("failure in writeBatchDataToFile");
+        returnStatus =  1 ;
+    }
+    if (nullptr != floatBuffer) {
+        LOGGD("freeing floatBuffer");
+        free(floatBuffer);
+        floatBuffer = nullptr;
+    }
+    return returnStatus;
+}
+
+
+// Helper method to write out output. There is no de-quantization here.
+// Just write output as is to files.
+int qnn_io_tensor::writeOutputTensor(Qnn_Tensor_t *output,
+                                                           std::vector<std::string> outputPaths,
+                                                           std::string fileName,
+                                                           size_t outputBatchSize) {
+    if (nullptr == output) {
+        LOGGW("output is nullptr");
+        return  1 ;
+    }
+    auto returnStatus =  0 ;
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(output), QNN_TENSOR_GET_RANK(output));
+    uint8_t *bufferToWrite = reinterpret_cast<uint8_t *>(QNN_TENSOR_GET_CLIENT_BUF(output).data);
+    if ( 0  !=
+        writeBatchDataToFile(outputPaths,
+                                       fileName,
+                                       dims,
+                                       QNN_TENSOR_GET_DATA_TYPE(output),
+                                       bufferToWrite,
+                                       outputBatchSize)) {
+        LOGGW("failure in writeBatchDataToFile");
+        returnStatus =  1 ;
+    }
+    return returnStatus;
+}
+
+
+// write out all output tensors to files. If output_data_type is float,
+// then all outputs will be raw floats regardless of what the model outputs.
+// If the output_data_type is native, then output is written as produced by the model.
+// Also, for native option, a json with quantization parameters is written out.
+// If output_data_type is float_and_native, both above are done.
+// If the output in the graph is float, then output_data_type has no effect.
+int qnn_io_tensor::writeOutputTensors(uint32_t graphIdx,
+                                                            size_t startIdx,
+                                                            char *graphName,
+                                                            Qnn_Tensor_t *outputs,
+                                                            uint32_t numOutputs,
+                                                            OutputDataType outputDatatype,
+                                                            uint32_t graphsCount,
+                                                            std::string outputPath,
+                                                            size_t numInputFilesPopulated,
+                                                            size_t outputBatchSize) {
+    if (nullptr == outputs) {
+        LOGGW("Received nullptr");
+        return  1 ;
+    }
+    if (graphsCount > 1) {
+        if (nullptr != graphName && strlen(graphName) > 0) {
+            outputPath += ("/" + std::string(graphName));
+        } else {
+            outputPath += ("/" + std::string("Graph_") +
+                           std::to_string(graphIdx));
+        }
+    }
+    auto returnStatus =  0 ;
+    std::vector<std::string> outputPaths;
+    for (size_t idx = 0; idx < numInputFilesPopulated; idx++) {
+        std::string output = outputPath + ("/" + std::string("Result_") +
+                                           std::to_string(startIdx + idx));
+        outputPaths.push_back(output);
+    }
+    for (size_t outputIdx = 0; outputIdx < numOutputs; outputIdx++) {
+        LOGGD("Writing output for outputIdx: %d", outputIdx);
+        GGML_JNI_NOTIFY("Writing output for outputIdx: %d", outputIdx);
+        std::string outputFilePrefix;
+        if (nullptr != QNN_TENSOR_GET_NAME(outputs[outputIdx]) &&
+            strlen(QNN_TENSOR_GET_NAME(outputs[outputIdx])) > 0) {
+            outputFilePrefix = std::string(QNN_TENSOR_GET_NAME(outputs[outputIdx]));
+        } else {
+            outputFilePrefix = std::string("Output_") + std::to_string(outputIdx);
+        }
+        auto outputFile = outputFilePrefix + std::string(".raw");
+        auto outputFileNative = outputFilePrefix + std::string("_native.raw");
+        if (QNN_TENSOR_GET_DATA_TYPE(outputs[outputIdx]) == QNN_DATATYPE_FLOAT_32) {
+            LOGGD("Writing in output->dataType == QNN_DATATYPE_FLOAT_32");
+            returnStatus =
+                    writeOutputTensor(&(outputs[outputIdx]), outputPaths, outputFile,
+                                      outputBatchSize);
+        } else if (outputDatatype == OutputDataType::FLOAT_ONLY) {
+            LOGGD("Writing in output->dataType == OutputDataType::FLOAT_ONLY");
+            returnStatus = convertAndWriteOutputTensorInFloat(
+                    &(outputs[outputIdx]), outputPaths, outputFile, outputBatchSize);
+        } else if (outputDatatype == OutputDataType::NATIVE_ONLY) {
+            LOGGD("Writing in output->dataType == OutputDataType::NATIVE_ONLY");
+            returnStatus =
+                    writeOutputTensor(&(outputs[outputIdx]), outputPaths, outputFileNative,
+                                      outputBatchSize);
+        } else if (outputDatatype == OutputDataType::FLOAT_AND_NATIVE) {
+            LOGGD("Writing in output->dataType == OutputDataType::FLOAT_AND_NATIVE");
+            returnStatus = convertAndWriteOutputTensorInFloat(
+                    &(outputs[outputIdx]), outputPaths, outputFile, outputBatchSize);
+            if ( 0  == returnStatus) {
+                returnStatus = writeOutputTensor(
+                        &(outputs[outputIdx]), outputPaths, outputFileNative, outputBatchSize);
+            }
+        }
+    }
+    return returnStatus;
+}
+
+
+// Helper method to allocate a buffer and copy data to it.
+int qnn_io_tensor::allocateAndCopyBuffer(uint8_t **buffer, Qnn_Tensor_t *tensor) {
+    if (nullptr == tensor) {
+        return  1 ;
+    }
+    std::vector<size_t> dims;
+    fillDims(dims, QNN_TENSOR_GET_DIMENSIONS(tensor), QNN_TENSOR_GET_RANK(tensor));
+    int datautilStatus = 0;
+    size_t length;
+    std::tie(datautilStatus, length) =
+            calculateLength(dims, QNN_TENSOR_GET_DATA_TYPE(tensor));
+    if (datautilStatus !=  0 ) {
+        return  1 ;
+    }
+    if ( 0  != allocateBuffer(buffer, dims, QNN_TENSOR_GET_DATA_TYPE(tensor))) {
+        LOGGW("failure in allocateBuffer");
+        return  1 ;
+    }
+    memscpy(*buffer,
+                           length * sizeof(uint8_t),
+                           QNN_TENSOR_GET_CLIENT_BUF(tensor).data,
+                           length * sizeof(uint8_t));
+    return 0;
+}
+
+
+int qnn_io_tensor::fillDims(std::vector<size_t> &dims, uint32_t *inDimensions, uint32_t rank) {
+    if (nullptr == inDimensions) {
+        LOGGW("input dimensions is nullptr\n");
+        return 1;
+    }
+    for (size_t r = 0; r < rank; r++) {
+        dims.push_back(inDimensions[r]);
+    }
+    return 0;
+}
+
+
 class qnn_implementation {
 public:
     using BackendIdType = decltype(QnnInterface_t{}.backendId);
 
-    explicit qnn_implementation(const std::string & lib_path) : _lib_path(std::move(lib_path)) {};
+    explicit qnn_implementation(const std::string & lib_path, const std::string & backend_name) :
+    _lib_path(std::move(lib_path)) ,
+    _backend_name(std::move(backend_name))
+    {};
 
     ~qnn_implementation() {
         //TODO:
@@ -983,7 +2445,27 @@ public:
 
     int qnn_finalize();
 
-    const qnn_interface & get_qnn_interface() const;
+    const qnn_interface & get_qnn_interface() {
+        if (!_qnn_interface.is_loaded()) {
+            LOGGW("pls check why _qnn_interface is not loaded\n");
+        }
+        return _qnn_interface;
+    }
+
+
+    const QNN_INTERFACE_VER_TYPE & get_qnn_raw_interface () {
+        if (!_qnn_interface.is_loaded()) {
+            LOGGW("pls check why _qnn_interface is not loaded\n");
+        }
+        return _qnn_raw_interface;
+    }
+
+    const QNN_SYSTEM_INTERFACE_VER_TYPE & get_qnn_raw_system_interface () {
+        if (!_qnn_interface.is_loaded()) {
+            LOGGW("pls check why _qnn_interface is not loaded\n");
+        }
+        return _qnn_raw_system_interface;
+    }
 
     const Qnn_LogHandle_t get_qnn_log_handle() { return _qnn_log_handle; }
 
@@ -1000,11 +2482,56 @@ public:
     const Qnn_GraphHandle_t get_qnn_graph_handle() { return _qnn_graph_handle; }
 
 
+    int init_qnn_model(const char* graph_name,
+                       bool debug,
+                       uint8_t do_node_validation              = 1,
+                       const QnnGraph_Config_t ** graph_configs = nullptr
+                       );
+
+    int finalize_qnn_model();
+    /**
+     * @param node_name        Lookup name for node/layer
+     * @param p_tensor         A pointer to a struct containing information on the tensor
+     * @param b_save_tensor    Flag to indicate if tensor should be saved in object for later retrieval
+     *                         with class getter functions
+     * @return
+     */
     int add_tensor(const char * node_name, Qnn_Tensor_t * p_tensor, bool b_save_tensor = true);
 
     int add_tensor(const char *node_name, Qnn_Tensor_t tensor, bool b_save_tensor = true) {
         return add_tensor(node_name, &tensor, b_save_tensor);
     }
+
+
+    /**
+     * @param version      version The QNN version for Op_Config_t structure to use,QNN_OPCONFIG_VERSION_1
+     * @param name         The node name to use
+     * @param packageName  The node package name (e.g. qti.aisw)
+     * @param type         The QNN_OP_QNN_OP_H node type (e.g. QNN_OP_ARGMAX)
+     * @param params       A struct object containing all the params for the node to be added. For
+     *                     tensorParam case. The tensor will be created within the function and the
+     *                     data will be retrieved from the binary blob to set the tensor data
+     * @param numOfParams  The number of elements in above params object
+     * @param inputNames   List of tensor names for inputs to node. Note: the corresponding qnn
+     * tensor objects must be created within this instance prior to being listed as input to a node
+     * @param numOfInputs  The number of elements in above inputNames object
+     * @param outputTensors List of Qnn_Tensor_t objects for outputs from node.
+     *                      Note1: the corresponding qnn tensor objects will be created in function
+     *                      and must not already exist.
+     *                      Note2: the output names must be unique per graph
+     * @param numOfOutputs  The number of elements in above outputs object
+     * @return
+     */
+    int add_node(Qnn_OpConfigVersion_t version,
+                 const char * name,
+                 const char * packageName,
+                 const char * type,
+                 Qnn_Param_t * params,
+                 uint32_t numOfParams,
+                 const char ** inputNames,
+                 uint32_t numOfInputs,
+                 Qnn_Tensor_t * outputTensors,
+                 uint32_t numOfOutputs);
 
     int get_tensor(const char *& node_name, const char *& tensor_name, Qnn_Tensor_t & tensor) {
         std::string map_entry = std::string(tensor_name);
@@ -1017,21 +2544,38 @@ public:
         return 0;
     }
 
-    int add_node(Qnn_OpConfigVersion_t version,
-                 const char * name,
-                 const char * packageName,
-                 const char * type,
-                 Qnn_Param_t * params,
-                 uint32_t numOfParams,
-                 const char ** inputNames,
-                 uint32_t numOfInputs,
-                 Qnn_Tensor_t * outputTensors,
-                 uint32_t numOfOutputs);
-
     int add_node(const Qnn_OpConfig_t & op_config) {
         return _qnn_interface.qnn_graph_add_node(_qnn_graph_handle, op_config);
     };
 
+    int get_graphinfo_from_model(GraphInfoPtr_t ** graphs_info, uint32_t * num_graphsinfo);
+
+    int compose_graph();
+
+    int finalize_graph() {
+        ENTER_FUNC();
+
+        int error = 0;
+        LOGGD("qnn graph handle %s, %p\n", get_qnn_graph_name().c_str(), get_qnn_graph_handle());
+        for (size_t graph_idx = 0; graph_idx < _graphs_count; graph_idx++) {
+            error = _qnn_raw_interface.graphFinalize((*_graphs_info)[graph_idx].graph, _qnn_profile_handle, nullptr);
+            if (QNN_GRAPH_NO_ERROR != error) {
+                LOGGW("graph finalize failure, error %d\n", error);
+                //return 1;
+            }
+        }
+
+        if (ggml_qnn_profile_level::profile_off != _profile_level) {
+            //TODO: handle profile info with _qnn_profile_handle
+        }
+
+        LOGGD("qnn graph handle %p\n", _qnn_graph_handle);
+        _graphs_count  = 0;
+
+        LEAVE_FUNC();
+
+        return 0;
+    }
 
     int execute_graph(
             const std::vector<Qnn_Tensor_t>& input_tensor_structs,
@@ -1088,6 +2632,12 @@ public:
         return result;
     }
 
+    int execute_graph2();
+
+    int run_qnn_matrix();
+
+    std::string get_qnn_graph_name() { return _graph_name; }
+
     std::vector<Qnn_Tensor_t> get_graph_input_tensors() { return _input_tensors; }
 
     std::vector<Qnn_Tensor_t> get_graph_output_tensors() { return _output_tensors; }
@@ -1121,41 +2671,51 @@ public:
     }
 
 private:
-    int load_system(const std::string & system_lib_path);
+    int load_system();
     int unload_system();
 
-    int free_cached_tensors() {
-        int err = 0;
+    int load_backend(std::string & lib_path, const QnnSaver_Config_t ** saver_config);
+    int unload_backend();
 
+    void set_qnn_raw_interface(QNN_INTERFACE_VER_TYPE & raw_interface) {
+        _qnn_raw_interface = raw_interface;
+    }
+
+    void set_qnn_raw_system_interface(QNN_SYSTEM_INTERFACE_VER_TYPE & raw_interface) {
+        _qnn_raw_system_interface = raw_interface;
+    }
+
+    int free_cached_tensors() {
+        int error = 0;
+
+        ENTER_FUNC();
         for (std::map<std::string, Qnn_Tensor_t>::iterator tensorIt = _tensors_map.begin();
              tensorIt != _tensors_map.end();) {
             Qnn_Tensor_t &tensor = tensorIt->second;
             if (QNN_TENSOR_GET_TYPE(tensor) != QNN_TENSOR_TYPE_APP_WRITE &&
                 QNN_TENSOR_GET_TYPE(tensor) != QNN_TENSOR_TYPE_APP_READ) {
-                VALIDATE(freeQnnTensor(tensor), err);
+                VALIDATE(freeQnnTensor(tensor), error);
                 tensorIt = _tensors_map.erase(tensorIt);
             } else {
                 tensorIt++;
             }
         }
 
-        return err;
+        _tensors_map.clear();
+        LEAVE_FUNC();
+
+        return error;
     }
+
 
 
 private:
     static constexpr const int _required_num_providers = 1;
 
-    static int load_backend(
-            const std::string &lib_path,
-            const QnnSaver_Config_t ** saver_config);
-
-    static int init_backend(
-            void * const lib_handle,
-            const QnnSaver_Config_t ** saver_config);
-
 private:
     std::string _lib_path;
+    std::string _backend_name;
+    BackendIdType _backend_id;
 
     bool _debug_tensor                              = false; // flag to indicate if requested graph is to be run in debug mode
     bool _do_node_validations                       = true;  // flag to indicate whether all add_node calls need to be validated
@@ -1181,12 +2741,19 @@ private:
 
     QnnSystemContext_Handle_t _qnn_system_handle    = nullptr;
 
+    QNN_INTERFACE_VER_TYPE _qnn_raw_interface;
+    QNN_SYSTEM_INTERFACE_VER_TYPE _qnn_raw_system_interface;
+
     std::unordered_set<Qnn_MemHandle_t> _qnn_mem_set;
+
+    GraphInfo_t ** _graphs_info;
+    uint32_t _graphs_count;
 
     std::vector<Qnn_Tensor_t> _input_tensors;
     std::vector<Qnn_Tensor_t> _output_tensors;
     std::map<std::string, Qnn_Tensor_t> _tensors_map;
     std::map<std::string, std::vector<std::string>> _output_tensor_map;
+    std::string _graph_name;
 
     static std::mutex _init_mutex;
     static std::unordered_map<BackendIdType, void *> _loaded_lib_handle;
@@ -1199,6 +2766,9 @@ private:
     pfn_rpc_mem_free  _pfn_rpc_mem_free;
     pfn_rpc_mem_to_fd _pfn_rpc_mem_to_fd;
     std::unordered_map<void *, void *> _rpcmem_store_map;
+
+    qnn_io_tensor _io_tensor;
+
 };
 
 
@@ -1249,7 +2819,7 @@ void qnn_implementation::free_rpcmem(void * buf) {
 
 int32_t qnn_implementation::rpcmem_to_fd(void * buf) {
     int32_t mem_fd = -1;
-    if (!_rpcmem_initialized) {
+    if (!is_rpcmem_initialized()) {
         LOGGW("rpc memory not initialized\n");
     } else {
         mem_fd = _pfn_rpc_mem_to_fd(buf);
@@ -1265,19 +2835,24 @@ int qnn_implementation::register_rpcmem(void * p_data, Qnn_Tensor_t * p_tensor) 
         return 1;
     }
 
-    //if (is_rpcmem_allocated(p_data)) {
-        //LOGGW("rpc memory already allocated\n");
-        //return 2;
-    //}
+    if (!is_rpcmem_initialized()) {
+        LOGGW("rpc memory not initialized\n");
+        return 2;
+    }
+
+    if (is_rpcmem_allocated(p_data)) {
+        LOGGW("rpc memory already allocated\n");
+        //return 3;
+    }
     if (is_rpcmem_registered((QNN_VER_PTR(*p_tensor)->memHandle))) {
         LOGGW("tensor %s has been registered shared memory\n", (QNN_VER_PTR(*p_tensor)->name));
-        return 3;
+        return 4;
     }
 
     int32_t mem_fd = rpcmem_to_fd(p_data);
     if (-1 == mem_fd) {
         LOGGW("failed to get file descriptor\n");
-        return 4;
+        return 5;
     }
     LOGGD("mem_fd %d\n", mem_fd);
     Qnn_MemDescriptor_t descriptor = {
@@ -1294,7 +2869,7 @@ int qnn_implementation::register_rpcmem(void * p_data, Qnn_Tensor_t * p_tensor) 
             &handle);
     if (error != QNN_SUCCESS) {
         LOGGW("failed to register shared memory, error %d, %s\n", QNN_GET_ERROR_CODE(error), strerror(error));
-        return 1;
+        return 6;
     } else {
         LOGGI("tensor %s successfully register shared memory\n", (QNN_VER_PTR(*p_tensor)->name));
     }
@@ -1327,27 +2902,11 @@ bool qnn_implementation::is_rpcmem_allocated(void * buf) {
 }
 
 
-int qnn_implementation::init_backend(void * const lib_handle, const QnnSaver_Config_t ** saver_config) {
+int qnn_implementation::load_backend(std::string & lib_path, const QnnSaver_Config_t ** saver_config) {
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
+    LOGGD("lib_path:%s\n", lib_path.c_str());
 
-    // saver_config must be set before backend initialization
-    auto saver_initialize = load_qnn_functionpointers<_pfn_QnnSaver_initialize *>(lib_handle, "QnnSaver_initialize");
-    if (nullptr != saver_initialize) {
-        error = saver_initialize(saver_config);
-        if (error != QNN_SUCCESS) {
-            LOGGW("failed to saver_initialize，error %d", QNN_GET_ERROR_CODE(error));
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-int qnn_implementation::load_backend(const std::string & lib_path, const QnnSaver_Config_t ** saver_config) {
-    Qnn_ErrorHandle_t error = QNN_SUCCESS;
-    void *lib_handle = dlopen(lib_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
-
+    void * lib_handle = dlopen(lib_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (nullptr == lib_handle) {
         LOGGW("can not open QNN library %s, with error: %s", lib_path.c_str(), dlerror());
         return 1;
@@ -1371,8 +2930,29 @@ int qnn_implementation::load_backend(const std::string & lib_path, const QnnSave
     LOGGD("num_providers=%d\n", num_providers);
     if (num_providers != _required_num_providers) {
         LOGGW("providers is %d instead of required %d", num_providers, _required_num_providers);
-        return 4;
+        //return 4;
     }
+
+    if (nullptr == provider_list) {
+        LOGGW("failed to get qnn interface providers\n");
+        return 5;
+    }
+    bool found_valid_interface = false;
+    QNN_INTERFACE_VER_TYPE qnn_interface;
+    for (size_t idx = 0; idx < num_providers; idx++) {
+        if (QNN_API_VERSION_MAJOR == provider_list[idx]->apiVersion.coreApiVersion.major &&
+            QNN_API_VERSION_MINOR <= provider_list[idx]->apiVersion.coreApiVersion.minor) {
+            found_valid_interface = true;
+            qnn_interface = provider_list[idx]->QNN_INTERFACE_VER_NAME;
+            break;
+        }
+    }
+
+    if (!found_valid_interface) {
+        LOGGW("unable to find a valid qnn interface\n");
+        return 6;
+    }
+    set_qnn_raw_interface(qnn_interface);
 
     BackendIdType backend_id = provider_list[0]->backendId;
     _lib_path_to_backend_id[lib_path] = backend_id;
@@ -1389,29 +2969,49 @@ int qnn_implementation::load_backend(const std::string & lib_path, const QnnSave
         }
     }
     _loaded_lib_handle[backend_id] = lib_handle;
+    _backend_id = backend_id;
 
-    int is_init_ok = init_backend(_loaded_lib_handle[backend_id], saver_config);
-    if (is_init_ok != 0) {
-        // backend init fails. clear things
-        _lib_path_to_backend_id.erase(lib_path);
-        _loaded_backend.erase(backend_id);
-
-        int dlclose_error = dlclose(_loaded_lib_handle[backend_id]);
-        if (dlclose_error != 0) {
-            LOGGW("fail to close %p after backend-init failure, with error %s",
-                    _loaded_lib_handle[backend_id], dlerror());
+    // saver_initialize must be set before backend initialization
+    auto saver_initialize = load_qnn_functionpointers<_pfn_QnnSaver_initialize *>(_loaded_lib_handle[backend_id], "QnnSaver_initialize");
+    if (nullptr != saver_initialize) {
+        error = saver_initialize(saver_config);
+        if (error != QNN_SUCCESS) {
+            LOGGW("failed to saver_initialize，error %d", QNN_GET_ERROR_CODE(error));
+            return 7;
         }
-
-        _loaded_lib_handle.erase(backend_id);
-        return is_init_ok;
+    } else {
+        LOGGW("saver_initialize is null\n");
     }
 
     return 0;
 }
 
 
-int qnn_implementation::load_system(const std::string & system_lib_path) {
+int qnn_implementation::unload_backend() {
+    ENTER_FUNC();
+    int dlclose_error = 0;
+    for (auto &it : _loaded_lib_handle) {
+        dlclose_error = dlclose(it.second);
+        if (dlclose_error != 0) {
+            LOGGW("failed to close QNN backend %d, error %s\n", it.first, dlerror());
+        }
+    }
+
+    _loaded_lib_handle.clear();
+    _lib_path_to_backend_id.clear();
+    _loaded_backend.clear();
+
+    LEAVE_FUNC();
+
+    return 0;
+}
+
+
+int qnn_implementation::load_system() {
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
+
+    std::string system_lib_path = _lib_path + "libQnnSystem.so";
+    LOGGD("system_lib_path:%s\n", system_lib_path.c_str());
 
     _system_lib_handle = dlopen(system_lib_path.c_str(), RTLD_NOW | RTLD_LOCAL);
     if (nullptr == _system_lib_handle) {
@@ -1425,7 +3025,7 @@ int qnn_implementation::load_system(const std::string & system_lib_path) {
         return 2;
     }
 
-    std::uint32_t num_providers;
+    uint32_t num_providers = 0;
     const QnnSystemInterface_t ** provider_list = nullptr;
     error = get_providers(&provider_list, &num_providers);
     if (error != QNN_SUCCESS) {
@@ -1434,9 +3034,32 @@ int qnn_implementation::load_system(const std::string & system_lib_path) {
     }
 
     if (num_providers != _required_num_providers) {
-        LOGGW("providers is %d instead of required %d\n", num_providers, _required_num_providers);
+        //LOGGW("providers is %d instead of required %d\n", num_providers, _required_num_providers);
         return 4;
     }
+
+    if (nullptr == provider_list) {
+        LOGGW("can not get providers\n");
+        return 5;
+    }
+
+    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_system_interface;
+    bool found_valid_system_interface = false;
+    for (size_t idx = 0; idx < num_providers; idx++) {
+        if (QNN_SYSTEM_API_VERSION_MAJOR ==
+                    provider_list[idx]->systemApiVersion.major &&
+            QNN_SYSTEM_API_VERSION_MINOR <=
+                    provider_list[idx]->systemApiVersion.minor) {
+            found_valid_system_interface = true;
+            qnn_system_interface = provider_list[idx]->QNN_SYSTEM_INTERFACE_VER_NAME;
+            break;
+        }
+    }
+    if (!found_valid_system_interface) {
+        LOGGW("unable to find a valid qnn system interface\n");
+        return 6;
+    }
+    set_qnn_raw_system_interface(qnn_system_interface);
 
     _qnn_interface.set_qnn_system_interface(provider_list[0]);
 
@@ -1452,9 +3075,14 @@ int qnn_implementation::load_system(const std::string & system_lib_path) {
 
 
 int qnn_implementation::unload_system() {
+    ENTER_FUNC();
+
     int result = 0;
-    if (nullptr == _system_lib_handle)
+
+    if (nullptr == _system_lib_handle) {
+        LOGGD("system lib handle is null\n");
         return 1;
+    }
 
     if (nullptr != _qnn_system_handle) {
         result = _qnn_interface.qnn_system_context_free(_qnn_system_handle);
@@ -1471,6 +3099,7 @@ int qnn_implementation::unload_system() {
     }
 
     _system_lib_handle = nullptr;
+    LEAVE_FUNC();
 
     return 0;
 }
@@ -1532,26 +3161,27 @@ int qnn_implementation::qnn_init(const QnnSaver_Config_t ** saver_config) {
 
     const std::lock_guard<std::mutex> lock(_init_mutex);
 
-    if (0 != load_system("/data/data/com.cdeos.kantv/libQnnSystem.so")) { //TODO:hardcode
+    if (0 != load_system()) {
         LOGGW("can not load QNN system lib, pls check why?\n");
         return 1;
     } else {
         LOGGD("load QNN system lib succesfully\n");
     }
 
-    if (0 == _lib_path_to_backend_id.count(_lib_path)) {
-        int is_load_ok = load_backend(_lib_path, saver_config);
+    std::string bakend_lib_path = _lib_path + _backend_name;
+    if (0 == _lib_path_to_backend_id.count(bakend_lib_path)) {
+        int is_load_ok = load_backend(bakend_lib_path, saver_config);
         if (0 != is_load_ok) {
             LOGGW("failed to load QNN backend\n");
             return 2;
         }
     }
 
-    backend_id = _lib_path_to_backend_id[_lib_path];
+    backend_id = _lib_path_to_backend_id[bakend_lib_path];
     if (0 == _loaded_backend.count(backend_id) ||
         0 == _loaded_lib_handle.count(backend_id)) {
         LOGGW("library %s is loaded but loaded backend count=%zu, loaded lib_handle count=%zu\n",
-              _lib_path.c_str(),
+              bakend_lib_path.c_str(),
               _loaded_backend.count(backend_id),
               _loaded_lib_handle.count(backend_id));
         return 3;
@@ -1576,19 +3206,53 @@ int qnn_implementation::qnn_init(const QnnSaver_Config_t ** saver_config) {
         LOGGD("initialize qnn backend successfully\n");
     }
 
+    if (nullptr != _qnn_raw_interface.propertyHasCapability) {
+        auto qnnStatus = _qnn_raw_interface.propertyHasCapability(QNN_PROPERTY_GROUP_DEVICE);
+        if (QNN_PROPERTY_NOT_SUPPORTED == qnnStatus) {
+            LOGGW("device property is not supported\n");
+        }
+        if (QNN_PROPERTY_ERROR_UNKNOWN_KEY == qnnStatus) {
+            LOGGW("device property is not known to backend\n");
+        }
+    }
+
+    auto qnnStatus = _qnn_raw_interface.deviceCreate(_qnn_log_handle, nullptr, &_qnn_device_handle);
+    if (QNN_SUCCESS != qnnStatus && QNN_DEVICE_ERROR_UNSUPPORTED_FEATURE != qnnStatus) {
+        LOGGW("failed to create device\n");
+    } else {
+        LOGGI("create device successfully\n");
+    }
+
+    /*
     std::vector<const QnnDevice_Config_t*> temp_device_config;  //TODO:now is empty because I don't know how to use QnnDevice_Config_t currently
     _qnn_interface.qnn_device_create(_qnn_log_handle, temp_device_config.empty() ? nullptr : temp_device_config.data(), &_qnn_device_handle);
     if (nullptr == _qnn_device_handle) {
         LOGGW("why failed to initialize qnn device\n");
         //return 6;
     }
+    */
 
-    _qnn_interface.qnn_profile_create(_qnn_backend_handle, static_cast<int>(_profile_level), &_qnn_profile_handle);
-    if (nullptr == _qnn_profile_handle) {
-        LOGGW("why failed to initialize qnn profile\n");
-        return 7;
-    } else {
-        LOGGD("initialize qnn profile successfully\n");
+    if (ggml_qnn_profile_level::profile_off != _profile_level) {
+        LOGGI("profiling turned on; level = %d", _profile_level);
+        if (ggml_qnn_profile_level::profile_basic == _profile_level) {
+            LOGGI("basic profiling requested. creating Qnn Profile object\n");
+            if (QNN_PROFILE_NO_ERROR != _qnn_raw_interface.profileCreate(
+                        _qnn_backend_handle, QNN_PROFILE_LEVEL_BASIC, &_qnn_profile_handle)) {
+                LOGGW("unable to create profile handle in the backend\n");
+                return 7;
+            } else {
+                LOGGD("initialize qnn profile successfully\n");
+            }
+        } else if (ggml_qnn_profile_level::profile_detail == _profile_level) {
+            LOGGI("detailed profiling requested. Creating Qnn Profile object\n");
+            if (QNN_PROFILE_NO_ERROR != _qnn_raw_interface.profileCreate(
+                    _qnn_backend_handle, QNN_PROFILE_LEVEL_DETAILED, &_qnn_profile_handle)) {
+                LOGGW("unable to create profile handle in the backend\n");
+                return 7;
+            } else {
+                LOGGD("initialize qnn profile successfully\n");
+            }
+        }
     }
 
     std::vector<const QnnContext_Config_t*> temp_context_config; //TODO:now is empty because I don't know how to use QnnContext_Config_t currently
@@ -1600,32 +3264,25 @@ int qnn_implementation::qnn_init(const QnnSaver_Config_t ** saver_config) {
         LOGGD("initialize qnn context successfully\n");
     }
 
-    std::vector<const QnnGraph_Config_t*> temp_graph_config; //TODO:now is empty because I don't know how to use QnnGraph_Config_t currently
-    //harcode graph name to "qnn_matrix"
-    _qnn_interface.qnn_graph_create(_qnn_context_handle, "qnn_matrix", temp_graph_config.empty() ? nullptr : temp_graph_config.data(), &_qnn_graph_handle);
-    if (nullptr == _qnn_graph_handle) {
-        LOGGW("why failed to initialize qnn graph\n");
-        return 9;
-    }
-
     _rpc_lib_handle = dlopen("libcdsprpc.so", RTLD_NOW | RTLD_LOCAL);
     if (nullptr == _rpc_lib_handle) {
         LOGGW("failed to load qualcomm's rpc lib, error:%s\n", dlerror());
-        return 10;
+        return 9;
     } else {
         LOGGD("load rpcmem lib successfully\n");
         set_rpcmem_initialized(true);
     }
-    _pfn_rpc_mem_alloc = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle, "rpcmem_alloc"));
-    _pfn_rpc_mem_free = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
-    _pfn_rpc_mem_to_fd = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle, "rpcmem_to_fd"));
+    _pfn_rpc_mem_alloc  = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle, "rpcmem_alloc"));
+    _pfn_rpc_mem_free   = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
+    _pfn_rpc_mem_to_fd  = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle, "rpcmem_to_fd"));
     if (nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free || nullptr == _pfn_rpc_mem_to_fd) {
         LOGGW("unable to access symbols in shared buffer. dlerror(): %s", dlerror());
         dlclose(_rpc_lib_handle);
-        return 11;
+        return 10;
     }
 
     LOGGD("leave qni_init\n");
+
     return 0;
 }
 
@@ -1633,19 +3290,12 @@ int qnn_implementation::qnn_init(const QnnSaver_Config_t ** saver_config) {
 int qnn_implementation::qnn_finalize() {
     int ret_status = 0;
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
-    LOGGD("enter qni_finalize\n");
+    ENTER_FUNC();
+
     if (dlclose(_rpc_lib_handle) != 0) {
         LOGGW("failed to unload qualcomm's rpc lib, error:%s\n", dlerror());
-    }
-
-    if (nullptr != _qnn_graph_handle) {
-        error = _qnn_interface.qnn_graph_finalize(_qnn_graph_handle, _qnn_profile_handle, nullptr);
-        if (error != QNN_SUCCESS) {
-            LOGGW("failed to free QNN graph_handle: ID %u, error %d\n",
-                  _qnn_interface.get_backend_id(), QNN_GET_ERROR_CODE(error));
-
-        }
-        _qnn_graph_handle = nullptr;
+    } else {
+        LOGGD("succeed to close rpcmem lib\n");
     }
 
     VALIDATE(free_cached_tensors(), error);
@@ -1699,30 +3349,13 @@ int qnn_implementation::qnn_finalize() {
         _qnn_log_handle = nullptr;
     }
 
+    unload_backend();
+
     unload_system();
 
-    _loaded_backend.clear();
-
-    for (auto &it : _loaded_lib_handle) {
-        int dlclose_error = dlclose(it.second);
-        if (dlclose_error != 0) {
-            LOGGW("failed to close QNN backend %d, error %s\n", it.first, dlerror());
-            ret_status = 1;
-        }
-    }
-    _loaded_lib_handle.clear();
-    _lib_path_to_backend_id.clear();
-    LOGGD("leave qni_finalize\n");
+    LEAVE_FUNC();
 
     return ret_status;
-}
-
-
-const qnn_interface &qnn_implementation::get_qnn_interface() const {
-    if (!_qnn_interface.is_loaded()) {
-        LOGGW("pls check why _qnn_interface is not loaded\n");
-    }
-    return _qnn_interface;
 }
 
 
@@ -1970,6 +3603,282 @@ int qnn_implementation::add_node(Qnn_OpConfigVersion_t version,
 }
 
 
+int qnn_implementation::init_qnn_model(const char * graph_name, bool debug, uint8_t do_node_validation, const QnnGraph_Config_t ** graph_configs) {
+    int result = 0;
+
+    ENTER_FUNC();
+
+    if (nullptr == graph_name) {
+        LOGGW("graph name is null\n");
+        return 1;
+    }
+
+    if (!_graph_name.empty()) {
+        //TODO: only one graph is allowed
+        LOGGW("qnn model for graph %s already initialized\n", graph_name);
+        return 2;
+    }
+
+    if (!do_node_validation) {
+        LOGGW("node validation disabled, backend will not perform op validation prior to adding node\n");
+    }
+
+    _graph_name = graph_name;
+    _debug_tensor = debug;
+    _do_node_validations = do_node_validation;
+
+    result = _qnn_raw_interface.graphCreate(_qnn_context_handle, graph_name, graph_configs, &_qnn_graph_handle);
+    if (result != QNN_GRAPH_NO_ERROR || nullptr == _qnn_graph_handle) {
+        LOGGW("failed to create graph in qnn context\n");
+        return 3;
+    } else {
+        LOGGI("succeed to create graph in qnn context: %p\n", _qnn_graph_handle);
+    }
+
+    LEAVE_FUNC();
+    return 0;
+}
+
+
+int qnn_implementation::get_graphinfo_from_model(GraphInfoPtr_t ** graphsInfo, uint32_t * numGraphsInfo) {
+    int  err = 0;
+    int  numModels = 1;
+
+    ENTER_FUNC();
+
+    *graphsInfo = (GraphInfo_t **)malloc(numModels * sizeof(GraphInfo_t *));
+    if (nullptr == *graphsInfo) {
+        LOGGW("malloc failure\n");
+        return 1;
+    }
+
+    GraphInfo_t *graphArr = (GraphInfo_t *)malloc(numModels * sizeof(GraphInfo_t));
+    if (nullptr == graphArr) {
+        LOGGW("malloc failure\n");
+        return 2;
+    }
+
+    for (uint32_t i = 0; i < numModels; i++) {
+        graphArr[i].graph = _qnn_graph_handle;
+        graphArr[i].graphName = ::strndup(_graph_name.c_str(), _graph_name.size());
+        if (nullptr == graphArr[i].graphName) {
+            LOGGW("graph name is null\n");
+            return 3;
+        }
+
+        // allocate and add graph input/output TensorsWrapper. Note: no need to make deep copies of
+        // the tensor's pointer members as they are already allocated on heap in the addTensor
+        // function call.
+        std::vector<Qnn_Tensor_t> graphInputTensors = get_graph_input_tensors();
+        size_t numInputTensors                      = graphInputTensors.size();
+        LOGGD("numInputTensors %d\n", numInputTensors);
+        size_t inputTensorsSize                     = numInputTensors * sizeof(Qnn_Tensor_t);
+        graphArr[i].inputTensors                    = (Qnn_Tensor_t *)malloc(inputTensorsSize);
+        memscpy(graphArr[i].inputTensors, inputTensorsSize, graphInputTensors.data(), inputTensorsSize);
+        graphArr[i].numInputTensors = (uint32_t)numInputTensors;
+        // allocate and add graph outputTensors
+        std::vector<Qnn_Tensor_t> graphOutputTensors = get_graph_output_tensors();
+        size_t numOutputTensors                      = graphOutputTensors.size();
+        LOGGD("numOutputTensors %d\n", numOutputTensors);
+        size_t outputTensorsSize                     = numOutputTensors * sizeof(Qnn_Tensor_t);
+        graphArr[i].outputTensors                    = (Qnn_Tensor_t *)malloc(outputTensorsSize);
+        memscpy(graphArr[i].outputTensors, outputTensorsSize, graphOutputTensors.data(), outputTensorsSize);
+        graphArr[i].numOutputTensors = (uint32_t)numOutputTensors;
+
+        // have return object point to the populated graph struct
+        (*graphsInfo)[i] = graphArr + i;
+
+        // graph composition is complete by this stage, free if any cached tensors remaining
+        free_cached_tensors();
+    }
+
+    *numGraphsInfo = numModels;
+
+    LEAVE_FUNC();
+
+    return err;
+}
+
+
+
+int qnn_implementation::compose_graph() {
+    ENTER_FUNC();
+
+    //get_graphinfo_from_model(&_graphs_info, &_graphs_count);
+
+    LEAVE_FUNC();
+
+    return 0;
+}
+
+// execute_graph2() that is currently used by qnn-sample-app's main.cpp.
+// This function runs all the graphs present in model.so by reading
+// inputs from input_list based files and writes output to .raw files.
+int qnn_implementation::execute_graph2() {
+    ENTER_FUNC();
+    int return_value                                = 0;
+    bool read_success                               = false;
+    std::string input_list_path                     = "/sdcard/kantv/raw_list.txt";
+    std::string output_path                         = "/sdcard/kantv/out/";
+
+    std::vector<std::string> input_list_paths;
+    std::vector<std::vector<std::vector<std::string>>> input_file_lists;
+    std::vector<std::unordered_map<std::string, uint32_t>> input_name_to_index;
+
+
+    OutputDataType output_datatype                  = OutputDataType::FLOAT_ONLY;
+    InputDataType input_datatype                    = InputDataType::FLOAT;
+
+    split(input_list_paths, input_list_path, ',');
+
+
+    std::tie(input_file_lists, input_name_to_index, read_success) = readInputLists(input_list_paths);
+    if (!read_success) {
+        LOGGW("can not read data from file\n");
+        return 1;
+    } else {
+        LOGGD("succeed to read data from file\n", input_list_path.c_str());
+    }
+    LOGGD("input_file_lists.size() %d", input_file_lists.size());
+
+    for (size_t graph_idx = 0; graph_idx < _graphs_count; graph_idx++) {
+        LOGGD("Starting execution for graph_idx: %d", graph_idx);
+        if (graph_idx >= input_file_lists.size()) {
+            LOGGW("No Inputs available for: %d", graph_idx);
+            return_value = 1;
+            break;
+        }
+
+        Qnn_Tensor_t *inputs    = nullptr;
+        Qnn_Tensor_t *outputs   = nullptr;
+        if (0 != _io_tensor.setupInputAndOutputTensors(&inputs, &outputs, (*_graphs_info)[graph_idx])) {
+            LOGGE("Error in setting up Input and output Tensors for graph_idx: %d", graph_idx);
+            return_value = 1;
+            break;
+        }
+        auto graphs_info = (*_graphs_info)[graph_idx];
+        auto input_file_list = input_file_lists[graph_idx];
+        if (!input_file_list.empty()) {
+            size_t total_count = input_file_list[0].size();
+            size_t input_file_index_offset = 0;
+            while (input_file_index_offset < total_count) {
+                int iotReturnStatus;
+                size_t numInputFilesPopulated;
+                size_t batchSize;
+                std::tie(iotReturnStatus, numInputFilesPopulated, batchSize) =
+                        _io_tensor.populateInputTensors(graph_idx,
+                                                        input_file_list,
+                                                        input_file_index_offset,
+                                                        false,
+                                                        input_name_to_index[graph_idx],
+                                                        inputs,
+                                                        graphs_info,
+                                                        input_datatype);
+                if (0 != iotReturnStatus) {
+                    return_value = 1;
+                }
+                if (0 == return_value) {
+                    LOGGD("Successfully populated input tensors for graph_idx: %d", graph_idx);
+                    GGML_JNI_NOTIFY("Successfully populated input tensors for graph_idx: %d", graph_idx);
+                    Qnn_ErrorHandle_t executeStatus = QNN_GRAPH_NO_ERROR;
+                    executeStatus = _qnn_raw_interface.graphExecute(graphs_info.graph,
+                                                                            inputs,
+                                                                            graphs_info.numInputTensors,
+                                                                            outputs,
+                                                                            graphs_info.numOutputTensors,
+                                                                            _qnn_profile_handle,
+                                                                            nullptr);
+                    if (QNN_GRAPH_NO_ERROR != executeStatus) {
+                        return_value = 1;
+                    }
+                    if (0 == return_value) {
+                        LOGGD("Successfully executed graph_idx: %d ", graph_idx);
+                        GGML_JNI_NOTIFY("Successfully executed graph_idx: %d ", graph_idx);
+
+                        if (0 !=
+                                _io_tensor.writeOutputTensors(graph_idx,
+                                                          input_file_index_offset,
+                                                          graphs_info.graphName,
+                                                          outputs,
+                                                          graphs_info.numOutputTensors,
+                                                          output_datatype,
+                                                          _graphs_count,
+                                                          output_path,
+                                                          numInputFilesPopulated,
+                                                          batchSize)) {
+                            return_value = 1;
+                        }
+                    }
+                    input_file_index_offset += numInputFilesPopulated;
+                }
+                if (0 != return_value) {
+                    LOGGE("execution of graph: %d failure\n", graph_idx);
+                    break;
+                }
+            }
+        }
+        _io_tensor.tearDownInputAndOutputTensors(inputs, outputs, graphs_info.numInputTensors, graphs_info.numOutputTensors);
+        inputs = nullptr;
+        outputs = nullptr;
+        if (0 != return_value) {
+            break;
+        }
+    }
+
+    freeGraphsInfo(&_graphs_info, _graphs_count);
+    _graphs_info = nullptr;
+
+    LEAVE_FUNC();
+
+    return return_value;
+}
+
+
+int qnn_implementation::finalize_qnn_model() {
+    ENTER_FUNC();
+    if (nullptr != _qnn_graph_handle) {
+        if (_qnn_raw_interface.graphFinalize(_qnn_graph_handle, _qnn_profile_handle, nullptr) !=
+            QNN_GRAPH_NO_ERROR) {
+            LOGGW("finalizing graph failure\n");
+            //return 1;
+        }
+        _qnn_graph_handle = nullptr;
+    } else {
+        LOGGD("qnn graph handle is null\n");
+    }
+
+    free_cached_tensors();
+
+    LEAVE_FUNC();
+
+    return 0;
+}
+
+extern "C" int qnn_composeGraphs(GraphInfoPtr_t** graphsInfo,uint32_t* numGraphsInfo);
+// this function is used to troubleshooting issue in
+// PoC-S26: offload a simple f32 2x2 matrix addition operation to QNN CPU backend
+// https://github.com/zhouwg/kantv/issues/121
+int qnn_implementation::run_qnn_matrix() {
+    LOGGD("enter run_qnn_matrix\n");
+
+    init_qnn_model("qnn_matrix", false);
+
+    compose_graph();
+
+    qnn_composeGraphs(&_graphs_info, &_graphs_count);
+    LOGGD("_graphs_count %d\n", _graphs_count);
+
+    finalize_graph();
+
+    execute_graph2();
+
+    finalize_qnn_model();
+
+    LOGGD("leave run_qnn_matrix\n");
+
+    return 0;
+}
+
 
 // =================================================================================================
 //
@@ -1980,109 +3889,56 @@ int qnn_implementation::add_node(Qnn_OpConfigVersion_t version,
 //TODO:
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S26: offload a simple f32 2x2 matrix addition operation to QNN CPU backend
+
+qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so");
+
 int qnn_matrix(int n_backend_type, int n_op_type) {
-    int result = 0;
-    uint32_t i  = 0;
-    uint32_t j  = 0;
-    LOGGD("enter qnn_matrix\n");
-    LOGGV("[%s], op type:%d\n", __func__, n_op_type);
-    GGML_JNI_NOTIFY("[%s], backend_type:%d, op type:%d\n", __func__, n_backend_type, n_op_type);
-    uint32_t num_graphs = 0;
-    uint32_t num_graph_inputs = 0;
-    uint32_t num_graph_outputs = 0;
-    QnnSystemContext_GraphInfo_t * graph = nullptr;
-    //const QnnSystemContext_BinaryInfo_t * binaryinfo{nullptr};
-    //Qnn_ContextBinarySize_t binaryinfo_size = 0;
-    Qnn_ErrorHandle_t error = QNN_SUCCESS;
-    std::string graph_name  = "qnn_matrix";
-    std::vector<Qnn_Tensor_t> input_tensor_structs;
-    std::vector<Qnn_Tensor_t> output_tensor_structs;
+    int result                      = 0;
+    std::string graph_name          = "qnn_matrix";
+    uint32_t matrix_input_0[]       = {1, 2, 3, 4};
+    uint32_t matrix_input_1[]       = {1, 2, 3, 4};
 
-    const QnnProfile_EventId_t* events_ptr = nullptr;
-    const QnnProfile_EventId_t* sub_events_ptr = nullptr;
-    std::uint32_t num_events = 0;
-    std::uint32_t num_sub_events = 0;
-    QnnProfile_EventData_t event_data;
-    QnnProfile_EventData_t sub_event_data;
-    Qnn_OpConfig_t qnn_opconfig;
-    typedef struct {
-        void * buffer;
-        uint64_t num_bytes;
-    } buffer_blob_t;
-
-    uint32_t matrix_input_0[] = {1, 2, 3, 4};
-    uint32_t matrix_input_1[] = {1, 2, 3, 4};
 
     auto is_io_tensor = [](Qnn_TensorType_t type) {
         return type < QNN_TENSOR_TYPE_STATIC;
     };
-    Qnn_Tensor_t tensor_0 = QNN_TENSOR_INIT;
-    Qnn_Tensor_t tensor_1 = QNN_TENSOR_INIT;
+    uint8_t * qnn_buffer                = nullptr;
+    Qnn_Tensor_t tensor_0               = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_1               = QNN_TENSOR_INIT;
     Qnn_QuantizeParams_t quantize_param = QNN_QUANTIZE_PARAMS_INIT;
+    Qnn_OpConfig_t qnn_opconfig         = QNN_OPCONFIG_INIT;
 
-    buffer_blob_t buffer_blob;
+    LOGGD("enter qnn_matrix\n");
+    LOGGI("[%s], backend type:%d, op type:%d\n", __func__, n_backend_type, n_op_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d, op type:%d\n", __func__, n_backend_type, n_op_type);
 
-    uint8_t * qnn_buffer = nullptr;
-
-    struct ggml_context * ctx;
-    const int sizey = 2;
-    const int sizex = 2;
-    const ggml_type qtype = GGML_TYPE_F32;
-    size_t ctx_size = 0;
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
-    ctx_size += ggml_row_size(qtype,         sizex*sizey);
-    ctx_size += ggml_row_size(qtype,         sizex*sizey);
-    ctx_size += 1024 * 1024 * 16;
-    struct ggml_init_params params = {
-            /*.mem_size   =*/ ctx_size,
-            /*.mem_buffer =*/ NULL,
-            /* no_alloc   =*/ 0
-    };
-    ctx = ggml_init(params);
-    if (!ctx) {
-        LOGGW("ggml_init failure\n");
-        return 1;
-    }
-    struct ggml_tensor * m11 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m11, 1.0f);
-    struct ggml_tensor * m12 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m12, 2.5f);
-    struct ggml_tensor * m2 = ggml_add(ctx, m11, m12);
-    struct ggml_cgraph * gf = ggml_new_graph(ctx);
-    ggml_build_forward_expand(gf, m2);
-    std::vector<uint8_t> work_buffer;
-    ggml_graph_compute_helper(work_buffer, gf, 4);
-    TENSOR_DUMP(m11);
-    TENSOR_DUMP(m12);
-    TENSOR_DUMP(m2);
-    LOGGD("finish ggml matrix manipulation\n");
-
-    //buffer_blob.buffer = new (std::nothrow)char[1024];
-    //assert(nullptr != buffer_blob.buffer);
-    //buffer_blob.num_bytes = 1024;
-    qnn_implementation _qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/libQnnCpu.so"); //TODO: hardcode
-    int qnn_error = _qnn_backend.qnn_init(nullptr);
-    if (0 != qnn_error) {
+    //qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so");
+    result = qnn_backend.qnn_init(nullptr);
+    if (0 != result) {
         LOGGW("init qnn subsystem failed, pls check why\n");
         result = 1;
         return 1;
     }
-
-    qnn_interface _qnn_interface = _qnn_backend.get_qnn_interface();
-    if (!_qnn_interface.is_loaded()) {
+    QNN_INTERFACE_VER_TYPE qnn_raw_interface                = qnn_backend.get_qnn_raw_interface();
+    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface  = qnn_backend.get_qnn_raw_system_interface();
+    qnn_interface qnn_interface                             = qnn_backend.get_qnn_interface();
+    if (!qnn_interface.is_loaded()) {
         LOGGW("qnn subsystem failure\n");
         result = 2;
         goto failure;
     }
-
-    qnn_buffer = static_cast<uint8_t *>(_qnn_backend.alloc_rpcmem(8192, 4));
+    qnn_buffer = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(8192, 4));
     if (nullptr == qnn_buffer) {
         LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
         goto failure;
     } else {
         LOGGD("alloc rpcmem successfully\n");
     }
+
+#if 0
+    qnn_backend.run_qnn_matrix();
+#else
+    qnn_backend.init_qnn_model("qnn_matrix_addition", false);
 
     QNN_VER_PTR(tensor_0)->id = 0;
     QNN_VER_PTR(tensor_0)->name = "matrix_input_0";
@@ -2115,19 +3971,12 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     QNN_VER_PTR(tensor_0)->quantizeParams = quantize_param;
     QNN_VER_PTR(tensor_0)->rank = 2;
 
-    //QNN_VER_PTR(tensor_0)->dimensions = reinterpret_cast<uint32_t*>(m11->data);
     QNN_VER_PTR(tensor_0)->dimensions = reinterpret_cast<uint32_t *>(qnn_buffer);
-    //QNN_VER_PTR(tensor_0)->clientBuf.dataSize = ggml_element_size(m11);
     QNN_VER_PTR(tensor_0)->clientBuf.dataSize = 0;
-    LOGGD("client buf size %d\n", ggml_nbytes(m11));
-    LOGGD("is_io_tensor(QNN_VER_PTR(tensor)->type:%d\n", is_io_tensor(QNN_VER_PTR(tensor_0)->type));
-    QNN_VER_PTR(tensor_0)->clientBuf.data = is_io_tensor(QNN_VER_PTR(tensor_0)->type) ? nullptr : static_cast<void*>(m11->data);
+    QNN_VER_PTR(tensor_0)->clientBuf.data = is_io_tensor(QNN_VER_PTR(tensor_0)->type) ? nullptr : static_cast<void*>(matrix_input_0);
     QNN_VER_PTR(tensor_0)->clientBuf.dataSize = 8; //TODO:?
-    //QNN_VER_PTR(tensor_0)->clientBuf.data = nullptr;
-    //QNN_VER_PTR(tensor_0)->clientBuf.dataSize = 0;
-    //QNN_VER_PTR(tensor_0)->clientBuf.data = nullptr;
     memcpy(QNN_VER_PTR(tensor_0)->dimensions, matrix_input_0, 16);
-    //result = _qnn_backend.add_tensor(QNN_VER_PTR(tensor_0)->name, &tensor_0);
+    //result = qnn_backend.add_tensor(QNN_VER_PTR(tensor_0)->name, &tensor_0);
     if (0 != result) {
         LOGGW("add input tensor 0 failure\n");
         //goto failure;
@@ -2150,15 +3999,13 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                     {.clientBuf= { .data=qnn_buffer + 32,
                             .dataSize=8}}}}};
     memcpy(QNN_VER_PTR(tensor_1)->dimensions, matrix_input_1, 16);
-    //result =_qnn_backend.add_tensor(QNN_VER_PTR(tensor_1)->name, &tensor_1);
+    //result =qnn_backend.add_tensor(QNN_VER_PTR(tensor_1)->name, &tensor_1);
     if (0 != result) {
         LOGGW("add input tensor 1 failure\n");
         //goto failure;
     }
 
-    //ref:/opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/model/Inception_v3.cpp
     if (1) {
-        qnn_opconfig = QNN_OPCONFIG_INIT;
         Qnn_Param_t qnn_params[] = {
                 {
                         .paramType=QNN_PARAMTYPE_TENSOR,
@@ -2197,10 +4044,9 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
 
 
         LOGGD("register tensor rpcmem\n");
-        //_qnn_backend.add_node(qnn_opconfig); //TODO: not work
-        result = _qnn_backend.register_rpcmem((QNN_VER_PTR(tensor_0))->dimensions, &(tensor_0)); //TODO: not work
-        result = _qnn_backend.register_rpcmem((QNN_VER_PTR(tensor_1))->dimensions, &(tensor_0)); //TODO: not work
-        result = _qnn_backend.register_rpcmem((QNN_VER_PTR(outputs[0]))->clientBuf.data, &(outputs[0])); //TODO: not work
+        result = qnn_backend.register_rpcmem((QNN_VER_PTR(tensor_0))->dimensions, &(tensor_0)); //TODO: not work
+        result = qnn_backend.register_rpcmem((QNN_VER_PTR(tensor_1))->dimensions, &(tensor_0)); //TODO: not work
+        result = qnn_backend.register_rpcmem((QNN_VER_PTR(outputs[0]))->clientBuf.data, &(outputs[0])); //TODO: not work
         if (0 != result) {
             LOGGW("register rpcmem failure\n");
             //goto failure;
@@ -2209,10 +4055,10 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         }
 
         //ref:https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/MasterOpDef.html#elementwiseadd
-        _qnn_backend.add_node(QNN_OPCONFIG_VERSION_1, // Op_Config_t Version
-                              "qnn_matrix_addition", // Node Name
-                              "qti.aisw", // Package Name,  must be "qti.aisw" otherwise error occurs
-                              "ElementWiseAdd", // Qnn Node Type,
+        qnn_backend.add_node(QNN_OPCONFIG_VERSION_1, // Op_Config_t Version
+                              qnn_backend.get_qnn_graph_name().c_str(), // Node Name
+                              QNN_OP_PACKAGE_NAME_QTI_AISW, // Package Name,  must be "qti.aisw" otherwise error occurs
+                              QNN_OP_ELEMENT_WISE_ADD, // Qnn Node Type,
                               qnn_params, // Node Params
                               2, // Num Node Params
                               inputs, // Input Tensor Names
@@ -2220,107 +4066,26 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                               outputs, // Output Tensors
                               1// Num Output Tensors
         );
+
+         qnn_backend.finalize_graph();
     }
 
-    result = _qnn_backend.execute_graph();//TODO:not work currently
+
+    result = qnn_backend.execute_graph();//TODO:not work currently
     if (0 != result) {
         LOGGW("qnn graph execution failure\n");
         goto failure;
     } else {
         LOGGD("qnn graph execution successfully\n");
     }
-    /*
-    error = _qnn_interface.qnn_system_context_get_binary_info(
-            _qnn_backend.get_qnn_system_handle(),
-            buffer_blob.buffer, buffer_blob.num_bytes,
-            &binaryinfo, &binaryinfo_size);
-    if (error != QNN_SUCCESS) {
-        LOGGW("failed to interpret QNN Context binary, error code %d", QNN_GET_ERROR_CODE(error));
-        result = 3;
-        goto failure;
-    }
+#endif
 
-    if (binaryinfo->version == QNN_SYSTEM_CONTEXT_BINARY_INFO_VERSION_1) {
-        num_graphs = binaryinfo->contextBinaryInfoV1.numGraphs;
-        graph = binaryinfo->contextBinaryInfoV1.graphs;
-    } else if (binaryinfo->version == QNN_SYSTEM_CONTEXT_BINARY_INFO_VERSION_2) {
-        num_graphs = binaryinfo->contextBinaryInfoV2.numGraphs;
-        graph = binaryinfo->contextBinaryInfoV2.graphs;
-    } else {
-        result = 4;
-        LOGGW("unknown QNN BinaryInfo version %d\n", binaryinfo->version);
-        goto failure;
-    }
-
-    if (num_graphs > 1) {
-        result = 5;
-        LOGGW("the context binary contains %lu graphs, but now assume that one context binary contains one graph\n", num_graphs);
-        goto failure;
-    }
-
-    if (graph[0].version != QNN_SYSTEM_CONTEXT_GRAPH_INFO_VERSION_1) {
-        result = 6;
-        LOGGW("unknown QNN GraphInfo version %d\n", graph[0].version);
-        goto failure;
-    }
-
-    graph_name = graph->graphInfoV1.graphName;
-    LOGGD("graph name:%s\n", graph_name.c_str());
-
-    num_graph_inputs = graph->graphInfoV1.numGraphInputs;
-    input_tensor_structs.reserve(num_graph_inputs);
-    for (std::uint32_t i = 0; i < num_graph_inputs; ++i) {
-        input_tensor_structs.emplace_back(graph->graphInfoV1.graphInputs[i]);
-    }
-
-    num_graph_outputs = graph->graphInfoV1.numGraphOutputs;
-    output_tensor_structs.reserve(num_graph_outputs);
-    for (std::uint32_t i = 0; i < num_graph_outputs; ++i) {
-        output_tensor_structs.emplace_back(graph->graphInfoV1.graphOutputs[i]);
-    }
-
-    error = _qnn_interface.qnn_profile_get_events(_qnn_backend.get_qnn_profile_handle(), &events_ptr, &num_events);
-    if (error != QNN_SUCCESS) {
-        LOGGW("failed to get profile events: %d\n", QNN_GET_ERROR_CODE(error));
-        goto failure;
-    }
-
-    for (i = 0; i < num_events; ++i) {
-        error = _qnn_interface.qnn_profile_get_event_data(events_ptr[i], &event_data);
-        if (error != QNN_SUCCESS) {
-            LOGGW("failed to get event data for event %d: %d\n", i, QNN_GET_ERROR_CODE(error));
-            goto failure;
-        }
-
-        error = _qnn_interface.qnn_profile_get_sub_events(events_ptr[i], &sub_events_ptr, &num_sub_events);
-        if (error != QNN_SUCCESS) {
-            LOGGW("failed to get sub events for event %d: %d\n", i, QNN_GET_ERROR_CODE(error));
-            goto failure;
-        }
-
-        for (j = 0; j < num_sub_events; ++j) {
-            error = _qnn_interface.qnn_profile_get_event_data(sub_events_ptr[j], &sub_event_data);
-            if (error != QNN_SUCCESS) {
-                LOGGW("failed to get sub event data for sub event %d of event %d: %d\n",
-                      j, i, QNN_GET_ERROR_CODE(error));
-                goto failure;
-            }
-            if (sub_event_data.type == QNN_PROFILE_EVENTTYPE_NODE &&
-                (sub_event_data.unit == QNN_PROFILE_EVENTUNIT_MICROSEC ||
-                 sub_event_data.unit == QNN_PROFILE_EVENTUNIT_CYCLES)) {
-                //TODO: handle profile data here
-                //  sub_event_data.identifier
-                //  sub_event_data.value
-            }
-        }
-    }
-    */
 
 failure:
-    _qnn_backend.unregister_rpcmem();
-    _qnn_backend.free_rpcmem(qnn_buffer);
+    qnn_backend.unregister_rpcmem();
+    qnn_backend.free_rpcmem(qnn_buffer);
+    qnn_backend.qnn_finalize();
 
-    _qnn_backend.qnn_finalize();
     LOGGD("leave qnn_matrix\n");
 
     return result;
@@ -2331,11 +4096,206 @@ failure:
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S27:  mapping ggml_tensor to QNN_tensor and offload a simple 2x2 matrix addition operation to QNN CPU backend
 int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
+    uint32_t i                                  = 0;
+    uint32_t j                                  = 0;
+    int error                                   = 0;
+    int result                                  = 0;
+    std::string graph_name                      = "qnn_matrix";
+
+    const int sizey                             = 2;
+    const int sizex                             = 2;
+    size_t ctx_size                             = 0;
+    struct ggml_context * ctx                   = nullptr;
+    struct ggml_tensor  * m11                   = nullptr;
+    struct ggml_tensor  * m12                   = nullptr;
+    struct ggml_tensor  * m2                    = nullptr;
+    struct ggml_cgraph  * gf                    = nullptr;
+    std::vector<uint8_t> work_buffer;
+    const ggml_type qtype           = GGML_TYPE_F32;
+    struct ggml_init_params params = {
+            /*.mem_size   =*/ 0,
+            /*.mem_buffer =*/ NULL,
+            /* no_alloc   =*/ 0
+    };
+
+    std::uint32_t num_events                    = 0;
+    std::uint32_t num_sub_events                = 0;
+    QnnProfile_EventData_t event_data;
+    QnnProfile_EventData_t sub_event_data;
+    const QnnProfile_EventId_t * events_ptr     = nullptr;
+    const QnnProfile_EventId_t * sub_events_ptr = nullptr;
+
+    uint32_t num_graphs                         = 0;
+    uint32_t num_graph_inputs                   = 0;
+    uint32_t num_graph_outputs                  = 0;
+    QnnSystemContext_GraphInfo_t * graph        = nullptr;
+
+    uint8_t * qnn_buffer                        = nullptr;
+
+    buffer_blob_t buffer_blob;
+    std::vector<Qnn_Tensor_t> input_tensor_structs;
+    std::vector<Qnn_Tensor_t> output_tensor_structs;
+
+    Qnn_ContextBinarySize_t binaryinfo_size     = 0;
+    const QnnSystemContext_BinaryInfo_t * binaryinfo {nullptr};
+
     LOGGD("enter qnn_ggml\n");
-    LOGGV("op type:%d\n", n_ggml_op_type);
-    GGML_JNI_NOTIFY("[%s], backend_type:%d, ggml op type:%d\n", __func__, n_backend_type,
-                    n_ggml_op_type);
+    LOGGI("[%s], backend type:%d, op type:%d\n", __func__, n_backend_type, n_ggml_op_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d, ggml op type:%d\n", __func__, n_backend_type, n_ggml_op_type);
+
+    buffer_blob.buffer = new (std::nothrow)char[1024];
+    assert(nullptr != buffer_blob.buffer);
+    buffer_blob.num_bytes = 1024;
+
+    //qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so");
+    error  = qnn_backend.qnn_init(nullptr);
+    if (0 != error) {
+        LOGGW("init qnn subsystem failed, pls check why\n");
+        result = 1;
+        return 1;
+    }
+
+    QNN_INTERFACE_VER_TYPE qnn_raw_interface                = qnn_backend.get_qnn_raw_interface();
+    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface  = qnn_backend.get_qnn_raw_system_interface();
+    qnn_interface qnn_interface                             = qnn_backend.get_qnn_interface();
+    if (!qnn_interface.is_loaded()) {
+        LOGGW("qnn subsystem failure\n");
+        result = 2;
+    }
+
+    qnn_buffer = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(8192, 4));
+    if (nullptr == qnn_buffer) {
+        LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
+        goto failure;
+    } else {
+        LOGGD("alloc rpcmem successfully\n");
+    }
+
+    // GGML matrix addition operation
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex*sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex*sizey);
+    ctx_size        += 1024 * 1024 * 16;
+    params.mem_size =  ctx_size;
+    ctx             =  ggml_init(params);
+    if (!ctx) {
+        LOGGW("ggml_init failure\n");
+        return 1;
+    }
+    m11             = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m11, 1.0f);
+    m12             = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m12, 2.5f);
+    m2              = ggml_add(ctx, m11, m12);
+    gf              = ggml_new_graph(ctx);
+    ggml_build_forward_expand(gf, m2);
+    ggml_graph_compute_helper(work_buffer, gf, 4);
+    TENSOR_DUMP(m11);
+    TENSOR_DUMP(m12);
+    TENSOR_DUMP(m2);
+    LOGGD("finish ggml matrix addition operation\n");
+    // end GGML matrix addition operation
+
+   error = qnn_interface.qnn_system_context_get_binary_info(
+           qnn_backend.get_qnn_system_handle(),
+           buffer_blob.buffer, buffer_blob.num_bytes,
+           &binaryinfo, &binaryinfo_size);
+   if (error != QNN_SUCCESS) {
+       LOGGW("failed to interpret QNN Context binary, error code %d", QNN_GET_ERROR_CODE(error));
+       result = 3;
+       goto failure;
+   }
+
+   if (binaryinfo->version == QNN_SYSTEM_CONTEXT_BINARY_INFO_VERSION_1) {
+       num_graphs = binaryinfo->contextBinaryInfoV1.numGraphs;
+       graph = binaryinfo->contextBinaryInfoV1.graphs;
+   } else if (binaryinfo->version == QNN_SYSTEM_CONTEXT_BINARY_INFO_VERSION_2) {
+       num_graphs = binaryinfo->contextBinaryInfoV2.numGraphs;
+       graph = binaryinfo->contextBinaryInfoV2.graphs;
+   } else {
+       result = 4;
+       LOGGW("unknown QNN BinaryInfo version %d\n", binaryinfo->version);
+       goto failure;
+   }
+
+   if (num_graphs > 1) {
+       result = 5;
+       LOGGW("the context binary contains %lu graphs, but now assume that one context binary contains one graph\n", num_graphs);
+       goto failure;
+   }
+
+   if (graph[0].version != QNN_SYSTEM_CONTEXT_GRAPH_INFO_VERSION_1) {
+       result = 6;
+       LOGGW("unknown QNN GraphInfo version %d\n", graph[0].version);
+       goto failure;
+   }
+
+   graph_name = graph->graphInfoV1.graphName;
+   LOGGD("graph name:%s\n", graph_name.c_str());
+
+   num_graph_inputs = graph->graphInfoV1.numGraphInputs;
+   input_tensor_structs.reserve(num_graph_inputs);
+   for (std::uint32_t i = 0; i < num_graph_inputs; ++i) {
+       input_tensor_structs.emplace_back(graph->graphInfoV1.graphInputs[i]);
+   }
+
+   num_graph_outputs = graph->graphInfoV1.numGraphOutputs;
+   output_tensor_structs.reserve(num_graph_outputs);
+   for (std::uint32_t i = 0; i < num_graph_outputs; ++i) {
+       output_tensor_structs.emplace_back(graph->graphInfoV1.graphOutputs[i]);
+   }
+
+   error = qnn_interface.qnn_profile_get_events(qnn_backend.get_qnn_profile_handle(), &events_ptr, &num_events);
+   if (error != QNN_SUCCESS) {
+       LOGGW("failed to get profile events: %d\n", QNN_GET_ERROR_CODE(error));
+       goto failure;
+   }
+
+   for (i = 0; i < num_events; ++i) {
+       error = qnn_interface.qnn_profile_get_event_data(events_ptr[i], &event_data);
+       if (error != QNN_SUCCESS) {
+           LOGGW("failed to get event data for event %d: %d\n", i, QNN_GET_ERROR_CODE(error));
+           goto failure;
+       }
+
+       error = qnn_interface.qnn_profile_get_sub_events(events_ptr[i], &sub_events_ptr, &num_sub_events);
+       if (error != QNN_SUCCESS) {
+           LOGGW("failed to get sub events for event %d: %d\n", i, QNN_GET_ERROR_CODE(error));
+           goto failure;
+       }
+
+       for (j = 0; j < num_sub_events; ++j) {
+           error = qnn_interface.qnn_profile_get_event_data(sub_events_ptr[j], &sub_event_data);
+           if (error != QNN_SUCCESS) {
+               LOGGW("failed to get sub event data for sub event %d of event %d: %d\n",
+                     j, i, QNN_GET_ERROR_CODE(error));
+               goto failure;
+           }
+           if (sub_event_data.type == QNN_PROFILE_EVENTTYPE_NODE &&
+               (sub_event_data.unit == QNN_PROFILE_EVENTUNIT_MICROSEC ||
+                sub_event_data.unit == QNN_PROFILE_EVENTUNIT_CYCLES)) {
+               //TODO: handle profile data here
+               //  sub_event_data.identifier
+               //  sub_event_data.value
+           }
+       }
+   }
+
+failure:
+    if (nullptr != buffer_blob.buffer) {
+        delete buffer_blob.buffer;
+        buffer_blob.buffer = nullptr;
+    }
+
+    qnn_backend.unregister_rpcmem();
+    qnn_backend.free_rpcmem(qnn_buffer);
+    qnn_backend.qnn_finalize();
+
     LOGGD("leave qnn_ggml\n");
 
-    return 0;
+    return result;
 }
+
+
+#include "Inception_v3.cpp"

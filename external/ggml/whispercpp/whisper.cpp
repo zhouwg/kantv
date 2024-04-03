@@ -4600,6 +4600,12 @@ struct whisper_full_params whisper_full_default_params(enum whisper_sampling_str
         /*.length_penalty    =*/ -1.0f,
 
         /*.temperature_inc   =*/  0.2f,
+
+        /*
+        ref: https://github.com/ggerganov/whisper.cpp/issues/1507
+        increase entropy threshold from the default 2.4 to 2.8 for example. Higher threshold will reject repetitive text and fallback to sampling with higher temperature
+        */
+
         /*.entropy_thold     =*/  2.4f,
         /*.logprob_thold     =*/ -1.0f,
         /*.no_speech_thold   =*/  0.6f,
