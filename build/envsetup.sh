@@ -78,8 +78,10 @@ export ANDROID_PLATFORM=android-34
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r18b
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r21e
 #export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r24
+#export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r25c
 export ANDROID_NDK=${KANTV_TOOLCHAIN_PATH}/android-ndk-r26c
-export ANDROID_NDK_ROOT=${ANDROID_NDK}
+export ANDROID_NDK_ROOT=${ANDROID_NDK}  # make some open source project happy
+export NDK_ROOT=${ANDROID_NDK}          # make some open source project happy
 export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
 

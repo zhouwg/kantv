@@ -20631,7 +20631,7 @@ static ModelError_t addNode_InceptionV3_Predictions_Softmax(qnn_implementation& 
 }
 
 
-int qnn_composeGraphs(GraphInfoPtr_t** graphsInfo,uint32_t* numGraphsInfo)
+int ggml_qqn_debug_composegraphs(GraphInfoPtr_t ** graphsInfo,uint32_t * numGraphsInfo)
 {
 
   LOGGI("enter %s\n", __func__);
@@ -20640,9 +20640,6 @@ int qnn_composeGraphs(GraphInfoPtr_t** graphsInfo,uint32_t* numGraphsInfo)
 
 
   /* model/graph for Inception_v3*/
-
-
-
   VALIDATE(addTensor_input_0(Inception_v3), err);
   //VALIDATE(addTensor_InceptionV3_Conv2d_1a_3x3_weights_read_0(Inception_v3), err);
   //VALIDATE(addTensor_InceptionV3_InceptionV3_Conv2d_1a_3x3_convolution_bias(Inception_v3), err);
@@ -21055,8 +21052,7 @@ int qnn_composeGraphs(GraphInfoPtr_t** graphsInfo,uint32_t* numGraphsInfo)
 
   uint32_t numModels = 1;
   // Populate the constructed graphs in provided output variables
-  qnn_backend.get_graphinfo_from_model(graphsInfo, numGraphsInfo);
-  //VALIDATE(getGraphInfoFromModels(*models, numModels, graphsInfo), err);
+  //qnn_backend.get_graphinfo_from_model(graphsInfo, numGraphsInfo);
   *numGraphsInfo = numModels;
 
   LOGGI("leave %s\n", __func__);

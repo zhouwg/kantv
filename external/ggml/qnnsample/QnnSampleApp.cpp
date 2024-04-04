@@ -58,6 +58,8 @@ sample_app::QnnSampleApp::QnnSampleApp(QnnFunctionPointers qnnFunctionPointers,
     if (m_outputPath.empty()) {
         m_outputPath = s_defaultOutputPath;
     }
+    m_graphConfigsInfoCount = 0;
+
     return;
 }
 
