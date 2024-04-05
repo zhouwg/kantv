@@ -34,7 +34,11 @@ Some goals of this project are:
 
 ### Software architecture of KanTV Android
 
-![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/ba5d10ed-a5c7-461c-8b55-b259a8f8420b)
+(this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
+
+
+![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/2b033e51-9d32-463b-bf30-69d8f38cd8be)
+
 
 ### How to build project
 
