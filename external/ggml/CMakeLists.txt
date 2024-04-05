@@ -55,6 +55,8 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-qnn.cpp
 
+        ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
+
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/sampling.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/common.cpp
@@ -164,6 +166,24 @@ set_target_properties(kantvffmpeg
         ${PREBUILT_LIB_PATH}/libkantv-ffmpeg.so)
 
 
+add_library(QNNSaver
+        SHARED
+        IMPORTED)
+
+set_target_properties(QNNSaver
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUILT_LIB_PATH}/libQnnSaver.so)
+
+add_library(QNNCpu
+        SHARED
+        IMPORTED)
+
+set_target_properties(QNNCpu
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${PREBUILT_LIB_PATH}/libQnnCpu.so)
+
 function(build_library target_name)
     add_library(
             ${target_name}
@@ -174,7 +194,7 @@ function(build_library target_name)
     if (GGML_JNI_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg QNNCpu QNNSaver android )
     else()
         target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
     endif()

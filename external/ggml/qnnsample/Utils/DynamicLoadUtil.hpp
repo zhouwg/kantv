@@ -28,7 +28,7 @@ namespace qnn {
                                               sample_app::QnnFunctionPointers *qnnFunctionPointers,
                                               void **backendHandle,
                                               bool loadModelLib,
-                                              void **modelHandleRtn);
+                                              void **modelHandleRtn, uint32_t *backendID);
 
             StatusCode getQnnSystemFunctionPointers(std::string systemLibraryPath,
                                                     sample_app::QnnFunctionPointers *qnnFunctionPointers);

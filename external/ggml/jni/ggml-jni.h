@@ -60,14 +60,16 @@ extern "C" {
 #define BENCHMARK_MATRIX            4
 #define BENCHMAKR_LLAMA             5
 #define BENCHMAKR_QNN_SAMPLE        6
-#define BENCHMARK_QNN_MATRIX        7
-#define BENCHMARK_QNN_GGML          8
-#define BENCHMAKR_MAX               8
+#define BENCHMAKR_QNN_SAVER         7
+#define BENCHMARK_QNN_MATRIX        8
+#define BENCHMARK_QNN_GGML          9
+#define BENCHMAKR_MAX               9
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
 #define BACKEND_DSP                 2
-#define BACKEND_MAX                 2
+#define BACKEND_SAVER               3
+#define BACKEND_MAX                 3
 
     enum ggml_jni_op {
         GGML_JNI_OP_NONE = 0,
@@ -89,7 +91,7 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN matrix 8: QNN GGML
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP
     * @param n_op_type             type of matrix manipulate / GGML OP
@@ -151,6 +153,8 @@ extern "C" {
 // =================================================================================================
 
     int qnn_sample_main(int argc, char** argv);
+
+    int qnn_saver_main(int argc, char** argv);
 
     int qnn_matrix(int n_backend_type, int n_op_type);
 

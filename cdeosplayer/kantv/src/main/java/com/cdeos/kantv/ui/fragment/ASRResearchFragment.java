@@ -170,6 +170,8 @@
          CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
+         CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");
          //qualcomm's prebuilt binary file
          CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
          CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");

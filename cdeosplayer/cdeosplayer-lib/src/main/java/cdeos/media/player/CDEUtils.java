@@ -267,8 +267,9 @@
      public static final int BENCHMARK_MATRIX  = 4;
      public static final int BENCHMARK_LLM     = 5;
      public static final int BENCHMARK_QNN_SAMPLE     = 6;
-     public static final int BENCHMARK_QNN_MATRIX     = 7;
-     public static final int BENCHMARK_QNN_GGML       = 8;
+     public static final int BENCHMARK_QNN_SAVER      = 7;
+     public static final int BENCHMARK_QNN_MATRIX     = 8;
+     public static final int BENCHMARK_QNN_GGML       = 9;
 
      private static int       mASRMode = ASR_MODE_NORMAL;
 
@@ -3925,6 +3926,9 @@
 
              case BENCHMARK_QNN_SAMPLE:
                  return "GGML QNN sample";
+
+             case BENCHMARK_QNN_SAVER:
+                 return "GGML QNN saver";
 
              case BENCHMARK_QNN_MATRIX:
                  return "GGML QNN matrix manipulate";

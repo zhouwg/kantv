@@ -354,12 +354,13 @@ namespace qnn {
 
                 QnnFunctionPointers qnnFunctionPointers;
                 // Load backend and model .so and validate all the required function symbols are resolved
+                uint32_t backendID = 0;
                 auto statusCode = dynamicloadutil::getQnnFunctionPointers(backEndPath,
                                                                           modelPath,
                                                                           &qnnFunctionPointers,
                                                                           &sg_backendHandle,
                                                                           !loadFromCachedBinary,
-                                                                          &sg_modelHandle);
+                                                                          &sg_modelHandle, &backendID);
                 if (dynamicloadutil::StatusCode::SUCCESS != statusCode) {
                     if (dynamicloadutil::StatusCode::FAIL_LOAD_BACKEND == statusCode) {
                         exitWithMessage(
@@ -398,7 +399,7 @@ namespace qnn {
                                                      parsedProfilingLevel,
                                                      dumpOutputs,
                                                      cachedBinaryPath,
-                                                     saveBinaryName));
+                                                     saveBinaryName, backendID));
                 return app;
             }
 

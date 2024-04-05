@@ -35,7 +35,7 @@ public class ggmljava {
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
      * @param audioPath     /sdcard/kantv/jfk.wav
-     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN matrix 8: QNN GGML
+     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML
      * @param nThreadCounts 1 - 8
      * @param nBackendType  0: CPU  1: GPU  2: DSP
      * @param nOpType       type of matrix manipulate / GGML OP

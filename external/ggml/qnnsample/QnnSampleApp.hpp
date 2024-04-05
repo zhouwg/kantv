@@ -39,7 +39,7 @@ namespace qnn {
                              ProfilingLevel profilingLevel = ProfilingLevel::OFF,
                              bool dumpOutputs = false,
                              std::string cachedBinaryPath = "",
-                             std::string saveBinaryName = "");
+                             std::string saveBinaryName = "", uint32_t backendID = 0);
 
                 // @brief Print a message to STDERR then return a nonzero
                 //  exit status.
@@ -122,6 +122,8 @@ namespace qnn {
                 Qnn_LogHandle_t m_logHandle = nullptr;
                 Qnn_BackendHandle_t m_backendHandle = nullptr;
                 Qnn_DeviceHandle_t m_deviceHandle = nullptr;
+
+                uint32_t m_backendID;
             };
         }  // namespace sample_app
     }  // namespace tools

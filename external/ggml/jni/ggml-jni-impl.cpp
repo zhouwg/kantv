@@ -788,7 +788,7 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN matrix 8: QNN GGML
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML
  * @param n_threads             1 - 8
  * @param n_backend_type        0: CPU  1: GPU  2: DSP
  * @param n_op_type             type of matrix manipulate / GGML OP
@@ -863,6 +863,9 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                     case 2:
                         qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnDsp.so";
                         break;
+                    case 3:
+                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnSaver.so";
+                        break;
                     default:
                         LOGGW("backend type %d not supported\n", n_backend_type);
                         break;
@@ -879,6 +882,14 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
                 //TODO:
                 // dsp backend not work
                 qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
+            }
+            break;
+
+        case BENCHMAKR_QNN_SAVER:
+            {
+                int argc                = 2;
+                char *argv[]            = {"qnn-saver", "--logging", "debug"};
+                qnn_saver_main(argc, argv);
             }
             break;
 

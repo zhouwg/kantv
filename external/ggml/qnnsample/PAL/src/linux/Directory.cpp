@@ -31,6 +31,8 @@
 #include "PAL/FileOp.hpp"
 #include "PAL/Path.hpp"
 
+#include "libavutil/cde_log.h"
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 #ifdef __QNXNTO__
@@ -57,6 +59,7 @@ static bool is_qnx_dir(const struct dirent *ep) {
 bool pal::Directory::create(const std::string &path, pal::Directory::DirMode dirmode) {
     struct stat st;
     int status = 0;
+    LOGGI("path:%s\n", path.c_str());
     if (stat(path.c_str(), &st) != 0) {
         // Directory does not exist
         status = mkdir(path.c_str(), static_cast<mode_t>(dirmode));

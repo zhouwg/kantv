@@ -80,6 +80,7 @@
         <item>matrix</item>
         <item>llama</item>
         <item>qnn-sample</item>
+        <item>qnn-saver</item>
         <item>qnn-matrix</item>
         <item>qnn-ggml</item>
     </string-array>
@@ -123,5 +124,6 @@
         <item>cpu</item>
         <item>gpu</item>
         <item>dsp</item>
+        <item>saver</item>
     </string-array>
 </resources>

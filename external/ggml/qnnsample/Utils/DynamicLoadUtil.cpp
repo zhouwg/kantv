@@ -38,7 +38,7 @@ dynamicloadutil::StatusCode dynamicloadutil::getQnnFunctionPointers(
         sample_app::QnnFunctionPointers *qnnFunctionPointers,
         void **backendHandleRtn,
         bool loadModelLib,
-        void **modelHandleRtn) {
+        void **modelHandleRtn, uint32_t *backendID) {
     void *libBackendHandle = pal::dynamicloading::dlOpen(
             backendPath.c_str(), pal::dynamicloading::DL_NOW | pal::dynamicloading::DL_LOCAL);
     if (nullptr == libBackendHandle) {
@@ -86,6 +86,8 @@ dynamicloadutil::StatusCode dynamicloadutil::getQnnFunctionPointers(
         libBackendHandle = nullptr;
         return StatusCode::FAIL_GET_INTERFACE_PROVIDERS;
     }
+
+    *backendID = interfaceProviders[0]->backendId;
 
     if (true == loadModelLib) {
         QNN_INFO("Loading model shared library ([model].so)");

@@ -11,6 +11,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <Saver/QnnSaver.h>
 
 #include "DataUtil.hpp"
 #include "Logger.hpp"
@@ -40,7 +41,7 @@ sample_app::QnnSampleApp::QnnSampleApp(QnnFunctionPointers qnnFunctionPointers,
                                        sample_app::ProfilingLevel profilingLevel,
                                        bool dumpOutputs,
                                        std::string cachedBinaryPath,
-                                       std::string saveBinaryName)
+                                       std::string saveBinaryName, uint32_t backendID)
         : m_qnnFunctionPointers(qnnFunctionPointers),
           m_outputPath(outputPath),
           m_saveBinaryName(saveBinaryName),
@@ -59,6 +60,7 @@ sample_app::QnnSampleApp::QnnSampleApp(QnnFunctionPointers qnnFunctionPointers,
         m_outputPath = s_defaultOutputPath;
     }
     m_graphConfigsInfoCount = 0;
+    m_backendID = backendID;
 
     return;
 }
@@ -176,6 +178,19 @@ int32_t sample_app::QnnSampleApp::reportError(const std::string &err) {
 
 // Initialize a QnnBackend.
 sample_app::StatusCode sample_app::QnnSampleApp::initializeBackend() {
+    QnnSaver_Config_t outputDirCfg;
+    outputDirCfg.option = QNN_SAVER_CONFIG_OPTION_OUTPUT_DIRECTORY;
+    outputDirCfg.outputDirectory = "/data/data/com.cdeos.kantv/qnn/"; //can be absolute e.g. "/data/local/tmp/saver/"
+
+    QnnSaver_Config_t backendIdCfg;
+    backendIdCfg.option = QNN_SAVER_CONFIG_OPTION_BACKEND_ID;
+    backendIdCfg.backendId = m_backendID;
+
+    const QnnSaver_Config_t *saverCfg[] = {&outputDirCfg, &backendIdCfg, NULL};
+
+    QnnSaver_initialize(saverCfg);
+
+
     auto qnnStatus = m_qnnFunctionPointers.qnnInterface.backendCreate(
             m_logHandle, (const QnnBackend_Config_t **) m_backendConfig, &m_backendHandle);
     if (QNN_BACKEND_NO_ERROR != qnnStatus) {
