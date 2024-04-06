@@ -53,7 +53,6 @@
 #include <cassert>
 #include <unordered_set>
 #include <utility>
-#include <HTP/QnnHtpDevice.h>
 
 #include "QnnTypes.h"
 #include "QnnCommon.h"
@@ -65,6 +64,7 @@
 #include "QnnInterface.h"
 #include "Saver/QnnSaver.h"
 #include "System/QnnSystemInterface.h"
+#include "HTP/QnnHtpDevice.h"
 
 #include "ggml-qnn.h"
 

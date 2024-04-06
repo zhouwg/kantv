@@ -207,7 +207,7 @@ cd kantv
 
  ```
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L86">build/envsetup.sh</a> accordingly before launch build
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 

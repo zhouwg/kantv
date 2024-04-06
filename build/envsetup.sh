@@ -86,8 +86,9 @@ export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
 
 #modify following lines to adapt to local dev envs
-export UPSTREAM_WHISPERCPP_PATH=~/whisper.cpp
-export UPSTREAM_LLAMACPP_PATH=~/llama.cpp
+export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
+export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
+export UPSTREAM_SDCPP_PATH=~/github/stablediffusion.cpp
 export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
 export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
 

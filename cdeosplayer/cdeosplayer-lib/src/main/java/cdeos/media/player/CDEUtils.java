@@ -270,6 +270,7 @@
      public static final int BENCHMARK_QNN_SAVER      = 7;
      public static final int BENCHMARK_QNN_MATRIX     = 8;
      public static final int BENCHMARK_QNN_GGML       = 9;
+     public static final int BENCHMARK_STABLEDIFFUSION= 10;
 
      private static int       mASRMode = ASR_MODE_NORMAL;
 
@@ -3935,6 +3936,9 @@
 
              case BENCHMARK_QNN_GGML:
                  return "GGML QNN ggml";
+
+             case BENCHMARK_STABLEDIFFUSION:
+                 return "GGML stable diffusion";
 
          }
 

@@ -26,6 +26,9 @@ set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/)
 #03-26-2024, integrate llama.cpp to kantv
 set(LLAMACPP_SRC_DIR            ${CMAKE_SOURCE_DIR}/llamacpp/)
 
+
+set(SDCPP_SRC_DIR                ${CMAKE_SOURCE_DIR}/stablediffusioncpp/)
+
 #03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML
 set(QNN_INC_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/lib/)
@@ -37,6 +40,9 @@ include_directories(${QNN_SRC_DIR}/Utils)
 include_directories(${QNN_SRC_DIR}/Log)
 include_directories(${QNN_SRC_DIR}/WrapperUtils)
 include_directories(${QNN_SRC_DIR}/PAL/include)
+
+aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
+include_directories(${SDCPP_SRC_DIR})
 
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred
@@ -53,6 +59,9 @@ set(SOURCE_FILES
 
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
+
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
+
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-qnn.cpp
 
         ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
@@ -78,6 +87,9 @@ set(SOURCE_FILES
         ${QNN_SRC_DIR}/Utils/IOTensor.cpp
         ${QNN_SRC_DIR}/Utils/QnnSampleAppUtils.cpp
         ${QNN_SRC_DIR}/WrapperUtils/QnnWrapperUtils.cpp
+
+
+        ${stablediffusioncpp}
 )
 
 

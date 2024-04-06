@@ -63,7 +63,8 @@ extern "C" {
 #define BENCHMAKR_QNN_SAVER         7
 #define BENCHMARK_QNN_MATRIX        8
 #define BENCHMARK_QNN_GGML          9
-#define BENCHMAKR_MAX               9
+#define BENCHMAKR_STABLEDIFFUSION   10
+#define BENCHMAKR_MAX               10
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
@@ -91,7 +92,7 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: stable diffusion
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP
     * @param n_op_type             type of matrix manipulate / GGML OP
@@ -128,7 +129,7 @@ extern "C" {
 
 
 // =================================================================================================
-// trying to integrate llama.cpp from 03-26-2024
+// trying to integrate llama.cpp from 03/26/2024 to 03/28/2024
 // =================================================================================================
 
 
@@ -148,6 +149,8 @@ extern "C" {
     int          ggml_bench_llama(const char * sz_model_path, int num_threads);
 
 
+
+
 // =================================================================================================
 // PoC#121:Add Qualcomm mobile SoC native backend for GGML from 03-29-2024
 // =================================================================================================
@@ -159,6 +162,25 @@ extern "C" {
     int qnn_matrix(int n_backend_type, int n_op_type);
 
     int qnn_ggml(int n_backend_type, int n_ggml_op_type);
+
+
+
+
+// =================================================================================================
+// trying to integrate stablediffusion.cpp on 04-06-2024(Apri,6,2024)
+// =================================================================================================
+
+
+// JNI helper function for stablediffusion.cpp
+/**
+*
+* @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
+* @param prompt
+* @param bench_type            not used currently
+* @param n_threads             1 - 8
+* @return
+*/
+int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
 
 
 #ifdef __cplusplus
