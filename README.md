@@ -6,9 +6,11 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- ASR(Automatic Speech Recognition, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
+- ASR(Automatic Speech Recognition, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
 
-- LLM(Large Language Model, a subfiled of AI) research by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> 
+- LLM(Large Language Model, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> 
+
+- SD(Text to Image by Stable Diffusion, a subfiled of AI) study by the amazing <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp </a> 
 
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
@@ -113,22 +115,6 @@ or run below script accordingly after fetch project's source code
   [Android Studio 4.2.1 or latest Android Studio](https://developer.android.google.cn/studio)
 
 
-  [Android NDK-r26c](https://developer.android.com/ndk/downloads)
-
-
-  then put Android NDK-r26c into /opt/kantv-toolchain accordingly
-
-  ```
-  ls /opt/kantv-toolchain/android-ndk-r26c
-
-  ```
-
-- Qualcomm QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
-
-
-  https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/introduction.html
-
-
 - vim settings
 
 
@@ -192,24 +178,11 @@ cd kantv
 
  . build/envsetup.sh
 
- sudo bash ${QNN_SDK_ROOT}/bin/check-linux-dependency.sh
-
- pip install tensorflow==2.10.1
-
- pip install tflite==2.3.0
-
- pip install pandas
-
-
- ${QNN_SDK_ROOT}/bin/envcheck -n
-
- ${QNN_SDK_ROOT}/bin/envcheck -c
-
  ```
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes
