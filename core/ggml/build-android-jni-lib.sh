@@ -21,8 +21,8 @@ fi
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 
 show_pwd
-#check_upstream_whispercpp
-#check_local_whispercpp
+check_upstream_whispercpp
+check_local_whispercpp
 
 if [ "${PROJECT_BUILD_TYPE}" == "release" ]; then
     BUILD_TYPE=Release

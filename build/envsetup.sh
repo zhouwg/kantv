@@ -89,11 +89,9 @@ export PATH=${ANDROID_NDK_ROOT}:${PATH}
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
 export UPSTREAM_SDCPP_PATH=~/github/stablediffusion.cpp
-
-
-#following is not required for project user
 export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
 export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
+
 export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
 export PYTHONPATH=${QNN_SDK_ROOT}/lib/python/:${PYTHONPATH}
 
