@@ -172,7 +172,7 @@ cd kantv
 
 ```
 
- - environment setup for QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
+ - environment setup
 
  ```
 
@@ -182,7 +182,7 @@ cd kantv
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L16">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
 
 #### Build native codes
