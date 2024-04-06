@@ -15,11 +15,10 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
-- Run/experience LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 using the amazing <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> 
+- Run/experience LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 using the amazing <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
-- Performance benchmark for Android-based mobile phone for R&D activity
 
 - UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
@@ -38,7 +37,8 @@ Some goals of this project are:
 
 (this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
 
-![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/2b033e51-9d32-463b-bf30-69d8f38cd8be)
+
+![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/71013c2e-f6dc-4d7f-905f-9c14a07ce144)
 
 
 ### How to build project
@@ -108,9 +108,9 @@ or run below script accordingly after fetch project's source code
 
 ```
 
-- Android NDK & Android Studio
+- Android Studio
 
-  download and install Android Studio and Android NDK manually
+  download and install Android Studio manually
 
   [Android Studio 4.2.1 or latest Android Studio](https://developer.android.google.cn/studio)
 
