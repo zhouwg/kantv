@@ -24,8 +24,7 @@
  package com.cdeos.kantv.ui.fragment;
 
 
-
-
+ import static org.ggml.ggmljava.GGML_JNI_OP_ADD;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -96,11 +95,17 @@
      private int nThreadCounts = 1;
      private int benchmarkIndex = 0;
      private String strModeName = "tiny.en-q8_0";
+     private String strBackend = "cpu";
+     private int backendIndex = 0; //CPU
 
      private long beginTime = 0;
      private long endTime = 0;
      private long duration = 0;
      private String strBenchmarkInfo;
+     private long nLogCounts = 0;
+     private boolean isLLMModel = false;
+     private boolean isQNNModel = false;
+     private boolean isSDModel=false;
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -157,6 +162,22 @@
          CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
+
+         //add the qnn binary files to facilitate other developers to reproduce the qnn sample on Qualcomm SoC based android phone(Xiaomi 14 is preferred)
+         //qualcomm's dedicated model file
+         CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
+         //qualcomm's prebuilt QNN userspace library
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnCpu.so", CDEUtils.getDataPath(mContext) + "libQnnCpu.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
+         CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");
+         //qualcomm's prebuilt binary file
+         CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
+         CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
+
+
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
@@ -185,7 +206,7 @@
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n");
+         _txtGGMLInfo.append("Powered by GGML(Georgi Gerganov Machine Learning)(https://github.com/ggerganov/ggml)\n");
 
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
@@ -242,13 +263,36 @@
          });
 
 
+         Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
+         String[] arrayBackend = getResources().getStringArray(R.array.backend);
+         ArrayAdapter<String> adapterBackend = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
+         spinnerBackend.setAdapter(adapterBackend);
+         spinnerBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "backend:" + arrayBackend[position]);
+                 strBackend = arrayBackend[position];
+                 backendIndex = Integer.valueOf(position);
+                 CDELog.j(TAG, "strBackend:" + strBackend);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
-             CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ", threads:" + nThreadCounts + ", model:" + strModeName);
+             CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex)
+                     + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
              String selectModeFileName = "";
              String selectModelFilePath = "";
              File selectModeFile = null;
-             boolean isLLMModel = false;
+
+             isLLMModel = false;
+             isQNNModel = false;
+             isSDModel  = false;
 
              //TODO: better method
              //sanity check begin
@@ -260,9 +304,22 @@
                  isLLMModel = true;
              } else if (strModeName.contains("gemma")) {
                  isLLMModel = true;
-             }
+             } else if (strModeName.startsWith("qnn")) {
+                 isQNNModel = true;
+            } else if (strModeName.startsWith("sdmodel")) //TODO:hardcode
+                isSDModel = true;
+
+             CDELog.j(TAG, "isSDModel:" + isSDModel);
              if (isLLMModel)
                  selectModeFileName = strModeName + ".gguf";
+             else if (isQNNModel)
+                 //qualcomm's dedicated model:a model is a dynamic so and it's generated by Qualcomm special tools
+                 selectModeFileName =  "libInception_v3.so"; //TODO:hardcode in PoC stage
+             else if (isSDModel)
+                 //https://github.com/leejet/stable-diffusion.cpp
+                 //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
+                 //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
+                 selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf"; //TODO: hardcode SD model name
              else
                  selectModeFileName = "ggml-" + strModeName + ".bin";
 
@@ -276,11 +333,33 @@
                  return;
              }
 
-             selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+             if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+
+             if (isQNNModel && (benchmarkIndex < CDEUtils.BENCHMARK_QNN_SAMPLE)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+             if (!isQNNModel && ((benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE) && (benchmarkIndex < CDEUtils.BENCHMARK_STABLEDIFFUSION))) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+
+             if (!isQNNModel)
+                 selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+             else
+                 selectModelFilePath = CDEUtils.getDataPath(mContext) + selectModeFileName;
+
              CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
              selectModeFile = new File(selectModelFilePath);
-
              displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
+
              if (!selectModeFile.exists()) {
                  CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
              }
@@ -295,11 +374,13 @@
              //reset default ggml model file name after sanity check
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
-             ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK);
+             if (!isQNNModel) {
+                 ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK);
+             }
              if (benchmarkIndex == CDEUtils.BECHMARK_ASR) {
                  //playAudioFile();
              }
-
+             nLogCounts = 0;
              isBenchmarking.set(true);
 
              startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ")");
@@ -333,16 +414,30 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 ggmljava.asr_set_benchmark_status(0);
+                 if (!isQNNModel) {
+                     ggmljava.asr_set_benchmark_status(0);
+                 }
 
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
-                     strBenchmarkInfo = ggmljava.ggml_bench(
-                             CDEUtils.getDataPath() + ggmlModelFileName,
-                             CDEUtils.getDataPath() + ggmlSampleFileName,
-                             benchmarkIndex,
-                             nThreadCounts);
+                     if (!isQNNModel) {
+                         strBenchmarkInfo = ggmljava.ggml_bench(
+                                 CDEUtils.getDataPath() + ggmlModelFileName,
+                                 CDEUtils.getDataPath() + ggmlSampleFileName,
+                                 benchmarkIndex,
+                                 nThreadCounts, 0, 0);
+                     } else {
+                         // avoid following issue
+                         // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
+                         // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.cdeos.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
+                         // is not accessible for the namespace "clns-4"
+                         strBenchmarkInfo = ggmljava.ggml_bench(
+                                 CDEUtils.getDataPath(mContext) + ggmlModelFileName,
+                                 CDEUtils.getDataPath() + ggmlSampleFileName,
+                                 benchmarkIndex,
+                                 nThreadCounts, backendIndex, GGML_JNI_OP_ADD);
+                     }
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);
 
@@ -506,6 +601,11 @@
                  if (content.startsWith("unknown")) {
 
                  } else {
+                     nLogCounts++;
+                     if (nLogCounts > 100) {
+                         _txtASRInfo.setText(""); //make QNN SDK happy on Xiaomi14
+                         nLogCounts = 0;
+                     }
                      _txtASRInfo.append(content);
                  }
              }

@@ -13,7 +13,7 @@
             android:id="@+id/pageInfo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="@string/asr_tip" />
+            android:text="AI/Machine Learning research(by Georgi Gerganov\'s GGML\&amp;whisper.cpp\&amp;llama.cpp)" />
 
         <LinearLayout
             android:id="@+id/ggmlLayout"
@@ -26,7 +26,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:src="@drawable/whispercpp_logo" />
+                android:src="@drawable/ggml_logo" />
 
             <TextView
                 android:id="@+id/ggmlInfo"
@@ -91,6 +91,26 @@
                 android:dropDownSelector="#63D81B60"
                 android:spinnerMode="dropdown" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Backend" />
+
+            <Spinner
+                android:id="@+id/spinnerBackend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:dropDownSelector="#63D81B60"
+                android:spinnerMode="dropdown" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
             <Button
                 android:id="@+id/btnBenchmark"
                 android:layout_width="wrap_content"
@@ -100,17 +120,11 @@
                 android:text="Benchmark"
                 android:textAllCaps="false"
                 android:textColor="#ffffff" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/asrInfo"
                 android:layout_width="match_parent"
-                android:layout_height="1200dp"
+                android:layout_height="2000dp"
                 android:layout_marginTop="5dp" />
 
         </LinearLayout>

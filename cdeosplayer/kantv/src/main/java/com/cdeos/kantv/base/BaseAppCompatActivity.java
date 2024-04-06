@@ -369,7 +369,8 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity implements
         CDELog.j(TAG, "isRunningOnTV = " + CDEUtils.isRunningOnTV());
 
         //for realtime subtitle demo with prebuilt android apk
-        String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        //String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
+        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
 
         if (CDEUtils.isRunningOnTV()) {

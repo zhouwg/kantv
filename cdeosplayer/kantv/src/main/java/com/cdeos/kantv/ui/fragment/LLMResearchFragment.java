@@ -120,12 +120,17 @@
      // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q4_K_M.gguf  // 1.5 GB
      // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    // 2.67 GB
 
+     // https://huggingface.co/TheBloke/Yi-34B-Chat-GGUF/tree/main
+     // https://huggingface.co/second-state/Yi-34B-Chat-GGUF/blob/a93fd377944179153cc8477eef2e69645c1a8ff9/Yi-34B-Chat-Q2_K.gguf // 12.8 GB
+
 
      //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
      //private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
      //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; // 1.1 GB
      //private String ggmlModelFileName = "baichuan2-7b.Q4_K_M.gguf"; // 4.61 GB
      //private String ggmlModelFileName = "gemma-2b.Q4_K_M.gguf";  // 1.5 GB
+
+     //https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf // 2.67 GB
      private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
 
      private Context mContext;

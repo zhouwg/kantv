@@ -36,7 +36,6 @@ Some goals of this project are:
 
 (this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
 
-
 ![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/2b033e51-9d32-463b-bf30-69d8f38cd8be)
 
 
@@ -124,6 +123,11 @@ or run below script accordingly after fetch project's source code
 
   ```
 
+- Qualcomm QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
+
+
+  https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/introduction.html
+
 
 - vim settings
 
@@ -182,7 +186,28 @@ cd kantv
 
 ```
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L86">build/envsetup.sh</a> accordingly before launch build
+ - environment setup for QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK
+
+ ```
+
+ . build/envsetup.sh
+
+ sudo bash ${QNN_SDK_ROOT}/bin/check-linux-dependency.sh
+
+ pip install tensorflow==2.10.1
+
+ pip install tflite==2.3.0
+
+ pip install pandas
+
+
+ ${QNN_SDK_ROOT}/bin/envcheck -n
+
+ ${QNN_SDK_ROOT}/bin/envcheck -c
+
+ ```
+
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/external/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 

@@ -1,0 +1,9 @@
+*.so
+*.a
+*.o
+out/
+SampleApp
+
+*.qik
+*.deb
+*.tar

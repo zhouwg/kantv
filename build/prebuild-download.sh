@@ -32,9 +32,14 @@ fi
 
 if [ ${is_android_ndk_exist} -eq 0 ]; then
     echo -e "begin downloading android ndk \n"
-    wget --no-config --quiet --show-progress -O ${ANDROID_NDK}-linux.zip  https://dl.google.com/android/repository/android-ndk-r26c-linux.zip
+    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-ndk-r25c-linux.zip  https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-ndk-r26c-linux.zip  https://dl.google.com/android/repository/android-ndk-r26c-linux.zip
+
     cd ${PROJECT_ROOT_PATH}/prebuilts/toolchain
+
+    unzip android-ndk-r25c-linux.zip
     unzip android-ndk-r26c-linux.zip
+
     cd ${PROJECT_ROOT_PATH}
 
     if [ $? -ne 0 ]; then

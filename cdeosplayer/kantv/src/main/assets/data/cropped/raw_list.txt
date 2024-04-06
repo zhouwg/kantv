@@ -1,0 +1,4 @@
+/opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/data/cropped/notice_sign.raw
+/opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/data/cropped/plastic_cup.raw
+/opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/data/cropped/trash_bin.raw
+/opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/data/cropped/chairs.raw

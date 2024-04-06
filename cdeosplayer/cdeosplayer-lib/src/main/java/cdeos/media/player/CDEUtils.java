@@ -266,7 +266,11 @@
      public static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
      public static final int BENCHMARK_MATRIX  = 4;
      public static final int BENCHMARK_LLM     = 5;
-     public static final int BENCHMARK_QNN     = 6;
+     public static final int BENCHMARK_QNN_SAMPLE     = 6;
+     public static final int BENCHMARK_QNN_SAVER      = 7;
+     public static final int BENCHMARK_QNN_MATRIX     = 8;
+     public static final int BENCHMARK_QNN_GGML       = 9;
+     public static final int BENCHMARK_STABLEDIFFUSION= 10;
 
      private static int       mASRMode = ASR_MODE_NORMAL;
 
@@ -3921,8 +3925,20 @@
              case BENCHMARK_LLM:
                  return "GGML LLAMA";
 
-             case BENCHMARK_QNN:
-                 return "GGML QNN";
+             case BENCHMARK_QNN_SAMPLE:
+                 return "GGML QNN sample";
+
+             case BENCHMARK_QNN_SAVER:
+                 return "GGML QNN saver";
+
+             case BENCHMARK_QNN_MATRIX:
+                 return "GGML QNN matrix manipulate";
+
+             case BENCHMARK_QNN_GGML:
+                 return "GGML QNN ggml";
+
+             case BENCHMARK_STABLEDIFFUSION:
+                 return "GGML stable diffusion";
 
          }
 
