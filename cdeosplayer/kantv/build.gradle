@@ -44,7 +44,7 @@ android {
     externalNativeBuild {
         cmake {
             version "3.22.1" //make llamacpp happy
-            path "../../external/ggml/CMakeLists.txt"
+            path "../../core/ggml/CMakeLists.txt"
         }
     }
 

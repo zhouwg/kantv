@@ -1,2 +1,11 @@
-out
-build
+out/
+build/
+qualcomm/
+
+*.a
+*.so
+*.o
+
+whispercpp/bench
+whispercpp/main
+whispercpp/quantize

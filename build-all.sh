@@ -43,7 +43,7 @@ function build_kantvcore
 
 function build_ggml_x86
 {
-    cd ${PROJECT_ROOT_PATH}/external/ggml/whispercpp
+    cd ${PROJECT_ROOT_PATH}/core/ggml/whispercpp
     show_pwd
 
     echo ""
@@ -65,7 +65,7 @@ function build_ggml_x86
         /bin/cp -fv quantize ${FF_PREFIX}/bin/
     fi
 
-    cd ${PROJECT_ROOT_PATH}/external/ggml/llamacpp
+    cd ${PROJECT_ROOT_PATH}/core/ggml/llamacpp
     show_pwd
     make
 
@@ -109,12 +109,12 @@ function build_jni()
 {
     jni_libs=" ggml "
 
-    cd ${PROJECT_ROOT_PATH}/external/
+    cd ${PROJECT_ROOT_PATH}/core/
     for item in ${jni_libs};do
-        cd ${PROJECT_ROOT_PATH}/external/${item}/
+        cd ${PROJECT_ROOT_PATH}/core/${item}/
         echo "build Android JNI lib${item}.so in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
         ./build-android-jni-lib.sh
-        cd ${PROJECT_ROOT_PATH}/external/
+        cd ${PROJECT_ROOT_PATH}/core/
     done
 
     cd ${PROJECT_ROOT_PATH}
