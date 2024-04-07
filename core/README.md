@@ -41,16 +41,12 @@ Some open-source C/C++ AI projects/examples based on GGML:
 This project is a (<b>personal</b>) workbench for study&practise AI tech in real scenario on Android device, powered by the great GGML(ggml library,whisper.cpp,llama.cpp,stablediffusion.cpp...other C/C++ AI project based on GGML) and FFmpeg
 
 
-Project maintainer: zhouwg (zhouwg2000@gmail.com,an experienced Android system software programmer,knows nothing about real/hard-core AI technology, but is very interested in the practice of AI technology on mobile/edge device)
-
-
-
 ```
 .
 ├── ggml
-│   ├── build-android-jni-lib.sh (by me)
-│   ├── CMakeLists.txt (by me)
-│   ├── jni (by me, some source codes was borrowed from examples in ggml/whisper.cpp/llama.cpp/stablediffusion.cpp, see comments in codes or license file accordingly)
+│   ├── build-android-jni-lib.sh
+│   ├── CMakeLists.txt
+│   ├── jni (some source codes was borrowed from examples in ggml/whisper.cpp/llama.cpp/stablediffusion.cpp, see comments in codes or license file accordingly)
 │   ├── llamacpp(original author is Georgi Gerganov)
 │   ├── qnnsample(customized Qualcomm's QNN sample for PoC:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121)
 │   ├── stablediffusioncpp(original author is leejet(https://github.com/leejet/stable-diffusion.cpp))

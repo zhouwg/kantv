@@ -4,6 +4,12 @@
 *.o
 *.bin
 
+*.m
+*.cu
+*.metal
+*.cuh
+*.comp
+
 out/
 obj/
 make/
