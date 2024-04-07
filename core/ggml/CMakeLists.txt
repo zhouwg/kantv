@@ -161,14 +161,14 @@ endif()
 
 find_library(LOG_LIB log)
 
-add_library(kantvcore
+add_library(kantvmedia
         SHARED
         IMPORTED)
 
-set_target_properties(kantvcore
+set_target_properties(kantvmedia
         PROPERTIES
         IMPORTED_LOCATION
-        ${PREBUILT_LIB_PATH}/libkantv-core.so)
+        ${PREBUILT_LIB_PATH}/libkantv-media.so)
 
 add_library(kantvffmpeg
         SHARED
@@ -207,10 +207,10 @@ function(build_library target_name)
 
     if (GGML_JNI_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
-        #target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg QNNCpu QNNSaver android )
+        #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg QNNCpu QNNSaver android )
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvcore kantvffmpeg android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android)
     endif()
 
 endfunction()

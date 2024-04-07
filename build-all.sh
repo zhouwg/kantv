@@ -288,8 +288,8 @@ esac
 
 
 if [ $# == 0 ]; then
-    #default target is linux
-    user_command="linux"
+    #default target is android
+    user_command="android"
 else
     user_command=$1
 fi
