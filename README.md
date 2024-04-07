@@ -37,7 +37,6 @@ Some goals of this project are:
 
 (this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
 
-
 ![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/3d850ce3-f8b5-4fc7-9ce7-cc8300717b45)
 
 ### How to build project
