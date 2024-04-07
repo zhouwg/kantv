@@ -165,18 +165,12 @@ cd kantv
  - download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist
 
 ```
+. build/envsetup.sh
 
 ./build/prebuild-download.sh
 
 ```
 
- - environment setup
-
- ```
-
- . build/envsetup.sh
-
- ```
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
 
