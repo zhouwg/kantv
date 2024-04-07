@@ -38,8 +38,7 @@ Some goals of this project are:
 (this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
 
 
-![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/71013c2e-f6dc-4d7f-905f-9c14a07ce144)
-
+![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/3d850ce3-f8b5-4fc7-9ce7-cc8300717b45)
 
 ### How to build project
 
@@ -194,7 +193,7 @@ cd kantv
 
 ```
 
-![Screenshot from 2024-03-27 13-16-55](https://github.com/zhouwg/kantv/assets/6889919/187e11c9-6453-4d6f-9400-8818034e59b0)
+![Screenshot from 2024-04-07 09-45-04](https://github.com/zhouwg/kantv/assets/6889919/44a1f614-902c-48c1-babc-a73511c3a0f6)
 
 
 #### Build Android APK

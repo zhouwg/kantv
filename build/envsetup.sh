@@ -26,16 +26,16 @@ export BUILD_TIME=`date +"%Y-%m-%d-%H-%M-%S"`
 
 export BUILD_HOST=Linux
 
-#export BUILD_TARGET=android
-#export PROJECT_NAME=KanTV-android
+export BUILD_TARGET=android
+export PROJECT_NAME=KanTV-android
 #default is release for target android
-#export PROJECT_BUILD_TYPE=release
+export PROJECT_BUILD_TYPE=release
 
 #default target is linux
-export BUILD_TARGET=linux
-export PROJECT_NAME=KanTV-linux
+#export BUILD_TARGET=linux
+#export PROJECT_NAME=KanTV-linux
 #default is debug for target linux to purpose of troubleshooting
-export PROJECT_BUILD_TYPE=debug
+#export PROJECT_BUILD_TYPE=debug
 
 
 if [ "${BUILD_TARGET}" == "android" ]; then
@@ -56,7 +56,7 @@ export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/core/ggml/whispercpp
 export LOCAL_LLAMACPP_PATH=${PROJECT_ROOT_PATH}/core/ggml/llamacpp
 
 
-export KANTV_PROJECTS="kantv-linux kantv-android kantv-ios"
+export KANTV_PROJECTS="kantv-android kantv-linux kantv-ios"
 export KANTV_PROJECTS_DEBUG="kantv-android-debug"
 
 
@@ -142,7 +142,7 @@ echo -e "[*] to continue to build project, pls run\n"
 echo -e "lunch\n"
 echo -e "[*] or\n"
 echo -e "./build-all.sh\n"
-echo -e "[*] for default target linux\n"
+echo -e "[*] for default target android\n"
 echo "------------------------------------------------------------------------------------------"
 echo -e "\n"
 

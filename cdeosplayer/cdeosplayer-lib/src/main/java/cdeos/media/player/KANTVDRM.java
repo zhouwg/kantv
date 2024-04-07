@@ -34,13 +34,13 @@ final public class KANTVDRM {
     public static KANTVDRM getInstance() {
         if (!mIsLibLoaded) {
             CDELog.d(TAG, "calling loadLibrary");
-            CDELibraryLoader.load("kantv-core");
+            CDELibraryLoader.load("kantv-media");
             CDELog.d(TAG, "after loadLibrary");
             mIsLibLoaded = true;
 
             instance = new KANTVDRM();
         } else {
-            CDELog.d(TAG, "kantv-core.so already loaded");
+            CDELog.d(TAG, "kantv-media.so already loaded");
         }
         return instance;
     }

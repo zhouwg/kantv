@@ -29,7 +29,7 @@ import cdeos.media.player.CDELog;
 public class CDELibraryLoader
 {
     private static final String TAG = CDELibraryLoader.class.getSimpleName();
-    private static final String JNILIB_NAME = "kantv-core";
+    private static final String JNILIB_NAME = "kantv-media";
     private static Boolean sLoaded = new Boolean(false);
     private static String sLoadedLibrarySuffix = "";
 
