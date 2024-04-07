@@ -67,6 +67,8 @@
  import java.io.RandomAccessFile;
  import java.nio.ByteBuffer;
  import java.nio.ByteOrder;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
@@ -448,6 +450,13 @@
                              String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + strModeName
                                      + " ,threads: " + nThreadCounts
                                      + " ) cost " + duration + " milliseconds";
+                             //04-07-2024(April,7,2024), add timestamp
+                             String timestamp = "";
+                             SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+                             Date date = new Date(System.currentTimeMillis());
+                             timestamp = fullDateFormat.format(date);
+                             benchmarkTip += ", on " + timestamp;
+
                              benchmarkTip += "\n";
 
                              //becareful here
