@@ -22,6 +22,17 @@ function build_init()
     echo -e "build project ${PROJECT_NAME} on ${BUILD_TIME} by ${BUILD_USER} for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}\n"
 
     show_pwd
+
+    if [ "${BUILD_TARGET}" == "android" ]; then
+        check_ndk
+        if [ $? -ne 0 ]; then
+            printf "failed to check android ndk\n"
+            printf "pls run ./build/prebuild-download.sh firstly\n"
+            printf "\n\n"
+            exit 1
+        fi
+
+    fi
 }
 
 

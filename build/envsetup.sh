@@ -277,8 +277,8 @@ function lunch()
         elif [ "${project}" == "kantv-wasm" ]; then
             export BUILD_TARGET=wasm
         else
-            #default target is linux
-            export BUILD_TARGET=linux
+            #default target is android
+            export BUILD_TARGET=android
         fi
 
         setup_env
