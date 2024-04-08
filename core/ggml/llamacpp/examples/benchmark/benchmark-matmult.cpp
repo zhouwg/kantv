@@ -175,6 +175,8 @@ int main(int argc, char ** argv)  {
 
     //TENSOR_DUMP(gf->nodes[0]);
 
+    ggml_free(ctx);
+
     return 0;
 
     printf("\n------ Test 2 - Matrix Mult via %s code\n", ggml_type_name(qtype));
@@ -264,4 +266,8 @@ int main(int argc, char ** argv)  {
     printf("\n");
     printf("Average%78.2f\n",gflops_sum/((double)benchmark_params.n_iterations));
     printf("=====================================================================================\n");
+
+    ggml_free(ctx);
+
+    return 0;
 }

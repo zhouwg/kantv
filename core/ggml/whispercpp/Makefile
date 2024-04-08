@@ -313,16 +313,16 @@ $(info )
 # Build library
 #
 
-ggml.o: ggml.c
+ggml.o: ../llamacpp/ggml.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-alloc.o: ggml-alloc.c
+ggml-alloc.o: ../llamacpp/ggml-alloc.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-backend.o: ggml-backend.c
+ggml-backend.o: ../llamacpp/ggml-backend.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-quants.o: ggml-quants.c
+ggml-quants.o: ../llamacpp/ggml-quants.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
 WHISPER_OBJ += ggml.o ggml-alloc.o ggml-backend.o ggml-quants.o
@@ -382,7 +382,7 @@ clean:
 
 CC_SDL=`sdl2-config --cflags --libs`
 
-SRC_COMMON     = examples/common.cpp examples/common-ggml.cpp
+SRC_COMMON     = examples/common.cpp examples/common-ggml.cpp examples/grammar-parser.cpp
 SRC_COMMON_SDL = examples/common-sdl.cpp
 
 main: examples/main/main.cpp $(SRC_COMMON) $(WHISPER_OBJ)

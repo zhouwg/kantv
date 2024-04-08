@@ -128,4 +128,10 @@
         <item>dsp</item>
         <item>ggml</item>
     </string-array>
+
+    <string-array name="optype">
+        <item>add</item>
+        <item>mul</item>
+        <item>mulmat</item>
+    </string-array>
 </resources>

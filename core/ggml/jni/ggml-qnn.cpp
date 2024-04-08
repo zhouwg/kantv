@@ -4806,10 +4806,12 @@ int qnn_implementation::run_qnn_matrix() {
 // should move into ggml-jni-impl.cpp in the future
 //
 // =================================================================================================
-//TODO:
+
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S26: offload a simple f32 2x2 matrix addition operation to QNN CPU backend
 
+// done on 04-07-2024,17:00(April-07-2024,17:00), not perfect because there are some unresolved problems
+// in this function but there are more much valuable things in next steps)
 
 //qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so", "");
 int qnn_matrix(int n_backend_type, int n_op_type) {
@@ -4834,8 +4836,9 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     Qnn_QuantizeParams_t quantize_param = QNN_QUANTIZE_PARAMS_INIT;
     Qnn_OpConfig_t qnn_opconfig         = QNN_OPCONFIG_INIT;
 
-    n_begin_time                        = ggml_time_us();
 
+    ggml_time_init();
+    n_begin_time                        = ggml_time_us();
     LOGGD("enter qnn_matrix\n");
     LOGGI("qnn matrix addition operation, backend type:%d(%s), op type:%d\n",
           n_backend_type, get_qnn_backend_name(n_backend_type), n_op_type);
@@ -4882,8 +4885,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
             break;
     }
 
-    //this "fake" backend is just used for compare performance
-    if (3 == n_backend_type) { // backend is ggml
+    if (3 == n_backend_type) {  //this "fake" backend is just used for compare performance
         const int sizey                             = 2;
         const int sizex                             = 2;
         size_t ctx_size                             = 0;
@@ -4922,6 +4924,8 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         TENSOR_DUMP(m0);
         TENSOR_DUMP(m1);
         TENSOR_DUMP(m2);
+
+        ggml_free(ctx);
 
         n_end_time  = ggml_time_us();
         n_durtion   = (n_end_time - n_begin_time) / 1000;
@@ -5009,7 +5013,6 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                                 .dataSize=0}}}}
         };
 
-        //here is similar to OpenMAX IL
         Qnn_Tensor_t  tensor_2 = (Qnn_Tensor_t) {
                 .version= QNN_TENSOR_VERSION_1,
                 {.v1= {
@@ -5035,6 +5038,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
         LOGGI("error = %d\n", error);
 
+        //here is similar to OpenMAX IL
         QNN_VER_PTR(tensor_0)->clientBuf =  { input_matrix[0], 16};
         QNN_VER_PTR(tensor_1)->clientBuf =  { input_matrix[1], 16};
         QNN_VER_PTR(tensor_2)->clientBuf =  { output_matrix[0], 16};
@@ -5130,7 +5134,21 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     uint32_t j                                  = 0;
     int error                                   = 0;
     int result                                  = 0;
-    std::string graph_name                      = "qnn_matrix";
+    std::string graph_name                      = "qnn_ggml";
+    const char * qnn_backend_lib                = "libQnnCpu.so";
+
+    int64_t  n_begin_time                       = 0LL;
+    int64_t  n_end_time                         = 0LL;
+    int64_t  n_durtion                          = 0LL;
+
+    Qnn_GraphHandle_t graph_handle              = nullptr;
+    Qnn_Tensor_t tensor_0                       = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_1                       = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_2                       = QNN_TENSOR_INIT;
+    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
+    Qnn_OpConfig_t qnn_opconfig                 = QNN_OPCONFIG_INIT;
+    Qnn_Param_t qnn_params[]                    = {};
+    const char * qnn_op_typename                = QNN_OP_ELEMENT_WISE_ADD;
 
     const int sizey                             = 2;
     const int sizex                             = 2;
@@ -5140,6 +5158,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     struct ggml_tensor  * m1                    = nullptr;
     struct ggml_tensor  * m2                    = nullptr;
     struct ggml_cgraph  * gf                    = nullptr;
+    enum ggml_op     ggmlop                     = GGML_OP_ADD;
     std::vector<uint8_t> work_buffer;
     const ggml_type qtype                       = GGML_TYPE_F32;
     struct ggml_init_params params = {
@@ -5148,13 +5167,118 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
             /* no_alloc   =*/ 0
     };
 
-    uint8_t * qnn_buffer                        = nullptr;
+    ggml_time_init();
+    n_begin_time                                = ggml_time_us();
 
     LOGGD("enter qnn_ggml\n");
-    LOGGI("[%s], backend type:%d, op type:%d\n", __func__, n_backend_type, n_ggml_op_type);
-    GGML_JNI_NOTIFY("[%s], backend_type:%d, ggml op type:%d", __func__, n_backend_type, n_ggml_op_type);
+    LOGGI("[%s], backend type:%d(%s), op type:%d\n", __func__,
+          n_backend_type, get_qnn_backend_name(n_backend_type), n_ggml_op_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), ggml op type:%d", __func__,
+                    n_backend_type, get_qnn_backend_name(n_backend_type), n_ggml_op_type);
+    switch (n_backend_type) {
+        case 0:
+            qnn_backend_lib = "libQnnCpu.so";
+            break;
 
-    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so", "");
+        case 1:
+            qnn_backend_lib = "libQnnGpu.so";
+            break;
+
+        case 2: {
+            qnn_backend_lib = "libQnnHtp.so";
+            std::string path = "/data/data/com.cdeos.kantv/";
+            LOGGI("path:%s\n", path.c_str());
+            LOGGI("qnn backend lib:%s\n", qnn_backend_lib);
+            if (0 == setenv("LD_LIBRARY_PATH",
+                            (path + ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images").c_str(),
+                            1)) {
+                LOGGI("QNN DSP backend setenv successfully");
+            } else {
+                LOGGE("QNN DSP backend setenv failure");
+            }
+            if (0 == setenv("ADSP_LIBRARY_PATH",
+                            (path + ";/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp").c_str(),
+                            1)) {
+                LOGGI("QNN DSP backend setenv successfully");
+            } else {
+                LOGGE("QNN DSP backend setenv failure");
+            }
+            break;
+        }
+        case 3:
+            // fall into ggml, just for compare performance between QNN SDK and original GGML
+            break;
+
+        default:
+            LOGGW("backend type %d not supported\n", n_backend_type);
+            break;
+    }
+
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
+    ctx_size        += 1024 * 1024 * 16;
+    params.mem_size =  ctx_size;
+    ctx             =  ggml_init(params);
+    if (!ctx) {
+        LOGGW("ggml_init failure\n");
+        return 1;
+    }
+
+    m0              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m0, 1.0f);
+    m1              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m1, 2.0f);
+
+    //https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/SupportedOps.html
+    switch (n_ggml_op_type) {
+        case 0: //TODO:hardcode
+            ggmlop          = GGML_OP_ADD;
+            m2              = ggml_add(ctx, m0, m1);
+            qnn_op_typename = QNN_OP_ELEMENT_WISE_ADD;
+            break;
+
+        case 1: //TODO:hardcode
+            ggmlop          = GGML_OP_MUL;
+            m2              = ggml_mul(ctx, m0, m1);
+            qnn_op_typename = QNN_OP_ELEMENT_WISE_MULTIPLY;
+            break;
+
+        case 2: //TODO:hardcode
+            ggmlop          = GGML_OP_MUL_MAT;
+            m2              = ggml_mul_mat(ctx, m0, m1);
+            qnn_op_typename = QNN_OP_MAT_MUL;
+            break;
+
+        default:
+            break;
+    }
+
+
+    if (3 == n_backend_type) {  // this "fake" backend is just used for compare performance between QNN SDK and original GGML
+        gf              = ggml_new_graph(ctx);
+        ggml_set_f32(m2, 0.0f);
+        ggml_build_forward_expand(gf, m2);
+        ggml_graph_compute_helper(work_buffer, gf, 4);
+
+        TENSOR_DUMP(m0);
+        TENSOR_DUMP(m1);
+        TENSOR_DUMP(m2);
+
+        ggml_free(ctx);
+
+        n_end_time  = ggml_time_us();
+        n_durtion   = (n_end_time - n_begin_time) / 1000;
+        LOGGD("duration of qnn_ggml with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
+        GGML_JNI_NOTIFY("duration of qnn_ggml with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
+
+        LOGGD("leave qnn_ggml\n");
+
+        return 0;
+    }
+
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
     error  = qnn_backend.qnn_init(nullptr);
     if (0 != error) {
         LOGGW("init qnn subsystem failed, pls check why\n");
@@ -5170,42 +5294,128 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         result = 2;
     }
 
-    qnn_buffer = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(8192, 4));
-    if (nullptr == qnn_buffer) {
-        LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
-        goto failure;
-    } else {
-        LOGGD("alloc rpcmem successfully\n");
+    error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(),
+                                          "qnn_ggml_addition", nullptr, &graph_handle);
+    LOGGI("error = %d\n", error);
+    uint32_t dimensions_input_0[] = {2, 2};
+    uint32_t dimensions_input_1[] = {2, 2};
+    uint32_t dimensions_output[]  = {2, 2};
+
+    float input_matrix[2][4]  = {{1, 1, 1, 1},
+                                {2, 2, 2, 2}};
+    float output_matrix[1][4] = {{1.0, 1.0, 1.0, 1.0}};
+
+    tensor_0 = {
+            .version= QNN_TENSOR_VERSION_1,
+            {.v1= {
+                    .id=0,
+                    .name= "tensor_0",
+                    .type= QNN_TENSOR_TYPE_APP_WRITE,
+                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                    .dataType= QNN_DATATYPE_FLOAT_32,
+                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                    .rank= 2,
+                    .dimensions=dimensions_input_0,
+                    .memType= QNN_TENSORMEMTYPE_RAW,
+                    {.clientBuf= {.data=nullptr,
+                            .dataSize=0}}}}
+    };
+
+    tensor_1 = {
+            .version= QNN_TENSOR_VERSION_1,
+            {.v1= {
+                    .id=0,
+                    .name= "tensor_1",
+                    .type= QNN_TENSOR_TYPE_APP_WRITE,
+                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                    .dataType= QNN_DATATYPE_FLOAT_32,
+                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                    .rank= 2,
+                    .dimensions=dimensions_input_1,
+                    .memType= QNN_TENSORMEMTYPE_RAW,
+                    {.clientBuf= {.data=nullptr,
+                            .dataSize=0}}}}
+    };
+
+    tensor_2 = (Qnn_Tensor_t) {
+            .version= QNN_TENSOR_VERSION_1,
+            {.v1= {
+                    .id=0,
+                    .name= "tensor_2",
+                    .type= QNN_TENSOR_TYPE_APP_READ,
+                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                    .dataType= QNN_DATATYPE_FLOAT_32,
+                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                    .rank= 2,
+                    .dimensions= dimensions_output,
+                    .memType= QNN_TENSORMEMTYPE_RAW,
+                    {.clientBuf= {.data=nullptr,
+                            .dataSize=0}}}}};
+
+
+    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_0);
+    LOGGI("error = %d\n", error);
+    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_1);
+    LOGGI("error = %d\n", error);
+    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
+    LOGGI("error = %d\n", error);
+
+    // mapping GGML tensor to QNN tensor
+    QNN_VER_PTR(tensor_0)->clientBuf = {m0->data, 16};
+    QNN_VER_PTR(tensor_1)->clientBuf = {m1->data, 16};
+    QNN_VER_PTR(tensor_2)->clientBuf = {m2->data, 16};
+
+    Qnn_Tensor_t tensor_inputs[] = {
+            tensor_0,
+            tensor_1
+    };
+
+    Qnn_Tensor_t tensor_outputs[] = {
+            tensor_2
+    };
+
+    Qnn_OpConfig_t opconfig = {
+            (Qnn_OpConfigVersion_t) 1, .v1 = {
+                    "qnn_matrix_addition",
+                    QNN_OP_PACKAGE_NAME_QTI_AISW,
+                    qnn_op_typename,
+                    0,
+                    qnn_params,
+                    2,
+                    tensor_inputs,
+                    1,
+                    tensor_outputs
+            }
+    };
+    error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
+    LOGGI("error = %d\n", error);
+    error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
+    LOGGI("error = %d\n", error);
+    error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
+                                           nullptr, nullptr);
+    LOGGI("error = %d\n", error);
+    if (0 == error) {
+        TENSOR_DUMP(m0);
+        TENSOR_DUMP(m1);
+        TENSOR_DUMP(m2);
     }
 
-    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
-    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
-    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
-    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
-    ctx_size        += 1024 * 1024 * 16;
-    params.mem_size =  ctx_size;
-    ctx             =  ggml_init(params);
-    if (!ctx) {
-        LOGGW("ggml_init failure\n");
-        return 1;
-    }
-    m0              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m0, 1.0f);
-    m1              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m1, 2.0f);
-    m2              = ggml_add(ctx, m0, m1); // GGML_OP_ADD
-    gf              = ggml_new_graph(ctx);
-    ggml_build_forward_expand(gf, m2);
-    ggml_graph_compute_helper(work_buffer, gf, 4);
-    TENSOR_DUMP(m0);
-    TENSOR_DUMP(m1);
-    TENSOR_DUMP(m2);
-    LOGGD("finish ggml matrix addition operation\n");
+    ggml_free(ctx);
 
 failure:
-    qnn_backend.unregister_rpcmem();
-    qnn_backend.free_rpcmem(qnn_buffer);
     qnn_backend.qnn_finalize();
+
+    n_end_time  = ggml_time_us();
+    n_durtion   = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of qnn_ggml with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+    GGML_JNI_NOTIFY("duration of qnn_ggml with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+
 
     LOGGD("leave qnn_ggml\n");
 
