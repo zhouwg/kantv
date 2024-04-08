@@ -113,7 +113,7 @@
      private ProgressDialog mProgressDialog;
 
      //private String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
-     private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
+     private String ggmlModelFileName  = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
      private String ggmlSampleFileName = "jfk.wav";
 
      private Context mContext;
@@ -172,6 +172,9 @@
          CDEAssetLoader.copyAssetFile(mContext, "libQnnCpu.so", CDEUtils.getDataPath(mContext) + "libQnnCpu.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtp.so", CDEUtils.getDataPath(mContext) + "libQnnHtp.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Stub.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Stub.so");
+         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75CalculatorStub.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75CalculatorStub.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
          CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
          CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");

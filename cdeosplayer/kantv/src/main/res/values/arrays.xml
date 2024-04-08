@@ -55,21 +55,21 @@
         <item>352x288  (CIF)</item>
         <item>640x480  (VGA)</item>
         <item>720x576  (DVD)</item>
-        <item>1280x720 (720P,准高清)</item>
-        <item>1920x1080(1080P,高清)</item>
+        <item>1280x720 (720P)</item>
+        <item>1920x1080(1080P)</item>
         <item>2560x1440(2K)</item>
-        <item>3840x2160(4K,超高清)</item>
-        <item>7680x4320(8K,超高清)</item>
+        <item>3840x2160(4K)</item>
+        <item>7680x4320(8K)</item>
     </string-array>
 
     <string-array name="encodePattern">
-        <item>三角形</item>
-        <item>方块</item>
+        <item>triangle</item>
+        <item>square</item>
     </string-array>
 
     <string-array name="encodeFilter">
-        <item>存</item>
-        <item>不存</item>
+        <item>save to file</item>
+        <item>not save</item>
     </string-array>
 
     <string-array name="benchType">
@@ -126,6 +126,6 @@
         <item>cpu</item>
         <item>gpu</item>
         <item>dsp</item>
-        <item>saver</item>
+        <item>ggml</item>
     </string-array>
 </resources>
