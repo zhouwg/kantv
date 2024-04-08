@@ -124,7 +124,7 @@
             <TextView
                 android:id="@+id/asrInfo"
                 android:layout_width="match_parent"
-                android:layout_height="2000dp"
+                android:layout_height="3800dp"
                 android:layout_marginTop="5dp" />
 
         </LinearLayout>

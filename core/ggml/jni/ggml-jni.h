@@ -159,8 +159,19 @@ extern "C" {
 
     int qnn_saver_main(int argc, char** argv);
 
+    /**
+     * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
+     * @param n_op_type not used in this function
+     * @return
+     */
     int qnn_matrix(int n_backend_type, int n_op_type);
 
+
+    /**
+    * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
+    * @param n_op_type GGML OP type
+    * @return
+    */
     int qnn_ggml(int n_backend_type, int n_ggml_op_type);
 
 
