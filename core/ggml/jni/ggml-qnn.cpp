@@ -4691,26 +4691,29 @@ int qnn_implementation::run_qnn_matrix() {
         "tensor_1"
     };
 
+    Qnn_Tensor_t  tensor_2 = (Qnn_Tensor_t) {
+            .version= QNN_TENSOR_VERSION_1,
+            {.v1= {
+                    .id=0,
+                    .name= "tensor_2",
+                    .type= QNN_TENSOR_TYPE_APP_READ,
+                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                    .dataType= QNN_DATATYPE_FLOAT_32,
+                    .quantizeParams= { QNN_DEFINITION_UNDEFINED,
+                                       QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                       {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                    .rank= 2,
+                    .dimensions= dimensions_output,
+                    .memType= QNN_TENSORMEMTYPE_RAW,
+                    {.clientBuf= { .data=nullptr,
+                            .dataSize=0}}}}};
+
     Qnn_Tensor_t outputs[] = {
-    (Qnn_Tensor_t) {
-          .version= QNN_TENSOR_VERSION_1,
-          {.v1= {
-            .id=0,
-            .name= "tensor_2",
-            .type= QNN_TENSOR_TYPE_APP_READ,
-            .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-            .dataType= QNN_DATATYPE_FLOAT_32,
-            .quantizeParams= { QNN_DEFINITION_UNDEFINED,
-                               QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                               {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-            .rank= 2,
-            .dimensions= dimensions_output,
-            .memType= QNN_TENSORMEMTYPE_RAW,
-            {.clientBuf= { .data=nullptr,
-                           .dataSize=0}}}}}
+        tensor_2
     };
 
     Qnn_Param_t context_params[] = {}; // 04-05-2024(April-5,2024), to make QNN SDK happy
+
     add_tensor("qnn_matrix_addtition", &tensor_0);
     add_tensor("qnn_matrix_addtition", &tensor_1);
     add_node(QNN_OPCONFIG_VERSION_1, // Op_Config_t Version
@@ -4796,6 +4799,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     uint8_t * qnn_buffer                = nullptr;
     Qnn_Tensor_t tensor_0               = QNN_TENSOR_INIT;
     Qnn_Tensor_t tensor_1               = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_2               = QNN_TENSOR_INIT;
     Qnn_QuantizeParams_t quantize_param = QNN_QUANTIZE_PARAMS_INIT;
     Qnn_OpConfig_t qnn_opconfig         = QNN_OPCONFIG_INIT;
 
@@ -4826,7 +4830,152 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         LOGGD("alloc rpcmem successfully\n");
     }
 
-    qnn_backend.run_qnn_matrix();
+    if (0) {
+        qnn_backend.run_qnn_matrix();   //TODO: QNN pipeline works but result of output tensor is incorrect
+    } else {                            //the following workaround method works fine as expect
+        int error = 0;
+        Qnn_GraphHandle_t graph_handle = nullptr;
+        error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(), "qnn_matrix_addition", nullptr, &graph_handle);
+        LOGGI("error = %d\n", error);
+        uint32_t dimensions_input_0[] = {2, 2};
+        uint32_t dimensions_input_1[] = {2, 2};
+        uint32_t dimensions_output[]  = {2, 2};
+
+        float input_matrix[2][4]      = { {1, 1, 1, 1}, {2, 2, 2, 2}};
+        float output_matrix[1][4]     = { {1.0,1.0,1.0,1.0} };
+
+        tensor_0 =  {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_0",
+                        .type= QNN_TENSOR_TYPE_APP_WRITE,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= QNN_DATATYPE_FLOAT_32,
+                        .quantizeParams= { QNN_DEFINITION_UNDEFINED,
+                                           QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                           {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= 2,
+                        .dimensions=dimensions_input_0,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= { .data=nullptr,
+                                .dataSize=0}}}}
+        };
+
+        tensor_1 =  {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_1",
+                        .type= QNN_TENSOR_TYPE_APP_WRITE,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= QNN_DATATYPE_FLOAT_32,
+                        .quantizeParams= { QNN_DEFINITION_UNDEFINED,
+                                           QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                           {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= 2,
+                        .dimensions=dimensions_input_1,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= { .data=nullptr,
+                                .dataSize=0}}}}
+        };
+
+        //here is similar to OpenMAX IL
+        Qnn_Tensor_t  tensor_2 = (Qnn_Tensor_t) {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_2",
+                        .type= QNN_TENSOR_TYPE_APP_READ,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= QNN_DATATYPE_FLOAT_32,
+                        .quantizeParams= { QNN_DEFINITION_UNDEFINED,
+                                           QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                           {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= 2,
+                        .dimensions= dimensions_output,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= { .data=nullptr,
+                                .dataSize=0}}}}};
+
+
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_0);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_1);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
+        LOGGI("error = %d\n", error);
+
+        QNN_VER_PTR(tensor_0)->clientBuf =  { input_matrix[0], 16};
+        QNN_VER_PTR(tensor_1)->clientBuf =  { input_matrix[1], 16};
+        QNN_VER_PTR(tensor_2)->clientBuf =  { output_matrix[0], 16};
+
+        //for this single compute node in a single compute graph, nullptr is ok
+        Qnn_Param_t params[] = {};
+        Qnn_Tensor_t tensor_inputs[] = {
+                tensor_0,
+                tensor_1
+        };
+
+        Qnn_Tensor_t tensor_outputs[] = {
+                tensor_2
+        };
+
+        Qnn_OpConfig_t opconfig = {
+                (Qnn_OpConfigVersion_t) 1, .v1 = {
+                        "qnn_matrix_addition",
+                        QNN_OP_PACKAGE_NAME_QTI_AISW,
+                        QNN_OP_ELEMENT_WISE_ADD,//https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/MasterOpDef.html#elementwiseadd
+                        0,
+                        params,
+                        2,
+                        tensor_inputs,
+                        1,
+                        tensor_outputs
+                }
+        };
+        error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
+        LOGGI("error = %d\n", error);
+        //TODO:hardcode in PoC stage, shape of input matrix is 2x2
+        for (size_t i = 0; i < 2; i++) {
+            if (0 == i) {
+                LOGGD("input matrix A:\n");
+                GGML_JNI_NOTIFY("input matrix A:");
+            } else if (1 == i) {
+                LOGGD("input matrix B:\n");
+                GGML_JNI_NOTIFY("input matrix B:");
+            }
+            float *temp = input_matrix[i];
+            LOGGD("%.2f \t %.2f\n", temp[0], temp[1]);
+            LOGGD("%.2f \t %.2f\n", temp[2], temp[3]);
+            GGML_JNI_NOTIFY("%.2f \t %.2f\n", temp[0], temp[1]);
+            GGML_JNI_NOTIFY("%.2f \t %.2f\n", temp[2], temp[3]);
+        }
+        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1, nullptr, nullptr);
+        LOGGI("error = %d\n", error);
+        if (0 == error) {
+            float * temp = (float*)((QNN_VER_PTR(tensor_2)->clientBuf.data));
+            LOGGD("output tensor:%.2f %.2f %.2f %.2f\n", temp[0], temp[1], temp[2], temp[3]);
+
+            if (0 == result) { // works fine as expected at the first time on 04-07(April,7),17:00, 2024
+                //TODO:hardcode in PoC stage, shape of output matrix is 2x2
+                LOGGD("output matrix:\n");
+                GGML_JNI_NOTIFY("output matrix:");
+                for (size_t i = 0; i < 1; i++) {
+                    float * temp = output_matrix[i];
+                    LOGGD("%.2f \t %.2f\n", temp[0], temp[1]);
+                    LOGGD("%.2f \t %.2f\n", temp[2], temp[3]);
+                    GGML_JNI_NOTIFY("%.2f \t %.2f\n", temp[0], temp[1]);
+                    GGML_JNI_NOTIFY("%.2f \t %.2f\n", temp[2], temp[3]);
+                }
+                LOGGD("\n");
+            }
+
+        }
+    }
+
 
 failure:
     qnn_backend.unregister_rpcmem();
