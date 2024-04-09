@@ -5171,6 +5171,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     n_begin_time                                = ggml_time_us();
 
     LOGGD("enter qnn_ggml\n");
+    n_ggml_op_type                              += 1; // GGML_OP_NONE is 0 and skipped in Java layer
     LOGGI("[%s], backend type:%d(%s), op type:%d\n", __func__,
           n_backend_type, get_qnn_backend_name(n_backend_type), n_ggml_op_type);
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), ggml op type:%d", __func__,
@@ -5233,26 +5234,28 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
 
     //https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/SupportedOps.html
     switch (n_ggml_op_type) {
-        case 0: //TODO:hardcode
+        case GGML_OP_ADD:
             ggmlop          = GGML_OP_ADD;
             m2              = ggml_add(ctx, m0, m1);
             qnn_op_typename = QNN_OP_ELEMENT_WISE_ADD;
             break;
 
-        case 1: //TODO:hardcode
+        case GGML_OP_MUL:
             ggmlop          = GGML_OP_MUL;
             m2              = ggml_mul(ctx, m0, m1);
             qnn_op_typename = QNN_OP_ELEMENT_WISE_MULTIPLY;
             break;
 
-        case 2: //TODO:hardcode
+        case GGML_OP_MUL_MAT:
             ggmlop          = GGML_OP_MUL_MAT;
             m2              = ggml_mul_mat(ctx, m0, m1);
             qnn_op_typename = QNN_OP_MAT_MUL;
             break;
 
         default:
-            break;
+            LOGGD("only ADD, MUL, MUL_MAT supported currently");
+            GGML_JNI_NOTIFY("only ADD, MUL, MUL_MAT supported currently");
+            return 0;
     }
 
 

@@ -115,7 +115,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="GGML OP type:" />
+                android:text="OP:" />
 
             <Spinner
                 android:id="@+id/spinnerOPType"
@@ -127,8 +127,8 @@
             <Button
                 android:id="@+id/btnBenchmark"
                 android:layout_width="wrap_content"
-                android:layout_height="30dp"
-                android:layout_marginLeft="10dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
                 android:background="@drawable/button_drawable"
                 android:text="Benchmark"
                 android:textAllCaps="false"
