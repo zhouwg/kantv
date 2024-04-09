@@ -37,9 +37,13 @@
 
 #define LLAMA_FILE_MAGIC_GGLA 0x67676c61u // 'ggla'
 #define LLAMA_FILE_MAGIC_GGSN 0x6767736eu // 'ggsn'
+#define LLAMA_FILE_MAGIC_GGSQ 0x67677371u // 'ggsq'
 
 #define LLAMA_SESSION_MAGIC   LLAMA_FILE_MAGIC_GGSN
 #define LLAMA_SESSION_VERSION 5
+
+#define LLAMA_STATE_SEQ_MAGIC   LLAMA_FILE_MAGIC_GGSQ
+#define LLAMA_STATE_SEQ_VERSION 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -523,6 +527,7 @@ extern "C" {
             struct llama_context * ctx);
 
     // Removes all tokens that belong to the specified sequence and have positions in [p0, p1)
+    // Returns false if a partial sequence cannot be removed. Removing a whole sequence never fails
     // seq_id < 0 : match any sequence
     // p0 < 0     : [0,  p1]
     // p1 < 0     : [p0, inf)
@@ -594,34 +599,92 @@ extern "C" {
 
     // Returns the maximum size in bytes of the state (rng, logits, embedding
     // and kv_cache) - will often be smaller after compacting tokens
-    LLAMA_API size_t llama_get_state_size(const struct llama_context * ctx);
+    LLAMA_API size_t llama_state_get_size(const struct llama_context * ctx);
+    LLAMA_API DEPRECATED(size_t llama_get_state_size(const struct llama_context * ctx),
+        "use llama_state_get_size instead");
 
     // Copies the state to the specified destination address.
     // Destination needs to have allocated enough memory.
     // Returns the number of bytes copied
-    LLAMA_API size_t llama_copy_state_data(
+    LLAMA_API size_t llama_state_get_data(
             struct llama_context * ctx,
                          uint8_t * dst);
+    LLAMA_API DEPRECATED(size_t llama_copy_state_data(
+            struct llama_context * ctx,
+                         uint8_t * dst),
+        "use llama_state_get_data instead");
 
     // Set the state reading from the specified address
     // Returns the number of bytes read
-    LLAMA_API size_t llama_set_state_data(
+    LLAMA_API size_t llama_state_set_data(
             struct llama_context * ctx,
                    const uint8_t * src);
+    LLAMA_API DEPRECATED(size_t llama_set_state_data(
+            struct llama_context * ctx,
+                   const uint8_t * src),
+        "use llama_state_set_data instead");
 
     // Save/load session file
-    LLAMA_API bool llama_load_session_file(
+    LLAMA_API bool llama_state_load_file(
             struct llama_context * ctx,
                       const char * path_session,
                      llama_token * tokens_out,
                           size_t   n_token_capacity,
                           size_t * n_token_count_out);
+    LLAMA_API DEPRECATED(bool llama_load_session_file(
+            struct llama_context * ctx,
+                      const char * path_session,
+                     llama_token * tokens_out,
+                          size_t   n_token_capacity,
+                          size_t * n_token_count_out),
+        "use llama_state_load_file instead");
 
-    LLAMA_API bool llama_save_session_file(
+    LLAMA_API bool llama_state_save_file(
             struct llama_context * ctx,
                       const char * path_session,
                const llama_token * tokens,
                           size_t   n_token_count);
+    LLAMA_API DEPRECATED(bool llama_save_session_file(
+            struct llama_context * ctx,
+                      const char * path_session,
+               const llama_token * tokens,
+                          size_t   n_token_count),
+        "use llama_state_save_file instead");
+
+    // Get the exact size needed to copy the KV cache of a single sequence
+    LLAMA_API size_t llama_state_seq_get_size(
+            struct llama_context * ctx,
+                    llama_seq_id   seq_id);
+
+    // Copy the KV cache of a single sequence into the specified buffer
+    LLAMA_API size_t llama_state_seq_get_data(
+            struct llama_context * ctx,
+                         uint8_t * dst,
+                    llama_seq_id   seq_id);
+
+    // Copy the sequence data (originally copied with `llama_state_seq_get_data`) into the specified sequence
+    // Returns:
+    //  - Positive: Ok
+    //  - Zero: Failed to load
+    LLAMA_API size_t llama_state_seq_set_data(
+            struct llama_context * ctx,
+                   const uint8_t * src,
+                    llama_seq_id   dest_seq_id);
+
+    LLAMA_API size_t llama_state_seq_save_file(
+            struct llama_context * ctx,
+                      const char * filepath,
+                    llama_seq_id   seq_id,
+               const llama_token * tokens,
+                          size_t   n_token_count);
+
+    LLAMA_API size_t llama_state_seq_load_file(
+            struct llama_context * ctx,
+                      const char * filepath,
+                    llama_seq_id   dest_seq_id,
+                     llama_token * tokens_out,
+                          size_t   n_token_capacity,
+                          size_t * n_token_count_out);
 
     //
     // Decoding
@@ -684,8 +747,9 @@ extern "C" {
     // Cols: n_vocab
     LLAMA_API float * llama_get_logits(struct llama_context * ctx);
 
-    // Logits for the ith token. Equivalent to:
+    // Logits for the ith token. For positive indices, Equivalent to:
     // llama_get_logits(ctx) + ctx->output_ids[i]*n_vocab
+    // Negative indicies can be used to access logits in reverse order, -1 is the last logit.
     // returns NULL for invalid ids.
     LLAMA_API float * llama_get_logits_ith(struct llama_context * ctx, int32_t i);
 
@@ -697,8 +761,9 @@ extern "C" {
     // Otherwise, returns NULL.
     LLAMA_API float * llama_get_embeddings(struct llama_context * ctx);
 
-    // Get the embeddings for the ith token. Equivalent to:
+    // Get the embeddings for the ith token. For positive indices, Equivalent to:
     // llama_get_embeddings(ctx) + ctx->output_ids[i]*n_embd
+    // Negative indicies can be used to access embeddings in reverse order, -1 is the last embedding.
     // shape: [n_embd] (1-dimensional)
     // returns NULL for invalid ids.
     LLAMA_API float * llama_get_embeddings_ith(struct llama_context * ctx, int32_t i);
@@ -1007,9 +1072,37 @@ extern "C" {
 
 struct ggml_tensor;
 
+struct llama_partial_utf8 {
+    uint32_t value;    // bit value so far (unshifted)
+    int      n_remain; // num bytes remaining; -1 indicates invalid sequence
+};
+
+struct llama_grammar {
+    const std::vector<std::vector<llama_grammar_element>>   rules;
+    std::vector<std::vector<const llama_grammar_element *>> stacks;
+
+    // buffer for partially generated UTF-8 sequence from accepted tokens
+    llama_partial_utf8                                      partial_utf8;
+};
+
+struct llama_grammar_candidate {
+    size_t               index;
+    const uint32_t     * code_points;
+    llama_partial_utf8   partial_utf8;
+};
+
 const std::vector<std::pair<std::string, struct ggml_tensor *>> & llama_internal_get_tensor_map(
     struct llama_context * ctx
 );
+
+std::vector<std::vector<const llama_grammar_element *>> llama_grammar_accept(
+        const std::vector<std::vector<llama_grammar_element>>         & rules,
+        const std::vector<std::vector<const llama_grammar_element *>> & stacks,
+        const uint32_t                                                  chr);
+
+std::pair<std::vector<uint32_t>, llama_partial_utf8> decode_utf8(
+        const std::string & src,
+        llama_partial_utf8   partial_start);
 
 #endif // LLAMA_API_INTERNAL
 
