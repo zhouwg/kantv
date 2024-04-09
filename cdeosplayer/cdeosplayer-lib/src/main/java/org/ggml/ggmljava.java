@@ -116,12 +116,12 @@ public class ggmljava {
     public static native void asr_set_benchmark_status(int bExitBenchmark);
 
     /**
-     * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
+     * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
      * @param audioPath     /sdcard/kantv/jfk.wav
-     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: stable diffusion
+     * @param nBenchType    0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
      * @param nThreadCounts 1 - 8
-     * @param nBackendType  0: CPU  1: GPU  2: DSP
-     * @param nOpType       type of matrix manipulate / GGML OP
+     * @param nBackendType  0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
+     * @param nOpType       type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
      * @return
      */
     public static native String ggml_bench(String modelPath, String audioPath, int nBenchType, int nThreadCounts, int nBackendType, int nOpType);

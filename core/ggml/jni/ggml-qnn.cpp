@@ -5043,7 +5043,15 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         QNN_VER_PTR(tensor_1)->clientBuf =  { input_matrix[1], 16};
         QNN_VER_PTR(tensor_2)->clientBuf =  { output_matrix[0], 16};
 
-        //for this single compute node in a single compute graph, nullptr is ok
+        //for this single compute graph which contains three nodes(every node is a tensor,
+        //the GGML_OP_ADD is the edge of this single compute graph), nullptr is ok
+        //
+        //tensor_2 = tensor_0 + tensor_1
+        //
+        // tensor_0
+        //          + (GGML_OP_ADD)    =   tensor_2
+        // tensor_1
+        //
         Qnn_Param_t params[] = {};
         Qnn_Tensor_t tensor_inputs[] = {
                 tensor_0,
@@ -5126,7 +5134,6 @@ failure:
 }
 
 
-//TODO:
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S27:  mapping ggml_tensor to QNN_tensor and offload a simple 2x2 matrix addition operation to QNN CPU backend
 int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
@@ -5227,6 +5234,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         return 1;
     }
 
+    //construct input tensor, this is graph node in a compute graph
     m0              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_f32(m0, 1.0f);
     m1              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
@@ -5235,8 +5243,8 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     //https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/SupportedOps.html
     switch (n_ggml_op_type) {
         case GGML_OP_ADD:
-            ggmlop          = GGML_OP_ADD;
-            m2              = ggml_add(ctx, m0, m1);
+            ggmlop          = GGML_OP_ADD;              //this is edge of a compute graph
+            m2              = ggml_add(ctx, m0, m1);    //construct output tensor, another graph node in this single compute graph
             qnn_op_typename = QNN_OP_ELEMENT_WISE_ADD;
             break;
 
@@ -5298,7 +5306,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     }
 
     error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(),
-                                          "qnn_ggml_addition", nullptr, &graph_handle);
+                                          "qnn_ggml", nullptr, &graph_handle);
     LOGGI("error = %d\n", error);
     uint32_t dimensions_input_0[] = {2, 2};
     uint32_t dimensions_input_1[] = {2, 2};
@@ -5425,5 +5433,362 @@ failure:
     return result;
 }
 
+
+//LayerNorm in C, https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.c
+static void layernorm_forward(float * out, float * mean, float * rstd,
+                              float * inp, float * weight, float * bias,
+                              int B, int T, int C) {
+    float eps = 1e-5f;
+    for (int b = 0; b < B; b++) {
+        for (int t = 0; t < T; t++) {
+            // seek to the input position inp[b,t,:]
+            float * x = inp + b * T * C + t * C;
+            // calculate the mean
+            float m = 0.0f;
+            for (int i = 0; i < C; i++) {
+                m += x[i];
+            }
+            m = m / C;
+            // calculate the variance (without any bias correction)
+            float v = 0.0f;
+            for (int i = 0; i < C; i++) {
+                float xshift = x[i] - m;
+                v += xshift * xshift;
+            }
+            v = v / C;
+            // calculate the rstd
+            float s = 1.0f / sqrtf(v + eps);
+            // seek to the output position in out[b,t,:]
+            float * out_bt = out + b * T * C + t * C;
+            for (int i = 0; i < C; i++) {
+                float n = (s * (x[i] - m)); // normalized output
+                float o = n * weight[i] + bias[i]; // scale and shift it
+                out_bt[i] = o; // write
+            }
+            // cache the mean and rstd for the backward pass later
+            mean[b * T + t] = m;
+            rstd[b * T + t] = s;
+        }
+    }
+}
+
+
+static void layernorm_backward(float * dinp, float * dweight, float * dbias,
+                        float * dout, float * inp, float * weight, float * mean, float * rstd,
+                        int B, int T, int C) {
+    for (int b = 0; b < B; b++) {
+        for (int t = 0; t < T; t++) {
+            float * dout_bt = dout + b * T * C + t * C;
+            float * inp_bt = inp + b * T * C + t * C;
+            float * dinp_bt = dinp + b * T * C + t * C;
+            float mean_bt = mean[b * T + t];
+            float rstd_bt = rstd[b * T + t];
+
+            // first: two reduce operations
+            float dnorm_mean = 0.0f;
+            float dnorm_norm_mean = 0.0f;
+            for (int i = 0; i < C; i++) {
+                float norm_bti = (inp_bt[i] - mean_bt) * rstd_bt;
+                float dnorm_i = weight[i] * dout_bt[i];
+                dnorm_mean += dnorm_i;
+                dnorm_norm_mean += dnorm_i * norm_bti;
+            }
+            dnorm_mean = dnorm_mean / C;
+            dnorm_norm_mean = dnorm_norm_mean / C;
+
+            // now iterate again and accumulate all the gradients
+            for (int i = 0; i < C; i++) {
+                float norm_bti = (inp_bt[i] - mean_bt) * rstd_bt;
+                float dnorm_i = weight[i] * dout_bt[i];
+                // gradient contribution to bias
+                dbias[i] += dout_bt[i];
+                // gradient contribution to weight
+                dweight[i] += norm_bti * dout_bt[i];
+                // gradient contribution to input
+                float dval = 0.0f;
+                dval += dnorm_i; // term 1
+                dval -= dnorm_mean; // term 2
+                dval -= norm_bti * dnorm_norm_mean; // term 3
+                dval *= rstd_bt; // final scale
+                dinp_bt[i] += dval;
+            }
+        }
+    }
+}
+
+
+// poor man's tensor checker
+static int check_tensor(float * a, float * b, int n, char * label) {
+    int ok = 1;
+    LOGGD("%s\n", label);
+    GGML_JNI_NOTIFY("%s\n", label);
+    for (int i = 0; i < n; i++) {
+        if (fabs(a[i] - b[i]) <= 1e-5) {
+            LOGGD("OK ");
+            GGML_JNI_NOTIFY("OK ");
+        } else {
+            LOGGD("NOT OK ");
+            GGML_JNI_NOTIFY("NOT OK ");
+            ok = 0;
+        }
+        LOGGD("%f %f\n", a[i], b[i]);
+        GGML_JNI_NOTIFY("%f %f\n", a[i], b[i]);
+    }
+    return ok;
+}
+
+
+//TODO:
+// https://github.com/zhouwg/kantv/issues/121
+// PoC-S35&S37:implement a complex/complicated compute graph in C/C++ and then mapping to GGML compute graph and then mapping to QNN CPU/GPU backend
+int qnn_complex_graph(int n_backend_type, int n_graph_type) {
+    uint32_t i                                  = 0;
+    uint32_t j                                  = 0;
+    int error                                   = 0;
+    int result                                  = 0;
+    std::string graph_name                      = "qnn_ggml";
+    const char * qnn_backend_lib                = "libQnnCpu.so";
+
+    int64_t  n_begin_time                       = 0LL;
+    int64_t  n_end_time                         = 0LL;
+    int64_t  n_durtion                          = 0LL;
+
+    Qnn_GraphHandle_t graph_handle              = nullptr;
+    Qnn_Tensor_t tensor_0                       = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_1                       = QNN_TENSOR_INIT;
+    Qnn_Tensor_t tensor_2                       = QNN_TENSOR_INIT;
+    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
+    Qnn_OpConfig_t qnn_opconfig                 = QNN_OPCONFIG_INIT;
+    Qnn_Param_t qnn_params[]                    = {};
+    const char * qnn_op_typename                = QNN_OP_ELEMENT_WISE_ADD;
+
+    const int sizey                             = 2;
+    const int sizex                             = 2;
+    size_t ctx_size                             = 0;
+    struct ggml_context * ctx                   = nullptr;
+    struct ggml_tensor  * m0                    = nullptr;
+    struct ggml_tensor  * m1                    = nullptr;
+    struct ggml_tensor  * m2                    = nullptr;
+    struct ggml_cgraph  * gf                    = nullptr;
+    enum ggml_op     ggmlop                     = GGML_OP_ADD;
+    std::vector<uint8_t> work_buffer;
+    const ggml_type qtype                       = GGML_TYPE_F32;
+    struct ggml_init_params params = {
+            /*.mem_size   =*/ 0,
+            /*.mem_buffer =*/ NULL,
+            /* no_alloc   =*/ 0
+    };
+
+    ggml_time_init();
+    n_begin_time                                = ggml_time_us();
+
+    LOGGD("enter qnn_complex_graph\n");
+    n_graph_type                                = 0; //TODO: hardcode to 0
+
+    LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
+          n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
+                    n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+    switch (n_backend_type) {
+        case 0:
+            qnn_backend_lib = "libQnnCpu.so";
+            break;
+
+        case 1:
+            qnn_backend_lib = "libQnnGpu.so";
+            break;
+
+        case 2: {
+            qnn_backend_lib = "libQnnHtp.so";
+            std::string path = "/data/data/com.cdeos.kantv/";
+            LOGGI("path:%s\n", path.c_str());
+            LOGGI("qnn backend lib:%s\n", qnn_backend_lib);
+            if (0 == setenv("LD_LIBRARY_PATH",
+                            (path + ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images").c_str(),
+                            1)) {
+                LOGGI("QNN DSP backend setenv successfully");
+            } else {
+                LOGGE("QNN DSP backend setenv failure");
+            }
+            if (0 == setenv("ADSP_LIBRARY_PATH",
+                            (path + ";/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp").c_str(),
+                            1)) {
+                LOGGI("QNN DSP backend setenv successfully");
+            } else {
+                LOGGE("QNN DSP backend setenv failure");
+            }
+            break;
+        }
+        case 3:
+            // fall into ggml, just for compare performance between QNN SDK and original GGML
+            break;
+
+        default:
+            LOGGW("backend type %d not supported\n", n_backend_type);
+            break;
+    }
+
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
+    ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
+    ctx_size        += ggml_row_size(qtype,         sizex * sizey);
+    ctx_size        += 1024 * 1024 * 16;
+    params.mem_size =  ctx_size;
+    ctx             =  ggml_init(params);
+    if (!ctx) {
+        LOGGW("ggml_init failure\n");
+        return 1;
+    }
+
+
+    m0              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m0, 1.0f);
+    m1              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    ggml_set_f32(m1, 2.0f);
+
+    //https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/SupportedOps.html
+    switch (n_graph_type) {
+        case 0: // LayerNorm, https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.md
+        //the following code comes from https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.c
+        {
+            //what's the Bias & Variance: https://scott.fortmann-roe.com/docs/BiasVariance.html
+            int B = 2; // batch
+            int T = 3; // time / sequence length
+            int C = 4; // number of channels
+
+            float *x = (float *) malloc(B * T * C * sizeof(float));
+            float *w = (float *) malloc(C * sizeof(float));
+            float *b = (float *) malloc(C * sizeof(float));
+            float *out = (float *) malloc(B * T * C * sizeof(float));
+            float *mean = (float *) malloc(B * T * sizeof(float));
+            float *rstd = (float *) malloc(B * T * sizeof(float));
+            float *dout = (float *) malloc(B * T * C * sizeof(float));
+            float *dx = (float *) malloc(B * T * C * sizeof(float));
+            float *dw = (float *) malloc(C * sizeof(float));
+            float *db = (float *) malloc(C * sizeof(float));
+
+            // read reference information from Python
+            FILE *file = fopen("/sdcard/kantv/ln.bin", "rb");
+            if (file == NULL) {
+                LOGGW("Error opening file\n");
+                GGML_JNI_NOTIFY("Error opening file\n");
+                ggml_free(ctx);
+                return 2;
+            }
+            fread(x, sizeof(float), B * T * C, file);
+            fread(w, sizeof(float), C, file);
+            fread(b, sizeof(float), C, file);
+            fread(out, sizeof(float), B * T * C, file);
+            fread(mean, sizeof(float), B * T, file);
+            fread(rstd, sizeof(float), B * T, file);
+            fread(dout, sizeof(float), B * T * C, file);
+            fread(dx, sizeof(float), B * T * C, file);
+            fread(dw, sizeof(float), C, file);
+            fread(db, sizeof(float), C, file);
+            fclose(file);
+
+            // now let's calculate everything ourselves
+
+            // forward pass
+            float *c_out = (float *) malloc(B * T * C * sizeof(float));
+            float *c_mean = (float *) malloc(B * T * sizeof(float));
+            float *c_rstd = (float *) malloc(B * T * sizeof(float));
+            layernorm_forward(c_out, c_mean, c_rstd, x, w, b, B, T, C);
+
+            // check correctness of forward pass
+            check_tensor(out, c_out, B * T * C, "out");
+            check_tensor(mean, c_mean, B * T, "mean");
+            check_tensor(rstd, c_rstd, B * T, "rstd");
+
+            // backward pass (note calloc inits grads to zero)
+            float *c_dx = (float *) calloc(B * T * C, sizeof(float));
+            float *c_dw = (float *) calloc(B * T, sizeof(float));
+            float *c_db = (float *) calloc(B * T, sizeof(float));
+            layernorm_backward(c_dx, c_dw, c_db, dout, x, w, c_mean, c_rstd, B, T, C);
+
+            // check correctness of backward pass
+            check_tensor(c_dx, dx, B * T * C, "dx");
+            check_tensor(c_dw, dw, C, "dw");
+            check_tensor(c_db, db, C, "db");
+
+            free(c_db);
+            free(c_dw);
+            free(c_dx);
+
+            free(c_rstd);
+            free(c_mean);
+            free(c_out);
+
+            free(db);
+            free(dw);
+            free(dx);
+            free(dout);
+            free(rstd);
+            free(mean);
+            free(out);
+            free(b);
+            free(w);
+            free(x);
+        }
+            break;
+
+        default:
+            LOGGD("only LayerNorm supported currently");
+            GGML_JNI_NOTIFY("only LayerNorm supported currently");
+            return 0;
+    }
+
+
+    if (3 == n_backend_type) {  // this "fake" backend is just used for compare performance between QNN SDK and original GGML
+
+        n_end_time  = ggml_time_us();
+        n_durtion   = (n_end_time - n_begin_time) / 1000;
+        LOGGD("duration of qnn_complex_graph with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
+        GGML_JNI_NOTIFY("duration of qnn_complex_graph with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
+
+        LOGGD("leave qnn_ggml\n");
+
+        return 0;
+    }
+
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
+    error  = qnn_backend.qnn_init(nullptr);
+    if (0 != error) {
+        LOGGW("init qnn subsystem failed, pls check why\n");
+        result = 1;
+        return 1;
+    }
+
+    QNN_INTERFACE_VER_TYPE qnn_raw_interface                = qnn_backend.get_qnn_raw_interface();
+    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface  = qnn_backend.get_qnn_raw_system_interface();
+    qnn_interface qnn_interface                             = qnn_backend.get_qnn_interface();
+    if (!qnn_interface.is_loaded()) {
+        LOGGW("qnn subsystem failure\n");
+        result = 2;
+    }
+
+    error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(),
+                                          "qnn_complex_graph", nullptr, &graph_handle);
+
+    if (0 == error) {
+        TENSOR_DUMP(m0);
+        TENSOR_DUMP(m1);
+    }
+
+    ggml_free(ctx);
+
+failure:
+    qnn_backend.qnn_finalize();
+
+    n_end_time  = ggml_time_us();
+    n_durtion   = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+    GGML_JNI_NOTIFY("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+
+
+    LOGGD("leave qnn_complex_graph\n");
+
+    return result;
+}
 
 //#include "Inception_v3.cpp"

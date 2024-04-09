@@ -786,12 +786,12 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
 
 /**
  *
- * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's dedicated model
+ * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: stable diffusion
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
  * @param n_threads             1 - 8
- * @param n_backend_type        0: CPU  1: GPU  2: DSP
- * @param n_op_type             type of matrix manipulate / GGML OP
+ * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
+ * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
  * @return
 */
 void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads, int n_backend_type, int n_op_type) {
@@ -848,6 +848,10 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             ggml_bench_llama(sz_model_path, n_threads);
             break;
 
+        case BENCHMAKR_STABLEDIFFUSION:
+            stablediffusion_inference(sz_model_path, "a lovely cat", 0, n_threads); //TODO:not work on Xiaomi 14
+            break;
+
         case BENCHMAKR_QNN_SAMPLE:
             {
                 //TODO: this is a lazy method in PoC stage
@@ -901,8 +905,8 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             qnn_ggml(n_backend_type, n_op_type);
             break;
 
-        case BENCHMAKR_STABLEDIFFUSION:
-            stablediffusion_inference(sz_model_path, "a lovely cat", 0, n_threads); //TODO:not work on Xiaomi 14
+        case BENCHMARK_QNN_COMPLEX:
+            qnn_complex_graph(n_backend_type, n_op_type);
             break;
 
         default:

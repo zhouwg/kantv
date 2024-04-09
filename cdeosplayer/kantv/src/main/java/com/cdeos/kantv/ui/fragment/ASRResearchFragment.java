@@ -95,11 +95,18 @@
 
      private int nThreadCounts  = 1;
      private int benchmarkIndex = 0;
+     private int previousBenchmakrIndex= 0;
      private String strModeName = "tiny.en-q8_0";
      private String strBackend  = "cpu";
      private int backendIndex   = 0; //CPU
      private String strOPType   = "add";
-     private int optypeIndex    = 0; //addition
+     private int optypeIndex    = 0; //matrix addition operation
+
+     Spinner spinnerOPType      = null;
+     String[] arrayOPType       = null;
+     String[] arrayGraphType    = null;
+     ArrayAdapter<String> adapterOPType = null;
+     ArrayAdapter<String> adapterGraphType = null;
 
 
      private long beginTime = 0;
@@ -184,6 +191,9 @@
          CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
          CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
 
+         //prebuilt data from https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.md
+         CDEAssetLoader.copyAssetFile(mContext, "ln.bin", CDEUtils.getDataPath() + "ln.bin");
+
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
@@ -225,6 +235,20 @@
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                  CDELog.j(TAG, "bench type:" + arrayBenchType[position]);
                  benchmarkIndex = Integer.valueOf(position);
+
+                 if ((previousBenchmakrIndex != CDEUtils.BENCHMAKR_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMAKR_QNN_COMPLEX)) {
+                     previousBenchmakrIndex = benchmarkIndex;
+                     return;
+                 }
+
+                 if (benchmarkIndex == CDEUtils.BENCHMAKR_QNN_COMPLEX) {
+                     spinnerOPType.setAdapter(adapterGraphType);
+                 } else {
+                     spinnerOPType.setAdapter(adapterOPType);
+                 }
+                 adapterOPType.notifyDataSetChanged();
+
+                 previousBenchmakrIndex = benchmarkIndex;
              }
 
              @Override
@@ -289,25 +313,33 @@
              }
          });
 
-         Spinner spinnerOPType = mActivity.findViewById(R.id.spinnerOPType);
-         int max_idx = ggmljava.ggml_op.valueOf("GGML_OP_MUL_MAT").ordinal();
-         String[] arrayOPType = new String[max_idx];// = getResources().getStringArray(R.array.optype);
-         ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
-         int idx = 0;
-         for (ggmljava.ggml_op op : ggmlops) {
-             CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
-             if (op.name().contains("GGML_OP_NONE"))
-                 continue;
+         spinnerOPType      = mActivity.findViewById(R.id.spinnerOPType);
+         arrayGraphType     = getResources().getStringArray(R.array.graphtype);
 
-             arrayOPType[idx] = op.name();
-             idx++;
+         {
+             int max_idx = ggmljava.ggml_op.valueOf("GGML_OP_MUL_MAT").ordinal();
+             arrayOPType = new String[max_idx];// = getResources().getStringArray(R.array.optype);
+             ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
+             int idx = 0;
+             for (ggmljava.ggml_op op : ggmlops) {
+                 CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
+                 if (op.name().contains("GGML_OP_NONE"))
+                     continue;
 
-             if (op.name().contains("GGML_OP_MUL_MAT")) {
-                 break;
+                 arrayOPType[idx] = op.name();
+                 idx++;
+
+                 if (op.name().contains("GGML_OP_MUL_MAT")) {
+                     break;
+                 }
              }
          }
-         ArrayAdapter<String> adapterOPType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
+
+         adapterOPType      = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
+         adapterGraphType   = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayGraphType);
+
          spinnerOPType.setAdapter(adapterOPType);
+
          spinnerOPType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -388,7 +420,7 @@
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
-             if (!isQNNModel && ((benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE) && (benchmarkIndex < CDEUtils.BENCHMARK_STABLEDIFFUSION))) {
+             if (!isQNNModel && (benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE)) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }

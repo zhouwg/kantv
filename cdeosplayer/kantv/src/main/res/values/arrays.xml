@@ -28,19 +28,6 @@
         <item>LITE_POWER_RAND_HIGH</item>
         <item>LITE_POWER_RAND_LOW</item>
     </string-array>
-    <string-array name="text">
-        <item>Please select one statement to practise TTS</item>
-        <item>昨日，这名“伤者”与医生全部被警方依法刑事拘留。</item>
-        <item>钱伟长想到上海来办学校是经过深思熟虑的。</item>
-        <item>她见我一进门就骂，吃饭时也骂，骂得我抬不起头。</item>
-        <item>李述德在离开之前，只说了一句“柱驼杀父亲了”。</item>
-        <item>这种车票和保险单捆绑出售属于重复性购买。</item>
-        <item>戴佩妮的男友西米露接唱情歌，让她非常开心。</item>
-        <item>观大势、谋大局、出大策始终是该院的办院方针。</item>
-        <item>他们骑着摩托回家，正好为农忙时的父母帮忙。</item>
-        <item>但是因为还没到退休年龄，只能掰着指头捱日子。</item>
-        <item>这几天雨水不断，人们恨不得待在家里不出门。</item>
-    </string-array>
 
     <string-array name="encodeFormat">
         <item>H264</item>
@@ -79,11 +66,13 @@
         <item>full</item>
         <item>matrix</item>
         <item>llama</item>
-        <item>qnn-sample</item>
-        <item>qnn-saver</item>
-        <item>qnn-matrix</item>
-        <item>qnn-ggml</item>
-        <item>stablediffusion</item>
+        <item>stablediffusion</item> <!-- not work on Xiaomi 14 currently -->
+        <!-- step by step -->
+        <item>qnn-sample</item> <!-- "play with /say hello to" QNN Sample -->
+        <item>qnn-saver</item>  <!-- study QNN SDK mechanism by QNN Saver -->
+        <item>qnn-matrix</item> <!-- offload a simple matrix addition operation to QNN -->
+        <item>qnn-ggml</item>   <!-- mapping ggml tensor to QNN tensor -->
+        <item>qnn-complex</item><!-- complex compute graph in C/C++ or GGML, and then offload them to QNN -->
     </string-array>
 
     <string-array name="threadCounts">
@@ -118,8 +107,8 @@
         <item>qwen_8b</item>
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
-        <item>qnn</item>
         <item>sdmodel</item>
+        <item>qnn</item>
     </string-array>
 
     <string-array name="backend">
@@ -133,5 +122,9 @@
         <item>add</item>
         <item>mul</item>
         <item>mulmat</item>
+    </string-array>
+
+    <string-array name="graphtype">
+        <item>layernorm</item>
     </string-array>
 </resources>
