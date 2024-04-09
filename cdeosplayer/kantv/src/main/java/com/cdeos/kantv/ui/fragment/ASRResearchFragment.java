@@ -24,7 +24,6 @@
  package com.cdeos.kantv.ui.fragment;
 
 
- import static org.ggml.ggmljava.GGML_JNI_OP_ADD;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -291,7 +290,22 @@
          });
 
          Spinner spinnerOPType = mActivity.findViewById(R.id.spinnerOPType);
-         String[] arrayOPType = getResources().getStringArray(R.array.optype);
+         int max_idx = ggmljava.ggml_op.valueOf("GGML_OP_MUL_MAT").ordinal();
+         String[] arrayOPType = new String[max_idx];// = getResources().getStringArray(R.array.optype);
+         ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
+         int idx = 0;
+         for (ggmljava.ggml_op op : ggmlops) {
+             CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
+             if (op.name().contains("GGML_OP_NONE"))
+                 continue;
+
+             arrayOPType[idx] = op.name();
+             idx++;
+
+             if (op.name().contains("GGML_OP_MUL_MAT")) {
+                 break;
+             }
+         }
          ArrayAdapter<String> adapterOPType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
          spinnerOPType.setAdapter(adapterOPType);
          spinnerOPType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -301,6 +315,7 @@
                  strOPType = arrayOPType[position];
                  optypeIndex = Integer.valueOf(position);
                  CDELog.j(TAG, "strOPType:" + strOPType);
+                 CDELog.j(TAG, "optypeIndex:" + optypeIndex);
              }
 
              @Override
