@@ -94,11 +94,14 @@
 
      Button _btnBenchmark;
 
-     private int nThreadCounts = 1;
+     private int nThreadCounts  = 1;
      private int benchmarkIndex = 0;
      private String strModeName = "tiny.en-q8_0";
-     private String strBackend = "cpu";
-     private int backendIndex = 0; //CPU
+     private String strBackend  = "cpu";
+     private int backendIndex   = 0; //CPU
+     private String strOPType   = "add";
+     private int optypeIndex    = 0; //addition
+
 
      private long beginTime = 0;
      private long endTime = 0;
@@ -287,6 +290,25 @@
              }
          });
 
+         Spinner spinnerOPType = mActivity.findViewById(R.id.spinnerOPType);
+         String[] arrayOPType = getResources().getStringArray(R.array.optype);
+         ArrayAdapter<String> adapterOPType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
+         spinnerOPType.setAdapter(adapterOPType);
+         spinnerOPType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "GGML op type:" + arrayOPType[position]);
+                 strOPType = arrayOPType[position];
+                 optypeIndex = Integer.valueOf(position);
+                 CDELog.j(TAG, "strOPType:" + strOPType);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex)
@@ -441,7 +463,7 @@
                                  CDEUtils.getDataPath(mContext) + ggmlModelFileName,
                                  CDEUtils.getDataPath() + ggmlSampleFileName,
                                  benchmarkIndex,
-                                 nThreadCounts, backendIndex, GGML_JNI_OP_ADD);
+                                 nThreadCounts, backendIndex, optypeIndex);
                      }
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);

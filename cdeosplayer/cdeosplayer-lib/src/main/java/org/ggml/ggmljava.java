@@ -6,7 +6,7 @@ package org.ggml;
 public class ggmljava {
     private static final String TAG = ggmljava.class.getName();
 
-    // keep sync with ggml_jni_op in ggml-jni.h
+    //TODO: refine here, a simple and better way to keep sync between Java/JNI/GGML internal
     public static final int    GGML_JNI_OP_NONE     = 0;
     public static final int    GGML_JNI_OP_ADD      = 1;
     public static final int    GGML_JNI_OP_SUB      = 2;
