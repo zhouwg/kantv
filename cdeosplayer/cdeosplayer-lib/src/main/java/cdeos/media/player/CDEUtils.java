@@ -259,18 +259,20 @@
      public static final int  ASR_MODE_BECHMARK     = 2;     // asr peformance benchamrk
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
 
-     //keep sync with kantv_asr.h
+     //keep sync with ggml-jni.h
      public static final int BECHMARK_ASR      = 0;
      public static final int BECHMARK_MEMCPY   = 1;
      public static final int BECHMARK_MULMAT   = 2;
-     public static final int BECHMARK_FULL     = 3; //looks good on Xiaomi 14 after optimized by build optimization
+     public static final int BECHMARK_FULL     = 3;
      public static final int BENCHMARK_MATRIX  = 4;
      public static final int BENCHMARK_LLM     = 5;
-     public static final int BENCHMARK_QNN_SAMPLE     = 6;
-     public static final int BENCHMARK_QNN_SAVER      = 7;
-     public static final int BENCHMARK_QNN_MATRIX     = 8;
-     public static final int BENCHMARK_QNN_GGML       = 9;
-     public static final int BENCHMARK_STABLEDIFFUSION= 10;
+     public static final int BENCHMARK_STABLEDIFFUSION= 6;
+     public static final int BENCHMARK_QNN_SAMPLE     = 7;
+     public static final int BENCHMARK_QNN_SAVER      = 8;
+     public static final int BENCHMARK_QNN_MATRIX     = 9;
+     public static final int BENCHMARK_QNN_GGML       = 10;
+     public static final int BENCHMAKR_QNN_COMPLEX    = 11;
+
 
      private static int       mASRMode = ASR_MODE_NORMAL;
 

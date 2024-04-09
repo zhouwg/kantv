@@ -126,9 +126,9 @@
 
             <Button
                 android:id="@+id/btnBenchmark"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:layout_width="80dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="5dp"
                 android:background="@drawable/button_drawable"
                 android:text="Benchmark"
                 android:textAllCaps="false"

@@ -21,7 +21,7 @@ I know very very very very very very little about real/hard-core AI tech. In sho
 
 <hr>
 
-- Will you open source the source code of libkantv-core.so?
+- Will you open source the source code of libkantv-media.so?
 
 <b>NO</b>
 

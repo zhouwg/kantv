@@ -10,6 +10,7 @@ Project KanTV has used/tried following open-source projects(list in here is not 
      <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">GGML whisper.cpp</a></li>
      <li><a href="https://github.com/ggerganov/llama.cpp" target="_blank" rel="noopener">GGML llama.cpp</a></li>
      <li><a href="https://github.com/leejet/stable-diffusion.cpp" target="_blank" rel="noopener">stablediffusion.cpp</a></li>
+     <li><a href="https://github.com/karpathy/llm.c" target="_blank">llm.c</a></li>
      <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">Bilibili ijkplayer</a></li>
      <li><a href="https://github.com/mozilla/DeepSpeech" target="_blank" rel="noopener">Mozilla DeepSpeech</a></li>
      <li><a href="https://www.videolan.org/vlc/" target="_blank" rel="noopener">libx264/libx265</a></li>
