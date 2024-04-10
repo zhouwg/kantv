@@ -72,7 +72,7 @@
         <item>qnn-saver</item>  <!-- study QNN SDK mechanism by QNN Saver -->
         <item>qnn-matrix</item> <!-- offload a simple matrix addition operation to QNN -->
         <item>qnn-ggml</item>   <!-- mapping ggml tensor to QNN tensor -->
-        <item>qnn-complex</item><!-- complex compute graph in C/C++ or GGML, and then offload them to QNN -->
+        <item>qnn-complex</item><!-- complex computation graph in C/C++ or GGML, and then offload them to QNN -->
     </string-array>
 
     <string-array name="threadCounts">
