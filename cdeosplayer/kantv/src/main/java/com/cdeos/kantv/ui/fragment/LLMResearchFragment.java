@@ -202,7 +202,7 @@
          String phoneInfo = "Device info:" + " "
                  + "Brand:" + Build.BRAND + " "
                  + "Hardware:" + Build.HARDWARE + " "
-                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
+                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + " "
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");

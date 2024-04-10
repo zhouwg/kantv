@@ -3927,6 +3927,9 @@
              case BENCHMARK_LLM:
                  return "GGML LLAMA";
 
+             case BENCHMARK_STABLEDIFFUSION:
+                 return "GGML stable diffusion";
+
              case BENCHMARK_QNN_SAMPLE:
                  return "GGML QNN sample";
 
@@ -3939,9 +3942,8 @@
              case BENCHMARK_QNN_GGML:
                  return "GGML QNN ggml";
 
-             case BENCHMARK_STABLEDIFFUSION:
-                 return "GGML stable diffusion";
-
+             case BENCHMAKR_QNN_COMPLEX:
+                 return "GGML QNN complex graph";
          }
 
          return "unknown";

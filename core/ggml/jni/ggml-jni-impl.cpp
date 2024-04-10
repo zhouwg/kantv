@@ -658,7 +658,6 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
             goto failure;
         }
         LOGGI("whispercpp inference successfully\n");
-        //whisper_print_timings(context);
         num_segments = whisper_full_n_segments(context);
         LOGGD("num_segments:%d\n", num_segments);
         for (index = 0; index < num_segments; index++) {
@@ -704,10 +703,15 @@ failure:
     }
 
     if (0 == result) {
-#ifdef TARGET_ANDROID
-        kantv_asr_notify_benchmark(asr_result);
-#endif
-        return asr_result.c_str();
+        if (num_segments != 0) {
+            kantv_asr_notify_benchmark(asr_result);
+            return asr_result.c_str();
+        } else {
+            asr_result = "pls check why whisper.cpp inference failure: whether whisper model file exist? whether jfk.wav is correct?\n";
+            kantv_asr_notify_benchmark(asr_result);
+            LOGGD("%s", asr_result.c_str());
+            return NULL;
+        }
     } else
         return NULL;
 }

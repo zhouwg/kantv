@@ -200,6 +200,8 @@ cd kantv
 
 ### Run Android APK on real Android phone
 
+This Android APK works well on any <b>mainstream</b> Qualcomm mobile SoC based Android phone.
+
 The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
 
 - Access to storage is required to generate necessary temporary files
