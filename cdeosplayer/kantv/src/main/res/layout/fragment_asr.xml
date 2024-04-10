@@ -9,12 +9,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/pageInfo"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="AI/Machine Learning research(by Georgi Gerganov\'s GGML\&amp;whisper.cpp\&amp;llama.cpp)" />
-
         <LinearLayout
             android:id="@+id/ggmlLayout"
             android:layout_width="match_parent"
@@ -31,12 +25,12 @@
             <TextView
                 android:id="@+id/ggmlInfo"
                 android:layout_width="match_parent"
-                android:layout_height="210dp" />
+                android:layout_height="145dp" />
 
             <TextView
                 android:id="@+id/ggmlStatus"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="5dp"
                 android:text=" " />
         </LinearLayout>
@@ -49,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bench type:" />
+                android:text="Bench:" />
 
             <Spinner
                 android:id="@+id/spinnerBenchType"

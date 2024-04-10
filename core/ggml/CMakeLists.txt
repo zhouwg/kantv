@@ -13,8 +13,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(TARGET_XIAOMI14 "whether running device is Xiaomi 14"                                ON)
-option(GGML_JNI_QNN    "kantv-ggml-jni: use QNN(Qualcomm Neural Network) SDK"               ON)
+set(TARGET_XIAOMI14    OFF) # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+set(GGML_JNI_QNN       ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
 set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)

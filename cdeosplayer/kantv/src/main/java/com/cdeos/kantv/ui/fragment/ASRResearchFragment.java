@@ -215,16 +215,14 @@
 
          CDELog.j(TAG, "load ggml's whispercpp info");
          String systemInfo = ggmljava.asr_get_systeminfo();
-         String phoneInfo = "Device info:" + "\n"
-                 + "Brand:" + Build.BRAND + "\n"
-                 + "Hardware:" + Build.HARDWARE + "\n"
-                 /*+ "Fingerprint:" + Build.FINGERPRINT + "\n"*/ /* pls don't uncomment this line in public project */
-                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + "\n"
+         String phoneInfo = "Device info:" + " "
+                 + "Brand:" + Build.BRAND + " "
+                 + "Hardware:" + Build.HARDWARE + " "
+                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + " "
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by GGML(Georgi Gerganov Machine Learning)(https://github.com/ggerganov/ggml)\n");
-
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);

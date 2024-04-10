@@ -9,12 +9,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/pageInfoLLM"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="LLM(Large Language Model) research(by GGML's llama.cpp)" />
-
         <LinearLayout
             android:id="@+id/ggmlLayoutLLM"
             android:layout_width="match_parent"

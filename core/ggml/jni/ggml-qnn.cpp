@@ -5293,6 +5293,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     error  = qnn_backend.qnn_init(nullptr);
     if (0 != error) {
         LOGGW("init qnn subsystem failed, pls check why\n");
+        ggml_free(ctx);
         result = 1;
         return 1;
     }
@@ -5417,9 +5418,8 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         TENSOR_DUMP(m2);
     }
 
-    ggml_free(ctx);
-
 failure:
+    ggml_free(ctx);
     qnn_backend.qnn_finalize();
 
     n_end_time  = ggml_time_us();
@@ -5733,6 +5733,8 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
             break;
 
         default:
+
+            ggml_free(ctx);
             LOGGD("only LayerNorm supported currently");
             GGML_JNI_NOTIFY("only LayerNorm supported currently");
             return 0;
@@ -5743,6 +5745,7 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
 
         n_end_time  = ggml_time_us();
         n_durtion   = (n_end_time - n_begin_time) / 1000;
+        ggml_free(ctx);
         LOGGD("duration of qnn_complex_graph with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
         GGML_JNI_NOTIFY("duration of qnn_complex_graph with fake qnn backend ggml is: %lld milliseconds\n", n_durtion);
 
@@ -5756,6 +5759,7 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     if (0 != error) {
         LOGGW("init qnn subsystem failed, pls check why\n");
         result = 1;
+        ggml_free(ctx);
         return 1;
     }
 
@@ -5775,9 +5779,8 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
         TENSOR_DUMP(m1);
     }
 
-    ggml_free(ctx);
-
 failure:
+    ggml_free(ctx);
     qnn_backend.qnn_finalize();
 
     n_end_time  = ggml_time_us();
