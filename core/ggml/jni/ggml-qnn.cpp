@@ -5043,8 +5043,8 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         QNN_VER_PTR(tensor_1)->clientBuf =  { input_matrix[1], 16};
         QNN_VER_PTR(tensor_2)->clientBuf =  { output_matrix[0], 16};
 
-        //for this single compute graph which contains three nodes(every node is a tensor,
-        //the GGML_OP_ADD is the edge of this single compute graph), nullptr is ok
+        //for this single computation graph which contains three nodes(every node is a tensor,
+        //the GGML_OP_ADD is the edge of this single computation graph), nullptr is ok
         //
         //tensor_2 = tensor_0 + tensor_1
         //
@@ -5234,7 +5234,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         return 1;
     }
 
-    //construct input tensor, this is graph node in a compute graph
+    //construct input tensor, this is graph node in a computation graph
     m0              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_f32(m0, 1.0f);
     m1              = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
@@ -5243,8 +5243,8 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     //https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/SupportedOps.html
     switch (n_ggml_op_type) {
         case GGML_OP_ADD:
-            ggmlop          = GGML_OP_ADD;              //this is edge of a compute graph
-            m2              = ggml_add(ctx, m0, m1);    //construct output tensor, another graph node in this single compute graph
+            ggmlop          = GGML_OP_ADD;              //this is edge of a computation graph
+            m2              = ggml_add(ctx, m0, m1);    //construct output tensor, another graph node in this single computation graph
             qnn_op_typename = QNN_OP_ELEMENT_WISE_ADD;
             break;
 
@@ -5540,7 +5540,7 @@ static int check_tensor(float * a, float * b, int n, char * label) {
 
 //TODO:
 // https://github.com/zhouwg/kantv/issues/121
-// PoC-S35&S37:implement a complex/complicated compute graph in C/C++ and then mapping to GGML compute graph and then mapping to QNN CPU/GPU backend
+// PoC-S35&S37:implement a complex/complicated computation graph in C/C++ and then mapping to GGML computation graph and then mapping to QNN CPU/GPU backend
 int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     uint32_t i                                  = 0;
     uint32_t j                                  = 0;

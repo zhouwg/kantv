@@ -67,7 +67,7 @@ extern "C" {
 #define BENCHMAKR_QNN_SAVER         8       //study QNN SDK mechanism by QNN Saver
 #define BENCHMARK_QNN_MATRIX        9       //offload a simple fp32 2x2 matrix addition operation to QNN
 #define BENCHMARK_QNN_GGML          10      //mapping ggml tensor to QNN tensor
-#define BENCHMARK_QNN_COMPLEX       11      //complex/complicated compute graph in C/C++ or GGML and then offload them to QNN
+#define BENCHMARK_QNN_COMPLEX       11      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
 #define BENCHMAKR_MAX               11
 
 #define BACKEND_CPU                 0
@@ -90,7 +90,7 @@ extern "C" {
     * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
-    * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
+    * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated computation graph
     * @return
     */
     // renamed to ggml_jni_bench for purpose of unify JNI layer of whisper.cpp and llama.cpp
@@ -172,7 +172,7 @@ extern "C" {
 
     /**
     * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
-    * @param n_graph_type type of various compute graph
+    * @param n_graph_type type of various computation graph
     * @return
     */
     int qnn_complex_graph(int n_backend_type, int n_graph_type);
