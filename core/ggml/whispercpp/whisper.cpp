@@ -1,5 +1,7 @@
 #include "whisper.h"
 
+#define GGML_USE_QNN
+
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
 #include "ggml-jni.h"
@@ -21,6 +23,10 @@
 
 #ifdef GGML_USE_SYCL
 #include "ggml-sycl.h"
+#endif
+
+#ifdef GGML_USE_QNN
+#include "ggml-qnn.h"
 #endif
 
 #ifdef WHISPER_USE_OPENVINO
@@ -132,10 +138,15 @@ static void byteswap_tensor(ggml_tensor * tensor) {
 WHISPER_ATTRIBUTE_FORMAT(2, 3)
 static void whisper_log_internal        (ggml_log_level level, const char * format, ...);
 static void whisper_log_callback_default(ggml_log_level level, const char * text, void * user_data);
-
+#if 0
 #define WHISPER_LOG_ERROR(...) whisper_log_internal(GGML_LOG_LEVEL_ERROR, __VA_ARGS__)
 #define WHISPER_LOG_WARN(...)  whisper_log_internal(GGML_LOG_LEVEL_WARN , __VA_ARGS__)
 #define WHISPER_LOG_INFO(...)  whisper_log_internal(GGML_LOG_LEVEL_INFO , __VA_ARGS__)
+#else
+#define WHISPER_LOG_ERROR LOGGE
+#define WHISPER_LOG_WARN  LOGGW
+#define WHISPER_LOG_INFO  LOGGI
+#endif
 
 // define this to enable verbose trace logging - useful for debugging purposes
 //#define WHISPER_DEBUG
@@ -1240,6 +1251,16 @@ static ggml_backend_t whisper_backend_init(const whisper_context_params & params
     }
 #endif
 
+#ifdef GGML_USE_QNN
+    if (params.use_gpu) {
+         WHISPER_LOG_INFO("%s: using QNN backend\n", __func__);
+        backend_gpu = ggml_backend_qnn_init(params.gpu_device);
+        if (!backend_gpu) {
+            WHISPER_LOG_ERROR("%s: ggml_backend_qnn_init() failed\n", __func__);
+        }
+    }
+#endif
+
     if (backend_gpu) {
         return backend_gpu;
     }
@@ -1670,11 +1691,13 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         }
     }
 
+    LOGGI("calling whisper_backend_init\n");
     wctx.backend = whisper_backend_init(wctx.params);
     if (!wctx.backend) {
         WHISPER_LOG_ERROR("%s: failed to initialize the backend\n", __func__);
         return false;
     }
+    LOGGI("after calling whisper_backend_init\n");
 
     // allocate tensors in the backend buffers
     model.buffer = ggml_backend_alloc_ctx_tensors(model.ctx, wctx.backend);
@@ -3182,6 +3205,8 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
         WHISPER_LOG_ERROR("%s: whisper_backend_init() failed\n", __func__);
         whisper_free_state(state);
         return nullptr;
+    } else {
+        WHISPER_LOG_INFO("%s: whisper_backend_init() succeed\n", __func__);
     }
 
     // at this point, we don't know yet how many decoders will be used, so we overallocate 3x ctx
@@ -3495,6 +3520,7 @@ struct whisper_context * whisper_init_from_file_with_params(const char * path_mo
 
     ctx->state = whisper_init_state(ctx);
     if (!ctx->state) {
+        LOGGI("whisper init failure\n");
         whisper_free(ctx);
         return nullptr;
     }

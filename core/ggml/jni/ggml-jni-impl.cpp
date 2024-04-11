@@ -183,7 +183,7 @@ typedef struct {
     bool     b_enable_dump_16k_data;
 } whisper_asr_context;
 
-static whisper_asr_context *p_asr_ctx   = NULL;
+static whisper_asr_context * p_asr_ctx   = NULL;
 
 static fifo_buffer_t  * whisper_asr_getfifo();
 static const char     * whisper_asr_callback(void * opaque);
@@ -1445,6 +1445,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      int result         = 0;
 
      struct whisper_full_params params;
+     struct whisper_context_params c_params = whisper_context_default_params();
 
      if ((NULL == sz_model_path) || (n_asrmode > 3)) {
          LOGGW("invalid param\n");
@@ -1518,10 +1519,17 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      p_asr_ctx->n_threads  = n_threads;
 
      LOGGD("calling whisper_init_from_file");
+#if 0
      p_asr_ctx->p_context = whisper_init_from_file(sz_model_path);
+#else  //04-11-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
+     //struct whisper_context_params c_params = whisper_context_default_params();
+     c_params.use_gpu       = true;
+     c_params.gpu_device    = 0;
+     p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
+#endif
      if (nullptr == p_asr_ctx->p_context) {
          result = 8;
-         LOGGW("initialize failure\n");
+         LOGGW("whispercpp initialize failure\n");
          goto failure;
      }
      LOGGD("after calling whisper_init_from_file");
@@ -1554,6 +1562,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      params.suppress_blank              = true;
      params.suppress_non_speech_tokens  = true;
 
+
      //ref: https://github.com/ggerganov/whisper.cpp/issues/1507
      //reduce the maximum context size (--max-context). By default it is 224. Setting it to 64 or 32 can reduce the repetitions significantly. Setting it to 0 will most likely eliminate all repetitions, but the transcription quality can be affected because it will be losing the context from the previous transcript
      params.n_max_text_ctx              = 224; //default value
@@ -1566,6 +1575,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      //params.tdrz_enable                  = false;//whisper complain failed to compute log mel spectrogram when this flag was enabled
      //params.suppress_blank               = true;
      //params.suppress_non_speech_tokens   = true;
+
 
      memcpy(p_asr_ctx->p_params, &params, sizeof(struct whisper_full_params));
 

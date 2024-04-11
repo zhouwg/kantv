@@ -13,7 +13,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(TARGET_XIAOMI14    OFF) # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 set(GGML_JNI_QNN       ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
@@ -59,6 +59,8 @@ set(SOURCE_FILES
 
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-qnn.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-qnn-impl.cpp
 
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
 
@@ -114,6 +116,10 @@ include_directories(${LLAMACPP_SRC_DIR}/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
+
+if (GGML_JNI_QNN)
+add_definitions(-DGGML_USE_QNN)
+endif()
 
 add_definitions(-DNDEBUG)
 add_definitions(-O3)

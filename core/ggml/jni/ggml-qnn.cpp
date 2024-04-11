@@ -12,11 +12,10 @@
  *     Inception_v3.cpp is generated automatically by Qualcomm's dedicated tool and it contains more then 20,000 lines C++ code
  *
  *
- * this implementation is for
+ * this implementation is preparation of
  *
  * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121) in Project KanTV
  *
- * and will submit to upstream GGML community after this PoC is finished
  *
  */
 #include <stdio.h>
@@ -68,9 +67,7 @@
 
 #include "ggml-qnn.h"
 
-#include "ggml-jni.h"  //should be removed after finished this PoC for purpose of submit to upstream GGML community
-
-
+#include "ggml-jni.h"
 
 
 // =================================================================================================
@@ -5132,6 +5129,8 @@ failure:
 
     return result;
 }
+//not used because PoC-S26 done
+//#include "Inception_v3.cpp"
 
 
 // https://github.com/zhouwg/kantv/issues/121
@@ -5538,7 +5537,7 @@ static int check_tensor(float * a, float * b, int n, char * label) {
 }
 
 
-//TODO:
+// 04-11-2024, skip this step because I already know how to do it, move to PoC-S41&S42
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S35&S37:implement a complex/complicated computation graph in C/C++ and then mapping to GGML computation graph and then mapping to QNN CPU/GPU backend
 int qnn_complex_graph(int n_backend_type, int n_graph_type) {
@@ -5793,5 +5792,3 @@ failure:
 
     return result;
 }
-
-//#include "Inception_v3.cpp"

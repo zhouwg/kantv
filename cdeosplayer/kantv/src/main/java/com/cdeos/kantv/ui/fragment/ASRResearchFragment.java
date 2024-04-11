@@ -173,7 +173,7 @@
          CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
          CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
-
+/*       move to the very beginning of app's launch stage to make PoC:Add Qualcomm mobile SoC native backend for GGML happy
          //add the qnn binary files to facilitate other developers to reproduce the qnn sample on Qualcomm SoC based android phone(Xiaomi 14 is preferred)
          //qualcomm's dedicated model file
          CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
@@ -193,7 +193,7 @@
 
          //prebuilt data from https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.md
          CDEAssetLoader.copyAssetFile(mContext, "ln.bin", CDEUtils.getDataPath() + "ln.bin");
-
+*/
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);

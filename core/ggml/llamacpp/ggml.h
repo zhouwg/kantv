@@ -2397,6 +2397,8 @@ extern "C" {
 
     GGML_API ggml_type_traits_t ggml_internal_get_type_traits(enum ggml_type type);
 
+#include "libavutil/cde_log.h"
+
 #ifdef  __cplusplus
 }
 #endif
