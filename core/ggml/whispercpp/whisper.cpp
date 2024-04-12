@@ -1,6 +1,5 @@
 #include "whisper.h"
 
-#define GGML_USE_QNN
 
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
@@ -1213,6 +1212,7 @@ static size_t aheads_masks_nbytes(struct whisper_aheads_masks & aheads_masks) {
 }
 
 static ggml_backend_t whisper_backend_init(const whisper_context_params & params) {
+    ENTER_FUNC();
     ggml_backend_t backend_gpu = NULL;
 
     // initialize the backends
@@ -1770,9 +1770,7 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
                 return false;
             }
 
-            //ggml_backend_t backend = wctx.backend;
-
-            //printf("%s: [%5.5s] %s\n", __func__, ggml_backend_name(backend), name.c_str());
+            //LOGGI("%s: [%s] %s\n", __func__, ggml_backend_name(wctx.backend), name.c_str());
 
             if (ggml_backend_buffer_is_host(model.buffer)) {
                 // for the CPU and Metal backend, we can read directly into the tensor
@@ -1787,7 +1785,7 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
                 ggml_backend_tensor_set(tensor, read_buf.data(), 0, ggml_nbytes(tensor));
             }
 
-            //printf("%48s - [%5d, %5d, %5d], type = %6s, %6.2f MB\n", name.data(), ne[0], ne[1], ne[2], ggml_type_name((ggml_type) ttype), ggml_nbytes(tensor)/1e6);
+            //LOGGI("%48s - [%5d, %5d, %5d], type = %6s, %6.2f MB", name.data(), ne[0], ne[1], ne[2], ggml_type_name((ggml_type) ttype), ggml_nbytes(tensor)/1e6);
             total_size += ggml_nbytes(tensor);
             model.n_loaded++;
         }
@@ -3196,6 +3194,7 @@ static std::string whisper_openvino_get_path_cache(std::string path_bin) {
 #endif
 
 struct whisper_state * whisper_init_state(whisper_context * ctx) {
+    ENTER_FUNC();
     fill_sin_cos_table();
 
     whisper_state * state = new whisper_state;
@@ -4119,6 +4118,16 @@ static int whisper_has_openvino(void) {
 #endif
 }
 
+
+static int whisper_has_qnn(void) {
+#ifdef GGML_USE_QNN
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+
 const char * whisper_print_system_info(void) {
     static std::string s;
 
@@ -4139,7 +4148,8 @@ const char * whisper_print_system_info(void) {
     s += "VSX = "       + std::to_string(ggml_cpu_has_vsx())       + " | ";
     s += "CUDA = "      + std::to_string(ggml_cpu_has_cuda())      + " | ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
-    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())          ;
+    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())   + " | " ;
+    s += "QNN = "       + std::to_string(whisper_has_qnn())               ;
 
     return s.c_str();
 }

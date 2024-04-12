@@ -2920,6 +2920,8 @@ static struct ggml_tensor * ggml_new_tensor_impl(
         size_t                view_offs) {
 
     assert(n_dims >= 1 && n_dims <= GGML_MAX_DIMS);
+    static int i_tensor_idx = 0;
+    char tensor_name[GGML_MAX_NAME] = {0};
 
     // find the base tensor and absolute offset
     if (view_src != NULL && view_src->view_src != NULL) {
@@ -2966,6 +2968,8 @@ static struct ggml_tensor * ggml_new_tensor_impl(
 
     struct ggml_tensor * const result = (struct ggml_tensor *)((char *)ctx->mem_buffer + obj_new->offs);
 
+    snprintf(tensor_name, GGML_MAX_NAME, "%s_%d", "tensor", i_tensor_idx);
+    i_tensor_idx++;
     *result = (struct ggml_tensor) {
         /*.type         =*/ type,
         /*.backend      =*/ GGML_BACKEND_TYPE_CPU,
@@ -2988,6 +2992,7 @@ static struct ggml_tensor * ggml_new_tensor_impl(
         /*.padding      =*/ { 0 },
     };
 
+    memcpy((*result).name, tensor_name, GGML_MAX_NAME);
     // TODO: this should not be needed as long as we don't rely on aligned SIMD loads
     //ggml_assert_aligned(result->data);
 

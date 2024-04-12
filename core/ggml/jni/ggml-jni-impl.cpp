@@ -1524,7 +1524,10 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
 #else  //04-11-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
      //struct whisper_context_params c_params = whisper_context_default_params();
      c_params.use_gpu       = true;
-     c_params.gpu_device    = 0;
+     // ref:https://github.com/ggerganov/llama.cpp/pull/6022
+     // the user could specify the devices that they want to use by name. For example,
+     // the user could specify to use devices cpu, sycl_igpu0 and sycl_dgpu0 to select CPU, iGPU and dGPU
+     c_params.gpu_device    = QNN_CPU;
      p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
 #endif
      if (nullptr == p_asr_ctx->p_context) {
@@ -1683,7 +1686,7 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode) 
 
     LOGGD("enter asr reset\n");
     if (NULL == p_asr_ctx) {
-        LOGGW("asr instance already initialized\n");
+        LOGGW("asr instance not initialized, pls check why\n");
         return 1;
     }
 

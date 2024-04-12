@@ -12,11 +12,11 @@
  *     Inception_v3.cpp is generated automatically by Qualcomm's dedicated tool and it contains more then 20,000 lines C++ code
  *
  *
- * this implementation is preparation of
+ * this implementation is preparation(PoC-S2, PoC-S3) of
  *
  * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121) in Project KanTV
  *
- *
+ * should be renamed to ggml-jni-qnn.cpp after finish this PoC
  */
 #include <stdio.h>
 #include <stdlib.h>

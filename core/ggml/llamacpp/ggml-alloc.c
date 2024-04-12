@@ -937,10 +937,10 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
         }
 
         if (this_size > max_size) {
-            LOGGW("%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu, max buffer size: %zu)\n",
+            LOGGW("%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu(%d MB), max buffer size: %zu(%d MB))\n",
                     __func__, t->name,
                     ggml_backend_buft_name(buft),
-                    this_size, max_size);
+                    this_size, this_size / (1024 * 1024), max_size, max_size / (1024 * 1024));
             for (size_t i = 0; i < n_buffers; i++) {
                 ggml_backend_buffer_free(buffers[i]);
             }
