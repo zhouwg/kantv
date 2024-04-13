@@ -550,7 +550,7 @@
                  }
 
                  stopUIBuffering();
-                 release();
+                 //release();
 
              }
          });
@@ -608,7 +608,7 @@
                  }
                  String benchmarkTip = "GGML benchmark finished ";
                  CDELog.j(TAG, benchmarkTip);
-                 release();
+                 //release();
              }
          });
      }
@@ -694,7 +694,10 @@
 
      private void initKANTVMgr() {
          if (mKANTVMgr != null) {
-             return;
+             //04-13-2024, workaround for PoC:Add Qualcomm mobile SoC native backend for GGML,https://github.com/zhouwg/kantv/issues/121
+             release();
+             mKANTVMgr = null;
+             //return;
          }
 
          try {
