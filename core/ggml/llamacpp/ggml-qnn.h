@@ -3,11 +3,7 @@
  * Copyright (C) 2024 KanTV Authors
  * SPDX-License-Identifier: MIT
  *
- * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121)
- *
  * this is implementation of ggml QNN(Qualcomm Nerual Network, aka AI Engine Direct) backend
- *
- * this file will be submitted to upstream ggml as ggml-qnn.h
  */
 #pragma once
 

@@ -3,22 +3,11 @@
  * Copyright (C) 2024 KanTV Authors
  * SPDX-License-Identifier: MIT
  *
- * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121)
- *
  * this is implementation of ggml QNN(Qualcomm Nerual Network, aka AI Engine Direct) backend
  *
  * this file will be submitted to upstream ggml as ggml-qnn.cpp
  *
- * The most important three references are:
- *
- * https://github.com/ggerganov/llama.cpp/blob/master/ggml-sycl.cpp
- *
- * https://github.com/ggerganov/llama.cpp/blob/master/ggml-metal.m
- *
- * https://github.com/zhouwg/kantv/blob/master/core/ggml/jni/ggml-qnn.cpp
- *
- *
- * status: on-going
+ * status: major/core implementation has been completed, lack of implementation GGML-OP using QNN API
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -182,13 +171,15 @@ struct ggml_backend_qnn_context {
 
 
 //TODO: not real backend buffer(aka not real QNN buffer),
-//      there are various memory / various memory type in an embedded system(the Android phone is also an embedded system):
+//      there are various memory / various memory type in an embedded system
+//      (the Android phone is also an embedded system):
 //      system memory, device memory(GPU memory, DSP memory...), TEE memory...,
 //      on-screen memory, off-screen memory,
 //      ...
 //      here I use system memory to simulate backend buffer(GPU buffer, DSP buffer...)
 //      and study the internal mechanism of ggml
-//      in the HLD stage(PoC-S41: HLD of ggml-qnn backend, https://github.com/zhouwg/kantv/issues/121)
+//      in the HLD stage(PoC-S41: HLD of ggml-qnn backend,
+//      https://github.com/zhouwg/kantv/issues/121)
 struct ggml_backend_qnn_buffer_context {
     ~ggml_backend_qnn_buffer_context() {
         if (buffer) {
@@ -206,17 +197,20 @@ struct ggml_backend_qnn_buffer_context {
 //TODO: should be removed in the future
 static bool g_qnn_loaded = false;
 
-//TODO: this global static var is used to adapt to whisper.cpp because whisper.cpp will calling whisper_backend_init many times
+//TODO: this global static var is used to adapt to whisper.cpp because whisper.cpp will
+// calling whisper_backend_init many times
+//
 // I have no idea how to handle it properly at the moment
 static ggml_backend_t g_qnn_backend = nullptr;
 
-//TODO: should be remove in the future, just used to tracking ggml internal
+//TODO: should be removed in the future, just used to tracking ggml internal
 static int i_alloc_buffer_counts    = 0;
 static long i_alloc_buffer_sizes    = 0;
 static int i_get_alloc_counts       = 0;
 static long i_get_alloc_sizes       = 0;
 
-//use a prebuild static memory layout to avoid complex resource management, this method also used in GGML internal or FFmpeg
+//use a prebuild static memory layout to avoid complex resource management, this method also used
+//in GGML internal or FFmpeg
 static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
         [QNN_CPU]   = {.device = 0, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
         [QNN_GPU]   = {.device = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
@@ -564,7 +558,7 @@ qnn_buf_t * qnn_buf_new (const char * name, int num_buffers, uint32_t buf_size) 
 }
 
 
-static const char *get_qnn_backend_name(int n_backend_type) {
+static const char * get_qnn_backend_name(int n_backend_type) {
     switch (n_backend_type) {
         case 0:
             return "QNN-CPU";
@@ -1665,6 +1659,8 @@ static void ggml_qnn_get_rows(const ggml_tensor * src0, const ggml_tensor * src1
 }
 
 
+//ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
+// https://github.com/zhouwg/kantv/commit/4e08bd46686429fe8f178600e8ad6ec93373e09d
 static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
 
@@ -1679,6 +1675,8 @@ static void ggml_qnn_acc(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 }
 
 
+//ref: PoC-S29:mapping ggml_tensor to QNN_tensor
+// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-qnn.cpp#L5138
 static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
 
@@ -1811,6 +1809,8 @@ static void ggml_qnn_dup(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 }
 
 
+//ref: PoC-S29:mapping ggml_tensor to QNN_tensor
+// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-qnn.cpp#L5138
 static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
 
@@ -2212,7 +2212,7 @@ static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_back
 
     LOGGD("size %d, %d MB", size_aligned, size_aligned / (1 << 20));
 
-    //TODO:use pre-mallocated buffer in memory pool
+    //TODO:use pre-mallocated buffer in internal memory pool
     ctx->buffer = ggml_qnn_host_malloc(size_aligned);
     ctx->buffer_size = size_aligned;
 
@@ -2245,30 +2245,6 @@ static size_t ggml_backend_qnn_buffer_type_get_max_size(ggml_backend_buffer_type
 }
 
 
-/*
-static size_t ggml_backend_qnn_buffer_type_get_alloc_size(ggml_backend_buffer_type_t buft,
-                                                          const ggml_tensor * tensor) {
-    ENTER_FUNC();
-    GGML_UNUSED(buft);
-    size_t size = ggml_nbytes(tensor);
-    int64_t ne0 = tensor->ne[0];
-
-    i_get_alloc_counts++;
-    LOGGD("size %d, ne0 %d", size, ne0);
-    if (ggml_is_quantized(tensor->type)) {
-        if (ne0 % MATRIX_ROW_PADDING != 0) {
-            size += ggml_row_size(tensor->type, MATRIX_ROW_PADDING - ne0 % MATRIX_ROW_PADDING);
-        }
-    }
-    i_get_alloc_sizes += size;
-    LOGGI("i_alloc_counts %d, i_alloc_sizes %ld(%ldMB)", i_get_alloc_counts, i_get_alloc_sizes, i_get_alloc_sizes / (1 << 20));
-    LEAVE_FUNC();
-
-    return size;
-}
-*/
-
-
 static bool ggml_backend_qnn_buffer_type_supports_backend(ggml_backend_buffer_type_t buft,
                                                           ggml_backend_t backend) {
     ENTER_FUNC();
@@ -2279,6 +2255,10 @@ static bool ggml_backend_qnn_buffer_type_supports_backend(ggml_backend_buffer_ty
 }
 
 
+// attention here because Qualcomm's QNN SDK is a highly well-designed SDK
+//
+// refer to https://developer.qualcomm.com/sites/default/files/attachments/qnn_software_stack.png
+//          https://docs.qualcomm.com/bundle/publicresource/topics/80-63442-50/overview.html
 static bool ggml_backend_qnn_buffer_is_host(ggml_backend_buffer_type_t buft) {
     GGML_UNUSED(buft);
     return true;
@@ -2335,6 +2315,7 @@ static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_
 }
 
 
+//TODO: implement all supported GGML OP using QNN API
 static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
     ENTER_FUNC();
     ggml_backend_qnn_context * ctx = (ggml_backend_qnn_context *) backend->context;
@@ -2376,6 +2357,7 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
 
     return GGML_STATUS_SUCCESS;
 }
+
 
 #if 1
 static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tensor * op) {
@@ -2650,6 +2632,7 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
             i_get_alloc_counts   = 0;
             i_get_alloc_sizes  = 0;
         }
+        //TODO: better method to handle internal state between whisper.cpp/llama.cpp and qnn backend
         //return nullptr;
     }
 
@@ -2705,7 +2688,7 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     //TODO:refine internal buffer management
     g_qnn_mgr[device].buffer_pool               = qnn_buf_new(get_qnn_backend_name(device), GGML_QNN_MAX_BUFFERS, (1 << 20));
     GGML_ASSERT(g_qnn_mgr[device].buffer_pool != nullptr);
-    g_qnn_loaded                                = true; // got a valid QNN instance
+    g_qnn_loaded                                = true; // TODO: better method to handle multiple QNN device
 
     ggml_backend_t qnn_backend = new ggml_backend {
             /* .guid      = */ ggml_backend_qnn_guid(),

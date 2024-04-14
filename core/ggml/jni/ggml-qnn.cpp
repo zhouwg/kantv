@@ -12,7 +12,7 @@
  *     Inception_v3.cpp is generated automatically by Qualcomm's dedicated tool and it contains more then 20,000 lines C++ code
  *
  *
- * this implementation is preparation(PoC-S2, PoC-S3) of
+ * this implementation is preparation stage (PoC-S2, PoC-S3) of PoC-S42
  *
  * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121) in Project KanTV
  *
@@ -5134,7 +5134,7 @@ failure:
 
 
 // https://github.com/zhouwg/kantv/issues/121
-// PoC-S27:  mapping ggml_tensor to QNN_tensor and offload a simple 2x2 matrix addition operation to QNN CPU backend
+// PoC-S29:  mapping ggml_tensor to QNN_tensor and offload a simple 2x2 matrix addition operation to QNN CPU backend
 int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     uint32_t i                                  = 0;
     uint32_t j                                  = 0;
@@ -5536,16 +5536,16 @@ static int check_tensor(float * a, float * b, int n, char * label) {
     return ok;
 }
 
-
+static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type);
 // 04-11-2024, skip this step because I already know how to do it, move to PoC-S41&S42
 // https://github.com/zhouwg/kantv/issues/121
-// PoC-S35&S37:implement a complex/complicated computation graph in C/C++ and then mapping to GGML computation graph and then mapping to QNN CPU/GPU backend
+// PoC-S35&S37:implement a complex/complicated computation graph
 int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     uint32_t i                                  = 0;
     uint32_t j                                  = 0;
     int error                                   = 0;
     int result                                  = 0;
-    std::string graph_name                      = "qnn_ggml";
+    std::string graph_name                      = "qnn_complex_graph";
     const char * qnn_backend_lib                = "libQnnCpu.so";
 
     int64_t  n_begin_time                       = 0LL;
@@ -5578,9 +5578,12 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
             /* no_alloc   =*/ 0
     };
 
+    if (1 == n_graph_type) {
+        result = qnn_complex_graph_inception(n_backend_type, 1);
+        return result;
+    }
     ggml_time_init();
     n_begin_time                                = ggml_time_us();
-
     LOGGD("enter qnn_complex_graph\n");
     n_graph_type                                = 0; //TODO: hardcode to 0
 
@@ -5789,6 +5792,385 @@ failure:
 
 
     LOGGD("leave qnn_complex_graph\n");
+
+    return result;
+}
+
+
+// https://github.com/zhouwg/kantv/issues/121
+// PoC-S37:implement a complex/complicated computation graph
+// how to mapping GGML tensor to QNN tensor could be found at PoC-S29(function qnn_ggml)
+static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
+    int error   = 0;
+    int result  = 0;
+    std::string graph_name                      = "qnn_complex_graph";
+    const char * qnn_backend_lib                = "libQnnCpu.so"; //TODO hardcode
+
+    int64_t  n_begin_time                       = 0LL;
+    int64_t  n_end_time                         = 0LL;
+    int64_t  n_durtion                          = 0LL;
+
+    ggml_time_init();
+    n_begin_time                                = ggml_time_us();
+
+    LOGGD("enter qnn_complex_graph_inception\n");
+    n_graph_type                                = 1; //TODO: hardcode to 1
+
+    LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
+          n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
+                    n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
+    error  = qnn_backend.qnn_init(nullptr);
+    if (0 != error) {
+        LOGGW("init qnn subsystem failed, pls check why\n");
+        return 1;
+    }
+
+    QNN_INTERFACE_VER_TYPE qnn_raw_interface                = qnn_backend.get_qnn_raw_interface();
+    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface  = qnn_backend.get_qnn_raw_system_interface();
+    qnn_interface qnn_interface                             = qnn_backend.get_qnn_interface();
+    Qnn_BackendHandle_t backend_0                           = qnn_backend.get_qnn_backend_handle();
+    Qnn_ContextHandle_t context_0                           = qnn_backend.get_qnn_context_handle();
+    Qnn_DeviceHandle_t device_0                             = qnn_backend.get_qnn_device_handle();
+    if (!qnn_interface.is_loaded()) {
+        LOGGW("qnn subsystem failure\n");
+        return 2;
+    }
+
+    //prebuild data for this complex computation graph
+    FILE *fp = fopen("/sdcard/kantv/params.bin", "rb");
+    if (!fp) {
+        error = -1;
+        LOGGI("ERROR! Could not open params.bin, ensure this file is in the current working directory when executing this program\n");
+        GGML_JNI_NOTIFY("ERROR! Could not open params.bin, ensure this file is in the current working directory when executing this program\n");
+        return error;
+    }
+
+    const QnnGraph_Config_t *context_0_convReluModel_config_0[] = {NULL};
+    Qnn_GraphHandle_t context_0_convReluModel;
+    qnn_raw_interface.graphCreate(context_0, graph_name.c_str(), context_0_convReluModel_config_0, &context_0_convReluModel);
+
+    //how to compose a complex qnn computation graph
+    //step-1:
+    uint32_t context_0_convReluModel_tensor_0_dims[] = {1, 299, 299, 3};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_0_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}};
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_0_clientBuf = {NULL, 0};
+    Qnn_TensorV1_t context_0_convReluModel_tensor_0_v1 = {0, "input_0",
+                                                          QNN_TENSOR_TYPE_APP_WRITE,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_FLOAT_32,
+                                                          context_0_convReluModel_tensor_0_quantizeParams,
+                                                          4, context_0_convReluModel_tensor_0_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_0_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_0 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_0_v1
+    };
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel,&context_0_convReluModel_tensor_0);
+    LOGGI("error = %d\n", error);
+
+    //step-2:
+    uint32_t context_0_convReluModel_tensor_1_dims[] = {3, 3, 3, 32};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_1_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    float context_0_convReluModel_tensor_1_data[864];
+    fread(context_0_convReluModel_tensor_1_data, 4, 864, fp);
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_1_clientBuf = {
+            (void *) context_0_convReluModel_tensor_1_data, 3456
+    };
+    Qnn_TensorV1_t context_0_convReluModel_tensor_1_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_weight",
+                                                          QNN_TENSOR_TYPE_STATIC,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_FLOAT_32,
+                                                          context_0_convReluModel_tensor_1_quantizeParams,
+                                                          4, context_0_convReluModel_tensor_1_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_1_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_1 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_1_v1
+    };
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_1);
+    LOGGI("error = %d\n", error);
+
+    //step-3:
+    uint32_t context_0_convReluModel_tensor_2_dims[] = {32};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_2_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    float context_0_convReluModel_tensor_2_data[32];
+    fread(context_0_convReluModel_tensor_2_data, 4, 32, fp);
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_2_clientBuf = {
+            (void *) context_0_convReluModel_tensor_2_data, 128
+    };
+    Qnn_TensorV1_t context_0_convReluModel_tensor_2_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_bias",
+                                                          QNN_TENSOR_TYPE_STATIC,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_FLOAT_32,
+                                                          context_0_convReluModel_tensor_2_quantizeParams,
+                                                          1, context_0_convReluModel_tensor_2_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_2_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_2 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_2_v1
+    };
+    error=qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_2);
+    LOGGI("error = %d\n", error);
+
+    //step-4:
+    uint32_t context_0_convReluModel_tensor_3_dims[] = {2};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_3_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    static uint32_t context_0_convReluModel_tensor_3_data[2];
+    fread(context_0_convReluModel_tensor_3_data, 4, 2, fp);
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_3_clientBuf = {
+            (void *) context_0_convReluModel_tensor_3_data, 8
+    };
+    Qnn_TensorV1_t context_0_convReluModel_tensor_3_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_dilation",
+                                                          QNN_TENSOR_TYPE_STATIC,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_UINT_32,
+                                                          context_0_convReluModel_tensor_3_quantizeParams,
+                                                          1, context_0_convReluModel_tensor_3_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_3_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_3 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_3_v1
+    };
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_3);
+    LOGGI("error = %d\n", error);
+
+    //step-5:
+    uint32_t context_0_convReluModel_tensor_4_dims[] = {2, 2};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_4_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    static uint32_t context_0_convReluModel_tensor_4_data[4];
+    fread(context_0_convReluModel_tensor_4_data, 4, 4, fp);
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_4_clientBuf = {
+            (void *) context_0_convReluModel_tensor_4_data,
+            16
+    };
+    Qnn_TensorV1_t context_0_convReluModel_tensor_4_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_pad_amount",
+                                                          QNN_TENSOR_TYPE_STATIC,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_UINT_32,
+                                                          context_0_convReluModel_tensor_4_quantizeParams,
+                                                          2, context_0_convReluModel_tensor_4_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_4_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_4 = {
+            (Qnn_TensorVersion_t) 1, .v1 = context_0_convReluModel_tensor_4_v1};
+    error =qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_4);
+    LOGGI("error = %d\n", error);
+
+
+
+    //step-6:
+    uint32_t context_0_convReluModel_tensor_5_dims[] = {2};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_5_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    static uint32_t context_0_convReluModel_tensor_5_data[2];
+    fread(context_0_convReluModel_tensor_5_data, 4, 2, fp);
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_5_clientBuf = {
+            (void *) context_0_convReluModel_tensor_5_data, 8
+    };
+    Qnn_TensorV1_t context_0_convReluModel_tensor_5_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_stride",
+                                                          QNN_TENSOR_TYPE_STATIC,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_UINT_32,
+                                                          context_0_convReluModel_tensor_5_quantizeParams,
+                                                          1, context_0_convReluModel_tensor_5_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_5_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_5 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_5_v1
+    };
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_5);
+    LOGGI("error = %d\n", error);
+
+    //step-7:
+    uint32_t context_0_convReluModel_tensor_6_dims[] = {1, 149, 149, 32};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_6_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_6_clientBuf = {NULL, 0};
+    Qnn_TensorV1_t context_0_convReluModel_tensor_6_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_BatchNorm_FusedBatchNorm_0",
+                                                          QNN_TENSOR_TYPE_NATIVE,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_FLOAT_32,
+                                                          context_0_convReluModel_tensor_6_quantizeParams,
+                                                          4, context_0_convReluModel_tensor_6_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_6_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_6 = {
+            (Qnn_TensorVersion_t) 1, .v1 = context_0_convReluModel_tensor_6_v1};
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_6);
+    LOGGI("error = %d\n", error);
+
+
+    //step-8:
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_0 = {
+            QNN_PARAMTYPE_TENSOR,
+            "dilation",
+            .tensorParam = context_0_convReluModel_tensor_3
+    };
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_1 = {
+            QNN_PARAMTYPE_TENSOR,
+            "pad_amount",
+            .tensorParam = context_0_convReluModel_tensor_4
+    };
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_2 = {
+            QNN_PARAMTYPE_TENSOR,
+            "stride",
+            .tensorParam = context_0_convReluModel_tensor_5
+    };
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_3 = {
+            QNN_PARAMTYPE_SCALAR,
+            "group",
+            .scalarParam = {
+                    QNN_DATATYPE_UINT_32, .uint32Value = 1}
+    };
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_params[] = {
+            context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_0,
+            context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_1,
+            context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_2,
+            context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_param_3};
+
+    Qnn_Tensor_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_inputs[] = {
+            context_0_convReluModel_tensor_0,
+            context_0_convReluModel_tensor_1,
+            context_0_convReluModel_tensor_2};
+
+    Qnn_Tensor_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_outputs[] = {
+            context_0_convReluModel_tensor_6
+    };
+    //attention here, key point of how to construct QNN OP config for a complex computation graph
+    //similar to CFG in front-end phase/stage of GCC compiler
+    Qnn_OpConfig_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0 = {
+            (Qnn_OpConfigVersion_t) 1,
+            .v1 = {
+                    "InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D",
+                    "qti.aisw",
+                    "Conv2d",
+                    4,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_params,
+                    3,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_inputs,
+                    1,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0_outputs
+            }
+    };
+    //attention here
+    error = qnn_raw_interface.graphAddNode(context_0_convReluModel, context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Conv2D_0);
+    LOGGI("error = %d\n", error);
+
+    //step-9:
+    uint32_t context_0_convReluModel_tensor_7_dims[] = {1, 149, 149, 32};
+    Qnn_QuantizeParams_t context_0_convReluModel_tensor_7_quantizeParams = {
+            QNN_DEFINITION_UNDEFINED,
+            QNN_QUANTIZATION_ENCODING_UNDEFINED,
+            .scaleOffsetEncoding = {0.0, 0}
+    };
+    Qnn_ClientBuffer_t context_0_convReluModel_tensor_7_clientBuf = {NULL, 0};
+    Qnn_TensorV1_t context_0_convReluModel_tensor_7_v1 = {0,
+                                                          "InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0",
+                                                          QNN_TENSOR_TYPE_APP_READ,
+                                                          QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                                                          QNN_DATATYPE_FLOAT_32,
+                                                          context_0_convReluModel_tensor_7_quantizeParams,
+                                                          4, context_0_convReluModel_tensor_7_dims,
+                                                          QNN_TENSORMEMTYPE_RAW,
+                                                          context_0_convReluModel_tensor_7_clientBuf
+    };
+    Qnn_Tensor_t context_0_convReluModel_tensor_7 = {
+            (Qnn_TensorVersion_t) 1,
+            .v1 = context_0_convReluModel_tensor_7_v1
+    };
+    error = qnn_raw_interface.tensorCreateGraphTensor(context_0_convReluModel, &context_0_convReluModel_tensor_7);
+    LOGGI("error = %d\n", error);
+
+    //step-10:
+    //attention here: similar to what I did in PoC-S26
+    Qnn_Param_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_params[] = {};
+    Qnn_Tensor_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_inputs[] = {
+            context_0_convReluModel_tensor_6
+    };
+    Qnn_Tensor_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_outputs[] = {
+            context_0_convReluModel_tensor_7
+    };
+    Qnn_OpConfig_t context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0 = {
+            (Qnn_OpConfigVersion_t) 1, .v1 = {
+                    "InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu",
+                    "qti.aisw",
+                    "Relu",
+                    0,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_params,
+                    1,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_inputs,
+                    1,
+                    context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0_outputs
+            }
+    };
+    //attention here
+    error = qnn_raw_interface.graphAddNode(context_0_convReluModel,context_0_convReluModel_InceptionV3_InceptionV3_Conv2d_1a_3x3_Relu_0);
+    LOGGI("error = %d\n", error);
+
+    //step-11:
+    error = qnn_raw_interface.graphFinalize(context_0_convReluModel, NULL, NULL);
+    LOGGI("error = %d\n", error);
+    Qnn_Tensor_t context_0_convReluModel_inputTensors_0[] = {context_0_convReluModel_tensor_0};
+    Qnn_Tensor_t context_0_convReluModel_outputTensors_0[] = {context_0_convReluModel_tensor_7};
+    //attention here
+    error = qnn_raw_interface.graphExecute(context_0_convReluModel, context_0_convReluModel_inputTensors_0, 1,
+                                           context_0_convReluModel_outputTensors_0, 1, NULL, NULL);
+    LOGGI("error = %d\n", error);
+
+    qnn_backend.qnn_finalize();
+
+    n_end_time  = ggml_time_us();
+    n_durtion   = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of qnn_complex_graph_inception with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+    GGML_JNI_NOTIFY("duration of qnn_complex_graph_inception with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+
+    LOGGD("leave qnn_complex_graph_inception\n");
 
     return result;
 }

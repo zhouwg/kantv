@@ -126,5 +126,6 @@
 
     <string-array name="graphtype">
         <item>layernorm</item>
+        <item>inception</item>
     </string-array>
 </resources>
