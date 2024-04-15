@@ -267,7 +267,7 @@ failure:
 }
 
 
-void  ggml_jni_notify_c_impl(const char *format,  ...) {
+void  ggml_jni_notify_c_impl(const char * format,  ...) {
     static unsigned char s_ggml_jni_buf[JNI_BUF_LEN];
 
     va_list va;

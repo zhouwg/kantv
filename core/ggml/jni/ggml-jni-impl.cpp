@@ -814,8 +814,11 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
-
-    p_asr_ctx->b_use_gpu                = false;        // TODO:not used currently
+#ifdef GGML_USE_QNN
+    p_asr_ctx->b_use_gpu                = true;
+#else
+    p_asr_ctx->b_use_gpu                = false;
+#endif
     p_asr_ctx->n_threads                = n_threads;
     p_asr_ctx->n_benchmark_type         = n_bench_type;
     memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
@@ -845,7 +848,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             break;
 
         case BENCHMARK_MATRIX:
-            ggml_bench_matrix(n_threads);
+            ggml_bench_matrix(n_backend_type, n_threads);
             break;
 
         case BENCHMAKR_LLAMA:
@@ -1527,7 +1530,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      // ref:https://github.com/ggerganov/llama.cpp/pull/6022
      // the user could specify the devices that they want to use by name. For example,
      // the user could specify to use devices cpu, sycl_igpu0 and sycl_dgpu0 to select CPU, iGPU and dGPU
-     c_params.gpu_device    = QNN_CPU;
+     c_params.gpu_device    = QNN_CPU; //QNN_GPU
      p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
 #endif
      if (nullptr == p_asr_ctx->p_context) {

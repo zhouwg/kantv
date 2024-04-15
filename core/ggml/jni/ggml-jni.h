@@ -139,7 +139,12 @@ extern "C" {
     */
     int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
 
-    void         ggml_bench_matrix(int num_threads);
+    /**
+     *
+     * @param backend_type QNN CPU/GPU/DSP or ggml
+     * @param num_threads  1-8
+     */
+    void         ggml_bench_matrix(int backend_type, int num_threads);
 
     int          ggml_bench_llama(const char * sz_model_path, int num_threads);
 

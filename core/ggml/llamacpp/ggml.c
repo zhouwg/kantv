@@ -5,6 +5,8 @@
 #include "ggml-quants.h"
 #include "ggml.h"
 
+#include "libavutil/cde_log.h"
+
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <malloc.h> // using malloc.h with MSC/MINGW
 #elif !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
@@ -26,6 +28,9 @@
 #include <signal.h>
 #if defined(__gnu_linux__)
 #include <syscall.h>
+#endif
+#ifdef GGML_USE_QNN
+#include "ggml-qnn.h"
 #endif
 
 #ifdef GGML_USE_METAL
@@ -185,7 +190,11 @@ void ggml_print_backtrace(void) {
 #define GGML_PRINT_DEBUG_10(...)
 #endif
 
+#if 0
 #define GGML_PRINT(...) printf(__VA_ARGS__)
+#else
+#define GGML_PRINT      LOGGD
+#endif
 
 //
 // end of logging block
@@ -2195,6 +2204,7 @@ struct ggml_context {
     bool   mem_buffer_owned;
     bool   no_alloc;
     bool   no_alloc_save; // this is used to save the no_alloc state when using scratch buffers
+    bool   use_hwaccel;   // for PoC: Add Qualcomm mobile SoC native backend for GGML,https://github.com/zhouwg/kantv/issues/121
 
     int    n_objects;
 
@@ -2754,13 +2764,13 @@ struct ggml_context * ggml_init(struct ggml_init_params params) {
         /*.mem_buffer_owned   =*/ params.mem_buffer ? false : true,
         /*.no_alloc           =*/ params.no_alloc,
         /*.no_alloc_save      =*/ params.no_alloc,
+        /*.use_hwaccel        =*/ params.use_hwaccel,
         /*.n_objects          =*/ 0,
         /*.objects_begin      =*/ NULL,
         /*.objects_end        =*/ NULL,
         /*.scratch            =*/ { 0, 0, NULL, },
         /*.scratch_save       =*/ { 0, 0, NULL, },
     };
-
     GGML_ASSERT(ctx->mem_buffer != NULL);
 
     ggml_assert_aligned(ctx->mem_buffer);
@@ -2991,6 +3001,9 @@ static struct ggml_tensor * ggml_new_tensor_impl(
         /*.extra        =*/ NULL,
         /*.padding      =*/ { 0 },
     };
+
+    if (ctx->use_hwaccel)
+        result->backend =  GGML_BACKEND_TYPE_GPU;
 
     memcpy((*result).name, tensor_name, GGML_MAX_NAME);
     // TODO: this should not be needed as long as we don't rely on aligned SIMD loads
@@ -10738,6 +10751,20 @@ static void ggml_compute_forward_mul_mat(
 
     // nb01 >= nb00 - src0 is not transposed
     //   compute by src0 rows
+    if (src0->backend == GGML_BACKEND_TYPE_GPU) {
+#if defined(GGML_USE_QNN)
+        if (ggml_qnn_can_mul_mat(src0, src1, dst)) {
+            if (params->ith == 0 && params->type == GGML_TASK_TYPE_COMPUTE) {
+                ggml_qnn_mul_mat(src0, src1, dst);
+            }
+            return;
+        }
+        LOGGI("hw acceleration with QNN");
+#endif
+    } else {
+        LOGGI("no hw acceleration");
+    }
+
 
 #if defined(GGML_USE_CLBLAST)
     if (ggml_cl_can_mul_mat(src0, src1, dst)) {
@@ -16207,7 +16234,15 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
             } break;
         case GGML_OP_MUL_MAT:
             {
+                //LOGGI("I'm GGML_OP_MUL_MAT");
+                int64_t  n_begin_time                       = 0LL;
+                int64_t  n_end_time                         = 0LL;
+                int64_t  n_durtion                          = 0LL;
+                n_begin_time                                = ggml_time_us();
                 ggml_compute_forward_mul_mat(params, tensor);
+                n_end_time  = ggml_time_us();
+                n_durtion   = (n_end_time - n_begin_time);
+                //LOGGD("duration is: %lld us\n",  n_durtion);
             } break;
         case GGML_OP_MUL_MAT_ID:
             {
@@ -18662,6 +18697,12 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
                 (double) cgraph->perf_cycles  / (double) ggml_cycles_per_ms() / (double) cgraph->perf_runs,
                 (double) perf_time_us_cur     / 1000.0,
                 (double) cgraph->perf_time_us / 1000.0 / cgraph->perf_runs);
+        LOGGI("%s: perf (%d) - cpu = %.3f / %.3f ms, wall = %.3f / %.3f ms\n",
+                         __func__, cgraph->perf_runs,
+                         (double) perf_cycles_cur      / (double) ggml_cycles_per_ms(),
+                         (double) cgraph->perf_cycles  / (double) ggml_cycles_per_ms() / (double) cgraph->perf_runs,
+                         (double) perf_time_us_cur     / 1000.0,
+                         (double) cgraph->perf_time_us / 1000.0 / cgraph->perf_runs);
     }
 
     return compute_status;

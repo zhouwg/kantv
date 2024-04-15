@@ -109,6 +109,26 @@ extern "C" {
 
 #define log_tostr(var) log_var_to_string_impl(var).c_str()
 
+static uint32_t get_tensor_data_size(const ggml_tensor * tensor) {
+    uint32_t data_size = tensor->ne[0] * tensor->ne[1] * tensor->ne[2] * tensor->ne[3] * ggml_type_size(tensor->type);
+
+    return data_size;
+}
+
+static const char * get_qnn_backend_name(int n_backend_type) {
+    switch (n_backend_type) {
+        case 0:
+            return "QNN CPU";
+        case 1:
+            return "QNN GPU";
+        case 2:
+            return "QNN DSP";
+        case 3:
+            return "ggml";
+        default:
+            return "unknown";
+    }
+}
 
 // 03-26-2024,
 // this function was referenced by this PR:https://github.com/ggerganov/llama.cpp/pull/5935/
@@ -769,24 +789,47 @@ static void ggml_graph_compute_helper(std::vector<uint8_t> & buf, ggml_cgraph * 
 
 static float tensor_sum_elements(const ggml_tensor * tensor) {
     double sum = 0;
+    float  value = 0;
+    std::ostringstream tmposs;
     if (tensor->type == GGML_TYPE_F32) {
-        for (int j = 0; j < tensor->ne[1]; j++) {
-            for (int k = 0; k < tensor->ne[0]; k++) {
-                sum += ((float *) tensor->data)[j*tensor->ne[0] + k];
+        for (int h = 0; h < tensor->ne[3]; h++) {
+            for (int i = 0; i < tensor->ne[2]; i++) {
+                for (int j = 0; j < tensor->ne[1]; j++) {
+                    for (int k = 0; k < tensor->ne[0]; k++) {
+                        value = ((float *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] + j * tensor->ne[0] + k];
+                        sum += value;
+                        //LOGGD("[%d][%d][%d][%d]%.2f \t", h, i, j, k, value);
+                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value << "\t";
+                    }
+                    if (strlen(tmposs.str().c_str()) > 4000) {
+
+                    } else {
+                        LOGGD("%s", tmposs.str().c_str());
+                        GGML_JNI_NOTIFY("%s", tmposs.str().c_str());
+                    }
+                    tmposs.clear();
+                    tmposs.str("");
+                    LOGGD("\n");
+                }
             }
         }
     }
+    LOGGD("\n");
     return sum;
 }
 
-
 static void tensor_dump(const ggml_tensor * tensor, const char * name) {
-    printf("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi) - ", name,
-            tensor->type, ggml_type_name(tensor->type),
-            tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
+    LOGGD("dump ggml tensor %s\n", name);
+    GGML_JNI_NOTIFY("dump ggml tensor %s",name);
+    LOGGD("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", name,
+          tensor->type, ggml_type_name(tensor->type),
+          tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
     float sum = tensor_sum_elements(tensor);
-    printf("Sum of tensor %s is %6.2f\n", name, sum);
+
+    LOGGD("\n");
+    LOGGD("Sum of tensor %s is %6.2f\n", name, sum);
 }
+
 
 
 #define TENSOR_DUMP(tensor) tensor_dump(tensor, #tensor)
@@ -796,11 +839,16 @@ struct benchmark_params_struct {
     int32_t n_iterations  = 10;
 };
 
-void ggml_bench_matrix(int num_threads) {
+
+void ggml_bench_matrix(int backend_type, int num_threads) {
     struct benchmark_params_struct benchmark_params;
 
     bool invalid_param = false;
     std::string arg;
+
+    int64_t  n_begin_time           = 0LL;
+    int64_t  n_end_time             = 0LL;
+    int64_t  n_durtion              = 0LL;
 
     LOGGD("enter ggml_bench_matrix\n");
 
@@ -813,8 +861,8 @@ void ggml_bench_matrix(int num_threads) {
 
 #undef VERBOSE_DEBUGGING
 #ifndef VERBOSE_DEBUGGING
-    const int sizey = 4096;
-    const int sizex = 11008;
+    const int sizey = 2048;
+    const int sizex = 2048;
     const int sizez = 128;
 #else
     /* Working - let's increase size */
@@ -830,7 +878,9 @@ void ggml_bench_matrix(int num_threads) {
     GGML_JNI_NOTIFY("Memsize required = %i\n", sizex*sizex);
 
     // TODO: perform the bench for all types or for a user specified type
-    const ggml_type qtype = GGML_TYPE_Q4_1;
+    const ggml_type qtype = GGML_TYPE_F32;
+
+    n_begin_time                        = ggml_time_us();
 
     size_t ctx_size = 0;
     ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
@@ -850,6 +900,11 @@ void ggml_bench_matrix(int num_threads) {
             /* no_alloc   =*/ 0
     };
 
+#ifdef GGML_USE_QNN
+    if (backend_type != 3) //original ggml
+        params.use_hwaccel   = true;
+#endif
+
     ctx = ggml_init(params);
     if (!ctx) {
         LOGGW("%s: ggml_init() failed\n");
@@ -863,30 +918,52 @@ void ggml_bench_matrix(int num_threads) {
 
     // GGML_JNI_NOTIFY("Creating new tensor m1\n");
     struct ggml_tensor * m12 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m12, 1.5f);
+    ggml_set_f32(m12, 2.0f);
 
     // GGML_JNI_NOTIFY("Creating new tensor m2\n");
     struct ggml_tensor * m2 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizez);
     ggml_set_f32(m2, 2.0f);
 
-    GGML_JNI_NOTIFY("\n------ Test 1 - Matrix Mult via F32 code\n");
+    GGML_JNI_NOTIFY("\n------Matrix Mult via F32 code\n");
     // GGML_JNI_NOTIFY("Creating new tensor m11xm2\n");
-    struct ggml_tensor * m11xm2 = ggml_mul_mat(ctx, m11, m2);
+    struct ggml_tensor * m11xm12 = ggml_mul_mat(ctx, m11, m12);
+    ggml_set_f32(m11xm12, 0.0f);
 
     // GGML_JNI_NOTIFY("Creating compute graph\n");
     struct ggml_cgraph * gf = ggml_new_graph(ctx);
-    ggml_build_forward_expand(gf, m11xm2);
+    ggml_build_forward_expand(gf, m11xm12);
 
     GGML_JNI_NOTIFY("n_threads=%i\n", benchmark_params.n_threads);
-
-    TENSOR_DUMP(m11);
-    TENSOR_DUMP(m2);
 
     std::vector<uint8_t> work_buffer;
 
     ggml_graph_compute_helper(work_buffer, gf, benchmark_params.n_threads);
 
-    TENSOR_DUMP(gf->nodes[0]);
+    if (get_tensor_data_size(m11) < 100) {
+        TENSOR_DUMP(m11);
+        TENSOR_DUMP(m12);
+        TENSOR_DUMP(m11xm12);
+    } else {
+        LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m11->name,
+              m11->type, ggml_type_name(m11->type), m11->ne[0], m11->ne[1], m11->ne[2], m11->nb[0], m11->nb[1], m11->nb[2]);
+        LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m12->name,
+              m12->type, ggml_type_name(m12->type), m12->ne[0], m12->ne[1], m12->ne[2], m12->nb[0], m12->nb[1], m12->nb[2]);
+        LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m11xm12->name,
+              m11xm12->type, ggml_type_name(m11xm12->type), m11xm12->ne[0], m11xm12->ne[1], m11xm12->ne[2], m11xm12->nb[0], m11xm12->nb[1], m11xm12->nb[2]);
+        GGML_JNI_NOTIFY("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m11->name,
+              m11->type, ggml_type_name(m11->type), m11->ne[0], m11->ne[1], m11->ne[2], m11->nb[0], m11->nb[1], m11->nb[2]);
+        GGML_JNI_NOTIFY("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m12->name,
+              m12->type, ggml_type_name(m12->type), m12->ne[0], m12->ne[1], m12->ne[2], m12->nb[0], m12->nb[1], m12->nb[2]);
+        GGML_JNI_NOTIFY("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", m11xm12->name,
+              m11xm12->type, ggml_type_name(m11xm12->type), m11xm12->ne[0], m11xm12->ne[1], m11xm12->ne[2], m11xm12->nb[0], m11xm12->nb[1], m11xm12->nb[2]);
+    }
+
+    //TENSOR_DUMP(gf->nodes[0]);
+    n_end_time  = ggml_time_us();
+    n_durtion   = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of matrix with backend %d(%s) is: %lld milliseconds\n", backend_type, get_qnn_backend_name(backend_type), n_durtion);
+    GGML_JNI_NOTIFY("duration of matrix with backend %d(%s) is: %lld milliseconds\n", backend_type, get_qnn_backend_name(backend_type), n_durtion);
+    return;
 
     GGML_JNI_NOTIFY("\n------ Test 2 - Matrix Mult via %s code\n", ggml_type_name(qtype));
 

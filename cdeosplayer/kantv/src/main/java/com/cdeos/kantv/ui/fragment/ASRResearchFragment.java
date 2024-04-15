@@ -498,7 +498,7 @@
                                  CDEUtils.getDataPath() + ggmlModelFileName,
                                  CDEUtils.getDataPath() + ggmlSampleFileName,
                                  benchmarkIndex,
-                                 nThreadCounts, 0, 0);
+                                 nThreadCounts, backendIndex, 0);
                      } else {
                          // avoid following issue
                          // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by

@@ -2109,10 +2109,11 @@ static struct ggml_cgraph * whisper_build_graph_encoder(
 
     wstate.embd_enc = cur;
 
-    //ggml_graph_print(gf);
+    ggml_graph_print(gf);
 
     ////////////////////////////////////////////////////////////////////////////
 
+    LOGGI("used_mem = %f MB", ggml_used_mem(ctx0)/1e6);
     //printf("%s: used_mem = %f MB, %f MB, %f MB %f MB %f MB\n", __func__,
     //        ggml_used_mem(ctx0)/1e6,
     //        wstate.get_buf_max_mem(0)/1e6,
@@ -2181,7 +2182,7 @@ static struct ggml_cgraph * whisper_build_graph_cross(
         ggml_build_forward_expand(gf, ggml_cpy(ctx0, Vcross, v));
     }
 
-    //ggml_graph_print(gf);
+    ggml_graph_print(gf);
 
     ggml_free(ctx0);
 
@@ -6588,6 +6589,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
         const size_t N = sizes[j];
 
+#if 1
         for (int k = 0; k < 7; ++k) {
             const ggml_type wtype =
                 k == 0 ? GGML_TYPE_Q4_0 :
@@ -6596,6 +6598,11 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 k == 3 ? GGML_TYPE_Q5_1 :
                 k == 4 ? GGML_TYPE_Q8_0 :
                 k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
+#else
+        for (int k = 0; k < 1; ++k) {
+            const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
+            k = 6; //hardcode to 6 make following code happy
+#endif
 
             double & s = k == 0 ? s_q4_0 : k == 1 ? s_q4_1 : k == 2 ? s_q5_0 : k == 3 ? s_q5_1 : k == 4 ? s_q8_0 : k == 5 ? s_fp16 : /*k == 6*/ s_fp32;
             int    & n = k == 0 ? n_q4_0 : k == 1 ? n_q4_1 : k == 2 ? n_q5_0 : k == 3 ? n_q5_1 : k == 4 ? n_q8_0 : k == 5 ? n_fp16 : /*k == 6*/ n_fp32;
@@ -6605,6 +6612,9 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 /*.mem_buffer =*/ buf.data(),
                 /*.no_alloc   =*/ false,
             };
+#ifdef GGML_USE_QNN
+            gparams.use_hwaccel   = true;
+#endif
 
             struct ggml_context * ctx0 = ggml_init(gparams);
 

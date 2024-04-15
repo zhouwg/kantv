@@ -33,15 +33,25 @@ static void ggml_graph_compute_helper(std::vector<uint8_t> & buf, ggml_cgraph * 
 
 static float tensor_sum_elements(const ggml_tensor * tensor) {
     double sum = 0;
-    if (tensor->type == GGML_TYPE_F32) {
+    float value = 0.0f;
+
+        for (int h = 0; h < tensor->ne[3]; h++)
+        for (int i = 0; i < tensor->ne[2]; i++)
         for (int j = 0; j < tensor->ne[1]; j++) {
             for (int k = 0; k < tensor->ne[0]; k++) {
-                sum += ((float *) tensor->data)[j*tensor->ne[0] + k];
-                printf("%.2f \t", ((float*)tensor->data)[j*tensor->ne[0] + k]);
+                if (tensor->type == GGML_TYPE_F32) {
+                    value =  ((float*)tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] + j * tensor->ne[0] + k];
+                }
+                if (tensor->type == GGML_TYPE_F16) {
+                    value =  ((ggml_fp16_t*)tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] + j * tensor->ne[0] + k];
+                }
+
+                sum += value;
+                printf("%.2f \t", value);
             }
             printf("\n");
         }
-    }
+
     printf("\n");
     return sum;
 }
@@ -112,19 +122,21 @@ int main(int argc, char ** argv)  {
     //const int sizex = 4096;
     //const int sizey = 11008;
 
-    const int sizey = 2;
-    const int sizex = 2;
-    const int sizez = 0;
+    const int sizey = 4;
+    const int sizex = 4;
+    //const int sizez = 1;
+    const int sizez = 2;
 
     //printf("Memsize required = %i\n", sizex*sizex);
 
     // TODO: perform the bench for all types or for a user specified type
     const ggml_type qtype = GGML_TYPE_F32;
+    //const ggml_type qtype = GGML_TYPE_F16;
 
     size_t ctx_size = 0;
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizez);
+    ctx_size += ggml_row_size(qtype, sizex*sizey);
+    ctx_size += ggml_row_size(qtype, sizex*sizey);
+    ctx_size += ggml_row_size(qtype, sizex*sizez);
     ctx_size += ggml_row_size(qtype,         sizex*sizey);
     ctx_size += ggml_row_size(qtype,         sizex*sizey);
     ctx_size += 1024*1024*16;
@@ -146,12 +158,18 @@ int main(int argc, char ** argv)  {
 
     printf("Creating new tensors\n");
     // printf("Creating new tensor m1\n");
-    struct ggml_tensor * m11 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m11, 1.0f);
+    struct ggml_tensor * m11 = ggml_new_tensor_3d(ctx, qtype, sizex, sizey, sizez);
+    if (qtype == GGML_TYPE_F32)
+        ggml_set_f32(m11, 1.0f);
+    if (qtype == GGML_TYPE_F16)
+        ggml_set_i32(m11, 1.0f);
 
     // printf("Creating new tensor m1\n");
-    struct ggml_tensor * m12 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(m12, 2.5f);
+    struct ggml_tensor * m12 = ggml_new_tensor_3d(ctx, qtype, sizex, sizey, sizez);
+    if (qtype == GGML_TYPE_F32)
+        ggml_set_f32(m12, 2.0f);
+    if (qtype == GGML_TYPE_F16)
+        ggml_set_i32(m11, 2.0f);
 
     printf("\n------ Test 1 - Matrix Add via F32 code\n");
     // printf("Creating new tensor m11xm2\n");
