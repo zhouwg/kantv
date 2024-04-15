@@ -7,7 +7,7 @@
  *
  * study various open source pure C/C++ AI projects based on GGML(such as llama.cpp, stablediffusion.cpp)
  *
- * implementation of PoC S2 & PoC S3, should be rename to ggml-jni-qnn.cpp, https://github.com/zhouwg/kantv/issues/121
+ * implementation of PoC S2 & PoC S3 (merged into this file on 04/15/2024), https://github.com/zhouwg/kantv/issues/121
  *
  */
 #include <stdio.h>

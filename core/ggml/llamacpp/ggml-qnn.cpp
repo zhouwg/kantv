@@ -59,7 +59,7 @@
 #include "HTP/QnnHtpDevice.h"
 
 #include "ggml-qnn.h"
-#include "ggml-jni.h" //for validation purpose, should be removed in final version
+#include "ggml-jni.h" //for validation purpose during development stage, should be removed before PR to upstream GGML/whisper.cpp
 
 #include "ggml-backend-impl.h"
 
@@ -1418,10 +1418,8 @@ static void ggml_qnn_logcallback(const char * fmt,
         memset(s_ggml_qnn_logbuf, 0, GGML_QNN_LOGBUF_LEN);
         len_content = vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
         LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
-        //for validation purpose, should be removed in final version
-        {
-            GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
-        }
+        //for validation purpose during development stage, should be removed before PR to upstream GGML/whisper.cpp
+        GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
     }
 }
 
@@ -1739,7 +1737,7 @@ static void ggml_qnn_get_rows(const ggml_tensor * src0, const ggml_tensor * src1
 
 
 //ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
-// https://github.com/zhouwg/kantv/commit/4e08bd46686429fe8f178600e8ad6ec93373e09d
+// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
 static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
 
@@ -1755,7 +1753,7 @@ static void ggml_qnn_acc(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
 
 //ref: PoC-S29:mapping ggml_tensor to QNN_tensor
-// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-qnn.cpp#L5138
+// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L7060
 static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
 
@@ -1889,7 +1887,7 @@ static void ggml_qnn_dup(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
 
 //ref: PoC-S29:mapping ggml_tensor to QNN_tensor
-// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-qnn.cpp#L5138
+// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L7060
 void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
     LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", src0->name,
