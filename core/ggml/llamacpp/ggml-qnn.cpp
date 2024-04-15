@@ -5,9 +5,11 @@
  *
  * this is implementation of ggml QNN(Qualcomm Nerual Network, aka AI Engine Direct) backend
  *
- * this file will be submitted to upstream ggml as ggml-qnn.cpp
- *
- * status: major/core implementation has been completed, lack of implementation GGML-OP using QNN API
+ * status: core implementation(data path) has been completed on 04/13/2024
+ *         major GGML OP(mulmat using QNN CPU backend) has been completed
+ *         lack of implementation of QNN GPU backend
+ *         lack of implementation of QNN DSP backend
+ *         lack of implementation of other GGML-OPs using QNN API
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -216,8 +218,6 @@ static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
         [QNN_CPU]   = {.device = 0, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
         [QNN_GPU]   = {.device = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
         [QNN_HTP]   = {.device = 2, .name =   "qnn-htp", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_CDSP]  = {.device = 3, .name =   "qnn-cdsp",.lib = "libQnnDsp.so",.instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_HTA]   = {.device = 4, .name =   "qnn-hta", .lib = "libQnnHta.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
 };
 
 

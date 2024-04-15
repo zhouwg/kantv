@@ -16,14 +16,12 @@ extern "C" {
 
 
 #define GGML_QNN_NAME           "QNN"
-#define GGML_QNN_MAX_DEVICES    5
+#define GGML_QNN_MAX_DEVICES    3
 
 enum QNNBackend {
     QNN_CPU,
     QNN_GPU,
     QNN_HTP,
-    QNN_CDSP,
-    QNN_HTA
 };
 
 GGML_API int            ggml_backend_qnn_reg_devices(void);

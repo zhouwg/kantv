@@ -73,6 +73,28 @@ struct benchmark_params_struct {
     int32_t n_iterations  = 10;
 };
 
+
+static uint32_t get_tensor_rank(const ggml_tensor * tensor) {
+    uint32_t rank = 0;
+    for (int i = 0; i < GGML_MAX_DIMS; i++) {
+        if (0 != tensor->ne[0]) {
+            rank++;
+        }
+    }
+
+    return rank;
+}
+
+static uint32_t get_tensor_data_size(const ggml_tensor * tensor) {
+    size_t data_size = ggml_row_size(tensor->type, tensor->ne[0]);
+    size_t n_dims = get_tensor_rank(tensor);
+    for (int i = 1; i < n_dims; i++) {
+        data_size *= tensor->ne[i];
+    }
+    return data_size;
+    //return ggml_nbytes(tensor);
+}
+
 static void print_usage(int /*argc*/, char ** argv, struct benchmark_params_struct params) {
     fprintf(stderr, "usage: %s [options]\n", argv[0]);
     fprintf(stderr, "\n");
@@ -193,6 +215,8 @@ int main(int argc, char ** argv)  {
 
     //TENSOR_DUMP(gf->nodes[0]);
 
+    printf("m11 size %d\n", get_tensor_data_size(m11));
+    printf("m11 size %d\n", ggml_nbytes(m11));
     ggml_free(ctx);
 
     return 0;

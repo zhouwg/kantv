@@ -50,7 +50,7 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml-alloc.c
         ${LLAMACPP_SRC_DIR}/ggml-backend.c
         ${LLAMACPP_SRC_DIR}/ggml-quants.c
-        ${LLAMACPP_SRC_DIR}/ggml-qnn-impl.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
+        ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
@@ -61,8 +61,6 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-qnn.cpp  # implementation of PoC S2 & PoC S3, should be rename to ggml-jni-qnn.cpp, https://github.com/zhouwg/kantv/issues/121
-
 
         ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
 
