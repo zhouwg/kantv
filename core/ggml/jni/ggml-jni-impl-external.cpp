@@ -8135,7 +8135,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     const int sizex = 4096;
     const int sizez = 128;
 #else
-    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct
+    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct in ggml-qnn.cpp
     const int sizey = 2;
     const int sizex = 2;
     const int sizez = 1;

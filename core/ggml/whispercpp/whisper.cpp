@@ -952,11 +952,13 @@ static bool kv_cache_init(
     cache.k = ggml_new_tensor_1d(cache.ctx, wtype, n_elements);
     cache.v = ggml_new_tensor_1d(cache.ctx, wtype, n_elements);
 
+    LOGGI("calling ggml_backend_alloc_ctx_tensors");
     cache.buffer = ggml_backend_alloc_ctx_tensors(cache.ctx, backend);
     if (!cache.buffer) {
         WHISPER_LOG_ERROR("%s: failed to allocate memory for the kv cache\n", __func__);
         return false;
     }
+    LOGGI("after calling ggml_backend_alloc_ctx_tensors");
 
     return true;
 }
@@ -3213,6 +3215,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
     // in theory, there can be a case where this is not enough, but in practice it should always be enough
     const int factor = 3;
 
+    LOGGI("calling kv_cache_init");
     if (!kv_cache_init(ctx->model.hparams, state->kv_self, ctx->backend, ctx->itype, factor*ctx->model.hparams.n_text_ctx)) {
         WHISPER_LOG_ERROR("%s: kv_cache_init() failed for self-attention cache\n", __func__);
         whisper_free_state(state);
@@ -3224,6 +3227,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
         WHISPER_LOG_INFO("%s: kv self size  = %7.2f MB\n", __func__, memory_size / 1e6);
     }
 
+    LOGGI("calling kv_cache_init");
     if (!kv_cache_init(ctx->model.hparams, state->kv_cross, ctx->backend, ctx->itype, ctx->model.hparams.n_audio_ctx)) {
         WHISPER_LOG_ERROR("%s: kv_cache_init() failed for cross-attention cache\n", __func__);
         whisper_free_state(state);

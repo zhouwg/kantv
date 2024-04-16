@@ -1534,7 +1534,9 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode) {
      // ref:https://github.com/ggerganov/llama.cpp/pull/6022
      // the user could specify the devices that they want to use by name. For example,
      // the user could specify to use devices cpu, sycl_igpu0 and sycl_dgpu0 to select CPU, iGPU and dGPU
-     c_params.gpu_device    = QNN_CPU; //QNN_GPU
+     c_params.gpu_device    = QNN_GPU;
+     c_params.gpu_device    = QNN_CPU;
+     //c_params.gpu_device    = QNN_HTP;//TODO:Failed in loading stub: dlopen failed: library "libQnnHtpV66Stub.so" not found
      p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
 #endif
      if (nullptr == p_asr_ctx->p_context) {

@@ -5,10 +5,10 @@
  *
  * this is implementation of ggml QNN(Qualcomm Nerual Network, aka AI Engine Direct) backend
  *
- * status: core implementation(data path) has been completed on 04/13/2024
- *         major GGML OP(mulmat using QNN CPU backend) has been completed
- *         lack of implementation of QNN GPU backend
- *         lack of implementation of QNN DSP backend
+ * status: core implementation(data path works as expected with whisper.cpp using QNN CPU backend) has been completed on 04/13/2024
+ *         major GGML OP(GGML_OP_MUL_MAT using QNN API) has been completed
+ *         data path works as expected with whisper.cpp using QNN GPU backend at the first time on 04/16/2024. it's a workaround method
+ *         data path with whisper.cpp not work using QNN HTP(aka DSP) backend
  *         lack of implementation of other GGML-OPs using QNN API
  */
 #include <stdio.h>
@@ -2255,7 +2255,7 @@ void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_t
     uint32_t dimensions_output[] = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
                                     (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 #else
-    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct
+    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct in ggml-qnn.cpp
     uint32_t dimensions_input_0[] = {2, 2};
     uint32_t dimensions_input_1[] = {2, 2};
     uint32_t dimensions_output[]  = {2, 2};
@@ -2322,7 +2322,7 @@ void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_t
     error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
     LOGGI("error = %d\n", error);
 
-    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct
+    //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct in ggml-qnn.cpp
     LOGGD("tensor 0 data size %d", get_tensor_data_size(src0));
     LOGGD("tensor 1 data size %d", get_tensor_data_size(src1));
     LOGGD("tensor 2 data size %d", get_tensor_data_size(dst));
@@ -2850,7 +2850,10 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
         g_qnn_mgr[ctx->device].buffer_pool = nullptr;
     }
 
-    delete backend;
+    if (ctx->device == QNN_CPU)
+        delete backend;
+    else
+        free(backend);
 
     LEAVE_FUNC();
 }
@@ -2858,6 +2861,7 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
 
 static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_backend_t backend) {
     ENTER_FUNC();
+    LOGGI("here");
     ggml_backend_qnn_context * ctx = (ggml_backend_qnn_context *) backend->context;
 
     LOGGD("device %d,%s", ctx->device, ctx->name);
@@ -3161,6 +3165,10 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     //TODO: better method to handle internal state between whisper.cpp/llama.cpp and qnn backend
     if (g_qnn_loaded) {
         LOGGE("qnn backend already loaded, it should not happened, pls check why?");
+        if (QNN_GPU == device) {
+            return g_qnn_backend; //TODO:apk will crash with QNN GPU backend, workaround method to handle it
+        }
+
         if (nullptr != g_qnn_backend) {
             ggml_backend_qnn_free(g_qnn_backend);
             i_alloc_buffer_counts  = 0;
@@ -3224,14 +3232,34 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     //TODO:refine internal buffer management
     g_qnn_mgr[device].buffer_pool               = qnn_buf_new(get_qnn_backend_name(device), GGML_QNN_MAX_BUFFERS, (1 << 20));
     GGML_ASSERT(g_qnn_mgr[device].buffer_pool != nullptr);
-    g_qnn_loaded                                = true; // TODO: better method to handle multiple QNN device
 
-    ggml_backend_t qnn_backend = new ggml_backend {
-            /* .guid      = */ ggml_backend_qnn_guid(),
-            /* .interface = */ ggml_backend_qnn_interface,
-            /* .context   = */ &g_qnn_mgr[device]
-    };
+    ggml_backend_t qnn_backend = nullptr;
 
+    if (QNN_CPU == device) {
+        LOGGD("here");
+        qnn_backend = new ggml_backend{
+                /* .guid      = */ ggml_backend_qnn_guid(),
+                /* .interface = */ ggml_backend_qnn_interface,
+                /* .context   = */ &g_qnn_mgr[device]
+        };
+    } else {
+        qnn_backend = (struct ggml_backend*)malloc(sizeof(struct ggml_backend));
+        if (nullptr == qnn_backend) {
+            instance->qnn_finalize();
+            delete instance;
+
+            g_qnn_mgr[device].buffer_pool->destroy(g_qnn_mgr[device].buffer_pool);
+            LOGGE("malloc failed");
+            return nullptr;
+        }
+        qnn_backend->guid = ggml_backend_qnn_guid();
+        qnn_backend->iface = ggml_backend_qnn_interface;
+        qnn_backend->context = &g_qnn_mgr[device];
+    }
+    g_qnn_loaded = true;
+
+    LOGGI("get_default_buffer_type %p", qnn_backend->iface.get_default_buffer_type);//TODO:why the pointer changed with QNN GPU backend?
+    LOGGI("qnn_backend %p", qnn_backend);
     LEAVE_FUNC();
 
     //TODO: better method to handle multi backend device
