@@ -792,7 +792,7 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
+ * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex 12: QNN GGML OP
  * @param n_threads             1 - 8
  * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
  * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
@@ -914,6 +914,10 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
 
         case BENCHMARK_QNN_COMPLEX:
             qnn_complex_graph(n_backend_type, n_op_type);
+            break;
+
+        case BENCHMARK_QNN_GGML_OP:
+            qnn_ggml_op(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
         default:

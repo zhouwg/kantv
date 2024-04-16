@@ -68,7 +68,8 @@ extern "C" {
 #define BENCHMARK_QNN_MATRIX        9       //offload a simple fp32 2x2 matrix addition operation to QNN
 #define BENCHMARK_QNN_GGML          10      //mapping ggml tensor to QNN tensor
 #define BENCHMARK_QNN_COMPLEX       11      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
-#define BENCHMAKR_MAX               11
+#define BENCHMARK_QNN_GGML_OP       12      //for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
+#define BENCHMAKR_MAX               12
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
@@ -87,7 +88,7 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
+    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex 12: QNN GGML OP
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
     * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated computation graph
@@ -181,6 +182,24 @@ extern "C" {
     * @return
     */
     int qnn_complex_graph(int n_backend_type, int n_graph_type);
+
+
+    /**
+     * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
+     * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
+     *
+     * this function will calling GGML QNN backend directly
+     *
+     * this function used to validate PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
+     * or this function is UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
+     *
+     * @param model_path whisper.cpp model at the first step, llama.cpp model at the second step
+     * @param num_threads 1 - 8
+     * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance between QNN and original GGML)
+     * @param n_op_type GGML OP type
+     * @return
+     */
+    int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
 
 
 // =================================================================================================

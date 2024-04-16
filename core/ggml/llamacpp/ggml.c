@@ -10751,21 +10751,6 @@ static void ggml_compute_forward_mul_mat(
 
     // nb01 >= nb00 - src0 is not transposed
     //   compute by src0 rows
-    if (src0->backend == GGML_BACKEND_TYPE_GPU) {
-#if defined(GGML_USE_QNN)
-        if (ggml_qnn_can_mul_mat(src0, src1, dst)) {
-            if (params->ith == 0 && params->type == GGML_TASK_TYPE_COMPUTE) {
-                ggml_qnn_mul_mat(src0, src1, dst);
-            }
-            return;
-        }
-        LOGGI("hw acceleration with QNN");
-#endif
-    } else {
-        LOGGI("no hw acceleration");
-    }
-
-
 #if defined(GGML_USE_CLBLAST)
     if (ggml_cl_can_mul_mat(src0, src1, dst)) {
         if (params->ith == 0 && params->type == GGML_TASK_TYPE_COMPUTE) {
@@ -16143,6 +16128,27 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
         return;
     }
 
+
+    const struct ggml_tensor * src0 = tensor->src[0];
+    const struct ggml_tensor * src1 = tensor->src[1];
+    if (NULL != src0 && NULL != src1) {
+        if (src0->backend == GGML_BACKEND_TYPE_GPU) {
+#if defined(GGML_USE_QNN)
+            LOGGI("hw acceleration with QNN");
+            if (tensor->op == GGML_OP_ADD
+            ||  tensor->op == GGML_OP_MUL
+            ||  tensor->op == GGML_OP_MUL_MAT
+            ) {
+                ggml_qnn_compute_forward(params, tensor);
+                return;
+            }
+#endif
+        } else {
+            LOGGI("no hw acceleration");
+        }
+    }
+
+
     switch (tensor->op) {
         case GGML_OP_DUP:
             {
@@ -16234,15 +16240,7 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
             } break;
         case GGML_OP_MUL_MAT:
             {
-                //LOGGI("I'm GGML_OP_MUL_MAT");
-                int64_t  n_begin_time                       = 0LL;
-                int64_t  n_end_time                         = 0LL;
-                int64_t  n_durtion                          = 0LL;
-                n_begin_time                                = ggml_time_us();
                 ggml_compute_forward_mul_mat(params, tensor);
-                n_end_time  = ggml_time_us();
-                n_durtion   = (n_end_time - n_begin_time);
-                //LOGGD("duration is: %lld us\n",  n_durtion);
             } break;
         case GGML_OP_MUL_MAT_ID:
             {

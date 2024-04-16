@@ -271,7 +271,8 @@
      public static final int BENCHMARK_QNN_SAVER      = 8;
      public static final int BENCHMARK_QNN_MATRIX     = 9;
      public static final int BENCHMARK_QNN_GGML       = 10;
-     public static final int BENCHMAKR_QNN_COMPLEX    = 11;
+     public static final int BENCHMARK_QNN_COMPLEX    = 11;
+     public static final int BENCHMARK_QNN_GGML_OP    = 12;
 
 
      private static int       mASRMode = ASR_MODE_NORMAL;
@@ -3942,8 +3943,11 @@
              case BENCHMARK_QNN_GGML:
                  return "GGML QNN ggml";
 
-             case BENCHMAKR_QNN_COMPLEX:
+             case BENCHMARK_QNN_COMPLEX:
                  return "GGML QNN complex graph";
+
+             case BENCHMARK_QNN_GGML_OP:
+                 return "GGML QNN OP"; //for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
          }
 
          return "unknown";

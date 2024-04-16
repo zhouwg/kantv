@@ -94,7 +94,7 @@
      Button _btnBenchmark;
 
      private int nThreadCounts  = 1;
-     private int benchmarkIndex = 0;
+     private int benchmarkIndex = 12; //0: asr 12: qnn-ggml-op, make "PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API" happy
      private int previousBenchmakrIndex= 0;
      private String strModeName = "tiny.en-q8_0";
      private String strBackend  = "cpu";
@@ -233,13 +233,14 @@
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                  CDELog.j(TAG, "bench type:" + arrayBenchType[position]);
                  benchmarkIndex = Integer.valueOf(position);
+                 CDELog.j(TAG, "benchmark index:" + benchmarkIndex);
 
-                 if ((previousBenchmakrIndex != CDEUtils.BENCHMAKR_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMAKR_QNN_COMPLEX)) {
+                 if ((previousBenchmakrIndex != CDEUtils.BENCHMARK_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMARK_QNN_COMPLEX)) {
                      previousBenchmakrIndex = benchmarkIndex;
                      return;
                  }
 
-                 if (benchmarkIndex == CDEUtils.BENCHMAKR_QNN_COMPLEX) {
+                 if (benchmarkIndex == CDEUtils.BENCHMARK_QNN_COMPLEX) {
                      spinnerOPType.setAdapter(adapterGraphType);
                  } else {
                      spinnerOPType.setAdapter(adapterOPType);
@@ -418,7 +419,7 @@
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
-             if (!isQNNModel && (benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE)) {
+             if (!isQNNModel && ((benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE) && (benchmarkIndex < CDEUtils.BENCHMARK_QNN_GGML_OP))) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
@@ -498,7 +499,7 @@
                                  CDEUtils.getDataPath() + ggmlModelFileName,
                                  CDEUtils.getDataPath() + ggmlSampleFileName,
                                  benchmarkIndex,
-                                 nThreadCounts, backendIndex, 0);
+                                 nThreadCounts, backendIndex, optypeIndex);
                      } else {
                          // avoid following issue
                          // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by

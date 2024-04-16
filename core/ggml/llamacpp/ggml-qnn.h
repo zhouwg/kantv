@@ -18,6 +18,7 @@ extern "C" {
 #define GGML_QNN_NAME           "QNN"
 #define GGML_QNN_MAX_DEVICES    3
 
+//QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/HTP(aka DSP) backend currently
 enum QNNBackend {
     QNN_CPU,
     QNN_GPU,
@@ -34,6 +35,7 @@ GGML_API void           ggml_backend_qnn_get_device_description(int device, char
 
 GGML_API bool           ggml_qnn_can_mul_mat(const struct ggml_tensor * src0, const struct ggml_tensor * src1, struct ggml_tensor * dst);
 GGML_API void           ggml_qnn_mul_mat(const struct ggml_tensor * src0, const struct ggml_tensor * src1, struct ggml_tensor * dst);
+GGML_API bool           ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor);
 
 
 GGML_API ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t dev_num);

@@ -73,6 +73,7 @@
         <item>qnn-matrix</item> <!-- offload a simple matrix addition operation to QNN -->
         <item>qnn-ggml</item>   <!-- mapping ggml tensor to QNN tensor -->
         <item>qnn-complex</item><!-- complex computation graph in C/C++ or GGML, and then offload them to QNN -->
+        <item>qnn-ggml-op</item><!-- for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
     </string-array>
 
     <string-array name="threadCounts">
