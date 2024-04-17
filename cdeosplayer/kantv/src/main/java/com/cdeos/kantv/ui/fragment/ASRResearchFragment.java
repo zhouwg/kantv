@@ -94,7 +94,7 @@
      Button _btnBenchmark;
 
      private int nThreadCounts  = 1;
-     private int benchmarkIndex = 12; //0: asr 12: qnn-ggml-op, make "PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API" happy
+     private int benchmarkIndex = 0; //0: asr 12: qnn-ggml-op, make "PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API" happy
      private int previousBenchmakrIndex= 0;
      private String strModeName = "tiny.en-q8_0";
      private String strBackend  = "cpu";
@@ -272,6 +272,7 @@
 
              }
          });
+         spinnerThreadsCounts.setSelection(4);
 
          Spinner spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
          String[] arrayModelName = getResources().getStringArray(R.array.modelName);
@@ -280,7 +281,7 @@
          spinnerModelName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 CDELog.j(TAG, "model:" + arrayModelName[position]);
+                 CDELog.j(TAG, "position: " + position + ", model:" + arrayModelName[position]);
                  strModeName = arrayModelName[position];
 
                  CDELog.j(TAG, "strModeName:" + strModeName);
@@ -291,6 +292,7 @@
 
              }
          });
+         spinnerModelName.setSelection(3);
 
 
          Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
@@ -311,19 +313,20 @@
 
              }
          });
+         spinnerBackend.setSelection(3);
 
          spinnerOPType      = mActivity.findViewById(R.id.spinnerOPType);
          arrayGraphType     = getResources().getStringArray(R.array.graphtype);
 
          {
              int max_idx = ggmljava.ggml_op.valueOf("GGML_OP_MUL_MAT").ordinal();
-             arrayOPType = new String[max_idx];// = getResources().getStringArray(R.array.optype);
+             arrayOPType = new String[max_idx + 1];
              ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
              int idx = 0;
              for (ggmljava.ggml_op op : ggmlops) {
                  CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
-                 if (op.name().contains("GGML_OP_NONE"))
-                     continue;
+                 //if (op.name().contains("GGML_OP_NONE"))
+                 //    continue;
 
                  arrayOPType[idx] = op.name();
                  idx++;
@@ -333,6 +336,7 @@
                  }
              }
          }
+         spinnerOPType.setSelection(0);
 
          adapterOPType      = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
          adapterGraphType   = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayGraphType);
@@ -415,7 +419,7 @@
                  return;
              }
 
-             if (isQNNModel && (benchmarkIndex < CDEUtils.BENCHMARK_QNN_SAMPLE)) {
+             if (isQNNModel && ((benchmarkIndex < CDEUtils.BENCHMARK_QNN_SAMPLE) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP))) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
@@ -442,17 +446,21 @@
                  CDEUtils.showMsgBox(mActivity, "pls check whether GGML's model file:" + selectModeFileName + " and sample file(jfk.wav) exist in /sdcard/kantv/");
                  return;
              }
+
+             if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {//QNN HTP(aka DSP)
+                 CDEUtils.showMsgBox(mActivity, "QNN HTP(aka DSP) not supported currently");
+                 return;
+             }
              //sanity check end
 
              //reset default ggml model file name after sanity check
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
-             if (!isQNNModel) {
-                 ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK);
+             //if (!isQNNModel)
+             {
+                 ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
              }
-             if (benchmarkIndex == CDEUtils.BECHMARK_ASR) {
-                 //playAudioFile();
-             }
+
              nLogCounts = 0;
              isBenchmarking.set(true);
 
@@ -520,6 +528,7 @@
                          public void run() {
                              String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + strModeName
                                      + " ,threads: " + nThreadCounts
+                                     + " ,backend: " + CDEUtils.getBackendDesc(backendIndex)
                                      + " ) cost " + duration + " milliseconds";
                              //04-07-2024(April,7,2024), add timestamp
                              String timestamp = "";
@@ -532,7 +541,9 @@
 
                              //becareful here
                              if (!strBenchmarkInfo.startsWith("unknown")) {
-                                 benchmarkTip += strBenchmarkInfo;
+                                 if (!strBenchmarkInfo.startsWith("asr_result")) {
+                                     benchmarkTip += strBenchmarkInfo;
+                                 }
                              }
 
 

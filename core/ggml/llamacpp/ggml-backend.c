@@ -80,6 +80,7 @@ const char * ggml_backend_buffer_name(ggml_backend_buffer_t buffer) {
 }
 
 void ggml_backend_buffer_free(ggml_backend_buffer_t buffer) {
+    ENTER_FUNC();
     if (buffer == NULL) {
         return;
     }
@@ -88,6 +89,7 @@ void ggml_backend_buffer_free(ggml_backend_buffer_t buffer) {
         buffer->iface.free_buffer(buffer);
     }
     free(buffer);
+    LEAVE_FUNC();
 }
 
 size_t ggml_backend_buffer_get_size(ggml_backend_buffer_t buffer) {
@@ -762,6 +764,7 @@ struct ggml_backend_plan_cpu {
 };
 
 GGML_CALL static ggml_backend_graph_plan_t ggml_backend_cpu_graph_plan_create(ggml_backend_t backend, const struct ggml_cgraph * cgraph) {
+    ENTER_FUNC();
     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
 
     struct ggml_backend_plan_cpu * cpu_plan = malloc(sizeof(struct ggml_backend_plan_cpu));
@@ -770,6 +773,7 @@ GGML_CALL static ggml_backend_graph_plan_t ggml_backend_cpu_graph_plan_create(gg
     cpu_plan->cgraph = *cgraph; // FIXME: deep copy
 
     if (cpu_plan->cplan.work_size > 0) {
+        LOGGI("here");
         cpu_plan->cplan.work_data = malloc(cpu_plan->cplan.work_size);
         if (cpu_plan->cplan.work_data == NULL) {
             free(cpu_plan);
@@ -779,6 +783,8 @@ GGML_CALL static ggml_backend_graph_plan_t ggml_backend_cpu_graph_plan_create(gg
 
     cpu_plan->cplan.abort_callback      = cpu_ctx->abort_callback;
     cpu_plan->cplan.abort_callback_data = cpu_ctx->abort_callback_data;
+
+    LEAVE_FUNC();
 
     return cpu_plan;
 }
@@ -801,12 +807,14 @@ GGML_CALL static enum ggml_status ggml_backend_cpu_graph_plan_compute(ggml_backe
 }
 
 GGML_CALL static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
+    ENTER_FUNC();
     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
 
     struct ggml_cplan cplan = ggml_graph_plan(cgraph, cpu_ctx->n_threads);
 
     if (cpu_ctx->work_size < cplan.work_size) {
         free(cpu_ctx->work_data);
+        LOGGI("here");
         cpu_ctx->work_data = malloc(cplan.work_size);
         if (cpu_ctx->work_data == NULL) {
             cpu_ctx->work_size = 0;
@@ -814,11 +822,13 @@ GGML_CALL static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t 
         }
         cpu_ctx->work_size = cplan.work_size;
     }
+    LOGGI("here");
     cplan.work_data = cpu_ctx->work_data;
 
     cplan.abort_callback      = cpu_ctx->abort_callback;
     cplan.abort_callback_data = cpu_ctx->abort_callback_data;
 
+    LEAVE_FUNC();
     return ggml_graph_compute(cgraph, &cplan);
 }
 
@@ -868,6 +878,7 @@ ggml_backend_t ggml_backend_cpu_init(void) {
     }
 
     ctx->n_threads           = GGML_DEFAULT_N_THREADS;
+    LOGGI("here");
     ctx->work_data           = NULL;
     ctx->work_size           = 0;
     ctx->abort_callback      = NULL;

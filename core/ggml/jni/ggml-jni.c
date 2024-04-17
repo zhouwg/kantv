@@ -123,7 +123,7 @@ Java_org_ggml_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode) {
+Java_org_ggml_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -139,8 +139,9 @@ Java_org_ggml_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, 
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("thread counts:%d\n", n_threads);
     LOGGV("asr mode:%d\n", n_asrmode);
+    LOGGV("backend type: %d\n", n_backend);
 
-    result = whisper_asr_init(sz_model_path, n_threads, n_asrmode);
+    result = whisper_asr_init(sz_model_path, n_threads, n_asrmode, n_backend);
 
 failure:
     if (NULL != sz_model_path) {
@@ -161,7 +162,7 @@ Java_org_ggml_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
 
 JNIEXPORT jint JNICALL
 Java_org_ggml_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
-                                               jint n_thread_counts, jint n_asrmode) {
+                                               jint n_thread_counts, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -177,8 +178,9 @@ Java_org_ggml_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_p
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("thread counts:%d\n", n_thread_counts);
     LOGGV("asr mode:%d\n", n_asrmode);
+    LOGGV("backend type: %d\n", n_backend);
 
-    result = whisper_asr_reset(sz_model_path, n_thread_counts, n_asrmode);
+    result = whisper_asr_reset(sz_model_path, n_thread_counts, n_asrmode, n_backend);
 
 failure:
     if (NULL != sz_model_path) {
@@ -221,7 +223,7 @@ Java_org_ggml_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 JNIEXPORT jstring  JNICALL
 Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
-                                               jint n_bench_type, jint n_thread_counts) {
+                                               jint n_bench_type, jint n_thread_counts, jint n_backend) {
     UNUSED(clazz);
 
     const char *sz_model_path = NULL;
@@ -246,11 +248,12 @@ Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_p
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("bench type: %d\n", n_bench_type);
     LOGGV("thread counts:%d\n", n_thread_counts);
+    LOGGV("backend type:%d\n", n_backend);
 
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llama_inference(sz_model_path, sz_prompt, n_bench_type, n_thread_counts);
+    result = llama_inference(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend);
 
 failure:
     if (NULL != sz_prompt) {

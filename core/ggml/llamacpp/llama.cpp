@@ -95,7 +95,8 @@
 #if defined(_MSC_VER)
 #pragma warning(disable: 4244 4267) // possible loss of data
 #endif
-
+#if (defined __ANDROID__) || (defined ANDROID)
+#define WHISPER_ATTRIBUTE_FORMAT(...)
 #ifdef __GNUC__
 #ifdef __MINGW32__
 #define LLAMA_ATTRIBUTE_FORMAT(...) __attribute__((format(gnu_printf, __VA_ARGS__)))
@@ -105,6 +106,7 @@
 #else
 #define LLAMA_ATTRIBUTE_FORMAT(...)
 #endif
+#endif
 
 #define LLAMA_MAX_NODES   8192
 #define LLAMA_MAX_EXPERTS 8
@@ -113,14 +115,18 @@
 //
 // logging
 //
+#if (defined __ANDROID__) || (defined ANDROID)
+extern "C" int __android_log_print(int prio, const char * tag, const char * fmt, ...)
+__attribute__((__format__(printf, 3, 4)));
+#endif
 
-LLAMA_ATTRIBUTE_FORMAT(2, 3)
-static void llama_log_internal        (ggml_log_level level, const char* format, ...);
+LLAMA_ATTRIBUTE_FORMAT(5, 6)
+static void llama_log_internal        (ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
 static void llama_log_callback_default(ggml_log_level level, const char * text, void * user_data);
 
-#define LLAMA_LOG_INFO(...)  llama_log_internal(GGML_LOG_LEVEL_INFO , __VA_ARGS__)
-#define LLAMA_LOG_WARN(...)  llama_log_internal(GGML_LOG_LEVEL_WARN , __VA_ARGS__)
-#define LLAMA_LOG_ERROR(...) llama_log_internal(GGML_LOG_LEVEL_ERROR, __VA_ARGS__)
+#define LLAMA_LOG_INFO(...)  llama_log_internal(GGML_LOG_LEVEL_INFO , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LLAMA_LOG_WARN(...)  llama_log_internal(GGML_LOG_LEVEL_WARN , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define LLAMA_LOG_ERROR(...) llama_log_internal(GGML_LOG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 //
 // helpers
@@ -16636,13 +16642,18 @@ void llama_log_set(ggml_log_callback log_callback, void * user_data) {
 #endif
 }
 
-static void llama_log_internal_v(ggml_log_level level, const char * format, va_list args) {
+static void llama_log_internal_v(ggml_log_level level, const char * file, const char * func, int line, const char * format, va_list args) {
     va_list args_copy;
     va_copy(args_copy, args);
-    char buffer[128];
-    int len = vsnprintf(buffer, 128, format, args);
-    if (len < 128) {
+    char buffer[1024];
+    int len_prefix = snprintf(buffer, 1024, "[%s, %d]: ", func, line);
+    int len = vsnprintf(buffer + len_prefix, 1024 - len_prefix, format, args);
+    if (len < (1024 - len_prefix)) {
+#if (defined __ANDROID__) || (defined ANDROID)
+        __android_log_print(level, "KANTV", "%s", buffer);
+#else
         g_state.log_callback(level, buffer, g_state.log_callback_user_data);
+#endif
     } else {
         char* buffer2 = new char[len+1];
         vsnprintf(buffer2, len+1, format, args_copy);
@@ -16653,10 +16664,10 @@ static void llama_log_internal_v(ggml_log_level level, const char * format, va_l
     va_end(args_copy);
 }
 
-static void llama_log_internal(ggml_log_level level, const char * format, ...) {
+static void llama_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...) {
     va_list args;
     va_start(args, format);
-    llama_log_internal_v(level, format, args);
+    llama_log_internal_v(level, file, func, line, format, args);
     va_end(args);
 }
 

@@ -76,7 +76,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Model:" />
+                android:text="M:" />
 
             <Spinner
                 android:id="@+id/spinnerModelName"
@@ -88,7 +88,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Backend" />
+                android:text="Back:" />
 
             <Spinner
                 android:id="@+id/spinnerBackend"

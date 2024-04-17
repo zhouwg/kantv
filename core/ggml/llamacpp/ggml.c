@@ -16121,13 +16121,12 @@ static void ggml_compute_forward_cross_entropy_loss_back(
 
 /////////////////////////////////
 
-static void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
+void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
     GGML_ASSERT(params);
 
     if (tensor->op == GGML_OP_NONE || ggml_is_empty(tensor)) {
         return;
     }
-
 
     const struct ggml_tensor * src0 = tensor->src[0];
     const struct ggml_tensor * src1 = tensor->src[1];
@@ -16135,16 +16134,13 @@ static void ggml_compute_forward(struct ggml_compute_params * params, struct ggm
         if (src0->backend == GGML_BACKEND_TYPE_GPU) {
 #if defined(GGML_USE_QNN)
             LOGGI("hw acceleration with QNN");
-            if (tensor->op == GGML_OP_ADD
-            ||  tensor->op == GGML_OP_MUL
-            ||  tensor->op == GGML_OP_MUL_MAT
-            ) {
+            if (tensor->op == GGML_OP_ADD) {
                 ggml_qnn_compute_forward(params, tensor);
                 return;
             }
 #endif
         } else {
-            LOGGI("no hw acceleration");
+            //LOGGI("no hw acceleration");
         }
     }
 
@@ -18615,6 +18611,8 @@ struct ggml_cplan ggml_graph_plan(const struct ggml_cgraph * cgraph, int n_threa
 }
 
 enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cplan * cplan) {
+    ENTER_FUNC();
+
     {
         GGML_ASSERT(cplan);
         GGML_ASSERT(cplan->n_threads > 0);
@@ -18623,8 +18621,12 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
             GGML_ASSERT(cplan->work_data);
         }
     }
-
+    LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
+#ifdef GGML_USE_QNN
+    const int n_threads = 1; //TODO: multithread support in QNN backend
+#else
     const int n_threads = cplan->n_threads;
+#endif
 
     struct ggml_compute_state_shared state_shared = {
         /*.cgraph                  =*/ cgraph,
@@ -18695,22 +18697,26 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
                 (double) cgraph->perf_cycles  / (double) ggml_cycles_per_ms() / (double) cgraph->perf_runs,
                 (double) perf_time_us_cur     / 1000.0,
                 (double) cgraph->perf_time_us / 1000.0 / cgraph->perf_runs);
+#if 0
         LOGGI("%s: perf (%d) - cpu = %.3f / %.3f ms, wall = %.3f / %.3f ms\n",
                          __func__, cgraph->perf_runs,
                          (double) perf_cycles_cur      / (double) ggml_cycles_per_ms(),
                          (double) cgraph->perf_cycles  / (double) ggml_cycles_per_ms() / (double) cgraph->perf_runs,
                          (double) perf_time_us_cur     / 1000.0,
                          (double) cgraph->perf_time_us / 1000.0 / cgraph->perf_runs);
+#endif
     }
 
+    LEAVE_FUNC();
     return compute_status;
 }
 
 enum ggml_status ggml_graph_compute_with_ctx(struct ggml_context * ctx, struct ggml_cgraph * cgraph, int n_threads) {
+    ENTER_FUNC();
     struct ggml_cplan cplan = ggml_graph_plan(cgraph, n_threads);
 
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
-
+    LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     return ggml_graph_compute(cgraph, &cplan);
@@ -19202,6 +19208,8 @@ struct ggml_cgraph * ggml_graph_import(const char * fname, struct ggml_context *
 }
 
 void ggml_graph_print(const struct ggml_cgraph * cgraph) {
+    return;
+
     int64_t perf_total_per_op_us[GGML_OP_COUNT] = {0};
 
     GGML_PRINT("=== GRAPH ===\n");
@@ -19476,6 +19484,7 @@ static enum ggml_opt_result ggml_opt_adam(
         void * callback_data) {
     GGML_ASSERT(ggml_is_scalar(f));
 
+    ENTER_FUNC();
     // these will store the parameters we want to optimize
     struct ggml_tensor * ps[GGML_MAX_PARAMS];
 
@@ -19518,6 +19527,7 @@ static enum ggml_opt_result ggml_opt_adam(
 
     struct ggml_cplan cplan = ggml_graph_plan(gb, params.n_threads);
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
+    LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     bool cancel = false;
@@ -19839,6 +19849,7 @@ static enum ggml_opt_result ggml_opt_lbfgs(
         }
     }
 
+    ENTER_FUNC();
     const int m = params.lbfgs.m;
 
     // these will store the parameters we want to optimize
@@ -19865,6 +19876,7 @@ static enum ggml_opt_result ggml_opt_lbfgs(
 
     struct ggml_cplan cplan = ggml_graph_plan(gb, params.n_threads);
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
+    LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     float * x  = opt->lbfgs.x->data;  // current parameters

@@ -276,7 +276,7 @@
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              strUserInput,
                              benchmarkIndex,
-                             nThreadCounts);
+                             nThreadCounts, CDEUtils.QNN_BACKEND_GGML);
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);
                      isBenchmarking.set(false);

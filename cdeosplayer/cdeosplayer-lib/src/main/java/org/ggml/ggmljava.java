@@ -98,7 +98,8 @@ public class ggmljava {
         GGML_OP_COUNT,
     };
 
-    public static native int  asr_init(String strModelPath, int nThreadCounts, int nASRMode);
+
+    public static native int  asr_init(String strModelPath, int nThreadCounts, int nASRMode, int nBackendType);
 
     public static native void asr_finalize();
 
@@ -106,7 +107,7 @@ public class ggmljava {
 
     public static native void asr_stop();
 
-    public static native int  asr_reset(String strModelPath, int nThreadCounts, int nASRMode);
+    public static native int  asr_reset(String strModelPath, int nThreadCounts, int nASRMode, int nBackendType);
 
     public static native String asr_get_systeminfo();
 
@@ -130,5 +131,5 @@ public class ggmljava {
     public static native String llm_get_systeminfo();
 
 
-    public static native String llm_inference(String modelPath, String prompt, int nBenchType, int nThreadCounts);
+    public static native String llm_inference(String modelPath, String prompt, int nBenchType, int nThreadCounts, int nBackendType);
 }

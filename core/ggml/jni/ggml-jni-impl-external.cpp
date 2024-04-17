@@ -247,9 +247,10 @@ static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & token
  * @param prompt
  * @param bench_type            not used currently
  * @param n_threads             1 - 8
+ * @param n_backend             0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
  * @return
 */
-int  llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads) {
+int  llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend) {
     llama_context           ** g_ctx;
     llama_model             ** g_model;
     gpt_params               * g_params;
@@ -790,7 +791,7 @@ struct benchmark_params_struct {
 };
 
 
-void ggml_bench_matrix(int backend_type, int num_threads) {
+void ggml_bench_matrix(int num_threads, int backend_type) {
     struct benchmark_params_struct benchmark_params;
 
     bool invalid_param = false;
@@ -1886,9 +1887,10 @@ static int stablediffusion_main(int argc, const char* argv[]) {
  * @param prompt
  * @param bench_type            not used currently
  * @param n_threads             1 - 8
+ * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
  * @return
 */
-int  stablediffusion_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads) {
+int  stablediffusion_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type) {
     int result = 0;
 
     //TODO: this is a lazy method, just for fun with stablediffusion.cpp on Xiaomi 14
@@ -7097,7 +7099,6 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     n_begin_time                                = ggml_time_us();
 
     LOGGD("enter qnn_ggml\n");
-    n_ggml_op_type                              += 1; // GGML_OP_NONE is 0 and skipped in Java layer
     LOGGI("[%s], backend type:%d(%s), op type:%d\n", __func__,
           n_backend_type, get_qnn_backend_name(n_backend_type), n_ggml_op_type);
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), ggml op type:%d", __func__,
@@ -7651,7 +7652,6 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
             break;
 
         default:
-
             ggml_free(ctx);
             LOGGD("only LayerNorm supported currently");
             GGML_JNI_NOTIFY("only LayerNorm supported currently");
@@ -8096,7 +8096,9 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
   * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
   * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
   *
-  * this function will calling GGML QNN backend (which implemented in ggml-qnn.cpp) directly
+  * the function qnn_ggml calling QNN API directly in JNI layer, bypass the framekwork in ggml's internal
+  *
+  * this function will calling function in ggml-qnn.cpp via ggml layer(which executed in GGML QNN backend using QNN SDK --- ggml-qnn.cpp)
   *
   * this function used to validate PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
   * or this function is UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
@@ -8120,8 +8122,6 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     struct ggml_tensor * dst        = nullptr;
     std::vector<uint8_t> work_buffer;
 
-    n_ggml_op_type                  += 1; // GGML_OP_NONE is 0 and skipped in Java layer
-
     LOGGD("enter qnn_ggml_op\n");
     LOGGI("mode path:%s", model_path);
     LOGGI("num_threads:%d", num_threads);
@@ -8129,21 +8129,23 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     LOGGI("ggml op:%d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type));
 
 
-    GGML_JNI_NOTIFY("Starting qnn_ggml_op benchmark\n");
-#if 1
+    GGML_JNI_NOTIFY("starting qnn_ggml_op UT(unit test)\n");
+#if 0 // for performance comparison between QNN backend and original GGML
     const int sizey = 4096;
     const int sizex = 4096;
     const int sizez = 128;
-#else
+#else // for UT with PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API,https://github.com/zhouwg/kantv/issues/121
     //troubleshooting issue in previous commit: mulmat's result using QNN CPU backend is not correct in ggml-qnn.cpp
-    const int sizey = 2;
-    const int sizex = 2;
-    const int sizez = 1;
+    int sizey = 2;
+    int sizex = 2;
+    int sizez = 1;
 #endif
 
     const ggml_type qtype = GGML_TYPE_F32;
 
     n_begin_time                        = ggml_time_us();
+    srand(time(NULL));
+
 
     ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
     ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
@@ -8170,12 +8172,14 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         return 1;
     }
 
-    GGML_JNI_NOTIFY("Creating new tensors\n");
+    GGML_JNI_NOTIFY("creating new tensors\n");
     src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_f32(src0, 1.0f);
+    ggml_set_f32(src0, (rand() % 100 + 1));
 
     src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_f32(src1, 2.0f);
+    ggml_set_f32(src1, (rand() % 100 + 1));
 
     switch (n_ggml_op_type) {
         case GGML_OP_ADD:
@@ -8190,13 +8194,14 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         default:
             LOGGD("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type));
             GGML_JNI_NOTIFY("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type));
+            LOGGD("leave qnn_ggml_op UT(unit test)\n");
             ggml_free(ctx);
             return 2;
             //break;
     }
     ggml_set_f32(dst, 0.0f);
 
-    GGML_JNI_NOTIFY("Creating compute graph\n");
+    GGML_JNI_NOTIFY("creating compute graph\n");
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
     ggml_graph_compute_helper(work_buffer, gf, num_threads);
@@ -8227,7 +8232,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     n_durtion   = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type), n_durtion);
-    LOGGD("leave qnn_ggml_op\n");
+    LOGGD("leave qnn_ggml_op UT(unit test)\n");
 
     return 0;
 }

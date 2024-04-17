@@ -107,8 +107,9 @@ extern "C" {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     */
-    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode);
+    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode, int n_backend);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
@@ -117,8 +118,9 @@ extern "C" {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     */
-    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
+    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
 
 
@@ -136,18 +138,19 @@ extern "C" {
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     * @return
     */
-    int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
+    int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
 
     /**
      *
-     * @param backend_type QNN CPU/GPU/DSP or ggml
      * @param num_threads  1-8
+     * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
      */
-    void         ggml_bench_matrix(int backend_type, int num_threads);
+    void         ggml_bench_matrix(int num_threads, int n_backend);
 
-    int          ggml_bench_llama(const char * sz_model_path, int num_threads);
+    int          ggml_bench_llama(const char * sz_model_path, int num_threads, int n_backend);
 
 
 
@@ -214,9 +217,10 @@ extern "C" {
 * @param prompt
 * @param bench_type            not used currently
 * @param n_threads             1 - 8
+* @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
 * @return
 */
-int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
+int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
 
 
 #ifdef __cplusplus

@@ -1,15 +1,22 @@
 /*
  * MIT license
- * Copyright (C) 2024 KanTV Authors
+ * Copyright (C) 2024 GGML Authors
  * SPDX-License-Identifier: MIT
  *
- * this is implementation of ggml QNN(Qualcomm Nerual Network, aka AI Engine Direct) backend
+ * this is implementation of ggml QNN(Qualcomm Neural Network, aka AI Engine Direct) backend
  *
- * status: core implementation(data path works as expected with whisper.cpp using QNN CPU backend) has been completed on 04/13/2024
- *         major GGML OP(GGML_OP_MUL_MAT using QNN API) has been completed
- *         data path works as expected with whisper.cpp using QNN GPU backend at the first time on 04/16/2024. it's a workaround method
- *         data path with whisper.cpp not work using QNN HTP(aka DSP) backend
- *         lack of implementation of other GGML-OPs using QNN API
+ * status:
+ *
+ * 1. core implementation(data path works as expected with whisper.cpp using QNN CPU backend) has been completed on 04/13/2024
+ *
+ * 2. data path works perfectly with whisper.cpp using QNN CPU/GPU backend at the first time on 04/17/2024
+ *
+ * 3. major GGML OP(GGML_OP_MUL_MAT) using QNN API has been completed
+ *
+ * 4. data path with whisper.cpp not work using QNN HTP(aka DSP) backend, QNN HTP(aka DSP) backend heavily
+ *    depend on vendor's customized Android OS based on Qualcomm's BSP
+ *
+ * 5. lack of implementation of other GGML-OPs using QNN API
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +52,7 @@
 #include <cassert>
 #include <unordered_set>
 #include <utility>
+#include <stdatomic.h>
 
 #include "QnnTypes.h"
 #include "QnnCommon.h"
@@ -167,8 +175,10 @@ struct ggml_backend_qnn_context {
     char lib[GGML_MAX_NAME];
     qnn_instance * instance;
     qnn_buf_t * buffer_pool;
+    struct ggml_backend * backend;
     QNN_INTERFACE_VER_TYPE raw_interface;
     QNN_SYSTEM_INTERFACE_VER_TYPE raw_system_interface;
+
 } ;
 
 
@@ -196,29 +206,48 @@ struct ggml_backend_qnn_buffer_context {
     std::vector<void *> sub_buffers;
 };
 
-//TODO: should be removed in the future
-static bool g_qnn_loaded = false;
+extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor);
 
-//TODO: this global static var is used to adapt to whisper.cpp because whisper.cpp will
-// calling whisper_backend_init many times
-//
-// I have no idea how to handle it properly at the moment
+//TODO: should be removed in the future
 static ggml_backend_t g_qnn_backend = nullptr;
 
-//TODO: should be removed in the future, just used to tracking ggml internal
-static int i_alloc_buffer_counts    = 0;
-static long i_alloc_buffer_sizes    = 0;
-static int i_get_alloc_counts       = 0;
-static long i_get_alloc_sizes       = 0;
+static bool GGML_OP_HAS_INIT    [GGML_OP_COUNT] = { 0 };
+static bool GGML_OP_HAS_FINALIZE[GGML_OP_COUNT] = { 0 };
+static void ggml_setup_op_has_task_pass(void) {
+    {   // INIT
+        bool * p = GGML_OP_HAS_INIT;
+
+        p[GGML_OP_ACC                    ] = true;
+        p[GGML_OP_MUL_MAT                ] = true;
+        p[GGML_OP_MUL_MAT_ID             ] = true;
+        p[GGML_OP_OUT_PROD               ] = true;
+        p[GGML_OP_SET                    ] = true;
+        p[GGML_OP_GET_ROWS_BACK          ] = true;
+        p[GGML_OP_DIAG_MASK_INF          ] = true;
+        p[GGML_OP_DIAG_MASK_ZERO         ] = true;
+        p[GGML_OP_CONV_TRANSPOSE_1D      ] = true;
+        p[GGML_OP_CONV_TRANSPOSE_2D      ] = true;
+        p[GGML_OP_FLASH_ATTN_BACK        ] = true;
+        p[GGML_OP_CROSS_ENTROPY_LOSS     ] = true;
+        p[GGML_OP_ADD_REL_POS            ] = true;
+    }
+
+    {   // FINALIZE
+        bool * p = GGML_OP_HAS_FINALIZE;
+
+        p[GGML_OP_CROSS_ENTROPY_LOSS     ] = true;
+    }
+}
+
 
 //use a prebuild static memory layout to avoid complex resource management, this method also used
 //in GGML internal or FFmpeg
 
 //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/HTP(aka DSP) backend currently
 static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
-        [QNN_CPU]   = {.device = 0, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_GPU]   = {.device = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_HTP]   = {.device = 2, .name =   "qnn-htp", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_CPU]   = {.device = 0, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_GPU]   = {.device = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_HTP]   = {.device = 2, .name =   "qnn-htp", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
 };
 
 
@@ -846,13 +875,13 @@ public:
     const Qnn_GraphHandle_t get_qnn_graph_handle() { return _qnn_graph_handle; }
 
 
-    int init_qnn_model(const char * graph_name,
+    int init_qnn_graph(const char * graph_name,
                        bool debug,
                        uint8_t do_node_validation = 1,
                        const QnnGraph_Config_t ** graph_configs = nullptr
     );
 
-    int finalize_qnn_model();
+    int finalize_qnn_graph();
 
     int init_htp_perfinfra() {
         QnnDevice_Infrastructure_t device_infra = nullptr;
@@ -1426,7 +1455,7 @@ static void ggml_qnn_logcallback(const char * fmt,
         memset(s_ggml_qnn_logbuf, 0, GGML_QNN_LOGBUF_LEN);
         len_content = vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
         LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
-        GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);//should be removed before PR to upstream GGML/whisper.cpp
+        //GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);//should be removed before PR to upstream GGML/whisper.cpp
     }
 }
 
@@ -1483,8 +1512,6 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
     } else {
         LOGGD("initialize qnn backend successfully\n");
     }
-
-    LOGGD("here");
 
     if (nullptr != _qnn_raw_interface.propertyHasCapability) {
         auto qnnStatus = _qnn_raw_interface.propertyHasCapability(QNN_PROPERTY_GROUP_DEVICE);
@@ -1647,7 +1674,7 @@ int qnn_instance::qnn_finalize() {
 }
 
 
-int qnn_instance::init_qnn_model(const char * graph_name, bool debug, uint8_t do_node_validation,
+int qnn_instance::init_qnn_graph(const char * graph_name, bool debug, uint8_t do_node_validation,
                                    const QnnGraph_Config_t ** graph_configs) {
     int result = 0;
 
@@ -1685,7 +1712,7 @@ int qnn_instance::init_qnn_model(const char * graph_name, bool debug, uint8_t do
 }
 
 
-int qnn_instance::finalize_qnn_model() {
+int qnn_instance::finalize_qnn_graph() {
     ENTER_FUNC();
     if (nullptr != _qnn_graph_handle) {
         if (_qnn_raw_interface.graphFinalize(_qnn_graph_handle, _qnn_profile_handle, nullptr) !=
@@ -1693,7 +1720,6 @@ int qnn_instance::finalize_qnn_model() {
             LOGGW("finalizing graph failure\n");
             //return 1;
         }
-        _qnn_graph_handle = nullptr;
     } else {
         LOGGD("qnn graph handle is null\n");
     }
@@ -1704,9 +1730,9 @@ int qnn_instance::finalize_qnn_model() {
 }
 
 
-bool ggml_qnn_can_mul_mat(const struct ggml_tensor * src0, const struct ggml_tensor * src1,
+static bool ggml_qnn_can_mul_mat(const struct ggml_tensor * src0, const struct ggml_tensor * src1,
                                  struct ggml_tensor * dst) {
-    if (!g_qnn_loaded) {
+    if (nullptr == g_qnn_backend) {
         LOGGW("qnn backend not initialized");
         return false;
     }
@@ -1745,12 +1771,16 @@ static void ggml_qnn_get_rows(const ggml_tensor * src0, const ggml_tensor * src1
 
 //ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
 // https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
-static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
+static void ggml_qnn_add(const ggml_tensor *src0, const ggml_tensor *src1, ggml_tensor *dst) {
     LOGGD("call %s\n", __func__);
-    LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", src0->name,
-          src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2], src0->nb[0], src0->nb[1], src0->nb[2]);
-    LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", src1->name,
-          src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2], src1->nb[0], src1->nb[1], src1->nb[2]);
+    LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          src0->name,
+          src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
+          src0->nb[0], src0->nb[1], src0->nb[2]);
+    LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          src1->name,
+          src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
+          src1->nb[0], src1->nb[1], src1->nb[2]);
     LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           dst->name,
           dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0],
@@ -1758,26 +1788,36 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     //TENSOR_DUMP(src0);
 
     int error = 0;
+    static bool init_qnn_add_op = false; //TODO:should be removed in the future
 
-    int64_t n_begin_time                = 0LL;
-    int64_t n_end_time                  = 0LL;
-    int64_t n_durtion                   = 0LL;
+    int64_t n_begin_time = 0LL;
+    int64_t n_end_time = 0LL;
+    int64_t n_durtion = 0LL;
 
-    qnn_instance * instance             = nullptr;
-    Qnn_GraphHandle_t graph_handle      = nullptr;
-    Qnn_Tensor_t tensor_0               = QNN_TENSOR_INIT;
-    Qnn_Tensor_t tensor_1               = QNN_TENSOR_INIT;
-    Qnn_Tensor_t tensor_2               = QNN_TENSOR_INIT;
-    Qnn_QuantizeParams_t quantize_param = QNN_QUANTIZE_PARAMS_INIT;
-    Qnn_OpConfig_t qnn_opconfig         = QNN_OPCONFIG_INIT;
-    Qnn_Param_t qnn_params[]            = {};
+    qnn_instance *instance = nullptr;
 
-    enum ggml_op ggmlop = GGML_OP_MUL_MAT;
+    static Qnn_GraphHandle_t graph_handle = nullptr;
+    static Qnn_Tensor_t tensor_0 = QNN_TENSOR_INIT;
+    static Qnn_Tensor_t tensor_1 = QNN_TENSOR_INIT;
+    static Qnn_Tensor_t tensor_2 = QNN_TENSOR_INIT;
+
+    static Qnn_QuantizeParams_t quantize_param = QNN_QUANTIZE_PARAMS_INIT;
+    static Qnn_OpConfig_t qnn_opconfig = QNN_OPCONFIG_INIT;
+    static Qnn_Param_t qnn_params[] = {};
+
+    enum ggml_op ggmlop = GGML_OP_ADD;
     Qnn_DataType_t src0_qnn_type = QNN_DATATYPE_FLOAT_32;
     Qnn_DataType_t src1_qnn_type = QNN_DATATYPE_FLOAT_32;
 
     ggml_time_init();
     n_begin_time = ggml_time_us();
+
+    uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
+                                     (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
+    uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
+                                     (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
+    uint32_t dimensions_output[] = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
+                                    (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 
     struct ggml_backend_qnn_context *ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
     instance = ctx->instance;
@@ -1789,116 +1829,137 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
     QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->raw_interface;
     QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface = ctx->raw_system_interface;
-    error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(), "qnn_mul_mat", nullptr, &graph_handle);
-    LOGGI("error = %d\n", error);
+    if (nullptr == graph_handle) {
+        error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(),
+                                              ggml_op_name(ggmlop), nullptr, &graph_handle);
+        //graph_handle = instance->get_qnn_graph_handle();
+        LOGGI("error = %d\n", error);
 
-    uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                     (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-    uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                     (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-    uint32_t dimensions_output[] = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                    (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
+        tensor_0 = {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_0",
+                        .type= QNN_TENSOR_TYPE_APP_WRITE,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= src0_qnn_type,
+                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= get_tensor_rank(src0),
+                        .dimensions=dimensions_input_0,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= {.data=nullptr,
+                                .dataSize=0}}}}
+        };
 
-    tensor_0 = {
-            .version= QNN_TENSOR_VERSION_1,
-            {.v1= {
-                    .id=0,
-                    .name= "tensor_0",
-                    .type= QNN_TENSOR_TYPE_APP_WRITE,
-                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                    .dataType= src0_qnn_type,
-                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                    .rank= get_tensor_rank(src0),
-                    .dimensions=dimensions_input_0,
-                    .memType= QNN_TENSORMEMTYPE_RAW,
-                    {.clientBuf= {.data=nullptr,
-                            .dataSize=0}}}}
-    };
+        tensor_1 = {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_1",
+                        .type= QNN_TENSOR_TYPE_APP_WRITE,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= src1_qnn_type,
+                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= get_tensor_rank(src1),
+                        .dimensions=dimensions_input_1,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= {.data=nullptr,
+                                .dataSize=0}}}}
+        };
 
-    tensor_1 = {
-            .version= QNN_TENSOR_VERSION_1,
-            {.v1= {
-                    .id=0,
-                    .name= "tensor_1",
-                    .type= QNN_TENSOR_TYPE_APP_WRITE,
-                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                    .dataType= src1_qnn_type,
-                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                    .rank= get_tensor_rank(src1),
-                    .dimensions=dimensions_input_1,
-                    .memType= QNN_TENSORMEMTYPE_RAW,
-                    {.clientBuf= {.data=nullptr,
-                            .dataSize=0}}}}
-    };
-
-    tensor_2 = (Qnn_Tensor_t) {
-            .version= QNN_TENSOR_VERSION_1,
-            {.v1= {
-                    .id=0,
-                    .name= "tensor_2",
-                    .type= QNN_TENSOR_TYPE_APP_READ,
-                    .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                    .dataType= QNN_DATATYPE_FLOAT_32,
-                    .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                      QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                      {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                    .rank= get_tensor_rank(dst),
-                    .dimensions= dimensions_output,
-                    .memType= QNN_TENSORMEMTYPE_RAW,
-                    {.clientBuf= {.data=nullptr,
-                            .dataSize=0}}}}};
+        tensor_2 = (Qnn_Tensor_t) {
+                .version= QNN_TENSOR_VERSION_1,
+                {.v1= {
+                        .id=0,
+                        .name= "tensor_2",
+                        .type= QNN_TENSOR_TYPE_APP_READ,
+                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
+                        .dataType= QNN_DATATYPE_FLOAT_32,
+                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
+                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
+                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
+                        .rank= get_tensor_rank(dst),
+                        .dimensions= dimensions_output,
+                        .memType= QNN_TENSORMEMTYPE_RAW,
+                        {.clientBuf= {.data=nullptr,
+                                .dataSize=0}}}}};
 
 
-    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_0);
-    LOGGI("error = %d\n", error);
-    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_1);
-    LOGGI("error = %d\n", error);
-    error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
-    LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_0);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_1);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
+        LOGGI("error = %d\n", error);
 
-    // mapping GGML tensor to QNN tensor
-    QNN_VER_PTR(tensor_0)->clientBuf = {src0->data, get_tensor_data_size(src0)};
-    QNN_VER_PTR(tensor_1)->clientBuf = {src1->data, get_tensor_data_size(src1)};
-    QNN_VER_PTR(tensor_2)->clientBuf = {dst->data, get_tensor_data_size(dst)};
+        QNN_VER_PTR(tensor_0)->clientBuf = {src0->data, get_tensor_data_size(src0)};
+        QNN_VER_PTR(tensor_1)->clientBuf = {src1->data, get_tensor_data_size(src1)};
+        QNN_VER_PTR(tensor_2)->clientBuf = {dst->data, get_tensor_data_size(dst)};
 
-    Qnn_Tensor_t tensor_inputs[] = {
-            tensor_0,
-            tensor_1
-    };
+        Qnn_Tensor_t tensor_inputs[] = {
+                tensor_0,
+                tensor_1
+        };
 
-    Qnn_Tensor_t tensor_outputs[] = {
-            tensor_2
-    };
+        Qnn_Tensor_t tensor_outputs[] = {
+                tensor_2
+        };
 
-    Qnn_OpConfig_t opconfig = {
-            (Qnn_OpConfigVersion_t) 1, .v1 = {
-                    "qnn_mul_mat",
-                    QNN_OP_PACKAGE_NAME_QTI_AISW,
-                    QNN_OP_ELEMENT_WISE_ADD,
-                    0,
-                    qnn_params,
-                    2,
-                    tensor_inputs,
-                    1,
-                    tensor_outputs
-            }
-    };
-    error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
-    LOGGI("error = %d\n", error);
-    error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
-    LOGGI("error = %d\n", error);
-    error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
-                                           nullptr, nullptr);
-    LOGGI("error = %d\n", error);
+
+        Qnn_OpConfig_t opconfig = {
+                (Qnn_OpConfigVersion_t) 1, .v1 = {
+                        "qnn_add",
+                        QNN_OP_PACKAGE_NAME_QTI_AISW,
+                        QNN_OP_ELEMENT_WISE_ADD,
+                        0,
+                        qnn_params,
+                        2,
+                        tensor_inputs,
+                        1,
+                        tensor_outputs
+                }
+        };
+        error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
+        LOGGI("error = %d\n", error);
+        error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
+        LOGGI("error = %d\n", error);
+
+        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
+                                               nullptr, nullptr);
+        LOGGI("error = %d\n", error);
+    } else {
+        QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
+        QNN_VER_PTR(tensor_0)->rank = get_tensor_rank(src0);
+        QNN_VER_PTR(tensor_1)->dimensions = dimensions_input_1;
+        QNN_VER_PTR(tensor_1)->rank = get_tensor_rank(src1);
+        QNN_VER_PTR(tensor_2)->dimensions = dimensions_output;
+        QNN_VER_PTR(tensor_2)->rank = get_tensor_rank(dst);
+
+        QNN_VER_PTR(tensor_0)->clientBuf = {src0->data, get_tensor_data_size(src0)};
+        QNN_VER_PTR(tensor_1)->clientBuf = {src1->data, get_tensor_data_size(src1)};
+        QNN_VER_PTR(tensor_2)->clientBuf = {dst->data, get_tensor_data_size(dst)};
+
+        Qnn_Tensor_t tensor_inputs[] = {
+                tensor_0,
+                tensor_1
+        };
+
+        Qnn_Tensor_t tensor_outputs[] = {
+                tensor_2
+        };
+        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
+                                               nullptr, nullptr);
+        LOGGI("error = %d\n", error);
+    }
 
     failure:
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
-    LOGGD("duration of qnn mul_mat : %lld milliseconds\n", n_durtion);
+    LOGGD("duration of ggml_qnn_add : %lld milliseconds\n", n_durtion);
 
     LOGGD("call %s done\n", __func__);
 }
@@ -2199,7 +2260,7 @@ static void ggml_qnn_dup(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
 //ref: PoC-S29:mapping ggml_tensor to QNN_tensor
 // https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L7060
-void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
+static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
     LOGGD("call %s\n", __func__);
     LOGGI("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n", src0->name,
           src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2], src0->nb[0], src0->nb[1], src0->nb[2]);
@@ -2466,18 +2527,18 @@ static void ggml_qnn_nop(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
 bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
     //ENTER_FUNC();
-    if (!g_qnn_loaded) {
+    if (nullptr == g_qnn_backend) {
         LOGGD("pls check why qnn subsystem not initialized");
         return false;
     }
 
     ggml_qnn_func_t func;
 
-    bool supported_op = (tensor->op == GGML_OP_ADD
-        ||  tensor->op == GGML_OP_MUL
-        ||  tensor->op == GGML_OP_MUL_MAT);
+    bool supported_op = (tensor->op == GGML_OP_ADD);
     if (!supported_op) {
-        return false;
+        //use default GGML OPs
+        ggml_compute_forward(params, tensor);
+        return true;
     }
 
     if (tensor->op == GGML_OP_MUL_MAT) {
@@ -2773,10 +2834,6 @@ static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_back
         LEAVE_FUNC();
         return nullptr;
     }
-    i_alloc_buffer_counts++;
-    i_alloc_buffer_sizes += size;
-    LOGGI("total buffer counts %d, total buffer size %d(%d MB)", i_alloc_buffer_counts, i_alloc_buffer_sizes, i_alloc_buffer_sizes / (1 << 20));
-
     LEAVE_FUNC();
 
     return ggml_backend_buffer_init(buft, ggml_backend_qnn_buffer_interface, ctx, size);
@@ -2833,7 +2890,7 @@ static const char * ggml_backend_qnn_name(ggml_backend_t backend) {
 
 
 static void ggml_backend_qnn_free(ggml_backend_t backend) {
-    ENTER_FUNC();
+    LOGGI("enter %s", __func__ );
     ggml_backend_qnn_context * ctx = (ggml_backend_qnn_context *) backend->context;
     LOGGD("idx %d, name:%s", ctx->device, g_qnn_mgr[ctx->device].name);
 
@@ -2850,20 +2907,18 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
         g_qnn_mgr[ctx->device].buffer_pool = nullptr;
     }
 
-    if (ctx->device == QNN_CPU)
-        delete backend;
-    else
-        free(backend);
+    g_qnn_backend = nullptr;
+    g_qnn_mgr[ctx->device].backend = nullptr;
 
-    LEAVE_FUNC();
+    delete backend;
+
+    LOGGI("leave %s", __func__ );
 }
 
 
 static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_backend_t backend) {
     ENTER_FUNC();
-    LOGGI("here");
     ggml_backend_qnn_context * ctx = (ggml_backend_qnn_context *) backend->context;
-
     LOGGD("device %d,%s", ctx->device, ctx->name);
     LEAVE_FUNC();
 
@@ -2871,35 +2926,7 @@ static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_
 }
 
 
-//TODO: implement all supported GGML OP using QNN API
-static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
-    ENTER_FUNC();
-    ggml_backend_qnn_context * ctx = (ggml_backend_qnn_context *) backend->context;
-
-    ggml_compute_params params = {};
-    params.type = GGML_TASK_TYPE_COMPUTE;
-    params.ith = 0;
-    for (int i = 0; i < cgraph->n_nodes; i++) {
-        ggml_tensor * node = cgraph->nodes[i];
-
-        if (node->op == GGML_OP_RESHAPE || node->op == GGML_OP_TRANSPOSE ||
-            node->op == GGML_OP_VIEW || node->op == GGML_OP_PERMUTE || node->op == GGML_OP_NONE) {
-            continue;
-        }
-        bool ok = ggml_qnn_compute_forward(&params, node);
-        if (!ok) {
-            LOGGD("%s: error: op not supported %s (%s)\n", __func__, node->name, ggml_op_name(node->op));
-        }
-        //GGML_ASSERT(ok);
-    }
-
-    LEAVE_FUNC();
-
-    return GGML_STATUS_SUCCESS;
-}
-
-
-#if 1
+#if 0
 static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tensor * op) {
     ENTER_FUNC();
 
@@ -3039,6 +3066,88 @@ static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tens
 #endif
 
 
+//TODO: implement all supported GGML OP using QNN API
+//PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
+//https://github.com/zhouwg/kantv/issues/121
+static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
+    ENTER_FUNC();
+    enum ggml_status result         = GGML_STATUS_SUCCESS;
+    int node_n                      = -1;
+    int task_phase                  = GGML_TASK_TYPE_FINALIZE;
+    ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
+
+    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);
+
+    if (plan.work_size > 0) {
+        LOGGI("work size %d(%d MB)", plan.work_size, plan.work_size / (1 << 20));
+        //plan.work_data = static_cast<uint8_t *>(malloc(plan.work_size));
+        plan.work_data = ctx->buffer_pool->buffer_alloc(ctx->buffer_pool)->content;
+        if (plan.work_data == NULL) {
+            LOGGE("malloc failed");
+            return GGML_STATUS_FAILED;
+        }
+    }
+    struct ggml_cplan * cplan = &plan;
+    GGML_ASSERT(cplan->n_threads > 0);
+    if (cplan->work_size > 0) {
+        GGML_ASSERT(cplan->work_data);
+    }
+
+    while (true) {
+        if (cplan->abort_callback && cplan->abort_callback(cplan->abort_callback_data)) {
+            result = GGML_STATUS_ABORTED;
+            break;
+        }
+        struct ggml_compute_params params = {
+                /*.type  =*/ GGML_TASK_TYPE_FINALIZE,
+                /*.ith   =*/ 0,
+                /*.nth   =*/ 0,
+                /*.wsize =*/ cplan->work_size,
+                /*.wdata =*/ cplan->work_data,
+        };
+
+        if (node_n != -1) {
+            /* FINALIZE */
+            struct ggml_tensor * node = cgraph->nodes[node_n];
+            if (GGML_OP_HAS_FINALIZE[node->op]) {
+                params.nth = 1;
+                ggml_qnn_compute_forward(&params, node);
+            }
+        }
+
+        while (++node_n < cgraph->n_nodes) {
+            //LOGGD("%s: %d/%d\n", __func__, node_n, cgraph->n_nodes);
+            struct ggml_tensor * node = cgraph->nodes[node_n];
+            params.nth = 1;
+            if (GGML_OP_HAS_INIT[node->op]) {
+                params.type = GGML_TASK_TYPE_INIT;
+                ggml_qnn_compute_forward(&params, node);
+            }
+            params.type = GGML_TASK_TYPE_COMPUTE;
+            ggml_qnn_compute_forward(&params, node);
+            if (GGML_OP_HAS_FINALIZE[node->op]) {
+                params.type = GGML_TASK_TYPE_FINALIZE;
+                ggml_qnn_compute_forward(&params, node);
+            }
+            if (cplan->abort_callback && cplan->abort_callback(cplan->abort_callback_data)) {
+                result = GGML_STATUS_ABORTED;
+                break;
+            }
+        }
+        task_phase = GGML_TASK_TYPE_INIT;
+        if (node_n >= cgraph->n_nodes) {
+            LOGGI("node_n %d", node_n);
+            LOGGI("cgraph->n_nodes %d", cgraph->n_nodes);
+            break;
+        }
+    }
+
+    //free(plan.work_data);
+    LEAVE_FUNC();
+
+    return result;
+}
+
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * op) {
     ENTER_FUNC();
     GGML_UNUSED(backend);
@@ -3102,6 +3211,14 @@ bool ggml_backend_is_qnn(ggml_backend_t backend) {
 }
 
 
+const char * ggml_backend_qnn_get_name(ggml_backend_t backend) {
+    ENTER_FUNC();
+    LEAVE_FUNC();
+
+    //return ggml_backend_qnn_name(backend);
+    return backend->iface.get_name(backend);
+}
+
 int ggml_backend_qnn_get_device_count() {
     ENTER_FUNC();
     LEAVE_FUNC();
@@ -3137,7 +3254,7 @@ ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t device_index) {
     if (device_index >= GGML_QNN_MAX_DEVICES) {
         LOGGD("ggml_backend_qnn_buffer_type error: device_index:%d is out of range [0, %d]\n",
                device_index, GGML_QNN_MAX_DEVICES - 1);
-        GGML_ASSERT(device_index < GGML_QNN_MAX_DEVICES);
+        return nullptr;
     }
 
     static struct ggml_backend_buffer_type ggml_backend_buffer_type_qnn = {
@@ -3162,31 +3279,23 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     ENTER_FUNC();
     int result = 0;
 
-    //TODO: better method to handle internal state between whisper.cpp/llama.cpp and qnn backend
-    if (g_qnn_loaded) {
-        LOGGE("qnn backend already loaded, it should not happened, pls check why?");
-        if (QNN_GPU == device) {
-            return g_qnn_backend; //TODO:apk will crash with QNN GPU backend, workaround method to handle it
-        }
-
-        if (nullptr != g_qnn_backend) {
-            ggml_backend_qnn_free(g_qnn_backend);
-            i_alloc_buffer_counts  = 0;
-            i_alloc_buffer_sizes  = 0;
-            i_get_alloc_counts   = 0;
-            i_get_alloc_sizes  = 0;
-        }
-        //TODO: better method to handle internal state between whisper.cpp/llama.cpp and qnn backend
-        //return nullptr;
-    }
-
     LOGGD("device %d", device);
     if (device >= GGML_QNN_MAX_DEVICES) {
-        LOGGW("invalid device index %d", device);
+        LOGGE("invalid device %d", device);
         return nullptr;
     }
 
-    LOGGI("enter %s, device %d\n", __func__, device);
+    if (nullptr != g_qnn_mgr[device].backend) {
+        LOGGE("qnn backend %d(%s) already loaded, it should not happened, pls check why?", device, get_qnn_backend_name(device));
+        g_qnn_backend = g_qnn_mgr[device].backend;
+        return g_qnn_mgr[device].backend;
+    }
+
+    static bool is_first_call = true;
+    if (is_first_call) {
+        ggml_setup_op_has_task_pass();
+        is_first_call = false;
+    }
 
     if (QNN_HTP == device) {
         //TODO: hardcode path
@@ -3224,8 +3333,10 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
         delete instance;
         return nullptr;
     }
+
     std::string device_name = GGML_QNN_NAME + std::string("_") + std::to_string(device) + std::string("_") + get_qnn_backend_name(device);
     LOGGI("qnn device name %s", device_name.c_str());
+    instance->init_qnn_graph(device_name.c_str(), false);
     g_qnn_mgr[device].instance                  = instance;
     g_qnn_mgr[device].raw_interface             = instance->get_qnn_raw_interface();
     g_qnn_mgr[device].raw_system_interface      = instance->get_qnn_raw_system_interface();
@@ -3233,37 +3344,17 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     g_qnn_mgr[device].buffer_pool               = qnn_buf_new(get_qnn_backend_name(device), GGML_QNN_MAX_BUFFERS, (1 << 20));
     GGML_ASSERT(g_qnn_mgr[device].buffer_pool != nullptr);
 
-    ggml_backend_t qnn_backend = nullptr;
-
-    if (QNN_CPU == device) {
-        LOGGD("here");
-        qnn_backend = new ggml_backend{
+    ggml_backend_t qnn_backend = new ggml_backend{
                 /* .guid      = */ ggml_backend_qnn_guid(),
-                /* .interface = */ ggml_backend_qnn_interface,
+                /* .iface     = */ ggml_backend_qnn_interface,
                 /* .context   = */ &g_qnn_mgr[device]
-        };
-    } else {
-        qnn_backend = (struct ggml_backend*)malloc(sizeof(struct ggml_backend));
-        if (nullptr == qnn_backend) {
-            instance->qnn_finalize();
-            delete instance;
-
-            g_qnn_mgr[device].buffer_pool->destroy(g_qnn_mgr[device].buffer_pool);
-            LOGGE("malloc failed");
-            return nullptr;
-        }
-        qnn_backend->guid = ggml_backend_qnn_guid();
-        qnn_backend->iface = ggml_backend_qnn_interface;
-        qnn_backend->context = &g_qnn_mgr[device];
-    }
-    g_qnn_loaded = true;
+    };
+    g_qnn_mgr[device].backend   = qnn_backend;
+    g_qnn_backend = g_qnn_mgr[device].backend;
 
     LOGGI("get_default_buffer_type %p", qnn_backend->iface.get_default_buffer_type);//TODO:why the pointer changed with QNN GPU backend?
     LOGGI("qnn_backend %p", qnn_backend);
     LEAVE_FUNC();
-
-    //TODO: better method to handle multi backend device
-    g_qnn_backend = qnn_backend;
 
     return qnn_backend;
 }
@@ -3276,7 +3367,8 @@ int ggml_backend_qnn_reg_devices() {
     ENTER_FUNC();
     for (size_t idx = 0; idx < GGML_QNN_MAX_DEVICES; idx++) {
         int id = g_qnn_mgr[idx].device;
-        char name[128];
+        char name[GGML_MAX_NAME];
+        memset(name, 0, GGML_MAX_NAME);
         snprintf(name, sizeof(name), "%s%d", GGML_QNN_NAME, id);
         ggml_backend_register(name, ggml_backend_qnn_reg_init, ggml_backend_qnn_buffer_type(idx),
                               (void *) (intptr_t)idx);

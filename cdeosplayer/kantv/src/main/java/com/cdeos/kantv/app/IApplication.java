@@ -393,9 +393,9 @@ public class IApplication extends Application {
             CDELog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL, CDEUtils.QNN_BACKEND_GGML);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST, CDEUtils.QNN_BACKEND_GGML);
             }
             CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             CDEUtils.setTVASR(false);
