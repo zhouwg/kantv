@@ -9,12 +9,20 @@
  *
  * 1. core implementation(data path works as expected with whisper.cpp using QNN CPU backend) has been completed on 04/13/2024
  *
- * 2. major GGML OP(GGML_OP_MUL_MAT) using QNN API has been completed
+ * 2. core implementation(data path works as expected with whisper.cpp using QNN GPU backend) has been completed
  *
- * 3. data path with whisper.cpp not work using QNN HTP(aka DSP) backend, QNN HTP(aka DSP) backend heavily
+ * 3. GGML_OP_MUL_MAT & GGML_OP_MUL & GGML_OP_ADD using QNN API has been completed
+ *
+ * 4. data path with whisper.cpp not work using QNN HTP(aka DSP) backend, QNN HTP(aka DSP) backend heavily
  *    depend on vendor's customized Android OS based on Qualcomm's BSP
  *
- * 4. lack of implementation of other GGML-OPs using QNN API
+ * 5. lack of implementation of other GGML-OPs using QNN API
+ *
+ * 6. lack of resource management of internal QNN resources and toggle between different backend(QNN CPU backend, QNN GPU backend, ggml...)
+ *
+ * 7. only support FP32 / FP16
+ *
+ * 8. stability
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,6 +216,12 @@ extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct
 
 //TODO: should be removed in the future
 static ggml_backend_t g_qnn_backend = nullptr;
+
+//TODO: better method to handle toggle between QNN CPU backend, QNN GPU backend, ggml
+static int g_previous_device        = 3;
+
+//TODO: better method to handle internal QNN resources management
+static std::map<std::string, Qnn_GraphHandle_t> qnn_graph_map;
 
 static bool GGML_OP_HAS_INIT    [GGML_OP_COUNT] = { 0 };
 static bool GGML_OP_HAS_FINALIZE[GGML_OP_COUNT] = { 0 };
@@ -1413,7 +1427,6 @@ int qnn_instance::unload_system() {
 }
 
 
-#include "ggml-jni.h" //should be removed before PR to upstream GGML/whisper.cpp
 static void ggml_qnn_logcallback(const char * fmt,
                                  QnnLog_Level_t level,
                                  uint64_t timestamp,
@@ -1453,7 +1466,6 @@ static void ggml_qnn_logcallback(const char * fmt,
         memset(s_ggml_qnn_logbuf, 0, GGML_QNN_LOGBUF_LEN);
         len_content = vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
         //LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
-        //GGML_JNI_NOTIFY("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);//should be removed before PR to upstream GGML/whisper.cpp
     }
 }
 
@@ -2041,14 +2053,19 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->raw_interface;
     QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface = ctx->raw_system_interface;
 
-    if (nullptr == graph_handle) {
+    bool graph_initialized = false;
+    std::string map_entry = std::string(ggml_op_name(ggmlop));
+    if (qnn_graph_map.find(map_entry) != qnn_graph_map.end()) {
+        graph_initialized = true;
+    }
+
+    if (!graph_initialized) {
         error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(),
                                               ggml_op_name(ggmlop), nullptr, &graph_handle);
         if (QNN_SUCCESS != error) {
             LOGGI("can't create qnn graph handle, error = %d\n", error);
             return;
         }
-
         tensor_0 = {
                 .version= QNN_TENSOR_VERSION_1,
                 {.v1= {
@@ -2157,6 +2174,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
         if (QNN_SUCCESS != error) {
             LOGGI("error = %d\n", error);
         }
+        qnn_graph_map[map_entry] = graph_handle;
     } else {
         QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
         QNN_VER_PTR(tensor_0)->rank = get_tensor_rank(src0);
@@ -2267,7 +2285,13 @@ static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     uint32_t dimensions_output[] = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
                                     (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 
-    if (nullptr == graph_handle) {
+    bool graph_initialized = false;
+    std::string map_entry = std::string(ggml_op_name(ggmlop));
+    if (qnn_graph_map.find(map_entry) != qnn_graph_map.end()) {
+        graph_initialized = true;
+    }
+
+    if (!graph_initialized) {
         error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(),
                                               ggml_op_name(ggmlop), nullptr, &graph_handle);
         if (QNN_SUCCESS != error) {
@@ -2384,6 +2408,7 @@ static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggm
         if (QNN_SUCCESS != error) {
             LOGGI("error = %d\n", error);
         }
+        qnn_graph_map[map_entry] = graph_handle;
     } else {
         QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
         QNN_VER_PTR(tensor_0)->rank = get_tensor_rank(src0);
@@ -2604,8 +2629,13 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
     uint32_t dimensions_input_1[] = {2, 2};
     uint32_t dimensions_output[]  = {2, 2};
 #endif
+    bool graph_initialized = false;
+    std::string map_entry = std::string(ggml_op_name(optype));
+    if (qnn_graph_map.find(map_entry) != qnn_graph_map.end()) {
+        graph_initialized = true;
+    }
 
-    if (nullptr == graph_handle) {
+    if (!graph_initialized) {
         error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(),
                                               ggml_op_name(optype), nullptr, &graph_handle);
         if (QNN_SUCCESS != error) {
@@ -2726,6 +2756,7 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
         if (QNN_SUCCESS != error) {
             LOGGI("error = %d\n", error);
         }
+        qnn_graph_map[map_entry] = graph_handle;
     } else {
         QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
         QNN_VER_PTR(tensor_0)->rank = get_tensor_rank(src0);
@@ -3161,7 +3192,7 @@ static void * ggml_qnn_host_malloc(size_t n) {
 
 //TODO
 static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_backend_buffer_type_t buft, size_t size) {
-    ENTER_FUNC();
+    //ENTER_FUNC();
 
     ggml_backend_qnn_buffer_context * ctx = new ggml_backend_qnn_buffer_context;
 
@@ -3172,7 +3203,7 @@ static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_back
         size_aligned += (size_page - (size_aligned % size_page));
     }
 
-    LOGGD("size %d, %d MB", size_aligned, size_aligned / (1 << 20));
+    //LOGGD("size %d, %d MB", size_aligned, size_aligned / (1 << 20));
 
     //TODO:use pre-mallocated buffer in internal memory pool
     ctx->buffer = ggml_qnn_host_malloc(size_aligned);
@@ -3183,7 +3214,7 @@ static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_back
         LEAVE_FUNC();
         return nullptr;
     }
-    LEAVE_FUNC();
+    //LEAVE_FUNC();
 
     return ggml_backend_buffer_init(buft, ggml_backend_qnn_buffer_interface, ctx, size);
 }
@@ -3256,10 +3287,19 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
         g_qnn_mgr[ctx->device].buffer_pool = nullptr;
     }
 
-    g_qnn_backend = nullptr;
-    g_qnn_mgr[ctx->device].backend = nullptr;
+    if (g_qnn_mgr[ctx->device].backend      != nullptr) {
+        delete backend;
+        g_qnn_backend = nullptr;
+        g_qnn_mgr[ctx->device].backend = nullptr;
+    }
 
-    delete backend;
+
+    //TODO:release all QNN resources
+    std::map<std::string, Qnn_GraphHandle_t>::iterator it;
+    for (it = qnn_graph_map.begin(); it != qnn_graph_map.end(); it++) {
+        Qnn_GraphHandle_t & graph_handle = it->second;
+    }
+    qnn_graph_map.clear();
 
     LOGGI("leave %s", __func__ );
 }
@@ -3616,6 +3656,7 @@ ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t device_index) {
 }
 
 
+//TODO: better method to handle toggle between QNN CPU backend, QNN GPU backend, ggml
 ggml_backend_t ggml_backend_qnn_init(size_t device) {
     ENTER_FUNC();
     int result = 0;
@@ -3628,8 +3669,14 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
 
     if (nullptr != g_qnn_mgr[device].backend) {
         LOGGE("qnn backend %d(%s) already loaded, it should not happened, pls check why?", device, get_qnn_backend_name(device));
-        g_qnn_backend = g_qnn_mgr[device].backend;
-        return g_qnn_mgr[device].backend;
+        if (device == g_previous_device) {
+            g_qnn_backend = g_qnn_mgr[device].backend;
+            LOGGI("re-use cached backend %d(%s)", device, get_qnn_backend_name(device));
+            return g_qnn_mgr[device].backend;
+        } else {
+            LOGGI("delete previous backend %d(%s)", device, get_qnn_backend_name(device));
+            ggml_backend_qnn_free(g_qnn_backend);
+        }
     }
 
     static bool is_first_call = true;
@@ -3692,6 +3739,7 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     };
     g_qnn_mgr[device].backend   = qnn_backend;
     g_qnn_backend = g_qnn_mgr[device].backend;
+    g_previous_device = device;
 
     LOGGI("get_default_buffer_type %p", qnn_backend->iface.get_default_buffer_type);//TODO:why the pointer changed with QNN GPU backend?
     LOGGI("qnn_backend %p", qnn_backend);

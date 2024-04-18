@@ -255,6 +255,7 @@
 
              }
          });
+         spinnerBenchType.setSelection(CDEUtils.BENCHMARK_QNN_GGML_OP);
 
          Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerThreadCounts);
          String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
