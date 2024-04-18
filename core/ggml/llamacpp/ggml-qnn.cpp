@@ -2868,7 +2868,7 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
 
     bool supported_op = false;
     supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
-    supported_op = (tensor->op == GGML_OP_ADD);
+    //supported_op = (tensor->op == GGML_OP_ADD);
     //supported_op = false;
     if (!supported_op) {
         //use default GGML OPs
