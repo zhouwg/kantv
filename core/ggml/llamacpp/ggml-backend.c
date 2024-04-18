@@ -80,8 +80,10 @@ const char * ggml_backend_buffer_name(ggml_backend_buffer_t buffer) {
 }
 
 void ggml_backend_buffer_free(ggml_backend_buffer_t buffer) {
-    ENTER_FUNC();
+    //ENTER_FUNC();
     if (buffer == NULL) {
+        //LOGGW("buffer is nullptr");
+        LEAVE_FUNC();
         return;
     }
 
@@ -89,7 +91,7 @@ void ggml_backend_buffer_free(ggml_backend_buffer_t buffer) {
         buffer->iface.free_buffer(buffer);
     }
     free(buffer);
-    LEAVE_FUNC();
+    //LEAVE_FUNC();
 }
 
 size_t ggml_backend_buffer_get_size(ggml_backend_buffer_t buffer) {
@@ -183,9 +185,9 @@ void ggml_backend_free(ggml_backend_t backend) {
 }
 
 ggml_backend_buffer_type_t ggml_backend_get_default_buffer_type(ggml_backend_t backend) {
-    LOGGI("backend %p", backend);
-    LOGGI("backend->iface %p", backend->iface);
-    LOGGI("backend->iface.get_default_buffer_type %p", backend->iface.get_default_buffer_type);
+    //LOGGI("backend %p", backend);
+    //LOGGI("backend->iface %p", backend->iface);
+    //LOGGI("backend->iface.get_default_buffer_type %p", backend->iface.get_default_buffer_type);
     return backend->iface.get_default_buffer_type(backend);
 }
 

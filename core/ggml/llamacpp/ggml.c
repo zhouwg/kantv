@@ -16128,13 +16128,15 @@ void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tenso
         return;
     }
 
+
+    //depend on this PR in upstream whisper.cpp https://github.com/ggerganov/whisper.cpp/pull/2073
     const struct ggml_tensor * src0 = tensor->src[0];
     const struct ggml_tensor * src1 = tensor->src[1];
     if (NULL != src0 && NULL != src1) {
         if (src0->backend == GGML_BACKEND_TYPE_GPU) {
 #if defined(GGML_USE_QNN)
-            LOGGI("hw acceleration with QNN");
-            if (tensor->op == GGML_OP_ADD) {
+            //LOGGI("hw acceleration with QNN");
+            if ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT)) {
                 ggml_qnn_compute_forward(params, tensor);
                 return;
             }

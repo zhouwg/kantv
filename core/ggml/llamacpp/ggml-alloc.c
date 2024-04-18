@@ -916,15 +916,15 @@ static bool alloc_tensor_range(struct ggml_context * ctx,
 }
 
 ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_context * ctx, ggml_backend_buffer_type_t buft) {
-    LOGGI("here ctx %p, ggml_backend_buffer_type_t %p", ctx, buft);
+    //LOGGI("here ctx %p, ggml_backend_buffer_type_t %p", ctx, buft);
     GGML_ASSERT(ggml_get_no_alloc(ctx) == true);
 
-    LOGGI("enter %s", __func__);
+    //LOGGI("enter %s", __func__);
     size_t alignment = ggml_backend_buft_get_alignment(buft);
     size_t max_size = ggml_backend_buft_get_max_size(buft);
 
-    LOGGD("alignment %d", alignment);
-    LOGGD("max_size %d", max_size);
+    //LOGGD("alignment %d", alignment);
+    //LOGGD("max_size %d", max_size);
 
     ggml_backend_buffer_t * buffers = NULL;
     size_t n_buffers = 0;
@@ -989,6 +989,6 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
 }
 
 ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors(struct ggml_context * ctx, ggml_backend_t backend) {
-    LOGGI("here ctx %p, backend %p", ctx, backend); //TODO:crash here, why the pointer changed with QNN GPU backend?
+    //LOGGI("here ctx %p, backend %p", ctx, backend); //TODO:crash here, why the pointer changed with QNN GPU backend?
     return ggml_backend_alloc_ctx_tensors_from_buft(ctx, ggml_backend_get_default_buffer_type(backend));
 }

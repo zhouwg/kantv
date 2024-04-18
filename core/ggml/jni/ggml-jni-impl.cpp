@@ -715,11 +715,11 @@ failure:
 
     if (0 == result) {
         if (num_segments != 0) {
-            kantv_asr_notify_benchmark(asr_result);
-            return asr_result.c_str();
+            GGML_JNI_NOTIFY("%s", asr_result.c_str());
+            return "asr_result";
         } else {
             asr_result = "pls check why whisper.cpp inference failure: whether whisper model file exist? whether jfk.wav is correct?\n";
-            kantv_asr_notify_benchmark(asr_result);
+            GGML_JNI_NOTIFY("%s", asr_result.c_str());
             LOGGD("%s", asr_result.c_str());
             return NULL;
         }
