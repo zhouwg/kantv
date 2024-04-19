@@ -2085,6 +2085,8 @@ typedef int ( * ComposeGraphsHandleType_t)(
 
 typedef int ( * FreeGraphsHandleType_t)(GraphInfo_t ***, uint32_t);
 
+using pfn_rpc_mem_init                      = void (*)(void);
+using pfn_rpc_mem_deinit                    = void (*)(void);
 
 using pfn_rpc_mem_alloc                     = void * (*)(int, uint32_t, int);
 using pfn_rpc_mem_free                      = void (*)(void *);
@@ -5221,6 +5223,8 @@ private:
     pfn_rpc_mem_alloc _pfn_rpc_mem_alloc;
     pfn_rpc_mem_free  _pfn_rpc_mem_free;
     pfn_rpc_mem_to_fd _pfn_rpc_mem_to_fd;
+    pfn_rpc_mem_init  _pfn_rpc_mem_init;
+    pfn_rpc_mem_deinit _pfn_rpc_mem_deinit;
     std::unordered_map<void *, void *> _rpcmem_store_map;
 
     qnn_io_tensor _io_tensor;
@@ -5330,6 +5334,7 @@ int qnn_implementation::register_rpcmem(void * p_data, Qnn_Tensor_t * p_tensor) 
         LOGGI("tensor %s successfully register shared memory\n", (QNN_VER_PTR(*p_tensor)->name));
     }
     QNN_VER_PTR(*p_tensor)->memHandle = handle;
+    //QNN_VER_PTR(*p_tensor)->memType = QNN_TENSORMEMTYPE_MEMHANDLE;
     _qnn_mem_set.insert(handle);
 
     return 0;
@@ -5787,14 +5792,20 @@ int qnn_implementation::qnn_init(const QnnSaver_Config_t ** saver_config) {
         LOGGD("load rpcmem lib successfully\n");
         set_rpcmem_initialized(true);
     }
+    _pfn_rpc_mem_init   = reinterpret_cast<pfn_rpc_mem_init>(dlsym(_rpc_lib_handle, "rpcmem_init"));
+    _pfn_rpc_mem_deinit = reinterpret_cast<pfn_rpc_mem_deinit>(dlsym(_rpc_lib_handle, "rpcmem_deinit"));
     _pfn_rpc_mem_alloc  = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle, "rpcmem_alloc"));
     _pfn_rpc_mem_free   = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
     _pfn_rpc_mem_to_fd  = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle, "rpcmem_to_fd"));
-    if (nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free || nullptr == _pfn_rpc_mem_to_fd) {
-        LOGGW("unable to access symbols in shared buffer. dlerror(): %s", dlerror());
+    if (nullptr == _pfn_rpc_mem_init || nullptr == _pfn_rpc_mem_deinit
+        || nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free
+        || nullptr == _pfn_rpc_mem_to_fd) {
+        LOGGW("unable to access symbols in QNN RPC lib. dlerror(): %s", dlerror());
         dlclose(_rpc_lib_handle);
         return 10;
     }
+
+    _pfn_rpc_mem_init();
 
     std::vector<const QnnContext_Config_t*> temp_context_config; //TODO:now is empty because I don't know how to use QnnContext_Config_t currently
     _qnn_interface.qnn_context_create(_qnn_backend_handle, _qnn_device_handle, temp_context_config.empty() ? nullptr : temp_context_config.data(), &_qnn_context_handle);
@@ -5816,6 +5827,8 @@ int qnn_implementation::qnn_finalize() {
     int ret_status = 0;
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
     ENTER_FUNC();
+
+    _pfn_rpc_mem_deinit();
 
     if (dlclose(_rpc_lib_handle) != 0) {
         LOGGW("failed to unload qualcomm's rpc lib, error:%s\n", dlerror());
@@ -6748,7 +6761,9 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     auto is_io_tensor = [](Qnn_TensorType_t type) {
         return type < QNN_TENSOR_TYPE_STATIC;
     };
-    uint8_t * qnn_buffer                = nullptr;
+    uint8_t * qnn_buffer_0                = nullptr;
+    uint8_t * qnn_buffer_1                = nullptr;
+    uint8_t * qnn_buffer_2                = nullptr;
     Qnn_Tensor_t tensor_0               = QNN_TENSOR_INIT;
     Qnn_Tensor_t tensor_1               = QNN_TENSOR_INIT;
     Qnn_Tensor_t tensor_2               = QNN_TENSOR_INIT;
@@ -6765,15 +6780,15 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                     n_backend_type, get_qnn_backend_name(n_backend_type), n_op_type);
 
     switch (n_backend_type) {
-        case 0:
+        case QNN_CPU:
             qnn_backend_lib = "libQnnCpu.so";
             break;
 
-        case 1:
+        case QNN_GPU:
             qnn_backend_lib = "libQnnGpu.so";
             break;
 
-        case 2: {
+        case QNN_HTP: {
             qnn_backend_lib = "libQnnHtp.so";
             std::string path = "/data/data/com.cdeos.kantv/";
             LOGGI("path:%s\n", path.c_str());
@@ -6874,13 +6889,14 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         result = 2;
         goto failure;
     }
-    qnn_buffer = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(8192, 4));
-    if (nullptr == qnn_buffer) {
-        LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
-        goto failure;
-    } else {
-        LOGGD("alloc rpcmem successfully\n");
+
+    {
+        QnnDevice_PlatformInfo_t platform_info;
+        const QnnDevice_PlatformInfo_t *p_info = &platform_info;
+        qnn_raw_interface.deviceGetInfo(qnn_backend.get_qnn_device_handle(), &p_info);
+        LOGGD("device counts %d", platform_info.v1.numHwDevices);
     }
+
 
     if (0) {
         qnn_backend.run_qnn_matrix();   //TODO: QNN pipeline works but result of output tensor is incorrect
@@ -6957,10 +6973,47 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
         LOGGI("error = %d\n", error);
 
-        //here is similar to OpenMAX IL
-        QNN_VER_PTR(tensor_0)->clientBuf =  { input_matrix[0], 16};
-        QNN_VER_PTR(tensor_1)->clientBuf =  { input_matrix[1], 16};
-        QNN_VER_PTR(tensor_2)->clientBuf =  { output_matrix[0], 16};
+        if (QNN_HTP == n_backend_type) {
+            qnn_buffer_0 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(128, 4));
+            if (nullptr == qnn_buffer_0) {
+                LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
+                goto failure;
+            } else {
+                LOGGD("alloc rpcmem successfully\n");
+            }
+            memset(qnn_buffer_0, 1, 128);
+            qnn_backend.register_rpcmem(qnn_buffer_0, &tensor_0);
+            QNN_VER_PTR(tensor_0)->clientBuf =  { qnn_buffer_0, 16};
+
+
+            qnn_buffer_1 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(128, 4));
+            if (nullptr == qnn_buffer_1) {
+                LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
+                goto failure;
+            } else {
+                LOGGD("alloc rpcmem successfully\n");
+            }
+            memset(qnn_buffer_1, 2, 128);
+            qnn_backend.register_rpcmem(qnn_buffer_1, &tensor_1);
+            QNN_VER_PTR(tensor_1)->clientBuf =  { qnn_buffer_1, 16};
+
+
+            qnn_buffer_2 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(128, 4));
+            if (nullptr == qnn_buffer_2) {
+                LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
+                goto failure;
+            } else {
+                LOGGD("alloc rpcmem successfully\n");
+            }
+            memset(qnn_buffer_2, 0, 128);
+            qnn_backend.register_rpcmem(qnn_buffer_2, &tensor_2);
+            QNN_VER_PTR(tensor_2)->clientBuf =  { qnn_buffer_2, 16};
+        } else {
+            //here is similar to OpenMAX IL
+            QNN_VER_PTR(tensor_0)->clientBuf = {input_matrix[0], 16};
+            QNN_VER_PTR(tensor_1)->clientBuf = {input_matrix[1], 16};
+            QNN_VER_PTR(tensor_2)->clientBuf = {output_matrix[0], 16};
+        }
 
         //for this single computation graph which contains three nodes(every node is a tensor,
         //the GGML_OP_ADD is the edge of this single computation graph), nullptr is ok
@@ -7024,7 +7077,11 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                 LOGGD("output matrix:\n");
                 GGML_JNI_NOTIFY("output matrix:");
                 for (size_t i = 0; i < 1; i++) {
-                    float * temp = output_matrix[i];
+                    float * temp = nullptr;
+                    if (QNN_HTP == n_backend_type)
+                        temp = (float*)qnn_buffer_2;
+                    else
+                        temp = output_matrix[i];
                     LOGGD("%.2f \t %.2f\n", temp[0], temp[1]);
                     LOGGD("%.2f \t %.2f\n", temp[2], temp[3]);
                     GGML_JNI_NOTIFY("%.2f \t %.2f\n", temp[0], temp[1]);
@@ -7037,9 +7094,15 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     }
 
 
-    failure:
+failure:
     qnn_backend.unregister_rpcmem();
-    qnn_backend.free_rpcmem(qnn_buffer);
+    if (nullptr != qnn_buffer_0)
+        qnn_backend.free_rpcmem(qnn_buffer_0);
+    if (nullptr != qnn_buffer_1)
+        qnn_backend.free_rpcmem(qnn_buffer_1);
+    if (nullptr != qnn_buffer_2)
+        qnn_backend.free_rpcmem(qnn_buffer_2);
+
     qnn_backend.qnn_finalize();
 
     n_end_time  = ggml_time_us();

@@ -18613,7 +18613,7 @@ struct ggml_cplan ggml_graph_plan(const struct ggml_cgraph * cgraph, int n_threa
 }
 
 enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cplan * cplan) {
-    ENTER_FUNC();
+    //ENTER_FUNC();
 
     {
         GGML_ASSERT(cplan);
@@ -18623,7 +18623,7 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
             GGML_ASSERT(cplan->work_data);
         }
     }
-    LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
+    //LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
 #ifdef GGML_USE_QNN
     const int n_threads = 1; //TODO: multithread support in QNN backend
 #else
@@ -18709,16 +18709,16 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
 #endif
     }
 
-    LEAVE_FUNC();
+    //LEAVE_FUNC();
     return compute_status;
 }
 
 enum ggml_status ggml_graph_compute_with_ctx(struct ggml_context * ctx, struct ggml_cgraph * cgraph, int n_threads) {
-    ENTER_FUNC();
+    //ENTER_FUNC();
     struct ggml_cplan cplan = ggml_graph_plan(cgraph, n_threads);
 
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
-    LOGGI("here");
+    //LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     return ggml_graph_compute(cgraph, &cplan);
@@ -19529,7 +19529,7 @@ static enum ggml_opt_result ggml_opt_adam(
 
     struct ggml_cplan cplan = ggml_graph_plan(gb, params.n_threads);
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
-    LOGGI("here");
+    //LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     bool cancel = false;
@@ -19878,7 +19878,7 @@ static enum ggml_opt_result ggml_opt_lbfgs(
 
     struct ggml_cplan cplan = ggml_graph_plan(gb, params.n_threads);
     struct ggml_object * obj = ggml_new_object(ctx, GGML_OBJECT_TYPE_WORK_BUFFER, cplan.work_size);
-    LOGGI("here");
+    //LOGGI("here");
     cplan.work_data = (uint8_t *)ctx->mem_buffer + obj->offs;
 
     float * x  = opt->lbfgs.x->data;  // current parameters

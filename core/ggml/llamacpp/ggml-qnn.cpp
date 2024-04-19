@@ -93,14 +93,15 @@
 #define BUF_MAJOR_MASK                                  0xFF000000
 #define BUF_CONTROL_BASE                                0xEE000000
 
+using pfn_rpc_mem_init                      = void (*)(void);
+using pfn_rpc_mem_deinit                    = void (*)(void);
+using pfn_rpc_mem_alloc                     = void *(*)(int, uint32_t, int);
+using pfn_rpc_mem_free                      = void (*)(void *);
+using pfn_rpc_mem_to_fd                     = int (*)(void *);
 
-using pfn_rpc_mem_alloc = void *(*)(int, uint32_t, int);
-using pfn_rpc_mem_free = void (*)(void *);
-using pfn_rpc_mem_to_fd = int (*)(void *);
-
-using _pfn_QnnSaver_initialize = decltype(QnnSaver_initialize);
-using _pfn_QnnInterface_getProviders = decltype(QnnInterface_getProviders);
-using _pfn_QnnSystemInterface_getProviders = decltype(QnnSystemInterface_getProviders);
+using _pfn_QnnSaver_initialize              = decltype(QnnSaver_initialize);
+using _pfn_QnnInterface_getProviders        = decltype(QnnInterface_getProviders);
+using _pfn_QnnSystemInterface_getProviders  = decltype(QnnSystemInterface_getProviders);
 
 template<typename Fn>
 Fn load_qnn_functionpointers(void * handle, const char * function_name) {
@@ -1067,6 +1068,8 @@ private:
     pfn_rpc_mem_alloc _pfn_rpc_mem_alloc;
     pfn_rpc_mem_free _pfn_rpc_mem_free;
     pfn_rpc_mem_to_fd _pfn_rpc_mem_to_fd;
+    pfn_rpc_mem_init  _pfn_rpc_mem_init;
+    pfn_rpc_mem_deinit _pfn_rpc_mem_deinit;
     std::unordered_map<void *, void *> _rpcmem_store_map;
 
 
@@ -1574,7 +1577,7 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
         }
     }
 
-    /* not remove, for future use
+
     _rpc_lib_handle = dlopen("libcdsprpc.so", RTLD_NOW | RTLD_LOCAL);
     if (nullptr == _rpc_lib_handle) {
         LOGGW("failed to load qualcomm's rpc lib, error:%s\n", dlerror());
@@ -1583,18 +1586,20 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
         LOGGD("load rpcmem lib successfully\n");
         set_rpcmem_initialized(true);
     }
-    _pfn_rpc_mem_alloc = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle,
-                                                                   "rpcmem_alloc"));
-    _pfn_rpc_mem_free = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
-    _pfn_rpc_mem_to_fd = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle,
-                                                                   "rpcmem_to_fd"));
-    if (nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free ||
-        nullptr == _pfn_rpc_mem_to_fd) {
-        LOGGW("unable to access symbols in shared buffer. dlerror(): %s", dlerror());
+    _pfn_rpc_mem_init   = reinterpret_cast<pfn_rpc_mem_init>(dlsym(_rpc_lib_handle, "rpcmem_init"));
+    _pfn_rpc_mem_deinit = reinterpret_cast<pfn_rpc_mem_deinit>(dlsym(_rpc_lib_handle, "rpcmem_deinit"));
+    _pfn_rpc_mem_alloc  = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle,"rpcmem_alloc"));
+    _pfn_rpc_mem_free   = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
+    _pfn_rpc_mem_to_fd  = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle,"rpcmem_to_fd"));
+    if (nullptr == _pfn_rpc_mem_init || nullptr == _pfn_rpc_mem_deinit
+        || nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free
+        || nullptr == _pfn_rpc_mem_to_fd) {
+        LOGGW("unable to access symbols in QNN RPC lib. dlerror(): %s", dlerror());
         dlclose(_rpc_lib_handle);
         return 10;
     }
-    */
+
+    _pfn_rpc_mem_init();
 
     std::vector<const QnnContext_Config_t *> temp_context_config;
     _qnn_interface.qnn_context_create(_qnn_backend_handle, _qnn_device_handle,
@@ -1619,13 +1624,13 @@ int qnn_instance::qnn_finalize() {
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
     ENTER_FUNC();
 
-    /* not remove, for future use
+    _pfn_rpc_mem_deinit();
     if (dlclose(_rpc_lib_handle) != 0) {
         LOGGW("failed to unload qualcomm's rpc lib, error:%s\n", dlerror());
     } else {
         LOGGD("succeed to close rpcmem lib\n");
     }
-    */
+
 
     if (nullptr != _qnn_context_handle) {
         error = _qnn_interface.qnn_context_free(_qnn_context_handle, _qnn_profile_handle);
@@ -1755,13 +1760,14 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
     const int64_t ne1 = dst->ne[1];
 
     /*
-    return (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16 || ggml_is_quantized(src0->type)) &&
-           (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16 || ggml_is_quantized(src1->type)) &&
-           dst->type == GGML_TYPE_F32 &&
-           ((ne0 >= 32 && ne1 >= 32 && ne10 >= 32) || src0->backend == GGML_BACKEND_TYPE_GPU);*/
+    return (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16) &&
+           (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
+            (dst->type == GGML_TYPE_F32);
+            */
+
     return (src0->type == GGML_TYPE_F32) &&
            (src1->type == GGML_TYPE_F32) &&
-            (dst->type == GGML_TYPE_F32);
+           (dst->type == GGML_TYPE_F32);
 
 }
 
@@ -2268,7 +2274,7 @@ static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     ggml_time_init();
     n_begin_time = ggml_time_us();
 
-    struct ggml_backend_qnn_context *ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
+    struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
     instance = ctx->instance;
 
     if (src0->type == GGML_TYPE_F16)
@@ -2300,7 +2306,6 @@ static void ggml_qnn_mul(const ggml_tensor * src0, const ggml_tensor * src1, ggm
             LOGGI("can't create qnn graph handle, error = %d\n", error);
             return;
         }
-
 
         tensor_0 = {
                 .version= QNN_TENSOR_VERSION_1,
@@ -2900,23 +2905,30 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
     ggml_qnn_func_t func;
 
     bool supported_op = false;
+    //this is special scenario for UT function qnn_ggml_op
+    //borrow some advantages from PyTorch:the user or the upper layer codes could specify whether a GGML OP(such as add/mul/mulmat) is accelerated by a specify backend)
+    //otherwise ggml-qnn.cpp don't known whether current caller is whisper.cpp or other scenario(for example, JNI function...)
+    bool use_hwaccel = (tensor->src[0]->backend == GGML_BACKEND_TYPE_GPU);
+
     supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
     //supported_op = (tensor->op == GGML_OP_ADD);
     //supported_op = false;
-    if (!supported_op) {
+
+    if ((!use_hwaccel) && (!supported_op)) {
         //use default GGML OPs
         ggml_compute_forward(params, tensor);
         return true;
     }
 
-    if (NULL != tensor && nullptr != tensor->src[1]) {
-        if (0 == memcmp(tensor->src[1]->name, "embd", 4)) {
-            //LOGGI("is whisper.cpp");
-        }
+    if (!ggml_qnn_can_handle_op(tensor->src[0], tensor->src[1], tensor)) {
+        //use default GGML OPs
+        ggml_compute_forward(params, tensor);
+        return true;
     }
 
-#if 0 //modify it to 1 for whisper.cpp otherwise the asr result is not correct
-    if (offload_add_counts > 10) {//TODO:unknown issue/incorrect usage in QNN backend
+
+#if 0 // modify it to 1 for whisper.cpp otherwise the asr result is not correct. should be removed in the future, otherwise it's NOT a "real" QNN backend
+    if (offload_add_counts > 10) {//TODO:unknown issue or incorrect usage/misunderstanding in QNN SDK
         //use default GGML OPs
         ggml_compute_forward(params, tensor);
         return true;
@@ -2925,10 +2937,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
 
     switch (tensor->op) {
         case GGML_OP_ADD:
-            if (!ggml_qnn_can_handle_op(tensor->src[0], tensor->src[1], tensor)) {
-                ggml_compute_forward(params, tensor);
-                return true;
-            }
             func = ggml_qnn_add;
             break;
 
