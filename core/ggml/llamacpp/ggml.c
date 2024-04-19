@@ -3005,6 +3005,8 @@ static struct ggml_tensor * ggml_new_tensor_impl(
     if (ctx->use_hwaccel)
         result->backend =  GGML_BACKEND_TYPE_GPU;
 
+    result->rank = n_dims;
+
     memcpy((*result).name, tensor_name, GGML_MAX_NAME);
     // TODO: this should not be needed as long as we don't rely on aligned SIMD loads
     //ggml_assert_aligned(result->data);
