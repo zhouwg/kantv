@@ -251,8 +251,10 @@ public class IApplication extends Application {
         CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtp.so", CDEUtils.getDataPath(mContext) + "libQnnHtp.so");
+        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpNetRunExtensions.so", CDEUtils.getDataPath(mContext) + "libQnnHtpNetRunExtensions.so");
+        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpPrepare.so", CDEUtils.getDataPath(mContext) + "libQnnHtpPrepare.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Stub.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Stub.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75CalculatorStub.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75CalculatorStub.so");
+        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Skel.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Skel.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
         CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");

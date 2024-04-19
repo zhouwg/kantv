@@ -3,24 +3,26 @@
  * Copyright (C) 2024 GGML Authors
  * SPDX-License-Identifier: MIT
  *
- * this is implementation of ggml QNN(Qualcomm Neural Network, aka AI Engine Direct) backend
+ *
+ * this is implementation of "PoC: Add Qualcomm mobile SoC native backend for GGML", https://github.com/zhouwg/kantv/issues/121
+ *
+ * this is also the implementation of ggml QNN(Qualcomm Neural Network, aka AI Engine Direct) backend
  *
  * status:
  *
  * 1. core implementation(data path works as expected with whisper.cpp using QNN CPU backend) has been completed on 04/13/2024
  *
- * 2. core implementation(data path works as expected with whisper.cpp using QNN GPU backend) has been completed
+ * 2. core implementation(data path works as expected with whisper.cpp using QNN GPU & HTP(aka DSP) backend) has been completed
  *
  * 3. GGML_OP_MUL_MAT & GGML_OP_MUL & GGML_OP_ADD using QNN API has been completed
  *
- * 4. data path with whisper.cpp not work using QNN HTP(aka DSP) backend, QNN HTP(aka DSP) backend heavily
- *    depend on vendor's customized Android OS based on Qualcomm's BSP
+ * 4. lack of implementation of other GGML-OPs using QNN API
  *
- * 5. lack of implementation of other GGML-OPs using QNN API
+ * 5. lack of resource management of internal QNN resources and toggle between different backend(QNN CPU backend, QNN GPU backend, ggml...)
  *
- * 6. lack of resource management of internal QNN resources and toggle between different backend(QNN CPU backend, QNN GPU backend, ggml...)
+ * 6. only support FP32 / FP16 (depend on QNN SDK)
  *
- * 7. only support FP32 / FP16
+ * 7. QNN's RPC feature not used currently
  *
  * 8. stability
  */

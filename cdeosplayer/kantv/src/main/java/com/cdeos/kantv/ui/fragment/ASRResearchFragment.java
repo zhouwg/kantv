@@ -449,8 +449,8 @@
              }
 
              if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {//QNN HTP(aka DSP)
-                 CDEUtils.showMsgBox(mActivity, "QNN HTP(aka DSP) not supported currently");
-                 return;
+                 //CDEUtils.showMsgBox(mActivity, "QNN HTP(aka DSP) not supported currently");
+                 //return;
              }
              //sanity check end
 
