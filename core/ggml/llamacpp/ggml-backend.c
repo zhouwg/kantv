@@ -809,14 +809,14 @@ GGML_CALL static enum ggml_status ggml_backend_cpu_graph_plan_compute(ggml_backe
 }
 
 GGML_CALL static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
-    ENTER_FUNC();
+    //ENTER_FUNC();
     struct ggml_backend_cpu_context * cpu_ctx = (struct ggml_backend_cpu_context *)backend->context;
 
     struct ggml_cplan cplan = ggml_graph_plan(cgraph, cpu_ctx->n_threads);
 
     if (cpu_ctx->work_size < cplan.work_size) {
         free(cpu_ctx->work_data);
-        LOGGI("here");
+        //LOGGI("here");
         cpu_ctx->work_data = malloc(cplan.work_size);
         if (cpu_ctx->work_data == NULL) {
             cpu_ctx->work_size = 0;
@@ -824,13 +824,13 @@ GGML_CALL static enum ggml_status ggml_backend_cpu_graph_compute(ggml_backend_t 
         }
         cpu_ctx->work_size = cplan.work_size;
     }
-    LOGGI("here");
+    //LOGGI("here");
     cplan.work_data = cpu_ctx->work_data;
 
     cplan.abort_callback      = cpu_ctx->abort_callback;
     cplan.abort_callback_data = cpu_ctx->abort_callback_data;
 
-    LEAVE_FUNC();
+    //LEAVE_FUNC();
     return ggml_graph_compute(cgraph, &cplan);
 }
 

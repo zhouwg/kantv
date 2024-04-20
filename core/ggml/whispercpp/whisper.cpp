@@ -146,6 +146,11 @@ extern "C" int __android_log_print(int prio, const char * tag, const char * fmt,
     __attribute__((__format__(printf, 3, 4)));
 #endif
 
+static std::string _s_internal_error_info = "unknown";
+
+const char * whisper_get_internal_error() {
+    return _s_internal_error_info.c_str();
+}
 
 WHISPER_ATTRIBUTE_FORMAT(5, 6)
 static void whisper_log_internal        (ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
@@ -223,10 +228,9 @@ static bool ggml_graph_compute_helper(
                 return false;
             }
         }
-        return ggml_graph_compute(graph, &plan) == GGML_STATUS_SUCCESS;  //04-17-2024, works perfectly with whisper.cpp
+        return ggml_graph_compute(graph, &plan) == GGML_STATUS_SUCCESS;
 #else
-        //04-17-2024, refer to PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API,https://github.com/zhouwg/kantv/issues/121
-        return ggml_backend_graph_compute(backend, graph) == GGML_STATUS_SUCCESS;
+        ggml_backend_qnn_set_n_threads(backend, n_threads);
 #endif
     }
 #endif
@@ -1292,7 +1296,11 @@ static ggml_backend_t whisper_backend_init(const whisper_context_params & params
             WHISPER_LOG_INFO("%s: using QNN backend\n", __func__);
             backend_gpu = ggml_backend_qnn_init(params.gpu_device);
             if (!backend_gpu) {
-                WHISPER_LOG_ERROR("%s: ggml_backend_qnn_init() failed\n", __func__);
+                char device_name[GGML_MAX_NAME];
+                ggml_backend_qnn_get_device_description(params.gpu_device, device_name, GGML_MAX_NAME);
+                WHISPER_LOG_ERROR("%s: ggml_backend_qnn_init() failed with device %d(%s)\n", __func__, params.gpu_device, device_name);
+                _s_internal_error_info = "ggml_backend_qnn_init() failed with device (" + std::to_string(params.gpu_device) + ") " + device_name;
+                return nullptr; //04-20-2024, do not fall into the default GGML CPU backend, so the upper layer code/UI could know correct feedback
             }
         }
     }
@@ -3559,6 +3567,7 @@ struct whisper_context * whisper_init_from_file_with_params(const char * path_mo
         return nullptr;
     }
 
+    _s_internal_error_info = "unknown";
     ctx->state = whisper_init_state(ctx);
     if (!ctx->state) {
         WHISPER_LOG_INFO("whisper init failure\n");
@@ -6572,12 +6581,12 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
     return s.c_str();
 }
 
-WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads) {
-    fputs(whisper_bench_ggml_mul_mat_str(n_threads), stderr);
+WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads, int n_backend) {
+    fputs(whisper_bench_ggml_mul_mat_str(n_threads, n_backend), stderr);
     return 0;
 }
 
-WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
+WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads, int n_backend) {
     static std::string s;
     s = "";
     char strbuf[256];
@@ -6658,9 +6667,12 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 /*.mem_buffer =*/ buf.data(),
                 /*.no_alloc   =*/ false,
             };
+
 #ifdef GGML_USE_QNN
-            gparams.use_hwaccel   = true;
+            if (n_backend != 3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                gparams.use_hwaccel = true;
 #endif
+
 
             struct ggml_context * ctx0 = ggml_init(gparams);
 

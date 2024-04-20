@@ -642,7 +642,8 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
         context = whisper_init_from_file_with_params(sz_model_path, wcp);
         if (nullptr == context) {
             LOGGW("whisper_init_from_file_with_params failure, pls check why\n");
-            GGML_JNI_NOTIFY("whisper_init_from_file_with_params failure, pls check why(pls check whether whispercpp model is valid)\n");
+            GGML_JNI_NOTIFY("whisper_init_from_file_with_params failure(%s), pls check why? whether whispercpp model %s is valid ?\n",
+                            whisper_get_internal_error(), sz_model_path);
             result = -1;
             goto failure;
         }
@@ -803,7 +804,7 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
  *
  * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
  * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex 12: QNN GGML OP
+ * @param n_bench_type          0: whisper asr 1: memcpy 2: mulmat  3: whisper full 4: LLAMA 5: stable diffusion 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: QNN complex 11: QNN GGML OP(QNN UT) 12: QNN UT automation
  * @param n_threads             1 - 8
  * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
  * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
@@ -855,16 +856,17 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             break;
 
         case BECHMARK_MULMAT:
-            whisper_bench_ggml_mul_mat(n_threads);
+            whisper_bench_ggml_mul_mat(n_threads, n_backend_type);
             break;
 
         case BECHMARK_FULL:
             whisper_bench_full();
             break;
-
+            /* not used since 04-20-2024
         case BENCHMARK_MATRIX:
             ggml_bench_matrix(n_backend_type, n_threads);
             break;
+             */
 
         case BENCHMAKR_LLAMA:
             ggml_bench_llama(sz_model_path, n_threads, n_backend_type);
@@ -919,20 +921,24 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             }
             break;
 
-        case BENCHMARK_QNN_MATRIX:
+        case BENCHMARK_QNN_MATRIX:  //offload a simple fp32 2x2 matrix addition operation to QNN
             qnn_matrix(n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_QNN_GGML:
+        case BENCHMARK_QNN_GGML:    //mapping ggml tensor to QNN tensor
             qnn_ggml(n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_QNN_COMPLEX:
+        case BENCHMARK_QNN_COMPLEX: //complicated computation graph in C/C++ or GGML and then offload them to QNN
             qnn_complex_graph(n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_QNN_GGML_OP:
+        case BENCHMARK_QNN_GGML_OP: //UT for PoC-S49: implementation of GGML OPs using QNN API
             qnn_ggml_op(sz_model_path, n_threads, n_backend_type, n_op_type);
+            break;
+
+        case BENCHMARK_QNN_AUTO_UT://automation UT for PoC-S49: implementation of GGML OPs using QNN API
+            qnn_ggml_op_automation_ut(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
         default:

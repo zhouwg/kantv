@@ -31,6 +31,8 @@ GGML_API ggml_backend_t ggml_backend_qnn_init(size_t dev_num);
 
 GGML_API bool           ggml_backend_is_qnn(ggml_backend_t backend);
 
+GGML_API void           ggml_backend_qnn_set_n_threads(ggml_backend_t backend, int n_threads);
+
 GGML_API int            ggml_backend_qnn_get_device_count(void);
 GGML_API void           ggml_backend_qnn_get_device_description(int device, char * description, size_t description_size);
 

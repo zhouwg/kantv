@@ -654,8 +654,10 @@ extern "C" {
 
     WHISPER_API int          whisper_bench_memcpy          (int n_threads);
     WHISPER_API const char * whisper_bench_memcpy_str      (int n_threads);
-    WHISPER_API int          whisper_bench_ggml_mul_mat    (int n_threads);
-    WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads);
+    WHISPER_API int          whisper_bench_ggml_mul_mat    (int n_threads, int n_backend);
+    WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads, int n_backend);
+
+    WHISPER_API const char * whisper_get_internal_error(void);
 
     // Control logging output; default behavior is to print to stderr
 

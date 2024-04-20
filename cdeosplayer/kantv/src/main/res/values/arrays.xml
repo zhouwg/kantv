@@ -60,20 +60,20 @@
     </string-array>
 
     <string-array name="benchType">
-        <item>asr</item>
-        <item>mempcpy</item>
-        <item>mulmat</item>
-        <item>full</item>
-        <item>matrix</item>
-        <item>llama</item>
-        <item>stablediffusion</item> <!-- not work on Xiaomi 14 currently -->
-        <!-- step by step -->
-        <item>qnn-sample</item> <!-- "play with /say hello to" QNN Sample -->
-        <item>qnn-saver</item>  <!-- study QNN SDK mechanism by QNN Saver -->
-        <item>qnn-matrix</item> <!-- offload a simple matrix addition operation to QNN -->
-        <item>qnn-ggml</item>   <!-- mapping ggml tensor to QNN tensor -->
-        <item>qnn-complex</item><!-- complex computation graph in C/C++ or GGML, and then offload them to QNN -->
-        <item>qnn-ggml-op</item><!-- for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
+        <item>whisper asr</item>            <!-- whisper asr benchmark / asr validation -->
+        <item>memcpy</item>                 <!-- whisper memcopy benchmark -->
+        <item>whisper mulmat</item>         <!-- whisper mulmat benchmark -->
+        <item>whisper full</item>           <!-- whisper full benchmark -->
+        <item>llama</item>                  <!-- llama benchmark,            not work currently -->
+        <item>stablediffusion</item>        <!-- stable diffusion benchmark, not work currently -->
+        <!-- step by step for PoC: Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121 -->
+        <item>qnn-sample</item>             <!-- "play with /say hello to" QNN Sample -->
+        <item>qnn-saver</item>              <!-- study QNN SDK mechanism by QNN Saver -->
+        <item>qnn-matrix</item>             <!-- offload a simple matrix addition operation to QNN -->
+        <item>qnn-ggml</item>               <!-- mapping ggml tensor to QNN tensor -->
+        <item>qnn-complex</item>            <!-- complex computation graph in C/C++ or GGML, and then offload them to QNN -->
+        <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
+        <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
     </string-array>
 
     <string-array name="threadCounts">

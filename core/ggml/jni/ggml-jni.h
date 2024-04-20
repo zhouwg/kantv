@@ -53,22 +53,23 @@ extern "C" {
 #define JNI_BUF_LEN                 4096
 #define JNI_TMP_LEN                 256
 
-#define BECHMARK_ASR                0
-#define BECHMARK_MEMCPY             1
-#define BECHMARK_MULMAT             2
-#define BECHMARK_FULL               3
-#define BENCHMARK_MATRIX            4
-#define BENCHMAKR_LLAMA             5
-#define BENCHMAKR_STABLEDIFFUSION   6       //not work on Xiaomi 14 currently
-// I think there are three killer/heavyweight AI applications based on GGML currently: whisper.cpp, llama.cpp, stablediffusion.cpp, so they are here
+#define BECHMARK_ASR                0       //whisper.cpp ASR benchmark
+#define BECHMARK_MEMCPY             1       //memcpy  benchmark
+#define BECHMARK_MULMAT             2       //mulmat  benchmark
+#define BECHMARK_FULL               3       //whisper.cpp full benchmark
+/*#define BENCHMARK_MATRIX          4*/     //not used since 04-20-2024
+#define BENCHMAKR_LLAMA             4       //llama.cpp benchmark
+#define BENCHMAKR_STABLEDIFFUSION   5       //stable diffusion benchmark, not work on Xiaomi 14 currently
+// there are three killer/heavyweight AI applications based on GGML currently: whisper.cpp, llama.cpp, stablediffusion.cpp, so they are here
 // then
 // step-by-step for PoC:Add Qualcomm mobile SoC native backend for GGML https://github.com/zhouwg/kantv/issues/121
-#define BENCHMAKR_QNN_SAMPLE        7       //"play with /say hello to" QNN Sample
-#define BENCHMAKR_QNN_SAVER         8       //study QNN SDK mechanism by QNN Saver
-#define BENCHMARK_QNN_MATRIX        9       //offload a simple fp32 2x2 matrix addition operation to QNN
-#define BENCHMARK_QNN_GGML          10      //mapping ggml tensor to QNN tensor
-#define BENCHMARK_QNN_COMPLEX       11      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
-#define BENCHMARK_QNN_GGML_OP       12      //for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
+#define BENCHMAKR_QNN_SAMPLE        6       //"play with /say hello to" QNN Sample
+#define BENCHMAKR_QNN_SAVER         7       //study QNN SDK mechanism by QNN Saver
+#define BENCHMARK_QNN_MATRIX        8       //offload a simple fp32 2x2 matrix addition operation to QNN
+#define BENCHMARK_QNN_GGML          9       //mapping ggml tensor to QNN tensor
+#define BENCHMARK_QNN_COMPLEX       10      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
+#define BENCHMARK_QNN_GGML_OP       11      //UT for PoC-S49: implementation of GGML OPs using QNN API
+#define BENCHMARK_QNN_AUTO_UT       12      //automation UT for PoC-S49: implementation of GGML OPs using QNN API
 #define BENCHMAKR_MAX               12
 
 #define BACKEND_CPU                 0
@@ -88,7 +89,7 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex 12: QNN GGML OP
+    * @param n_bench_type          0: whisper asr 1: memcpy 2: mulmat  3: whisper full 4: LLAMA 5: stable diffusion 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: QNN complex 11: QNN GGML OP(QNN UT) 12: QNN UT automation
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
     * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated computation graph
@@ -203,6 +204,11 @@ extern "C" {
      * @return
      */
     int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
+
+    /**
+     * similar to qnn_ggml_op, but an automation UT for a specify GGML OP with a specify backend
+     */
+    int qnn_ggml_op_automation_ut(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
 
 
 // =================================================================================================

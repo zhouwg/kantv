@@ -18321,7 +18321,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 
             // distribute new work or execute it direct if 1T
             while (++node_n < cgraph->n_nodes) {
-                GGML_PRINT_DEBUG_5("%s: %d/%d\n", __func__, node_n, cgraph->n_nodes);
+                //LOGGI("%s: %d/%d\n", __func__, node_n, cgraph->n_nodes);
                 struct ggml_tensor * node = cgraph->nodes[node_n];
                 const int n_tasks = ggml_get_n_tasks(node, n_threads, state->shared->n_threads);
 

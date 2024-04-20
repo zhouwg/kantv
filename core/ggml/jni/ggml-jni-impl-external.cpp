@@ -117,7 +117,12 @@ extern "C" {
 
 static const char * get_qnn_backend_name(int n_backend_type);
 static float tensor_sum_elements(const ggml_tensor * tensor);
-static void ggml_graph_compute_helper(std::vector<uint8_t> & buf, ggml_cgraph * graph, int n_threads);
+static bool ggml_graph_compute_helper(
+        struct ggml_cgraph * graph,
+        std::vector<uint8_t> & buf,
+        int   n_threads,
+        ggml_abort_callback   abort_callback,
+        void * abort_callback_data);
 static void tensor_dump(const ggml_tensor * tensor, const char * name);
 #define TENSOR_DUMP(tensor) tensor_dump(tensor, #tensor)
 
@@ -885,7 +890,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
     std::vector<uint8_t> work_buffer;
 
-    ggml_graph_compute_helper(work_buffer, gf, benchmark_params.n_threads);
+    ggml_graph_compute_helper(gf,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
 
     if (get_tensor_data_size(m11) < 100) {
         TENSOR_DUMP(m11);
@@ -963,7 +968,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
         long long int start = ggml_time_us();
         //GGML_JNI_NOTIFY("Running ggml_graph_compute\n");
-        ggml_graph_compute_helper(work_buffer, gf31, benchmark_params.n_threads);
+        ggml_graph_compute_helper(gf31,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
 
         long long int stop = ggml_time_us();
         long long int usec = stop-start;
@@ -996,7 +1001,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
         }
 
         // Running a different graph computation to make sure we override the CPU cache lines
-        ggml_graph_compute_helper(work_buffer, gf32, benchmark_params.n_threads);
+        ggml_graph_compute_helper(gf,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
     }
     GGML_JNI_NOTIFY("\n");
     GGML_JNI_NOTIFY("Average%78.2f\n",gflops_sum/((double)benchmark_params.n_iterations));
@@ -3298,18 +3303,25 @@ static intptr_t alignTo(size_t alignment, intptr_t offset) {
 }
 
 
-static void ggml_graph_compute_helper(std::vector<uint8_t> & buf, ggml_cgraph * graph, int n_threads) {
+
+static bool ggml_graph_compute_helper(
+        struct ggml_cgraph * graph,
+        std::vector<uint8_t> & buf,
+        int   n_threads,
+        ggml_abort_callback   abort_callback,
+        void * abort_callback_data) {
     struct ggml_cplan plan = ggml_graph_plan(graph, n_threads);
+
+    plan.abort_callback      = abort_callback;
+    plan.abort_callback_data = abort_callback_data;
 
     if (plan.work_size > 0) {
         buf.resize(plan.work_size);
         plan.work_data = buf.data();
     }
 
-    ggml_graph_compute(graph, &plan);
+    return ggml_graph_compute(graph, &plan);
 }
-
-
 
 static float tensor_sum_elements(const ggml_tensor * tensor) {
     double sum = 0;
@@ -6854,7 +6866,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         m2              = ggml_add(ctx, m0, m1); // GGML_OP_ADD
         gf              = ggml_new_graph(ctx);
         ggml_build_forward_expand(gf, m2);
-        ggml_graph_compute_helper(work_buffer, gf, 4);
+        ggml_graph_compute_helper(gf, work_buffer,  4, nullptr, nullptr);
         TENSOR_DUMP(m0);
         TENSOR_DUMP(m1);
         TENSOR_DUMP(m2);
@@ -7254,7 +7266,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         gf              = ggml_new_graph(ctx);
         ggml_set_f32(m2, 0.0f);
         ggml_build_forward_expand(gf, m2);
-        ggml_graph_compute_helper(work_buffer, gf, 4);
+        ggml_graph_compute_helper(gf,work_buffer,  4, nullptr, nullptr);
 
         TENSOR_DUMP(m0);
         TENSOR_DUMP(m1);
@@ -8194,6 +8206,8 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
 
     GGML_JNI_NOTIFY("starting qnn_ggml_op UT(unit test)\n");
 #if 0 // for performance comparison between QNN backend and original GGML
+      // on Xiaomi14,      9x performance gain
+      // on low-end phone, 3x performance gain
     const int sizey = 4096;
     const int sizex = 4096;
     const int sizez = 128;
@@ -8267,7 +8281,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     GGML_JNI_NOTIFY("creating compute graph\n");
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
-    ggml_graph_compute_helper(work_buffer, gf, num_threads);
+    ggml_graph_compute_helper(gf,work_buffer, num_threads, nullptr, nullptr);
 
     if (get_tensor_data_size(dst) < 100) {
         TENSOR_DUMP(src0);
@@ -8296,6 +8310,229 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     LOGGD("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n", n_ggml_op_type, ggml_op_name((enum ggml_op)n_ggml_op_type), n_backend_type, get_qnn_backend_name(n_backend_type), n_durtion);
     LOGGD("leave qnn_ggml_op UT(unit test)\n");
+
+    return 0;
+}
+
+
+/**
+  * similar to qnn_ggml_op, but an automation UT for a specify GGML OP with a specify backend
+  *
+  * this function borrow from whisper.cpp
+  */
+//TODO: 1. only support GGML_OP_ADD, GGML_OP_MUL, GGMPL_OP_MULMAT
+//      2. works with FP32
+int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_backend_type,
+                              int n_ggml_op_type) {
+    int result = 0;
+    int64_t n_begin_time = 0LL;
+    int64_t n_end_time = 0LL;
+    int64_t n_durtion = 0LL;
+
+
+    LOGGD("enter qnn_ggml_op_automation_ut\n");
+    LOGGI("mode path:%s", model_path);
+    LOGGI("num_threads:%d", num_threads);
+    LOGGI("backend_type:%d(%s)", n_backend_type, get_qnn_backend_name(n_backend_type));
+    LOGGI("ggml op:%d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type));
+    GGML_JNI_NOTIFY("starting qnn_ggml_op_automation_ut(automation unit test)\n");
+
+    n_begin_time = ggml_time_us();
+
+    srand(time(NULL));
+
+    bool support_ops = (n_ggml_op_type == GGML_OP_MUL_MAT || n_ggml_op_type == GGML_OP_MUL || n_ggml_op_type == GGML_OP_ADD);
+    if (!support_ops) {
+        LOGGD("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
+              ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
+              get_qnn_backend_name(n_backend_type));
+        GGML_JNI_NOTIFY("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
+                        ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
+                        get_qnn_backend_name(n_backend_type));
+        LOGGD("leave qnn_ggml_op UT(unit test)\n");
+
+        return 1;
+    }
+
+
+    char strbuf[256];
+    std::string tipString;
+    tipString = "";
+
+    const int n_max = 128;
+
+    const std::vector<size_t> sizes = {
+            64, 128, 256, 512, 1024, 2048, 4096,
+    };
+
+    const size_t N_max = sizes.back();
+
+    // a: N*N*sizeof(float)
+    // b: N*N*sizeof(float)
+    // c: N*N*sizeof(float)
+    // when F16 is used, there is an extra work buffer of size N*N*sizeof(float)
+    std::vector<uint8_t> buf(
+            3llu * N_max * N_max * sizeof(float) + 3 * ggml_tensor_overhead() +
+            ggml_graph_overhead());
+    std::vector<uint8_t> work;
+
+
+    tipString += "\nprepare matrix";
+    kantv_asr_notify_benchmark_c("prepare matrix\n");
+
+    for (size_t i = 0; i < buf.size(); i++) buf[i] = i;
+
+    for (int j = 0; j < (int) sizes.size(); j++) {
+        int n_q4_0 = 0;
+        int n_q4_1 = 0;
+        int n_q5_0 = 0;
+        int n_q5_1 = 0;
+        int n_q8_0 = 0;
+        int n_fp16 = 0;
+        int n_fp32 = 0;
+
+        // GFLOPS/s
+        double s_q4_0 = 0.0;
+        double s_q4_1 = 0.0;
+        double s_q5_0 = 0.0;
+        double s_q5_1 = 0.0;
+        double s_q8_0 = 0.0;
+        double s_fp16 = 0.0;
+        double s_fp32 = 0.0;
+
+        const size_t N = sizes[j];
+#if 0
+        for (int k = 0; k < 7; ++k) {
+            const ggml_type wtype =
+                    k == 0 ? GGML_TYPE_Q4_0 :
+                    k == 1 ? GGML_TYPE_Q4_1 :
+                    k == 2 ? GGML_TYPE_Q5_0 :
+                    k == 3 ? GGML_TYPE_Q5_1 :
+                    k == 4 ? GGML_TYPE_Q8_0 :
+                    k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
+#else
+            for (int k = 0; k < 1; ++k) {
+                const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
+                k = 6; //hardcode to 6 make following code happy
+#endif
+
+
+            double &s =
+                    k == 0 ? s_q4_0 : k == 1 ? s_q4_1 : k == 2 ? s_q5_0 : k == 3 ? s_q5_1 :
+                                                                          k == 4 ? s_q8_0 :
+                                                                          k == 5 ? s_fp16
+                                                                                 : /*k == 6*/ s_fp32;
+            int &n = k == 0 ? n_q4_0 : k == 1 ? n_q4_1 : k == 2 ? n_q5_0 : k == 3 ? n_q5_1 :
+                                                                           k == 4 ? n_q8_0 :
+                                                                           k == 5 ? n_fp16
+                                                                                  : /*k == 6*/ n_fp32;
+
+            struct ggml_init_params gparams = {
+                    /*.mem_size   =*/ buf.size(),
+                    /*.mem_buffer =*/ buf.data(),
+                    /*.no_alloc   =*/ false,
+            };
+#ifdef GGML_USE_QNN
+            if (n_backend_type !=
+                3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                gparams.use_hwaccel = true;
+#endif
+            struct ggml_context *ctx0 = ggml_init(gparams);
+
+            struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, wtype, N, N);
+            struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+
+            struct ggml_tensor *c = nullptr;
+
+            switch (n_ggml_op_type) {
+                case GGML_OP_ADD:
+                    c = ggml_add(ctx0, a, b);
+                    break;
+                case GGML_OP_MUL:
+                    c = ggml_mul(ctx0, a, b);
+                    break;
+                case GGML_OP_MUL_MAT:
+                    c =  ggml_mul_mat(ctx0, a, b);
+                    break;
+            }
+
+
+            struct ggml_cgraph *gf = ggml_new_graph(ctx0);
+
+            ggml_build_forward_expand(gf, c);
+
+            double tsum = 0.0;
+
+            // heat-up
+            ggml_graph_compute_helper(gf, work, num_threads, nullptr, nullptr);
+
+            for (int i = 0; i < n_max; ++i) {
+                const int64_t t0 = ggml_time_us();
+
+                kantv_asr_notify_benchmark_c("reset");
+                tipString = "calling ggml_graphic_compute_helper:\n";
+                tipString += "j= " + std::to_string(j) + "(matrix dimension = " +
+                             std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
+                             + ",k=" + std::to_string(k) + "(ggml quant type=" +
+                             std::string(whisper_get_ggml_type_str(
+                                     static_cast<ggml_type>(wtype))) + ")"
+                             + ",i=" + std::to_string(i) + "\n";
+
+                kantv_asr_notify_benchmark(tipString);
+
+                ggml_graph_compute_helper(gf, work, num_threads, nullptr, nullptr);
+
+                const int64_t t1 = ggml_time_us();
+
+                tsum += (t1 - t0) * 1e-6;
+                n++;
+
+                if (tsum > 1.0 && n >= 3) {
+                    break;
+                }
+            }
+
+            ggml_free(ctx0);
+
+            s = ((2.0 * N * N * N * n) / tsum) * 1e-9;
+        }
+
+        kantv_asr_notify_benchmark_c("reset");
+        tipString = "";
+        // Q4_0 | Q4_1
+        snprintf(strbuf, sizeof(strbuf),
+                 "%4zu x %4zu: Q4_0 %7.1f GFLOPS (%3d runs) | Q4_1 %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_q4_0, n_q4_0, s_q4_1, n_q4_1);
+        tipString += strbuf;
+
+        // Q5_0 | Q5_1 | Q8_0
+        snprintf(strbuf, sizeof(strbuf),
+                 "%4zu x %4zu: Q5_0 %7.1f GFLOPS (%3d runs) | Q5_1 %7.1f GFLOPS (%3d runs) | Q8_0 %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_q5_0, n_q5_0, s_q5_1, n_q5_1, s_q8_0, n_q8_0);
+        tipString += strbuf;
+
+        // F16 | F32
+        snprintf(strbuf, sizeof(strbuf),
+                 "%4zu x %4zu: F16  %7.1f GFLOPS (%3d runs) | F32  %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_fp16, n_fp16, s_fp32, n_fp32);
+        tipString += strbuf;
+
+
+        kantv_asr_notify_benchmark(tipString);
+        LOGGD("%s\n", tipString.c_str());
+    }
+
+
+    n_end_time = ggml_time_us();
+    n_durtion = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of qnn_ggml_op_automation_ut %d(%s) with backend %d(%s) is: %lld milliseconds\n",
+          n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
+          get_qnn_backend_name(n_backend_type), n_durtion);
+    GGML_JNI_NOTIFY(
+            "duration of qnn_ggml_op_automation_ut %d(%s) with backend %d(%s) is: %lld milliseconds\n",
+            n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
+            get_qnn_backend_name(n_backend_type), n_durtion);
+    LOGGD("leave qnn_ggml_op_automation_ut(automation unit test)\n");
 
     return 0;
 }

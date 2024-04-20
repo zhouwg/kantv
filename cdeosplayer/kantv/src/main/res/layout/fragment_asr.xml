@@ -43,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bench:" />
+                android:text="Bench" />
 
             <Spinner
                 android:id="@+id/spinnerBenchType"
@@ -55,7 +55,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Threads:" />
+                android:text="Threads" />
 
             <Spinner
                 android:id="@+id/spinnerThreadCounts"

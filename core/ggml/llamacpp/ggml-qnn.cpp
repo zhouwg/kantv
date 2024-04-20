@@ -20,7 +20,7 @@
  *
  * 5. lack of resource management of internal QNN resources and toggle between different backend(QNN CPU backend, QNN GPU backend, ggml...)
  *
- * 6. only support FP32 / FP16 and many strict limitation(depend on QNN SDK)
+ * 6. only support FP32 / FP16(other data type not used currently)
  *
  * 7. QNN's RPC feature not used currently
  *
@@ -180,6 +180,7 @@ struct qnn_buf_s
 
 struct ggml_backend_qnn_context {
     int device;
+    int threads;
     char name[GGML_MAX_NAME];
     char lib[GGML_MAX_NAME];
     qnn_instance * instance;
@@ -260,9 +261,9 @@ static void ggml_setup_op_has_task_pass(void) {
 
 //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/HTP(aka DSP) backend currently
 static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
-        [QNN_CPU]   = {.device = 0, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_GPU]   = {.device = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_HTP]   = {.device = 2, .name =   "qnn-htp", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_CPU]   = {.device = 0, .threads = 1, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_GPU]   = {.device = 1, .threads = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_HTP]   = {.device = 2, .threads = 1, .name =   "qnn-htp(aka dsp)", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
 };
 
 
@@ -1469,7 +1470,7 @@ static void ggml_qnn_logcallback(const char * fmt,
         int len_content = 0;
         memset(s_ggml_qnn_logbuf, 0, GGML_QNN_LOGBUF_LEN);
         len_content = vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
-        //LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
+        LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
     }
 }
 
@@ -1760,33 +1761,27 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
         return false;
     }
 
-    const int64_t ne10 = src0->ne[0];
-    const int64_t ne11 = src0->ne[1];
-    const int64_t ne20 = src1->ne[0];
-    const int64_t ne21 = src1->ne[1];
+    const int64_t ne00 = src0->ne[0];
+    const int64_t ne01 = src0->ne[1];
+    const int64_t ne10 = src1->ne[0];
+    const int64_t ne11 = src1->ne[1];
 
     const int64_t ne0 = dst->ne[0];
     const int64_t ne1 = dst->ne[1];
-
-    /*
-    return (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16) &&
-           (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
-            (dst->type == GGML_TYPE_F32);
-            */
 
 
     //make QNN SDK happy
     if (dst->op == GGML_OP_ADD) {
         return (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16) &&
                (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
-               (dst->type == GGML_TYPE_F32 || dst->type == GGML_TYPE_F16) && ((ne10 > 1 && ne11 > 1 && ne20 > 1 && ne21 > 1)) &&
+               (dst->type == GGML_TYPE_F32 || dst->type == GGML_TYPE_F16) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1)) &&
                (src0->rank == src1->rank);
     }
 
     //make QNN SDK happy
     return  (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16) &&
             (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
-                  (src0->type == src1->type) && (src0->type == dst->type) && ((ne10 > 1 && ne11 > 1 && ne20 > 1 && ne21 > 1));
+                  (src0->type == src1->type) && (src0->type == dst->type) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1));
 
 }
 
@@ -3520,7 +3515,7 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
     int task_phase                  = GGML_TASK_TYPE_FINALIZE;
     ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
 
-    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);
+    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);//TODO: multithread support in QNN backend
 
     buf_element_t * qnn_buf = nullptr;
 
@@ -3653,6 +3648,13 @@ bool ggml_backend_is_qnn(ggml_backend_t backend) {
     return backend != nullptr && ggml_guid_matches(backend->guid, ggml_backend_qnn_guid());
 }
 
+
+void ggml_backend_qnn_set_n_threads(ggml_backend_t backend, int n_threads) {
+    GGML_ASSERT(ggml_backend_is_qnn(backend));
+
+    struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *)backend->context;
+    ctx->threads = n_threads;
+}
 
 const char * ggml_backend_qnn_get_name(ggml_backend_t backend) {
     return backend->iface.get_name(backend);
