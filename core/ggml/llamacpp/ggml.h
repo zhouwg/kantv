@@ -597,7 +597,7 @@ extern "C" {
 
         int32_t rank;
 
-        char padding[8 + 12];
+        char padding[20];
     };
 
     static const size_t GGML_TENSOR_SIZE = sizeof(struct ggml_tensor);

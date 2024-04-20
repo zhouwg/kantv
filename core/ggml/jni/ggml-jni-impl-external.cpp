@@ -8215,7 +8215,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizez);
     ctx_size += ggml_row_size(qtype,         sizex*sizey);
     ctx_size += ggml_row_size(qtype,         sizex*sizey);
-    ctx_size += 1024 *1024 *16;
+    ctx_size += 1024 * 1024 * 16;
     GGML_JNI_NOTIFY("Allocating Memory of size %zi bytes, %zi MB\n",ctx_size, (ctx_size/1024/1024));
 
     struct ggml_init_params params = {

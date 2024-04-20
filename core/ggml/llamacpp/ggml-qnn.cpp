@@ -1508,13 +1508,18 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
 
     _qnn_interface.set_qnn_interface(_loaded_backend[backend_id]);
 
+#if 1
     _qnn_interface.qnn_log_create(ggml_qnn_logcallback, _qnn_log_level, &_qnn_log_handle);
+#else
+    _qnn_raw_interface.logCreate(ggml_qnn_logcallback, _qnn_log_level, &_qnn_log_handle);
+#endif
     if (nullptr == _qnn_log_handle) {
-        LOGGW("why failed to initialize qnn log\n");
+        LOGGW("why failed to initialize qnn log\n"); //DSP backend not work on Qualcomm SoC based low-end phone
         return 4;
     } else {
         LOGGD("initialize qnn log successfully\n");
     }
+
 
     std::vector<const QnnBackend_Config_t *> temp_backend_config; //TODO:now is empty because I don't know how to use QnnBackend_Config_t currently
     _qnn_interface.qnn_backend_create(_qnn_log_handle, temp_backend_config.empty() ? nullptr
@@ -1590,15 +1595,15 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
     _pfn_rpc_mem_alloc  = reinterpret_cast<pfn_rpc_mem_alloc>(dlsym(_rpc_lib_handle,"rpcmem_alloc"));
     _pfn_rpc_mem_free   = reinterpret_cast<pfn_rpc_mem_free>(dlsym(_rpc_lib_handle, "rpcmem_free"));
     _pfn_rpc_mem_to_fd  = reinterpret_cast<pfn_rpc_mem_to_fd>(dlsym(_rpc_lib_handle,"rpcmem_to_fd"));
-    if (nullptr == _pfn_rpc_mem_init || nullptr == _pfn_rpc_mem_deinit
-        || nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free
+    if (nullptr == _pfn_rpc_mem_alloc || nullptr == _pfn_rpc_mem_free
         || nullptr == _pfn_rpc_mem_to_fd) {
         LOGGW("unable to access symbols in QNN RPC lib. dlerror(): %s", dlerror());
         dlclose(_rpc_lib_handle);
         return 10;
     }
 
-    _pfn_rpc_mem_init();
+    if (nullptr != _pfn_rpc_mem_init) // make Qualcomm's SoC based low-end phone happy
+        _pfn_rpc_mem_init();
 
     std::vector<const QnnContext_Config_t *> temp_context_config;
     _qnn_interface.qnn_context_create(_qnn_backend_handle, _qnn_device_handle,
@@ -1623,7 +1628,9 @@ int qnn_instance::qnn_finalize() {
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
     ENTER_FUNC();
 
-    _pfn_rpc_mem_deinit();
+    if (nullptr != _pfn_rpc_mem_deinit) // make Qualcomm's SoC based low-end phone happy
+        _pfn_rpc_mem_deinit();
+
     if (dlclose(_rpc_lib_handle) != 0) {
         LOGGW("failed to unload qualcomm's rpc lib, error:%s\n", dlerror());
     } else {
@@ -2955,7 +2962,7 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
 
     //begin sanity check
     if (nullptr == g_qnn_backend) {
-        LOGGD("pls check why qnn subsystem not initialized");
+        LOGGE("pls check why qnn subsystem not initialized");
         //attention here: don't call ggml_compute_forward(params, tensor) here, just return false directly
         return false;
     }
@@ -3342,7 +3349,7 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
     }
 
 
-    //TODO:release all QNN resources
+    //TODO:release all QNN resources, I'm not sure whether the QNN SDK already handle it properly and robustly in internal of QNN SDK
     std::map<std::string, Qnn_GraphHandle_t>::iterator it;
     for (it = qnn_graph_map.begin(); it != qnn_graph_map.end(); it++) {
         Qnn_GraphHandle_t & graph_handle = it->second;
