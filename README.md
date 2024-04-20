@@ -191,7 +191,43 @@ cd kantv
 
 #### Build Android APK
 
-- Build APK from source code by Android Studio IDE manually
+- Option 1: Build APK from source code by Android Studio IDE manually
+
+- Option 2: Build from command line
+
+    1. Download [Android Command Line Tools (10.0)](https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip) and unzip (to the `prebuilts/Android/Sdk/cmdline-tools/latest/` as example).
+    
+        > **note:** If android sdk already installed, skip this step. Use `sdkmanager` directly in the `$ANDOIRD_HOME/tools/bin` directory.
+
+    2. Install `openjdk-11-jdk`.
+
+        ```shell
+        sudo apt install openjdk-11-jdk
+        ```
+    
+    3. Install android platform and build-tools.
+
+        ```shell
+        export ANDROID_HOME=`pwd`/prebuilts/Android/Sdk
+        # path to sdkmanager
+        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+
+        # check sdkmanager works
+        sdkmanager --version
+        # 10.0
+
+        yes | sdkmanager --licenses
+        yes | sdkmanager --install "platforms;android-34"
+        yes | sdkmanager --install "build-tools;34.0.0"
+        yes | sdkmanager --install "cmake;3.22.1"
+        ```
+      
+    4. Build Android APK
+
+        ```shell
+        cd cdeosplayer
+        ./gradlew assembleDebug
+        ```
 
   Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L156) which affect the running of the ASR demo and the size of the generated APK.
 
