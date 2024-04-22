@@ -3355,8 +3355,8 @@ static float tensor_sum_elements(const ggml_tensor * tensor) {
 }
 
 static void tensor_dump(const ggml_tensor * tensor, const char * name) {
-    LOGGD("dump ggml tensor %s", name);
-    GGML_JNI_NOTIFY("dump ggml tensor %s",name);
+    LOGGD("dump ggml tensor %s(%s)", name, tensor->name);
+    GGML_JNI_NOTIFY("dump ggml tensor %s(%s)",name, tensor->name);
     LOGGD("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)", name,
           tensor->type, ggml_type_name(tensor->type),
           tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
@@ -8238,9 +8238,20 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
             /* no_alloc   =*/ 0
     };
 
+    ggml_backend_t backend = nullptr;
+    ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-    if (n_backend_type != 3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-        params.use_hwaccel   = true;
+    if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        params.use_hwaccel = true;
+        params.no_alloc    = true;
+        //PoC-S53: troubleshooting stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+        backend = ggml_backend_qnn_init(n_backend_type);
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+            GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+            return 1;
+        }
+    }
 #endif
 
     ctx = ggml_init(params);
@@ -8250,14 +8261,14 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     }
 
     GGML_JNI_NOTIFY("creating new tensors\n");
+    LOGGD("creating new tensors\n");
     src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(src0, 1.0f);
-    ggml_set_f32(src0, (rand() % 100 + 1));
-
+    ggml_set_input(src0);
+    //src0->flags |= GGML_TENSOR_FLAG_INPUT;
+    LOGGD("here");
     src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
-    ggml_set_f32(src1, 2.0f);
-    ggml_set_f32(src1, (rand() % 100 + 1));
-
+    ggml_set_input(src1);
+    LOGGD("here");
     switch (n_ggml_op_type) {
         case GGML_OP_ADD:
             dst = ggml_add(ctx, src0, src1);
@@ -8276,11 +8287,39 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
             return 2;
             //break;
     }
+    ggml_set_output(dst);
+#ifdef GGML_USE_QNN
+    if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        LOGGD("creating backend buffer\n");
+        //PoC-S53: troubleshooting stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+        buffer = ggml_backend_alloc_ctx_tensors(ctx, backend);
+        if (!buffer) {
+            LOGGD("%s: failed to allocate backend buffer\n", __func__);
+            return false;
+        }
+    }
+#endif
+#if 0
+    ggml_gallocr_t alloc = nullptr;
+    alloc = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
+#endif
+    ggml_set_f32(src0, 1.0f);
+    ggml_set_f32(src0, (rand() % 100 + 1));
+    ggml_set_f32(src1, 2.0f);
+    ggml_set_f32(src1, (rand() % 100 + 1));
     ggml_set_f32(dst, 0.0f);
 
     GGML_JNI_NOTIFY("creating compute graph\n");
+    LOGGD("creating compute graph\n");
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
+#if 0
+    if (!ggml_gallocr_alloc_graph(alloc, gf)) {
+        // failed to allocate the compute buffer
+        LOGGW("%s: failed to allocate the compute buffer\n", __func__);
+        return false;
+    }
+#endif
     ggml_graph_compute_helper(gf,work_buffer, num_threads, nullptr, nullptr);
 
     if (get_tensor_data_size(dst) < 100) {
@@ -8303,7 +8342,11 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
               dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0], dst->nb[1], dst->nb[2]);
 
     }
+#if 0
+    ggml_gallocr_free(alloc);
+#endif
     ggml_free(ctx);
+    ggml_backend_buffer_free(buffer);
 
     n_end_time  = ggml_time_us();
     n_durtion   = (n_end_time - n_begin_time) / 1000;

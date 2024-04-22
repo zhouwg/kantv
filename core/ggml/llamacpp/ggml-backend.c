@@ -177,11 +177,14 @@ const char * ggml_backend_name(ggml_backend_t backend) {
 }
 
 void ggml_backend_free(ggml_backend_t backend) {
+    ENTER_FUNC();
     if (backend == NULL) {
+        LOGGD("backend is null");
         return;
     }
 
     backend->iface.free(backend);
+    LEAVE_FUNC();
 }
 
 ggml_backend_buffer_type_t ggml_backend_get_default_buffer_type(ggml_backend_t backend) {

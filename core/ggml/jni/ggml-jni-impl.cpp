@@ -488,7 +488,12 @@ static int whisper_bench_full() {
     cparams.use_gpu = p_asr_ctx->b_use_gpu;
     cparams.gpu_device = p_asr_ctx->gpu_device;
 
+    //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+    whisper_free(p_asr_ctx->p_context);
+
     struct whisper_context * ctx = whisper_init_from_file_with_params(p_asr_ctx->sz_model_path, cparams);
+    //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+    p_asr_ctx->p_context = ctx;
     LOGGD("system_info: n_threads = %d / %d | %s\n", p_asr_ctx->n_threads, std::thread::hardware_concurrency(), whisper_print_system_info());
     kantv_asr_notify_benchmark_c("start whisper bench full\n");
     if (ctx == nullptr) {
@@ -559,6 +564,8 @@ static int whisper_bench_full() {
 
     whisper_print_timings(ctx);
     whisper_free(ctx);
+    //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+    p_asr_ctx->p_context = nullptr;
 
     return 0;
 }
@@ -631,6 +638,8 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
             goto failure;
         }
     } else {
+        //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+        whisper_free(p_asr_ctx->p_context);
         struct whisper_context_params wcp = whisper_context_default_params();
         LOGGD("backend %d", n_backend_type);
         wcp.gpu_device  = n_backend_type;//added on 04-17-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
@@ -640,6 +649,8 @@ static const char * whisper_transcribe_from_file(const char * sz_model_path, con
             wcp.use_gpu = false;
         }
         context = whisper_init_from_file_with_params(sz_model_path, wcp);
+        //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+        p_asr_ctx->p_context = context;
         if (nullptr == context) {
             LOGGW("whisper_init_from_file_with_params failure, pls check why\n");
             GGML_JNI_NOTIFY("whisper_init_from_file_with_params failure(%s), pls check why? whether whispercpp model %s is valid ?\n",
@@ -712,6 +723,8 @@ failure:
 
     if (nullptr != context) {
         whisper_free(context);
+        //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
+        p_asr_ctx->p_context = nullptr;
     }
 
     if (0 == result) {
