@@ -83,7 +83,7 @@ void ggml_backend_buffer_free(ggml_backend_buffer_t buffer) {
     //ENTER_FUNC();
     if (buffer == NULL) {
         //LOGGW("buffer is nullptr");
-        LEAVE_FUNC();
+        //LEAVE_FUNC();
         return;
     }
 
