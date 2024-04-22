@@ -28,17 +28,16 @@
  *
  * todo:
  *
- * 1. lack of implementation of other GGML-OPs using QNN API(only support GGML_OP_MUL_MAT, GGML_OP_MUL, GGML_OP_ADD)
+ * 1. lack of implementation of other GGML-OPs using QNN API(only support GGML_OP_MUL_MAT,
+ *    GGML_OP_MUL, GGML_OP_ADD, would be done by community in upstream GGML community)
  *
- * 2. lack of stability during toggle between different backend(QNN CPU backend, QNN GPU backend, QNN HTP(aka DSP) backend,...)
+ * 2. only support FP32 / FP16(other data type not used currently, would be done by community in upstream GGML community)
  *
- * 3. only support FP32 / FP16(other data type not used currently)
+ * 3. QNN's RPC feature(which useful for QNN HTP(aka DSP) backend) not used
  *
- * 4. QNN's RPC feature not used currently
+ * 4. multi QNN backend(CPU/GPU/DSP) simultaneously not support
  *
- * 5. multi-thread supportive
- *
- * 6. multi QNN backend(CPU/GPU/DSP) simultaneously not support
+ * 5. multithreading not work with QNN GPU/HTP(aka DSP) backend
  *
  */
 #include <stdio.h>
@@ -4706,8 +4705,8 @@ static ggml_status ggml_backend_qnn_graph_compute_multithread(ggml_backend_t bac
     ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
     LOGGD("device %d, thread %d\n", ctx->device, ctx->threads);
 
-    if (QNN_GPU == ctx->device) {
-        //TODO:multithreading not supported using QNN GPU backend
+    if (QNN_GPU == ctx->device || QNN_HTP == ctx->device) {
+        //TODO:multithreading not supported using QNN GPU/HTP(aka DSP) backend
         ctx->threads = 1;
     }
     struct ggml_cplan plan          = ggml_graph_plan(cgraph, ctx->threads);
