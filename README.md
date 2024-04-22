@@ -199,10 +199,10 @@ cd kantv
     
         > **note:** If android sdk already installed, skip this step. Use `sdkmanager` directly in the `$ANDOIRD_HOME/tools/bin` directory.
 
-    2. Install `openjdk-11-jdk`.
+    2. Install `openjdk-17-jdk`.
 
         ```shell
-        sudo apt install openjdk-11-jdk
+        sudo apt install openjdk-17-jdk
         ```
     
     3. Install android platform and build-tools.
