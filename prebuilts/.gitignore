@@ -1,6 +1,8 @@
 out
 build
-Android/Sdk
+Android/
+Android/Sdk/
+toolchain/android-sdk/
 
 deepspeech-0.9.3-models.scorer
 

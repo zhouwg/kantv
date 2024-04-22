@@ -86,9 +86,12 @@ export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
 
 #modify following lines to adapt to local dev envs
+export ANDROID_HOME=${HOME_PATH}/Android/Sdk
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
 export UPSTREAM_SDCPP_PATH=~/github/stablediffusion.cpp
+
+export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
 
 
 #the following is not required for project's user

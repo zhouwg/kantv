@@ -19,6 +19,7 @@ show_pwd
 echo "ANDROID_NDK: ${ANDROID_NDK}"
 
 is_android_ndk_exist=1
+is_cmdlinetools_exist=1
 
 if [ ! -d ${ANDROID_NDK} ]; then
     echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
@@ -28,6 +29,11 @@ fi
 if [ ! -f ${ANDROID_NDK}/build/cmake/android.toolchain.cmake ]; then
     echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
     is_android_ndk_exist=0
+fi
+
+if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools/bin/sdkmanager ]; then
+    echo -e "${TEXT_RED}Android SDK cmdline-tools not exist, pls check...${TEXT_RESET}\n"
+    is_cmdlinetools_exist=0
 fi
 
 if [ ${is_android_ndk_exist} -eq 0 ]; then
@@ -56,3 +62,46 @@ if [ ${is_android_ndk_exist} -eq 0 ]; then
 else
     printf "android ndk already exist:${ANDROID_NDK} \n\n"
 fi
+
+
+
+if [ ${is_cmdlinetools_exist} -eq 0 ]; then
+    echo -e "begin downloading android sdk cmdline-tools \n"
+
+    if [ ! -d ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk ]; then
+        mkdir -p ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk
+    fi
+
+    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/commandlinetools-linux-9862592_latest.zip  https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip
+
+    if [ $? -ne 0 ]; then
+        printf "failed to download android sdk cmdline-tools\n"
+        exit 1
+    fi
+
+    cd ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk
+    unzip commandlinetools-linux-9862592_latest.zip
+
+    cd ${PROJECT_ROOT_PATH}
+else
+    printf "android sdk cmdline-tools already exist \n\n"
+fi
+
+
+#prepare for cmdline build
+
+export ANDROID_HOME=${HOME_PATH}/Android/Sdk
+export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
+
+# check sdkmanager works
+sdkmanager --version
+if [ $? -ne 0 ]; then
+    printf "android cmdline-tools could not work properly, pls check development envs\n"
+    exit 1
+fi
+
+yes | sdkmanager --licenses
+yes | sdkmanager --install "platforms;android-34"
+yes | sdkmanager --install "build-tools;34.0.0"
+yes | sdkmanager --install "cmake;3.22.1"
+
