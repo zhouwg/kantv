@@ -92,6 +92,8 @@ extern "C" {
 
 #include "llama.h"
 
+#include "ggml-qnn.h"
+
 #include "stable-diffusion.h"
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_STATIC
@@ -275,8 +277,11 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
     LOGGV("prompt:%s\n", prompt);
     LOGGV("model file %s\n", model_path);
+    n_backend = QNN_CPU;
     params.model = model_path;
     params.prompt = std::string(prompt);
+    params.main_gpu = n_backend;
+    params.n_gpu_layers = 1;
     llama_sampling_params & sparams = params.sparams;
 
     if (params.n_ctx != 0 && params.n_ctx < 8) {

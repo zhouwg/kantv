@@ -839,7 +839,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
-    if (3 == n_backend_type) { // 3 is fake QNN backend, just used for compare perforance between QNN backend and original ggml
+    if (3 == n_backend_type) { // 3 is fake QNN backend, just used for compare performance between QNN backend and original ggml
         p_asr_ctx->b_use_gpu = false;
         p_asr_ctx->gpu_device = 3;
     } else {
@@ -875,11 +875,6 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
         case BECHMARK_FULL:
             whisper_bench_full();
             break;
-            /* not used since 04-20-2024
-        case BENCHMARK_MATRIX:
-            ggml_bench_matrix(n_backend_type, n_threads);
-            break;
-             */
 
         case BENCHMAKR_LLAMA:
             ggml_bench_llama(sz_model_path, n_threads, n_backend_type);

@@ -14294,7 +14294,7 @@ struct llama_context * llama_new_context_with_model(
         }
 #elif defined(GGML_USE_QNN)
         if (model->n_gpu_layers > 0) {
-            ggml_backend_t backend = ggml_backend_qnn_init(QNN_GPU);//TODO
+            ggml_backend_t backend = ggml_backend_qnn_init(QNN_CPU);//TODO
             if (nullptr == backend) {
                 LLAMA_LOG_ERROR("%s: failed to initialize QNN backend\n", __func__);
                 llama_free(ctx);

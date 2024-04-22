@@ -264,7 +264,6 @@
      public static final int BENCHMARK_MEMCPY   = 1;
      public static final int BENCHMARK_MULMAT   = 2;
      public static final int BENCHMARK_FULL     = 3;
-     //public static final int BENCHMARK_MATRIX  = 4;//not used since 04-20-2024
      public static final int BENCHMARK_LLM     = 4;
      public static final int BENCHMARK_STABLEDIFFUSION= 5;
      public static final int BENCHMARK_QNN_SAMPLE     = 6;
@@ -3928,11 +3927,6 @@
 
              case BENCHMARK_ASR:
                  return "GGML whisper ASR";
-
-                 /*//not used since 04-20-2024
-             case BENCHMARK_MATRIX:
-                 return "GGML matrix";
-                 */
 
              case BENCHMARK_LLM:
                  return "GGML LLAMA";

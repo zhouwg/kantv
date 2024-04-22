@@ -57,7 +57,6 @@ extern "C" {
 #define BECHMARK_MEMCPY             1       //memcpy  benchmark
 #define BECHMARK_MULMAT             2       //mulmat  benchmark
 #define BECHMARK_FULL               3       //whisper.cpp full benchmark
-/*#define BENCHMARK_MATRIX          4*/     //not used since 04-20-2024
 #define BENCHMAKR_LLAMA             4       //llama.cpp benchmark
 #define BENCHMAKR_STABLEDIFFUSION   5       //stable diffusion benchmark, not work on Xiaomi 14 currently
 // there are three killer/heavyweight AI applications based on GGML currently: whisper.cpp, llama.cpp, stablediffusion.cpp, so they are here
