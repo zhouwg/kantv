@@ -3693,7 +3693,9 @@ struct ggml_backend_qnn_buffer_context {
             free_qnn_tensor(*qnn_tensor);
             free(qnn_tensor);
         }
+
         std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>>::iterator graph_it;
+        LOGGD("g_qnn_backend %p", g_qnn_backend);
         struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
         QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->instance->get_qnn_raw_interface();
         for (graph_it = backend_ctx->instance->_qnn_graph_map.begin(); graph_it != backend_ctx->instance->_qnn_graph_map.end(); graph_it++) {
@@ -4250,6 +4252,547 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
     return result;
 }
 
+
+struct ggml_compute_state_shared {
+    const struct ggml_cgraph * cgraph;
+    const struct ggml_cplan  * cplan;
+
+    int64_t perf_node_start_cycles;
+    int64_t perf_node_start_time_us;
+
+    const int n_threads;
+
+    // synchronization primitives
+    atomic_int n_active;  // num active threads
+    atomic_int node_n;    // active graph node
+    atomic_int node_task; // active graph node task phase
+
+    ggml_abort_callback abort_callback; // abort ggml_graph_compute when true
+    void * abort_callback_data;
+};
+
+struct ggml_compute_state {
+    pthread_t thrd;
+    int ith;
+    struct ggml_compute_state_shared * shared;
+    enum ggml_status ec;
+};
+
+
+#ifdef GGML_PERF
+#define ggml_perf_time_ms()       ggml_time_ms()
+#define ggml_perf_time_us()       ggml_time_us()
+#define ggml_perf_cycles()        ggml_cycles()
+#define ggml_perf_cycles_per_ms() ggml_cycles_per_ms()
+#else
+#define ggml_perf_time_ms()       0
+#define ggml_perf_time_us()       0
+#define ggml_perf_cycles()        0
+#define ggml_perf_cycles_per_ms() 0
+#endif
+#undef MIN
+#undef MAX
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
+
+static void ggml_graph_compute_perf_stats_node(struct ggml_tensor * node, const struct ggml_compute_state_shared * st) {
+    int64_t cycles_cur  = ggml_perf_cycles()  - st->perf_node_start_cycles;
+    int64_t time_us_cur = ggml_perf_time_us() - st->perf_node_start_time_us;
+
+    node->perf_runs++;
+    node->perf_cycles  += cycles_cur;
+    node->perf_time_us += time_us_cur;
+}
+
+
+static void ggml_graph_compute_thread_sync_node(int * node_n, struct ggml_compute_state * state, const bool do_yield) {
+    // wait for other threads to finish
+    const int last_node_n = * node_n;
+
+    while (true) {
+        if (do_yield) {
+            sched_yield();
+        }
+
+        * node_n = atomic_load(&state->shared->node_n);
+        if (* node_n != last_node_n) break;
+    }
+}
+
+
+static void ggml_graph_compute_thread_sync_task(int * task_phase, struct ggml_compute_state * state, const bool do_yield) {
+    // wait for other threads to finish
+    const int last_task_phase = * task_phase;
+
+    while (true) {
+        if (do_yield) {
+            sched_yield();
+        }
+
+        * task_phase = atomic_load(&state->shared->node_task);
+        if (* task_phase != last_task_phase) break;
+    }
+}
+
+
+static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads, int n_cur_threads) {
+    int n_tasks = 0;
+
+    if (ggml_is_empty(node)) {
+        // no need to multi-thread a no-op
+        n_tasks = 1;
+        return n_tasks;
+    }
+
+    switch (node->op) {
+        case GGML_OP_CPY:
+        case GGML_OP_DUP:
+        case GGML_OP_ADD:
+        case GGML_OP_ADD1:
+        case GGML_OP_ACC: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_SUB:
+        case GGML_OP_SQR:
+        case GGML_OP_SQRT:
+        case GGML_OP_LOG:
+        case GGML_OP_SUM:
+        case GGML_OP_SUM_ROWS:
+        case GGML_OP_MEAN:
+        case GGML_OP_ARGMAX:
+        case GGML_OP_REPEAT:
+        case GGML_OP_REPEAT_BACK:
+        case GGML_OP_LEAKY_RELU: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_UNARY:
+            switch (ggml_get_unary_op(node)) {
+                case GGML_UNARY_OP_ABS:
+                case GGML_UNARY_OP_SGN:
+                case GGML_UNARY_OP_NEG:
+                case GGML_UNARY_OP_STEP:
+                case GGML_UNARY_OP_TANH:
+                case GGML_UNARY_OP_ELU:
+                case GGML_UNARY_OP_RELU:
+                case GGML_UNARY_OP_HARDSWISH:
+                case GGML_UNARY_OP_HARDSIGMOID: {
+                    n_tasks = 1;
+                }
+                    break;
+
+                case GGML_UNARY_OP_GELU:
+                case GGML_UNARY_OP_GELU_QUICK:
+                case GGML_UNARY_OP_SILU: {
+                    n_tasks = n_threads;
+                }
+                    break;
+                default:
+                    GGML_ASSERT(false);
+            }
+            break;
+        case GGML_OP_SILU_BACK:
+        case GGML_OP_MUL:
+        case GGML_OP_DIV:
+        case GGML_OP_NORM:
+        case GGML_OP_RMS_NORM:
+        case GGML_OP_RMS_NORM_BACK:
+        case GGML_OP_GROUP_NORM:
+        case GGML_OP_CONCAT: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_MUL_MAT: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_MUL_MAT_ID: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_OUT_PROD: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_GET_ROWS: {
+            n_tasks = MIN(n_cur_threads, ggml_nelements(node->src[1]));
+        }
+            break;
+        case GGML_OP_SCALE:
+        case GGML_OP_SET:
+        case GGML_OP_CONT:
+        case GGML_OP_RESHAPE:
+        case GGML_OP_VIEW:
+        case GGML_OP_PERMUTE:
+        case GGML_OP_TRANSPOSE:
+        case GGML_OP_GET_ROWS_BACK:
+        case GGML_OP_DIAG: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_DIAG_MASK_ZERO:
+        case GGML_OP_DIAG_MASK_INF:
+        case GGML_OP_SOFT_MAX_BACK:
+        case GGML_OP_ROPE:
+        case GGML_OP_ROPE_BACK:
+        case GGML_OP_ADD_REL_POS: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_ALIBI: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_CLAMP: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_SOFT_MAX: {
+            n_tasks = MIN(n_threads, ggml_nrows(node->src[0]));
+        }
+            break;
+        case GGML_OP_CONV_TRANSPOSE_1D: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_IM2COL: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_CONV_TRANSPOSE_2D: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_POOL_1D:
+        case GGML_OP_POOL_2D: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_UPSCALE: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_PAD: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_ARANGE: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_TIMESTEP_EMBEDDING: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_ARGSORT: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_FLASH_ATTN: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_FLASH_FF: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_FLASH_ATTN_BACK: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_SSM_CONV:
+        case GGML_OP_SSM_SCAN: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_WIN_PART:
+        case GGML_OP_WIN_UNPART:
+        case GGML_OP_GET_REL_POS:
+        case GGML_OP_MAP_UNARY:
+        case GGML_OP_MAP_BINARY:
+        case GGML_OP_MAP_CUSTOM1_F32:
+        case GGML_OP_MAP_CUSTOM2_F32:
+        case GGML_OP_MAP_CUSTOM3_F32: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_MAP_CUSTOM1: {
+            LOGGE("not support");
+        }
+            break;
+        case GGML_OP_MAP_CUSTOM2: {
+            LOGGE("not support");
+        }
+            break;
+        case GGML_OP_MAP_CUSTOM3: {
+            LOGGE("not support");
+        }
+            break;
+        case GGML_OP_CROSS_ENTROPY_LOSS: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_CROSS_ENTROPY_LOSS_BACK: {
+            n_tasks = n_threads;
+        }
+            break;
+        case GGML_OP_NONE: {
+            n_tasks = 1;
+        }
+            break;
+        case GGML_OP_COUNT: {
+            GGML_ASSERT(false);
+        }
+            break;
+        default: {
+            LOGGW("%s: op not implemented: ", __func__);
+            if (node->op < GGML_OP_COUNT) {
+                LOGGD("%s\n", ggml_op_name(node->op));
+            } else {
+                LOGGD("%d\n", node->op);
+            }
+            GGML_ASSERT(false);
+        }
+            break;
+    }
+
+    assert(n_tasks > 0);
+
+    return n_tasks;
+}
+
+
+static void * ggml_graph_compute_thread(void * data) {
+    struct ggml_compute_state * state = (struct ggml_compute_state *) data;
+
+    const struct ggml_cgraph * cgraph = state->shared->cgraph;
+    const struct ggml_cplan  * cplan  = state->shared->cplan;
+
+    const int   n_threads   = state->shared->n_threads;
+
+    int node_n     = -1;
+    int task_phase = GGML_TASK_TYPE_FINALIZE;
+
+    while (true) {
+        if (cplan->abort_callback && cplan->abort_callback(cplan->abort_callback_data)) {
+            state->shared->node_n += 1;
+            state->ec = GGML_STATUS_ABORTED;
+            return 0;
+        }
+
+        if (atomic_fetch_sub(&state->shared->n_active, 1) == 1) {
+            // all other threads are finished and spinning
+            // do finalize and init here so we don't have synchronize again
+            struct ggml_compute_params params = {
+                    /*.type  =*/ GGML_TASK_TYPE_FINALIZE,
+                    /*.ith   =*/ 0,
+                    /*.nth   =*/ 0,
+                    /*.wsize =*/ cplan->work_size,
+                    /*.wdata =*/ cplan->work_data,
+            };
+
+            if (node_n != -1) {
+                /* FINALIZE */
+                struct ggml_tensor * node = cgraph->nodes[node_n];
+                if (GGML_OP_HAS_FINALIZE[node->op]) {
+                    params.nth = ggml_get_n_tasks(node, n_threads, state->shared->n_threads);
+                    ggml_qnn_compute_forward(&params, node);
+                }
+                ggml_graph_compute_perf_stats_node(node, state->shared);
+            }
+
+            // distribute new work or execute it direct if 1T
+            while (++node_n < cgraph->n_nodes) {
+                //LOGGI("%s: %d/%d\n", __func__, node_n, cgraph->n_nodes);
+                struct ggml_tensor * node = cgraph->nodes[node_n];
+                const int n_tasks = ggml_get_n_tasks(node, n_threads, state->shared->n_threads);
+
+                state->shared->perf_node_start_cycles  = ggml_perf_cycles();
+                state->shared->perf_node_start_time_us = ggml_perf_time_us();
+
+                params.nth = n_tasks;
+
+                if (n_tasks == 1) {
+                    /* INIT */
+                    if (GGML_OP_HAS_INIT[node->op]) {
+                        params.type = GGML_TASK_TYPE_INIT;
+                        ggml_qnn_compute_forward(&params, node);
+                    }
+
+                    // TODO: maybe push node_n to the atomic but if other threads see n_tasks is 1,
+                    // they do something more efficient than spinning (?)
+                    params.type = GGML_TASK_TYPE_COMPUTE;
+                    ggml_qnn_compute_forward(&params, node);
+
+                    if (GGML_OP_HAS_FINALIZE[node->op]) {
+                        params.type = GGML_TASK_TYPE_FINALIZE;
+                        ggml_qnn_compute_forward(&params, node);
+                    }
+
+                    ggml_graph_compute_perf_stats_node(node, state->shared);
+                } else {
+                    break;
+                }
+
+                if (cplan->abort_callback && cplan->abort_callback(cplan->abort_callback_data)) {
+                    break;
+                }
+            }
+
+            task_phase = GGML_TASK_TYPE_INIT;
+            atomic_store(&state->shared->n_active,  n_threads);
+            atomic_store(&state->shared->node_n,    node_n);
+            atomic_store(&state->shared->node_task, task_phase);
+        } else {
+            ggml_graph_compute_thread_sync_node(&node_n,     state, false);
+            ggml_graph_compute_thread_sync_task(&task_phase, state, false);
+        }
+
+        // check if we should stop
+        if (node_n >= cgraph->n_nodes) break;
+
+        /* INIT & COMPUTE */
+        struct ggml_tensor * node = cgraph->nodes[node_n];
+        const int n_tasks = ggml_get_n_tasks(node, n_threads, state->shared->n_threads);
+
+        struct ggml_compute_params params = {
+                /*.type  =*/ GGML_TASK_TYPE_INIT,
+                /*.ith   =*/ state->ith,
+                /*.nth   =*/ n_tasks,
+                /*.wsize =*/ cplan->work_size,
+                /*.wdata =*/ cplan->work_data,
+        };
+
+        if (state->ith < n_tasks) {
+            if (GGML_OP_HAS_INIT[node->op]) {
+                ggml_qnn_compute_forward(&params, node);
+            }
+        }
+
+        if (atomic_fetch_sub(&state->shared->n_active, 1) == 1) {
+            task_phase = GGML_TASK_TYPE_COMPUTE;
+            atomic_store(&state->shared->n_active,  n_threads);
+            atomic_store(&state->shared->node_task, task_phase);
+        }
+        else {
+            const bool do_yield = node_n < 0 || cgraph->nodes[node_n]->op == GGML_OP_MUL_MAT;
+            ggml_graph_compute_thread_sync_task(&task_phase, state, do_yield);
+        }
+
+        if (state->ith < n_tasks) {
+            params.type = GGML_TASK_TYPE_COMPUTE;
+            ggml_qnn_compute_forward(&params, node);
+        }
+
+        if (atomic_fetch_sub(&state->shared->n_active, 1) == 1) {
+            task_phase = GGML_TASK_TYPE_FINALIZE;
+            atomic_store(&state->shared->n_active,  n_threads);
+            atomic_store(&state->shared->node_task, task_phase);
+        }
+        else {
+            ggml_graph_compute_thread_sync_task(&task_phase, state, false);
+        }
+    }
+
+    return 0;
+}
+
+
+static ggml_status ggml_backend_qnn_graph_compute_multithread(ggml_backend_t backend, ggml_cgraph * cgraph) {
+    //ENTER_FUNC();
+    ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
+    LOGGD("device %d, thread %d\n", ctx->device, ctx->threads);
+
+    if (QNN_GPU == ctx->device) {
+        //TODO:multithreading not supported using QNN GPU backend
+        ctx->threads = 1;
+    }
+    struct ggml_cplan plan          = ggml_graph_plan(cgraph, ctx->threads);
+
+
+    if (plan.work_size > 0) {
+        LOGGI("work size %d(%d MB)", plan.work_size, plan.work_size / (1 << 20));
+        plan.work_data = static_cast<uint8_t *>(malloc(plan.work_size));
+        if (plan.work_data == nullptr) {
+            LOGGE("malloc failed");
+            return GGML_STATUS_FAILED;
+        }
+    }
+
+    struct ggml_cplan * cplan = &plan;
+    GGML_ASSERT(cplan->n_threads > 0);
+    if (cplan->work_size > 0) {
+        GGML_ASSERT(cplan->work_data);
+    }
+
+    LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
+    const int n_threads = cplan->n_threads;
+
+    struct ggml_compute_state_shared state_shared = {
+            /*.cgraph                  =*/ cgraph,
+            /*.cgraph_plan             =*/ cplan,
+            /*.perf_node_start_cycles  =*/ 0,
+            /*.perf_node_start_time_us =*/ 0,
+            /*.n_threads               =*/ n_threads,
+            /*.n_active                =*/ n_threads,
+            /*.node_n                  =*/ -1,
+            /*.node_task               =*/ GGML_TASK_TYPE_FINALIZE,
+            /*.abort_callback          =*/ nullptr,
+            /*.abort_callback_data     =*/ nullptr,
+    };
+    struct ggml_compute_state * workers = (struct ggml_compute_state*)alloca(sizeof(struct ggml_compute_state) * n_threads);
+    if (nullptr == workers) {
+        LOGGE("malloc failed");
+        if (plan.work_data != nullptr) {
+            free(plan.work_data);
+        }
+        return GGML_STATUS_FAILED;
+    }
+
+    // create thread pool
+    if (n_threads > 1) {
+        for (int j = 1; j < n_threads; ++j) {
+            workers[j] = (struct ggml_compute_state) {
+                    .thrd   = 0,
+                    .ith = j,
+                    .shared = &state_shared,
+                    .ec = GGML_STATUS_SUCCESS,
+            };
+
+            const int rc = pthread_create(&workers[j].thrd, NULL, ggml_graph_compute_thread, &workers[j]);
+            GGML_ASSERT(rc == 0);
+        }
+    }
+
+    workers[0].ith = 0;
+    workers[0].shared = &state_shared;
+    workers[0].ec = GGML_STATUS_SUCCESS;
+
+    // this is a work thread too
+    ggml_graph_compute_thread(&workers[0]);
+    enum ggml_status compute_status = workers[0].ec;
+
+    // join or kill thread pool
+    if (n_threads > 1) {
+        for (int j = 1; j < n_threads; j++) {
+            const int rc = pthread_join(workers[j].thrd, NULL);
+            GGML_ASSERT(rc == 0);
+            if (workers[j].ec != GGML_STATUS_SUCCESS)
+                compute_status = workers[j].ec;
+        }
+    }
+
+    if (plan.work_data != nullptr) {
+        free(plan.work_data);
+    }
+    LEAVE_FUNC();
+    return compute_status;
+}
+
+
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * op) {
     ENTER_FUNC();
     GGML_UNUSED(backend);
@@ -4274,7 +4817,7 @@ static ggml_backend_i ggml_backend_qnn_interface = {
         /* .graph_plan_create       = */ nullptr,
         /* .graph_plan_free         = */ nullptr,
         /* .graph_plan_compute      = */ nullptr,
-        /* .graph_compute           = */ ggml_backend_qnn_graph_compute,
+        /* .graph_compute           = */ ggml_backend_qnn_graph_compute_multithread,
         /* .supports_op             = */ ggml_backend_qnn_supports_op,
         /* .offload_op              = */ nullptr,
         /* .event_new               = */ nullptr,

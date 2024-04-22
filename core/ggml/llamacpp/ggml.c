@@ -18625,11 +18625,7 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
         }
     }
     //LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
-#ifdef GGML_USE_QNN
-    const int n_threads = 1; //TODO: multithread support in QNN backend
-#else
     const int n_threads = cplan->n_threads;
-#endif
 
     struct ggml_compute_state_shared state_shared = {
         /*.cgraph                  =*/ cgraph,
