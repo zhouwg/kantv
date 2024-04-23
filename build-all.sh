@@ -160,6 +160,21 @@ function build_nativelibs
 function build_kantv_apk()
 {
     echo ""
+    cd ${PROJECT_ROOT_PATH}/cdeosplayer
+    ./gradlew assembleDebug
+    if [ $? -eq 0 ]; then
+        echo ""
+        echo ""
+        printf "succeed to build apk ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk by cmdline-tools\n"
+        cd ${PROJECT_ROOT_PATH}
+        echo ""
+        echo ""
+        exit 0
+    fi
+
+    cd ${PROJECT_ROOT_PATH}
+
+    echo ""
     echo "------------------------------------------------------------------------------------------"
     echo -e "[*] to continue to build project KanTV Android APK for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls\n"
     echo ""

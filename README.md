@@ -76,6 +76,7 @@ sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
 sudo apt-get install nasm -y
 sudo apt-get install yasm -y
+sudo apt-get install openjdk-17-jdk -y
 
 sudo dpkg --add-architecture i386
 sudo apt-get install lib32z1 -y
@@ -172,7 +173,7 @@ cd kantv
 ```
 
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L91">build/envsetup.sh</a> accordingly before launch build
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L16">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
@@ -191,47 +192,19 @@ cd kantv
 
 #### Build Android APK
 
-- Option 1: Build APK from source code by Android Studio IDE manually
+- Option 1: Build APK from source code by Android Studio IDE
 
-- Option 2: Build from command line
+- Option 2: Build APK from source code by command line
 
-    1. Download [Android Command Line Tools (10.0)](https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip) and unzip (to the `prebuilts/Android/Sdk/cmdline-tools/latest/` as example).
-    
-        > **note:** If android sdk already installed, skip this step. Use `sdkmanager` directly in the `$ANDOIRD_HOME/tools/bin` directory.
+        . build/envsetup.sh
+        lunch 1
+        ./build-all.sh android
 
-    2. Install `openjdk-17-jdk`.
+  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L172) which affect the running of the ASR demo and the size of the generated APK.
 
-        ```shell
-        sudo apt install openjdk-17-jdk
-        ```
-    
-    3. Install android platform and build-tools.
-
-        ```shell
-        export ANDROID_HOME=`pwd`/prebuilts/Android/Sdk
-        # path to sdkmanager
-        export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
-
-        # check sdkmanager works
-        sdkmanager --version
-        # 10.0
-
-        yes | sdkmanager --licenses
-        yes | sdkmanager --install "platforms;android-34"
-        yes | sdkmanager --install "build-tools;34.0.0"
-        yes | sdkmanager --install "cmake;3.22.1"
-        ```
-      
-    4. Build Android APK
-
-        ```shell
-        cd cdeosplayer
-        ./gradlew assembleDebug
-        ```
-
-  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L156) which affect the running of the ASR demo and the size of the generated APK.
-
+<!--
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
+-->
 
 
 ### Run Android APK on real Android phone
