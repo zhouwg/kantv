@@ -25,9 +25,15 @@ enum QNNBackend {
     QNN_HTP,
 };
 
-GGML_API int            ggml_backend_qnn_reg_devices(void);
+GGML_API int            ggml_backend_qnn_reg_devices();
 
-GGML_API ggml_backend_t ggml_backend_qnn_init(size_t dev_num);
+/**
+ *
+ * @param device            0: QNN_CPU 1: QNN_GPU 2: QNN_HTP(aka DSP)
+ * @param qnn_lib_path      qnn library path, such as "/data/data/com.cdeos.kantv/" on Android which can got by JNI from Java layer
+ * @return
+ */
+GGML_API ggml_backend_t ggml_backend_qnn_init(size_t dev_num, const char * qnn_lib_path);
 
 GGML_API bool           ggml_backend_is_qnn(ggml_backend_t backend);
 

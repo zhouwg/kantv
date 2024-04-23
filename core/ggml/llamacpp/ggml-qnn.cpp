@@ -104,7 +104,7 @@ extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct
 
 static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
 
-#if (defined __ANDROID__) || (defined ANDROID) //Qualcomm's QNN could running on Window over ARM
+#if (defined __ANDROID__) || (defined ANDROID) //Qualcomm's QNN could running on Windows over ARM(aka WoA)
 extern "C" int __android_log_print(int prio, const char * tag, const char * fmt, ...)
 __attribute__((__format__(printf, 3, 4)));
 #endif
@@ -1800,7 +1800,6 @@ public:
 
 public:
     //TODO:refine
-    //std::map<std::string, Qnn_GraphHandle_t> _qnn_graph_map;
     std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>> _qnn_graph_map;
 
 private:
@@ -2333,7 +2332,7 @@ int qnn_instance::qnn_init(const QnnSaver_Config_t ** saver_config) {
     }
 
 
-    std::vector<const QnnBackend_Config_t *> temp_backend_config; //TODO:now is empty because I don't know how to use QnnBackend_Config_t currently
+    std::vector<const QnnBackend_Config_t *> temp_backend_config;
     _qnn_interface.qnn_backend_create(_qnn_log_handle, temp_backend_config.empty() ? nullptr
                                                                                    : temp_backend_config.data(),
                                       &_qnn_backend_handle);
@@ -2625,7 +2624,7 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
 
 
 
-#if 0 //this is dirty implementation before 04-21-2024, reserved it for purpose of reference
+#if 0 //this is dirty implementation before 04-21-2024, reserve it for purpose of reference
 //ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
 // https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
 static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
@@ -3995,7 +3994,7 @@ static void ggml_backend_qnn_buffer_init_tensor(ggml_backend_buffer_t buffer, gg
     */
 
     uint32_t dimensions[] = {(uint32_t) tensor->ne[0], (uint32_t) tensor->ne[1], (uint32_t) tensor->ne[2], (uint32_t) tensor->ne[3]};
-    //TODO:only support FP32
+    //TODO:only support FP32 & FP16
     Qnn_DataType_t  qnn_data_type = QNN_DATATYPE_FLOAT_32;
     Qnn_TensorType_t qnn_tensor_type = QNN_TENSOR_TYPE_APP_WRITE;
 
@@ -4149,7 +4148,7 @@ static ggml_backend_buffer_t ggml_backend_qnn_buffer_type_alloc_buffer(ggml_back
 
     //LOGGD("size %d, %d MB", size_aligned, size_aligned / (1 << 20));
 
-    //TODO:use pre-mallocated buffer in internal memory pool
+    //TODO:use pre-allocated buffer in internal memory pool
     ctx->buffer = ggml_qnn_host_malloc(size_aligned);
     ctx->buffer_size = size_aligned;
 
@@ -4404,7 +4403,7 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
     int task_phase                  = GGML_TASK_TYPE_FINALIZE;
     ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
 
-    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);//TODO: multithread support in QNN backend
+    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);
 
     buf_element_t * qnn_buf = nullptr;
 
@@ -5068,8 +5067,7 @@ static ggml_guid_t ggml_backend_qnn_guid() {
 
 static ggml_backend_t ggml_backend_qnn_reg_init(const char * params, void * user_data) {
     ENTER_FUNC();
-    GGML_UNUSED(params);
-    ggml_backend_t qnn_backend = ggml_backend_qnn_init((int) (intptr_t) user_data);
+    ggml_backend_t qnn_backend = ggml_backend_qnn_init((int) (intptr_t) user_data, params);
     LEAVE_FUNC();
 
     return qnn_backend;
@@ -5149,12 +5147,21 @@ ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t device_index) {
 }
 
 
-//TODO: better method to handle toggle between QNN CPU backend, QNN GPU backend, ggml
-ggml_backend_t ggml_backend_qnn_init(size_t device) {
+/**
+ *
+ * @param device            0: QNN_CPU 1: QNN_GPU 2: QNN_HTP(aka DSP)
+ * @param qnn_lib_path      qnn library path, such as "/data/data/com.cdeos.kantv/" on Android
+ * @return
+ */
+ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
     ENTER_FUNC();
     int result = 0;
 
+    if (nullptr == qnn_lib_path)
+        return nullptr;
+
     LOGGD("device %d", device);
+    LOGGD("qnn_lib_path %s", qnn_lib_path);
     if (device >= GGML_QNN_MAX_DEVICES) {
         LOGGE("invalid device %d", device);
         return nullptr;
@@ -5179,8 +5186,8 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     }
 
     if (QNN_HTP == device) {
-        //TODO: hardcode path
-        std::string path = "/data/data/com.cdeos.kantv/";
+        //std::string path = "/data/data/com.cdeos.kantv/";
+        std::string path = qnn_lib_path;
         if (0 == setenv("LD_LIBRARY_PATH",
                         (path +
                          ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images").c_str(),
@@ -5200,8 +5207,7 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
     }
 
     qnn_instance * instance = nullptr;
-    //TODO:hardcode QNN lib path
-    instance = new qnn_instance("/data/data/com.cdeos.kantv/", g_qnn_mgr[device].lib, "");
+    instance = new qnn_instance(qnn_lib_path, g_qnn_mgr[device].lib, "");
     result = instance->qnn_init(nullptr);
     if (0 != result) {
         LOGGW("init qnn subsystem failed with qnn backend %s, pls check why\n", get_qnn_backend_name(device));
@@ -5244,13 +5250,11 @@ ggml_backend_t ggml_backend_qnn_init(size_t device) {
 
 extern "C" int ggml_backend_qnn_reg_devices();
 
-//TODO: handle multi QNN backend device simultaneously
+
 int ggml_backend_qnn_reg_devices() {
     ENTER_FUNC();
 
-    LOGGD("multi QNN backend simultaneously not support currently");
-    //for (size_t idx = 0; idx < GGML_QNN_MAX_DEVICES; idx++) {
-    for (size_t idx = 0; idx < QNN_CPU; idx++) {
+    for (size_t idx = 0; idx < GGML_QNN_MAX_DEVICES; idx++) {
         int id = g_qnn_mgr[idx].device;
         char name[GGML_MAX_NAME];
         ggml_backend_qnn_get_device_description(idx, name, GGML_MAX_NAME);
@@ -5259,6 +5263,5 @@ int ggml_backend_qnn_reg_devices() {
     }
 
     LEAVE_FUNC();
-    //return GGML_QNN_MAX_DEVICES;
-    return QNN_CPU + 1;
+    return GGML_QNN_MAX_DEVICES;
 }
