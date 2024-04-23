@@ -8249,7 +8249,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         params.use_hwaccel = true;
         params.no_alloc    = true;
         //PoC-S53: troubleshooting stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
-        backend = ggml_backend_qnn_init(n_backend_type);
+        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
         if (nullptr == backend) {
             LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
             GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
