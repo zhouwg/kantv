@@ -31,13 +31,15 @@
  * 1. lack of implementation of other GGML-OPs using QNN API(only support GGML_OP_MUL_MAT,
  *    GGML_OP_MUL, GGML_OP_ADD, would be done by community in upstream GGML community)
  *
- * 2. only support FP32 / FP16(other data type not used currently, would be done by community in upstream GGML community)
+ * 2. only support FP32 / FP16 (other data type not used currently, would be done by community in upstream GGML community)
  *
- * 3. QNN's RPC feature(which useful for QNN HTP(aka DSP) backend) not used
+ * 3. data type of input tensors and output tensor must be same(this is a big limitation)
  *
- * 4. multi QNN backend(CPU/GPU/DSP) simultaneously not support
+ * 4. QNN's RPC feature(which useful for QNN HTP(aka DSP) backend) not used
  *
- * 5. multithreading not work with QNN GPU/HTP(aka DSP) backend
+ * 5. multi QNN backend(CPU/GPU/DSP) simultaneously not support
+ *
+ * 6. multithreading not work with QNN GPU/HTP(aka DSP) backend
  *
  */
 #include <stdio.h>
@@ -1054,6 +1056,7 @@ static uint32_t ggml_get_tensor_rank(const ggml_tensor * tensor) {
 
 
 //TODO:
+//ref:explanation of k-quants, https://github.com/ggerganov/llama.cpp/pull/1684
 static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
     switch (ggmltype) {
         case GGML_TYPE_Q4_0:
@@ -2571,11 +2574,6 @@ int qnn_instance::finalize_qnn_graph() {
 //TODO: refine / improvement
 static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct ggml_tensor * src1,
                                  struct ggml_tensor * dst) {
-    if (nullptr == g_qnn_backend) {
-        LOGGW("qnn backend not initialized");
-        return false;
-    }
-
     const int64_t ne00 = src0->ne[0];
     const int64_t ne01 = src0->ne[1];
     const int64_t ne10 = src1->ne[0];
@@ -2598,18 +2596,36 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
                (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
                (dst->type == GGML_TYPE_F32 || dst->type == GGML_TYPE_F16) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1)) &&
                (src0->rank == src1->rank);
+
+    }
+
+    if (dst->op == GGML_OP_MUL_MAT) {
+        LOGGD("GGML_OP_MUL_MAT");
+        LOGGI("%15s: rank = %d, type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+              src0->name, src0->rank,
+              src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
+              src0->nb[0], src0->nb[1], src0->nb[2]);
+        LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+              src1->name, src1->rank,
+              src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
+              src1->nb[0], src1->nb[1], src1->nb[2]);
+        LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+              dst->name, dst->rank,
+              dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0],
+              dst->nb[1], dst->nb[2]);
     }
 
     //make QNN SDK happy
     return  (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16) &&
             (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16) &&
-                  (src0->type == src1->type) && (src0->type == dst->type) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1));
+            (src0->type == src1->type) && (src0->type == dst->type) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1));
+
 
 }
 
 
 
-#if 0 //this is dirty implementation before 04-21-2024
+#if 0 //this is dirty implementation before 04-21-2024, reserved it for purpose of reference
 //ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
 // https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
 static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
@@ -2892,6 +2908,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     QNN_INTERFACE_VER_TYPE qnn_raw_interface    = ctx->raw_interface;
 
     n_begin_time                                = ggml_time_us();
+#if 0  //it works fine with whisper.cpp and llama.cpp. comment them because focus on mulmat in llama.cpp inference since 04-23-2024
     LOGGD("call %s\n", __func__);
     LOGGI("%15s: rank = %d, type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           src0->name, src0->rank,
@@ -2909,6 +2926,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     LOGGD("tensor0 name %s", QNN_TENSOR_GET_NAME(tensor_0));
     LOGGD("tensor1 name %s", QNN_TENSOR_GET_NAME(tensor_1));
     LOGGD("tensor2 name %s", QNN_TENSOR_GET_NAME(tensor_2));
+#endif
 
     QNN_VER_PTR(*tensor_0)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_1)->type = QNN_TENSOR_TYPE_APP_WRITE;
@@ -3003,6 +3021,215 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
         tensor_1     = std::get<2>(graph_item);
         tensor_2     = std::get<3>(graph_item);
 
+        //comment them because focus on mulmat in llama.cpp inference since 04-23-2024
+        //LOGGD("%d, %d, %d, %d", src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3]);
+        uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
+                                         (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
+        uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
+                                         (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
+        uint32_t dimensions_output[]  = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
+                                         (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
+        QNN_VER_PTR(*tensor_0)->dimensions = dimensions_input_0;
+        QNN_VER_PTR(*tensor_0)->rank = ggml_get_tensor_rank(src0);
+        QNN_VER_PTR(*tensor_0)->dataType = src0_qnn_type;
+        QNN_VER_PTR(*tensor_1)->dimensions = dimensions_input_1;
+        QNN_VER_PTR(*tensor_1)->rank = ggml_get_tensor_rank(src1);
+        QNN_VER_PTR(*tensor_1)->dataType = src1_qnn_type;
+        QNN_VER_PTR(*tensor_2)->dimensions = dimensions_output;
+        QNN_VER_PTR(*tensor_2)->rank = ggml_get_tensor_rank(dst);
+        QNN_VER_PTR(*tensor_2)->dataType = dst_qnn_type;
+
+        QNN_VER_PTR(*tensor_0)->clientBuf = {src0->data, ggml_get_tensor_data_size(src0)};
+        QNN_VER_PTR(*tensor_1)->clientBuf = {src1->data, ggml_get_tensor_data_size(src1)};
+        QNN_VER_PTR(*tensor_2)->clientBuf = {dst->data, ggml_get_tensor_data_size(dst)};
+
+        Qnn_Tensor_t tensor_inputs[] = {
+                *tensor_0,
+                *tensor_1
+        };
+        Qnn_Tensor_t tensor_outputs[] = {
+                *tensor_2
+        };
+        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1, nullptr, nullptr);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+    }
+    n_end_time = ggml_time_us();
+    n_durtion = (n_end_time - n_begin_time) / 1000;
+    //comment them because focus on mulmat in llama.cpp inference since 04-23-2024
+    //LOGGD("duration of ggml_qnn_add : %lld milliseconds\n", n_durtion);
+    //LOGGD("call %s done\n", __func__);
+}
+
+
+
+/*
+ * ggml_qnn_mul_mat was re-added as a standalone function because
+ * the following comments came from https://github.com/ggerganov/llama.cpp/pull/1632
+ * MUL_MAT take most of the compute time (about 95%). So to speed up llama, we have to focus on MUL_MAT.
+ * We have three kinds of MUL_MAT to compute:
+ * mul_mat_f32: both src0 and src1 are F32.
+ * mul_mat_f16_f32: src0 is F16 and src1 is F32.
+ * mul_mat_q_f32: src0 is quantized (Q4_0, Q4_1, ...), and src1 is F32.
+*/
+
+static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
+    Qnn_ErrorHandle_t error                     = QNN_SUCCESS;
+    bool graph_initialized                      = false;
+    int64_t n_begin_time                        = 0LL;
+    int64_t n_end_time                          = 0LL;
+    int64_t n_durtion                           = 0LL;
+
+    qnn_instance * instance                     = nullptr;
+    struct ggml_backend_qnn_context * ctx       = nullptr;
+
+    std::string graph_name                      = "ggml_op_qnn_mul_mat";
+    Qnn_GraphHandle_t graph_handle              = nullptr;
+    Qnn_Tensor_t * tensor_0                     = nullptr;
+    Qnn_Tensor_t * tensor_1                     = nullptr;
+    Qnn_Tensor_t * tensor_2                     = nullptr;
+
+    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
+    Qnn_OpConfig_t qnn_opconfig                 = QNN_OPCONFIG_INIT;
+    Qnn_Param_t qnn_params[]                    = {};
+
+    enum ggml_op ggmlop                         = GGML_OP_ADD;
+    Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
+    Qnn_DataType_t src1_qnn_type                = QNN_DATATYPE_FLOAT_32;
+    Qnn_DataType_t dst_qnn_type                 = QNN_DATATYPE_FLOAT_32;
+
+
+    if ((nullptr == src0) || (nullptr == src1) || (nullptr == dst)) {
+        LOGGW("pls check why GGML tensor is null");
+        return;
+    }
+    tensor_0                                    = (Qnn_Tensor_t *)src0->extra;
+    tensor_1                                    = (Qnn_Tensor_t *)src1->extra;
+    tensor_2                                    = (Qnn_Tensor_t *)dst->extra;
+    if ((nullptr == tensor_0) || (nullptr == tensor_1) || (nullptr == tensor_2)) {
+        LOGGW("pls check why QNN tensor is null");
+        return;
+    }
+    ctx                                         = (struct ggml_backend_qnn_context *)g_qnn_backend->context;
+    if (nullptr == ctx) {
+        LOGGW("pls check why backend ctx is null");
+        return;
+    }
+    instance                                    = ctx->instance;
+    if (nullptr == instance) {
+        LOGGW("pls check why qnn instance is null");
+        return;
+    }
+    QNN_INTERFACE_VER_TYPE qnn_raw_interface    = ctx->raw_interface;
+
+    n_begin_time                                = ggml_time_us();
+    LOGGD("call %s\n", __func__);
+    LOGGI("%15s: rank = %d, type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          src0->name, src0->rank,
+          src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
+          src0->nb[0], src0->nb[1], src0->nb[2]);
+    LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          src1->name, src1->rank,
+          src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
+          src1->nb[0], src1->nb[1], src1->nb[2]);
+    LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          dst->name, dst->rank,
+          dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0],
+          dst->nb[1], dst->nb[2]);
+    LOGGD("%d, %d, %d, %d", src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3]);
+    LOGGD("tensor0 name %s", QNN_TENSOR_GET_NAME(tensor_0));
+    LOGGD("tensor1 name %s", QNN_TENSOR_GET_NAME(tensor_1));
+    LOGGD("tensor2 name %s", QNN_TENSOR_GET_NAME(tensor_2));
+
+    QNN_VER_PTR(*tensor_0)->type = QNN_TENSOR_TYPE_APP_WRITE;
+    QNN_VER_PTR(*tensor_1)->type = QNN_TENSOR_TYPE_APP_WRITE;
+    QNN_VER_PTR(*tensor_2)->type = QNN_TENSOR_TYPE_APP_READ;
+
+    uint32_t dimensions_input_0[]   = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
+                                       (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
+    uint32_t dimensions_input_1[]   = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
+                                       (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
+    uint32_t dimensions_output[]    = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
+                                       (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
+
+    src0_qnn_type                   = qnn_datatype_from_ggml_datatype(src0->type);
+    src1_qnn_type                   = qnn_datatype_from_ggml_datatype(src1->type);
+    dst_qnn_type                    = qnn_datatype_from_ggml_datatype(dst->type);
+
+    std::string map_entry           = std::string(ggml_op_name(ggmlop));
+    if (instance->_qnn_graph_map.find(map_entry) != instance->_qnn_graph_map.end()) {
+        graph_initialized = true;
+        auto & graph_item = instance->_qnn_graph_map[map_entry];
+        graph_handle = std::get<0>(graph_item);
+    }
+
+    if (!graph_initialized) {
+        graph_name = graph_name + "_" + std::to_string(ctx->threads) + src0->name + "_" + src1->name;
+        LOGGD("graph name %s", graph_name.c_str());
+        error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(), graph_name.c_str(), nullptr, &graph_handle);
+        if (QNN_SUCCESS != error) {
+            LOGGI("can't create qnn graph handle with graph name %s, error = %d\n", graph_name.c_str(), error);
+            return;
+        }
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, tensor_0);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, tensor_1);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, tensor_2);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+
+        QNN_VER_PTR(*tensor_0)->clientBuf = {src0->data, ggml_get_tensor_data_size(src0)};
+        QNN_VER_PTR(*tensor_1)->clientBuf = {src1->data, ggml_get_tensor_data_size(src1)};
+        QNN_VER_PTR(*tensor_2)->clientBuf = {dst->data, ggml_get_tensor_data_size(dst)};
+
+        Qnn_Tensor_t tensor_inputs[] = {
+                *tensor_0,
+                *tensor_1
+        };
+        Qnn_Tensor_t tensor_outputs[] = {
+                *tensor_2
+        };
+        Qnn_OpConfig_t opconfig = {
+                (Qnn_OpConfigVersion_t) 1, .v1 = {
+                        "ggml_op_mul_mat",
+                        QNN_OP_PACKAGE_NAME_QTI_AISW,
+                        QNN_OP_MAT_MUL,
+                        0,
+                        qnn_params,
+                        2,
+                        tensor_inputs,
+                        1,
+                        tensor_outputs
+                }
+        };
+        error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+        error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1, nullptr, nullptr);
+        if (QNN_SUCCESS != error) {
+            LOGGI("error = %d\n", error);
+        }
+        auto  graph_item = std::make_tuple(graph_handle, tensor_0, tensor_1, tensor_2);
+        instance->_qnn_graph_map[map_entry] = graph_item;
+    } else {
+        auto & graph_item = instance->_qnn_graph_map[map_entry];
+        graph_handle = std::get<0>(graph_item);
+        tensor_0     = std::get<1>(graph_item);
+        tensor_1     = std::get<2>(graph_item);
+        tensor_2     = std::get<3>(graph_item);
+
         LOGGD("%d, %d, %d, %d", src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3]);
         uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
                                          (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
@@ -3038,7 +3265,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     }
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
-    LOGGD("duration of ggml_qnn_add : %lld milliseconds\n", n_durtion);
+    LOGGD("duration of ggml_qnn_mul_mat : %lld milliseconds\n", n_durtion);
     LOGGD("call %s done\n", __func__);
 }
 
@@ -3492,7 +3719,7 @@ static void ggml_qnn_nop(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 
 
 bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
-    //ENTER_FUNC();
+    ENTER_FUNC();
     ggml_qnn_func_t func                = nullptr;
     ggml_qnn_func_common_t  func_common = nullptr;
 
@@ -3532,8 +3759,8 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
 
     switch (tensor->op) {
         case GGML_OP_ADD:
-            //func = ggml_qnn_add;
-            func_common = ggml_qnn_hanlde_op;
+            func = ggml_qnn_add;
+            //func_common = ggml_qnn_hanlde_op;
             break;
 
         case GGML_OP_MUL:
@@ -3541,7 +3768,8 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
             break;
 
         case GGML_OP_MUL_MAT:
-            func_common = ggml_qnn_hanlde_op;
+            func = ggml_qnn_mul_mat;
+            //func_common = ggml_qnn_hanlde_op;
             break;
 
         case GGML_OP_REPEAT:
@@ -3694,7 +3922,6 @@ struct ggml_backend_qnn_buffer_context {
         }
 
         std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>>::iterator graph_it;
-        LOGGD("g_qnn_backend %p", g_qnn_backend);
         struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
         QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->instance->get_qnn_raw_interface();
         for (graph_it = backend_ctx->instance->_qnn_graph_map.begin(); graph_it != backend_ctx->instance->_qnn_graph_map.end(); graph_it++) {
@@ -4703,17 +4930,19 @@ static void * ggml_graph_compute_thread(void * data) {
 static ggml_status ggml_backend_qnn_graph_compute_multithread(ggml_backend_t backend, ggml_cgraph * cgraph) {
     //ENTER_FUNC();
     ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
-    LOGGD("device %d, thread %d\n", ctx->device, ctx->threads);
+    //LOGGD("device %d, thread %d\n", ctx->device, ctx->threads);
+
+    int num_threads = ctx->threads;
 
     if (QNN_GPU == ctx->device || QNN_HTP == ctx->device) {
         //TODO:multithreading not supported using QNN GPU/HTP(aka DSP) backend
-        ctx->threads = 1;
+        num_threads = 1;
     }
-    struct ggml_cplan plan          = ggml_graph_plan(cgraph, ctx->threads);
+    struct ggml_cplan plan          = ggml_graph_plan(cgraph, num_threads);
 
 
     if (plan.work_size > 0) {
-        LOGGI("work size %d(%d MB)", plan.work_size, plan.work_size / (1 << 20));
+        //LOGGI("work size %d(%d MB)", plan.work_size, plan.work_size / (1 << 20));
         plan.work_data = static_cast<uint8_t *>(malloc(plan.work_size));
         if (plan.work_data == nullptr) {
             LOGGE("malloc failed");
@@ -4727,7 +4956,7 @@ static ggml_status ggml_backend_qnn_graph_compute_multithread(ggml_backend_t bac
         GGML_ASSERT(cplan->work_data);
     }
 
-    LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
+    //LOGGD("cgraph %p, cplan %p, work size %d, work data %p", cgraph, cplan, cplan->work_size, cplan->work_data);
     const int n_threads = cplan->n_threads;
 
     struct ggml_compute_state_shared state_shared = {
