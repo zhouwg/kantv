@@ -76,6 +76,7 @@ sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
 sudo apt-get install nasm -y
 sudo apt-get install yasm -y
+sudo apt-get install openjdk-17-jdk -y
 
 sudo dpkg --add-architecture i386
 sudo apt-get install lib32z1 -y
@@ -172,7 +173,7 @@ cd kantv
 ```
 
 
- - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L88">build/envsetup.sh</a> accordingly before launch build
+ - modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L91">build/envsetup.sh</a> accordingly before launch build
 
  - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L16">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
@@ -191,11 +192,19 @@ cd kantv
 
 #### Build Android APK
 
-- Build APK from source code by Android Studio IDE manually
+- Option 1: Build APK from source code by Android Studio IDE
 
-  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L156) which affect the running of the ASR demo and the size of the generated APK.
+- Option 2: Build APK from source code by command line
 
+        . build/envsetup.sh
+        lunch 1
+        ./build-all.sh android
+
+  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L172) which affect the running of the ASR demo and the size of the generated APK.
+
+<!--
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
+-->
 
 
 ### Run Android APK on real Android phone

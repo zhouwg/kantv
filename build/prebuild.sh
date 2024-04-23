@@ -24,6 +24,7 @@ sudo apt-get install ffmpeg -y
 sudo apt-get install openssh-client -y
 sudo apt-get install nasm -y
 sudo apt-get install yasm -y
+sudo apt-get install openjdk-17-jdk -y
 
 sudo dpkg --add-architecture i386
 sudo apt-get install lib32z1 -y

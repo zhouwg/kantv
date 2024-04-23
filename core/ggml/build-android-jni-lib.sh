@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# Copyright (c) 2024, zhou.weiguo(zhouwg2000@gmail.com)
-
 # Copyright (c) 2024- KanTV Authors
 
 # Description: build libggml-jni.so for target Android
@@ -21,8 +19,6 @@ fi
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 
 show_pwd
-#check_upstream_whispercpp
-#check_local_whispercpp
 
 if [ "${PROJECT_BUILD_TYPE}" == "release" ]; then
     BUILD_TYPE=Release
@@ -32,8 +28,7 @@ if [ "${PROJECT_BUILD_TYPE}" == "debug" ]; then
     BUILD_TYPE=Debug
 fi
 
-echo -e  "upstream whispercpp path: ${UPSTREAM_WHISPERCPP_PATH}\n"
-echo -e  "local    whispercpp path: ${LOCAL_WHISPERCPP_PATH}\n"
+
 echo -e  "build               type: ${BUILD_TYPE}"
 
 if [ -d out ]; then

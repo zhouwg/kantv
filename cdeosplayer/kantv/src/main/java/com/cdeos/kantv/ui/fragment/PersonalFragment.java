@@ -92,6 +92,7 @@ import cdeos.media.player.CDEUtils;
         mContext = mActivity.getBaseContext();
         mSettings.updateUILang((AppCompatActivity) getActivity());
 
+        /*  not used since 03-22-2024 because the website was closed on 03-22-2024
         mWebView = (WebView) mActivity.findViewById(R.id.webview_ad);
         if (mWebView != null) {
             progressView = new ProgressView(mContext);
@@ -123,6 +124,7 @@ import cdeos.media.player.CDEUtils;
             }
             mWebView.loadUrl(aboutkantvUrl);
         }
+        */
         endTime = System.currentTimeMillis();
         CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
     }

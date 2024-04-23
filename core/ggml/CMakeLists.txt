@@ -1,8 +1,6 @@
-# Copyright (c) 2024, zhou.weiguo(zhouwg2000@gmail.com)
-
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build libggml-jni.so for target Android
+# Description: build libggml-jni.so for Project KanTV
 
 cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 project(ggml-jni)
@@ -14,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_JNI_QNN       ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_JNI_QNN       ON)   # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
 set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)

@@ -84,6 +84,9 @@ export ANDROID_NDK_ROOT=${ANDROID_NDK}  # make some open source project happy
 export NDK_ROOT=${ANDROID_NDK}          # make some open source project happy
 export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
+export ANDROID_HOME=${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/
+export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
+
 
 #modify following lines to adapt to local dev envs
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp

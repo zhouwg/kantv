@@ -1938,7 +1938,6 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
  *
  * PoC#121:Add Qualcomm mobile SoC native backend for GGML(https://github.com/zhouwg/kantv/issues/121) in Project KanTV
  *
- * should be renamed to ggml-jni-qnn.cpp after finish this PoC
  */
 #include <stdio.h>
 #include <stdlib.h>
