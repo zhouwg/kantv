@@ -68,19 +68,20 @@ fi
 if [ ${is_cmdlinetools_exist} -eq 0 ]; then
     echo -e "begin downloading android sdk cmdline-tools \n"
 
-    if [ ! -d ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk ]; then
-        mkdir -p ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk
+    if [ ! -d ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools/ ]; then
+        mkdir -p ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools/
     fi
 
-    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/commandlinetools-linux-9862592_latest.zip  https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip
+    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools/commandlinetools-linux-9862592_latest.zip  https://dl.google.com/android/repository/commandlinetools-linux-9862592_latest.zip
 
     if [ $? -ne 0 ]; then
         printf "failed to download android sdk cmdline-tools\n"
         exit 1
     fi
 
-    cd ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk
+    cd ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools
     unzip commandlinetools-linux-9862592_latest.zip
+    mv cmdline-tools latest
 
     cd ${PROJECT_ROOT_PATH}
 else
@@ -90,7 +91,7 @@ fi
 
 #prepare for cmdline build
 
-export ANDROID_HOME=${HOME_PATH}/Android/Sdk
+export ANDROID_HOME=${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/
 export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
 
 # check sdkmanager works

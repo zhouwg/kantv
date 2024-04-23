@@ -84,14 +84,14 @@ export ANDROID_NDK_ROOT=${ANDROID_NDK}  # make some open source project happy
 export NDK_ROOT=${ANDROID_NDK}          # make some open source project happy
 export PATH=${ANDROID_NDK_ROOT}:${PATH}
 
+export ANDROID_HOME=${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/
+export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
+
 
 #modify following lines to adapt to local dev envs
-export ANDROID_HOME=${HOME_PATH}/Android/Sdk
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
 export UPSTREAM_SDCPP_PATH=~/github/stablediffusion.cpp
-
-export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
 
 
 #the following is not required for project's user
