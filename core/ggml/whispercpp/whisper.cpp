@@ -1,5 +1,6 @@
 #include "whisper.h"
 
+
 #ifdef TARGET_ANDROID
 #include "kantv-asr.h"
 #include "ggml-jni.h"
@@ -21,6 +22,10 @@
 
 #ifdef GGML_USE_SYCL
 #include "ggml-sycl.h"
+#endif
+
+#ifdef GGML_USE_QNN
+#include "ggml-qnn.h"
 #endif
 
 #ifdef WHISPER_USE_OPENVINO
@@ -115,6 +120,12 @@ static void byteswap_tensor(ggml_tensor * tensor) {
 #define BYTESWAP_TENSOR(t) do {} while (0)
 #endif
 
+#if (defined __ANDROID__) || (defined ANDROID)
+
+#define WHISPER_ATTRIBUTE_FORMAT(...)
+
+#else
+
 #ifdef __GNUC__
 #ifdef __MINGW32__
 #define WHISPER_ATTRIBUTE_FORMAT(...) __attribute__((format(gnu_printf, __VA_ARGS__)))
@@ -125,23 +136,40 @@ static void byteswap_tensor(ggml_tensor * tensor) {
 #define WHISPER_ATTRIBUTE_FORMAT(...)
 #endif
 
+#endif
+
 //
 // logging
 //
+#if (defined __ANDROID__) || (defined ANDROID)
+extern "C" int __android_log_print(int prio, const char * tag, const char * fmt, ...)
+    __attribute__((__format__(printf, 3, 4)));
+#endif
 
-WHISPER_ATTRIBUTE_FORMAT(2, 3)
-static void whisper_log_internal        (ggml_log_level level, const char * format, ...);
+static std::string _s_internal_error_info = "unknown";
+
+const char * whisper_get_internal_error() {
+    return _s_internal_error_info.c_str();
+}
+
+WHISPER_ATTRIBUTE_FORMAT(5, 6)
+static void whisper_log_internal        (ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
 static void whisper_log_callback_default(ggml_log_level level, const char * text, void * user_data);
+#if 1
+#define WHISPER_LOG_ERROR(...) whisper_log_internal(GGML_LOG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define WHISPER_LOG_WARN(...)  whisper_log_internal(GGML_LOG_LEVEL_WARN , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define WHISPER_LOG_INFO(...)  whisper_log_internal(GGML_LOG_LEVEL_INFO , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#else
+#define WHISPER_LOG_ERROR LOGGE
+#define WHISPER_LOG_WARN  LOGGW
+#define WHISPER_LOG_INFO  LOGGI
+#endif
 
-#define WHISPER_LOG_ERROR(...) whisper_log_internal(GGML_LOG_LEVEL_ERROR, __VA_ARGS__)
-#define WHISPER_LOG_WARN(...)  whisper_log_internal(GGML_LOG_LEVEL_WARN , __VA_ARGS__)
-#define WHISPER_LOG_INFO(...)  whisper_log_internal(GGML_LOG_LEVEL_INFO , __VA_ARGS__)
-
-// define this to enable verbose trace logging - useful for debugging purposes
+// define this to enable verbose trace WHISPER_LOG_INFOng - useful for debugging purposes
 //#define WHISPER_DEBUG
 
 #if defined(WHISPER_DEBUG)
-#define WHISPER_LOG_DEBUG(...) whisper_log_internal(GGML_LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define WHISPER_LOG_DEBUG(...) whisper_log_internal(GGML_LOG_LEVEL_DEBUG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #else
 #define WHISPER_LOG_DEBUG(...)
 #endif
@@ -189,6 +217,24 @@ static bool ggml_graph_compute_helper(
     if (ggml_backend_is_cpu(backend)) {
         ggml_backend_cpu_set_n_threads(backend, n_threads);
     }
+#ifdef GGML_USE_QNN
+    if (ggml_backend_is_qnn(backend)) {
+#if 0
+        struct ggml_cplan plan = ggml_graph_plan(graph, 1);
+        if (plan.work_size > 0) {
+            plan.work_data = static_cast<uint8_t *>(malloc(plan.work_size));
+            if (plan.work_data == NULL) {
+                WHISPER_LOG_ERROR("malloc failed");
+                return false;
+            }
+        }
+        return ggml_graph_compute(graph, &plan) == GGML_STATUS_SUCCESS;
+#else
+        ggml_backend_qnn_set_n_threads(backend, n_threads);
+#endif
+    }
+#endif
+
 #ifdef GGML_USE_METAL
     if (ggml_backend_is_metal(backend)) {
         ggml_backend_metal_set_n_cb(backend, n_threads);
@@ -942,11 +988,13 @@ static bool kv_cache_init(
     cache.k = ggml_new_tensor_1d(cache.ctx, wtype, n_elements);
     cache.v = ggml_new_tensor_1d(cache.ctx, wtype, n_elements);
 
+    WHISPER_LOG_INFO("calling ggml_backend_alloc_ctx_tensors");
     cache.buffer = ggml_backend_alloc_ctx_tensors(cache.ctx, backend);
     if (!cache.buffer) {
         WHISPER_LOG_ERROR("%s: failed to allocate memory for the kv cache\n", __func__);
         return false;
     }
+    WHISPER_LOG_INFO("after calling ggml_backend_alloc_ctx_tensors");
 
     return true;
 }
@@ -1202,6 +1250,7 @@ static size_t aheads_masks_nbytes(struct whisper_aheads_masks & aheads_masks) {
 }
 
 static ggml_backend_t whisper_backend_init(const whisper_context_params & params) {
+    ENTER_FUNC();
     ggml_backend_t backend_gpu = NULL;
 
     // initialize the backends
@@ -1236,6 +1285,23 @@ static ggml_backend_t whisper_backend_init(const whisper_context_params & params
         backend_gpu = ggml_backend_sycl_init(params.gpu_device);
         if (!backend_gpu) {
             WHISPER_LOG_ERROR("%s: ggml_backend_sycl_init() failed\n", __func__);
+        }
+    }
+#endif
+
+#ifdef GGML_USE_QNN
+    WHISPER_LOG_INFO("use_gpu %d", params.use_gpu);
+    if (params.use_gpu) {
+        if (params.gpu_device != 3) { // 3 is "fake" QNN backend, just used for compare performance between QNN backend and original GGML
+            WHISPER_LOG_INFO("%s: using QNN backend\n", __func__);
+            backend_gpu = ggml_backend_qnn_init(params.gpu_device);
+            if (!backend_gpu) {
+                char device_name[GGML_MAX_NAME];
+                ggml_backend_qnn_get_device_description(params.gpu_device, device_name, GGML_MAX_NAME);
+                WHISPER_LOG_ERROR("%s: ggml_backend_qnn_init() failed with device %d(%s)\n", __func__, params.gpu_device, device_name);
+                _s_internal_error_info = "ggml_backend_qnn_init() failed with device (" + std::to_string(params.gpu_device) + ") " + device_name;
+                return nullptr; //04-20-2024, do not fall into the default GGML CPU backend, so the upper layer code/UI could know correct feedback
+            }
         }
     }
 #endif
@@ -1670,11 +1736,13 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
         }
     }
 
+    WHISPER_LOG_INFO("calling whisper_backend_init\n");
     wctx.backend = whisper_backend_init(wctx.params);
     if (!wctx.backend) {
         WHISPER_LOG_ERROR("%s: failed to initialize the backend\n", __func__);
         return false;
     }
+    WHISPER_LOG_INFO("after calling whisper_backend_init\n");
 
     // allocate tensors in the backend buffers
     model.buffer = ggml_backend_alloc_ctx_tensors(model.ctx, wctx.backend);
@@ -1747,9 +1815,7 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
                 return false;
             }
 
-            //ggml_backend_t backend = wctx.backend;
-
-            //printf("%s: [%5.5s] %s\n", __func__, ggml_backend_name(backend), name.c_str());
+            //WHISPER_LOG_INFO("%s: [%s] %s\n", __func__, ggml_backend_name(wctx.backend), name.c_str());
 
             if (ggml_backend_buffer_is_host(model.buffer)) {
                 // for the CPU and Metal backend, we can read directly into the tensor
@@ -1764,7 +1830,7 @@ static bool whisper_model_load(struct whisper_model_loader * loader, whisper_con
                 ggml_backend_tensor_set(tensor, read_buf.data(), 0, ggml_nbytes(tensor));
             }
 
-            //printf("%48s - [%5d, %5d, %5d], type = %6s, %6.2f MB\n", name.data(), ne[0], ne[1], ne[2], ggml_type_name((ggml_type) ttype), ggml_nbytes(tensor)/1e6);
+            //WHISPER_LOG_INFO("%48s - [%5d, %5d, %5d], type = %6s, %6.2f MB", name.data(), ne[0], ne[1], ne[2], ggml_type_name((ggml_type) ttype), ggml_nbytes(tensor)/1e6);
             total_size += ggml_nbytes(tensor);
             model.n_loaded++;
         }
@@ -2088,10 +2154,11 @@ static struct ggml_cgraph * whisper_build_graph_encoder(
 
     wstate.embd_enc = cur;
 
-    //ggml_graph_print(gf);
+    ggml_graph_print(gf);
 
     ////////////////////////////////////////////////////////////////////////////
 
+    WHISPER_LOG_INFO("used_mem = %f MB", ggml_used_mem(ctx0)/1e6);
     //printf("%s: used_mem = %f MB, %f MB, %f MB %f MB %f MB\n", __func__,
     //        ggml_used_mem(ctx0)/1e6,
     //        wstate.get_buf_max_mem(0)/1e6,
@@ -2160,7 +2227,7 @@ static struct ggml_cgraph * whisper_build_graph_cross(
         ggml_build_forward_expand(gf, ggml_cpy(ctx0, Vcross, v));
     }
 
-    //ggml_graph_print(gf);
+    ggml_graph_print(gf);
 
     ggml_free(ctx0);
 
@@ -2241,6 +2308,7 @@ static bool whisper_encode_internal(
     if (!whisper_encode_external(wstate)) {
         auto & alloc = wstate.alloc_encode.alloc;
 
+        WHISPER_LOG_INFO("whiserp.cpp encoder");
         ggml_cgraph * gf = whisper_build_graph_encoder(wctx, wstate);
 
         if (!ggml_gallocr_alloc_graph(alloc, gf)) {
@@ -2251,6 +2319,7 @@ static bool whisper_encode_internal(
         if (!ggml_graph_compute_helper(wstate.backend, gf, n_threads)) {
             return false;
         }
+        WHISPER_LOG_INFO("after whiserp.cpp encoder");
     }
 
     // cross
@@ -3173,6 +3242,7 @@ static std::string whisper_openvino_get_path_cache(std::string path_bin) {
 #endif
 
 struct whisper_state * whisper_init_state(whisper_context * ctx) {
+    ENTER_FUNC();
     fill_sin_cos_table();
 
     whisper_state * state = new whisper_state;
@@ -3182,12 +3252,15 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
         WHISPER_LOG_ERROR("%s: whisper_backend_init() failed\n", __func__);
         whisper_free_state(state);
         return nullptr;
+    } else {
+        WHISPER_LOG_INFO("%s: whisper_backend_init() succeed\n", __func__);
     }
 
     // at this point, we don't know yet how many decoders will be used, so we overallocate 3x ctx
     // in theory, there can be a case where this is not enough, but in practice it should always be enough
     const int factor = 3;
 
+    WHISPER_LOG_INFO("calling kv_cache_init");
     if (!kv_cache_init(ctx->model.hparams, state->kv_self, ctx->backend, ctx->itype, factor*ctx->model.hparams.n_text_ctx)) {
         WHISPER_LOG_ERROR("%s: kv_cache_init() failed for self-attention cache\n", __func__);
         whisper_free_state(state);
@@ -3199,6 +3272,7 @@ struct whisper_state * whisper_init_state(whisper_context * ctx) {
         WHISPER_LOG_INFO("%s: kv self size  = %7.2f MB\n", __func__, memory_size / 1e6);
     }
 
+    WHISPER_LOG_INFO("calling kv_cache_init");
     if (!kv_cache_init(ctx->model.hparams, state->kv_cross, ctx->backend, ctx->itype, ctx->model.hparams.n_audio_ctx)) {
         WHISPER_LOG_ERROR("%s: kv_cache_init() failed for cross-attention cache\n", __func__);
         whisper_free_state(state);
@@ -3395,7 +3469,7 @@ struct whisper_context_params whisper_context_default_params() {
 }
 
 struct whisper_context * whisper_init_from_file_with_params_no_state(const char * path_model, struct whisper_context_params params) {
-    WHISPER_LOG_INFO("%s: loading model from '%s'\n", __func__, path_model);
+    WHISPER_LOG_INFO("%s: loading model from '%s', use_gpu %d, backend %d, \n", __func__, path_model, params.use_gpu, params.gpu_device);
 
     auto fin = std::ifstream(path_model, std::ios::binary);
     if (!fin) {
@@ -3493,8 +3567,10 @@ struct whisper_context * whisper_init_from_file_with_params(const char * path_mo
         return nullptr;
     }
 
+    _s_internal_error_info = "unknown";
     ctx->state = whisper_init_state(ctx);
     if (!ctx->state) {
+        WHISPER_LOG_INFO("whisper init failure\n");
         whisper_free(ctx);
         return nullptr;
     }
@@ -3530,6 +3606,11 @@ struct whisper_context * whisper_init_with_params(struct whisper_model_loader * 
     }
 
     return ctx;
+}
+
+
+struct whisper_context * whisper_init_from_backend(const char * path_model, int backend) {
+    return whisper_init_from_file_with_params(path_model, whisper_context_default_params());
 }
 
 struct whisper_context * whisper_init_from_file(const char * path_model) {
@@ -4093,6 +4174,16 @@ static int whisper_has_openvino(void) {
 #endif
 }
 
+
+static int whisper_has_qnn(void) {
+#ifdef GGML_USE_QNN
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+
 const char * whisper_print_system_info(void) {
     static std::string s;
 
@@ -4113,7 +4204,8 @@ const char * whisper_print_system_info(void) {
     s += "VSX = "       + std::to_string(ggml_cpu_has_vsx())       + " | ";
     s += "CUDA = "      + std::to_string(ggml_cpu_has_cuda())      + " | ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
-    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())          ;
+    s += "OPENVINO = "  + std::to_string(whisper_has_openvino())   + " | " ;
+    s += "QNN = "       + std::to_string(whisper_has_qnn())               ;
 
     return s.c_str();
 }
@@ -6489,12 +6581,12 @@ WHISPER_API const char * whisper_bench_memcpy_str(int n_threads) {
     return s.c_str();
 }
 
-WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads) {
-    fputs(whisper_bench_ggml_mul_mat_str(n_threads), stderr);
+WHISPER_API int whisper_bench_ggml_mul_mat(int n_threads, int n_backend) {
+    fputs(whisper_bench_ggml_mul_mat_str(n_threads, n_backend), stderr);
     return 0;
 }
 
-WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
+WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads, int n_backend) {
     static std::string s;
     s = "";
     char strbuf[256];
@@ -6552,6 +6644,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
         const size_t N = sizes[j];
 
+#if 1
         for (int k = 0; k < 7; ++k) {
             const ggml_type wtype =
                 k == 0 ? GGML_TYPE_Q4_0 :
@@ -6560,6 +6653,11 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 k == 3 ? GGML_TYPE_Q5_1 :
                 k == 4 ? GGML_TYPE_Q8_0 :
                 k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
+#else
+        for (int k = 0; k < 1; ++k) {
+            const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
+            k = 6; //hardcode to 6 make following code happy
+#endif
 
             double & s = k == 0 ? s_q4_0 : k == 1 ? s_q4_1 : k == 2 ? s_q5_0 : k == 3 ? s_q5_1 : k == 4 ? s_q8_0 : k == 5 ? s_fp16 : /*k == 6*/ s_fp32;
             int    & n = k == 0 ? n_q4_0 : k == 1 ? n_q4_1 : k == 2 ? n_q5_0 : k == 3 ? n_q5_1 : k == 4 ? n_q8_0 : k == 5 ? n_fp16 : /*k == 6*/ n_fp32;
@@ -6569,6 +6667,12 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                 /*.mem_buffer =*/ buf.data(),
                 /*.no_alloc   =*/ false,
             };
+
+#ifdef GGML_USE_QNN
+            if (n_backend != 3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                gparams.use_hwaccel = true;
+#endif
+
 
             struct ggml_context * ctx0 = ggml_init(gparams);
 
@@ -6597,7 +6701,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
                              + ",i=" + std::to_string(i) + "\n";
 
                 kantv_asr_notify_benchmark(tipString);
-                //LOGGI("%s\n", tipString.c_str());
+                //WHISPER_LOG_INFO("%s\n", tipString.c_str());
 #endif
 
                 ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
@@ -6636,7 +6740,7 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads) {
 
 #ifdef TARGET_ANDROID
         kantv_asr_notify_benchmark(s);
-        LOGGI("%s\n", s.c_str());
+        WHISPER_LOG_INFO("%s\n", s.c_str());
 #endif
 
     }
@@ -7267,14 +7371,19 @@ void whisper_log_set(ggml_log_callback log_callback, void * user_data) {
     g_state.log_callback_user_data = user_data;
 }
 
-GGML_ATTRIBUTE_FORMAT(2, 3)
-static void whisper_log_internal(ggml_log_level level, const char * format, ...) {
+GGML_ATTRIBUTE_FORMAT(5, 6)
+static void whisper_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...) {
     va_list args;
     va_start(args, format);
     char buffer[1024];
-    int len = vsnprintf(buffer, 1024, format, args);
-    if (len < 1024) {
+    int len_prefix = snprintf(buffer, 1024, "[%s, %d]: ", func, line);
+    int len = vsnprintf(buffer + len_prefix, 1024 - len_prefix, format, args);
+    if (len < (1024 - len_prefix)) {
+#if (defined __ANDROID__) || (defined ANDROID)
+        __android_log_print(level, "KANTV", "%s", buffer);
+#else
         g_state.log_callback(level, buffer, g_state.log_callback_user_data);
+#endif
     } else {
         char* buffer2 = new char[len+1];
         vsnprintf(buffer2, len+1, format, args);

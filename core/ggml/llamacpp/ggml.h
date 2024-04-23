@@ -206,12 +206,16 @@
 #    define GGML_DEPRECATED(func, hint) func
 #endif
 
+#if (defined __ANDROID__) || (defined ANDROID)
+#    define GGML_ATTRIBUTE_FORMAT(...)
+#else
 #ifndef __GNUC__
 #    define GGML_ATTRIBUTE_FORMAT(...)
 #elif defined(__MINGW32__)
 #    define GGML_ATTRIBUTE_FORMAT(...) __attribute__((format(gnu_printf, __VA_ARGS__)))
 #else
 #    define GGML_ATTRIBUTE_FORMAT(...) __attribute__((format(printf, __VA_ARGS__)))
+#endif
 #endif
 
 #include <stdbool.h>
@@ -591,7 +595,9 @@ extern "C" {
 
         void * extra; // extra things e.g. for ggml-cuda.cu
 
-        char padding[8];
+        int32_t rank;
+
+        char padding[20];
     };
 
     static const size_t GGML_TENSOR_SIZE = sizeof(struct ggml_tensor);
@@ -657,6 +663,7 @@ extern "C" {
         size_t mem_size;   // bytes
         void * mem_buffer; // if NULL, memory will be allocated internally
         bool   no_alloc;   // don't allocate memory for the tensor data
+        bool   use_hwaccel;// for PoC: Add Qualcomm mobile SoC native backend for GGML,https://github.com/zhouwg/kantv/issues/121
     };
 
 
@@ -2396,6 +2403,8 @@ extern "C" {
     } ggml_type_traits_t;
 
     GGML_API ggml_type_traits_t ggml_internal_get_type_traits(enum ggml_type type);
+
+#include "libavutil/cde_log.h"
 
 #ifdef  __cplusplus
 }

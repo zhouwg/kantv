@@ -260,18 +260,25 @@
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
 
      //keep sync with ggml-jni.h
-     public static final int BECHMARK_ASR      = 0;
-     public static final int BECHMARK_MEMCPY   = 1;
-     public static final int BECHMARK_MULMAT   = 2;
-     public static final int BECHMARK_FULL     = 3;
-     public static final int BENCHMARK_MATRIX  = 4;
-     public static final int BENCHMARK_LLM     = 5;
-     public static final int BENCHMARK_STABLEDIFFUSION= 6;
-     public static final int BENCHMARK_QNN_SAMPLE     = 7;
-     public static final int BENCHMARK_QNN_SAVER      = 8;
-     public static final int BENCHMARK_QNN_MATRIX     = 9;
-     public static final int BENCHMARK_QNN_GGML       = 10;
-     public static final int BENCHMAKR_QNN_COMPLEX    = 11;
+     public static final int BENCHMARK_ASR      = 0;
+     public static final int BENCHMARK_MEMCPY   = 1;
+     public static final int BENCHMARK_MULMAT   = 2;
+     public static final int BENCHMARK_FULL     = 3;
+     public static final int BENCHMARK_LLM     = 4;
+     public static final int BENCHMARK_STABLEDIFFUSION= 5;
+     public static final int BENCHMARK_QNN_SAMPLE     = 6;
+     public static final int BENCHMARK_QNN_SAVER      = 7;
+     public static final int BENCHMARK_QNN_MATRIX     = 8;
+     public static final int BENCHMARK_QNN_GGML       = 9;
+     public static final int BENCHMARK_QNN_COMPLEX    = 10;
+     public static final int BENCHMARK_QNN_GGML_OP    = 11;
+     public static final int BENCHMARK_QNN_AUTO_UT    = 12;
+
+     //keep sync with ggml-qnn.h
+     public static final int QNN_BACKEND_CPU           = 0;
+     public static final int QNN_BACKEND_GPU           = 1;
+     public static final int QNN_BACKEND_HTP           = 2;
+     public static final int QNN_BACKEND_GGML          = 3; //"fake" QNN backend, just for compare performance between QNN and original GGML
 
 
      private static int       mASRMode = ASR_MODE_NORMAL;
@@ -3909,20 +3916,17 @@
 
      public static String getBenchmarkDesc(int benchmarkIndex) {
          switch (benchmarkIndex) {
-             case BECHMARK_FULL:
-                 return "GGML whisper_encode";
+             case BENCHMARK_FULL:
+                 return "GGML whisper full";
 
-             case BECHMARK_MEMCPY:
-                 return "GGML memcopy";
+             case BENCHMARK_MEMCPY:
+                 return "GGML memcpy";
 
-             case BECHMARK_MULMAT:
+             case BENCHMARK_MULMAT:
                  return "GGML matrix multiply";
 
-             case BECHMARK_ASR:
-                 return "GGML ASR inference";
-
-             case BENCHMARK_MATRIX:
-                 return "GGML matrix";
+             case BENCHMARK_ASR:
+                 return "GGML whisper ASR";
 
              case BENCHMARK_LLM:
                  return "GGML LLAMA";
@@ -3936,17 +3940,50 @@
              case BENCHMARK_QNN_SAVER:
                  return "GGML QNN saver";
 
+
              case BENCHMARK_QNN_MATRIX:
-                 return "GGML QNN matrix manipulate";
+                 return "GGML QNN matrix addition";
 
              case BENCHMARK_QNN_GGML:
-                 return "GGML QNN ggml";
+                 return "GGML QNN mapping ggml tensor";
 
-             case BENCHMAKR_QNN_COMPLEX:
+             case BENCHMARK_QNN_COMPLEX:
                  return "GGML QNN complex graph";
+
+             case BENCHMARK_QNN_GGML_OP:
+                 return "GGML QNN OP UT"; //UT for PoC-S49: implementation of GGML OPs using QNN API
+
+             case BENCHMARK_QNN_AUTO_UT:
+                 return "GGML QNN OP UT automation"; //automation UT for PoC-S49: implementation of GGML OPs using QNN API
          }
 
          return "unknown";
+     }
+
+
+     //keep sync with ggml-qnn.cpp
+     //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/HTP(aka DSP) backend currently
+     public static String getBackendDesc(int n_backend_type) {
+         switch (n_backend_type) {
+             case 0:
+                 return "QNN-CPU";
+             case 1:
+                 return "QNN-GPU";
+             case 2:
+                 return "QNN-HTP(DSP)";
+             case 3:
+                 return "ggml";      //fake QNN backend, just used to compare performance between QNN and original GGML
+
+/*
+             case 3:
+                 return "QNN-cDSP";
+             case 4:
+                 return "QNN-HTA";
+*/
+
+             default:
+                 return "unknown";
+         }
      }
 
 

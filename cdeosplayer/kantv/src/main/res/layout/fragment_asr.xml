@@ -43,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bench:" />
+                android:text="Bench" />
 
             <Spinner
                 android:id="@+id/spinnerBenchType"
@@ -55,7 +55,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Threads:" />
+                android:text="Threads" />
 
             <Spinner
                 android:id="@+id/spinnerThreadCounts"
@@ -76,7 +76,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Model:" />
+                android:text="M:" />
 
             <Spinner
                 android:id="@+id/spinnerModelName"
@@ -88,7 +88,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Backend" />
+                android:text="Back:" />
 
             <Spinner
                 android:id="@+id/spinnerBackend"

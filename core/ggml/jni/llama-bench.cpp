@@ -1184,7 +1184,7 @@ static void llama_null_log_callback(enum ggml_log_level level, const char * text
 }
 
 
-int  ggml_bench_llama(const char * model_path, int num_threads) {
+int  ggml_bench_llama(const char * model_path, int num_threads, int n_backend) {
     LOGGD("enter ggml_bench_llama\n");
 
     LOGGD("mode path %s\n", model_path);

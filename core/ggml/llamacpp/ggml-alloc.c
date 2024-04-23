@@ -916,10 +916,15 @@ static bool alloc_tensor_range(struct ggml_context * ctx,
 }
 
 ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_context * ctx, ggml_backend_buffer_type_t buft) {
+    //LOGGI("here ctx %p, ggml_backend_buffer_type_t %p", ctx, buft);
     GGML_ASSERT(ggml_get_no_alloc(ctx) == true);
 
+    //LOGGI("enter %s", __func__);
     size_t alignment = ggml_backend_buft_get_alignment(buft);
     size_t max_size = ggml_backend_buft_get_max_size(buft);
+
+    //LOGGD("alignment %d", alignment);
+    //LOGGD("max_size %d", max_size);
 
     ggml_backend_buffer_t * buffers = NULL;
     size_t n_buffers = 0;
@@ -933,10 +938,10 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
         }
 
         if (this_size > max_size) {
-            fprintf(stderr, "%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu, max buffer size: %zu)\n",
+            LOGGW("%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu(%d MB), max buffer size: %zu(%d MB))\n",
                     __func__, t->name,
                     ggml_backend_buft_name(buft),
-                    this_size, max_size);
+                    this_size, this_size / (1024 * 1024), max_size, max_size / (1024 * 1024));
             for (size_t i = 0; i < n_buffers; i++) {
                 ggml_backend_buffer_free(buffers[i]);
             }
@@ -947,6 +952,7 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
         if ((cur_buf_size + this_size) > max_size) {
             // allocate tensors in the current buffer
             if (!alloc_tensor_range(ctx, first, t, buft, cur_buf_size, &buffers, &n_buffers)) {
+                LOGGW("failure");
                 return NULL;
             }
             first = t;
@@ -959,6 +965,7 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
     // allocate remaining tensors
     if (cur_buf_size > 0) {
         if (!alloc_tensor_range(ctx, first, NULL, buft, cur_buf_size, &buffers, &n_buffers)) {
+            LOGGW("failure");
             return NULL;
         }
     }
@@ -967,6 +974,7 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
 #ifndef NDEBUG
         fprintf(stderr, "%s: all tensors in the context are already allocated\n", __func__);
 #endif
+        LOGGI("%s: all tensors in the context are already allocated\n", __func__);
         return NULL;
     }
 
@@ -981,5 +989,6 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
 }
 
 ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors(struct ggml_context * ctx, ggml_backend_t backend) {
+    //LOGGI("here ctx %p, backend %p", ctx, backend); //TODO:crash here, why the pointer changed with QNN GPU backend?
     return ggml_backend_alloc_ctx_tensors_from_buft(ctx, ggml_backend_get_default_buffer_type(backend));
 }

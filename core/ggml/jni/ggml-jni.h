@@ -53,22 +53,23 @@ extern "C" {
 #define JNI_BUF_LEN                 4096
 #define JNI_TMP_LEN                 256
 
-#define BECHMARK_ASR                0
-#define BECHMARK_MEMCPY             1
-#define BECHMARK_MULMAT             2
-#define BECHMARK_FULL               3
-#define BENCHMARK_MATRIX            4
-#define BENCHMAKR_LLAMA             5
-#define BENCHMAKR_STABLEDIFFUSION   6       //not work on Xiaomi 14 currently
-// I think there are three killer/heavyweight AI applications based on GGML currently: whisper.cpp, llama.cpp, stablediffusion.cpp, so they are here
+#define BECHMARK_ASR                0       //whisper.cpp ASR benchmark
+#define BECHMARK_MEMCPY             1       //memcpy  benchmark
+#define BECHMARK_MULMAT             2       //mulmat  benchmark
+#define BECHMARK_FULL               3       //whisper.cpp full benchmark
+#define BENCHMAKR_LLAMA             4       //llama.cpp benchmark
+#define BENCHMAKR_STABLEDIFFUSION   5       //stable diffusion benchmark, not work on Xiaomi 14 currently
+// there are three killer/heavyweight AI applications based on GGML currently: whisper.cpp, llama.cpp, stablediffusion.cpp, so they are here
 // then
 // step-by-step for PoC:Add Qualcomm mobile SoC native backend for GGML https://github.com/zhouwg/kantv/issues/121
-#define BENCHMAKR_QNN_SAMPLE        7       //"play with /say hello to" QNN Sample
-#define BENCHMAKR_QNN_SAVER         8       //study QNN SDK mechanism by QNN Saver
-#define BENCHMARK_QNN_MATRIX        9       //offload a simple fp32 2x2 matrix addition operation to QNN
-#define BENCHMARK_QNN_GGML          10      //mapping ggml tensor to QNN tensor
-#define BENCHMARK_QNN_COMPLEX       11      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
-#define BENCHMAKR_MAX               11
+#define BENCHMAKR_QNN_SAMPLE        6       //"play with /say hello to" QNN Sample
+#define BENCHMAKR_QNN_SAVER         7       //study QNN SDK mechanism by QNN Saver
+#define BENCHMARK_QNN_MATRIX        8       //offload a simple fp32 2x2 matrix addition operation to QNN
+#define BENCHMARK_QNN_GGML          9       //mapping ggml tensor to QNN tensor
+#define BENCHMARK_QNN_COMPLEX       10      //complex/complicated computation graph in C/C++ or GGML and then offload them to QNN
+#define BENCHMARK_QNN_GGML_OP       11      //UT for PoC-S49: implementation of GGML OPs using QNN API
+#define BENCHMARK_QNN_AUTO_UT       12      //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+#define BENCHMAKR_MAX               12
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
@@ -87,7 +88,7 @@ extern "C" {
     *
     * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_audio_path         /sdcard/kantv/jfk.wav
-    * @param n_bench_type          0: asr(transcription) 1: memcpy 2: mulmat  3: full/whisper_encode 4: matrix  5: LLAMA  6: stable diffusion 7: QNN sample 8: QNN saver 9: QNN matrix 10: QNN GGML 11: QNN complex
+    * @param n_bench_type          0: whisper asr 1: memcpy 2: mulmat  3: whisper full 4: LLAMA 5: stable diffusion 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: QNN complex 11: QNN GGML OP(QNN UT) 12: QNN UT automation
     * @param n_threads             1 - 8
     * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
     * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated computation graph
@@ -106,8 +107,9 @@ extern "C" {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     */
-    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode);
+    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode, int n_backend);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
@@ -116,8 +118,9 @@ extern "C" {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     */
-    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode);
+    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
 
 
@@ -135,13 +138,19 @@ extern "C" {
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
+    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
     * @return
     */
-    int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
+    int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
 
-    void         ggml_bench_matrix(int num_threads);
+    /**
+     *
+     * @param num_threads  1-8
+     * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
+     */
+    void         ggml_bench_matrix(int num_threads, int n_backend);
 
-    int          ggml_bench_llama(const char * sz_model_path, int num_threads);
+    int          ggml_bench_llama(const char * sz_model_path, int num_threads, int n_backend);
 
 
 
@@ -178,6 +187,29 @@ extern "C" {
     int qnn_complex_graph(int n_backend_type, int n_graph_type);
 
 
+    /**
+     * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
+     * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
+     *
+     * this function will calling GGML QNN backend directly
+     *
+     * this function used to validate PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
+     * or this function is UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
+     *
+     * @param model_path whisper.cpp model at the first step, llama.cpp model at the second step
+     * @param num_threads 1 - 8
+     * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance between QNN and original GGML)
+     * @param n_op_type GGML OP type
+     * @return
+     */
+    int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
+
+    /**
+     * similar to qnn_ggml_op, but an automation UT for a specify GGML OP with a specify backend
+     */
+    int qnn_ggml_op_automation_ut(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
+
+
 // =================================================================================================
 // trying to integrate stablediffusion.cpp on 04-06-2024(Apri,6,2024)
 // =================================================================================================
@@ -190,9 +222,10 @@ extern "C" {
 * @param prompt
 * @param bench_type            not used currently
 * @param n_threads             1 - 8
+* @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
 * @return
 */
-int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads);
+int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
 
 
 #ifdef __cplusplus
