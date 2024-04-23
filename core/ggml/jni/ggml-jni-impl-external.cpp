@@ -647,7 +647,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                     n_eval = params.n_batch;
                 }
 
-                LOGGV("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
+                //LOGGV("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0))) {
                     LOGGV("%s : failed to eval\n", __func__);
@@ -656,7 +656,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
                 n_past += n_eval;
 
-                LOGGV("n_past = %d\n", n_past);
+                //LOGGV("n_past = %d\n", n_past);
                 // Display total tokens alongside total time
                 if (params.n_print > 0 && n_past % params.n_print == 0) {
                     LOGGV("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
@@ -677,7 +677,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
             llama_sampling_accept(ctx_sampling, ctx, id, true);
 
-            LOGGV("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
+            //LOGGV("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
 
             embd.push_back(id);
 
@@ -687,10 +687,10 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
             // decrement remaining sampling budget
             --n_remain;
 
-            LOGGV("n_remain: %d\n", n_remain);
+            //LOGGV("n_remain: %d\n", n_remain);
         } else {
             // some user input remains from prompt or interaction, forward it to processing
-            LOGGV("embd_inp.size(): %d, n_consumed: %d\n", (int) embd_inp.size(), n_consumed);
+            //LOGGV("embd_inp.size(): %d, n_consumed: %d\n", (int) embd_inp.size(), n_consumed);
             while ((int) embd_inp.size() > n_consumed) {
                 embd.push_back(embd_inp[n_consumed]);
 
@@ -8175,9 +8175,9 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
   * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
   * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
   *
-  * the function qnn_ggml calling QNN API directly in JNI layer, bypass the framekwork in ggml's internal
+  * the function qnn_ggml calling QNN API directly in JNI layer, the framework in ggml's internal and ggml-qnn.cpp are both not used
   *
-  * this function will calling function in ggml-qnn.cpp via ggml layer(which executed in GGML QNN backend using QNN SDK --- ggml-qnn.cpp)
+  * this function will calling QNN backend function in ggml-qnn.cpp via framework in ggml's internal
   *
   * this function used to validate PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
   * or this function is UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
