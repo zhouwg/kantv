@@ -1056,6 +1056,7 @@ static uint32_t ggml_get_tensor_rank(const ggml_tensor * tensor) {
 
 
 //TODO:
+//ref:explanation of k-quants, https://github.com/ggerganov/llama.cpp/pull/1684
 static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
     switch (ggmltype) {
         case GGML_TYPE_Q4_0:
