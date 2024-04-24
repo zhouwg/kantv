@@ -219,16 +219,13 @@ The UI Layer of Project KanTV(this Android APK) follows the principles of '**min
 <hr>
 here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-https://github.com/zhouwg/kantv/assets/6889919/0f79799a-ca56-4b6d-a83b-239c955b0372
-
-<hr>
-better performance with better stability after finetune(sometimes whisper.cpp will produce meaningless repeat tokens) with new method which introduced in https://github.com/ggerganov/whisper.cpp/issues/1951
-
 https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
 
 ----
 
-![1697162123](https://github.com/zhouwg/kantv/assets/6889919/d6b9ab54-ff27-43f7-b169-25c614ca3280)
+here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+
+![504893116](https://github.com/zhouwg/kantv/assets/6889919/51f0b277-eca4-4938-86f5-415dbf5897e7)
 
 <details>
   <summary>some other screenshots</summary>
@@ -267,7 +264,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ### Hot topics
 
-- <a href="https://github.com/zhouwg/kantv/issues/121">add Qualcomm mobile SoC native backend for GGML</a>
+- <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 

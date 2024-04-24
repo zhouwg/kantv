@@ -161,11 +161,21 @@ function build_kantv_apk()
 {
     echo ""
     cd ${PROJECT_ROOT_PATH}/cdeosplayer
-    ./gradlew assembleDebug
+
+    #./gradlew assembleDebug
+
+    ./gradlew assembleRelease
+
     if [ $? -eq 0 ]; then
         echo ""
         echo ""
-        printf "succeed to build apk ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk by cmdline-tools\n"
+
+        #printf "succeed to build apk ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk by cmdline-tools\n"
+        #ls -lah ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk
+
+        printf "succeed to build apk ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-all64-release-unsigned.apk by cmdline-tools\n"
+        ls -lah ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-all64-release-unsigned.apk
+
         cd ${PROJECT_ROOT_PATH}
         echo ""
         echo ""

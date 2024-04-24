@@ -2216,7 +2216,9 @@ struct llama_model {
     int64_t t_start_us = 0;
 
     ~llama_model() {
+        LOGGD("here");
         for (struct ggml_context * ctx : ctxs) {
+            LOGGD("here");
             ggml_free(ctx);
         }
         for (ggml_backend_buffer_t buf : bufs) {
@@ -2225,8 +2227,10 @@ struct llama_model {
                 ggml_backend_cuda_unregister_host_buffer(ggml_backend_buffer_get_base(buf));
             }
 #endif
+            LOGGD("here");
             ggml_backend_buffer_free(buf);
         }
+        LOGGD("here");
     }
 };
 
@@ -2234,12 +2238,16 @@ struct llama_context {
     llama_context(const llama_model & model) : model(model), t_start_us(model.t_start_us), t_load_us(model.t_load_us) {}
     ~llama_context() {
         ggml_backend_sched_free(sched);
+        LOGGD("here");
 
         for (ggml_backend_t backend : backends) {
+            LOGGD("here");
             ggml_backend_free(backend);
         }
 
+        LOGGD("here");
         ggml_backend_buffer_free(buf_output);
+        LOGGD("here");
     }
 
     llama_cparams cparams;
@@ -14987,7 +14995,9 @@ struct llama_model * llama_load_model_from_file(
             unsigned percentage = (unsigned) (100 * progress);
             while (percentage > *cur_percentage_p) {
                 *cur_percentage_p = percentage;
+#ifndef GGML_USE_QNN
                 LLAMA_LOG_INFO(".");
+#endif
                 if (percentage >= 100) {
                     LLAMA_LOG_INFO("\n");
                 }

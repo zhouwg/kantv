@@ -254,6 +254,7 @@ Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_p
         n_thread_counts = 1;
 
     result = llama_inference(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend);
+    LOGGD("result %d", result);
 
 failure:
     if (NULL != sz_prompt) {

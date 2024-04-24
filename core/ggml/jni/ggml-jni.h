@@ -1,26 +1,7 @@
 /*
- * Copyright (c) 2024, zhou.weiguo(zhouwg2000@gmail.com)
- *
  * Copyright (c) 2024- KanTV Authors
  *
- * this clean-room implementation is for
- *
- * PoC(https://github.com/zhouwg/kantv/issues/64) in project KanTV. the initial implementation was done
- *
- * from 03-05-2024 to 03-16-2024.the initial implementation could be found at:
- *
- * https://github.com/zhouwg/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/whisper.cpp#L6727
-
- * https://github.com/zhouwg/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/whisper.h#L620
-
- * https://github.com/zhouwg/kantv/blob/kantv-poc-with-whispercpp/external/whispercpp/jni/whispercpp-jni.c
-
- * https://github.com/zhouwg/kantv/blob/kantv-poc-with-whispercpp/cdeosplayer/cdeosplayer-lib/src/main/java/org/ggml/whispercpp/whispercpp.java
- *
- *
- * in short, it's a very concise implementation and the method here is never seen in any other similar
- *
- * (whisper.cpp related) open-source project before 03-05-2024.
+ * JNI implementation of GGML for Project KanTV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The above statement and notice must be included in corresponding files in derived project
  */
 
 #ifndef KANTV_GGML_JNI_H
