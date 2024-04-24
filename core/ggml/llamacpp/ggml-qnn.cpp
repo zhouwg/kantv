@@ -980,8 +980,8 @@ static int free_qnn_tensor(Qnn_Tensor_t & tensor) {
     } else {
         //LOGGD("%p", QNN_TENSOR_GET_DIMENSIONS(tensor));
         //TODO:why crash in here? why pointer changed with mul_mat?
+        //memory leak after comment below line
         //free(QNN_TENSOR_GET_DIMENSIONS(tensor));
-        //memory leak after comment above line
     }
     //LEAVE_FUNC();
 
@@ -2150,11 +2150,11 @@ int qnn_instance::load_system() {
 
     _system_lib_handle = dlopen(system_lib_path.c_str(), RTLD_NOW | RTLD_LOCAL);
     if (nullptr == _system_lib_handle) {
-        LOGGW("can not pen QNN library %s, error: %s\n", system_lib_path.c_str(), dlerror());
+        LOGGW("can not open QNN library %s, error: %s\n", system_lib_path.c_str(), dlerror());
         return 1;
     }
 
-    auto *get_providers = reinterpret_cast<_pfn_QnnSystemInterface_getProviders *>(dlsym(
+    auto * get_providers = reinterpret_cast<_pfn_QnnSystemInterface_getProviders *>(dlsym(
             _system_lib_handle, "QnnSystemInterface_getProviders"));
     if (nullptr == get_providers) {
         LOGGW("can not load QNN symbol QnnSystemInterface_getProviders: %s\n", dlerror());
