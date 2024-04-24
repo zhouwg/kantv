@@ -182,6 +182,7 @@ static bool is_valid_utf8(const char * string) {
     return true;
 }
 
+#if 0
 static inline std::string log_var_to_string_impl(bool var)
 {
     return var ? "true" : "false";
@@ -213,6 +214,7 @@ static inline std::string log_var_to_string_impl(const std::vector<int> & var)
 
     return buf.str();
 }
+
 
 template <typename C, typename T>
 static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & tokens)
@@ -246,7 +248,7 @@ static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & token
 
     return buf.str();
 }
-
+#endif
 
 /**
  *

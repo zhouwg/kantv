@@ -56,16 +56,16 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/unicode.cpp
         ${LLAMACPP_SRC_DIR}/unicode-data.cpp
 
+        ${LLAMACPP_SRC_DIR}/common/sampling.cpp
+        ${LLAMACPP_SRC_DIR}/common/common.cpp
+        ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
+        ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
+
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
-
         ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
-
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
-        ${KANTV_GGMLJNI_SRC_DIR}/sampling.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/common.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/grammar-parser.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/llama-bench.cpp
 
         ${QNN_SRC_DIR}/QnnSampleMain.cpp
@@ -107,6 +107,7 @@ include_directories(${PREBUILT_INC_PATH}/)
 
 #re-use the ggml.h in subdirectory llamacpp/ggml.h to avoid NDK complain "error: redefinition of 'ggml_status'"
 include_directories(${LLAMACPP_SRC_DIR}/)
+include_directories(${LLAMACPP_SRC_DIR}/common/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)

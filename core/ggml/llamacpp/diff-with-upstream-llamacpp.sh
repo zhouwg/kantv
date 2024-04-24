@@ -37,3 +37,5 @@ for file in "${LLAMACPP_SRCS[@]}"; do
     echo "diff $file     ${UPSTREAM_LLAMACPP_PATH}/$file"
     diff ${LOCAL_LLAMACPP_PATH}/$file     ${UPSTREAM_LLAMACPP_PATH}/$file
 done
+
+diff -r ${LOCAL_LLAMACPP_PATH}/common ${UPSTREAM_LLAMACPP_PATH}/common
