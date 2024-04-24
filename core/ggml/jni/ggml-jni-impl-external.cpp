@@ -260,16 +260,15 @@ static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & token
  * @return
 */
 int  llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend) {
-    llama_context           ** g_ctx;
-    llama_model             ** g_model;
-    gpt_params               * g_params;
-    std::vector<llama_token> * g_input_tokens;
-    std::ostringstream       * g_output_ss;
-    std::vector<llama_token> * g_output_tokens;
+    llama_context **g_ctx;
+    llama_model **g_model;
+    gpt_params *g_params;
+    std::vector<llama_token> *g_input_tokens;
+    std::ostringstream *g_output_ss;
+    std::vector<llama_token> *g_output_tokens;
     bool is_interacting = false;
-
+    int max_tokens = 0;
     gpt_params params;
-
 
     if (NULL == model_path)
         return -1;
@@ -277,14 +276,23 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     if (NULL == prompt)
         return -1;
 
+    LOGGV("threads:%d", num_threads);
+    LOGGV("backend:%d(%s)", n_backend, get_qnn_backend_name(n_backend));
     LOGGV("prompt:%s\n", prompt);
     LOGGV("model file %s\n", model_path);
-    n_backend = QNN_CPU;
     params.model = model_path;
     params.prompt = std::string(prompt);
-    params.main_gpu = n_backend;
-    params.n_gpu_layers = 1;
-    llama_sampling_params & sparams = params.sparams;
+    if (n_backend != 3) { // 3 is the original GGML, used to compare performance between QNN backend and original GGML
+        LOGGD("using QNN backend");
+        params.main_gpu = n_backend;
+        params.n_gpu_layers = 1; //TODO
+    } else {
+        LOGGD("using original ggml");
+        params.main_gpu = n_backend;
+        params.n_gpu_layers = 0;
+    }
+    params.n_threads = num_threads;
+    llama_sampling_params &sparams = params.sparams;
 
     if (params.n_ctx != 0 && params.n_ctx < 8) {
         LOGGV("%s: warning: minimum context size is 8, using minimum size.\n", __func__);
@@ -292,7 +300,8 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     }
 
     if (params.rope_freq_base != 0.0) {
-        LOGGV("%s: warning: changing RoPE frequency base to %g.\n", __func__, params.rope_freq_base);
+        LOGGV("%s: warning: changing RoPE frequency base to %g.\n", __func__,
+              params.rope_freq_base);
     }
 
     if (params.rope_freq_scale != 0.0) {
@@ -307,18 +316,19 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
     std::mt19937 rng(params.seed);
 
-    LOGGD("%s: llama backend init\n", __func__);
+
+    LOG("%s: llama backend init\n", __func__);
     llama_backend_init();
     llama_numa_init(params.numa);
 
-    llama_model * model;
-    llama_context * ctx;
-    llama_context * ctx_guidance = NULL;
+    llama_model *model;
+    llama_context *ctx = nullptr;
+    llama_context *ctx_guidance = nullptr;
     g_model = &model;
     g_ctx = &ctx;
 
     // load the model and apply lora adapter, if any
-    LOGGD("%s: load the model and apply lora adapter, if any\n", __func__);
+    LOG("%s: load the model and apply lora adapter, if any\n", __func__);
     std::tie(model, ctx) = llama_init_from_gpt_params(params);
     if (sparams.cfg_scale > 1.f) {
         struct llama_context_params lparams = llama_context_params_from_gpt_params(params);
@@ -326,36 +336,55 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     }
 
     if (model == NULL) {
-        LOGGV("%s: error: unable to load model\n", __func__);
+        LOG_TEE("%s: error: unable to load model\n", __func__);
         return 1;
     }
 
     const int n_ctx_train = llama_n_ctx_train(model);
     const int n_ctx = llama_n_ctx(ctx);
-    LOGGV("n_ctx: %d\n", n_ctx);
+    LOG("n_ctx: %d\n", n_ctx);
 
     if (n_ctx > n_ctx_train) {
-        LOGGV("%s: warning: model was trained on only %d context tokens (%d specified)\n",
+        LOG_TEE("%s: warning: model was trained on only %d context tokens (%d specified)\n",
                 __func__, n_ctx_train, n_ctx);
+    }
+
+    // print system information
+    {
+        LOG_TEE("\n");
+        LOG_TEE("%s\n", get_system_info(params).c_str());
     }
 
     std::string path_session = params.path_prompt_cache;
     std::vector<llama_token> session_tokens;
 
+
     const bool add_bos = llama_should_add_bos_token(model);
-    LOGGV("add_bos: %d\n", add_bos);
+    GGML_ASSERT(llama_add_eos_token(model) != 1);
+    LOG("add_bos: %d\n", add_bos);
 
     std::vector<llama_token> embd_inp;
 
-    embd_inp = ::llama_tokenize(ctx, params.prompt, add_bos, true);
+    if (params.interactive_first || params.instruct || params.chatml || !params.prompt.empty() ||
+        session_tokens.empty()) {
+        LOG("tokenize the prompt\n");
+        if (params.chatml) {
+            params.prompt = "<|im_start|>system\n" + params.prompt + "<|im_end|>";
+        }
+        embd_inp = ::llama_tokenize(ctx, params.prompt, true, true);
+    } else {
+        LOG("use session tokens\n");
+        embd_inp = session_tokens;
+    }
 
-    LOGGV("prompt: \"%s\"\n", log_tostr(params.prompt));
-    LOGGV("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
+    LOG("prompt: \"%s\"\n", log_tostr(params.prompt));
+    LOG("tokens: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
 
     // Should not run without any tokens
     if (embd_inp.empty()) {
         embd_inp.push_back(llama_token_bos(model));
-        LOGGV("embd_inp was considered empty and bos was added: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
+        LOG("embd_inp was considered empty and bos was added: %s\n",
+            LOG_TOKENS_TOSTR_PRETTY(ctx, embd_inp).c_str());
     }
 
     // Tokenize negative prompt
@@ -363,22 +392,24 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     int guidance_offset = 0;
     int original_prompt_len = 0;
     if (ctx_guidance) {
-        LOGGV("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
+        LOG("cfg_negative_prompt: \"%s\"\n", log_tostr(sparams.cfg_negative_prompt));
 
-        guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, add_bos, true);
-        LOGGV("guidance_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
+        guidance_inp = ::llama_tokenize(ctx_guidance, sparams.cfg_negative_prompt, true, true);
+        LOG("guidance_inp tokenized: %s\n",
+            LOG_TOKENS_TOSTR_PRETTY(ctx_guidance, guidance_inp).c_str());
 
-        std::vector<llama_token> original_inp = ::llama_tokenize(ctx, params.prompt, add_bos, true);
-        LOGGV("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
+        std::vector<llama_token> original_inp = ::llama_tokenize(ctx, params.prompt, true, true);
+        LOG("original_inp tokenized: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, original_inp).c_str());
 
         original_prompt_len = original_inp.size();
-        guidance_offset = (int)guidance_inp.size() - original_prompt_len;
-        LOGGV("original_prompt_len: %s", log_tostr(original_prompt_len));
-        LOGGV("guidance_offset:     %s", log_tostr(guidance_offset));
+        guidance_offset = (int) guidance_inp.size() - original_prompt_len;
+        LOG("original_prompt_len: %s", log_tostr(original_prompt_len));
+        LOG("guidance_offset:     %s", log_tostr(guidance_offset));
     }
 
     if ((int) embd_inp.size() > n_ctx - 4) {
-        LOGGV("%s: error: prompt is too long (%d tokens, max %d)\n", __func__, (int) embd_inp.size(), n_ctx - 4);
+        LOG_TEE("%s: error: prompt is too long (%d tokens, max %d)\n", __func__,
+                (int) embd_inp.size(), n_ctx - 4);
         return 1;
     }
 
@@ -386,20 +417,21 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     size_t n_matching_session_tokens = 0;
     if (!session_tokens.empty()) {
         for (llama_token id : session_tokens) {
-            if (n_matching_session_tokens >= embd_inp.size() || id != embd_inp[n_matching_session_tokens]) {
+            if (n_matching_session_tokens >= embd_inp.size() ||
+                id != embd_inp[n_matching_session_tokens]) {
                 break;
             }
             n_matching_session_tokens++;
         }
         if (params.prompt.empty() && n_matching_session_tokens == embd_inp.size()) {
-            LOGGV("%s: using full prompt from session file\n", __func__);
+            LOG_TEE("%s: using full prompt from session file\n", __func__);
         } else if (n_matching_session_tokens >= embd_inp.size()) {
-            LOGGV("%s: session file has exact match for prompt!\n", __func__);
+            LOG_TEE("%s: session file has exact match for prompt!\n", __func__);
         } else if (n_matching_session_tokens < (embd_inp.size() / 2)) {
-            LOGGV("%s: warning: session file has low similarity to prompt (%zu / %zu tokens); will mostly be reevaluated\n",
+            LOG_TEE("%s: warning: session file has low similarity to prompt (%zu / %zu tokens); will mostly be reevaluated\n",
                     __func__, n_matching_session_tokens, embd_inp.size());
         } else {
-            LOGGV("%s: session file matches %zu / %zu tokens of prompt\n",
+            LOG_TEE("%s: session file matches %zu / %zu tokens of prompt\n",
                     __func__, n_matching_session_tokens, embd_inp.size());
         }
 
@@ -407,38 +439,42 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
         llama_kv_cache_seq_rm(ctx, -1, n_matching_session_tokens, -1);
     }
 
-    LOGGD(
+    LOGLN(
             "recalculate the cached logits (check): embd_inp.empty() %s, n_matching_session_tokens %zu, embd_inp.size() %zu, session_tokens.size() %zu, embd_inp.size() %zu",
-            log_tostr(embd_inp.empty()), n_matching_session_tokens, embd_inp.size(), session_tokens.size(), embd_inp.size());
+            log_tostr(embd_inp.empty()), n_matching_session_tokens, embd_inp.size(),
+            session_tokens.size(), embd_inp.size());
 
     // if we will use the cache for the full prompt without reaching the end of the cache, force
     // reevaluation of the last token token to recalculate the cached logits
-    if (!embd_inp.empty() && n_matching_session_tokens == embd_inp.size() && session_tokens.size() > embd_inp.size()) {
-        LOGGD("recalculate the cached logits (do): session_tokens.resize( %zu )", embd_inp.size() - 1);
+    if (!embd_inp.empty() && n_matching_session_tokens == embd_inp.size() &&
+        session_tokens.size() > embd_inp.size()) {
+        LOGLN("recalculate the cached logits (do): session_tokens.resize( %zu )",
+              embd_inp.size() - 1);
 
         session_tokens.resize(embd_inp.size() - 1);
     }
 
     // number of tokens to keep when resetting context
-    if (params.n_keep < 0 || params.n_keep > (int) embd_inp.size() || params.instruct || params.chatml) {
-        params.n_keep = (int)embd_inp.size();
+    if (params.n_keep<0 || params.n_keep>(int)
+        embd_inp.size() || params.instruct || params.chatml) {
+        params.n_keep = (int) embd_inp.size();
     } else {
         params.n_keep += add_bos; // always keep the BOS token
     }
 
     // prefix & suffix for instruct mode
-    const auto inp_pfx = ::llama_tokenize(ctx, "\n\n### Instruction:\n\n", add_bos, true);
-    const auto inp_sfx = ::llama_tokenize(ctx, "\n\n### Response:\n\n",    false,   true);
+    const auto inp_pfx = ::llama_tokenize(ctx, "\n\n### Instruction:\n\n", true, true);
+    const auto inp_sfx = ::llama_tokenize(ctx, "\n\n### Response:\n\n", false, true);
 
-    LOGGV("inp_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_pfx).c_str());
-    LOGGV("inp_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_sfx).c_str());
+    LOG("inp_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_pfx).c_str());
+    LOG("inp_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, inp_sfx).c_str());
 
     // chatml prefix & suffix
-    const auto cml_pfx = ::llama_tokenize(ctx, "\n<|im_start|>user\n", add_bos, true);
+    const auto cml_pfx = ::llama_tokenize(ctx, "\n<|im_start|>user\n", true, true);
     const auto cml_sfx = ::llama_tokenize(ctx, "<|im_end|>\n<|im_start|>assistant\n", false, true);
 
-    LOGGV("cml_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_pfx).c_str());
-    LOGGV("cml_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_sfx).c_str());
+    LOG("cml_pfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_pfx).c_str());
+    LOG("cml_sfx: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, cml_sfx).c_str());
 
     // in instruct mode, we inject a prefix and a suffix to each input by the user
     if (params.instruct) {
@@ -456,9 +492,39 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
         params.interactive = true;
     }
 
-    LOGGV("sampling: \n%s\n", llama_sampling_print(sparams).c_str());
-    LOGGV("sampling order: \n%s\n", llama_sampling_order_print(sparams).c_str());
-    LOGGV("generate: n_ctx = %d, n_batch = %d, n_predict = %d, n_keep = %d\n", n_ctx, params.n_batch, params.n_predict, params.n_keep);
+    if (params.verbose_prompt) {
+        LOG_TEE("\n");
+        LOG_TEE("%s: prompt: '%s'\n", __func__, params.prompt.c_str());
+        LOG_TEE("%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
+        for (int i = 0; i < (int) embd_inp.size(); i++) {
+            LOG_TEE("%6d -> '%s'\n", embd_inp[i], llama_token_to_piece(ctx, embd_inp[i]).c_str());
+        }
+
+        if (ctx_guidance) {
+            LOG_TEE("\n");
+            LOG_TEE("%s: negative prompt: '%s'\n", __func__, sparams.cfg_negative_prompt.c_str());
+            LOG_TEE("%s: number of tokens in negative prompt = %zu\n", __func__,
+                    guidance_inp.size());
+            for (int i = 0; i < (int) guidance_inp.size(); i++) {
+                LOG_TEE("%6d -> '%s'\n", guidance_inp[i],
+                        llama_token_to_piece(ctx, guidance_inp[i]).c_str());
+            }
+        }
+
+        if (params.n_keep > add_bos) {
+            LOG_TEE("%s: static prompt based on n_keep: '", __func__);
+            for (int i = 0; i < params.n_keep; i++) {
+                LOG_TEE("%s", llama_token_to_piece(ctx, embd_inp[i]).c_str());
+            }
+            LOG_TEE("'\n");
+        }
+        LOG_TEE("\n");
+    }
+
+    LOG_TEE("sampling: \n%s\n", llama_sampling_print(sparams).c_str());
+    LOG_TEE("sampling order: \n%s\n", llama_sampling_order_print(sparams).c_str());
+    LOG_TEE("generate: n_ctx = %d, n_batch = %d, n_predict = %d, n_keep = %d\n", n_ctx,
+            params.n_batch, params.n_predict, params.n_keep);
 
     // group-attention state
     // number of grouped KV tokens so far (used only if params.grp_attn_n > 1)
@@ -468,32 +534,39 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     const int ga_w = params.grp_attn_w;
 
     if (ga_n != 1) {
-        GGML_ASSERT(ga_n > 0                    && "grp_attn_n must be positive");                     // NOLINT
-        GGML_ASSERT(ga_w % ga_n == 0            && "grp_attn_w must be a multiple of grp_attn_n");     // NOLINT
+        GGML_ASSERT(ga_n > 0 && "grp_attn_n must be positive");                     // NOLINT
+        GGML_ASSERT(
+                ga_w % ga_n == 0 && "grp_attn_w must be a multiple of grp_attn_n");     // NOLINT
         //GGML_ASSERT(n_ctx_train % ga_w == 0     && "n_ctx_train must be a multiple of grp_attn_w");    // NOLINT
         //GGML_ASSERT(n_ctx >= n_ctx_train * ga_n && "n_ctx must be at least n_ctx_train * grp_attn_n"); // NOLINT
-        LOGGV("self-extend: n_ctx_train = %d, grp_attn_n = %d, grp_attn_w = %d\n", n_ctx_train, ga_n, ga_w);
+        LOG_TEE("self-extend: n_ctx_train = %d, grp_attn_n = %d, grp_attn_w = %d\n", n_ctx_train,
+                ga_n, ga_w);
     }
-    LOGGV("\n\n");
+    LOG_TEE("\n\n");
 
-    bool is_antiprompt        = false;
-    bool input_echo           = true;
-    bool display              = true;
-    bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
-    int n_past             = 0;
-    int n_remain           = params.n_predict;
-    int n_consumed         = 0;
+    bool is_antiprompt = false;
+    bool input_echo = true;
+    bool display = true;
+    bool need_to_save_session =
+            !path_session.empty() && n_matching_session_tokens < embd_inp.size();
+
+    int n_past = 0;
+    int n_remain = params.n_predict;
+    int n_consumed = 0;
     int n_session_consumed = 0;
-    int n_past_guidance    = 0;
+    int n_past_guidance = 0;
 
-    std::vector<int>   input_tokens;  g_input_tokens  = &input_tokens;
-    std::vector<int>   output_tokens; g_output_tokens = &output_tokens;
-    std::ostringstream output_ss;     g_output_ss     = &output_ss;
+    std::vector<int> input_tokens;
+    g_input_tokens = &input_tokens;
+    std::vector<int> output_tokens;
+    g_output_tokens = &output_tokens;
+    std::ostringstream output_ss;
+    g_output_ss = &output_ss;
 
     // the first thing we will do is to output the prompt, so set color accordingly
     //console::set_display(console::prompt);
-    //display = params.display_prompt;
+    display = params.display_prompt;
 
     std::vector<llama_token> embd;
     std::vector<llama_token> embd_guidance;
@@ -502,11 +575,11 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
     std::vector<std::vector<llama_token>> antiprompt_ids;
 
     antiprompt_ids.reserve(params.antiprompt.size());
-    for (const std::string & antiprompt : params.antiprompt) {
+    for (const std::string &antiprompt : params.antiprompt) {
         antiprompt_ids.emplace_back(::llama_tokenize(ctx, antiprompt, false, true));
     }
 
-    struct llama_sampling_context * ctx_sampling = llama_sampling_init(sparams);
+    struct llama_sampling_context *ctx_sampling = llama_sampling_init(sparams);
 
     while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
         // predict
@@ -519,9 +592,8 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
             if ((int) embd.size() > max_embd_size) {
                 const int skipped_tokens = (int) embd.size() - max_embd_size;
                 embd.resize(max_embd_size);
-
-
-                LOGGD("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
+                LOGGD("<<input too long: skipped %d token%s>>", skipped_tokens,
+                      skipped_tokens != 1 ? "s" : "");
             }
 
             if (ga_n == 1) {
@@ -531,17 +603,18 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                 // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
                 if (n_past + (int) embd.size() + std::max<int>(0, guidance_offset) > n_ctx) {
                     if (params.n_predict == -2) {
-                        LOGGV("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, params.n_predict);
+                        LOG_TEE("\n\n%s: context full and n_predict == -%d => stopping\n", __func__,
+                                params.n_predict);
                         break;
                     }
 
-                    const int n_left    = n_past - params.n_keep;
-                    const int n_discard = n_left/2;
+                    const int n_left = n_past - params.n_keep;
+                    const int n_discard = n_left / 2;
 
-                    LOGGV("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
-                        n_past, n_left, n_ctx, params.n_keep, n_discard);
+                    LOGGD("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
+                          n_past, n_left, n_ctx, params.n_keep, n_discard);
 
-                    llama_kv_cache_seq_rm (ctx, 0, params.n_keep            , params.n_keep + n_discard);
+                    llama_kv_cache_seq_rm(ctx, 0, params.n_keep, params.n_keep + n_discard);
                     llama_kv_cache_seq_add(ctx, 0, params.n_keep + n_discard, n_past, -n_discard);
 
                     n_past -= n_discard;
@@ -550,41 +623,45 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                         n_past_guidance -= n_discard;
                     }
 
-                    LOGGV("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
+                    LOG("after swap: n_past = %d, n_past_guidance = %d\n", n_past, n_past_guidance);
 
-                    LOGGV("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
+                    LOG("embd: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
 
-                    LOGGV("clear session path\n");
+                    LOG("clear session path\n");
                     path_session.clear();
                 }
             } else {
                 // context extension via Self-Extend
                 while (n_past >= ga_i + ga_w) {
-                    const int ib = (ga_n*ga_i)/ga_w;
-                    const int bd = (ga_w/ga_n)*(ga_n - 1);
-                    const int dd = (ga_w/ga_n) - ib*bd - ga_w;
+                    const int ib = (ga_n * ga_i) / ga_w;
+                    const int bd = (ga_w / ga_n) * (ga_n - 1);
+                    const int dd = (ga_w / ga_n) - ib * bd - ga_w;
 
-                    LOGGV("\n");
-                    LOGGV("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib*bd, ga_i + ib*bd, n_past + ib*bd);
-                    LOGGV("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib*bd, ga_i + ib*bd + ga_w, ga_n, (ga_i + ib*bd)/ga_n, (ga_i + ib*bd + ga_w)/ga_n);
-                    LOGGV("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib*bd + ga_w, n_past + ib*bd, dd, ga_i + ib*bd + ga_w + dd, n_past + ib*bd + dd);
+                    LOG("\n");
+                    LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib * bd,
+                        ga_i + ib * bd, n_past + ib * bd);
+                    LOG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd,
+                        ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n,
+                        (ga_i + ib * bd + ga_w) / ga_n);
+                    LOG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w,
+                        n_past + ib * bd, dd, ga_i + ib * bd + ga_w + dd, n_past + ib * bd + dd);
 
-                    llama_kv_cache_seq_add(ctx, 0, ga_i,                n_past,              ib*bd);
-                    llama_kv_cache_seq_div(ctx, 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
-                    llama_kv_cache_seq_add(ctx, 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
+                    llama_kv_cache_seq_add(ctx, 0, ga_i, n_past, ib * bd);
+                    llama_kv_cache_seq_div(ctx, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
+                    llama_kv_cache_seq_add(ctx, 0, ga_i + ib * bd + ga_w, n_past + ib * bd, dd);
 
                     n_past -= bd;
 
-                    ga_i += ga_w/ga_n;
+                    ga_i += ga_w / ga_n;
 
-                    LOGGV("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
+                    LOG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
                 }
             }
 
             // try to reuse a matching prefix from the loaded session instead of re-eval (via n_past)
             if (n_session_consumed < (int) session_tokens.size()) {
                 size_t i = 0;
-                for ( ; i < embd.size(); i++) {
+                for (; i < embd.size(); i++) {
                     if (embd[i] != session_tokens[n_session_consumed]) {
                         session_tokens.resize(n_session_consumed);
                         break;
@@ -607,7 +684,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
             // embd is typically prepared beforehand to fit within a batch, but not always
             if (ctx_guidance) {
                 int input_size = 0;
-                llama_token * input_buf = NULL;
+                llama_token *input_buf = NULL;
 
                 if (n_past_guidance < (int) guidance_inp.size()) {
                     // Guidance context should have the same data with these modifications:
@@ -623,19 +700,22 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                         );
                     }
 
-                    input_buf  = embd_guidance.data();
+                    input_buf = embd_guidance.data();
                     input_size = embd_guidance.size();
 
-                    LOGGV("guidance context: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd_guidance).c_str());
+                    LOG("guidance context: %s\n",
+                        LOG_TOKENS_TOSTR_PRETTY(ctx, embd_guidance).c_str());
                 } else {
-                    input_buf  = embd.data();
+                    input_buf = embd.data();
                     input_size = embd.size();
                 }
 
                 for (int i = 0; i < input_size; i += params.n_batch) {
                     int n_eval = std::min(input_size - i, params.n_batch);
-                    if (llama_decode(ctx_guidance, llama_batch_get_one(input_buf + i, n_eval, n_past_guidance, 0))) {
-                        LOGGV("%s : failed to eval\n", __func__);
+                    if (llama_decode(ctx_guidance,
+                                     llama_batch_get_one(input_buf + i, n_eval, n_past_guidance,
+                                                         0))) {
+                        LOG_TEE("%s : failed to eval\n", __func__);
                         return 1;
                     }
 
@@ -649,19 +729,19 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                     n_eval = params.n_batch;
                 }
 
-                //LOGGV("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
+                LOG("eval: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, embd).c_str());
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval, n_past, 0))) {
-                    LOGGV("%s : failed to eval\n", __func__);
+                    LOG_TEE("%s : failed to eval\n", __func__);
                     return 1;
                 }
 
                 n_past += n_eval;
 
-                //LOGGV("n_past = %d\n", n_past);
+                LOG("n_past = %d\n", n_past);
                 // Display total tokens alongside total time
                 if (params.n_print > 0 && n_past % params.n_print == 0) {
-                    LOGGV("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
+                    LOG_TEE("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
                 }
             }
 
@@ -679,7 +759,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
             llama_sampling_accept(ctx_sampling, ctx, id, true);
 
-            //LOGGV("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
+            LOG("last: %s\n", LOG_TOKENS_TOSTR_PRETTY(ctx, ctx_sampling->prev).c_str());
 
             embd.push_back(id);
 
@@ -689,10 +769,10 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
             // decrement remaining sampling budget
             --n_remain;
 
-            //LOGGV("n_remain: %d\n", n_remain);
+            LOG("n_remain: %d\n", n_remain);
         } else {
             // some user input remains from prompt or interaction, forward it to processing
-            //LOGGV("embd_inp.size(): %d, n_consumed: %d\n", (int) embd_inp.size(), n_consumed);
+            LOG("embd_inp.size(): %d, n_consumed: %d\n", (int) embd_inp.size(), n_consumed);
             while ((int) embd_inp.size() > n_consumed) {
                 embd.push_back(embd_inp[n_consumed]);
 
@@ -712,8 +792,10 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
             for (auto id : embd) {
                 const std::string token_str = llama_token_to_piece(ctx, id);
                 printf("%s", token_str.c_str());
+                max_tokens++;
 #ifdef TARGET_ANDROID
-                if (is_valid_utf8(token_str.c_str())) { //ref:https://github.com/ggerganov/llama.cpp/pull/5935/
+                if (is_valid_utf8(
+                        token_str.c_str())) { //ref:https://github.com/ggerganov/llama.cpp/pull/5935/
                     kantv_asr_notify_benchmark_c(token_str.c_str());
                 }
 #endif
@@ -725,7 +807,10 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                     output_ss << token_str;
                 }
             }
-            fflush(stdout);
+        }
+        // reset color to default if there is no pending user input
+        if (input_echo && (int) embd_inp.size() == n_consumed) {
+            display = true;
         }
 
         // if not currently processing queued inputs;
@@ -739,10 +824,14 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                 // Check if each of the reverse prompts appears at the end of the output.
                 // If we're not running interactively, the reverse prompt might be tokenized with some following characters
                 // so we'll compensate for that by widening the search window a bit.
-                for (std::string & antiprompt : params.antiprompt) {
+                for (std::string &antiprompt : params.antiprompt) {
                     size_t extra_padding = params.interactive ? 0 : 2;
-                    size_t search_start_pos = last_output.length() > static_cast<size_t>(antiprompt.length() + extra_padding)
-                                              ? last_output.length() - static_cast<size_t>(antiprompt.length() + extra_padding)
+                    size_t search_start_pos = last_output.length() >
+                                              static_cast<size_t>(antiprompt.length() +
+                                                                  extra_padding)
+                                              ? last_output.length() -
+                                                static_cast<size_t>(antiprompt.length() +
+                                                                    extra_padding)
                                               : 0;
 
                     if (last_output.find(antiprompt, search_start_pos) != std::string::npos) {
@@ -766,45 +855,74 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                     }
                 }
 
+                if (is_antiprompt) {
+                    LOGGD("found antiprompt: %s\n", last_output.c_str());
+                }
+            }
+
+            // deal with end of generation tokens in interactive mode
+            if (llama_token_is_eog(model, llama_sampling_last(ctx_sampling))) {
+                LOGGD("found EOS token\n");
+            }
+
+            if (n_past > 0) {
+                if (is_interacting) {
+                    llama_sampling_reset(ctx_sampling);
+                }
+                is_interacting = false;
             }
         }
 
-        if (!embd.empty() && embd.back() == llama_token_eos(model)) {
-            LOGGV(" [end of text]\n");
+        // end of generation
+        if (max_tokens > 100) { //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+            LOGGI(" [end of text]\n");
 #ifdef TARGET_ANDROID
             kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
 #endif
             break;
         }
+        if (!embd.empty() && llama_token_is_eog(model, embd.back()) &&
+            !(params.instruct || params.interactive || params.chatml)) {
+            LOGGI(" [end of text]\n");
+#ifdef TARGET_ANDROID
+            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+#endif
+            break;
+        }
+
+        // In interactive mode, respect the maximum number of tokens and drop back to user input when reached.
+        // We skip this logic when n_predict == -1 (infinite) or -2 (stop at context size).
+        if (params.interactive && n_remain <= 0 && params.n_predict >= 0) {
+            n_remain = params.n_predict;
+            is_interacting = true;
+        }
     }
 
     llama_print_timings(ctx);
     if (ctx_guidance) {
+        LOGGD("here");
         llama_free(ctx_guidance);
     }
-
-    llama_free(ctx);
-    llama_free_model(model);
+    LOGGD("here");
+    //TODO:crash here on Xiaomi 14
+    //llama_free(ctx); //TODO: memory leak after comment it
+    LOGGD("here");
+    //TODO:crash here on Xiaomi 14
+    //llama_free_model(model);//TODO: memory leak after comment it
+    LOGGD("here");
 
     llama_sampling_free(ctx_sampling);
+    LOGGD("here");
     llama_backend_free();
+    LOGGD("here");
 
     return 0;
 }
 
 
-
-
-
-
-struct benchmark_params_struct {
+void ggml_bench_matrix(int num_threads, int backend_type) {
     int32_t n_threads     = 1;
     int32_t n_iterations  = 10;
-};
-
-
-void ggml_bench_matrix(int num_threads, int backend_type) {
-    struct benchmark_params_struct benchmark_params;
 
     bool invalid_param = false;
     std::string arg;
@@ -840,7 +958,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
     n_begin_time                        = ggml_time_us();
 
-    benchmark_params.n_threads          = num_threads;
+    n_threads          = num_threads;
 
     size_t ctx_size = 0;
     ctx_size += ggml_row_size(GGML_TYPE_F32, sizex*sizey);
@@ -893,11 +1011,11 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
     struct ggml_cgraph * gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, m11xm12);
 
-    GGML_JNI_NOTIFY("n_threads=%i\n", benchmark_params.n_threads);
+    GGML_JNI_NOTIFY("n_threads=%i\n", n_threads);
 
     std::vector<uint8_t> work_buffer;
 
-    ggml_graph_compute_helper(gf,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
+    ggml_graph_compute_helper(gf,work_buffer, n_threads, nullptr, nullptr);
 
     if (get_tensor_data_size(m11) < 100) {
         TENSOR_DUMP(m11);
@@ -954,7 +1072,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
     //GGML_JNI_NOTIFY("Creating compute graph\n");
     struct ggml_cgraph * gf32 = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf32, q32);
-    GGML_JNI_NOTIFY("n_threads=%i\n", benchmark_params.n_threads);
+    GGML_JNI_NOTIFY("n_threads=%i\n", n_threads);
 
     const int dimx = sizex;
     const int dimy = sizey;
@@ -971,11 +1089,11 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
     GGML_JNI_NOTIFY("=====================================================================================\n");
 
     double  gflops_sum = 0;
-    for (int i=0;i<benchmark_params.n_iterations ;i++) {
+    for (int i=0;i<n_iterations ;i++) {
 
         long long int start = ggml_time_us();
         //GGML_JNI_NOTIFY("Running ggml_graph_compute\n");
-        ggml_graph_compute_helper(gf31,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
+        ggml_graph_compute_helper(gf31,work_buffer, n_threads, nullptr, nullptr);
 
         long long int stop = ggml_time_us();
         long long int usec = stop-start;
@@ -983,13 +1101,11 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
         gflops_sum += gflops;
         GGML_JNI_NOTIFY("%9i;%8i;%6i;%6i;%6i;%15lli;%18lli;%10.2f\n",
                i,
-               benchmark_params.n_threads,
+               n_threads,
                sizex, sizey, sizez, flops_per_matrix,
                usec,gflops);
 
-#ifdef VERBOSE_DEBUGGING
-        TENSOR_DUMP("res",gf31.nodes[0])
-#endif
+
 
         // Check that the matrix multiplication result is in the right ballpark
         // We cannot use the exact value from the F32 multiplication because the quantizuation will be slightly different
@@ -1008,10 +1124,10 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
         }
 
         // Running a different graph computation to make sure we override the CPU cache lines
-        ggml_graph_compute_helper(gf,work_buffer, benchmark_params.n_threads, nullptr, nullptr);
+        ggml_graph_compute_helper(gf,work_buffer, n_threads, nullptr, nullptr);
     }
     GGML_JNI_NOTIFY("\n");
-    GGML_JNI_NOTIFY("Average%78.2f\n",gflops_sum/((double)benchmark_params.n_iterations));
+    GGML_JNI_NOTIFY("Average%78.2f\n",gflops_sum/((double)n_iterations));
     GGML_JNI_NOTIFY("=====================================================================================\n");
 
     LOGGD("leave ggml_bench_matrix\n");

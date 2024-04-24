@@ -58,7 +58,6 @@ set(SOURCE_FILES
 
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
-        ${LLAMACPP_SRC_DIR}/common/build-info.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
@@ -210,7 +209,7 @@ function(build_library target_name)
     if (GGML_JNI_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg QNNCpu QNNSaver android )
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia QNNCpu QNNSaver android )
     else()
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android)
     endif()

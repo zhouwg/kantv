@@ -61,6 +61,8 @@
  import java.io.RandomAccessFile;
  import java.nio.ByteBuffer;
  import java.nio.ByteOrder;
+ import java.text.SimpleDateFormat;
+ import java.util.Date;
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
@@ -88,6 +90,9 @@
 
      private int nThreadCounts = 8;
      private int benchmarkIndex = 0;
+
+     private String strBackend  = "cpu";
+     private int backendIndex   = 0; //QNN_CPU
 
      private long beginTime = 0;
      private long endTime = 0;
@@ -208,6 +213,45 @@
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by https://github.com/ggerganov/llama.cpp");
 
+
+         Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerLLMThreadCounts);
+         String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
+         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayThreadCounts);
+         spinnerThreadsCounts.setAdapter(adapter);
+         spinnerThreadsCounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "thread counts:" + arrayThreadCounts[position]);
+                 nThreadCounts = Integer.valueOf(arrayThreadCounts[position]);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+         spinnerThreadsCounts.setSelection(4);
+
+         Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerLLMBackend);
+         String[] arrayBackend = getResources().getStringArray(R.array.backend);
+         ArrayAdapter<String> adapterBackend = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
+         spinnerBackend.setAdapter(adapterBackend);
+         spinnerBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 CDELog.j(TAG, "backend:" + arrayBackend[position]);
+                 strBackend = arrayBackend[position];
+                 backendIndex = Integer.valueOf(position);
+                 CDELog.j(TAG, "strBackend:" + strBackend);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+         spinnerBackend.setSelection(0);
+
          _btnInference.setOnClickListener(v -> {
              String strPrompt = _txtUserInput.getText().toString();
 
@@ -276,7 +320,7 @@
                              CDEUtils.getDataPath() + ggmlModelFileName,
                              strUserInput,
                              benchmarkIndex,
-                             nThreadCounts, CDEUtils.QNN_BACKEND_GGML);
+                             nThreadCounts, backendIndex);
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);
                      isBenchmarking.set(false);
@@ -285,8 +329,16 @@
                          @Override
                          public void run() {
                              String benchmarkTip = "LLAMA inference " + "(model: " + ggmlModelFileName
-                                     + " ,threads: " + nThreadCounts
+                                     + " ,threads: " + nThreadCounts + " , backend: " + CDEUtils.getBackendDesc(backendIndex)
                                      + " ) cost " + duration + " milliseconds";
+
+                             //04-24-2024, add timestamp
+                             String timestamp = "";
+                             SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+                             Date date = new Date(System.currentTimeMillis());
+                             timestamp = fullDateFormat.format(date);
+                             benchmarkTip += ", on " + timestamp;
+
                              benchmarkTip += "\n";
 
                              if (!strBenchmarkInfo.startsWith("unknown")) {

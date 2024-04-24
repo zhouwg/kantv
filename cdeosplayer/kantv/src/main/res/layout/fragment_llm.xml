@@ -33,22 +33,45 @@
                 android:layout_height="170dp"
                 android:layout_marginTop="5dp"
                 android:text=" " />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
 
             <EditText
                 android:id="@+id/txtUserInput"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:gravity="top"
-                android:background="@drawable/textview_border"
-                android:hint="introduce the movie Once Upon a Time in America briefly."
                 android:layout_marginTop="5dp"
-                />
+                android:background="@drawable/textview_border"
+                android:gravity="top"
+                android:hint="introduce the movie Once Upon a Time in America briefly." />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Backend:" />
+
+            <Spinner
+                android:id="@+id/spinnerLLMBackend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:dropDownSelector="#63D81B60"
+                android:spinnerMode="dropdown" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Threads:" />
+
+            <Spinner
+                android:id="@+id/spinnerLLMThreadCounts"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:dropDownSelector="#63D81B60"
+                android:spinnerMode="dropdown" />
 
             <Button
                 android:id="@+id/btnInference"
@@ -60,17 +83,25 @@
                 android:textAllCaps="false"
                 android:textColor="#ffffff" />
 
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
             <TextView
                 android:id="@+id/llmInfo"
                 android:layout_width="match_parent"
-                android:layout_marginRight="5dp"
-
-                android:scrollbars="vertical"
-                android:scrollIndicators="right"
-                android:fadeScrollbars="false"
-                android:scrollbarFadeDuration="0"
                 android:layout_height="150dp"
-                android:layout_marginTop="5dp" />
+
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:fadeScrollbars="false"
+                android:scrollIndicators="right"
+                android:scrollbarFadeDuration="0"
+                android:scrollbars="vertical" />
 
         </LinearLayout>
 

@@ -100,6 +100,7 @@
 // =================================================================================================
 class qnn_instance;
 
+//TODO: should be removed because this is a workaround method during development stage
 extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor);
 
 static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
@@ -316,10 +317,10 @@ struct ggml_backend_qnn_context {
 //  static global variables
 //
 // =================================================================================================
-//TODO: should be removed in the future
+//TODO: should be removed for support multi QNN backend simultaneously
 static ggml_backend_t g_qnn_backend = nullptr;
 
-//TODO: better method to handle toggle between QNN CPU backend, QNN GPU backend, QNN HTP(aka DSP) backend, the default ggml backend
+//TODO: should be removed for support multi QNN backend simultaneously
 static int g_current_device        = 3; // 3 is the default ggml backend
 
 static bool GGML_OP_HAS_INIT    [GGML_OP_COUNT] = { 0 };
@@ -2599,6 +2600,7 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
     }
 
     if (dst->op == GGML_OP_MUL_MAT) {
+#if 1 // log output have significant effect to performance but useful during development stage
         LOGGD("GGML_OP_MUL_MAT");
         LOGGI("%15s: rank = %d, type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
               src0->name, src0->rank,
@@ -2612,6 +2614,7 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
               dst->name, dst->rank,
               dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0],
               dst->nb[1], dst->nb[2]);
+#endif
     }
 
     //make QNN SDK happy
@@ -3729,7 +3732,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
     //begin sanity check
     if (nullptr == g_qnn_backend) {
         LOGGE("pls check why qnn subsystem not initialized");
-        //attention here: don't call ggml_compute_forward(params, tensor) here, just return false directly
         return false;
     }
 
@@ -3746,11 +3748,13 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
     //supported_op = (tensor->op == GGML_OP_ADD); //works very good with whisper.cpp(asr result is correct)
 
     if ((!use_hwaccel) && (!supported_op)) {
+        //TODO: should be removed because this is a workaround method during development stage
         ggml_compute_forward(params, tensor);
         return false;
     }
 
     if ((!use_hwaccel) && (!ggml_qnn_can_handle_op(tensor->src[0], tensor->src[1], tensor))) {
+        //TODO: should be removed because this is a workaround method during development stage
         ggml_compute_forward(params, tensor);
         return false;
     }
@@ -3963,10 +3967,10 @@ GGML_CALL static bool ggml_backend_buffer_is_qnn(ggml_backend_buffer_t buffer) {
 
 
 static void ggml_backend_qnn_buffer_free_buffer(ggml_backend_buffer_t buffer) {
-    //ENTER_FUNC();
+    ENTER_FUNC();
     ggml_backend_qnn_buffer_context * ctx = (ggml_backend_qnn_buffer_context *) buffer->context;
     delete ctx;
-    //LEAVE_FUNC();
+    LEAVE_FUNC();
 }
 
 
