@@ -58,7 +58,6 @@ set(SOURCE_FILES
 
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
-        ${LLAMACPP_SRC_DIR}/common/build-info.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
