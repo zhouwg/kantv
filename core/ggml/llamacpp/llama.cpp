@@ -15137,6 +15137,16 @@ struct llama_context * llama_new_context_with_model(
             }
             ctx->backends.push_back(ctx->backend_metal);
         }
+#elif defined(GGML_USE_QNN)
+        if (model->n_gpu_layers > 0) {
+            ggml_backend_t backend = ggml_backend_qnn_init(QNN_CPU, "/data/data/com.cdeos.kantv/");//the second param can be got by JNI from Java layer
+            if (nullptr == backend) {
+                LLAMA_LOG_ERROR("%s: failed to initialize QNN backend\n", __func__);
+                llama_free(ctx);
+                return nullptr;
+            }
+            ctx->backends.push_back(backend);
+        }
 #elif defined(GGML_USE_CUDA)
         if (model->split_mode == LLAMA_SPLIT_MODE_NONE || model->split_mode == LLAMA_SPLIT_MODE_ROW) {
             // with split_mode LLAMA_SPLIT_MODE_NONE or LLAMA_SPLIT_MODE_ROW, only the main GPU backend is used
