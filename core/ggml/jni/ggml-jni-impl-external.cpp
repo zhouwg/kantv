@@ -8327,9 +8327,8 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
 
 
     GGML_JNI_NOTIFY("starting qnn_ggml_op UT(unit test)\n");
-#if 0 // for performance comparison between QNN backend and original GGML
-      // on Xiaomi14,      9x performance gain
-      // on low-end phone, 3x performance gain
+#if 1 // for performance comparison between QNN backend and original GGML
+      // on Xiaomi14,      4x performance gain for GGML_OP_MUL_MAT with 1 thread
     const int sizey = 4096;
     const int sizex = 4096;
     const int sizez = 128;
