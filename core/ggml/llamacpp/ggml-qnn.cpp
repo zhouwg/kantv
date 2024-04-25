@@ -3895,8 +3895,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
             return false;
     }
 
-
-    //ok, real show time in Qualcomm's QNN internal
     if (nullptr != func)
         func(tensor->src[0], tensor->src[1], tensor);
     if (nullptr != func_common)
@@ -4181,7 +4179,8 @@ static size_t ggml_backend_qnn_buffer_type_get_alignment(ggml_backend_buffer_typ
 static size_t ggml_backend_qnn_buffer_type_get_max_size(ggml_backend_buffer_type_t buft) {
     GGML_UNUSED(buft);
     //works fine with ggml-tiny.en-q8_0.bin for whisper.cpp
-    return (38 * 1024 * 1024);
+    //return (38 * 1024 * 1024);
+    return (96 * 1024 * 1024);
 }
 
 

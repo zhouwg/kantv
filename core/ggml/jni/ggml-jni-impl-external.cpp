@@ -8373,6 +8373,8 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
             GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
             return 1;
         }
+        //ggml_backend_qnn_set_n_threads(backend, 1);
+        num_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
     }
 #endif
 
@@ -8387,10 +8389,8 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_input(src0);
     //src0->flags |= GGML_TENSOR_FLAG_INPUT;
-    LOGGD("here");
     src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_input(src1);
-    LOGGD("here");
     switch (n_ggml_op_type) {
         case GGML_OP_ADD:
             dst = ggml_add(ctx, src0, src1);
@@ -8425,9 +8425,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     ggml_gallocr_t alloc = nullptr;
     alloc = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
 #endif
-    ggml_set_f32(src0, 1.0f);
     ggml_set_f32(src0, (rand() % 100 + 1));
-    ggml_set_f32(src1, 2.0f);
     ggml_set_f32(src1, (rand() % 100 + 1));
     ggml_set_f32(dst, 0.0f);
 
@@ -8443,7 +8441,6 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
     }
 #endif
     ggml_graph_compute_helper(gf,work_buffer, num_threads, nullptr, nullptr);
-
     if (get_tensor_data_size(dst) < 100) {
         TENSOR_DUMP(src0);
         TENSOR_DUMP(src1);
@@ -8469,6 +8466,8 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
 #endif
     ggml_free(ctx);
     ggml_backend_buffer_free(buffer);
+    //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
+    //ggml_backend_free(backend);
 
     n_end_time  = ggml_time_us();
     n_durtion   = (n_end_time - n_begin_time) / 1000;
@@ -8481,7 +8480,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
 
 
 /**
-  * similar to qnn_ggml_op, but an automation UT for a specify GGML OP with a specify backend
+  * similar to qnn_ggml_op, but an automation(pressure) UT for a specify GGML OP with a specify backend
   *
   * this function borrow from whisper.cpp
   */
@@ -8521,8 +8520,8 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
 
 
     char strbuf[256];
-    std::string tipString;
-    tipString = "";
+    std::string tipString = "";
+    std::string s = "";
 
     const int n_max = 128;
 
@@ -8576,9 +8575,9 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                     k == 4 ? GGML_TYPE_Q8_0 :
                     k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
 #else
-            for (int k = 0; k < 1; ++k) {
-                const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
-                k = 6; //hardcode to 6 make following code happy
+            for (int k = 5; k < 7; ++k) {
+                const ggml_type wtype =
+                        k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
 #endif
 
 
@@ -8597,15 +8596,29 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                     /*.mem_buffer =*/ buf.data(),
                     /*.no_alloc   =*/ false,
             };
+            ggml_backend_t backend = nullptr;
+            ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-            if (n_backend_type !=
-                3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+            if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 gparams.use_hwaccel = true;
+                gparams.no_alloc    = true;
+
+                backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
+                if (nullptr == backend) {
+                    LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+                    GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+                    return 1;
+                }
+                //ggml_backend_qnn_set_n_threads(backend, 1);
+                num_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
+            }
 #endif
             struct ggml_context *ctx0 = ggml_init(gparams);
 
             struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, wtype, N, N);
             struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+            ggml_set_input(a);
+            ggml_set_input(b);
 
             struct ggml_tensor *c = nullptr;
 
@@ -8620,7 +8633,19 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                     c =  ggml_mul_mat(ctx0, a, b);
                     break;
             }
-
+            ggml_set_output(c);
+#ifdef GGML_USE_QNN
+                if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                    LOGGD("creating backend buffer\n");
+                    buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
+                    if (!buffer) {
+                        LOGGD("%s: failed to allocate backend buffer\n", __func__);
+                        //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
+                        //ggml_backend_free(backend);
+                        return false;
+                    }
+                }
+#endif
 
             struct ggml_cgraph *gf = ggml_new_graph(ctx0);
 
@@ -8658,33 +8683,37 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
             }
 
             ggml_free(ctx0);
+            ggml_backend_buffer_free(buffer);
+            //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
+            //ggml_backend_free(backend);
 
             s = ((2.0 * N * N * N * n) / tsum) * 1e-9;
         }
 
         kantv_asr_notify_benchmark_c("reset");
-        tipString = "";
+#if 0
         // Q4_0 | Q4_1
         snprintf(strbuf, sizeof(strbuf),
                  "%4zu x %4zu: Q4_0 %7.1f GFLOPS (%3d runs) | Q4_1 %7.1f GFLOPS (%3d runs)\n",
                  N, N, s_q4_0, n_q4_0, s_q4_1, n_q4_1);
-        tipString += strbuf;
+        s += strbuf;
 
         // Q5_0 | Q5_1 | Q8_0
         snprintf(strbuf, sizeof(strbuf),
                  "%4zu x %4zu: Q5_0 %7.1f GFLOPS (%3d runs) | Q5_1 %7.1f GFLOPS (%3d runs) | Q8_0 %7.1f GFLOPS (%3d runs)\n",
                  N, N, s_q5_0, n_q5_0, s_q5_1, n_q5_1, s_q8_0, n_q8_0);
-        tipString += strbuf;
+        s += strbuf;
+#endif
 
         // F16 | F32
         snprintf(strbuf, sizeof(strbuf),
                  "%4zu x %4zu: F16  %7.1f GFLOPS (%3d runs) | F32  %7.1f GFLOPS (%3d runs)\n",
                  N, N, s_fp16, n_fp16, s_fp32, n_fp32);
-        tipString += strbuf;
+        s += strbuf;
 
 
-        kantv_asr_notify_benchmark(tipString);
-        LOGGD("%s\n", tipString.c_str());
+        kantv_asr_notify_benchmark(s);
+        LOGGD("%s\n", s.c_str());
     }
 
 
