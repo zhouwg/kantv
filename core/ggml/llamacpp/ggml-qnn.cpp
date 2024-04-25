@@ -980,8 +980,8 @@ static int free_qnn_tensor(Qnn_Tensor_t & tensor) {
     } else {
         //LOGGD("%p", QNN_TENSOR_GET_DIMENSIONS(tensor));
         //TODO:why crash in here? why pointer changed with mul_mat?
+        //memory leak after comment below line
         //free(QNN_TENSOR_GET_DIMENSIONS(tensor));
-        //memory leak after comment above line
     }
     //LEAVE_FUNC();
 
@@ -2150,11 +2150,11 @@ int qnn_instance::load_system() {
 
     _system_lib_handle = dlopen(system_lib_path.c_str(), RTLD_NOW | RTLD_LOCAL);
     if (nullptr == _system_lib_handle) {
-        LOGGW("can not pen QNN library %s, error: %s\n", system_lib_path.c_str(), dlerror());
+        LOGGW("can not open QNN library %s, error: %s\n", system_lib_path.c_str(), dlerror());
         return 1;
     }
 
-    auto *get_providers = reinterpret_cast<_pfn_QnnSystemInterface_getProviders *>(dlsym(
+    auto * get_providers = reinterpret_cast<_pfn_QnnSystemInterface_getProviders *>(dlsym(
             _system_lib_handle, "QnnSystemInterface_getProviders"));
     if (nullptr == get_providers) {
         LOGGW("can not load QNN symbol QnnSystemInterface_getProviders: %s\n", dlerror());
@@ -3895,8 +3895,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
             return false;
     }
 
-
-    //ok, real show time in Qualcomm's QNN internal
     if (nullptr != func)
         func(tensor->src[0], tensor->src[1], tensor);
     if (nullptr != func_common)
@@ -4181,7 +4179,8 @@ static size_t ggml_backend_qnn_buffer_type_get_alignment(ggml_backend_buffer_typ
 static size_t ggml_backend_qnn_buffer_type_get_max_size(ggml_backend_buffer_type_t buft) {
     GGML_UNUSED(buft);
     //works fine with ggml-tiny.en-q8_0.bin for whisper.cpp
-    return (38 * 1024 * 1024);
+    //return (38 * 1024 * 1024);
+    return (96 * 1024 * 1024);
 }
 
 

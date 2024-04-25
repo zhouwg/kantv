@@ -6667,19 +6667,44 @@ WHISPER_API const char * whisper_bench_ggml_mul_mat_str(int n_threads, int n_bac
                 /*.mem_buffer =*/ buf.data(),
                 /*.no_alloc   =*/ false,
             };
-
+            ggml_backend_t backend = nullptr;
+            ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-            if (n_backend != 3) //3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+            if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 gparams.use_hwaccel = true;
+                gparams.no_alloc    = true;
+
+                backend = ggml_backend_qnn_init(n_backend, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
+                if (nullptr == backend) {
+                    LOGGD("create qnn backend %d failed", n_backend);
+                    GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend);
+                    return "unknown";
+                }
+                n_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
+            }
 #endif
-
-
             struct ggml_context * ctx0 = ggml_init(gparams);
 
             struct ggml_tensor * a = ggml_new_tensor_2d(ctx0, wtype,         N, N);
             struct ggml_tensor * b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+            ggml_set_input(a);
+            ggml_set_input(b);
 
             struct ggml_tensor * c = ggml_mul_mat(ctx0, a, b);
+            ggml_set_output(c);
+
+#ifdef GGML_USE_QNN
+            if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                LOGGD("creating backend buffer\n");
+                buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
+                if (!buffer) {
+                    LOGGD("%s: failed to allocate backend buffer\n", __func__);
+                    //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
+                    //ggml_backend_free(backend);
+                    return "unknown";
+                }
+            }
+#endif
 
             struct ggml_cgraph * gf = ggml_new_graph(ctx0);
 
