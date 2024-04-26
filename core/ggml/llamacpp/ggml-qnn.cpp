@@ -2092,6 +2092,7 @@ int qnn_instance::load_backend(std::string & lib_path, const QnnSaver_Config_t *
     _loaded_lib_handle[backend_id] = lib_handle;
     _backend_id = backend_id;
 
+#if 0
     QnnSaver_Config_t outputdir_cfg;
     outputdir_cfg.option = QNN_SAVER_CONFIG_OPTION_OUTPUT_DIRECTORY;
     outputdir_cfg.outputDirectory = "/data/data/com.cdeos.kantv/qnn/";
@@ -2105,6 +2106,7 @@ int qnn_instance::load_backend(std::string & lib_path, const QnnSaver_Config_t *
     } else {
         LOGGI("QnnSaver_initialize failure");
     }
+#endif
 
     auto saver_initialize = load_qnn_functionpointers<_pfn_QnnSaver_initialize *>(
             _loaded_lib_handle[backend_id], "QnnSaver_initialize");
@@ -4388,6 +4390,8 @@ static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tens
 
     switch (op->op) {
         case GGML_OP_MUL_MAT:
+        case GGML_OP_MUL:
+        case GGML_OP_ADD:
             return true;
         default:
             return false;
@@ -5070,6 +5074,12 @@ static ggml_guid_t ggml_backend_qnn_guid() {
 
 static ggml_backend_t ggml_backend_qnn_reg_init(const char * params, void * user_data) {
     ENTER_FUNC();
+    if (nullptr == params) {
+        //this is data path of prebuit QNN libs provided by Qualcomm
+        //can be obtained through JNI from Java layer such as "/data/data/com.ggml.llamacpp/"
+        //or hardcoded to "/data/local/tmp/" which is an Android OS defined path
+        params = "/data/local/tmp/";
+    }
     ggml_backend_t qnn_backend = ggml_backend_qnn_init((int) (intptr_t) user_data, params);
     LEAVE_FUNC();
 

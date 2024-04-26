@@ -373,6 +373,10 @@ void  LOG_PRI_ZWG_IMPL(const char *file, const char *func, unsigned int line,  i
         #if (defined __ANDROID__) || (defined ANDROID)
             __android_log_print(priority, tag, "%s", logBuf);
             __android_log_print(priority, tag, NONE);
+#ifdef GGML_USE_QNN
+            printf("%s", logBuf);
+            printf("%s%s", logBuf, NONE);
+#endif
         #else
             #ifndef TEE_TA_SIDE
                 #if (defined(TARGET_WASM))
