@@ -8,14 +8,11 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - ASR(Automatic Speech Recognition, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
 
-- LLM(Large Language Model, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> 
-
-- SD(Text to Image by Stable Diffusion, a subfiled of AI) study by the amazing <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp </a> 
-
+- LLM(Large Language Model, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>，Run/experience LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 using the llama.cpp 
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
-- Run/experience LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 using the amazing <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>
+- 2D graphic performance 
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
@@ -35,9 +32,9 @@ Some goals of this project are:
 
 ### Software architecture of KanTV Android
 
-(this is proposal and depend on https://github.com/zhouwg/kantv/issues/121)
+(depend on https://github.com/zhouwg/kantv/issues/121)
 
-![kantv-android-arch](https://github.com/zhouwg/kantv/assets/6889919/3d850ce3-f8b5-4fc7-9ce7-cc8300717b45)
+![Screenshot from 2024-04-28 10-16-29](https://github.com/zhouwg/kantv/assets/6889919/a78f8d7f-6ca3-40d7-a9ab-0ab70a7c585d)
 
 ### How to build project
 
@@ -316,7 +313,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-the AI part of this project is <b>heavily depend on</b> [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
+the AI part of this project is <b> powered by </b> [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
 
 ### License
 
