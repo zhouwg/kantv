@@ -314,10 +314,21 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-the AI part of this project is <b> powered by </b>
-   [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
 
-   [ncnn](https://github.com/Tencent/ncnn) by Tencent
+    the AI part of this project is <b> powered by </b>
+
+  <ul>
+  <li>
+
+   [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov)
+
+  </li>
+
+  <li>
+   <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
+  </li>
+
+  </ul>
 
 ### License
 
