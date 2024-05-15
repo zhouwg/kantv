@@ -283,14 +283,11 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- ASR, TTS, CV, LLM, Agent ... by <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
 - bugfix in UI layer(Java)
 
 - bugfix in native layer(C/C++)
-
-- participate in improvement of ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Android device and feedback to upstream
-
 
 ### Contribution
 
