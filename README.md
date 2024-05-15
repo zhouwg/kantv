@@ -285,6 +285,8 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 - ASR, TTS, CV, LLM, Agent ... by <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
+- Qualcomm QNN backend for Tencent NCNN
+
 - bugfix in UI layer(Java)
 
 - bugfix in native layer(C/C++)
