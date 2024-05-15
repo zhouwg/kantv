@@ -261,8 +261,12 @@ public class IApplication extends Application {
         //qualcomm's prebuilt binary file
         CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
         CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
-        //prebuilt data from https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.md
-        CDEAssetLoader.copyAssetFile(mContext, "ln.bin", CDEUtils.getDataPath() + "ln.bin");
+
+        //prebuilt model and data for MNIST
+        CDEAssetLoader.copyAssetFile(mContext, "example.png", CDEUtils.getDataPath() + "example.png");
+        CDEAssetLoader.copyAssetFile(mContext, "mnist-5.png", CDEUtils.getDataPath() + "mnist-5.png");
+        CDEAssetLoader.copyAssetFile(mContext, "mnist-7.png", CDEUtils.getDataPath() + "mnist-7.png");
+        CDEAssetLoader.copyAssetFile(mContext, "mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
 
 
         CDEAssetLoader.copyAssetFile(mContext, "config.json", CDEAssetLoader.getDataPath(mContext) + "config.json");

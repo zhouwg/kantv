@@ -14,3 +14,7 @@ out/
 obj/
 make/
 out.*/
+
+whispercpp/bench
+whispercpp/main
+whispercpp/quantize
