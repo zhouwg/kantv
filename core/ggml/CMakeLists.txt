@@ -64,6 +64,7 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/mnist-ggml.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/llama-bench.cpp

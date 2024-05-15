@@ -34,7 +34,8 @@ Some goals of this project are:
 
 (depend on https://github.com/zhouwg/kantv/issues/121)
 
-![Screenshot from 2024-04-28 10-16-29](https://github.com/zhouwg/kantv/assets/6889919/a78f8d7f-6ca3-40d7-a9ab-0ab70a7c585d)
+![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b7e04205-6406-42e7-9746-ccd592f6d12c)
+
 
 ### How to build project
 
@@ -282,14 +283,13 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- real-time Chinese subtitle for online English TV by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- ASR, TTS, CV, LLM, Agent ... by <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+
+- Qualcomm QNN backend for Tencent NCNN
 
 - bugfix in UI layer(Java)
 
 - bugfix in native layer(C/C++)
-
-- participate in improvement of ![whisper.cpp](https://github.com/ggerganov/whisper.cpp) on Android device and feedback to upstream
-
 
 ### Contribution
 
@@ -313,7 +313,20 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-the AI part of this project is <b> powered by </b> [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov).
+  the AI part of this project is powered by
+
+  <ul>
+  <li>
+
+   [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov)
+
+  </li>
+
+  <li>
+   <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
+  </li>
+
+  </ul>
 
 ### License
 
