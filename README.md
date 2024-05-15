@@ -313,8 +313,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-
-    the AI part of this project is <b> powered by </b>
+  the AI part of this project is powered by
 
   <ul>
   <li>
