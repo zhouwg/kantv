@@ -285,8 +285,6 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 - multimodel AI agent(ASR, TTS, CV, LLM ...) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
-- Qualcomm QNN backend for Tencent NCNN
-
 - bugfix in UI layer(Java)
 
 - bugfix in native layer(C/C++)
