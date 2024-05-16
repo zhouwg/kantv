@@ -191,3 +191,10 @@
                     <li>use ggml-jni to validate/verify llama-2-7b,qwen1_5-1_8b, baichuan2-7b, gemma-2b models on Xiaomi 14</li>
                     <li>regular cleanup/refine files/codes/README</li>
                  </ul>
+
+- v1.3.7 2024-05-16,
+                 <ul>
+                    <li>PoC:QNN backend</li>
+                    <li>Build:add command-line mode and docker mode</li>
+                    <li>JNI:add mnist-ggml example</li>
+                 </ul>

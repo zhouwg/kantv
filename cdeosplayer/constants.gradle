@@ -44,8 +44,8 @@ project.ext {
     appTargetSdkVersion = 29
 
     //version and version code of KanTV
-    releaseVersion     = '1.3.6'
-    releaseVersionCode = 1000306
+    releaseVersion     = '1.3.7'
+    releaseVersionCode = 1000307
 
     modulePrefix = ':'
     guavaVersion = '27.1-android'

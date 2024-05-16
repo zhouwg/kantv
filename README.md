@@ -279,13 +279,11 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 ### Hot topics
 
+- Android multimodel AI agent(ASR, TTS, CV, LLM ..., an open source GPT-4o for Android device) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
-
-- ASR, TTS, CV, LLM, Agent ... by <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
-
-- Qualcomm QNN backend for Tencent NCNN
 
 - bugfix in UI layer(Java)
 
