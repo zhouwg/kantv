@@ -283,7 +283,7 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 - improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
-- multimodel AI agent(ASR, TTS, CV, LLM ...) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+- Android multimodel AI agent(ASR, TTS, CV, LLM ...) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
 - bugfix in UI layer(Java)
 
