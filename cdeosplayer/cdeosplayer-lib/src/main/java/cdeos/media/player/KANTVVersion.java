@@ -19,7 +19,7 @@ package cdeos.media.player;
 
 final class KANTVVersion
 {
-    public static final String KANTV_VERSION="KANTV-v1.3.6"; //not used since 03-30-2024
+    public static final String KANTV_VERSION="KANTV-v1.3.7"; //not used since 03-30-2024
 
     public static native int kantv_anti_remove_rename_this_file();
 }

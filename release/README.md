@@ -195,5 +195,6 @@
 - v1.3.7 2024-05-16,
                  <ul>
                     <li>PoC:QNN backend</li>
+                    <li>Build:add command-line mode and docker mode</li>
                     <li>JNI:add mnist-ggml example</li>
                  </ul>
