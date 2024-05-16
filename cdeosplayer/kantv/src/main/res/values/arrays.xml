@@ -60,20 +60,16 @@
     </string-array>
 
     <string-array name="benchType">
-        <item>whisper asr</item>            <!-- whisper asr benchmark / asr validation -->
+        <item>ASR(whisper)</item>           <!-- whisper ASR benchmark / validation ASR with QNN backend -->
         <item>memcpy</item>                 <!-- whisper memcopy benchmark -->
         <item>whisper mulmat</item>         <!-- whisper mulmat benchmark -->
         <item>whisper full</item>           <!-- whisper full benchmark -->
-        <item>llama</item>                  <!-- llama benchmark,            not work currently -->
+        <item>LLM</item>                    <!-- LLM benchmark -->
         <item>stablediffusion</item>        <!-- stable diffusion benchmark, not work currently -->
-        <!-- step by step for PoC: Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121 -->
-        <item>qnn-sample</item>             <!-- "play with /say hello to" QNN Sample -->
-        <item>qnn-saver</item>              <!-- study QNN SDK mechanism by QNN Saver -->
-        <item>qnn-matrix</item>             <!-- offload a simple matrix addition operation to QNN -->
-        <item>qnn-ggml</item>               <!-- mapping ggml tensor to QNN tensor -->
-        <item>qnn-complex</item>            <!-- complex computation graph in C/C++ or GGML, and then offload them to QNN -->
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
+        <item>MNIST</item>                  <!-- MNIST benchmark -->
+        <item>TTS</item>                    <!-- TTS benchmark -->
     </string-array>
 
     <string-array name="threadCounts">
@@ -109,6 +105,7 @@
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
         <item>sdmodel</item>
+        <item>mnist</item>
         <item>qnn</item>
     </string-array>
 

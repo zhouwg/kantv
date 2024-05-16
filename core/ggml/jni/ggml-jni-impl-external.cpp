@@ -5565,7 +5565,7 @@ int qnn_implementation::load_backend(std::string & lib_path, const QnnSaver_Conf
     }
     _loaded_lib_handle[backend_id] = lib_handle;
     _backend_id = backend_id;
-
+#if 0 //remove libQnnCPU.so and libQNNSaver.so and reduce size of apk
     QnnSaver_Config_t outputdir_cfg;
     outputdir_cfg.option = QNN_SAVER_CONFIG_OPTION_OUTPUT_DIRECTORY;
     outputdir_cfg.outputDirectory = "/data/data/com.cdeos.kantv/qnn/";
@@ -5591,6 +5591,7 @@ int qnn_implementation::load_backend(std::string & lib_path, const QnnSaver_Conf
     } else {
         LOGGW("saver_initialize is null\n");
     }
+#endif
 
     return 0;
 }

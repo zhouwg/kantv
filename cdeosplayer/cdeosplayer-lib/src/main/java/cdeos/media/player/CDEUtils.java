@@ -266,13 +266,11 @@
      public static final int BENCHMARK_FULL     = 3;
      public static final int BENCHMARK_LLM     = 4;
      public static final int BENCHMARK_STABLEDIFFUSION= 5;
-     public static final int BENCHMARK_QNN_SAMPLE     = 6;
-     public static final int BENCHMARK_QNN_SAVER      = 7;
-     public static final int BENCHMARK_QNN_MATRIX     = 8;
-     public static final int BENCHMARK_QNN_GGML       = 9;
-     public static final int BENCHMARK_QNN_COMPLEX    = 10;
-     public static final int BENCHMARK_QNN_GGML_OP    = 11;
-     public static final int BENCHMARK_QNN_AUTO_UT    = 12;
+     public static final int BENCHMARK_QNN_GGML_OP     = 6;
+     public static final int BENCHMARK_QNN_AUTO_UT      = 7;
+     public static final int BENCHMARK_MNIST     = 8;
+     public static final int BENCHMARK_TTS       = 9;
+
 
      //keep sync with ggml-qnn.h
      public static final int QNN_BACKEND_CPU           = 0;
@@ -3934,27 +3932,17 @@
              case BENCHMARK_STABLEDIFFUSION:
                  return "GGML stable diffusion";
 
-             case BENCHMARK_QNN_SAMPLE:
-                 return "GGML QNN sample";
-
-             case BENCHMARK_QNN_SAVER:
-                 return "GGML QNN saver";
-
-
-             case BENCHMARK_QNN_MATRIX:
-                 return "GGML QNN matrix addition";
-
-             case BENCHMARK_QNN_GGML:
-                 return "GGML QNN mapping ggml tensor";
-
-             case BENCHMARK_QNN_COMPLEX:
-                 return "GGML QNN complex graph";
-
              case BENCHMARK_QNN_GGML_OP:
                  return "GGML QNN OP UT"; //UT for PoC-S49: implementation of GGML OPs using QNN API
 
              case BENCHMARK_QNN_AUTO_UT:
                  return "GGML QNN OP UT automation"; //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+
+             case BENCHMARK_MNIST:
+                 return "GGML mnist";
+                 
+             case BENCHMARK_TTS:
+                 return "GGML TTS";
          }
 
          return "unknown";

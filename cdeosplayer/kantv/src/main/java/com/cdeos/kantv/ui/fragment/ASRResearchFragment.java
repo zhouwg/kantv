@@ -41,6 +41,7 @@
  import android.widget.AdapterView;
  import android.widget.ArrayAdapter;
  import android.widget.Button;
+ import android.widget.EditText;
  import android.widget.LinearLayout;
  import android.widget.Spinner;
  import android.widget.TextView;
@@ -90,6 +91,7 @@
      TextView _txtASRInfo;
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
+     EditText _txtUserInput;
 
      Button _btnBenchmark;
 
@@ -114,9 +116,11 @@
      private long duration = 0;
      private String strBenchmarkInfo;
      private long nLogCounts = 0;
-     private boolean isLLMModel = false;
-     private boolean isQNNModel = false;
-     private boolean isSDModel=false;
+     private boolean isLLMModel     = false;
+     private boolean isQNNModel     = false;
+     private boolean isSDModel      = false;
+     private boolean isMNISTModel   = false;
+     private boolean isTTSModel     = false;
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -124,6 +128,41 @@
      //private String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
      private String ggmlModelFileName  = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
      private String ggmlSampleFileName = "jfk.wav";
+
+     // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main
+     // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-13B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
+     // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
+
+
+     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
+
+
+     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF
+     // https://huggingface.co/shaowenchen/baichuan2-7b-chat-gguf
+     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf // 4.61 GB
+
+
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/tree/main
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q4_K_M.gguf  // 1.5 GB
+     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    // 2.67 GB
+
+     // https://huggingface.co/TheBloke/Yi-34B-Chat-GGUF/tree/main
+     // https://huggingface.co/second-state/Yi-34B-Chat-GGUF/blob/a93fd377944179153cc8477eef2e69645c1a8ff9/Yi-34B-Chat-Q2_K.gguf // 12.8 GB
+
+
+     //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
+     //private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
+     //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; // 1.1 GB
+     //private String ggmlModelFileName = "baichuan2-7b.Q4_K_M.gguf"; // 4.61 GB
+     //private String ggmlModelFileName = "gemma-2b.Q4_K_M.gguf";  // 1.5 GB
+
+     //https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf // 2.67 GB
+     //private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
+     private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words.";
 
      private Context mContext;
      private Activity mActivity;
@@ -166,7 +205,8 @@
          _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfo);
          _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = (Button) mActivity.findViewById(R.id.btnBenchmark);
-
+         //TODO: change to voice input, and then use whisper.cpp to convert it into text
+         _txtUserInput = (EditText) mActivity.findViewById(R.id.txtPrompt);
 
          //copy asset files to /sdcard/kantv/
          //or just upload dependent files to /sdcard/kantv/ accordingly so the APK size would be smaller significantly
@@ -216,13 +256,13 @@
          CDELog.j(TAG, "load ggml's whispercpp info");
          String systemInfo = ggmljava.asr_get_systeminfo();
          String phoneInfo = "Device info:" + " "
-                 + "Brand:" + Build.BRAND + " "
-                 + "Hardware:" + Build.HARDWARE + " "
-                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + " "
+                 + Build.BRAND + " "
+                 + Build.HARDWARE + " "
+                 + "Android " + android.os.Build.VERSION.RELEASE + " "
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Powered by GGML(Georgi Gerganov Machine Learning)(https://github.com/ggerganov/ggml)\n");
+         _txtGGMLInfo.append("Powered by GGML(https://github.com/ggerganov/ggml)\n");
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -235,16 +275,13 @@
                  benchmarkIndex = Integer.valueOf(position);
                  CDELog.j(TAG, "benchmark index:" + benchmarkIndex);
 
-                 if ((previousBenchmakrIndex != CDEUtils.BENCHMARK_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMARK_QNN_COMPLEX)) {
-                     previousBenchmakrIndex = benchmarkIndex;
-                     return;
-                 }
+                 //if ((previousBenchmakrIndex != CDEUtils.BENCHMARK_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMARK_QNN_COMPLEX)) {
+                 //    previousBenchmakrIndex = benchmarkIndex;
+                 //    return;
+                 //}
 
-                 if (benchmarkIndex == CDEUtils.BENCHMARK_QNN_COMPLEX) {
-                     spinnerOPType.setAdapter(adapterGraphType);
-                 } else {
-                     spinnerOPType.setAdapter(adapterOPType);
-                 }
+                 spinnerOPType.setAdapter(adapterOPType);
+
                  adapterOPType.notifyDataSetChanged();
 
                  previousBenchmakrIndex = benchmarkIndex;
@@ -370,7 +407,9 @@
 
              isLLMModel = false;
              isQNNModel = false;
-             isSDModel  = false;
+             isSDModel = false;
+             isMNISTModel = false;
+             isTTSModel = false;
 
              //TODO: better method
              //sanity check begin
@@ -384,20 +423,24 @@
                  isLLMModel = true;
              } else if (strModeName.startsWith("qnn")) {
                  isQNNModel = true;
-            } else if (strModeName.startsWith("sdmodel")) //TODO:hardcode
-                isSDModel = true;
+             } else if (strModeName.startsWith("mnist")) {
+                 isMNISTModel = true;
+             } else if (strModeName.startsWith("sdmodel")) //TODO:hardcode
+                 isSDModel = true;
 
              CDELog.j(TAG, "isSDModel:" + isSDModel);
              if (isLLMModel)
                  selectModeFileName = strModeName + ".gguf";
              else if (isQNNModel)
                  //qualcomm's dedicated model:a model is a dynamic so and it's generated by Qualcomm special tools
-                 selectModeFileName =  "libInception_v3.so"; //TODO:hardcode in PoC stage
+                 selectModeFileName = "libInception_v3.so"; //TODO:hardcode in PoC stage
              else if (isSDModel)
                  //https://github.com/leejet/stable-diffusion.cpp
                  //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
                  //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
                  selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf"; //TODO: hardcode SD model name
+             else if (isMNISTModel)
+                 selectModeFileName = "mnist-ggml-model-f32.gguf"; //TODO:hardcode MNIST model name
              else
                  selectModeFileName = "ggml-" + strModeName + ".bin";
 
@@ -416,15 +459,6 @@
                  return;
              }
              if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
-
-             if (isQNNModel && ((benchmarkIndex < CDEUtils.BENCHMARK_QNN_SAMPLE) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP))) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
-             if (!isQNNModel && ((benchmarkIndex >= CDEUtils.BENCHMARK_QNN_SAMPLE) && (benchmarkIndex < CDEUtils.BENCHMARK_QNN_GGML_OP))) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }
@@ -448,10 +482,16 @@
                  return;
              }
 
-             if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {//QNN HTP(aka DSP)
-                 //CDEUtils.showMsgBox(mActivity, "QNN HTP(aka DSP) not supported currently");
+             String strPrompt = _txtUserInput.getText().toString();
+             if (strPrompt.isEmpty()) {
+                 //CDEUtils.showMsgBox(mActivity, "pls check your input");
                  //return;
+                 strPrompt = strUserInput;
              }
+             strPrompt = strPrompt.trim();
+             strUserInput = strPrompt;
+             CDELog.j(TAG, "User input: \n " + strUserInput);
+
              //sanity check end
 
              //reset default ggml model file name after sanity check
@@ -504,11 +544,19 @@
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
                      if (!isQNNModel) {
-                         strBenchmarkInfo = ggmljava.ggml_bench(
-                                 CDEUtils.getDataPath() + ggmlModelFileName,
-                                 CDEUtils.getDataPath() + ggmlSampleFileName,
-                                 benchmarkIndex,
-                                 nThreadCounts, backendIndex, optypeIndex);
+                         if (isLLMModel) {
+                             strBenchmarkInfo = ggmljava.llm_inference(
+                                     CDEUtils.getDataPath() + ggmlModelFileName,
+                                     strUserInput,
+                                     benchmarkIndex,
+                                     nThreadCounts, backendIndex);
+                         } else {
+                             strBenchmarkInfo = ggmljava.ggml_bench(
+                                     CDEUtils.getDataPath() + ggmlModelFileName,
+                                     CDEUtils.getDataPath() + ggmlSampleFileName,
+                                     benchmarkIndex,
+                                     nThreadCounts, backendIndex, optypeIndex);
+                         }
                      } else {
                          // avoid following issue
                          // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
@@ -685,6 +733,7 @@
                      return;
                  }
 
+
                  if (content.startsWith("reset")) {
                      _txtASRInfo.setText("");
                      return;
@@ -693,12 +742,19 @@
                  if (content.startsWith("unknown")) {
 
                  } else {
-                     nLogCounts++;
-                     if (nLogCounts > 100) {
-                         _txtASRInfo.setText(""); //make QNN SDK happy on Xiaomi14
-                         nLogCounts = 0;
+                     /*
+                     if (content.startsWith("llama-timings")) {
+                         _txtGGMLStatus.setText("");
+                         _txtGGMLStatus.append(content);
                      }
-                     _txtASRInfo.append(content);
+                     else */{
+                         nLogCounts++;
+                         if (nLogCounts > 100) {
+                             //_txtASRInfo.setText(""); //make QNN SDK happy on Xiaomi14
+                             nLogCounts = 0;
+                         }
+                         _txtASRInfo.append(content);
+                     }
                  }
              }
          }

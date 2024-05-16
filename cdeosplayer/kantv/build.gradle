@@ -24,9 +24,9 @@ android {
         //fix conflict between open source native libs and prebuilt proprietary native libs(IDE would complain more than one file was found)
         packagingOptions {
             pickFirst 'lib/arm64-v8a/libkantv-media.so'
-            pickFirst 'lib/arm64-v8a/libkantv-ffmpeg.so'
+            //pickFirst 'lib/arm64-v8a/libkantv-ffmpeg.so'
             pickFirst 'lib/arm64-v8a/libggml-jni.so'
-            pickFirst 'lib/arm64-v8a/libQnn*.so'
+            //pickFirst 'lib/arm64-v8a/libQnn*.so'
         }
 
         versionName project.ext.releaseVersion

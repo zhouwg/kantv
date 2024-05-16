@@ -65,26 +65,7 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/mnist-ggml.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/saver_output.c
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
-        ${KANTV_GGMLJNI_SRC_DIR}/llama-bench.cpp
-
-        ${QNN_SRC_DIR}/QnnSampleMain.cpp
-        ${QNN_SRC_DIR}/QnnSampleApp.cpp
-        ${QNN_SRC_DIR}/Log/Logger.cpp
-        ${QNN_SRC_DIR}/Log/LogUtils.cpp
-        ${QNN_SRC_DIR}/PAL/src/linux/Directory.cpp
-        ${QNN_SRC_DIR}/PAL/src/linux/DynamicLoading.cpp
-        ${QNN_SRC_DIR}/PAL/src/linux/FileOp.cpp
-        ${QNN_SRC_DIR}/PAL/src/linux/Path.cpp
-        ${QNN_SRC_DIR}/PAL/src/common/GetOpt.cpp
-        ${QNN_SRC_DIR}/PAL/src/common/StringOp.cpp
-        ${QNN_SRC_DIR}/Utils/DataUtil.cpp
-        ${QNN_SRC_DIR}/Utils/DynamicLoadUtil.cpp
-        ${QNN_SRC_DIR}/Utils/IOTensor.cpp
-        ${QNN_SRC_DIR}/Utils/QnnSampleAppUtils.cpp
-        ${QNN_SRC_DIR}/WrapperUtils/QnnWrapperUtils.cpp
-
 
         ${stablediffusioncpp}
 )
@@ -181,25 +162,6 @@ set_target_properties(kantvffmpeg
         IMPORTED_LOCATION
         ${PREBUILT_LIB_PATH}/libkantv-ffmpeg.so)
 
-
-add_library(QNNSaver
-        SHARED
-        IMPORTED)
-
-set_target_properties(QNNSaver
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${PREBUILT_LIB_PATH}/libQnnSaver.so)
-
-add_library(QNNCpu
-        SHARED
-        IMPORTED)
-
-set_target_properties(QNNCpu
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${PREBUILT_LIB_PATH}/libQnnCpu.so)
-
 function(build_library target_name)
     add_library(
             ${target_name}
@@ -210,9 +172,9 @@ function(build_library target_name)
     if (GGML_JNI_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia QNNCpu QNNSaver android )
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android )
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
     endif()
 
 endfunction()

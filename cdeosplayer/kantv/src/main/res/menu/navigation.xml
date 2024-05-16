@@ -19,7 +19,7 @@
     <item
         android:id="@+id/navigation_llm"
         android:icon="@mipmap/ic_personal_scan"
-        android:title="LLM"/>
+        android:title="Agent"/>
 
     <item
         android:id="@+id/navigation_personal"

@@ -1,4 +1,0 @@
-/sdcard/kantv/data/cropped/notice_sign.raw
-/sdcard/kantv/data/cropped/plastic_cup.raw
-/sdcard/kantv/data/cropped/trash_bin.raw
-/sdcard/kantv/data/cropped/chairs.raw
