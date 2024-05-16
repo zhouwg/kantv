@@ -263,7 +263,6 @@ public class IApplication extends Application {
         CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
 
         //prebuilt model and data for MNIST
-        CDEAssetLoader.copyAssetFile(mContext, "example.png", CDEUtils.getDataPath() + "example.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-5.png", CDEUtils.getDataPath() + "mnist-5.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-7.png", CDEUtils.getDataPath() + "mnist-7.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
