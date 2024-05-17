@@ -10,4 +10,10 @@
         android:title="@string/network_content"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/original_filter" android:title="Original" app:showAsAction="never"/>
+    <item android:id="@+id/beauty_filter" android:title="Beauty" app:showAsAction="never"/>
+    <item android:id="@+id/cool_filter" android:title="Cool" app:showAsAction="never"/>
+    <item android:id="@+id/nostalgia_filter" android:title="Nostalgia" app:showAsAction="never"/>
+    <item android:id="@+id/romance_filter" android:title="Romance" app:showAsAction="never"/>
+
 </menu>

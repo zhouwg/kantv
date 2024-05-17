@@ -5565,7 +5565,7 @@ int qnn_implementation::load_backend(std::string & lib_path, const QnnSaver_Conf
     }
     _loaded_lib_handle[backend_id] = lib_handle;
     _backend_id = backend_id;
-
+#if 0 //remove libQnnCPU.so and libQNNSaver.so and reduce size of apk
     QnnSaver_Config_t outputdir_cfg;
     outputdir_cfg.option = QNN_SAVER_CONFIG_OPTION_OUTPUT_DIRECTORY;
     outputdir_cfg.outputDirectory = "/data/data/com.cdeos.kantv/qnn/";
@@ -5591,6 +5591,7 @@ int qnn_implementation::load_backend(std::string & lib_path, const QnnSaver_Conf
     } else {
         LOGGW("saver_initialize is null\n");
     }
+#endif
 
     return 0;
 }
@@ -7651,52 +7652,6 @@ static int check_tensor(float * a, float * b, int n, char * label) {
 }
 
 
-static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type);
-extern int mnist_ggml(int argc, char * argv[]);
-// PoC-S35&S37:implement a complex/complicated computation graph
-// 在这个函数里使用GGML做各种推理实验
-int qnn_complex_graph(int n_backend_type, int n_graph_type) {
-    int result                                  = 0;
-    int64_t  n_begin_time                       = 0LL;
-    int64_t  n_end_time                         = 0LL;
-    int64_t  n_durtion                          = 0LL;
-
-    ggml_time_init();
-    n_begin_time                                = ggml_time_us();
-    LOGGD("enter qnn_complex_graph\n");
-    LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
-          n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
-    GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
-                    n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
-
-    switch (n_graph_type) {
-        case 0: // MNIST手写数字识别推理, https://github.com/StudyingLover/ggml-tutorial
-        {
-            int argc = 3;
-            char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
-            GGML_JNI_NOTIFY("input data is mnist-5.png\n");
-            mnist_ggml(argc, argv);
-            break;
-        }
-        case 1:
-        {
-            result = qnn_complex_graph_inception(n_backend_type, 1);
-            return result;
-        }
-        default:
-            return 0;
-    }
-
-    n_end_time  = ggml_time_us();
-    n_durtion   = (n_end_time - n_begin_time) / 1000;
-    LOGGD("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
-    GGML_JNI_NOTIFY("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
-    LOGGD("leave qnn_complex_graph\n");
-
-    return result;
-}
-
-
 // https://github.com/zhouwg/kantv/issues/121
 // PoC-S37:implement a complex/complicated computation graph
 // how to mapping GGML tensor to QNN tensor could be found at PoC-S29(function qnn_ggml)
@@ -8071,6 +8026,49 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
     GGML_JNI_NOTIFY("duration of qnn_complex_graph_inception with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
 
     LOGGD("leave qnn_complex_graph_inception\n");
+
+    return result;
+}
+
+// PoC-S35&S37:implement a complex/complicated computation graph
+// 在这个函数里使用GGML做各种推理实验
+int qnn_complex_graph(int n_backend_type, int n_graph_type) {
+    int result                                  = 0;
+    int64_t  n_begin_time                       = 0LL;
+    int64_t  n_end_time                         = 0LL;
+    int64_t  n_durtion                          = 0LL;
+
+    ggml_time_init();
+    n_begin_time                                = ggml_time_us();
+    LOGGD("enter qnn_complex_graph\n");
+    LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
+          n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+    GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
+                    n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
+
+    switch (n_graph_type) {
+        case 0: // MNIST手写数字识别推理, https://github.com/StudyingLover/ggml-tutorial
+        {
+            int argc = 3;
+            char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
+            GGML_JNI_NOTIFY("input data is mnist-5.png\n");
+            mnist_inference(argc, argv);
+            break;
+        }
+        case 1:
+        {
+            result = qnn_complex_graph_inception(n_backend_type, 1);
+            return result;
+        }
+        default:
+            return 0;
+    }
+
+    n_end_time  = ggml_time_us();
+    n_durtion   = (n_end_time - n_begin_time) / 1000;
+    LOGGD("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+    GGML_JNI_NOTIFY("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n", get_qnn_backend_name(n_backend_type), n_durtion);
+    LOGGD("leave qnn_complex_graph\n");
 
     return result;
 }

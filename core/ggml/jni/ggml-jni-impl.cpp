@@ -34,8 +34,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * The above statement and notice must be included in corresponding files in derived project
  */
 
 #define RUAPU_IMPLEMENTATION
@@ -814,14 +812,14 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
 
 
 /**
- *
- * @param sz_model_path         /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
- * @param sz_audio_path         /sdcard/kantv/jfk.wav
- * @param n_bench_type          0: whisper asr 1: memcpy 2: mulmat  3: whisper full 4: LLAMA 5: stable diffusion 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: QNN complex 11: QNN GGML OP(QNN UT) 12: QNN UT automation
- * @param n_threads             1 - 8
- * @param n_backend_type        0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
- * @param n_op_type             type of matrix manipulate / GGML OP / type of various complex/complicated compute graph
- * @return
+  *
+  * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
+  * @param sz_audio_path   /sdcard/kantv/jfk.wav, for ASR benchmark
+  * @param n_bench_type    0: ASR(whisper.cpp) 1: memcpy 2: mulmat  3: whisper full 4: LLM(llama.cpp) 5: stable diffusion 6: QNN GGML OP(QNN UT) 7: QNN UT automation 8: MNIST 9: TTS
+  * @param n_threads       1 - 8
+  * @param n_backend_type  0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
+  * @param n_op_type       type of GGML OP
+  * @return
 */
 void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n_bench_type, int n_threads, int n_backend_type, int n_op_type) {
     int result = 0;
@@ -876,77 +874,33 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             whisper_bench_full();
             break;
 
-        case BENCHMAKR_LLAMA:
-            ggml_bench_llama(sz_model_path, n_threads, n_backend_type);
+        case BENCHMARK_LLAMA:
+            llama_inference(sz_model_path, "introduce the movie Once Upon a Time in America briefly", n_bench_type, n_threads, n_backend_type);
             break;
 
-        case BENCHMAKR_STABLEDIFFUSION:
+        case BENCHMARK_STABLEDIFFUSION:
             stablediffusion_inference(sz_model_path, "a lovely cat", 0, n_threads, n_backend_type); //TODO:not work on Xiaomi 14
-            break;
-
-        case BENCHMAKR_QNN_SAMPLE:
-            {
-                //TODO: this is a lazy method in PoC stage
-                int argc = 11;
-                char *qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnCpu.so";
-                switch (n_backend_type) {
-                    case 0:
-                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnCpu.so";
-                        break;
-                    case 1:
-                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnGpu.so";
-                        break;
-                    case 2:
-                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnDsp.so";
-                        break;
-                    case 3:
-                        qnn_backend_lib = "/data/data/com.cdeos.kantv/libQnnSaver.so";
-                        break;
-                    default:
-                        LOGGW("backend type %d not supported\n", n_backend_type);
-                        break;
-                }
-
-                LOGGD("qnn_backend:%s\n", qnn_backend_lib);
-                LOGGD("qnn_model:%s\n", sz_model_path);
-                char *argv[] = {"qnn-net-run", "--backend", qnn_backend_lib,
-                                "--model", const_cast<char *>(sz_model_path),
-                                "--input_list", "/sdcard/kantv/raw_list.txt",
-                                "--output_dir", "/sdcard/kantv/qnn/",
-                                "--log_level", "debug"
-                               };
-                //TODO:
-                // dsp backend not work
-                qnn_sample_main(argc, argv); //works on Xiaomi 14 on 03-30-2024,18:09 at the first time
-            }
-            break;
-
-        case BENCHMAKR_QNN_SAVER:
-            {
-                int argc                = 2;
-                char *argv[]            = {"qnn-saver", "--logging", "debug"};
-                qnn_saver_main(argc, argv);
-            }
-            break;
-
-        case BENCHMARK_QNN_MATRIX:  //offload a simple fp32 2x2 matrix addition operation to QNN
-            qnn_matrix(n_backend_type, n_op_type);
-            break;
-
-        case BENCHMARK_QNN_GGML:    //mapping ggml tensor to QNN tensor
-            qnn_ggml(n_backend_type, n_op_type);
-            break;
-
-        case BENCHMARK_QNN_COMPLEX: //complicated computation graph in C/C++ or GGML and then offload them to QNN
-            qnn_complex_graph(n_backend_type, n_op_type);
             break;
 
         case BENCHMARK_QNN_GGML_OP: //UT for PoC-S49: implementation of GGML OPs using QNN API
             qnn_ggml_op(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_QNN_AUTO_UT://automation UT for PoC-S49: implementation of GGML OPs using QNN API
+        case BENCHMARK_QNN_AUTO_UT: //automation UT for PoC-S49: implementation of GGML OPs using QNN API
             qnn_ggml_op_automation_ut(sz_model_path, n_threads, n_backend_type, n_op_type);
+            break;
+
+        case BENCHMARK_MNIST:
+        {
+            int argc = 3;
+            char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
+            GGML_JNI_NOTIFY("input data is mnist-5.png\n");
+            mnist_inference(argc, argv);
+        }
+            break;
+
+        case BENCHMARK_TTS: //TODO:
+            GGML_JNI_NOTIFY("TTS not support currently\n");
             break;
 
         default:

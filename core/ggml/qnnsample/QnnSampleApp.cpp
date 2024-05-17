@@ -186,10 +186,10 @@ sample_app::StatusCode sample_app::QnnSampleApp::initializeBackend() {
     backendIdCfg.option = QNN_SAVER_CONFIG_OPTION_BACKEND_ID;
     backendIdCfg.backendId = m_backendID;
 
+#if 0
     const QnnSaver_Config_t *saverCfg[] = {&outputDirCfg, &backendIdCfg, NULL};
-
     QnnSaver_initialize(saverCfg);
-
+#endif
 
     auto qnnStatus = m_qnnFunctionPointers.qnnInterface.backendCreate(
             m_logHandle, (const QnnBackend_Config_t **) m_backendConfig, &m_backendHandle);
