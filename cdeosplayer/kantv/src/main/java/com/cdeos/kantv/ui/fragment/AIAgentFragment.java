@@ -112,7 +112,7 @@
      private long duration = 0;
      private String strBenchmarkInfo;
      //private String strUserInput = "how many days in March 2024?";
-     private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words.";
+     private String strUserInput = "introduce the movie Once Upon a Time in America briefly.";
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
