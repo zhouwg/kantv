@@ -240,7 +240,8 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![458953071](https://github.com/zhouwg/kantv/assets/6889919/a45a526d-815b-46f4-afa0-455fbcbccd3e)
+![1782274840](https://github.com/zhouwg/kantv/assets/6889919/8b9228f8-e3f4-4b11-b70f-c4e0c7fadacb)
+
 
 <details>
   <summary>some other screenshots</summary>
@@ -248,9 +249,9 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
-![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
+![1589547090](https://github.com/zhouwg/kantv/assets/6889919/b0add0eb-4004-4bd0-b11e-5db533a4f096)
 
-![1377769652](https://github.com/zhouwg/kantv/assets/6889919/c9e56c16-2821-4cef-ab2c-bc43a36af05a)
+![1714239572](https://github.com/zhouwg/kantv/assets/6889919/20e23c8d-4656-4bb3-bb84-e0cef71cb532)
 
 ![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
 

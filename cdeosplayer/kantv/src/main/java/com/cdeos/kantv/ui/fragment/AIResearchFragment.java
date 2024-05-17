@@ -102,6 +102,7 @@
      private int backendIndex = 0; //CPU
      private String strOPType = "add";
      private int optypeIndex = 0; //matrix addition operation
+     private String selectModeFileName = "";
 
      Spinner spinnerOPType = null;
      String[] arrayOPType = null;
@@ -400,7 +401,7 @@
              CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex)
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
-             String selectModeFileName = "";
+             //String selectModeFileName = "";
              String selectModelFilePath = "";
              File selectModeFile = null;
 
@@ -580,7 +581,7 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + strModeName
+                             String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
                                      + " ,threads: " + nThreadCounts
                                      + " ,backend: " + CDEUtils.getBackendDesc(backendIndex)
                                      + " ) cost " + duration + " milliseconds";
