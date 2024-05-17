@@ -242,6 +242,11 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 ![1782274840](https://github.com/zhouwg/kantv/assets/6889919/8b9228f8-e3f4-4b11-b70f-c4e0c7fadacb)
 
+----
+
+here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+
+![1589547090](https://github.com/zhouwg/kantv/assets/6889919/b0add0eb-4004-4bd0-b11e-5db533a4f096)
 
 <details>
   <summary>some other screenshots</summary>
@@ -249,13 +254,11 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
-![1589547090](https://github.com/zhouwg/kantv/assets/6889919/b0add0eb-4004-4bd0-b11e-5db533a4f096)
+
 
 ![1714239572](https://github.com/zhouwg/kantv/assets/6889919/20e23c8d-4656-4bb3-bb84-e0cef71cb532)
 
 ![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
-
-  
 
 ![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
 
