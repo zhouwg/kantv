@@ -190,7 +190,7 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L91">build/envsetup.sh</a> accordingly before launch build
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L92">build/envsetup.sh</a> accordingly before launch build
 
  - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
 
@@ -247,7 +247,7 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![1589547090](https://github.com/zhouwg/kantv/assets/6889919/b0add0eb-4004-4bd0-b11e-5db533a4f096)
+![667358015](https://github.com/zhouwg/kantv/assets/6889919/94a175ca-97c0-41ef-b9a1-1dc4b7168516)
 
 
 <details>
