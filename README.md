@@ -249,7 +249,7 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 
 ![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
 ![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
-![1904016769](https://github.com/zhouwg/kantv/assets/6889919/a6b14cb1-8e3c-436d-89f1-b0c7adeaf00a)
+![1589547090](https://github.com/zhouwg/kantv/assets/6889919/b0add0eb-4004-4bd0-b11e-5db533a4f096)
 
 ![1714239572](https://github.com/zhouwg/kantv/assets/6889919/20e23c8d-4656-4bb3-bb84-e0cef71cb532)
 
