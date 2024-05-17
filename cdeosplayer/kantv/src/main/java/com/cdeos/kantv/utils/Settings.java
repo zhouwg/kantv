@@ -421,7 +421,7 @@ public class Settings {
 
     public String getRTMPServerUrl() {
         String key = mAppContext.getString(R.string.pref_key_rtmpserver);
-        return mSharedPreferences.getString(key, "rtmp://www.cde-os.com/live/livestream");
+        return mSharedPreferences.getString(key, "rtmp://www.cdeos.com/live/livestream");
     }
 
     public boolean getEnableWisePlay() {

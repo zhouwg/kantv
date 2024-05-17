@@ -17,7 +17,7 @@
         android:title="AI" />
 
     <item
-        android:id="@+id/navigation_llm"
+        android:id="@+id/navigation_aiagent"
         android:icon="@mipmap/ic_personal_scan"
         android:title="Agent"/>
 

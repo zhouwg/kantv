@@ -287,12 +287,16 @@ public abstract class BaseAppCompatActivity extends AppCompatActivity implements
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.READ_PHONE_STATE
+                                Manifest.permission.READ_PHONE_STATE,
+                                Manifest.permission.CAMERA,
+                                Manifest.permission.RECORD_AUDIO
                         },
                         SDK_PERMISSION_REQUEST);
             } else {

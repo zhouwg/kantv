@@ -36,7 +36,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.ToastUtils;
-import com.cdeos.kantv.ui.fragment.ASRResearchFragment;
+import com.cdeos.kantv.ui.fragment.AIResearchFragment;
+import com.cdeos.kantv.ui.fragment.AIAgentFragment;
 import com.cdeos.kantv.ui.fragment.LLMResearchFragment;
 import com.cdeos.kantv.ui.fragment.TVGridFragment;
 import com.cdeos.kantv.utils.Settings;
@@ -75,10 +76,13 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     private LocalMediaFragment LocalMediaFragment;
     private PersonalFragment personalFragment;
     private BaseMvpFragment previousFragment;
-    private ASRResearchFragment asrFragment;
-    private LLMResearchFragment llmFragment;
+    private AIResearchFragment asrFragment;
+    //private LLMResearchFragment llmFragment;
+    private AIAgentFragment agentFragment;
 
+    private Menu      optionMenu;
     private MenuItem  menuNetItem;
+    private MenuItem  menuAIAgent;
 
     private Context mContext;
     private Activity mActivity;
@@ -165,12 +169,14 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 fragmentTransaction.remove(homeFragment);
             if (LocalMediaFragment != null)
                 fragmentTransaction.remove(LocalMediaFragment);
-            if (llmFragment != null)
-                fragmentTransaction.remove(llmFragment);
+            //if (llmFragment != null)
+            //    fragmentTransaction.remove(llmFragment);
             if (personalFragment != null)
                 fragmentTransaction.remove(personalFragment);
             if (asrFragment != null)
                 fragmentTransaction.remove(asrFragment);
+            if (agentFragment != null)
+                fragmentTransaction.remove(agentFragment);
 
             fragmentTransaction.commitAllowingStateLoss();
         }
@@ -185,31 +191,36 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 case R.id.navigation_home:
                     setTitle(mActivity.getBaseContext().getString(R.string.onlinetv));
                     switchFragment(TVGridFragment.class);
-                    menuNetItem.setVisible(false);
+                    //menuNetItem.setVisible(false);
+                    hideOptionMenu();
                     return true;
 
                 case R.id.navigation_play:
                     setTitle(mActivity.getBaseContext().getString(R.string.localmedia));
                     switchFragment(LocalMediaFragment.class);
-                    menuNetItem.setVisible(true);
+                    //menuNetItem.setVisible(true);
+                    showLocalMediaMenu();
                     return true;
 
-                case R.id.navigation_llm:
-                    setTitle("LLM Research");
-                    switchFragment(LLMResearchFragment.class);
-                    menuNetItem.setVisible(false);
+                case R.id.navigation_aiagent:
+                    setTitle("AI Agent Demo");
+                    switchFragment(AIAgentFragment.class);
+                    //menuNetItem.setVisible(false);
+                    showAIAgentMenu();
                     return true;
 
                 case R.id.navigation_asr:
-                    setTitle("AI/Machine Learning Research");
-                    switchFragment(ASRResearchFragment.class);
-                    menuNetItem.setVisible(false);
+                    setTitle("AI Research");
+                    switchFragment(AIResearchFragment.class);
+                    //menuNetItem.setVisible(false);
+                    hideOptionMenu();
                     return true;
 
                 case R.id.navigation_personal:
                     setTitle(mActivity.getBaseContext().getString(R.string.personal_center));
                     switchFragment(PersonalFragment.class);
-                    menuNetItem.setVisible(false);
+                    //menuNetItem.setVisible(false);
+                    hideOptionMenu();
                     return true;
             }
             return false;
@@ -242,15 +253,44 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
         getMenuInflater().inflate(R.menu.menu_main, menu);
         menuNetItem = menu.findItem(R.id.menu_item_network);
         menuNetItem.setVisible(false);
+
+        optionMenu = menu;
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setVisible(false);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
+    private void hideOptionMenu()
+    {
+        for (int i = 0; i < optionMenu.size(); i++) {
+            optionMenu.getItem(i).setVisible(false);
+        }
+    }
+
+    private void showLocalMediaMenu() {
+        for (int i = 0; i < optionMenu.size(); i++) {
+            optionMenu.getItem(i).setVisible(false);
+        }
+        menuNetItem.setVisible(true);
+    }
+
+    private void showAIAgentMenu() {
+        for (int i = 0; i < optionMenu.size(); i++) {
+            optionMenu.getItem(i).setVisible(true);
+        }
+        menuNetItem.setVisible(false);
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_network:
                 new CommonEditTextDialog(this, CommonEditTextDialog.NETWORK_LINK).show();
+                break;
+            default:
+                if (agentFragment != null)
+                    agentFragment.onMenuItemSelected(item);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -274,7 +314,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             showWarningDialog(this, "can't running this app in emulator");
             navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
-            navigationView.getMenu().findItem(R.id.navigation_llm).setEnabled(false);
+            navigationView.getMenu().findItem(R.id.navigation_aiagent).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_asr).setEnabled(false);
             navigationView.getMenu().findItem(R.id.navigation_personal).setEnabled(false);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -287,7 +327,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 showWarningDialog(this, "warning:the app seems running within debugger");
                 navigationView.getMenu().findItem(R.id.navigation_play).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_home).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.navigation_llm).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.navigation_aiagent).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_asr).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.navigation_personal).setEnabled(false);
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -325,15 +365,19 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
         if (previousFragment != null) {
             String fragmentName = previousFragment.getClass().getName();
-            if (fragmentName.contains("ASRResearchFragment")) {
+            if (fragmentName.contains("AIResearchFragment")) {
                 CDELog.d(TAG, "release ASR resource");
                 asrFragment.release();
             }
 
-
             if (fragmentName.contains("LLMResearchFragment")) {
                 CDELog.d(TAG, "release LLM resource");
-                llmFragment.release();
+                //llmFragment.release();
+            }
+
+            if (fragmentName.contains("AgentFragment")) {
+                CDELog.d(TAG, "release Agent resource");
+                agentFragment.release();
             }
         }
 
@@ -342,46 +386,51 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             if (homeFragment == null) {
                 homeFragment = TVGridFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, homeFragment).commit();
-                previousFragment = homeFragment;
             } else {
                 getFragmentTransaction().show(homeFragment).commit();
-                previousFragment = homeFragment;
             }
+            previousFragment = homeFragment;
         } else if (clazz == PersonalFragment.class) {
             if (personalFragment == null) {
                 personalFragment = PersonalFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, personalFragment).commit();
-                previousFragment = personalFragment;
             } else {
                 getFragmentTransaction().show(personalFragment).commit();
-                previousFragment = personalFragment;
             }
+            previousFragment = personalFragment;
         } else if (clazz == LocalMediaFragment.class) {
             if (LocalMediaFragment == null) {
                 LocalMediaFragment = LocalMediaFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, LocalMediaFragment).commit();
-                previousFragment = LocalMediaFragment;
             } else {
                 getFragmentTransaction().show(LocalMediaFragment).commit();
-                previousFragment = LocalMediaFragment;
             }
-        } else if (clazz == LLMResearchFragment.class) {
+            previousFragment = LocalMediaFragment;
+        }/* else if (clazz == LLMResearchFragment.class) {
             if (llmFragment == null) {
                 llmFragment = LLMResearchFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
-                previousFragment = llmFragment;
             } else {
                 getFragmentTransaction().show(llmFragment).commit();
-                previousFragment = llmFragment;
             }
-        } else if (clazz == ASRResearchFragment.class) {
+            previousFragment = llmFragment;
+        }*/ else if (clazz == AIResearchFragment.class) {
             if (asrFragment == null) {
-                asrFragment = ASRResearchFragment.newInstance();
+                asrFragment = AIResearchFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, asrFragment).commit();
             } else {
                 getFragmentTransaction().show(asrFragment).commit();
             }
             previousFragment = asrFragment;
+        } else if (clazz == AIAgentFragment.class) {
+            if (agentFragment == null) {
+                agentFragment = AIAgentFragment.newInstance();
+                getFragmentTransaction().add(R.id.fragment_container, agentFragment).commit();
+            } else {
+                getFragmentTransaction().show(agentFragment).commit();
+                agentFragment.initCamera();
+            }
+            previousFragment = agentFragment;
         }
     }
 

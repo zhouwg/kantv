@@ -895,7 +895,7 @@ void ggml_jni_bench(const char * sz_model_path, const char *sz_audio_path, int n
             int argc = 3;
             char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
             GGML_JNI_NOTIFY("input data is mnist-5.png\n");
-            mnist_ggml(argc, argv);
+            mnist_inference(argc, argv);
         }
             break;
 

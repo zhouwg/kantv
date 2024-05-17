@@ -91,8 +91,8 @@
      private int nThreadCounts = 8;
      private int benchmarkIndex = 0;
 
-     private String strBackend  = "cpu";
-     private int backendIndex   = 0; //QNN_CPU
+     private String strBackend = "cpu";
+     private int backendIndex = 0; //QNN_CPU
 
      private long beginTime = 0;
      private long endTime = 0;

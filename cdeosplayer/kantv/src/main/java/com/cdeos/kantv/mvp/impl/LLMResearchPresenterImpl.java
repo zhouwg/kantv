@@ -10,7 +10,6 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.cdeos.kantv.base.BaseMvpPresenterImpl;
 import com.cdeos.kantv.mvp.presenter.LLMResearchPresenter;
-import com.cdeos.kantv.mvp.view.ASRResearchView;
 import com.cdeos.kantv.mvp.view.LLMResearchView;
 
 

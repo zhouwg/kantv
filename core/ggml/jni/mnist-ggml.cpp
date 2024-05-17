@@ -126,7 +126,8 @@ static bool image_load_from_file(const std::string & fname, image_u8 & img) {
     return true;
 }
 
-int mnist_ggml(int argc, char ** argv) {
+
+int mnist_inference(int argc, char ** argv) {
     srand(time(NULL));
     ggml_time_init();
 
