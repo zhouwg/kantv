@@ -240,7 +240,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![504893116](https://github.com/zhouwg/kantv/assets/6889919/51f0b277-eca4-4938-86f5-415dbf5897e7)
+![458953071](https://github.com/zhouwg/kantv/assets/6889919/a45a526d-815b-46f4-afa0-455fbcbccd3e)
 
 <details>
   <summary>some other screenshots</summary>

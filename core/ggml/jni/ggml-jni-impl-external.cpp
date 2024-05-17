@@ -874,7 +874,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
         }
 
         // end of generation
-        if (max_tokens > 100) { //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+        if (max_tokens > 300) { //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
             LOGGI(" [end of text]\n");
 #ifdef TARGET_ANDROID
             kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
