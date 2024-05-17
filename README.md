@@ -226,10 +226,12 @@ cd kantv
 
 This Android APK works well on any <b>mainstream</b> Qualcomm mobile SoC based Android phone.
 
-The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following two permissions are required：
+The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' and '**do not upload user data to server/cloud**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following four permissions are required：
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
+- Access to camera is needed for AI Agent
+- Access to mic(audio recorder) is needed for AI Agent
 
 <hr>
 here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
