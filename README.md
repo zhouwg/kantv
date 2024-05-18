@@ -327,11 +327,11 @@ Report issue in various Android-based phone or even submit PR to this project is
   </li>
 
   <li>
-   <a href="https://github.com/PABannier/bark.cpp">ncnn</a> by [PABannier](https://github.com/PABannier)
+   <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by [PABannier](https://github.com/PABannier)
   </li>
 
   <li>
-   <a href="https://github.com/leejet/stable-diffusion.cpp">ncnn</a> by [leejet](https://github.com/leejet)
+   <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by [leejet](https://github.com/leejet)
   </li>
 
   <li>
