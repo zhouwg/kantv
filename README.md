@@ -327,6 +327,14 @@ Report issue in various Android-based phone or even submit PR to this project is
   </li>
 
   <li>
+   <a href="https://github.com/PABannier/bark.cpp">ncnn</a> by [PABannier](https://github.com/PABannier)
+  </li>
+
+  <li>
+   <a href="https://github.com/leejet/stable-diffusion.cpp">ncnn</a> by [leejet](https://github.com/leejet)
+  </li>
+
+  <li>
    <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
   </li>
 
