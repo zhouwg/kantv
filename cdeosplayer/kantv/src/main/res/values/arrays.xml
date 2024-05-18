@@ -113,7 +113,7 @@
     <string-array name="backend">
         <item>cpu</item>
         <item>gpu</item>
-        <item>dsp</item>
+        <item>npu</item>
         <item>ggml</item>
     </string-array>
 

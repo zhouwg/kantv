@@ -121,6 +121,7 @@
      private boolean isSDModel = false;
      private boolean isMNISTModel = false;
      private boolean isTTSModel = false;
+     private boolean isASRModel = false;
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -389,6 +390,7 @@
              isSDModel = false;
              isMNISTModel = false;
              isTTSModel = false;
+             isASRModel = false;
 
              //TODO: better method
              //sanity check begin
@@ -425,6 +427,7 @@
                  isTTSModel = true;
                  selectModeFileName = "ggml-bark-small.bin";
              } else {
+                 isASRModel = true;
                  selectModeFileName = "ggml-" + strModeName + ".bin";
              }
              CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
@@ -491,9 +494,7 @@
              //reset default ggml model file name after sanity check
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
-             //if (!isQNNModel)
-             if (!isTTSModel)
-             {
+             if (isASRModel) { //avoid crash
                  ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
              }
 
