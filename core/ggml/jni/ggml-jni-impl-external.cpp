@@ -6880,7 +6880,7 @@ int qnn_implementation::run_qnn_matrix() {
 // done on 04-07-2024,17:00(April-07-2024,17:00), not perfect because there are some unresolved problems
 // in this function but there are more much valuable things in next steps)
 
-//qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", "libQnnCpu.so", "");
+//qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/qnnlib/", "libQnnCpu.so", "");
 int qnn_matrix(int n_backend_type, int n_op_type) {
     int result                      = 0;
     std::string graph_name          = "qnn_matrix";
@@ -6925,7 +6925,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
 
         case QNN_HTP: {
             qnn_backend_lib = "libQnnHtp.so";
-            std::string path = "/data/data/com.cdeos.kantv/";
+            std::string path = "/data/data/com.cdeos.kantv/qnnlib/";
             LOGGI("path:%s\n", path.c_str());
             LOGGI("qnn backend lib:%s\n", qnn_backend_lib);
             if (0 == setenv("LD_LIBRARY_PATH",
@@ -7008,7 +7008,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
 
     LOGGD("qnn_backend:%s\n", qnn_backend_lib);
     //QNN prebuilt model.so not used in this PoC but using QNN lowlevel API directly, so mode name is ""
-    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/qnnlib/", qnn_backend_lib, "");
     result = qnn_backend.qnn_init(nullptr);
     if (0 != result) {
         LOGGW("init qnn subsystem failed with qnn backend %s, pls check why\n", get_qnn_backend_name(n_backend_type));
@@ -7312,7 +7312,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
 
         case 2: {
             qnn_backend_lib = "libQnnHtp.so";
-            std::string path = "/data/data/com.cdeos.kantv/";
+            std::string path = "/data/data/com.cdeos.kantv/qnnlib/";
             LOGGI("path:%s\n", path.c_str());
             LOGGI("qnn backend lib:%s\n", qnn_backend_lib);
             if (0 == setenv("LD_LIBRARY_PATH",
@@ -7407,7 +7407,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         return 0;
     }
 
-    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/qnnlib/", qnn_backend_lib, "");
     error  = qnn_backend.qnn_init(nullptr);
     if (0 != error) {
         LOGGW("init qnn subsystem failed, pls check why\n");
@@ -7676,7 +7676,7 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
                     n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
 
-    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/", qnn_backend_lib, "");
+    qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/qnnlib/", qnn_backend_lib, "");
     error  = qnn_backend.qnn_init(nullptr);
     if (0 != error) {
         LOGGW("init qnn subsystem failed, pls check why\n");
@@ -8049,10 +8049,8 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     switch (n_graph_type) {
         case 0: // MNIST手写数字识别推理, https://github.com/StudyingLover/ggml-tutorial
         {
-            int argc = 3;
-            char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
             GGML_JNI_NOTIFY("input data is mnist-5.png\n");
-            mnist_inference(argc, argv);
+            mnist_inference("/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png", 0, 4, BACKEND_GGML);
             break;
         }
         case 1:
@@ -8151,7 +8149,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         params.use_hwaccel = true;
         params.no_alloc    = true;
         //PoC-S53: troubleshooting stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
-        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
+        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
         if (nullptr == backend) {
             LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
             GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
@@ -8387,7 +8385,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                 gparams.use_hwaccel = true;
                 gparams.no_alloc    = true;
 
-                backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
+                backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
                 if (nullptr == backend) {
                     LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
                     GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));

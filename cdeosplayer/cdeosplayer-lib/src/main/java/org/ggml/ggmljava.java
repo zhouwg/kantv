@@ -118,14 +118,14 @@ public class ggmljava {
 
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
-     * @param audioPath     /sdcard/kantv/jfk.wav
+     * @param userData      ASR: /sdcard/kantv/jfk.wav LLM: user input Text2Image: user input MNIST: image path TTS: user input
      * @param nBenchType    0: whisper asr 1: memcpy 2: mulmat  3: whisper full 4: LLAMA 5: stable diffusion 6: QNN sample 7: QNN saver 8: QNN matrix 9: QNN GGML 10: QNN complex 11: QNN GGML OP(QNN UT) 12: QNN UT automation
      * @param nThreadCounts 1 - 8
      * @param nBackendType  0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
      * @param nOpType       type of matrix manipulate / GGML OP / type of various complex/complicated computation graph
      * @return
      */
-    public static native String ggml_bench(String modelPath, String audioPath, int nBenchType, int nThreadCounts, int nBackendType, int nOpType);
+    public static native String ggml_bench(String modelPath, String userData, int nBenchType, int nThreadCounts, int nBackendType, int nOpType);
 
 
     public static native String llm_get_systeminfo();

@@ -42,15 +42,15 @@ This project is a (<b>personal</b>) workbench for study&practise AI tech in real
 
 
 ```
-
 .
+├── barkcpp(TTS)
 ├── build-android-jni-lib.sh
 ├── CMakeLists.txt
 ├── jni
-├── llamacpp
-├── qnnsample
+├── llamacpp(LLM)
+├── qnnsample(not used since v1.3.8, keep it for future usage)
 ├── README.md
-├── stablediffusioncpp
-└── whispercpp
+├── stablediffusioncpp(Text2Image)
+└── whispercpp(ASR)
 
 ```

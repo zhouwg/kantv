@@ -32,9 +32,9 @@ Some goals of this project are:
 
 ### Software architecture of KanTV Android
 
-(depend on https://github.com/zhouwg/kantv/issues/121)
+(depend on https://github.com/zhouwg/kantv/issues/121 and https://github.com/zhouwg/kantv/issues/176 )
 
-![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b7e04205-6406-42e7-9746-ccd592f6d12c)
+![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b4f986f3-26ea-440c-931d-6262c2785ebb)
 
 
 ### How to build project
@@ -215,8 +215,6 @@ cd kantv
         lunch 1
         ./build-all.sh android
 
-  Please attention ![some source codes in ASRResearchFragment.java](https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/java/com/cdeos/kantv/ui/fragment/ASRResearchFragment.java#L172) which affect the running of the ASR demo and the size of the generated APK.
-
 <!--
 - Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
 -->
@@ -291,7 +289,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
-- improve <b>quality</b> of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
+- improve the quality of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - bugfix in UI layer(Java)
 
@@ -319,18 +317,40 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-  the AI part of this project is powered by
+ <ul>AI inference framework
 
-  <ul>
+   <ul>
   <li>
+   <a href="https://github.com/ggerganov/ggml">GGML</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   </li>
 
-   [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov)
-
-  </li>
 
   <li>
    <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
   </li>
+  </ul>
+
+  </ul>
+
+ <ul>AI application engine
+
+  <ul>
+  <li>
+   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  </li>
+
+   <li>
+  LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  </li>
+
+  <li>
+   TTS engine <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by <a href="https://github.com/PABannier">PABannier</a>
+  </li>
+
+  <li>
+   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
+  </li>
+  </ul>
 
   </ul>
 

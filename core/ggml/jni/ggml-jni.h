@@ -156,7 +156,7 @@ int          stablediffusion_inference(const char * model_path, const char * pro
 // =================================================================================================
 // mnist using ggml
 // =================================================================================================
-int          mnist_inference(int argc, char ** argv);
+int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type);
 
 #ifdef __cplusplus
 }

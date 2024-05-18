@@ -27,6 +27,8 @@ set(LLAMACPP_SRC_DIR            ${CMAKE_SOURCE_DIR}/llamacpp/)
 
 set(SDCPP_SRC_DIR                ${CMAKE_SOURCE_DIR}/stablediffusioncpp/)
 
+set(BARKCPP_SRC_DIR                ${CMAKE_SOURCE_DIR}/barkcpp/)
+
 #03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML
 set(QNN_INC_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/lib/)
@@ -41,6 +43,7 @@ include_directories(${QNN_SRC_DIR}/PAL/include)
 
 aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
 include_directories(${SDCPP_SRC_DIR})
+include_directories(${BARKCPP_SRC_DIR})
 
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred
@@ -68,6 +71,10 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
 
         ${stablediffusioncpp}
+
+        ${BARKCPP_SRC_DIR}/bark.cpp
+        ${BARKCPP_SRC_DIR}/encodec.cpp
+        ${BARKCPP_SRC_DIR}/ggml-allocr.c
 )
 
 

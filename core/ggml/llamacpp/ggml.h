@@ -229,6 +229,7 @@
 #define GGML_QNT_VERSION        2    // bump this on quantization format changes
 #define GGML_QNT_VERSION_FACTOR 1000 // do not change this
 
+#define GGML_MAX_NODES         100000
 #define GGML_MAX_DIMS           4
 #define GGML_MAX_PARAMS         2048
 #define GGML_MAX_CONTEXTS       64
@@ -471,6 +472,7 @@ extern "C" {
         GGML_OP_CONV_TRANSPOSE_2D,
         GGML_OP_POOL_1D,
         GGML_OP_POOL_2D,
+        GGML_OP_PAD_REFLEC_1D,
         GGML_OP_UPSCALE, // nearest interpolate
         GGML_OP_PAD,
         GGML_OP_ARANGE,
@@ -1186,6 +1188,17 @@ extern "C" {
     // operations on tensors without backpropagation
     //
 
+    GGML_API struct ggml_tensor * ggml_scale_bark(
+            struct ggml_context * ctx,
+            struct ggml_tensor  * a,
+            struct ggml_tensor  * b);
+
+    // in-place, returns view(a)
+    GGML_API struct ggml_tensor * ggml_scale_inplace_bark(
+            struct ggml_context * ctx,
+            struct ggml_tensor  * a,
+            struct ggml_tensor  * b);
+
     GGML_API struct ggml_tensor * ggml_scale(
             struct ggml_context * ctx,
             struct ggml_tensor  * a,
@@ -1592,6 +1605,13 @@ extern "C" {
             struct ggml_tensor  * b,
             int                   s,
             int                   d);
+
+    GGML_API struct ggml_tensor * ggml_pad_reflec_1d(
+             struct ggml_context * ctx,
+             struct ggml_tensor  * a,
+             int                   p0,
+             int                   p1);
+
 
     GGML_API struct ggml_tensor * ggml_conv_transpose_1d(
             struct ggml_context * ctx,
@@ -2219,6 +2239,18 @@ extern "C" {
                    int64_t   nrows,
                    int64_t   n_per_row,
                const float * imatrix);
+
+     //
+    // quantization
+    //
+
+    GGML_API size_t ggml_quantize_q4_0(const float * src, void * dst, int n, int k, int64_t * hist);
+    GGML_API size_t ggml_quantize_q4_1(const float * src, void * dst, int n, int k, int64_t * hist);
+    GGML_API size_t ggml_quantize_q5_0(const float * src, void * dst, int n, int k, int64_t * hist);
+    GGML_API size_t ggml_quantize_q5_1(const float * src, void * dst, int n, int k, int64_t * hist);
+    GGML_API size_t ggml_quantize_q8_0(const float * src, void * dst, int n, int k, int64_t * hist);
+
+    GGML_API size_t ggml_quantize_chunk_bark(enum ggml_type type, const float * src, void * dst, int start, int n, int64_t * hist);
 
     //
     // gguf

@@ -2045,7 +2045,7 @@ static const char * GGML_OP_NAME[GGML_OP_COUNT] = {
     "CROSS_ENTROPY_LOSS_BACK",
 };
 
-static_assert(GGML_OP_COUNT == 76, "GGML_OP_COUNT != 76");
+static_assert(GGML_OP_COUNT == 77, "GGML_OP_COUNT != 77");
 
 static const char * GGML_OP_SYMBOL[GGML_OP_COUNT] = {
     "none",
@@ -2135,7 +2135,7 @@ static const char * GGML_OP_SYMBOL[GGML_OP_COUNT] = {
     "cross_entropy_loss_back(x,y)",
 };
 
-static_assert(GGML_OP_COUNT == 76, "GGML_OP_COUNT != 76");
+static_assert(GGML_OP_COUNT == 77, "GGML_OP_COUNT != 77");
 
 static_assert(GGML_OP_POOL_COUNT == 2, "GGML_OP_POOL_COUNT != 2");
 
@@ -5788,6 +5788,78 @@ struct ggml_tensor* ggml_conv_1d_ph(
         int                   d) {
     return ggml_conv_1d(ctx, a, b, s, a->ne[0] / 2, d);
 }
+
+
+// ggml_pad_reflec_1d
+
+struct ggml_tensor * ggml_pad_reflec_1d(
+        struct ggml_context * ctx,
+        struct ggml_tensor  * a,
+        int                   p0,
+        int                   p1) {
+
+    bool is_node = false;
+
+    if (a->grad) {
+        GGML_ASSERT(false); // TODO: implement backward
+        is_node = true;
+    }
+
+    const int64_t ne[2] = { p0 + a->ne[0] + p1, a->ne[1] };
+    struct ggml_tensor * result = ggml_new_tensor(ctx, GGML_TYPE_F32, 2, ne);
+
+    int32_t params[] = { p0, p1 };
+    ggml_set_op_params(result, params, sizeof(params));
+
+    result->op = GGML_OP_PAD_REFLEC_1D;
+    result->grad = is_node ? ggml_dup_tensor(ctx, result) : NULL;
+    result->src[0] = a;
+
+    return result;
+}
+
+#if 1
+// ggml_scale
+
+static struct ggml_tensor * ggml_scale_impl_bark(
+        struct ggml_context * ctx,
+        struct ggml_tensor  * a,
+        struct ggml_tensor  * b,
+        bool inplace) {
+    GGML_ASSERT(ggml_is_scalar(b));
+    GGML_ASSERT(ggml_is_padded_1d(a));
+
+    bool is_node = false;
+
+    if (a->grad || b->grad) {
+        is_node = true;
+    }
+
+    struct ggml_tensor * result = inplace ? ggml_view_tensor(ctx, a) : ggml_dup_tensor(ctx, a);
+
+    result->op   = GGML_OP_SCALE;
+    result->grad = is_node ? ggml_dup_tensor(ctx, result) : NULL;
+    result->src[0] = a;
+    result->src[1] = b;
+
+    return result;
+}
+
+struct ggml_tensor * ggml_scale_bark(
+        struct ggml_context * ctx,
+        struct ggml_tensor * a,
+        struct ggml_tensor * b) {
+    return ggml_scale_impl_bark(ctx, a, b, false);
+}
+
+struct ggml_tensor * ggml_scale_inplace_bark(
+        struct ggml_context * ctx,
+        struct ggml_tensor * a,
+        struct ggml_tensor * b) {
+    return ggml_scale_impl_bark(ctx, a, b, true);
+}
+
+#endif
 
 // ggml_conv_transpose_1d
 
@@ -20482,6 +20554,219 @@ size_t ggml_quantize_chunk(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+size_t ggml_quantize_q4_0(const float * src, void * dst, int n, int k, int64_t * hist) {
+    assert(k % QK4_0 == 0);
+    const int nb = k / QK4_0;
+
+    for (int b = 0; b < n; b += k) {
+        block_q4_0 * restrict y = (block_q4_0 *) dst + b/QK4_0;
+
+        quantize_row_q4_0_reference(src + b, y, k);
+
+        for (int i = 0; i < nb; i++) {
+            for (int j = 0; j < QK4_0; j += 2) {
+                const uint8_t vi0 = y[i].qs[j/2] & 0x0F;
+                const uint8_t vi1 = y[i].qs[j/2] >> 4;
+
+                hist[vi0]++;
+                hist[vi1]++;
+            }
+        }
+    }
+
+    return (n/QK4_0*sizeof(block_q4_0));
+}
+
+size_t ggml_quantize_q4_1(const float * src, void * dst, int n, int k, int64_t * hist) {
+    assert(k % QK4_1 == 0);
+    const int nb = k / QK4_1;
+
+    for (int b = 0; b < n; b += k) {
+        block_q4_1 * restrict y = (block_q4_1 *) dst + b/QK4_1;
+
+        quantize_row_q4_1_reference(src + b, y, k);
+
+        for (int i = 0; i < nb; i++) {
+            for (int j = 0; j < QK4_1; j += 2) {
+                const uint8_t vi0 = y[i].qs[j/2] & 0x0F;
+                const uint8_t vi1 = y[i].qs[j/2] >> 4;
+
+                hist[vi0]++;
+                hist[vi1]++;
+            }
+        }
+    }
+
+    return (n/QK4_1*sizeof(block_q4_1));
+}
+
+size_t ggml_quantize_q5_0(const float * src, void * dst, int n, int k, int64_t * hist) {
+    assert(k % QK5_0 == 0);
+    const int nb = k / QK5_0;
+
+    for (int b = 0; b < n; b += k) {
+        block_q5_0 * restrict y = (block_q5_0 *)dst + b/QK5_0;
+
+        quantize_row_q5_0_reference(src + b, y, k);
+
+        for (int i = 0; i < nb; i++) {
+            uint32_t qh;
+            memcpy(&qh, &y[i].qh, sizeof(qh));
+
+            for (int j = 0; j < QK5_0; j += 2) {
+                const uint8_t vh0 = ((qh & (1u << (j + 0 ))) >> (j + 0 )) << 4;
+                const uint8_t vh1 = ((qh & (1u << (j + 16))) >> (j + 12));
+
+                // cast to 16 bins
+                const uint8_t vi0 = ((y[i].qs[j/2] & 0x0F) | vh0) / 2;
+                const uint8_t vi1 = ((y[i].qs[j/2] >>   4) | vh1) / 2;
+
+                hist[vi0]++;
+                hist[vi1]++;
+            }
+        }
+    }
+
+    return (n/QK5_0*sizeof(block_q5_0));
+}
+
+size_t ggml_quantize_q5_1(const float * src, void * dst, int n, int k, int64_t * hist) {
+    assert(k % QK5_1 == 0);
+    const int nb = k / QK5_1;
+
+    for (int b = 0; b < n; b += k) {
+        block_q5_1 * restrict y = (block_q5_1 *)dst + b/QK5_1;
+
+        quantize_row_q5_1_reference(src + b, y, k);
+
+        for (int i = 0; i < nb; i++) {
+            uint32_t qh;
+            memcpy(&qh, &y[i].qh, sizeof(qh));
+
+            for (int j = 0; j < QK5_1; j += 2) {
+                const uint8_t vh0 = ((qh & (1u << (j + 0 ))) >> (j + 0 )) << 4;
+                const uint8_t vh1 = ((qh & (1u << (j + 16))) >> (j + 12));
+
+                // cast to 16 bins
+                const uint8_t vi0 = ((y[i].qs[j/2] & 0x0F) | vh0) / 2;
+                const uint8_t vi1 = ((y[i].qs[j/2] >>   4) | vh1) / 2;
+
+                hist[vi0]++;
+                hist[vi1]++;
+            }
+        }
+    }
+
+    return (n/QK5_1*sizeof(block_q5_1));
+}
+
+size_t ggml_quantize_q8_0(const float * src, void * dst, int n, int k, int64_t * hist) {
+    assert(k % QK8_0 == 0);
+    const int nb = k / QK8_0;
+
+    for (int b = 0; b < n; b += k) {
+        block_q8_0 * restrict y = (block_q8_0 *)dst + b/QK8_0;
+
+        quantize_row_q8_0_reference(src + b, y, k);
+
+        for (int i = 0; i < nb; i++) {
+            for (int j = 0; j < QK8_0; ++j) {
+                const int8_t vi = y[i].qs[j];
+
+                hist[vi/16 + 8]++;
+            }
+        }
+    }
+
+    return (n/QK8_0*sizeof(block_q8_0));
+}
+
+size_t ggml_quantize_chunk_bark(enum ggml_type type, const float * src, void * dst, int start, int n, int64_t * hist) {
+    size_t result = 0;
+    switch (type) {
+        case GGML_TYPE_Q4_0:
+            {
+                GGML_ASSERT(start % QK4_0 == 0);
+                block_q4_0 * block = (block_q4_0*)dst + start / QK4_0;
+                result = ggml_quantize_q4_0(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q4_1:
+            {
+                GGML_ASSERT(start % QK4_1 == 0);
+                block_q4_1 * block = (block_q4_1*)dst + start / QK4_1;
+                result = ggml_quantize_q4_1(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q5_0:
+            {
+                GGML_ASSERT(start % QK5_0 == 0);
+                block_q5_0 * block = (block_q5_0*)dst + start / QK5_0;
+                result = ggml_quantize_q5_0(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q5_1:
+            {
+                GGML_ASSERT(start % QK5_1 == 0);
+                block_q5_1 * block = (block_q5_1*)dst + start / QK5_1;
+                result = ggml_quantize_q5_1(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q8_0:
+            {
+                GGML_ASSERT(start % QK8_0 == 0);
+                block_q8_0 * block = (block_q8_0*)dst + start / QK8_0;
+                result = ggml_quantize_q8_0(src + start, block, n, n, hist);
+            } break;
+#ifdef GGML_USE_K_QUANTS
+        case GGML_TYPE_Q2_K:
+            {
+                GGML_ASSERT(start % QK_K == 0);
+                block_q2_K * block = (block_q2_K*)dst + start / QK_K;
+                result = ggml_quantize_q2_K(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q3_K:
+            {
+                GGML_ASSERT(start % QK_K == 0);
+                block_q3_K * block = (block_q3_K*)dst + start / QK_K;
+                result = ggml_quantize_q3_K(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q4_K:
+            {
+                GGML_ASSERT(start % QK_K == 0);
+                block_q4_K * block = (block_q4_K*)dst + start / QK_K;
+                result = ggml_quantize_q4_K(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q5_K:
+            {
+                GGML_ASSERT(start % QK_K == 0);
+                block_q5_K * block = (block_q5_K*)dst + start / QK_K;
+                result = ggml_quantize_q5_K(src + start, block, n, n, hist);
+            } break;
+        case GGML_TYPE_Q6_K:
+            {
+                GGML_ASSERT(start % QK_K == 0);
+                block_q6_K * block = (block_q6_K*)dst + start / QK_K;
+                result = ggml_quantize_q6_K(src + start, block, n, n, hist);
+            } break;
+#endif
+        case GGML_TYPE_F16:
+            {
+                int elemsize = sizeof(ggml_fp16_t);
+                ggml_fp32_to_fp16_row(src + start, (ggml_fp16_t *)dst + start, n);
+                result = n * elemsize;
+            } break;
+        case GGML_TYPE_F32:
+            {
+                int elemsize = sizeof(float);
+                result = n * elemsize;
+                memcpy((uint8_t *)dst + start * elemsize, src + start, result);
+            } break;
+        default:
+            assert(false);
+    }
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 
 struct gguf_str {
     uint64_t n;  // GGUFv2
