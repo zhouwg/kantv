@@ -407,6 +407,7 @@
                  selectModeFileName = "gemma-2b.Q8_0.gguf";
              } else if (strModeName.contains("yi-chat")) {
                  isLLMModel = true;
+                 selectModeFileName = "yi-chat-6b.Q2_K.gguf";
                  selectModeFileName = "yi-chat-6b.Q4_0.gguf";
              } else if (strModeName.startsWith("qnn")) {
                  //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
@@ -419,7 +420,10 @@
                  //https://github.com/leejet/stable-diffusion.cpp
                  //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
                  //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
-                 selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf"; //TODO: hardcode SD model name
+                 selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
+             } else if (strModeName.contains("bark")) {
+                 isTTSModel = true;
+                 selectModeFileName = "ggml-bark-small.bin";
              } else {
                  selectModeFileName = "ggml-" + strModeName + ".bin";
              }
@@ -439,6 +443,15 @@
                  return;
              }
              if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+
+             if (isTTSModel && (benchmarkIndex != CDEUtils.BENCHMARK_TTS)) {
+                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 return;
+             }
+             if (!isTTSModel && (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
                  CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                  return;
              }

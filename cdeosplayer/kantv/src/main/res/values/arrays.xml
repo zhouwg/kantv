@@ -107,6 +107,7 @@
         <item>yi-chat-6b</item>
         <item>sdmodel</item>
         <item>mnist</item>
+        <item>bark-small</item>
     </string-array>
 
     <string-array name="backend">

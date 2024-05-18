@@ -48,7 +48,6 @@ This project is a (<b>personal</b>) workbench for study&practise AI tech in real
 ├── CMakeLists.txt
 ├── jni
 ├── llamacpp(LLM)
-├── out
 ├── qnnsample(not used since v1.3.8, keep it for future usage)
 ├── README.md
 ├── stablediffusioncpp(Text2Image)

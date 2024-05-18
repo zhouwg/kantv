@@ -411,6 +411,7 @@
          super.onResume();
          if (mCameraInit) {
              mPublisher.resumeRecord();
+             mPublisher.startCamera();
          }
      }
 
