@@ -9,7 +9,8 @@ Project KanTV has used/tried following open-source projects(list in here is not 
      <li><a href="https://github.com/ggerganov/ggml" target="_blank" rel="noopener">GGML</a></li>
      <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">GGML whisper.cpp</a></li>
      <li><a href="https://github.com/ggerganov/llama.cpp" target="_blank" rel="noopener">GGML llama.cpp</a></li>
-     <li><a href="https://github.com/leejet/stable-diffusion.cpp" target="_blank" rel="noopener">stablediffusion.cpp</a></li>
+     <li><a href="https://github.com/PABannier/bark.cpp" target="_blank" rel="noopener">GGML bark.cpp</a></li>
+     <li><a href="https://github.com/leejet/stable-diffusion.cpp" target="_blank" rel="noopener">GGML stablediffusion.cpp</a></li>
      <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent ncnn</a></li>
      <li><a href="https://github.com/karpathy/llm.c" target="_blank">llm.c</a></li>
      <li><a href="https://github.com/bilibili/ijkplayer" target="_blank" rel="noopener">Bilibili ijkplayer</a></li>

@@ -227,10 +227,12 @@ public class IApplication extends Application {
         CDELog.d(TAG, "packageName: " + packageInfos.get(indexKanTV).activityInfo.packageName + " ,launcherActivityName: " + launcherName);
 
 
-        //step-3
+        //step-3: asset files
         KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
         mKANTVDRM.ANDROID_JNI_Init(mContext, CDEUtils.getDataPath(mContext));
         mKANTVDRM.ANDROID_JNI_SetLocalEMS(CDEUtils.getLocalEMS());
+        CDEAssetLoader.copyAssetFile(mContext, "config.json", CDEAssetLoader.getDataPath(mContext) + "config.json");
+
         CDEUtils.copyAssetFile(mContext, "res/apple.png", CDEUtils.getDataPath(mContext) + "apple.png");
         CDEUtils.copyAssetFile(mContext, "res/colorkey.png", CDEUtils.getDataPath(mContext) + "colorkey.png");
         CDEUtils.copyAssetFile(mContext, "res/line.png", CDEUtils.getDataPath(mContext) + "line.png");
@@ -238,15 +240,18 @@ public class IApplication extends Application {
         CDEUtils.copyAssetFile(mContext, "res/png1.png", CDEUtils.getDataPath(mContext) + "png1.png");
         CDEUtils.copyAssetFile(mContext, "res/png2.png", CDEUtils.getDataPath(mContext) + "png2.png");
         CDEUtils.copyAssetFile(mContext, "res/simhei.ttf", CDEUtils.getDataPath(mContext) + "simhei.ttf");
+
+        //copy asset files to /sdcard/kantv/, these two files are needed for AI subtitle of online TV and AI research
         String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
         String ggmlSampleFileName = "jfk.wav";
         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
         CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
 
-
         //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
-        CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
+        //not used since v1.3.8 for purpose of reduce size of APK
+        //CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
         //qualcomm's prebuilt QNN userspace library
+        /*
         CDEAssetLoader.copyAssetFile(mContext, "libQnnCpu.so", CDEUtils.getDataPath(mContext) + "libQnnCpu.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
@@ -257,18 +262,27 @@ public class IApplication extends Application {
         CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Skel.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Skel.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
         CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
-        CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");
+        */
+
+        //TODO: move to /sdcard/kantv/qnnlib for purpose of reduce size of APK because size of prebuilt qnnlibs is about 49M and the size of APK is about 110M
+        CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
+
         //qualcomm's prebuilt binary file
+        /* not used since v1.3.8 for purpose of reduce size of APK
         CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
         CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
+        CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");
+        */
 
+        //copy asset files to /sdcard/kantv/
+        //or just upload dependent files to /sdcard/kantv/ accordingly so the APK size would be smaller significantly
         //prebuilt model and data for MNIST
         CDEAssetLoader.copyAssetFile(mContext, "mnist-5.png", CDEUtils.getDataPath() + "mnist-5.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-7.png", CDEUtils.getDataPath() + "mnist-7.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
 
 
-        CDEAssetLoader.copyAssetFile(mContext, "config.json", CDEAssetLoader.getDataPath(mContext) + "config.json");
+        //step-4:
         String configString = CDEAssetLoader.readTextFromFile(CDEAssetLoader.getDataPath(mContext) + "config.json");
         JSONObject jsonObject = JSON.parseObject(configString);
         CDELog.j(TAG, "Config: kantvServer: " + jsonObject.getString("kantvServer"));
@@ -461,7 +475,6 @@ public class IApplication extends Application {
         }
 
 
-        //step-4
         CDELog.j(TAG, "dump mode           : " + mSettings.getDumpMode());
         CDEUtils.setPlayEngine(mSettings.getPlayerEngine());
         CDELog.j(TAG, "play engine         : " + CDEUtils.getPlayEngineName(mSettings.getPlayerEngine()));

@@ -300,7 +300,7 @@
              mPublisher = new SrsPublisher(mCameraView);
              CDELog.j(TAG, "after create srspublisher");
              mPublisher.setEncodeHandler(new SrsEncodeHandler(srsEncodeListener));
-             CDELog.j(TAG, "after setEncodeHandlerr");
+             CDELog.j(TAG, "after setEncodeHandler");
              mPublisher.setRtmpHandler(new RtmpHandler(rtmpListener));
              CDELog.j(TAG, "here");
              mPublisher.setRecordHandler(new SrsRecordHandler(srsRecordListener));
