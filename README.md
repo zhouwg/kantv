@@ -317,7 +317,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
- <ul>device-side AI inferference framework
+ <ul>AI inference framework
 
    <ul>
   <li>
@@ -331,7 +331,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
   </ul>
 
- <ul>device-side AI application engine
+ <ul>AI application engine
 
   <ul>
   <li>
