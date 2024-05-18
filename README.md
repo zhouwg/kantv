@@ -324,13 +324,6 @@ Report issue in various Android-based phone or even submit PR to this project is
    <a href="https://github.com/ggerganov/ggml">GGML</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
    </li>
 
-  <li>
-   <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by <a href="https://github.com/PABannier">PABannier</a>
-  </li>
-
-  <li>
-   <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
-  </li>
 
   <li>
    <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
@@ -343,7 +336,11 @@ Report issue in various Android-based phone or even submit PR to this project is
 
   <ul>
   <li>
-   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> and LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  </li>
+
+   <li>
+  LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
   </li>
 
   <li>
