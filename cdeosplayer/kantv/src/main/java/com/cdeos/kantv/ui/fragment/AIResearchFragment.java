@@ -34,13 +34,17 @@
  import android.content.DialogInterface;
  import android.content.res.Resources;
  import android.media.MediaPlayer;
+ import android.net.Uri;
  import android.os.Build;
+ import android.view.Gravity;
  import android.view.View;
+ import android.view.ViewGroup;
  import android.view.WindowManager;
  import android.widget.AdapterView;
  import android.widget.ArrayAdapter;
  import android.widget.Button;
  import android.widget.EditText;
+ import android.widget.ImageView;
  import android.widget.LinearLayout;
  import android.widget.Spinner;
  import android.widget.TextView;
@@ -91,6 +95,8 @@
      TextView _txtGGMLInfo;
      TextView _txtGGMLStatus;
      EditText _txtUserInput;
+     ImageView _ivInfo;
+     LinearLayout _llInfoLayout;
 
      Button _btnBenchmark;
 
@@ -129,6 +135,7 @@
      //private String ggmlModelFileName = "ggml-tiny-q5_1.bin"; //31M
      private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
      private String ggmlSampleFileName = "jfk.wav";
+     private String ggmlMNISTImageFile = "mnist-5.png";
 
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main
      // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
@@ -208,12 +215,14 @@
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
 
-         _txtASRInfo = (TextView) mActivity.findViewById(R.id.asrInfo);
-         _txtGGMLInfo = (TextView) mActivity.findViewById(R.id.ggmlInfo);
-         _txtGGMLStatus = (TextView) mActivity.findViewById(R.id.ggmlStatus);
-         _btnBenchmark = (Button) mActivity.findViewById(R.id.btnBenchmark);
+         _txtASRInfo = mActivity.findViewById(R.id.asrInfo);
+         _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
+         _txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
+         _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
          //TODO: change to voice input, and then use whisper.cpp to convert it into text
-         _txtUserInput = (EditText) mActivity.findViewById(R.id.txtPrompt);
+         _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
+         //_ivInfo = mActivity.findViewById(R.id.imgInfo);
+         _llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + ggmlModelFileName);
@@ -377,6 +386,7 @@
              }
          });
 
+
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex)
@@ -385,12 +395,7 @@
              String selectModelFilePath = "";
              File selectModeFile = null;
 
-             isLLMModel = false;
-             isQNNModel = false;
-             isSDModel = false;
-             isMNISTModel = false;
-             isTTSModel = false;
-             isASRModel = false;
+             resetInternalVars();
 
              //TODO: better method
              //sanity check begin
@@ -414,7 +419,7 @@
              } else if (strModeName.startsWith("qnn")) {
                  //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
                  isQNNModel = true;
-             } else if (strModeName.startsWith("mnist")) {
+             } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.BENCHMARK_MNIST)){
                  isMNISTModel = true;
                  selectModeFileName = "mnist-ggml-model-f32.gguf";
              } else if (strModeName.startsWith("sdmodel")) {
@@ -432,31 +437,41 @@
              }
              CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
 
-             if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
-             if ((!isLLMModel) && (benchmarkIndex == CDEUtils.BENCHMARK_LLM)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
+             if ((benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_AUTO_UT)) {
+                 //do nothing
+             } else {
+                 if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
+                 if ((!isLLMModel) && (benchmarkIndex == CDEUtils.BENCHMARK_LLM)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
 
-             if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
-             if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
+                 if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
+                 if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
 
-             if (isTTSModel && (benchmarkIndex != CDEUtils.BENCHMARK_TTS)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
-             }
-             if (!isTTSModel && (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
-                 CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                 return;
+                 if (isTTSModel && (benchmarkIndex != CDEUtils.BENCHMARK_TTS)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
+                 if (!isTTSModel && (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
+                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
              }
 
              if (!isQNNModel)
@@ -498,6 +513,14 @@
                  ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
              }
 
+             if (!isMNISTModel) {
+                if (_ivInfo != null) {
+                    _ivInfo.setVisibility(View.INVISIBLE);
+                    _llInfoLayout.removeView(_ivInfo);
+                    _ivInfo = null;
+                }
+             }
+
              nLogCounts = 0;
              isBenchmarking.set(true);
 
@@ -523,6 +546,14 @@
          CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
      }
 
+     private void resetInternalVars() {
+         isLLMModel = false;
+         isQNNModel = false;
+         isSDModel = false;
+         isMNISTModel = false;
+         isTTSModel = false;
+         isASRModel = false;
+     }
 
      private final void launchGGMLBenchmarkThread() {
          Thread workThread = new Thread(new Runnable() {
@@ -532,10 +563,9 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 if (!isQNNModel) {
+                 if (isASRModel) {
                      ggmljava.asr_set_benchmark_status(0);
                  }
-
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
@@ -546,12 +576,30 @@
                                      strUserInput,
                                      benchmarkIndex,
                                      nThreadCounts, backendIndex);
-                         } else {
+                         } else if (isMNISTModel) {
                              strBenchmarkInfo = ggmljava.ggml_bench(
                                      CDEUtils.getDataPath() + ggmlModelFileName,
-                                     CDEUtils.getDataPath() + ggmlSampleFileName,
+                                     CDEUtils.getDataPath() + ggmlMNISTImageFile,
                                      benchmarkIndex,
                                      nThreadCounts, backendIndex, optypeIndex);
+                         } else if (isSDModel) {
+                             strBenchmarkInfo = ggmljava.ggml_bench(
+                                     CDEUtils.getDataPath() + ggmlModelFileName,
+                                     "a lovely cat"/*strUserInput*/,
+                                     benchmarkIndex,
+                                     nThreadCounts, backendIndex, optypeIndex);
+                         } else if (isTTSModel) {
+                             strBenchmarkInfo = ggmljava.ggml_bench(
+                                     CDEUtils.getDataPath() + ggmlModelFileName,
+                                     "this is an audio generated by bark.cpp"/*strUserInput*/,
+                                     benchmarkIndex,
+                                     nThreadCounts, backendIndex, optypeIndex);
+                         } else {
+                                 strBenchmarkInfo = ggmljava.ggml_bench(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         CDEUtils.getDataPath() + ggmlSampleFileName,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex, optypeIndex);
                          }
                      } else {
                          // avoid following issue
@@ -603,7 +651,29 @@
                              //update UI status
                              _btnBenchmark.setEnabled(true);
 
+                             if (isMNISTModel) {
+                                 if (_ivInfo != null) {
+                                     _ivInfo.setVisibility(View.INVISIBLE);
+                                     _llInfoLayout.removeView(_ivInfo);
+                                     _ivInfo = null;
+                                 }
+
+                                 ViewGroup.LayoutParams vlp = new LinearLayout.LayoutParams(
+                                         ViewGroup.LayoutParams.WRAP_CONTENT,
+                                         ViewGroup.LayoutParams.WRAP_CONTENT
+                                 );
+                                 _ivInfo = new ImageView(mActivity);
+                                 _ivInfo.setLayoutParams(vlp);
+                                 _llInfoLayout.addView(_ivInfo);
+                                 _llInfoLayout.setGravity(Gravity.CENTER);
+                                 Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath() + ggmlMNISTImageFile));
+                                 _ivInfo.setImageURI(uri);
+                                 _ivInfo.setVisibility(View.VISIBLE);
+                             }
+
                              _txtASRInfo.scrollTo(0, 0);
+
+                             resetInternalVars();
                          }
                      });
                  }

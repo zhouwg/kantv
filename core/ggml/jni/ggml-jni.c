@@ -52,11 +52,11 @@ Java_org_ggml_ggmljava_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
 
 JNIEXPORT jstring JNICALL
 Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path,
-                                       jstring audio_path, jint bench_type, jint num_threads, jint backend_type, jint op_type) {
+                                       jstring user_data, jint bench_type, jint num_threads, jint backend_type, jint op_type) {
     UNUSED(clazz);
 
     const char *sz_model_path = NULL;
-    const char *sz_audio_path = NULL;
+    const char *sz_user_data = NULL;
     const char *sz_bench_result = "unknown";
     const char *bench_result = NULL;
 
@@ -66,14 +66,14 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
         goto failure;
     }
 
-    sz_audio_path = (*env)->GetStringUTFChars(env, audio_path, NULL);
-    if (NULL == sz_audio_path) {
+    sz_user_data = (*env)->GetStringUTFChars(env, user_data, NULL);
+    if (NULL == sz_user_data) {
         LOGGW("JNI failure, pls check why?");
         goto failure;
     }
 
     LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("audio file:%s\n", sz_audio_path);
+    LOGGV("user_data:%s\n", sz_user_data);
     LOGGV("bench type: %d\n", bench_type);
     LOGGV("thread counts:%d\n", num_threads);
     LOGGV("backend type:%d\n", backend_type);
@@ -92,7 +92,7 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
     if (0 == num_threads)
         num_threads = 1;
 
-    ggml_jni_bench(sz_model_path, sz_audio_path, bench_type, num_threads, backend_type, op_type);
+    ggml_jni_bench(sz_model_path, sz_user_data, bench_type, num_threads, backend_type, op_type);
 
     if (BECHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
@@ -104,8 +104,8 @@ failure:
         (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
     }
 
-    if (NULL != sz_audio_path) {
-        (*env)->ReleaseStringUTFChars(env, audio_path, sz_audio_path);
+    if (NULL != sz_user_data) {
+        (*env)->ReleaseStringUTFChars(env, user_data, sz_user_data);
     }
 
     jstring string = (*env)->NewStringUTF(env, sz_bench_result);

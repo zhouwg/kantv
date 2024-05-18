@@ -141,11 +141,15 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llInfoLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-
-
 
             <TextView
                 android:id="@+id/asrInfo"
@@ -156,8 +160,7 @@
                 android:fadeScrollbars="false"
                 android:scrollIndicators="right"
                 android:scrollbarFadeDuration="0"
-                android:scrollbars="vertical"
-                />
+                android:scrollbars="vertical" />
 
         </LinearLayout>
 

@@ -8049,10 +8049,8 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     switch (n_graph_type) {
         case 0: // MNIST手写数字识别推理, https://github.com/StudyingLover/ggml-tutorial
         {
-            int argc = 3;
-            char *argv[] = {"mnist-ggml", "/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png"};
             GGML_JNI_NOTIFY("input data is mnist-5.png\n");
-            mnist_inference(argc, argv);
+            mnist_inference("/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png", 0, 4, BACKEND_GGML);
             break;
         }
         case 1:

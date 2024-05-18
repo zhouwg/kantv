@@ -126,40 +126,34 @@ static bool image_load_from_file(const std::string & fname, image_u8 & img) {
     return true;
 }
 
-
-int mnist_inference(int argc, char ** argv) {
+int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type) {
     srand(time(NULL));
     ggml_time_init();
-
-    if (argc != 3) {
-        return 1;
-    }
 
     mnist_model model;
     std::vector<float> digit;
 
-    // load the model
+    // load MNIST model
     {
         const int64_t t_start_us = ggml_time_us();
-        if (!mnist_model_load(argv[1], model)) {
-            LOGGE("%s: failed to load model from '%s'\n", __func__, argv[1]);
+        if (!mnist_model_load(sz_model_path, model)) {
+            LOGGE("failed to load model from '%s'\n", sz_model_path);
             return 1;
         }
-        
 
         const int64_t t_load_us = ggml_time_us() - t_start_us;
 
-        LOGGI("%s: loaded model in %8.2f ms\n", __func__, t_load_us / 1000.0f);
+        LOGGI("loaded model in %8.2f ms\n", t_load_us / 1000.0f);
     }
 
     // read a img from a file
     image_u8 img0;
-    std::string img_path = argv[2];
+    std::string img_path = sz_image_path;
     if (!image_load_from_file(img_path, img0)) {
-        LOGGI( "%s: failed to load image from '%s'\n", __func__, img_path.c_str());
+        LOGGI( "failed to load image from '%s'\n", img_path.c_str());
         return 1;
     }
-    LOGGI("%s: loaded image '%s' (%d x %d)\n", __func__, img_path.c_str(), img0.nx, img0.ny);
+    LOGGI("loaded image '%s' (%d x %d)\n", img_path.c_str(), img0.nx, img0.ny);
     
 
     uint8_t buf[784];
@@ -178,7 +172,7 @@ int mnist_inference(int argc, char ** argv) {
 
     const int64_t t_convert_us = ggml_time_us() - t_start_us;
 
-    LOGGI( "%s: converted image to digit in %8.2f ms\n", __func__, t_convert_us / 1000.0f);
+    LOGGI( "converted image to digit in %8.2f ms\n", t_convert_us / 1000.0f);
 
     const int prediction = mnist_eval(model, 1, digit, nullptr);
     LOGGI("%s: predicted digit is %d\n", __func__, prediction);
