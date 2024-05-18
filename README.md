@@ -317,26 +317,35 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Special Acknowledgement
 
-  the AI part of this project is powered by
+ <ul>device-side AI inferference framework
 
-  <ul>
+   <ul>
   <li>
-
-   [ggml](https://github.com/ggerganov/ggml) and [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and [llama.cpp](https://github.com/ggerganov/llama.cpp) by [Georgi Gerganov](https://github.com/ggerganov)
-
-  </li>
-
-  <li>
-   <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by <a href="https://github.com/PABannier">PABannier</a>
-  </li>
-
-  <li>
-   <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
-  </li>
+   <a href="https://github.com/ggerganov/ggml">GGML</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   </li>
 
   <li>
    <a href="https://github.com/Tencent/ncnn">ncnn</a> by Tencent
   </li>
+  </ul>
+
+  </ul>
+
+ <ul>device-side AI application engine
+
+  <ul>
+  <li>
+   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> and LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  </li>
+
+  <li>
+   TTS engine <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by <a href="https://github.com/PABannier">PABannier</a>
+  </li>
+
+  <li>
+   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
+  </li>
+  </ul>
 
   </ul>
 
