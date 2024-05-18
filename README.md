@@ -32,9 +32,9 @@ Some goals of this project are:
 
 ### Software architecture of KanTV Android
 
-(depend on https://github.com/zhouwg/kantv/issues/121)
+(depend on https://github.com/zhouwg/kantv/issues/121 and https://github.com/zhouwg/kantv/issues/176 )
 
-![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b7e04205-6406-42e7-9746-ccd592f6d12c)
+![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b4f986f3-26ea-440c-931d-6262c2785ebb)
 
 
 ### How to build project
