@@ -438,7 +438,8 @@
              CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
 
              if ((benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_AUTO_UT)) {
-                 //do nothing
+                 resetInternalVars();
+                 selectModeFileName = "ggml-tiny.en-q8_0.bin";
              } else {
                  if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
                      CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
