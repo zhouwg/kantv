@@ -1,22 +1,7 @@
 /*
- * MIT license
- * Copyright (C) 2024 Project KanTV
- * SPDX-License-Identifier: MIT
+ * Copyright (c) 2024- KanTV Authors
  *
  * this is implementation of "PoC: Add Qualcomm mobile SoC native backend for GGML", https://github.com/zhouwg/kantv/issues/121
- *
- * this is also the implementation of ggml QNN(Qualcomm Neural Network, aka AI Engine Direct) backend
- *
- * and will be submitted to upstream GGML/whisper.cpp/llama.cpp and modify from
- *
- *    Copyright (C) 2024 Project KanTV
- *
- *  to
- *
- *    Copyright (C) 2024 GGML authors
- *
- *  accordingly
- *
  *
  * status:
  *
@@ -25,6 +10,8 @@
  * 2. core implementation(data path works fine as expected with whisper.cpp using QNN HTP(aka DSP) backend on Qualcomm's soC based high-end phone
  *
  * 3. GGML_OP_MUL_MAT & GGML_OP_MUL & GGML_OP_ADD using QNN API has been completed
+ *
+ * 4. PR to upstream GGML community on 04-26-2024: https://github.com/ggerganov/llama.cpp/pull/6869
  *
  * todo:
  *
@@ -41,6 +28,17 @@
  *
  * 6. multithreading not work with QNN GPU/HTP(aka DSP) backend
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -2092,7 +2090,7 @@ int qnn_instance::load_backend(std::string & lib_path, const QnnSaver_Config_t *
     _loaded_lib_handle[backend_id] = lib_handle;
     _backend_id = backend_id;
 
-#if 0
+#if 0 //not used since v1.3.8 for purpose of reduce size of APK
     QnnSaver_Config_t outputdir_cfg;
     outputdir_cfg.option = QNN_SAVER_CONFIG_OPTION_OUTPUT_DIRECTORY;
     outputdir_cfg.outputDirectory = "/data/data/com.cdeos.kantv/qnn/";
@@ -2628,238 +2626,6 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
 }
 
 
-
-#if 0 //this is dirty implementation before 04-21-2024, reserve it for purpose of reference
-//ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
-// https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
-static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
-    LOGGD("call %s\n", __func__);
-    LOGGI("%15s: rank = %d, type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-          src0->name, src0->rank,
-          src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
-          src0->nb[0], src0->nb[1], src0->nb[2]);
-    LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-          src1->name, src1->rank,
-          src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
-          src1->nb[0], src1->nb[1], src1->nb[2]);
-    LOGGI("%15s: rank = %d, type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-          dst->name, dst->rank,
-          dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2], dst->nb[0],
-          dst->nb[1], dst->nb[2]);
-    //GGML_DUMP_TENSOR(src0);
-
-    int error = 0;
-
-    int64_t n_begin_time = 0LL;
-    int64_t n_end_time = 0LL;
-    int64_t n_durtion = 0LL;
-
-    qnn_instance * instance                     = nullptr;
-
-    static Qnn_GraphHandle_t graph_handle       = nullptr;
-    static Qnn_Tensor_t tensor_0                = QNN_TENSOR_INIT;
-    static Qnn_Tensor_t tensor_1                = QNN_TENSOR_INIT;
-    static Qnn_Tensor_t tensor_2                = QNN_TENSOR_INIT;
-
-    Qnn_QuantizeParams_t quantize_param  = QNN_QUANTIZE_PARAMS_INIT;
-    Qnn_OpConfig_t qnn_opconfig          = QNN_OPCONFIG_INIT;
-    Qnn_Param_t qnn_params[]             = {};
-
-    enum ggml_op ggmlop                         = GGML_OP_ADD;
-    Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
-    Qnn_DataType_t src1_qnn_type                = QNN_DATATYPE_FLOAT_32;
-    Qnn_DataType_t dst_qnn_type                 = QNN_DATATYPE_FLOAT_32;
-
-    ggml_time_init();
-    n_begin_time                                = ggml_time_us();
-
-    LOGGD("%d, %d, %d, %d", src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3]);
-    uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                     (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-    uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                     (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-    uint32_t dimensions_output[]  = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                     (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
-
-    struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
-    instance = ctx->instance;
-
-    if (src0->type == GGML_TYPE_F16)
-        src0_qnn_type = QNN_DATATYPE_FLOAT_16;
-    if (src1->type == GGML_TYPE_F16)
-        src1_qnn_type = QNN_DATATYPE_FLOAT_16;
-    if (dst->type == GGML_TYPE_F16)
-        dst_qnn_type  = QNN_DATATYPE_FLOAT_16;
-
-
-    QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->raw_interface;
-    QNN_SYSTEM_INTERFACE_VER_TYPE qnn_raw_system_interface = ctx->raw_system_interface;
-
-    bool graph_initialized = false;
-    std::string map_entry = std::string(ggml_op_name(ggmlop));
-    if (qnn_graph_map.find(map_entry) != qnn_graph_map.end()) {
-        graph_initialized = true;
-    }
-
-    if (!graph_initialized) {
-        error = qnn_raw_interface.graphCreate(instance->get_qnn_context_handle(),
-                                              ggml_op_name(ggmlop), nullptr, &graph_handle);
-        if (QNN_SUCCESS != error) {
-            LOGGI("can't create qnn graph handle, error = %d\n", error);
-            return;
-        }
-        tensor_0 = {
-                .version= QNN_TENSOR_VERSION_1,
-                {.v1= {
-                        .id=0,
-                        .name= "ggml_op_add_tensor_0",
-                        .type= QNN_TENSOR_TYPE_APP_WRITE,
-                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                        .dataType= src0_qnn_type,
-                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                        .rank= ggml_get_tensor_rank(src0),
-                        .dimensions=dimensions_input_0,
-                        .memType= QNN_TENSORMEMTYPE_RAW,
-                        {.clientBuf= {.data=nullptr,
-                                .dataSize=0}}}}
-        };
-
-        tensor_1 = {
-                .version= QNN_TENSOR_VERSION_1,
-                {.v1= {
-                        .id=0,
-                        .name= "ggml_op_add_tensor_1",
-                        .type= QNN_TENSOR_TYPE_APP_WRITE,
-                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                        .dataType= src1_qnn_type,
-                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                        .rank= ggml_get_tensor_rank(src1),
-                        .dimensions=dimensions_input_1,
-                        .memType= QNN_TENSORMEMTYPE_RAW,
-                        {.clientBuf= {.data=nullptr,
-                                .dataSize=0}}}}
-        };
-
-        tensor_2 = (Qnn_Tensor_t) {
-                .version= QNN_TENSOR_VERSION_1,
-                {.v1= {
-                        .id=0,
-                        .name= "ggml_op_add_tensor_2",
-                        .type= QNN_TENSOR_TYPE_APP_READ,
-                        .dataFormat= QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
-                        .dataType= dst_qnn_type,
-                        .quantizeParams= {QNN_DEFINITION_UNDEFINED,
-                                          QNN_QUANTIZATION_ENCODING_UNDEFINED,
-                                          {.scaleOffsetEncoding= {.scale= 0.0000000000000000f, .offset= 0}}},
-                        .rank= ggml_get_tensor_rank(dst),
-                        .dimensions= dimensions_output,
-                        .memType= QNN_TENSORMEMTYPE_RAW,
-                        {.clientBuf= {.data=nullptr,
-                                .dataSize=0}}}}};
-
-
-        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_0);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_1);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-        error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-
-        QNN_VER_PTR(tensor_0)->clientBuf = {src0->data, ggml_get_tensor_data_size(src0)};
-        QNN_VER_PTR(tensor_1)->clientBuf = {src1->data, ggml_get_tensor_data_size(src1)};
-        QNN_VER_PTR(tensor_2)->clientBuf = {dst->data, ggml_get_tensor_data_size(dst)};
-
-        Qnn_Tensor_t tensor_inputs[] = {
-                tensor_0,
-                tensor_1
-        };
-
-        Qnn_Tensor_t tensor_outputs[] = {
-                tensor_2
-        };
-
-
-        Qnn_OpConfig_t opconfig = {
-                (Qnn_OpConfigVersion_t) 1, .v1 = {
-                        "ggml_op_add",
-                        QNN_OP_PACKAGE_NAME_QTI_AISW,
-                        QNN_OP_ELEMENT_WISE_ADD,
-                        0,
-                        qnn_params,
-                        2,
-                        tensor_inputs,
-                        1,
-                        tensor_outputs
-                }
-        };
-        error = qnn_raw_interface.graphAddNode(graph_handle, opconfig);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-        error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-
-        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
-                                               nullptr, nullptr);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-        qnn_graph_map[map_entry] = graph_handle;
-    } else {
-        LOGGD("%d, %d, %d, %d", src0->ne[0], src0->ne[1], src0->ne[2], src0->ne[3]);
-        uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                         (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-        uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                         (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-        uint32_t dimensions_output[]  = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                         (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
-        QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
-        QNN_VER_PTR(tensor_0)->rank = ggml_get_tensor_rank(src0);
-        QNN_VER_PTR(tensor_0)->dataType = src0_qnn_type;
-        QNN_VER_PTR(tensor_1)->dimensions = dimensions_input_1;
-        QNN_VER_PTR(tensor_1)->rank = ggml_get_tensor_rank(src1);
-        QNN_VER_PTR(tensor_1)->dataType = src1_qnn_type;
-        QNN_VER_PTR(tensor_2)->dimensions = dimensions_output;
-        QNN_VER_PTR(tensor_2)->rank = ggml_get_tensor_rank(dst);
-        QNN_VER_PTR(tensor_2)->dataType = dst_qnn_type;
-
-        QNN_VER_PTR(tensor_0)->clientBuf = {src0->data, ggml_get_tensor_data_size(src0)};
-        QNN_VER_PTR(tensor_1)->clientBuf = {src1->data, ggml_get_tensor_data_size(src1)};
-        QNN_VER_PTR(tensor_2)->clientBuf = {dst->data, ggml_get_tensor_data_size(dst)};
-
-        Qnn_Tensor_t tensor_inputs[] = {
-                tensor_0,
-                tensor_1
-        };
-
-        Qnn_Tensor_t tensor_outputs[] = {
-                tensor_2
-        };
-        error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1, nullptr, nullptr);
-        if (QNN_SUCCESS != error) {
-            LOGGI("error = %d\n", error);
-        }
-    }
-
-    n_end_time = ggml_time_us();
-    n_durtion = (n_end_time - n_begin_time) / 1000;
-    LOGGD("duration of ggml_qnn_add : %lld milliseconds\n", n_durtion);
-
-    LOGGD("call %s done\n", __func__);
-}
-#endif
 //ref: PoC-S26: offload simple f32 2x2 matrix addition operation to QNN CPU
 // https://github.com/zhouwg/kantv/blob/kantv-poc-with-qnn/core/ggml/jni/ggml-jni-impl-external.cpp#L6736
 static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggml_tensor * dst) {
@@ -5074,9 +4840,9 @@ static ggml_guid_t ggml_backend_qnn_guid() {
 
 static ggml_backend_t ggml_backend_qnn_reg_init(const char * params, void * user_data) {
     ENTER_FUNC();
-    if (nullptr == params) {
+    if (nullptr == params) { // for QNN backend UT in command line mode
         //this is data path of prebuit QNN libs provided by Qualcomm
-        //can be obtained through JNI from Java layer such as "/data/data/com.ggml.llamacpp/"
+        //can be obtained through JNI from Java layer such as "/data/data/com.cdeos.kantv/qnnlib/"
         //or hardcoded to "/data/local/tmp/" which is an Android OS defined path
         params = "/data/local/tmp/";
     }
@@ -5163,7 +4929,7 @@ ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t device_index) {
 /**
  *
  * @param device            0: QNN_CPU 1: QNN_GPU 2: QNN_HTP(aka DSP)
- * @param qnn_lib_path      qnn library path, such as "/data/data/com.cdeos.kantv/" on Android
+ * @param qnn_lib_path      qnn library path, such as "/data/data/com.cdeos.kantv/qnnlib/" on Android
  * @return
  */
 ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
@@ -5199,7 +4965,6 @@ ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
     }
 
     if (QNN_HTP == device) {
-        //std::string path = "/data/data/com.cdeos.kantv/";
         std::string path = qnn_lib_path;
         if (0 == setenv("LD_LIBRARY_PATH",
                         (path +

@@ -104,9 +104,9 @@
         <item>qwen_8b</item>
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
+        <item>yi-chat-6b</item>
         <item>sdmodel</item>
         <item>mnist</item>
-        <item>qnn</item>
     </string-array>
 
     <string-array name="backend">
