@@ -260,16 +260,16 @@
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
 
      //keep sync with ggml-jni.h
-     public static final int BENCHMARK_ASR      = 0;
-     public static final int BENCHMARK_MEMCPY   = 1;
-     public static final int BENCHMARK_MULMAT   = 2;
-     public static final int BENCHMARK_FULL     = 3;
-     public static final int BENCHMARK_LLM     = 4;
-     public static final int BENCHMARK_STABLEDIFFUSION= 5;
-     public static final int BENCHMARK_QNN_GGML_OP     = 6;
-     public static final int BENCHMARK_QNN_AUTO_UT      = 7;
-     public static final int BENCHMARK_MNIST     = 8;
-     public static final int BENCHMARK_TTS       = 9;
+
+     public static final int BENCHMARK_MEMCPY           = 0;
+     public static final int BENCHMARK_MULMAT           = 1;
+     public static final int BENCHMARK_QNN_GGML_OP      = 2;
+     public static final int BENCHMARK_QNN_AUTO_UT      = 3;
+     public static final int BENCHMARK_ASR              = 4;
+     public static final int BENCHMARK_LLM              = 5;
+     public static final int BENCHMARK_TEXT2IMAGE       = 6;
+     public static final int BENCHMARK_CV_MNIST         = 7;
+     public static final int BENCHMARK_TTS              = 8;
 
 
      //keep sync with ggml-qnn.h
@@ -3914,9 +3914,6 @@
 
      public static String getBenchmarkDesc(int benchmarkIndex) {
          switch (benchmarkIndex) {
-             case BENCHMARK_FULL:
-                 return "GGML whisper full";
-
              case BENCHMARK_MEMCPY:
                  return "GGML memcpy";
 
@@ -3924,12 +3921,12 @@
                  return "GGML matrix multiply";
 
              case BENCHMARK_ASR:
-                 return "GGML whisper ASR";
+                 return "GGML ASR";
 
              case BENCHMARK_LLM:
                  return "GGML LLAMA";
 
-             case BENCHMARK_STABLEDIFFUSION:
+             case BENCHMARK_TEXT2IMAGE:
                  return "GGML stable diffusion";
 
              case BENCHMARK_QNN_GGML_OP:
@@ -3938,7 +3935,7 @@
              case BENCHMARK_QNN_AUTO_UT:
                  return "GGML QNN OP UT automation"; //automation UT for PoC-S49: implementation of GGML OPs using QNN API
 
-             case BENCHMARK_MNIST:
+             case BENCHMARK_CV_MNIST:
                  return "GGML mnist";
                  
              case BENCHMARK_TTS:

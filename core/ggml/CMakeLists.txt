@@ -52,29 +52,28 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml-backend.c
         ${LLAMACPP_SRC_DIR}/ggml-quants.c
         ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
-
-        ${WHISPERCPP_SRC_DIR}/whisper.cpp
-
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
         ${LLAMACPP_SRC_DIR}/unicode-data.cpp
-
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/mnist-ggml.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
+        ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
         ${stablediffusioncpp}
 
         ${BARKCPP_SRC_DIR}/bark.cpp
         ${BARKCPP_SRC_DIR}/encodec.cpp
         ${BARKCPP_SRC_DIR}/ggml-allocr.c
+
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
+        ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
 )
 
 

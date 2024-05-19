@@ -32,17 +32,17 @@ extern "C" {
 #define JNI_BUF_LEN                 4096
 #define JNI_TMP_LEN                 256
 
-#define BECHMARK_ASR                0       //whisper.cpp ASR benchmark
-#define BECHMARK_MEMCPY             1       //memcpy  benchmark
-#define BECHMARK_MULMAT             2       //mulmat  benchmark
-#define BECHMARK_FULL               3       //whisper.cpp full benchmark
-#define BENCHMARK_LLAMA             4       //llama.cpp benchmark
-#define BENCHMARK_STABLEDIFFUSION   5       //stable diffusion benchmark, not work on Xiaomi 14 currently
-#define BENCHMARK_QNN_GGML_OP       6      //UT for PoC-S49: implementation of GGML OPs using QNN API
-#define BENCHMARK_QNN_AUTO_UT       7      //automation UT for PoC-S49: implementation of GGML OPs using QNN API
-#define BENCHMARK_MNIST             8       //mnist
-#define BENCHMARK_TTS               9       //TTS
-#define BENCHMAKR_MAX               9
+
+#define BECHMARK_MEMCPY             0       //memcpy  benchmark
+#define BECHMARK_MULMAT             1       //mulmat  benchmark
+#define BENCHMARK_QNN_GGML_OP       2       //UT for PoC-S49: implementation of GGML OPs using QNN API
+#define BENCHMARK_QNN_AUTO_UT       3       //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+#define BECHMARK_ASR                4       //ASR(whisper.cpp) benchmark
+#define BENCHMARK_LLM               5       //LLM(llama.cpp) benchmark
+#define BENCHMARK_TEXT2IMAGE        6       //TEXT2IMAGE(stablediffusion.cpp) benchmark
+#define BENCHMARK_CV_MNIST          7       //mnist
+#define BENCHMARK_TTS               8       //TTS(bark.cpp) benchmark
+#define BENCHMAKR_MAX               8
 
 #define BACKEND_CPU                 0
 #define BACKEND_GPU                 1
@@ -60,14 +60,14 @@ extern "C" {
     /**
     *
     * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
-    * @param sz_audio_path   /sdcard/kantv/jfk.wav, for ASR benchmark
-    * @param n_bench_type    0: ASR(whisper.cpp) 1: memcpy 2: mulmat  3: whisper full 4: LLM(llama.cpp) 5: stable diffusion 6: QNN GGML OP(QNN UT) 7: QNN UT automation 8: MNIST 9: TTS
+    * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
+    * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
     * @param n_threads       1 - 8
-    * @param n_backend_type  0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
+    * @param n_backend_type  0: CPU  1: GPU  2: NPU 3: ggml("fake" QNN backend, just for compare performance)
     * @param n_op_type       type of GGML OP
     * @return
     */
-    void         ggml_jni_bench(const char *model_path, const char *audio_path, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
+    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
 
 
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
@@ -150,13 +150,19 @@ extern "C" {
 * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
 * @return
 */
-int          stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
+int  stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
 
 
 // =================================================================================================
-// mnist using ggml
+// MNIST inference using ggml
 // =================================================================================================
 int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type);
+
+
+// =================================================================================================
+// TTS inference using ggml
+// =================================================================================================
+int  tts_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
 
 #ifdef __cplusplus
 }

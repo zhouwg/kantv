@@ -33,6 +33,7 @@
  import android.content.Context;
  import android.content.DialogInterface;
  import android.content.res.Resources;
+ import android.graphics.BitmapFactory;
  import android.media.MediaPlayer;
  import android.net.Uri;
  import android.os.Build;
@@ -101,7 +102,7 @@
      Button _btnBenchmark;
 
      private int nThreadCounts = 1;
-     private int benchmarkIndex = 0; //0: asr 12: qnn-ggml-op, make "PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API" happy
+     private int benchmarkIndex = CDEUtils.BENCHMARK_ASR;
      private int previousBenchmakrIndex = 0;
      private String strModeName = "tiny.en-q8_0";
      private String strBackend = "cpu";
@@ -136,6 +137,7 @@
      private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
      private String ggmlSampleFileName = "jfk.wav";
      private String ggmlMNISTImageFile = "mnist-5.png";
+     private String ggmlMNISTModelFile = "mnist-ggml-model-f32.gguf";
 
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main
      // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
@@ -401,38 +403,48 @@
              //sanity check begin
              if (strModeName.contains("llama")) {
                  isLLMModel = true;
+                 //https://huggingface.co/bevangelista/Llama-2-7b-chat-hf-GGUF-Q4_K_M/tree/main, //4.08 GB
                  selectModeFileName = "llama-2-7b-chat.Q4_K_M.gguf";
              } else if (strModeName.contains("qwen")) {
                  isLLMModel = true;
+                 // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
                  selectModeFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
              } else if (strModeName.contains("baichuan")) {
                  isLLMModel = true;
+                 // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf //4.61 GB
                  selectModeFileName = "baichuan2-7b.Q4_K_M.gguf";
              } else if (strModeName.contains("gemma")) {
                  isLLMModel = true;
                  selectModeFileName = "gemma-2b.Q4_K_M.gguf";
+                 // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
                  selectModeFileName = "gemma-2b.Q8_0.gguf";
              } else if (strModeName.contains("yi-chat")) {
                  isLLMModel = true;
                  selectModeFileName = "yi-chat-6b.Q2_K.gguf";
+                 // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q4_0.gguf //3.48 GB
                  selectModeFileName = "yi-chat-6b.Q4_0.gguf";
              } else if (strModeName.startsWith("qnn")) {
                  //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
                  isQNNModel = true;
-             } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.BENCHMARK_MNIST)){
+             } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.BENCHMARK_CV_MNIST)) {
                  isMNISTModel = true;
+                 //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
                  selectModeFileName = "mnist-ggml-model-f32.gguf";
-             } else if (strModeName.startsWith("sdmodel")) {
+                 selectModeFileName = ggmlMNISTModelFile;
+             } else if ((strModeName.startsWith("sdmodel")) || (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
                  isSDModel = true;
                  //https://github.com/leejet/stable-diffusion.cpp
                  //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
                  //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
+                 //https://huggingface.co/zhouwg/kantv, //2.0 GB
                  selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
-             } else if (strModeName.contains("bark")) {
+             } else if ((strModeName.contains("bark")) || (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
                  isTTSModel = true;
+                 //https://huggingface.co/zhouwg/kantv/blob/main/ggml-bark-small.bin, //843 MB
                  selectModeFileName = "ggml-bark-small.bin";
              } else {
                  isASRModel = true;
+                 //https://huggingface.co/ggerganov/whisper.cpp
                  selectModeFileName = "ggml-" + strModeName + ".bin";
              }
              CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
@@ -452,12 +464,12 @@
                      return;
                  }
 
-                 if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                 if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_TEXT2IMAGE)) {
                      CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                      CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                      return;
                  }
-                 if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_STABLEDIFFUSION)) {
+                 if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
                      CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                      CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                      return;
@@ -659,17 +671,31 @@
                                      _ivInfo = null;
                                  }
 
+                                 String imgPath = CDEUtils.getDataPath() + ggmlMNISTImageFile;
+                                 Uri uri = Uri.fromFile(new File(imgPath));
+                                 BitmapFactory.Options opts = new BitmapFactory.Options();
+                                 opts.inJustDecodeBounds = true;
+                                 BitmapFactory.decodeFile(imgPath, opts);
+                                 int imgWidth = opts.outWidth;
+                                 int imgHeight = opts.outHeight;
+                                 CDELog.j(TAG, "img width=" + imgWidth + ", img height=" + imgHeight);
+
                                  ViewGroup.LayoutParams vlp = new LinearLayout.LayoutParams(
                                          ViewGroup.LayoutParams.WRAP_CONTENT,
                                          ViewGroup.LayoutParams.WRAP_CONTENT
                                  );
+                                 vlp.width = imgWidth;
+                                 vlp.height = imgHeight;
                                  _ivInfo = new ImageView(mActivity);
                                  _ivInfo.setLayoutParams(vlp);
                                  _llInfoLayout.addView(_ivInfo);
                                  _llInfoLayout.setGravity(Gravity.CENTER);
-                                 Uri uri = Uri.fromFile(new File(CDEUtils.getDataPath() + ggmlMNISTImageFile));
                                  _ivInfo.setImageURI(uri);
                                  _ivInfo.setVisibility(View.VISIBLE);
+                                 _ivInfo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                 _ivInfo.setAdjustViewBounds(true);
+                                 _ivInfo.setMaxWidth(250);
+                                 _ivInfo.setMaxHeight(250);
                              }
 
                              _txtASRInfo.scrollTo(0, 0);

@@ -60,16 +60,15 @@
     </string-array>
 
     <string-array name="benchType">
-        <item>ASR(whisper)</item>           <!-- whisper ASR benchmark / validation ASR with QNN backend -->
-        <item>memcpy</item>                 <!-- whisper memcopy benchmark -->
-        <item>whisper mulmat</item>         <!-- whisper mulmat benchmark -->
-        <item>whisper full</item>           <!-- whisper full benchmark -->
-        <item>LLM</item>                    <!-- LLM benchmark -->
-        <item>stablediffusion</item>        <!-- stable diffusion benchmark, not work currently -->
+        <item>memcpy</item>                 <!-- memcopy benchmark -->
+        <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
-        <item>MNIST</item>                  <!-- MNIST benchmark -->
-        <item>TTS</item>                    <!-- TTS benchmark -->
+        <item>ASR</item>                    <!-- ASR(whisper.cpp)benchmark / validation ASR with QNN backend -->
+        <item>LLM</item>                    <!-- LLM(llama.cpp) benchmark -->
+        <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp) benchmark -->
+        <item>CV-MNIST</item>               <!-- MNIST benchmark -->
+        <item>TTS</item>                    <!-- TTS(bark.cpp) benchmark -->
     </string-array>
 
     <string-array name="threadCounts">
@@ -105,9 +104,9 @@
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
         <item>yi-chat-6b</item>
-        <item>sdmodel</item>
+        <item>text2image</item>
         <item>mnist</item>
-        <item>bark-small</item>
+        <item>tts-small</item>
     </string-array>
 
     <string-array name="backend">

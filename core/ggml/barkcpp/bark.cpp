@@ -1,6 +1,7 @@
 #include "ggml-allocr.h"
 #include "ggml-backend.h"
 #include "ggml.h"
+#include "ggml-jni.h"
 
 #ifdef GGML_USE_CUBLAS
 #include "ggml-cuda.h"
@@ -1703,7 +1704,12 @@ static bool bark_eval_text_encoder(struct bark_context* bctx, int n_threads) {
 
     float eos_p = 0;
     int n_past = 0;
-
+    LOGGD("n_steps_text_encoder %d\n", n_steps_text_encoder);
+    LOGGD("semantic_vocab_size %d\n", semantic_vocab_size);
+    LOGGD("semantic_pad_token %d\n", semantic_pad_token);
+    LOGGD("min_eos_p %.2f\n", min_eos_p);
+    LOGGD("n_vocab %d\n", n_vocab);
+    LOGGD("temp %.2f\n", temp);
     for (int i = 0; i < n_steps_text_encoder; i++) {
         if (params.progress_callback) {
             const int progress_cur = 100*(i+1)/n_steps_text_encoder;
@@ -1712,8 +1718,10 @@ static bool bark_eval_text_encoder(struct bark_context* bctx, int n_threads) {
                 bctx, bark_encoding_step::SEMANTIC, progress_cur, params.progress_callback_user_data);
         }
 
+        //TODO: there is a bug in function bark_eval_encoder_internal?
         if (!bark_eval_encoder_internal(model, allocr, input, logits, &n_past, true, n_threads)) {
-            fprintf(stderr, "%s: Could not generate token\n", __func__);
+            LOGGD("%s: Could not generate token\n", __func__);
+            GGML_JNI_NOTIFY("%s: Could not generate token\n", __func__);
             return false;
         }
 
@@ -1725,6 +1733,8 @@ static bool bark_eval_text_encoder(struct bark_context* bctx, int n_threads) {
         bark_token next = gpt_sample(
             logits, bctx->rng, temp, &eos_p, &model.t_sample_us, &model.n_sample);
 
+        LOGGD("eos_p %.2f, min_eos_p %.2f", eos_p, min_eos_p);
+        GGML_JNI_NOTIFY("eos_p %.2f, min_eos_p %.2f", eos_p, min_eos_p);
         if (next == semantic_vocab_size || eos_p >= min_eos_p) {
             break;
         }
@@ -1732,6 +1742,16 @@ static bool bark_eval_text_encoder(struct bark_context* bctx, int n_threads) {
         input.push_back(next);
         output.push_back(next);
     }
+    LOGGD("output.size %d\n", output.size());
+    GGML_JNI_NOTIFY("output.size %d\n", output.size());
+
+    //added on 05-19-2024, avoid crash
+    if (0 == output.size()) {
+        LOGGD("can't get valid semantic tokens");
+        GGML_JNI_NOTIFY("[%s,%s,%d] can't get valid semantic tokens", __FILE__, __FUNCTION__, __LINE__);
+        return false;
+    }
+    //end added
 
     bctx->semantic_tokens = output;
     bctx->stats.n_sample_semantic = model.n_sample;
@@ -1772,8 +1792,10 @@ bool bark_forward_text_encoder(struct bark_context* bctx, int n_threads) {
         }
     }
 
+    LOGGI("calling bark_eval_text_encoder");
     if (!bark_eval_text_encoder(bctx, n_threads)) {
-        fprintf(stderr, "%s: failed to forward text encoder\n", __func__);
+        LOGGE("%s: failed to forward text encoder\n", __func__);
+        GGML_JNI_NOTIFY("[%s,%s,%d]: failed to forward text encoder\n", __FILE__, __FUNCTION__, __LINE__);
         return false;
     }
 
@@ -2013,28 +2035,24 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
 
     std::vector<float> logits;
     logits.resize(1024 * 1056);
-
     auto& model = bctx->text_model.fine_model;
     auto& hparams = model.hparams;
     auto& params = bctx->params;
-
     float temp = params.fine_temp;
-
     int32_t n_coarse_codebooks = params.n_coarse_codebooks;
     int32_t n_fine_codebooks = params.n_fine_codebooks;
     int32_t codebook_size = params.codebook_size;
 
-    int n_coarse = input[0].size();
     int original_seq_len = input.size();
+    LOGGD("seq len %d", original_seq_len);
+    int n_coarse = input[0].size();
     int n_remove_from_end = 0;
-
     // channel padding
     for (int i = 0; i < (int)input.size(); i++) {
         for (int j = n_coarse_codebooks; j < n_fine_codebooks; j++) {
             input[i].push_back(codebook_size);
         }
     }
-
     // spatial padding if sequence is too short
     if (original_seq_len < 1024) {
         n_remove_from_end = 1024 - original_seq_len;
@@ -2047,7 +2065,6 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
     int n_loops = std::max(0, (int)ceilf((input.size() - 1024) / 512.f)) + 1;
 
     bark_codes in_arr = input;  // [seq_length, n_codes]
-
     for (int n = 0; n < n_loops; n++) {
         int start_idx = std::min(n * 512, (int)in_arr.size() - 1024);
         int start_fill_idx = std::min(n * 512, (int)in_arr.size() - 512);
@@ -2060,7 +2077,6 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
                 in_buffer.push_back(in_arr[j][i]);
             }
         }
-
         for (int nn = n_coarse; nn < n_fine_codebooks; nn++) {
             if (params.progress_callback) {
                 const int progress_cur = 100*(n*(n_fine_codebooks-n_coarse)+(nn-n_coarse+1))/(n_loops*(n_fine_codebooks-n_coarse));
@@ -2068,7 +2084,6 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
                 params.progress_callback(
                     bctx, bark_encoding_step::FINE, progress_cur, params.progress_callback_user_data);
             }
-
             if (!bark_eval_fine_encoder_internal(bctx, in_buffer, logits, nn, n_threads)) {
                 fprintf(stderr, "%s: Could not generate token\n", __func__);
                 return false;
@@ -2098,9 +2113,7 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
     if (n_remove_from_end > 0) {
         in_arr.resize(in_arr.size() - n_remove_from_end);
     }
-
     assert(bctx->coarse_tokens.size() == in_arr.size());
-
     bctx->fine_tokens = in_arr;
     bctx->stats.n_sample_fine = model.n_sample;
 
@@ -2109,7 +2122,6 @@ static bool bark_eval_fine_encoder(struct bark_context* bctx, int n_threads) {
 
 bool bark_forward_fine_encoder(struct bark_context* bctx, int n_threads) {
     const int64_t t_main_start_us = ggml_time_us();
-
     auto& model = bctx->text_model.fine_model;
     auto& allocr = bctx->allocr;
     auto& hparams = model.hparams;
@@ -2117,13 +2129,11 @@ bool bark_forward_fine_encoder(struct bark_context* bctx, int n_threads) {
     auto& verbosity = bctx->params.verbosity;
 
     int32_t n_fine_codebooks = params.n_fine_codebooks;
-
     // allocate the compute buffer
     {
         // alignment required by the backend
         size_t align = ggml_backend_get_alignment(model.backend);
         bctx->allocr = ggml_allocr_new_measure(align);
-
         // create the worst-case graph for memory usage estimation
         std::vector<bark_vocab::id> decoy_tokens(hparams.block_size * n_fine_codebooks, 0);
         struct ggml_cgraph* gf = bark_build_fine_gpt_graph(
@@ -2131,12 +2141,10 @@ bool bark_forward_fine_encoder(struct bark_context* bctx, int n_threads) {
 
         // compute the required memory
         size_t mem_size = ggml_allocr_alloc_graph(bctx->allocr, gf);
-
         // recreate the allocator with the required memory
         ggml_allocr_free(bctx->allocr);
         bctx->buf_compute = ggml_backend_alloc_buffer(model.backend, mem_size);
         bctx->allocr = ggml_allocr_new_from_buffer(bctx->buf_compute);
-
         if (verbosity == bark_verbosity_level::MEDIUM || verbosity == bark_verbosity_level::HIGH) {
             fprintf(stderr, "%s: compute buffer size: %.2f MB\n\n", __func__, mem_size / 1024.0 / 1024.0);
         }
@@ -2146,12 +2154,9 @@ bool bark_forward_fine_encoder(struct bark_context* bctx, int n_threads) {
         fprintf(stderr, "%s: failed to forward coarse encoder\n", __func__);
         return false;
     }
-
     model.t_main_us = ggml_time_us() - t_main_start_us;
     bctx->stats.t_fine_us = model.t_main_us;
-
     bark_print_statistics(&model);
-
     ggml_backend_buffer_free(bctx->buf_compute);
     ggml_allocr_free(bctx->allocr);
 
@@ -2177,6 +2182,7 @@ static bool bark_forward_eval(struct bark_context* bctx, int n_threads) {
     return true;
 }
 
+
 bool bark_generate_audio(struct bark_context* bctx, const char* text, int n_threads) {
     if (!bctx) {
         fprintf(stderr, "%s: invalid bark context\n", __func__);
@@ -2188,10 +2194,11 @@ bool bark_generate_audio(struct bark_context* bctx, const char* text, int n_thre
     int64_t t_start_eval_us = ggml_time_us();
 
     std::string text_str(text);
+    LOGGD("text %s", text);
     bark_tokenize_input(bctx, text_str);
 
     if (!bark_forward_eval(bctx, n_threads)) {
-        fprintf(stderr, "%s: failed to forward eval\n", __func__);
+        LOGGW( "%s: failed to forward eval\n", __func__);
         return false;
     }
 

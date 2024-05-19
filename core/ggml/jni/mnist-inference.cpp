@@ -1,13 +1,9 @@
-//author:https://github.com/StudyingLover/ggml-tutorial
+//ref/original author:https://github.com/StudyingLover/ggml-tutorial
 
-#include "ggml.h"
 
-#include "common.h"
-#include "ggml-jni.h"
-
-#include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <cmath>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -15,10 +11,12 @@
 #include <vector>
 #include <algorithm>
 
+#include "ggml.h"
+#include "ggml-jni.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-
 
 struct mnist_model {
     struct ggml_tensor * fc1_weight;
@@ -125,6 +123,7 @@ static bool image_load_from_file(const std::string & fname, image_u8 & img) {
 
     return true;
 }
+
 
 int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type) {
     srand(time(NULL));

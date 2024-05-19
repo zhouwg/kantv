@@ -814,10 +814,10 @@ void whisper_set_benchmark_status(int b_exit_benchmark) {
 /**
   *
   * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
-  * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav LLM: user input Text2Image: user input MNIST: image path TTS: user input
-  * @param n_bench_type    0: ASR(whisper.cpp) 1: memcpy 2: mulmat  3: whisper full 4: LLM(llama.cpp) 5: stable diffusion 6: QNN GGML OP(QNN UT) 7: QNN UT automation 8: MNIST 9: TTS
+  * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
+  * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
   * @param n_threads       1 - 8
-  * @param n_backend_type  0: CPU  1: GPU  2: DSP 3: ggml("fake" QNN backend, just for compare performance)
+  * @param n_backend_type  0: CPU  1: GPU  2: NPU 3: ggml("fake" QNN backend, just for compare performance)
   * @param n_op_type       type of GGML OP
   * @return
 */
@@ -860,29 +860,12 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     kantv_asr_notify_benchmark_c("reset");
 
     switch (n_bench_type) {
-        case BECHMARK_ASR:
-            whisper_transcribe_from_file(sz_model_path, sz_user_data, n_threads, n_backend_type);
-            break;
-
         case BECHMARK_MEMCPY:
             whisper_bench_memcpy(n_threads);
             break;
 
         case BECHMARK_MULMAT:
             whisper_bench_ggml_mul_mat(n_threads, n_backend_type);
-            break;
-
-        case BECHMARK_FULL:
-            whisper_bench_full();
-            break;
-
-        case BENCHMARK_LLAMA:
-            llama_inference(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type);
-            break;
-
-        case BENCHMARK_STABLEDIFFUSION:
-            GGML_JNI_NOTIFY("Text2Image doesn't work properly currently\n");
-            //stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type); //TODO: crash on Xiaomi 14
             break;
 
         case BENCHMARK_QNN_GGML_OP: //UT for PoC-S49: implementation of GGML OPs using QNN API
@@ -893,15 +876,26 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             qnn_ggml_op_automation_ut(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_MNIST:
-        {
-            GGML_JNI_NOTIFY("input data is %s\n", sz_user_data);
-            mnist_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-        }
+        case BECHMARK_ASR:
+            whisper_transcribe_from_file(sz_model_path, sz_user_data, n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_TTS: //TODO: TTS inference using bark.cpp
-            GGML_JNI_NOTIFY("TTS not support currently\n");
+        case BENCHMARK_LLM:
+            llama_inference(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type);
+            break;
+
+        case BENCHMARK_TEXT2IMAGE:
+            GGML_JNI_NOTIFY("TEXT2IMAGE doesn't work properly currently\n");
+            //stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type); //TODO: crash on Xiaomi 14
+            break;
+
+        case BENCHMARK_CV_MNIST:
+            GGML_JNI_NOTIFY("input data is %s\n", sz_user_data);
+            mnist_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
+            break;
+
+        case BENCHMARK_TTS:
+            tts_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
         default:
