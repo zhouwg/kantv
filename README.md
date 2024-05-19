@@ -12,7 +12,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
-- 2D graphic performance 
+- 2D graphic performance
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
@@ -27,7 +27,7 @@ Some goals of this project are:
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(focus on Android currently)
 
-- Android <b>turn-key project</b> for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on device-side AI R&D activity, part of AI R&D activity(algorithm improvement, model training, model generation, algorithm validation, model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
+- Android <b>turn-key project</b> for AI experts/researchers/developers(whom mightbe not familiar with <b>regular Android software development</b>) focus on device-side AI R&D activity, part of AI R&D(ASR, LLM, TTS, NLP, CV...) activity (AI algorithm validation, AI model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### Software architecture of KanTV Android
@@ -285,7 +285,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
-- Android multimode AI agent(ASR, TTS, CV, NLP, LLM ..., an open source GPT-4o style AI agent for Android device) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+- Android multimode AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style AI agent for Android device) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 

@@ -985,9 +985,8 @@ struct ggml_tensor *encodec_forward_quantizer_encode(
 
         // compute distance
         // [seq_length, n_bins]
-        float dist_scale_b = 1.0;
-        struct ggml_tensor *dp = ggml_scale(
-            ctx0, ggml_mul_mat(ctx0, block.embed, residual), dist_scale_b);
+        struct ggml_tensor *dp = ggml_scale_bark(
+            ctx0, ggml_mul_mat(ctx0, block.embed, residual), dist_scale);
 
         // [n_bins]
         struct ggml_tensor *sqr_embed = ggml_sqr(ctx0, block.embed);
