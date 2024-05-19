@@ -438,6 +438,8 @@
                  //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
                  //https://huggingface.co/zhouwg/kantv, //2.0 GB
                  selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
+                 //https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main
+                 //selectModeFileName = "v1-5-pruned-emaonly.safetensors";
              } else if ((strModeName.contains("bark")) || (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
                  isTTSModel = true;
                  //https://huggingface.co/zhouwg/kantv/blob/main/ggml-bark-small.bin, //843 MB

@@ -211,6 +211,8 @@ std::string convert_sdxl_lora_name(std::string tensor_name) {
         {"unet", "model_diffusion_model"},
         {"te2", "cond_stage_model_1_transformer"},
         {"te1", "cond_stage_model_transformer"},
+        {"text_encoder_2", "cond_stage_model_1_transformer"},
+        {"text_encoder", "cond_stage_model_transformer"},
     };
     for (auto& pair_i : sdxl_lora_name_lookup) {
         if (tensor_name.compare(0, pair_i.first.length(), pair_i.first) == 0) {
@@ -446,18 +448,25 @@ std::string convert_tensor_name(const std::string& name) {
         } else {
             new_name = name;
         }
-    } else if (contains(name, "lora_up") || contains(name, "lora_down") || contains(name, "lora.up") || contains(name, "lora.down")) {
+    } else if (contains(name, "lora_up") || contains(name, "lora_down") ||
+               contains(name, "lora.up") || contains(name, "lora.down") ||
+               contains(name, "lora_linear")) {
         size_t pos = new_name.find(".processor");
         if (pos != std::string::npos) {
             new_name.replace(pos, strlen(".processor"), "");
         }
-        pos = new_name.find_last_of('_');
+        pos = new_name.rfind("lora");
         if (pos != std::string::npos) {
-            std::string name_without_network_parts = new_name.substr(0, pos);
-            std::string network_part               = new_name.substr(pos + 1);
+            std::string name_without_network_parts = new_name.substr(0, pos - 1);
+            std::string network_part               = new_name.substr(pos);
             // LOG_DEBUG("%s %s", name_without_network_parts.c_str(), network_part.c_str());
             std::string new_key = convert_diffusers_name_to_compvis(name_without_network_parts, '.');
+            new_key             = convert_sdxl_lora_name(new_key);
             replace_all_chars(new_key, '.', '_');
+            size_t npos = network_part.rfind("_linear_layer");
+            if (npos != std::string::npos) {
+                network_part.replace(npos, strlen("_linear_layer"), "");
+            }
             if (starts_with(network_part, "lora.")) {
                 network_part = "lora_" + network_part.substr(5);
             }
@@ -562,11 +571,9 @@ void convert_tensor(void* src,
         if (dst_type == GGML_TYPE_F16) {
             ggml_fp32_to_fp16_row((float*)src, (ggml_fp16_t*)dst, n);
         } else {
-            //int64_t hist[16];
+            int64_t hist[16];
             std::vector<float> imatrix(n_per_row, 1.0f);  // dummy importance matrix
             const float* im = imatrix.data();
-            //ggml_quantize_chunk(dst_type, (float*)src, dst, 0, nrows, n_per_row, hist, im);
-            //TODO:
             ggml_quantize_chunk(dst_type, (float*)src, dst, 0, nrows, n_per_row, im);
         }
     } else if (dst_type == GGML_TYPE_F32) {
@@ -595,10 +602,9 @@ void convert_tensor(void* src,
         if (dst_type == GGML_TYPE_F16) {
             ggml_fp32_to_fp16_row((float*)src_data_f32, (ggml_fp16_t*)dst, n);
         } else {
-            //int64_t hist[16];
+            int64_t hist[16];
             std::vector<float> imatrix(n_per_row, 1.0f);  // dummy importance matrix
             const float* im = imatrix.data();
-            //ggml_quantize_chunk(dst_type, (float*)src_data_f32, dst, 0, nrows, n_per_row, hist, im);
             ggml_quantize_chunk(dst_type, (float*)src_data_f32, dst, 0, nrows, n_per_row, im);
         }
     }
@@ -742,43 +748,45 @@ bool ModelLoader::init_from_file(const std::string& file_path, const std::string
 bool ModelLoader::init_from_gguf_file(const std::string& file_path, const std::string& prefix) {
     LOG_DEBUG("init from '%s'", file_path.c_str());
     file_paths_.push_back(file_path);
-    LOG_DEBUG("init from '%s'", file_path.c_str());
     size_t file_index = file_paths_.size() - 1;
 
     gguf_context* ctx_gguf_ = NULL;
     ggml_context* ctx_meta_ = NULL;
-
+    LOG_DEBUG("here");
     ctx_gguf_               = gguf_init_from_file(file_path.c_str(), {true, &ctx_meta_});
+    LOG_DEBUG("here");
     if (!ctx_gguf_) {
         LOG_ERROR("failed to open '%s'", file_path.c_str());
         return false;
     }
-
+    LOG_DEBUG("here");
     int n_tensors = gguf_get_n_tensors(ctx_gguf_);
-
+    LOG_DEBUG("here");
     size_t total_size  = 0;
     size_t data_offset = gguf_get_data_offset(ctx_gguf_);
+    LOG_DEBUG("here");
     for (int i = 0; i < n_tensors; i++) {
         std::string name          = gguf_get_tensor_name(ctx_gguf_, i);
         struct ggml_tensor* dummy = ggml_get_tensor(ctx_meta_, name.c_str());
         size_t offset             = data_offset + gguf_get_tensor_offset(ctx_gguf_, i);
 
         LOG_DEBUG("%s", name.c_str());
+        //added on 05-19-2024, fix crash on Xiaomi 14
+        if (NULL == dummy) {
+            LOG_WARN("pls check why tensor %s is NULL", name.c_str());
+            continue;
+        }
+        //end added
 
         TensorStorage tensor_storage(prefix + name, dummy->type, dummy->ne, ggml_n_dims(dummy), file_index, offset);
-        if (ggml_nbytes(dummy) != tensor_storage.nbytes()) {
-            LOGGW("init failed");
-            return false;
-        }
         GGML_ASSERT(ggml_nbytes(dummy) == tensor_storage.nbytes());
 
         tensor_storages.push_back(tensor_storage);
     }
-    LOGGD("after load model");
-
+    LOG_DEBUG("here");
     gguf_free(ctx_gguf_);
     ggml_free(ctx_meta_);
-
+    LOG_DEBUG("here");
     return true;
 }
 
@@ -886,6 +894,11 @@ bool ModelLoader::init_from_safetensors_file(const std::string& file_path, const
                 LOG_ERROR("invalid tensor '%s'", name.c_str());
                 return false;
             }
+        }
+
+        // ggml_n_dims returns 1 for scalars
+        if (n_dims == 0) {
+            n_dims = 1;
         }
 
         TensorStorage tensor_storage(prefix + name, type, ne, n_dims, file_index, ST_HEADER_SIZE_LEN + header_size_ + begin);
