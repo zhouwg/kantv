@@ -885,8 +885,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case BENCHMARK_TEXT2IMAGE:
-            GGML_JNI_NOTIFY("TEXT2IMAGE doesn't work properly currently\n");
-            //stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type); //TODO: crash on Xiaomi 14
+            stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
         case BENCHMARK_CV_MNIST:

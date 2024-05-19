@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "stable-diffusion.h"
-
 #include "libavutil/cde_log.h"
 
 bool ends_with(const std::string& str, const std::string& ending);

@@ -1780,6 +1780,7 @@ static int stablediffusion_main(int argc, const char* argv[]) {
 
     bool vae_decode_only        = true;
     uint8_t* input_image_buffer = NULL;
+    uint8_t* control_image_buffer = NULL;
     if (params.mode == IMG2IMG || params.mode == IMG2VID) {
         vae_decode_only = false;
 
@@ -1852,8 +1853,35 @@ static int stablediffusion_main(int argc, const char* argv[]) {
 
     if (sd_ctx == NULL) {
         LOGGD("new_sd_ctx_t failed\n");
+        GGML_JNI_NOTIFY("stable-diffusion init failed");
         return 1;
     }
+
+    sd_image_t* control_image = NULL;
+    if (params.controlnet_path.size() > 0 && params.control_image_path.size() > 0) {
+        int c                = 0;
+        control_image_buffer = stbi_load(params.control_image_path.c_str(), &params.width, &params.height, &c, 3);
+        if (control_image_buffer == NULL) {
+            fprintf(stderr, "load image from '%s' failed\n", params.control_image_path.c_str());
+            return 1;
+        }
+        control_image = new sd_image_t{(uint32_t)params.width,
+                                       (uint32_t)params.height,
+                                       3,
+                                       control_image_buffer};
+        if (params.canny_preprocess) {  // apply preprocessor
+            control_image->data = preprocess_canny(control_image->data,
+                                                   control_image->width,
+                                                   control_image->height,
+                                                   0.08f,
+                                                   0.08f,
+                                                   0.8f,
+                                                   1.0f,
+                                                   false);
+        }
+    }
+
+
 
     sd_image_t* results;
     if (params.mode == TXT2IMG) {
@@ -1951,7 +1979,12 @@ static int stablediffusion_main(int argc, const char* argv[]) {
                               params.sample_steps,
                               params.strength,
                               params.seed,
-                              params.batch_count);
+                              params.batch_count,
+                              control_image,
+                              params.control_strength,
+                              params.style_ratio,
+                              params.normalize_input,
+                              params.input_id_images_path.c_str());
         }
     }
 
@@ -2004,6 +2037,8 @@ static int stablediffusion_main(int argc, const char* argv[]) {
     }
     free(results);
     free_sd_ctx(sd_ctx);
+    free(control_image_buffer);
+    free(input_image_buffer);
 
     return 0;
 }
@@ -2015,7 +2050,7 @@ static int stablediffusion_main(int argc, const char* argv[]) {
  * @param prompt
  * @param bench_type            not used currently
  * @param n_threads             1 - 8
- * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
+ * @param n_backend_type        0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
  * @return
 */
 int  stablediffusion_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type) {
@@ -2030,7 +2065,7 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
     const char *argv[] = {"stablediffusion-main",
                     "-m", sz_model_path,
                     "-p", prompt,
-                    "-o", "/sdcard/kantv/stablediffusion/"
+                    "-o", "/sdcard/kantv/"
     };
     stablediffusion_main(argc, argv);
 
