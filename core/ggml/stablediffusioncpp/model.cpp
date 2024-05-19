@@ -752,19 +752,16 @@ bool ModelLoader::init_from_gguf_file(const std::string& file_path, const std::s
 
     gguf_context* ctx_gguf_ = NULL;
     ggml_context* ctx_meta_ = NULL;
-    LOG_DEBUG("here");
+
     ctx_gguf_               = gguf_init_from_file(file_path.c_str(), {true, &ctx_meta_});
-    LOG_DEBUG("here");
     if (!ctx_gguf_) {
         LOG_ERROR("failed to open '%s'", file_path.c_str());
         return false;
     }
-    LOG_DEBUG("here");
+
     int n_tensors = gguf_get_n_tensors(ctx_gguf_);
-    LOG_DEBUG("here");
     size_t total_size  = 0;
     size_t data_offset = gguf_get_data_offset(ctx_gguf_);
-    LOG_DEBUG("here");
     for (int i = 0; i < n_tensors; i++) {
         std::string name          = gguf_get_tensor_name(ctx_gguf_, i);
         struct ggml_tensor* dummy = ggml_get_tensor(ctx_meta_, name.c_str());
@@ -783,10 +780,10 @@ bool ModelLoader::init_from_gguf_file(const std::string& file_path, const std::s
 
         tensor_storages.push_back(tensor_storage);
     }
-    LOG_DEBUG("here");
+
     gguf_free(ctx_gguf_);
     ggml_free(ctx_meta_);
-    LOG_DEBUG("here");
+
     return true;
 }
 
