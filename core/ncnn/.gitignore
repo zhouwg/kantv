@@ -15,3 +15,11 @@ opencv-mobile-4.9.0-android.zip
 ncnn-20240410-android-vulkan.zip
 opencv-*.zip
 ncnn-*.zip
+#only arm64-v8a used in this project
+armeabi-v7a/
+x86/
+x86_64/
+abi-armeabi-v7a/
+abi-x86/
+abi-x86_64/
+

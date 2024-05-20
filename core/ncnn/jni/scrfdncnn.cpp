@@ -147,7 +147,7 @@ extern "C" {
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnLoad");
+    LOGGD("ncnn JNI_OnLoad");
 
     g_camera = new MyNdkCamera;
 
@@ -156,7 +156,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
 JNIEXPORT void JNI_OnUnload(JavaVM* vm, void* reserved)
 {
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "JNI_OnUnload");
+    LOGGD("ncnn JNI_OnUnload");
 
     {
         ncnn::MutexLockGuard g(lock);
@@ -179,7 +179,7 @@ JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_loadModel(JNIEnv* env, jobject
 
     AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "loadModel %p", mgr);
+    LOGGD("ncnn load Model %p", mgr);
 
     const char* modeltypes[] =
     {
@@ -223,7 +223,7 @@ JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_openCamera(JNIEnv* env, jobjec
     if (facing < 0 || facing > 1)
         return JNI_FALSE;
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "openCamera %d", facing);
+    LOGGD("ncnn openCamera %d", facing);
 
     g_camera->open((int)facing);
 
@@ -233,7 +233,7 @@ JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_openCamera(JNIEnv* env, jobjec
 // public native boolean closeCamera();
 JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_closeCamera(JNIEnv* env, jobject thiz)
 {
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "closeCamera");
+    LOGGD("ncnn closeCamera");
 
     g_camera->close();
 
@@ -245,7 +245,7 @@ JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_setOutputWindow(JNIEnv* env, j
 {
     ANativeWindow* win = ANativeWindow_fromSurface(env, surface);
 
-    __android_log_print(ANDROID_LOG_DEBUG, "ncnn", "setOutputWindow %p", win);
+    LOGGD("ncnn setOutputWindow %p", win);
 
     g_camera->set_window(win);
 

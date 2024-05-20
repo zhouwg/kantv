@@ -19,6 +19,8 @@
 
 #include <net.h>
 
+#include "libavutil/cde_log.h"
+
 struct FaceObject
 {
     cv::Rect_<float> rect;

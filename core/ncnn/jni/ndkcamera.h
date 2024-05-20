@@ -25,6 +25,8 @@
 
 #include <opencv2/core/core.hpp>
 
+#include "libavutil/cde_log.h"
+
 class NdkCamera
 {
 public:

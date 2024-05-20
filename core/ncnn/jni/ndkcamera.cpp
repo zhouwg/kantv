@@ -24,17 +24,17 @@
 
 static void onDisconnected(void* context, ACameraDevice* device)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onDisconnected %p", device);
+    LOGGI("NdkCamera: onDisconnected %p", device);
 }
 
 static void onError(void* context, ACameraDevice* device, int error)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onError %p %d", device, error);
+    LOGGW("NdkCamera: onError %p %d", device, error);
 }
 
 static void onImageAvailable(void* context, AImageReader* reader)
 {
-//     __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onImageAvailable %p", reader);
+    //LOGGD("NdkCamera: onImageAvailable %p", reader);
 
     AImage* image = 0;
     media_status_t status = AImageReader_acquireLatestImage(reader, &image);
@@ -129,37 +129,37 @@ static void onImageAvailable(void* context, AImageReader* reader)
 
 static void onSessionActive(void* context, ACameraCaptureSession *session)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onSessionActive %p", session);
+    LOGGI("NdkCamera: onSessionActive %p", session);
 }
 
 static void onSessionReady(void* context, ACameraCaptureSession *session)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onSessionReady %p", session);
+    LOGGI("NdkCamera: onSessionReady %p", session);
 }
 
 static void onSessionClosed(void* context, ACameraCaptureSession *session)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onSessionClosed %p", session);
+    LOGGI("NdkCamera: onSessionClosed %p", session);
 }
 
 void onCaptureFailed(void* context, ACameraCaptureSession* session, ACaptureRequest* request, ACameraCaptureFailure* failure)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onCaptureFailed %p %p %p", session, request, failure);
+    LOGGI("NdkCamera: onCaptureFailed %p %p %p", session, request, failure);
 }
 
 void onCaptureSequenceCompleted(void* context, ACameraCaptureSession* session, int sequenceId, int64_t frameNumber)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onCaptureSequenceCompleted %p %d %ld", session, sequenceId, frameNumber);
+    LOGGI("NdkCamera: onCaptureSequenceCompleted %p %d %ld", session, sequenceId, frameNumber);
 }
 
 void onCaptureSequenceAborted(void* context, ACameraCaptureSession* session, int sequenceId)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onCaptureSequenceAborted %p %d", session, sequenceId);
+    LOGGI("NdkCamera: onCaptureSequenceAborted %p %d", session, sequenceId);
 }
 
 void onCaptureCompleted(void* context, ACameraCaptureSession* session, ACaptureRequest* request, const ACameraMetadata* result)
 {
-//     __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "onCaptureCompleted %p %p %p", session, request, result);
+    //LOGGI("NdkCamera: onCaptureCompleted %p %p %p", session, request, result);
 }
 
 NdkCamera::NdkCamera()
@@ -213,7 +213,7 @@ NdkCamera::~NdkCamera()
 
 int NdkCamera::open(int _camera_facing)
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "open");
+    LOGGI("NdkCamera: open camera %d", _camera_facing);
 
     camera_facing = _camera_facing;
 
@@ -272,7 +272,7 @@ int NdkCamera::open(int _camera_facing)
         ACameraManager_deleteCameraIdList(camera_id_list);
     }
 
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "open %s %d", camera_id.c_str(), camera_orientation);
+    LOGGI("NdkCamera: open %s %d", camera_id.c_str(), camera_orientation);
 
     // open camera
     {
@@ -326,7 +326,7 @@ int NdkCamera::open(int _camera_facing)
 
 void NdkCamera::close()
 {
-    __android_log_print(ANDROID_LOG_WARN, "NdkCamera", "close");
+    LOGGI("NdkCamera:close");
 
     if (capture_session)
     {
@@ -499,7 +499,7 @@ void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv
                 float acceleration_x = e[num_event - 1].acceleration.x;
                 float acceleration_y = e[num_event - 1].acceleration.y;
                 float acceleration_z = e[num_event - 1].acceleration.z;
-//                 __android_log_print(ANDROID_LOG_WARN, "NdkCameraWindow", "x = %f, y = %f, z = %f", x, y, z);
+                //LOGGD("NdkCameraWindow", "x = %f, y = %f, z = %f", x, y, z);
 
                 if (acceleration_y > 7)
                 {
