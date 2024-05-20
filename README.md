@@ -346,6 +346,11 @@ Report issue in various Android-based phone or even submit PR to this project is
   <li>
    Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
   </li>
+
+  <li>
+  ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with ncnn <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a> by <a href="https://github.com/k2-fsa">k2-fsa</a>
+  </li>
+
   </ul>
 
   </ul>
