@@ -89,13 +89,12 @@ export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
 export PATH=${ANDROID_HOME}/cmake/3.22.1/bin:${PATH}
 
 
-#modify following lines to adapt to local dev envs
+#the following is required for project's maintainers
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
 export UPSTREAM_SDCPP_PATH=~/github/stablediffusion.cpp
 
-
-#the following is not required for project's user
+#the following is required for project's maintainers
 export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
 export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
 export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
