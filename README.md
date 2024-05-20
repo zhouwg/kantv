@@ -188,7 +188,9 @@ cd kantv
 
  - Modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L92">build/envsetup.sh</a> accordingly before launch build
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is <b>NOT</b> Qualcomm SoC based Android phone
 
 
 #### Build native codes
@@ -218,9 +220,7 @@ cd kantv
 
 ### Run Android APK on real Android phone
 
-This Android APK works well on any <b>mainstream</b> Qualcomm mobile SoC based Android phone.
-
-The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' and '**do not upload user data to server/cloud**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following four permissions are required：
+This Android APK works well on any <b>mainstream</b> Android phone and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
