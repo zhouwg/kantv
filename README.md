@@ -19,15 +19,11 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
-
-
-Some goals of this project are:
-
 - Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario on mobile device(focus on Android currently)
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(focus on Android currently)
 
-- Android <b>turn-key project</b> for AI experts/researchers/developers(whom mightbe not familiar with <b>regular Android software development</b>) focus on device-side AI R&D activity, part of AI R&D(ASR, LLM, TTS, NLP, CV...) activity (AI algorithm validation, AI model validation, performance benchmark......) could be done by Android Studio IDE + a powerful Android phone very easily
+- Android <b>turn-key project</b> for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### Software architecture of KanTV Android
@@ -285,7 +281,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
-- Android multimode AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style AI agent for Android device) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+- Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
 
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
@@ -350,6 +346,11 @@ Report issue in various Android-based phone or even submit PR to this project is
   <li>
    Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
   </li>
+
+  <li>
+   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an open-source ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with <a href="https://github.com/Tencent/ncnn">ncnn</a>) by <a href="https://github.com/k2-fsa">k2-fsa</a>
+  </li>
+
   </ul>
 
   </ul>
