@@ -118,15 +118,15 @@ function build_thirdparty()
 
 function build_jni()
 {
-    jni_libs=" ggml "
+    #jni_libs=" ggml "
 
     cd ${PROJECT_ROOT_PATH}/core/
-    for item in ${jni_libs};do
-        cd ${PROJECT_ROOT_PATH}/core/${item}/
-        echo "build Android JNI lib${item}.so in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
+    #for item in ${jni_libs};do
+    #    cd ${PROJECT_ROOT_PATH}/core/${item}/
+    #    echo "build Android JNI lib${item}.so in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
         ./build-android-jni-lib.sh
-        cd ${PROJECT_ROOT_PATH}/core/
-    done
+    #    cd ${PROJECT_ROOT_PATH}/core/
+    #done
 
     cd ${PROJECT_ROOT_PATH}
 }

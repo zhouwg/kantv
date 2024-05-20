@@ -2,12 +2,12 @@
 
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build libggml-jni.so for target Android
+# Description: build kantv-ai jni for target Android
 #
 
 set -e
 
-TARGET=ggml-jni
+TARGET=kantvai-jni
 BUILD_TYPE=Release
 
 if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
@@ -43,10 +43,6 @@ cmake -H. -B./out/arm64-v8a -DPROJECT_ROOT_PATH=${PROJECT_ROOT_PATH} -DTARGET_NA
 cd ./out/arm64-v8a
 make
 
-ls -l lib${TARGET}.so
-ls -lah lib${TARGET}.so
-#don't do this because IDE is preferred to this open source project for purpose of more easily/friendly
-#/bin/cp -fv lib${TARGET}.so ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/
 cd -
 }
 
@@ -57,10 +53,6 @@ cmake -H. -B./out/armeabi-v7a -DPROJECT_ROOT_PATH=${PROJECT_ROOT_PATH} -DTARGET_
 cd ./out/armeabi-v7a
 make
 
-ls -l lib${TARGET}.so
-ls -lah lib${TARGET}.so
-#don't do this because IDE is preferred to this open source project for purpose of more easily/friendly
-#/bin/cp -fv lib${TARGET}.so ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/armeabi-v7a/
 cd -
 }
 

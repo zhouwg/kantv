@@ -297,8 +297,9 @@ Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=
 
 Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
 
+<!--
  **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
-
+-->
 
 ### Docs
 

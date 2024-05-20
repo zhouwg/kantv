@@ -1,0 +1,17 @@
+*.so
+*.a
+*.wav
+*.o
+*.bin
+
+out/
+obj/
+make/
+out.*/
+
+sherpa-ncnn/
+
+opencv-mobile-4.9.0-android.zip
+ncnn-20240410-android-vulkan.zip
+opencv-*.zip
+ncnn-*.zip
