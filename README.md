@@ -218,7 +218,7 @@ cd kantv
 -->
 
 
-### Run Android APK on real Android phone
+### Run Android APK on Android phone
 
 This Android APK works well on any <b>mainstream</b> Android phone and the following four permissions are required:
 
