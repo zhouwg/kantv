@@ -70,7 +70,7 @@
         <item>MNIST(ggml)</item>            <!-- MNIST(based on ggml) benchmark -->
         <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
         <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn)benchmark -->
-        <item>TTS(ncnn)</item>              <!-- TTS(https://github.com/k2-fsa/sherpa-ncnn)benchmark -->
+        <item>TTS(ncnn)</item>              <!-- TBD -->
     </string-array>
 
     <string-array name="threadCounts">
