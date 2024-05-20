@@ -281,7 +281,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
-- Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+- <a href="https://github.com/zhouwg/kantv/issues/176"> Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">NCNN</a></a>
 
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
