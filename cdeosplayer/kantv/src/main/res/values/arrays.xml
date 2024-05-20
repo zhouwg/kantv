@@ -64,11 +64,13 @@
         <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
-        <item>ASR</item>                    <!-- ASR(whisper.cpp)benchmark / validation ASR with QNN backend -->
-        <item>LLM</item>                    <!-- LLM(llama.cpp) benchmark -->
-        <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp) benchmark -->
-        <item>CV-MNIST</item>               <!-- MNIST benchmark -->
-        <item>TTS</item>                    <!-- TTS(bark.cpp) benchmark -->
+        <item>ASR(whisper)</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
+        <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml) benchmark -->
+        <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
+        <item>MNIST(ggml)</item>            <!-- MNIST(based on ggml) benchmark -->
+        <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
+        <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn)benchmark -->
+        <item>TTS(ncnn)</item>              <!-- TBD -->
     </string-array>
 
     <string-array name="threadCounts">
@@ -126,4 +128,21 @@
         <item>mnist</item>
         <item>inception</item>
     </string-array>
+
+
+    <string-array name="model_array">
+        <item>500m</item>
+        <item>500m_kps</item>
+        <item>1g</item>
+        <item>2.5g</item>
+        <item>2.5g_kps</item>
+        <item>10g</item>
+        <item>10g_kps</item>
+        <item>34g</item>
+    </string-array>
+    <string-array name="cpugpu_array">
+        <item>CPU</item>
+        <item>GPU</item>
+    </string-array>
+
 </resources>

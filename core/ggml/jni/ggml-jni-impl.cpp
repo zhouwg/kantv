@@ -36,8 +36,9 @@
  * limitations under the License.
  */
 
-#define RUAPU_IMPLEMENTATION
-#include "ruapu.h"
+//not used since v1.3.8 because Tencent's NCNN inference framework was used in this project and ruapu.h already exist in libncnn.a
+//#define RUAPU_IMPLEMENTATION
+//#include "ruapu.h"
 
 #include "whisper.h"
 
@@ -1438,14 +1439,16 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, i
      }
 
 
-     // dynamic ISA dectect by RUAPU, prepare for SIMD optimization on Android device. but not used currently
+     //dynamic ISA dectect by RUAPU, prepare for SIMD optimization on Android device. but not used currently
+     //not used since v1.3.8 because Tencent's NCNN inference framework was used in this project and ruapu.h already exist in libncnn.a
+#if 0
      ruapu_init();
      const char* const* supported = ruapu_rua();
      while (*supported) {
          LOGGD("%s\n", *supported);
          supported++;
      }
-
+#endif
 
      LOGGV("model path:%s\n", sz_model_path);
      LOGGV("thread counts:%d\n", n_threads);

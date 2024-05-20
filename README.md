@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real application / real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **mobile device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) , with much enhancements and new features:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) , with much enhancements and new features:
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
@@ -23,7 +23,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(focus on Android currently)
 
-- Android <b>turn-key project</b> for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
+- Android <b>turn-key project</b> for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### Software architecture of KanTV Android
@@ -186,9 +186,9 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/build/envsetup.sh#L92">build/envsetup.sh</a> accordingly before launch build
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L12">ncnn/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if build-target is kantv-android and running Android device is NOT Xiaomi 14
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L10">ncnn/CMakeLists.txt</a> accordingly if target Android phone is <b>NOT</b> Qualcomm SoC based Android phone
 
 
 #### Build native codes
@@ -216,11 +216,9 @@ cd kantv
 -->
 
 
-### Run Android APK on real Android phone
+### Run Android APK on Android phone
 
-This Android APK works well on any <b>mainstream</b> Qualcomm mobile SoC based Android phone.
-
-The UI Layer of Project KanTV(this Android APK) follows the principles of '**minimum permissions**' and '**do not collect unnecessary user data**' and '**do not upload user data to server/cloud**' or EU's GDPR principle. When installing/using for the first time on an Android phone, only the following four permissions are required：
+This Android APK works well on any <b>mainstream</b> Android phone and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
@@ -281,11 +279,9 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
-- Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">Tencent NCNN</a>
+- <a href="https://github.com/zhouwg/kantv/issues/176"> Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">NCNN</a></a>
 
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
-
-- improve the quality of real-time English subtitle which powered by great and excellent and amazing ![whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 
 - bugfix in UI layer(Java)
 
@@ -297,8 +293,9 @@ Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=
 
 Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
 
+<!--
  **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
-
+-->
 
 ### Docs
 

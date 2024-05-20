@@ -27,6 +27,7 @@ android {
             //pickFirst 'lib/arm64-v8a/libkantv-ffmpeg.so'
             pickFirst 'lib/arm64-v8a/libggml-jni.so'
             //pickFirst 'lib/arm64-v8a/libQnn*.so'
+            pickFirst 'lib/arm64-v8a/libncnn-jni.so'
         }
 
         versionName project.ext.releaseVersion
@@ -44,7 +45,7 @@ android {
     externalNativeBuild {
         cmake {
             version "3.22.1" //make llamacpp happy
-            path "../../core/ggml/CMakeLists.txt"
+            path "../../core/CMakeLists.txt"
         }
     }
 

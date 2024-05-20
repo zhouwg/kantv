@@ -81,6 +81,7 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
 
     if (bench_type > BENCHMAKR_MAX) {
         LOGGW("pls check bench type\n");
+        GGML_JNI_NOTIFY("benchmark type %d not supported currently", bench_type);
         goto failure;
     }
 

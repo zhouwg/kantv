@@ -14,25 +14,40 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 set(GGML_JNI_QNN       ON)   # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
+set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
+
 #03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
-set(WHISPERCPP_SRC_DIR          ${CMAKE_SOURCE_DIR}/whispercpp/)
-set(PREBUILT_LIB_PATH           ${CMAKE_SOURCE_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUILT_INC_PATH           ${CMAKE_SOURCE_DIR}/../../prebuilts/include/)
-set(KANTV_GGMLJNI_SRC_DIR       ${CMAKE_SOURCE_DIR}/jni)
-set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/)
+set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
+set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
+set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
+
 
 #03-26-2024, integrate llama.cpp to kantv
-set(LLAMACPP_SRC_DIR            ${CMAKE_SOURCE_DIR}/llamacpp/)
+set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
 
 
-set(SDCPP_SRC_DIR                ${CMAKE_SOURCE_DIR}/stablediffusioncpp/)
+set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
 
-set(BARKCPP_SRC_DIR                ${CMAKE_SOURCE_DIR}/barkcpp/)
+set(BARKCPP_SRC_DIR             ${GGML_SRC_DIR}/barkcpp/)
 
 #03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML
-set(QNN_INC_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/include/QNN)
-set(QNN_LIB_PATH  ${CMAKE_SOURCE_DIR}/../../prebuilts/lib/)
-set(QNN_SRC_DIR   ${CMAKE_SOURCE_DIR}/qnnsample/)
+set(QNN_INC_PATH                ${GGML_SRC_DIR}/../../prebuilts/include/QNN)
+set(QNN_LIB_PATH                ${GGML_SRC_DIR}/../../prebuilts/lib/)
+set(QNN_SRC_DIR                 ${GGML_SRC_DIR}/qnnsample/)
+
+message("GGML_SRC_DIR         : ${GGML_SRC_DIR}")
+message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
+message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
+message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
+message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
+message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
+message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
+message("target name          : ${TARGET_NAME}")
+message("build target         : ${BUILD_TARGET}")
+message("QNN_INC_PATH         : ${QNN_INC_PATH}")
+message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
+
 
 include_directories(${QNN_INC_PATH}/)
 include_directories(${QNN_SRC_DIR}/)
@@ -76,18 +91,6 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
 )
 
-
-message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
-message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
-message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
-message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
-message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
-message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
-message("target name          : ${TARGET_NAME}")
-message("build target         : ${BUILD_TARGET}")
-message("QNN_INC_PATH         : ${QNN_INC_PATH}")
-message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
-
 include_directories(${WHISPERCPP_SRC_DIR}/)
 include_directories(${GGML_SRC_DIR}/)
 include_directories(${KANTV_GGMLJNI_SRC_DIR}/)
@@ -112,7 +115,7 @@ if (TARGET_XIAOMI14)
 #weiguo:2024-03-11
 # the below special build optimization ONLY validated ok on Xiaomi 14
 # works very well on Xiaomi 14 and got best ASR performance until now(less then 1 second)
-# manully enable it for Xiaomi 14
+# manually enable it for Xiaomi 14
 add_definitions(-march=armv8.7-a)
 add_definitions(-mcpu=cortex-x1)
 add_definitions(-mtune=cortex-x1)
@@ -178,7 +181,7 @@ function(build_library target_name)
     if (GGML_JNI_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android )
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
     else()
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
     endif()

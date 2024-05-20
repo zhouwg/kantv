@@ -1,20 +1,36 @@
- /*
-  * Copyright (c) 2024- KanTV Author
-  *
-  * 03-26-2024, weiguo, this is a skeleton/initial UI for study llama.cpp on Android phone
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
+// Tencent is pleased to support the open source community by making ncnn available.
+//
+// Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+
+
+/*
+ * Copyright (c) 2024- KanTV Author
+ *
+ * this file could be used as live broadcast client via RTMP protocol
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
  package com.cdeos.kantv.ui.fragment;
 
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
@@ -29,12 +45,15 @@
  import android.content.pm.ActivityInfo;
  import android.content.res.Configuration;
  import android.content.res.Resources;
+ import android.graphics.PixelFormat;
  import android.hardware.Camera;
  import android.media.MediaPlayer;
  import android.os.Build;
  import android.text.method.ScrollingMovementMethod;
  import android.view.MenuItem;
  import android.view.Surface;
+ import android.view.SurfaceHolder;
+ import android.view.SurfaceView;
  import android.view.View;
  import android.view.Window;
  import android.view.WindowManager;
@@ -50,6 +69,7 @@
  import androidx.annotation.NonNull;
  import androidx.annotation.RequiresApi;
  import androidx.appcompat.app.AppCompatActivity;
+ import androidx.core.content.ContextCompat;
 
  import com.cdeos.kantv.R;
  import com.cdeos.kantv.base.BaseMvpFragment;
@@ -60,6 +80,7 @@
 
 
  import org.ggml.ggmljava;
+ import org.ncnn.ncnnjava;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -74,7 +95,6 @@
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
- import cdeos.media.encoder.RtmpHandler;
  import cdeos.media.player.CDEAssetLoader;
  import cdeos.media.player.CDELibraryLoader;
  import cdeos.media.player.CDELog;
@@ -84,76 +104,35 @@
  import cdeos.media.player.KANTVEventType;
  import cdeos.media.player.KANTVException;
  import cdeos.media.player.KANTVMgr;
- import cdeos.media.encoder.RtmpHandler;
- import cdeos.media.encoder.SrsCameraView;
- import cdeos.media.encoder.SrsEncodeHandler;
- import cdeos.media.encoder.SrsPublisher;
- import cdeos.media.encoder.SrsRecordHandler;
- import cdeos.media.encoder.magicfilter.utils.MagicFilterType;
 
- public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implements AIAgentView, RtmpHandler.RtmpListener,
-         SrsRecordHandler.SrsRecordListener, SrsEncodeHandler.SrsEncodeListener {
 
+ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implements AIAgentView, SurfaceHolder.Callback {
      private static final String TAG = AIAgentFragment.class.getName();
-     TextView _txtLLMInfo;
-     TextView _txtGGMLInfo;
-     TextView _txtGGMLStatus;
-     EditText _txtUserInput;
-     Button _btnInference;
-
-     private int nThreadCounts = 8;
-     private int benchmarkIndex = 0;
 
      private String strBackend = "cpu";
      private int backendIndex = 0; //QNN_CPU
-
-     private long beginTime = 0;
-     private long endTime = 0;
-     private long duration = 0;
-     private String strBenchmarkInfo;
-     //private String strUserInput = "how many days in March 2024?";
-     private String strUserInput = "introduce the movie Once Upon a Time in America briefly.";
-
-     private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
-     private ProgressDialog mProgressDialog;
-
-
-     private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
 
      private Context mContext;
      private Activity mActivity;
      private Settings mSettings;
 
+     TextView _txtLLMInfo;
+     TextView _txtNCNNInfo;
+
      private KANTVMgr mKANTVMgr = null;
      private AIAgentFragment.MyEventListener mEventListener = new AIAgentFragment.MyEventListener();
 
-     private RtmpHandler.RtmpListener rtmpListener = this;
-     private SrsEncodeHandler.SrsEncodeListener srsEncodeListener = this;
-     private SrsRecordHandler.SrsRecordListener srsRecordListener = this;
-
-
-     private Button btnSwitchCamera;
-     private Button btnRecord;
-
-     private String rtmpUrl = "rtmp://192.168.0.20/live/livestream";
-     private String recPath = CDEUtils.getDataPath() + "/test.mp4";
-
-
-     private SrsPublisher mPublisher;
-     private SrsCameraView mCameraView;
-
-     private int mPreviewWidth = 1280;
-     private int mPreviewHeight = 720;
-     private int mEncodeWidth = 720;
-     private int mEncodeHeight = 480;
-     private boolean isPermissionGranted = CDEUtils.getPermissionGranted();
      private boolean mCameraInit = false;
 
-     private final static int LIVE_STATE_IDLE = 0x0;
-     private final static int LIVE_STATE_PREVIEW = 0x1;
-     private final static int LIVE_STATE_PUBLISH = 0x10;
-     private final static int LIVE_STATE_RECORD = 0x100;
-     private int mState = LIVE_STATE_IDLE;
+     private ncnnjava scrfdncnn = new ncnnjava();
+     private int facing = 0;
+
+     private Spinner spinnerModel;
+     private Spinner spinnerCPUGPU;
+     private int current_model = 0;
+     private int current_cpugpu = 0;
+
+     private SurfaceView cameraView;
 
      public static AIAgentFragment newInstance() {
          return new AIAgentFragment();
@@ -184,6 +163,8 @@
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
 
+         _txtNCNNInfo = mActivity.findViewById(R.id.ncnnlInfo);
+
 
          mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
          mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -199,6 +180,17 @@
              return;
          }
 
+         String systemInfo = ggmljava.llm_get_systeminfo();
+         String phoneInfo = "Device:" + " "
+                 + Build.BRAND + " "
+                 + Build.HARDWARE + " "
+                 + "Android " + android.os.Build.VERSION.RELEASE + " "
+                 + "Arch:" + Build.CPU_ABI;
+         CDELog.j(TAG, phoneInfo);
+         _txtNCNNInfo.setText("");
+         _txtNCNNInfo.append(phoneInfo + ",");
+         _txtNCNNInfo.append("Powered by NCNN(https://github.com/Tencent/ncnn)\n");
+
          try {
              initKANTVMgr();
          } catch (Exception e) {
@@ -206,64 +198,60 @@
              return;
          }
 
-         CDELog.j(TAG, "load ggml's LLAMACPP info");
-         String systemInfo = ggmljava.llm_get_systeminfo();
-         String phoneInfo = "Device info:" + " "
-                 + "Brand:" + Build.BRAND + " "
-                 + "Hardware:" + Build.HARDWARE + " "
-                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + " "
-                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
-         CDELog.j(TAG, phoneInfo);
-         //Toast.makeText(mContext, phoneInfo, Toast.LENGTH_SHORT).show();
+         cameraView = mActivity.findViewById(R.id.cameraview);
 
+         cameraView.getHolder().setFormat(PixelFormat.RGBA_8888);
+         cameraView.getHolder().addCallback(this);
 
-         btnSwitchCamera = mActivity.findViewById(R.id.swCam);
-         btnRecord = mActivity.findViewById(R.id.record);
-         mCameraView = mActivity.findViewById(R.id.glsurfaceview_camera);
+         Button buttonSwitchCamera = mActivity.findViewById(R.id.buttonSwitchCamera);
+         buttonSwitchCamera.setOnClickListener(arg0 -> {
 
+             int new_facing = 1 - facing;
 
-         btnSwitchCamera.setOnClickListener(v -> {
-             if (!mCameraInit)
-                 return;
+             scrfdncnn.closeCamera();
 
-             mPublisher.switchCameraFace((mPublisher.getCameraId() + 1) % Camera.getNumberOfCameras());
+             scrfdncnn.openCamera(new_facing);
+
+             facing = new_facing;
          });
 
-         btnRecord.setOnClickListener(v -> {
-             if (!mCameraInit)
-                 return;
-
-             Integer tmp = Integer.valueOf(mState);
-             CDELog.j(TAG, "state : 0x" + tmp.toHexString(tmp));
-             recPath = CDEUtils.getDataPath() + getRandomAlphaDigitString(10) + getRandomAlphaString(10) + ".mp4";
-             CDELog.j(TAG, "recPath:" + recPath);
-             if (mState == LIVE_STATE_PREVIEW) {
-                 CDELog.j(TAG, "state is PREVIEW");
-                 mPublisher.switchToHardEncoder();
-                 mPublisher.startPublish(rtmpUrl);
-
-                 if (mPublisher.startRecord(recPath)) {
-                     btnRecord.setText("stop record");
-                     btnSwitchCamera.setEnabled(false);
-                     mState |= LIVE_STATE_RECORD;
-                     tmp = Integer.valueOf(mState);
-                     CDELog.j(TAG, "state : 0x" + tmp.toHexString(tmp));
-                 } else {
-                     CDELog.j(TAG, "launch record failure\n");
-                     Toast.makeText(mContext, "launch record failure", Toast.LENGTH_SHORT).show();
+         spinnerModel = mActivity.findViewById(R.id.spinnerModel);
+         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
+             {
+                 if (position != current_model)
+                 {
+                     current_model = position;
+                     reload();
                  }
+             }
 
-             } else if ((mState | LIVE_STATE_RECORD) != 0) {
-                 mPublisher.stopPublish();
-                 btnRecord.setText("record");
-                 mPublisher.stopRecord();
-                 btnSwitchCamera.setEnabled(true);
-                 mState ^= LIVE_STATE_RECORD;
-                 tmp = Integer.valueOf(mState);
-                 CDELog.j(TAG, "state : 0x" + tmp.toHexString(tmp));
+             @Override
+             public void onNothingSelected(AdapterView<?> arg0)
+             {
              }
          });
 
+         spinnerCPUGPU = mActivity.findViewById(R.id.spinnerCPUGPU);
+         spinnerCPUGPU.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
+             {
+                 if (position != current_cpugpu)
+                 {
+                     current_cpugpu = position;
+                     reload();
+                 }
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> arg0)
+             {
+             }
+         });
+
+         reload();
 
          endTime = System.currentTimeMillis();
          CDELog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
@@ -275,13 +263,29 @@
 
      }
 
-
-     private void displayFileStatus(String modelFilePath) {
-         _txtGGMLStatus.setText("");
-         File modelFile = new File(modelFilePath);
-         if (!modelFile.exists()) {
-             CDELog.j(TAG, "model file not exist:" + modelFile.getAbsolutePath());
+     private void reload()
+     {
+         boolean ret_init = scrfdncnn.loadModel(mContext.getAssets(), current_model, current_cpugpu);
+         if (!ret_init)
+         {
+             CDELog.j(TAG, "ncnn loadModel failed");
          }
+     }
+
+     @Override
+     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
+     {
+         scrfdncnn.setOutputWindow(holder.getSurface());
+     }
+
+     @Override
+     public void surfaceCreated(SurfaceHolder holder)
+     {
+     }
+
+     @Override
+     public void surfaceDestroyed(SurfaceHolder holder)
+     {
      }
 
      public void initCamera() {
@@ -292,50 +296,9 @@
          getPreviewRotateDegree();
 
          CDELog.j(TAG, "running service: " + CDEUtils.getRunningServicesInfo(mContext));
-         //rtmpUrl = mSettings.getRTMPServerUrl();
-         CDELog.j(TAG, "rtmp url: " + rtmpUrl);
-         CDELog.j(TAG, "recPath: " + recPath);
          try {
-             CDELog.j(TAG, "create srspublisher");
-             mPublisher = new SrsPublisher(mCameraView);
-             CDELog.j(TAG, "after create srspublisher");
-             mPublisher.setEncodeHandler(new SrsEncodeHandler(srsEncodeListener));
-             CDELog.j(TAG, "after setEncodeHandler");
-             mPublisher.setRtmpHandler(new RtmpHandler(rtmpListener));
-             CDELog.j(TAG, "here");
-             mPublisher.setRecordHandler(new SrsRecordHandler(srsRecordListener));
-             CDELog.j(TAG, "here");
-             mPublisher.setPreviewResolution(mPreviewWidth, mPreviewHeight);
-             CDELog.j(TAG, "here");
-             mPublisher.setOutputResolution(mEncodeWidth, mEncodeHeight);
-             CDELog.j(TAG, "here");
-             //mPublisher.setVideoHDMode();
-             mPublisher.setVideoSmoothMode();
-             CDELog.j(TAG, "here");
-             mPublisher.setSendVideoOnly(true);
-             CDELog.j(TAG, "here");
-             mPublisher.switchToHardEncoder();
-
-             mPublisher.setPreviewOrientation(Configuration.ORIENTATION_PORTRAIT);
-             CDELog.j(TAG, "startCamera");
-             if (isPermissionGranted)
-                 mPublisher.startCamera();
-             else {
-                 CDELog.j(TAG, "camera permission was disabled");
-                 Toast.makeText(mContext, "camera permission was disabled", Toast.LENGTH_SHORT).show();
-                 return;
-             }
-
-             mCameraView.setCameraCallbacksHandler(new SrsCameraView.CameraCallbacksHandler() {
-                 @Override
-                 public void onCameraParameters(Camera.Parameters params) {
-                     //params.setFocusMode("custom-focus");
-                     //params.setWhiteBalance("custom-balance");
-                 }
-             });
+             scrfdncnn.openCamera(facing);
              mCameraInit = true;
-             mState = LIVE_STATE_PREVIEW;
-
          } catch (Exception e) {
              e.printStackTrace();
              CDELog.j(TAG, "init failed:" + e.getMessage());
@@ -346,14 +309,13 @@
 
      public void finalizeCamera() {
          if (mCameraInit) {
-             mPublisher.stopPublish();
-             mPublisher.stopRecord();
-             mPublisher.stopCamera();
+             scrfdncnn.closeCamera();
              mCameraInit = false;
          } else {
              CDELog.j(TAG, "camera already finalized");
          }
      }
+
 
      private int getPreviewRotateDegree() {
          int result = 0;
@@ -410,8 +372,7 @@
          CDELog.j(TAG, "onResume");
          super.onResume();
          if (mCameraInit) {
-             mPublisher.resumeRecord();
-             mPublisher.startCamera();
+             scrfdncnn.openCamera(facing);
          }
      }
 
@@ -420,7 +381,7 @@
          CDELog.j(TAG, "onPause");
          super.onPause();
          if (mCameraInit) {
-             mPublisher.pauseRecord();
+             scrfdncnn.closeCamera();
          }
      }
 
@@ -435,168 +396,6 @@
      public void onStop() {
          CDELog.j(TAG, "onStop");
          super.onStop();
-     }
-
-
-     private static String getRandomAlphaString(int length) {
-         String base = "abcdefghijklmnopqrstuvwxyz";
-         Random random = new Random();
-         StringBuilder sb = new StringBuilder();
-         for (int i = 0; i < length; i++) {
-             int number = random.nextInt(base.length());
-             sb.append(base.charAt(number));
-         }
-         CDELog.j(TAG, "string: " + sb.toString());
-         return sb.toString();
-     }
-
-
-     private static String getRandomAlphaDigitString(int length) {
-         String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-         Random random = new Random();
-         StringBuilder sb = new StringBuilder();
-         for (int i = 0; i < length; i++) {
-             int number = random.nextInt(base.length());
-             sb.append(base.charAt(number));
-         }
-         CDELog.j(TAG, "string: " + sb.toString());
-         return sb.toString();
-     }
-
-
-     private void handleException(Exception e) {
-         try {
-             Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
-             if (mCameraInit) {
-                 mPublisher.stopPublish();
-                 mPublisher.stopRecord();
-                 btnRecord.setText("record");
-             }
-         } catch (Exception ex) {
-             ex.printStackTrace();
-             CDELog.d(TAG, "error:" + ex.getMessage());
-         }
-     }
-
-
-     @Override
-     public void onRtmpConnecting(String msg) {
-         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRtmpConnected(String msg) {
-         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRtmpVideoStreaming() {
-     }
-
-     @Override
-     public void onRtmpAudioStreaming() {
-     }
-
-     @Override
-     public void onRtmpStopped() {
-         CDELog.j(TAG, "stopped");
-         Toast.makeText(mContext, "Stopped", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRtmpDisconnected() {
-         CDELog.j(TAG, "disconnected");
-         Toast.makeText(mContext, "Disconnected", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRtmpVideoFpsChanged(double fps) {
-         CDELog.d(TAG, String.format("Output Fps: %f", fps));
-     }
-
-     @Override
-     public void onRtmpVideoBitrateChanged(double bitrate) {
-         int rate = (int) bitrate;
-         if (rate / 1000 > 0) {
-             CDELog.d(TAG, String.format("Video bitrate: %f kbps", bitrate / 1000));
-         } else {
-             CDELog.j(TAG, String.format("Video bitrate: %d bps", rate));
-         }
-     }
-
-     @Override
-     public void onRtmpAudioBitrateChanged(double bitrate) {
-         int rate = (int) bitrate;
-         if (rate / 1000 > 0) {
-             CDELog.j(TAG, String.format("Audio bitrate: %f kbps", bitrate / 1000));
-         } else {
-             CDELog.j(TAG, String.format("Audio bitrate: %d bps", rate));
-         }
-     }
-
-     @Override
-     public void onRtmpSocketException(SocketException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onRtmpIOException(IOException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onRtmpIllegalArgumentException(IllegalArgumentException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onRtmpIllegalStateException(IllegalStateException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onRecordPause() {
-         Toast.makeText(mContext, "Record paused", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRecordResume() {
-         Toast.makeText(mContext, "Record resumed", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRecordStarted(String msg) {
-         Toast.makeText(mContext, "Recording file: " + msg, Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRecordFinished(String msg) {
-         Toast.makeText(mContext, "MP4 file saved: " + msg, Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onRecordIOException(IOException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onRecordIllegalArgumentException(IllegalArgumentException e) {
-         handleException(e);
-     }
-
-     @Override
-     public void onNetworkWeak() {
-         Toast.makeText(mContext, "Network weak", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onNetworkResume() {
-         Toast.makeText(mContext, "Network resume", Toast.LENGTH_SHORT).show();
-     }
-
-     @Override
-     public void onEncodeIllegalArgumentException(IllegalArgumentException e) {
-         handleException(e);
      }
 
 
@@ -627,10 +426,7 @@
                  if (content.startsWith("unknown")) {
 
                  } else {
-                     if (content.startsWith("llama-timings")) {
-                         _txtGGMLStatus.setText("");
-                         _txtGGMLStatus.append(content);
-                     } else {
+                     {
                          _txtLLMInfo.append(content);
 
                          int offset = _txtLLMInfo.getLineCount() * _txtLLMInfo.getLineHeight();
@@ -696,24 +492,24 @@
          int id = item.getItemId();
          switch (id) {
              case R.id.cool_filter:
-                 mPublisher.switchCameraFilter(MagicFilterType.COOL);
+
                  break;
 
              case R.id.beauty_filter:
-                 mPublisher.switchCameraFilter(MagicFilterType.BEAUTY);
+
                  break;
 
              case R.id.nostalgia_filter:
-                 mPublisher.switchCameraFilter(MagicFilterType.NOSTALGIA);
+
                  break;
 
              case R.id.romance_filter:
-                 mPublisher.switchCameraFilter(MagicFilterType.ROMANCE);
+
                  break;
 
              case R.id.original_filter:
              default:
-                 mPublisher.switchCameraFilter(MagicFilterType.NONE);
+
                  break;
          }
 
