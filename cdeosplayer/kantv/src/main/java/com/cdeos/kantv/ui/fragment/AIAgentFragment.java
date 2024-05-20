@@ -16,8 +16,6 @@
 /*
  * Copyright (c) 2024- KanTV Author
  *
- * this file could be used as live broadcast client via RTMP protocol
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -490,6 +488,7 @@
 
      public void onMenuItemSelected(MenuItem item) {
          int id = item.getItemId();
+         //TODO: various CV manipulations in native layer via OpenCV-Android/OpenGL/FFmpeg
          switch (id) {
              case R.id.cool_filter:
 
