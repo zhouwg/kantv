@@ -64,7 +64,7 @@
         <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
-        <item>ASR(ggml)</item>              <!-- ASR(whisper.cpp based on ggml)benchmark -->
+        <item>ASR(whisper)</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
         <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml) benchmark -->
         <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
         <item>MNIST(ggml)</item>            <!-- MNIST(based on ggml) benchmark -->
