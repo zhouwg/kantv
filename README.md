@@ -348,7 +348,7 @@ Report issue in various Android-based phone or even submit PR to this project is
   </li>
 
   <li>
-   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an open-source ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with ncnn ) by <a href="https://github.com/k2-fsa">k2-fsa</a>
+   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an open-source ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with <a href="https://github.com/Tencent/ncnn">ncnn</a>) by <a href="https://github.com/k2-fsa">k2-fsa</a>
   </li>
 
   </ul>
