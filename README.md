@@ -2,26 +2,23 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) , with much enhancements and new features:
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
+- Watch online TV and local media by my customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- ASR(Automatic Speech Recognition, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>
-
-- LLM(Large Language Model, a subfiled of AI) study by the great <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a>，Run/experience LLM(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Xiaomi 14 using the llama.cpp 
-
-- Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
+- AI subtitle(Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>)(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
 - 2D graphic performance
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
-
 - UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
 
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario on mobile device(focus on Android currently)
+- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers who was interested in practise state-of-the-art AI tech(like [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in real scenario on Android phone/device
 
-- Well-maintained "workbench" for LLM(Large Language Model) researchers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on mobile device(focus on Android currently)
+- Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(like [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Android phone/device using the magic llama.cpp
+
+- Well-maintained "workbench" for <a href="https://github.com/Tencent/ncnn">NCNN</a> beginners to study and practise NCNN inference framework on Android phone/device
 
 - Android <b>turn-key project</b> for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
