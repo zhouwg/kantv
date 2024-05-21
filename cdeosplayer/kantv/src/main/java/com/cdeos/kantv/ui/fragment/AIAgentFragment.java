@@ -1,3 +1,5 @@
+// ref&author:https://github.com/nihui/ncnn-android-scrfd
+
 // Tencent is pleased to support the open source community by making ncnn available.
 //
 // Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -15,8 +17,6 @@
 
 /*
  * Copyright (c) 2024- KanTV Author
- *
- * this file could be used as live broadcast client via RTMP protocol
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -490,6 +490,7 @@
 
      public void onMenuItemSelected(MenuItem item) {
          int id = item.getItemId();
+         //TODO: various CV manipulations in native layer via OpenCV-Android/OpenGL/FFmpeg
          switch (id) {
              case R.id.cool_filter:
 
