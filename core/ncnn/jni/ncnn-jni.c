@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * JNI implementation of ncnn-jni for Project KanTV
+ * implementation of ncnn-jni for Project KanTV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,4 +38,13 @@ void  ncnn_jni_notify_c_impl(const char * format,  ...) {
     kantv_asr_notify_benchmark_c(s_ggml_jni_buf);
 
     va_end(va);
+}
+
+
+bool is_zero_floatvalue(float value) {
+    const float EPSION = 0.000001;
+    if ((value >= -EPSION) && (value < EPSION))
+        return true;
+    else
+        return false;
 }

@@ -21,12 +21,20 @@ import android.view.Surface;
 
 public class ncnnjava
 {
-    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int cpugpu);
+    /**
+     * @param mgr
+     * @param netid
+     * @param modelid
+     * @param backend_type 0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
+     * @return
+     */
+    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type);
     public native boolean openCamera(int facing);
     public native boolean closeCamera();
     public native boolean setOutputWindow(Surface surface);
 
-    public native String  detectSqueeze(Bitmap bitmap, boolean use_gpu);
+    public native String  detectResNet(Bitmap bitmap, boolean use_gpu);
+    public native String  detectSqueezeNet(Bitmap bitmap, boolean use_gpu);
 
     static {
         System.loadLibrary("ncnn-jni");

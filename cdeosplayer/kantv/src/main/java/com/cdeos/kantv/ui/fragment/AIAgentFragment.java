@@ -128,9 +128,9 @@
      private int facing = 0;
 
      private Spinner spinnerModel;
-     private Spinner spinnerCPUGPU;
+     private Spinner spinnerNCNNBackend;
      private int current_model = 0;
-     private int current_cpugpu = 0;
+     private int current_ncnnbackend = CDEUtils.NCNN_BACKEND_CPU;
 
      private SurfaceView cameraView;
 
@@ -233,14 +233,14 @@
              }
          });
 
-         spinnerCPUGPU = mActivity.findViewById(R.id.spinnerCPUGPU);
-         spinnerCPUGPU.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+         spinnerNCNNBackend = mActivity.findViewById(R.id.spinnerNCNNBackend);
+         spinnerNCNNBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
              {
-                 if (position != current_cpugpu)
+                 if (position != current_ncnnbackend)
                  {
-                     current_cpugpu = position;
+                     current_ncnnbackend = position;
                      reload();
                  }
              }
@@ -265,7 +265,7 @@
 
      private void reload()
      {
-         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 0, current_model, current_cpugpu);
+         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 0, current_model, current_ncnnbackend);
          if (!ret_init)
          {
              CDELog.j(TAG, "ncnn loadModel failed");

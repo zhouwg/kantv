@@ -71,6 +71,7 @@
 
 #include "scrfd.h"
 #include "res.id.h"
+#include "squeezenet_v1.1.id.h"
 
 #include "ndkcamera.h"
 
@@ -154,12 +155,17 @@ static int draw_fps(cv::Mat &rgb) {
     return 0;
 }
 
-static SCRFD *g_scrfd = 0;
+static SCRFD *g_scrfd = NULL;
 static ncnn::Mutex lock;
 
 static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
 static ncnn::PoolAllocator g_workspace_pool_allocator;
+static ncnn::Net resnet;
+
+
+static std::vector<std::string> squeezenet_words;
 static ncnn::Net squeezenet;
+static ncnn::Net squeezenet_gpu;
 
 class MyNdkCamera : public NdkCameraWindow {
 public:
@@ -167,7 +173,6 @@ public:
 };
 
 void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
-    // scrfd
     {
         ncnn::MutexLockGuard g(lock);
 
@@ -184,7 +189,28 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
     draw_fps(rgb);
 }
 
-static MyNdkCamera *g_camera = 0;
+
+static std::vector<std::string> split_string(const std::string& str, const std::string& delimiter)
+{
+    std::vector<std::string> strings;
+
+    std::string::size_type pos = 0;
+    std::string::size_type prev = 0;
+    while ((pos = str.find(delimiter, prev)) != std::string::npos)
+    {
+        strings.push_back(str.substr(prev, pos - prev));
+        prev = pos + 1;
+    }
+
+    // To get the last substring (or only, if delimiter is not found)
+    strings.push_back(str.substr(prev));
+
+    return strings;
+}
+
+
+
+static MyNdkCamera *g_camera = NULL;
 
 extern "C" {
 
@@ -206,30 +232,41 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
         ncnn::MutexLockGuard g(lock);
 
         delete g_scrfd;
-        g_scrfd = 0;
+        g_scrfd = NULL;
     }
 
     ncnn::destroy_gpu_instance();
 
     delete g_camera;
-    g_camera = 0;
+    g_camera = NULL;
 }
 
-// public native boolean loadModel(AssetManager mgr, int modelid, int cpugpu);
+
+/**
+ *
+ * @param env
+ * @param thiz
+ * @param assetManager
+ * @param netid
+ * @param modelid
+ * @param backend_type 0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
+ * @return
+ */
 JNIEXPORT jboolean JNICALL
 Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint netid,
-                                 jint modelid, jint cpugpu) {
+                                 jint modelid, jint backend_type) {
     LOGGD("netid %d", netid);
     LOGGD("modelid %d", modelid);
-    LOGGD("cpugpu %d", cpugpu);
-    if (0 == netid) { // face detection
-        if (modelid < 0 || modelid > 7 || cpugpu < 0 || cpugpu > 1) {
+    LOGGD("backend_type %d", backend_type);
+
+    AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+    LOGGD("ncnn load model with AAssetManager %p", mgr);
+
+    if (NCNN_FACEDETECT == netid) { // face detect
+        if (modelid < 0 || modelid > 7 || backend_type >  NCNN_BACKEND_MAX) {
+            LOGGW("invalid params");
             return JNI_FALSE;
         }
-
-        AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
-
-        LOGGD("ncnn load Model %p", mgr);
 
         const char *modeltypes[] =
                 {
@@ -244,13 +281,15 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 };
 
         const char *modeltype = modeltypes[(int) modelid];
-        bool use_gpu = (int) cpugpu == 1;
+        bool use_gpu = (backend_type == NCNN_BACKEND_GPU);
 
         // reload
         {
             ncnn::MutexLockGuard g(lock);
 
             if (use_gpu && ncnn::get_gpu_count() == 0) {
+                LOGGW("ncnn gpu backend not supported");
+                NCNN_JNI_NOTIFY("ncnn gpu backend not supported");
                 // no gpu
                 delete g_scrfd;
                 g_scrfd = 0;
@@ -260,9 +299,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 g_scrfd->load(mgr, modeltype, use_gpu);
             }
         }
-    }
-
-    if (1 == netid) { //ResNet
+    } else if (NCNN_RESNET == netid) { //ResNet
         ncnn::Option opt;
         opt.lightmode = true;
         opt.num_threads = 4;
@@ -273,28 +310,104 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
         if (ncnn::get_gpu_count() != 0)
             opt.use_vulkan_compute = true;
 
-        AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
-
-        squeezenet.opt = opt;
+        resnet.opt = opt;
 
         // init param
         {
-            int ret = squeezenet.load_param_bin(mgr, "resnet.param.bin");
+            int ret = resnet.load_param_bin(mgr, "resnet.param.bin");
             if (ret != 0) {
-                LOGGW("SqueezeNcnn: load_param_bin failed");
+                LOGGW("ResNet Ncnn: load_param_bin failed");
                 return JNI_FALSE;
             }
         }
 
         // init bin
         {
-            int ret = squeezenet.load_model(mgr, "resnet.bin");
+            int ret = resnet.load_model(mgr, "resnet.bin");
             if (ret != 0) {
-                LOGGW("SqueezeNcnn:load_model failed");
+                LOGGW("ResNet Ncnn:load_model failed");
                 return JNI_FALSE;
             }
         }
 
+    } else if (NCNN_SQUEEZENET == netid) { //SqueezeNet
+        // init param
+        {
+            int ret = squeezenet.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+            if (ret != 0)
+            {
+                LOGGW("SqueezeNet Ncnn:load_param_bin failed");
+                return JNI_FALSE;
+            }
+        }
+
+        // init bin
+        {
+            int ret = squeezenet.load_model(mgr, "squeezenet_v1.1.bin");
+            if (ret != 0)
+            {
+                LOGGW("SqueezeNet Ncnn:load_model failed");
+                return JNI_FALSE;
+            }
+        }
+
+        // use vulkan compute
+        if (ncnn::get_gpu_count() != 0)
+        {
+            LOGGD("using ncnn gpu backend");
+            NCNN_JNI_NOTIFY("using ncnn gpu backend");
+            squeezenet_gpu.opt.use_vulkan_compute = true;
+
+            {
+                int ret = squeezenet_gpu.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+                if (ret != 0)
+                {
+                    LOGGW("SqueezeNet Ncnn: load_param_bin failed");
+                    return JNI_FALSE;
+                }
+            }
+            {
+                int ret = squeezenet_gpu.load_model(mgr, "squeezenet_v1.1.bin");
+                if (ret != 0)
+                {
+                    LOGGW("SqueezeNet Ncnn:load_model failed");
+                    return JNI_FALSE;
+                }
+            }
+        } else {
+            LOGGD("ncnn gpu backend not supported");
+            NCNN_JNI_NOTIFY("using ncnn gpu backend not supported");
+        }
+
+        // init words
+        {
+            AAsset* asset = AAssetManager_open(mgr, "synset_words.txt", AASSET_MODE_BUFFER);
+            if (!asset)
+            {
+                LOGGW("SqueezeNet Ncnn:open synset_words.txt failed");
+                return JNI_FALSE;
+            }
+
+            int len = AAsset_getLength(asset);
+
+            std::string words_buffer;
+            words_buffer.resize(len);
+            int ret = AAsset_read(asset, (void*)words_buffer.data(), len);
+
+            AAsset_close(asset);
+
+            if (ret != len)
+            {
+                LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
+                return JNI_FALSE;
+            }
+
+            squeezenet_words = split_string(words_buffer, "\n");
+        }
+    } else {
+        LOGGW("netid %d not supported using ncnn", netid);
+        NCNN_JNI_NOTIFY("netid %d not supported using ncnn", netid);
+        return JNI_FALSE;
     }
 
     return JNI_TRUE;
@@ -336,7 +449,7 @@ Java_org_ncnn_ncnnjava_setOutputWindow(JNIEnv *env, jobject thiz, jobject surfac
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ncnn_ncnnjava_detectSqueeze(JNIEnv *env, jobject thiz, jobject bitmap, jboolean use_gpu) {
+Java_org_ncnn_ncnnjava_detectResNet(JNIEnv *env, jobject thiz, jobject bitmap, jboolean use_gpu) {
     if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
         LOGGW("gpu not supported");
         NCNN_JNI_NOTIFY("gpu not supported");
@@ -348,8 +461,11 @@ Java_org_ncnn_ncnnjava_detectSqueeze(JNIEnv *env, jobject thiz, jobject bitmap, 
     AndroidBitmapInfo info;
     AndroidBitmap_getInfo(env, bitmap, &info);
 
-    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888)
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGGW("bitmap is not RGBA_8888");
+        NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
         return NULL;
+    }
 
     ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_RGB, 224,
                                                          224);
@@ -360,7 +476,7 @@ Java_org_ncnn_ncnnjava_detectSqueeze(JNIEnv *env, jobject thiz, jobject bitmap, 
 
         in.substract_mean_normalize(mean_vals, std_vals);
 
-        ncnn::Extractor ex = squeezenet.create_extractor();
+        ncnn::Extractor ex = resnet.create_extractor();
 
         ex.set_vulkan_compute(use_gpu);
 
@@ -397,7 +513,6 @@ Java_org_ncnn_ncnnjava_detectSqueeze(JNIEnv *env, jobject thiz, jobject bitmap, 
     vec.resize(size);
     for (int i = 0; i < size; i++) {
         vec[i] = std::make_pair(cls_scores[i], class_names[i]);
-
     }
 
     std::sort(vec.begin(), vec.end(), std::greater<std::pair<float, std::string>>());
@@ -422,4 +537,91 @@ Java_org_ncnn_ncnnjava_detectSqueeze(JNIEnv *env, jobject thiz, jobject bitmap, 
     return result;
 }
 
+
+
+
+JNIEXPORT jstring JNICALL
+Java_org_ncnn_ncnnjava_detectSqueezeNet(JNIEnv *env, jobject thiz, jobject bitmap,
+                                        jboolean use_gpu) {
+    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0)
+    {
+        LOGGW("gpu not supported");
+        NCNN_JNI_NOTIFY("gpu not supported");
+        return env->NewStringUTF("no vulkan capable gpu");
+    }
+
+    double start_time = ncnn::get_current_time();
+
+    AndroidBitmapInfo info;
+    AndroidBitmap_getInfo(env, bitmap, &info);
+    int width = info.width;
+    int height = info.height;
+
+    if (width != 227 || height != 227) {
+        LOGGW("width and height is not 227");
+        NCNN_JNI_NOTIFY("width and height is not 227");
+        return NULL;
+    }
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGGW("bitmap format is not RGBA_8888");
+        NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
+        return NULL;
+    }
+
+    ncnn::Mat in = ncnn::Mat::from_android_bitmap(env, bitmap, ncnn::Mat::PIXEL_BGR);
+
+    std::vector<float> cls_scores;
+    {
+        const float mean_vals[3] = {104.f, 117.f, 123.f};
+        in.substract_mean_normalize(mean_vals, 0);
+
+        ncnn::Extractor ex = use_gpu ? squeezenet_gpu.create_extractor() : squeezenet.create_extractor();
+
+        ex.input(squeezenet_v1_1_param_id::BLOB_data, in);
+
+        ncnn::Mat out;
+        ex.extract(squeezenet_v1_1_param_id::BLOB_prob, out);
+
+        cls_scores.resize(out.w);
+        for (int j=0; j<out.w; j++)
+        {
+            cls_scores[j] = out[j];
+        }
+    }
+
+    // return top class
+    int top_class = 0;
+    float max_score = 0.f;
+    for (size_t i=0; i<cls_scores.size(); i++)
+    {
+        float s = cls_scores[i];
+        //LOGGD("SqueezeNcnn %d %f", i, s);
+        if (s > max_score)
+        {
+            top_class = i;
+            max_score = s;
+        }
+    }
+
+    const std::string& word = squeezenet_words[top_class];
+    char tmp[32];
+    snprintf(tmp, 32,"%.3f", max_score);
+    LOGGD("max_score %s", tmp);
+    if (is_zero_floatvalue(max_score)) {
+        LOGGD("ncnn squeezenet inference failure");
+        NCNN_JNI_NOTIFY("ncnn squeezenet inference failure");
+        return env->NewStringUTF("ncnn squeezenet inference failure");
+    }
+    // +10 to skip leading n03179701
+    std::string result_str = std::string(word.c_str() + 10) + ", probability= " + tmp;
+    jstring result = env->NewStringUTF(result_str.c_str());
+
+    double elapse = ncnn::get_current_time() - start_time;
+    LOGGD("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(), elapse);
+    NCNN_JNI_NOTIFY("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(), elapse);
+
+    return result;
 }
+
+}
+

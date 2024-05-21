@@ -234,15 +234,20 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![1782274840](https://github.com/zhouwg/kantv/assets/6889919/8b9228f8-e3f4-4b11-b70f-c4e0c7fadacb)
-
+![196896722](https://github.com/zhouwg/kantv/assets/6889919/d190c039-6254-4713-83ce-557c0fda4c83)
 
 ----
 
 here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![667358015](https://github.com/zhouwg/kantv/assets/6889919/94a175ca-97c0-41ef-b9a1-1dc4b7168516)
+![1954672029](https://github.com/zhouwg/kantv/assets/6889919/2a4471d3-a39b-4f6a-8f06-118d3b0dd320)
 
+----
+here are some screenshots to demostrate CV inference by running the excellent <a href="https://github.com/Tencent/ncnn"> ncnn </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+
+![2015869763](https://github.com/zhouwg/kantv/assets/6889919/9b4c8325-8f7c-4bea-9cae-ee4627f9d199)
+
+![988568755](https://github.com/zhouwg/kantv/assets/6889919/49c7e22e-0e4c-4ece-b690-04d59ac1382f)
 
 <details>
   <summary>some other screenshots</summary>

@@ -126,6 +126,9 @@
      ArrayAdapter<String> adapterOPType = null;
      ArrayAdapter<String> adapterGraphType = null;
 
+     ArrayAdapter<String> adapterGGMLBackendType = null;
+     ArrayAdapter<String> adapterNCNNBackendType = null;
+
      Spinner spinnerBackend = null;
 
 
@@ -267,6 +270,7 @@
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by GGML(https://github.com/ggerganov/ggml)\n");
+         _txtGGMLInfo.append("Powered by NCNN(https://github.com/Tencent/ncnn)\n");
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -279,14 +283,26 @@
                  benchmarkIndex = Integer.valueOf(position);
                  CDELog.j(TAG, "benchmark index:" + benchmarkIndex);
 
-                 //if ((previousBenchmakrIndex != CDEUtils.BENCHMARK_QNN_COMPLEX) && (benchmarkIndex != CDEUtils.BENCHMARK_QNN_COMPLEX)) {
-                 //    previousBenchmakrIndex = benchmarkIndex;
-                 //    return;
-                 //}
+                 if ((previousBenchmakrIndex <= CDEUtils.BENCHMARK_GGML_MAX) && (benchmarkIndex <= CDEUtils.BENCHMARK_GGML_MAX)) {
+                     previousBenchmakrIndex = benchmarkIndex;
+                     return;
+                 }
 
-                 spinnerOPType.setAdapter(adapterOPType);
+                 if ((previousBenchmakrIndex > CDEUtils.BENCHMARK_GGML_MAX) && (benchmarkIndex > CDEUtils.BENCHMARK_GGML_MAX)) {
+                     previousBenchmakrIndex = benchmarkIndex;
+                     return;
+                 }
 
-                 adapterOPType.notifyDataSetChanged();
+                 if (benchmarkIndex > CDEUtils.BENCHMARK_GGML_MAX) {
+                     spinnerBackend.setAdapter(adapterNCNNBackendType);
+                     adapterNCNNBackendType.notifyDataSetChanged();
+                 } else {
+                     spinnerBackend.setAdapter(adapterGGMLBackendType);
+                     adapterGGMLBackendType.notifyDataSetChanged();
+                 }
+
+                 //spinnerOPType.setAdapter(adapterOPType);
+                 //adapterOPType.notifyDataSetChanged();
 
                  previousBenchmakrIndex = benchmarkIndex;
              }
@@ -337,11 +353,14 @@
          spinnerModelName.setSelection(3);
 
 
-         //Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
          spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
          String[] arrayBackend = getResources().getStringArray(R.array.backend);
-         ArrayAdapter<String> adapterBackend = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
-         spinnerBackend.setAdapter(adapterBackend);
+         adapterGGMLBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
+
+         String[] arrayNCNNBackend = getResources().getStringArray(R.array.ncnn_backend);
+         adapterNCNNBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNCNNBackend);
+
+         spinnerBackend.setAdapter(adapterGGMLBackendType);
          spinnerBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -356,7 +375,7 @@
 
              }
          });
-         spinnerBackend.setSelection(3);
+         spinnerBackend.setSelection(CDEUtils.QNN_BACKEND_GGML);
 
          spinnerOPType = mActivity.findViewById(R.id.spinnerOPType);
          arrayGraphType = getResources().getStringArray(R.array.graphtype);
@@ -421,8 +440,12 @@
 
              //TODO: better method
              //sanity check begin
-
              if (isNCNNInference()) {
+                 if ((benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX) < 1) {
+                     CDEUtils.showMsgBox(mActivity, "pls check why benchmarkIndex (" + benchmarkIndex + ") - CDEUtils.BENCHMARK_GGML_MAX (" + CDEUtils.BENCHMARK_GGML_MAX + ") < 1");
+                     return;
+                 }
+
                  if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {
                      CDEUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
                      return;
@@ -433,10 +456,12 @@
                  }
 
                  switch (benchmarkIndex) {
-                     case CDEUtils.BENCHMARK_CV_RESNET: {
+                     case CDEUtils.BENCHMARK_CV_RESNET:
+                     case CDEUtils.BENCHMARK_CV_SQUEEZENET:
+                     {
                          if (bitmapSelectedImage == null) {
                              CDELog.j(TAG, "image is empty");
-                             CDEUtils.showMsgBox(mActivity, "please select a image for RESNET inference using NCNN");
+                             CDEUtils.showMsgBox(mActivity, "please select a image for inference using NCNN");
                              return;
                          }
                          break;
@@ -684,16 +709,27 @@
                          //NCNN inference was imported since v1.3.8
                          switch (benchmarkIndex) {
                              case CDEUtils.BENCHMARK_CV_RESNET: {
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 1, 0, 0);
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, 0);
                                  if (!ret_init) {
                                      CDELog.j(TAG, "resnet init failed");
-                                     //CDEUtils.showMsgBox(mActivity, "resnet init failed");
                                  } else {
                                      if (bitmapSelectedImage != null)
-                                         ncnnjni.detectSqueeze(bitmapSelectedImage, false);
+                                         ncnnjni.detectResNet(bitmapSelectedImage, false);
                                  }
                              }
                              break;
+
+                             case CDEUtils.BENCHMARK_CV_SQUEEZENET: {
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, 0);
+                                 if (!ret_init) {
+                                     CDELog.j(TAG, "squeezenet init failed");
+                                 } else {
+                                     if (bitmapSelectedImage != null)
+                                         ncnnjni.detectSqueezeNet(bitmapSelectedImage, false);
+                                 }
+                             }
+                             break;
+
                              default:
                                  break;
                          }
@@ -1037,10 +1073,7 @@
                  ViewGroup.LayoutParams.WRAP_CONTENT,
                  ViewGroup.LayoutParams.WRAP_CONTENT
          );
-         if ((0 != imgWidth) && (0 != imgHeight)) {
-             vlp.width = imgWidth;
-             vlp.height = imgHeight;
-         } else {
+         if ((0 == imgWidth) || (0 == imgHeight)) {
              CDELog.j(TAG, "invalid image width and height");
              return;
          }
@@ -1052,8 +1085,6 @@
          _ivInfo.setVisibility(View.VISIBLE);
          _ivInfo.setScaleType(ImageView.ScaleType.FIT_CENTER);
          _ivInfo.setAdjustViewBounds(true);
-         _ivInfo.setMaxWidth(250);
-         _ivInfo.setMaxHeight(250);
      }
 
 

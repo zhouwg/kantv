@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * JNI header file of ncnn-jni for Project KanTV
+ * header file of ncnn-jni for Project KanTV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,28 @@
 #include "libavutil/cde_log.h"
 #include "kantv-asr.h"
 
-#define JNI_BUF_LEN                 4096
-#define JNI_TMP_LEN                 256
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#define JNI_BUF_LEN                 4096
+#define JNI_TMP_LEN                 256
+
+#define NCNN_BACKEND_CPU            0
+#define NCNN_BACKEND_GPU            1
+#define NCNN_BACKEND_MAX            1
+
+
+#define NCNN_FACEDETECT             0 //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
+#define NCNN_RESNET                 1
+#define NCNN_SQUEEZENET             2
+
+
 #define NCNN_JNI_NOTIFY(...)        ncnn_jni_notify_c_impl(__VA_ARGS__)
 
 void         ncnn_jni_notify_c_impl(const char * format, ...);
+
+bool         is_zero_floatvalue(float value);
 
 #ifdef __cplusplus
 }
