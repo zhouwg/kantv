@@ -265,11 +265,19 @@
      public static final int BENCHMARK_MULMAT           = 1;
      public static final int BENCHMARK_QNN_GGML_OP      = 2;
      public static final int BENCHMARK_QNN_AUTO_UT      = 3;
-     public static final int BENCHMARK_ASR              = 4;
+
+     //inference using GGML
+     public static final int BENCHMARK_ASR              = 4; //whisper.cpp
      public static final int BENCHMARK_LLM              = 5;
      public static final int BENCHMARK_TEXT2IMAGE       = 6;
      public static final int BENCHMARK_CV_MNIST         = 7;
      public static final int BENCHMARK_TTS              = 8;
+
+     //inference using NCNN
+     public static final int BENCHMARK_CV_RESNET        = 9;
+     public static final int BENCHAMRK_ASR_NCNN         = 10;
+     public static final int BENCHAMRK_TTS_NCNN         = 11;
+
 
 
      //keep sync with ggml-qnn.h
@@ -3921,13 +3929,13 @@
                  return "GGML matrix multiply";
 
              case BENCHMARK_ASR:
-                 return "GGML ASR";
+                 return "ASR using GGML";
 
              case BENCHMARK_LLM:
-                 return "GGML LLAMA";
+                 return "LLM using GGML";
 
              case BENCHMARK_TEXT2IMAGE:
-                 return "GGML stable diffusion";
+                 return "Text2Image using GGML";
 
              case BENCHMARK_QNN_GGML_OP:
                  return "GGML QNN OP UT"; //UT for PoC-S49: implementation of GGML OPs using QNN API
@@ -3936,10 +3944,19 @@
                  return "GGML QNN OP UT automation"; //automation UT for PoC-S49: implementation of GGML OPs using QNN API
 
              case BENCHMARK_CV_MNIST:
-                 return "GGML mnist";
+                 return "MNIST using GGML";
                  
              case BENCHMARK_TTS:
-                 return "GGML TTS";
+                 return "TTS using GGML";
+
+             case BENCHMARK_CV_RESNET:
+                 return "RESNET using NCNN";
+
+             case BENCHAMRK_ASR_NCNN:
+                 return "ASR using NCNN";
+
+             case BENCHAMRK_TTS_NCNN:
+                 return "TTS using NCNN";
          }
 
          return "unknown";
@@ -3966,6 +3983,17 @@
                  return "QNN-HTA";
 */
 
+             default:
+                 return "unknown";
+         }
+     }
+
+     public static String getNCNNBackendDesc(int n_backend_type) {
+         switch (n_backend_type) {
+             case 0:
+                 return "CPU";
+             case 1:
+                 return "GPU";
              default:
                  return "unknown";
          }

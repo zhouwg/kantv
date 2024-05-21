@@ -37,11 +37,11 @@ extern "C" {
 #define BECHMARK_MULMAT             1       //mulmat  benchmark
 #define BENCHMARK_QNN_GGML_OP       2       //UT for PoC-S49: implementation of GGML OPs using QNN API
 #define BENCHMARK_QNN_AUTO_UT       3       //automation UT for PoC-S49: implementation of GGML OPs using QNN API
-#define BECHMARK_ASR                4       //ASR(whisper.cpp) benchmark
-#define BENCHMARK_LLM               5       //LLM(llama.cpp) benchmark
-#define BENCHMARK_TEXT2IMAGE        6       //TEXT2IMAGE(stablediffusion.cpp) benchmark
-#define BENCHMARK_CV_MNIST          7       //mnist
-#define BENCHMARK_TTS               8       //TTS(bark.cpp) benchmark
+#define BECHMARK_ASR                4       //ASR(whisper.cpp) benchmark using GGML
+#define BENCHMARK_LLM               5       //LLM(llama.cpp) benchmark using GGML
+#define BENCHMARK_TEXT2IMAGE        6       //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
+#define BENCHMARK_CV_MNIST          7       //MNIST inference using GGML
+#define BENCHMARK_TTS               8       //TTS(bark.cpp) benchmark using GGML
 #define BENCHMAKR_MAX               8
 
 #define BACKEND_CPU                 0

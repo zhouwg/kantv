@@ -124,7 +124,7 @@
 
      private boolean mCameraInit = false;
 
-     private ncnnjava scrfdncnn = new ncnnjava();
+     private ncnnjava ncnnjni = new ncnnjava();
      private int facing = 0;
 
      private Spinner spinnerModel;
@@ -208,9 +208,9 @@
 
              int new_facing = 1 - facing;
 
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
 
-             scrfdncnn.openCamera(new_facing);
+             ncnnjni.openCamera(new_facing);
 
              facing = new_facing;
          });
@@ -265,7 +265,7 @@
 
      private void reload()
      {
-         boolean ret_init = scrfdncnn.loadModel(mContext.getAssets(), current_model, current_cpugpu);
+         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 0, current_model, current_cpugpu);
          if (!ret_init)
          {
              CDELog.j(TAG, "ncnn loadModel failed");
@@ -275,7 +275,7 @@
      @Override
      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
      {
-         scrfdncnn.setOutputWindow(holder.getSurface());
+         ncnnjni.setOutputWindow(holder.getSurface());
      }
 
      @Override
@@ -297,7 +297,7 @@
 
          CDELog.j(TAG, "running service: " + CDEUtils.getRunningServicesInfo(mContext));
          try {
-             scrfdncnn.openCamera(facing);
+             ncnnjni.openCamera(facing);
              mCameraInit = true;
          } catch (Exception e) {
              e.printStackTrace();
@@ -309,7 +309,7 @@
 
      public void finalizeCamera() {
          if (mCameraInit) {
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
              mCameraInit = false;
          } else {
              CDELog.j(TAG, "camera already finalized");
@@ -372,7 +372,7 @@
          CDELog.j(TAG, "onResume");
          super.onResume();
          if (mCameraInit) {
-             scrfdncnn.openCamera(facing);
+             ncnnjni.openCamera(facing);
          }
      }
 
@@ -381,7 +381,7 @@
          CDELog.j(TAG, "onPause");
          super.onPause();
          if (mCameraInit) {
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
          }
      }
 

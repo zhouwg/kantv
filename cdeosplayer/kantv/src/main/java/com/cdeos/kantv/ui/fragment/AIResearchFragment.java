@@ -23,6 +23,7 @@
   */
  package com.cdeos.kantv.ui.fragment;
 
+ import static android.app.Activity.RESULT_OK;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_FINALIZE;
  import static cdeos.media.player.KANTVEvent.KANTV_INFO_ASR_STOP;
 
@@ -32,7 +33,9 @@
  import android.app.ProgressDialog;
  import android.content.Context;
  import android.content.DialogInterface;
+ import android.content.Intent;
  import android.content.res.Resources;
+ import android.graphics.Bitmap;
  import android.graphics.BitmapFactory;
  import android.media.MediaPlayer;
  import android.net.Uri;
@@ -64,6 +67,7 @@
 
 
  import org.ggml.ggmljava;
+ import org.ncnn.ncnnjava;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -101,6 +105,9 @@
 
      Button _btnBenchmark;
 
+     Button _btnSelectImage;
+     private static final int SELECT_IMAGE = 1;
+
      private int nThreadCounts = 1;
      private int benchmarkIndex = CDEUtils.BENCHMARK_ASR;
      private int previousBenchmakrIndex = 0;
@@ -111,11 +118,15 @@
      private int optypeIndex = 0; //matrix addition operation
      private String selectModeFileName = "";
 
+     private Bitmap bitmapSelectedImage = null;
+
      Spinner spinnerOPType = null;
      String[] arrayOPType = null;
      String[] arrayGraphType = null;
      ArrayAdapter<String> adapterOPType = null;
      ArrayAdapter<String> adapterGraphType = null;
+
+     Spinner spinnerBackend = null;
 
 
      private long beginTime = 0;
@@ -187,6 +198,7 @@
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
 
+     private ncnnjava ncnnjni = new ncnnjava();
 
      public static AIResearchFragment newInstance() {
          return new AIResearchFragment();
@@ -221,6 +233,7 @@
          _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
          _txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
+         _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          //TODO: change to voice input, and then use whisper.cpp to convert it into text
          _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
          //_ivInfo = mActivity.findViewById(R.id.imgInfo);
@@ -324,7 +337,8 @@
          spinnerModelName.setSelection(3);
 
 
-         Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
+         //Spinner spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
+         spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
          String[] arrayBackend = getResources().getStringArray(R.array.backend);
          ArrayAdapter<String> adapterBackend = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
          spinnerBackend.setAdapter(adapterBackend);
@@ -389,6 +403,12 @@
          });
 
 
+         _btnSelectImage.setOnClickListener(arg0 -> {
+             Intent intent = new Intent(Intent.ACTION_PICK);
+             intent.setType("image/*");
+             startActivityForResult(intent, SELECT_IMAGE);
+         });
+
          _btnBenchmark.setOnClickListener(v -> {
              CDELog.j(TAG, "strModeName:" + strModeName);
              CDELog.j(TAG, "exec ggml benchmark: type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex)
@@ -401,124 +421,158 @@
 
              //TODO: better method
              //sanity check begin
-             if (strModeName.contains("llama")) {
-                 isLLMModel = true;
-                 //https://huggingface.co/bevangelista/Llama-2-7b-chat-hf-GGUF-Q4_K_M/tree/main, //4.08 GB
-                 selectModeFileName = "llama-2-7b-chat.Q4_K_M.gguf";
-             } else if (strModeName.contains("qwen")) {
-                 isLLMModel = true;
-                 // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
-                 selectModeFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
-             } else if (strModeName.contains("baichuan")) {
-                 isLLMModel = true;
-                 // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf //4.61 GB
-                 selectModeFileName = "baichuan2-7b.Q4_K_M.gguf";
-             } else if (strModeName.contains("gemma")) {
-                 isLLMModel = true;
-                 selectModeFileName = "gemma-2b.Q4_K_M.gguf";
-                 // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
-                 selectModeFileName = "gemma-2b.Q8_0.gguf";
-             } else if (strModeName.contains("yi-chat")) {
-                 isLLMModel = true;
-                 selectModeFileName = "yi-chat-6b.Q2_K.gguf";
-                 // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q4_0.gguf //3.48 GB
-                 selectModeFileName = "yi-chat-6b.Q4_0.gguf";
-             } else if (strModeName.startsWith("qnn")) {
-                 //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
-                 isQNNModel = true;
-             } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.BENCHMARK_CV_MNIST)) {
-                 isMNISTModel = true;
-                 //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
-                 selectModeFileName = "mnist-ggml-model-f32.gguf";
-                 selectModeFileName = ggmlMNISTModelFile;
-             } else if ((strModeName.startsWith("sdmodel")) || (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
-                 isSDModel = true;
-                 //https://github.com/leejet/stable-diffusion.cpp
-                 //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
-                 //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
-                 //https://huggingface.co/zhouwg/kantv, //2.0 GB
-                 selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
-                 //https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main
-                 //selectModeFileName = "v1-5-pruned-emaonly.safetensors";
-             } else if ((strModeName.contains("bark")) || (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
-                 isTTSModel = true;
-                 //https://huggingface.co/zhouwg/kantv/blob/main/ggml-bark-small.bin, //843 MB
-                 selectModeFileName = "ggml-bark-small.bin";
+
+             if (isNCNNInference()) {
+                 if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {
+                     CDEUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
+                     return;
+                 }
+                 if (backendIndex == CDEUtils.QNN_BACKEND_GGML) {
+                     CDEUtils.showMsgBox(mActivity, "NCNN inference only support CPU/GPU backend");
+                     return;
+                 }
+
+                 switch (benchmarkIndex) {
+                     case CDEUtils.BENCHMARK_CV_RESNET: {
+                         if (bitmapSelectedImage == null) {
+                             CDELog.j(TAG, "image is empty");
+                             CDEUtils.showMsgBox(mActivity, "please select a image for RESNET inference using NCNN");
+                             return;
+                         }
+                         break;
+                     }
+                     default:
+                         CDEUtils.showMsgBox(mActivity, "benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported curretnly");
+                         return;
+                 }
+
              } else {
-                 isASRModel = true;
-                 //https://huggingface.co/ggerganov/whisper.cpp
-                 selectModeFileName = "ggml-" + strModeName + ".bin";
-             }
-             CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
-
-             if ((benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_AUTO_UT)) {
-                 resetInternalVars();
-                 selectModeFileName = "ggml-tiny.en-q8_0.bin";
-             } else {
-                 if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     return;
-                 }
-                 if ((!isLLMModel) && (benchmarkIndex == CDEUtils.BENCHMARK_LLM)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     return;
+                 if (!isMNISTModel) {
+                     if (_ivInfo != null) {
+                         _ivInfo.setVisibility(View.INVISIBLE);
+                         _llInfoLayout.removeView(_ivInfo);
+                         _ivInfo = null;
+                     }
                  }
 
-                 if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_TEXT2IMAGE)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                 if (strModeName.contains("llama")) {
+                     isLLMModel = true;
+                     //https://huggingface.co/bevangelista/Llama-2-7b-chat-hf-GGUF-Q4_K_M/tree/main, //4.08 GB
+                     selectModeFileName = "llama-2-7b-chat.Q4_K_M.gguf";
+                 } else if (strModeName.contains("qwen")) {
+                     isLLMModel = true;
+                     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
+                     selectModeFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
+                 } else if (strModeName.contains("baichuan")) {
+                     isLLMModel = true;
+                     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf //4.61 GB
+                     selectModeFileName = "baichuan2-7b.Q4_K_M.gguf";
+                 } else if (strModeName.contains("gemma")) {
+                     isLLMModel = true;
+                     selectModeFileName = "gemma-2b.Q4_K_M.gguf";
+                     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
+                     selectModeFileName = "gemma-2b.Q8_0.gguf";
+                 } else if (strModeName.contains("yi-chat")) {
+                     isLLMModel = true;
+                     selectModeFileName = "yi-chat-6b.Q2_K.gguf";
+                     // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q4_0.gguf //3.48 GB
+                     selectModeFileName = "yi-chat-6b.Q4_0.gguf";
+                 } else if (strModeName.startsWith("qnn")) {
+                     //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
+                     isQNNModel = true;
+                 } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.BENCHMARK_CV_MNIST)) {
+                     isMNISTModel = true;
+                     //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
+                     selectModeFileName = "mnist-ggml-model-f32.gguf";
+                     selectModeFileName = ggmlMNISTModelFile;
+                 } else if ((strModeName.startsWith("sdmodel")) || (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
+                     isSDModel = true;
+                     //https://github.com/leejet/stable-diffusion.cpp
+                     //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
+                     //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
+                     //https://huggingface.co/zhouwg/kantv, //2.0 GB
+                     selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
+                     //https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main
+                     //selectModeFileName = "v1-5-pruned-emaonly.safetensors";
+                 } else if ((strModeName.contains("bark")) || (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
+                     isTTSModel = true;
+                     //https://huggingface.co/zhouwg/kantv/blob/main/ggml-bark-small.bin, //843 MB
+                     selectModeFileName = "ggml-bark-small.bin";
+                 } else {
+                     isASRModel = true;
+                     //https://huggingface.co/ggerganov/whisper.cpp
+                     selectModeFileName = "ggml-" + strModeName + ".bin";
+                 }
+                 CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
+
+                 if ((benchmarkIndex == CDEUtils.BENCHMARK_QNN_GGML_OP) || (benchmarkIndex == CDEUtils.BENCHMARK_QNN_AUTO_UT)) {
+                     resetInternalVars();
+                     selectModeFileName = "ggml-tiny.en-q8_0.bin";
+                 } else {
+                     if (isLLMModel && (benchmarkIndex != CDEUtils.BENCHMARK_LLM)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                     if ((!isLLMModel) && (benchmarkIndex == CDEUtils.BENCHMARK_LLM)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+
+                     if (isSDModel && (benchmarkIndex != CDEUtils.BENCHMARK_TEXT2IMAGE)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                     if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+
+                     if (isTTSModel && (benchmarkIndex != CDEUtils.BENCHMARK_TTS)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                     if (!isTTSModel && (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                 }
+
+                 if (!isQNNModel)
+                     selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
+                 else {
+                     //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
+                     selectModelFilePath = CDEUtils.getDataPath(mContext) + selectModeFileName;
+                 }
+
+                 CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
+                 selectModeFile = new File(selectModelFilePath);
+                 displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
+
+                 if (!selectModeFile.exists()) {
+                     CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
+                 }
+                 File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
+                 if (!selectModeFile.exists() || (!sampleFile.exists())) {
+                     CDEUtils.showMsgBox(mActivity, "pls check whether model file:" + selectModeFileName + " exist in /sdcard/kantv/");
                      return;
                  }
-                 if ((!isSDModel) && (benchmarkIndex == CDEUtils.BENCHMARK_TEXT2IMAGE)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     return;
+
+                 String strPrompt = _txtUserInput.getText().toString();
+                 if (strPrompt.isEmpty()) {
+                     //CDEUtils.showMsgBox(mActivity, "pls check your input");
+                     //return;
+                     strPrompt = strUserInput;
                  }
-
-                 if (isTTSModel && (benchmarkIndex != CDEUtils.BENCHMARK_TTS)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     return;
-                 }
-                 if (!isTTSModel && (benchmarkIndex == CDEUtils.BENCHMARK_TTS)) {
-                     CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
-                     return;
-                 }
+                 strPrompt = strPrompt.trim();
+                 strUserInput = strPrompt;
+                 CDELog.j(TAG, "User input: \n " + strUserInput);
              }
-
-             if (!isQNNModel)
-                 selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
-             else {
-                 //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
-                 selectModelFilePath = CDEUtils.getDataPath(mContext) + selectModeFileName;
-             }
-
-             CDELog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
-             selectModeFile = new File(selectModelFilePath);
-             displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
-
-             if (!selectModeFile.exists()) {
-                 CDELog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
-             }
-             File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
-             if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                 CDEUtils.showMsgBox(mActivity, "pls check whether model file:" + selectModeFileName + " exist in /sdcard/kantv/");
-                 return;
-             }
-
-             String strPrompt = _txtUserInput.getText().toString();
-             if (strPrompt.isEmpty()) {
-                 //CDEUtils.showMsgBox(mActivity, "pls check your input");
-                 //return;
-                 strPrompt = strUserInput;
-             }
-             strPrompt = strPrompt.trim();
-             strUserInput = strPrompt;
-             CDELog.j(TAG, "User input: \n " + strUserInput);
-
              //sanity check end
 
              //reset default ggml model file name after sanity check
@@ -526,14 +580,6 @@
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
              if (isASRModel) { //avoid crash
                  ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
-             }
-
-             if (!isMNISTModel) {
-                if (_ivInfo != null) {
-                    _ivInfo.setVisibility(View.INVISIBLE);
-                    _llInfoLayout.removeView(_ivInfo);
-                    _ivInfo = null;
-                }
              }
 
              nLogCounts = 0;
@@ -578,55 +624,82 @@
                  strBenchmarkInfo = "";
 
                  initKANTVMgr();
-                 if (isASRModel) {
-                     ggmljava.asr_set_benchmark_status(0);
-                 }
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
-                     if (!isQNNModel) {
-                         if (isLLMModel) {
-                             strBenchmarkInfo = ggmljava.llm_inference(
-                                     CDEUtils.getDataPath() + ggmlModelFileName,
-                                     strUserInput,
-                                     benchmarkIndex,
-                                     nThreadCounts, backendIndex);
-                         } else if (isMNISTModel) {
-                             strBenchmarkInfo = ggmljava.ggml_bench(
-                                     CDEUtils.getDataPath() + ggmlModelFileName,
-                                     CDEUtils.getDataPath() + ggmlMNISTImageFile,
-                                     benchmarkIndex,
-                                     nThreadCounts, backendIndex, optypeIndex);
-                         } else if (isSDModel) {
-                             strBenchmarkInfo = ggmljava.ggml_bench(
-                                     CDEUtils.getDataPath() + ggmlModelFileName,
-                                     "a lovely cat"/*strUserInput*/,
-                                     benchmarkIndex,
-                                     nThreadCounts, backendIndex, optypeIndex);
-                         } else if (isTTSModel) {
-                             strBenchmarkInfo = ggmljava.ggml_bench(
-                                     CDEUtils.getDataPath() + ggmlModelFileName,
-                                     "this is an audio generated by bark.cpp"/*strUserInput*/,
-                                     benchmarkIndex,
-                                     nThreadCounts, backendIndex, optypeIndex);
-                         } else {
+
+                     if (isGGMLInfernce()) {
+                         //GGML inference
+
+                         if (isASRModel) {
+                             ggmljava.asr_set_benchmark_status(0);
+                         }
+
+                         if (!isQNNModel) {
+                             if (isLLMModel) {
+                                 strBenchmarkInfo = ggmljava.llm_inference(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         strUserInput,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex);
+                             } else if (isMNISTModel) {
+                                 strBenchmarkInfo = ggmljava.ggml_bench(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         CDEUtils.getDataPath() + ggmlMNISTImageFile,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex, optypeIndex);
+                             } else if (isSDModel) {
+                                 strBenchmarkInfo = ggmljava.ggml_bench(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         "a lovely cat"/*strUserInput*/,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex, optypeIndex);
+                             } else if (isTTSModel) {
+                                 strBenchmarkInfo = ggmljava.ggml_bench(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         "this is an audio generated by bark.cpp"/*strUserInput*/,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex, optypeIndex);
+                             } else {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
                                          CDEUtils.getDataPath() + ggmlModelFileName,
                                          CDEUtils.getDataPath() + ggmlSampleFileName,
                                          benchmarkIndex,
                                          nThreadCounts, backendIndex, optypeIndex);
+                             }
+                         } else {
+                             // avoid following issue
+                             // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
+                             // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.cdeos.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
+                             // is not accessible for the namespace "clns-4"
+                             strBenchmarkInfo = ggmljava.ggml_bench(
+                                     CDEUtils.getDataPath(mContext) + ggmlModelFileName,
+                                     CDEUtils.getDataPath() + ggmlSampleFileName,
+                                     benchmarkIndex,
+                                     nThreadCounts, backendIndex, optypeIndex);
                          }
+
                      } else {
-                         // avoid following issue
-                         // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
-                         // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.cdeos.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
-                         // is not accessible for the namespace "clns-4"
-                         strBenchmarkInfo = ggmljava.ggml_bench(
-                                 CDEUtils.getDataPath(mContext) + ggmlModelFileName,
-                                 CDEUtils.getDataPath() + ggmlSampleFileName,
-                                 benchmarkIndex,
-                                 nThreadCounts, backendIndex, optypeIndex);
+
+                         //NCNN inference was imported since v1.3.8
+                         switch (benchmarkIndex) {
+                             case CDEUtils.BENCHMARK_CV_RESNET: {
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 1, 0, 0);
+                                 if (!ret_init) {
+                                     CDELog.j(TAG, "resnet init failed");
+                                     //CDEUtils.showMsgBox(mActivity, "resnet init failed");
+                                 } else {
+                                     if (bitmapSelectedImage != null)
+                                         ncnnjni.detectSqueeze(bitmapSelectedImage, false);
+                                 }
+                             }
+                             break;
+                             default:
+                                 break;
+                         }
                      }
+
+
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);
 
@@ -634,9 +707,13 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
+                             String backendDesc = CDEUtils.getBackendDesc(backendIndex);
+                             if (isNCNNInference()) {
+                                 backendDesc = CDEUtils.getNCNNBackendDesc(backendIndex);
+                             }
                              String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
                                      + " ,threads: " + nThreadCounts
-                                     + " ,backend: " + CDEUtils.getBackendDesc(backendIndex)
+                                     + " ,backend: " + backendDesc
                                      + " ) cost " + duration + " milliseconds";
                              //04-07-2024(April,7,2024), add timestamp
                              String timestamp = "";
@@ -666,43 +743,18 @@
                              //update UI status
                              _btnBenchmark.setEnabled(true);
 
-                             if (isMNISTModel) {
-                                 if (_ivInfo != null) {
-                                     _ivInfo.setVisibility(View.INVISIBLE);
-                                     _llInfoLayout.removeView(_ivInfo);
-                                     _ivInfo = null;
+                             if (isGGMLInfernce()) {
+                                 if (isMNISTModel) {
+                                     String imgPath = CDEUtils.getDataPath() + ggmlMNISTImageFile;
+                                     displayImage(imgPath);
                                  }
 
-                                 String imgPath = CDEUtils.getDataPath() + ggmlMNISTImageFile;
-                                 Uri uri = Uri.fromFile(new File(imgPath));
-                                 BitmapFactory.Options opts = new BitmapFactory.Options();
-                                 opts.inJustDecodeBounds = true;
-                                 BitmapFactory.decodeFile(imgPath, opts);
-                                 int imgWidth = opts.outWidth;
-                                 int imgHeight = opts.outHeight;
-                                 CDELog.j(TAG, "img width=" + imgWidth + ", img height=" + imgHeight);
+                                 _txtASRInfo.scrollTo(0, 0);
 
-                                 ViewGroup.LayoutParams vlp = new LinearLayout.LayoutParams(
-                                         ViewGroup.LayoutParams.WRAP_CONTENT,
-                                         ViewGroup.LayoutParams.WRAP_CONTENT
-                                 );
-                                 vlp.width = imgWidth;
-                                 vlp.height = imgHeight;
-                                 _ivInfo = new ImageView(mActivity);
-                                 _ivInfo.setLayoutParams(vlp);
-                                 _llInfoLayout.addView(_ivInfo);
-                                 _llInfoLayout.setGravity(Gravity.CENTER);
-                                 _ivInfo.setImageURI(uri);
-                                 _ivInfo.setVisibility(View.VISIBLE);
-                                 _ivInfo.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                                 _ivInfo.setAdjustViewBounds(true);
-                                 _ivInfo.setMaxWidth(250);
-                                 _ivInfo.setMaxHeight(250);
+                                 resetInternalVars();
+                             } else {
+                                 bitmapSelectedImage = null;
                              }
-
-                             _txtASRInfo.scrollTo(0, 0);
-
-                             resetInternalVars();
                          }
                      });
                  }
@@ -792,18 +844,37 @@
          super.onStop();
      }
 
+     @Override
+     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+         super.onActivityResult(requestCode, resultCode, data);
 
-     public void playAudioFile() {
-         try {
-             MediaPlayer mediaPlayer = new MediaPlayer();
-             CDELog.j(TAG, "audio file:" + CDEUtils.getDataPath() + ggmlSampleFileName);
-             mediaPlayer.setDataSource(CDEUtils.getDataPath() + ggmlSampleFileName);
-             mediaPlayer.prepare();
-             mediaPlayer.start();
-         } catch (IOException ex) {
-             CDELog.j(TAG, "failed to play audio file:" + ex.toString());
-         } catch (Exception ex) {
-             CDELog.j(TAG, "failed to play audio file:" + ex.toString());
+         CDELog.j(TAG, "onActivityResult:" + requestCode + " " + resultCode);
+         if (null != data) {
+             CDELog.j(TAG, "path:" + data.getData().getPath());
+         }
+         if (null != data) {
+             Uri selectedImageUri = data.getData();
+
+             try {
+                 if (requestCode == SELECT_IMAGE) {
+                     Bitmap bitmap = decodeUri(selectedImageUri);
+                     Bitmap rgba = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                     // resize to 227x227
+                     bitmapSelectedImage = Bitmap.createScaledBitmap(rgba, 227, 227, false);
+                     rgba.recycle();
+                     {
+                         String imgPath = selectedImageUri.getPath();
+                         CDELog.j(TAG, "image path:" + imgPath);
+                         imgPath = imgPath.substring(6); //TODO:
+                         CDELog.j(TAG, "image path:" + imgPath);
+                         displayImage(imgPath);
+                     }
+
+                 }
+             } catch (FileNotFoundException e) {
+                 CDELog.j(TAG, "FileNotFoundException: " + e.toString());
+                 return;
+             }
          }
      }
 
@@ -930,6 +1001,103 @@
          } else {
              CDELog.j(TAG, "model file not exist:" + modelFile.getAbsolutePath());
              _txtGGMLStatus.append("model   file not exist: " + modelFile.getAbsolutePath());
+         }
+     }
+
+     private boolean isGGMLInfernce() {
+         if (benchmarkIndex <= CDEUtils.BENCHMARK_TTS)
+             return true;
+         else
+             return false;
+     }
+
+     private boolean isNCNNInference() {
+         if (benchmarkIndex > CDEUtils.BENCHMARK_TTS)
+             return true;
+         else
+             return false;
+     }
+
+     private void displayImage(String imgPath) {
+         if (_ivInfo != null) {
+             _ivInfo.setVisibility(View.INVISIBLE);
+             _llInfoLayout.removeView(_ivInfo);
+             _ivInfo = null;
+         }
+
+         Uri uri = Uri.fromFile(new File(imgPath));
+         BitmapFactory.Options opts = new BitmapFactory.Options();
+         opts.inJustDecodeBounds = true;
+         BitmapFactory.decodeFile(imgPath, opts);
+         int imgWidth = opts.outWidth;
+         int imgHeight = opts.outHeight;
+         CDELog.j(TAG, "img width=" + imgWidth + ", img height=" + imgHeight);
+
+         ViewGroup.LayoutParams vlp = new LinearLayout.LayoutParams(
+                 ViewGroup.LayoutParams.WRAP_CONTENT,
+                 ViewGroup.LayoutParams.WRAP_CONTENT
+         );
+         if ((0 != imgWidth) && (0 != imgHeight)) {
+             vlp.width = imgWidth;
+             vlp.height = imgHeight;
+         } else {
+             CDELog.j(TAG, "invalid image width and height");
+             return;
+         }
+         _ivInfo = new ImageView(mActivity);
+         _ivInfo.setLayoutParams(vlp);
+         _llInfoLayout.addView(_ivInfo);
+         _llInfoLayout.setGravity(Gravity.CENTER);
+         _ivInfo.setImageURI(uri);
+         _ivInfo.setVisibility(View.VISIBLE);
+         _ivInfo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+         _ivInfo.setAdjustViewBounds(true);
+         _ivInfo.setMaxWidth(250);
+         _ivInfo.setMaxHeight(250);
+     }
+
+
+     private Bitmap decodeUri(Uri uriSelectedImage) throws FileNotFoundException {
+         // Decode image size
+         BitmapFactory.Options options = new BitmapFactory.Options();
+         options.inJustDecodeBounds = true;
+         BitmapFactory.decodeStream(mActivity.getContentResolver().openInputStream(uriSelectedImage), null, options);
+
+         // The new size we want to scale to
+         final int REQUIRED_SIZE = 400;
+
+         // Find the correct scale value. It should be the power of 2.
+         int width_tmp = options.outWidth;
+         int height_tmp = options.outHeight;
+         int scale = 1;
+         while (true) {
+             if (width_tmp / 2 < REQUIRED_SIZE
+                     || height_tmp / 2 < REQUIRED_SIZE) {
+                 break;
+             }
+             width_tmp /= 2;
+             height_tmp /= 2;
+             scale *= 2;
+         }
+
+         // Decode with inSampleSize
+         options = new BitmapFactory.Options();
+         options.inSampleSize = scale;
+         return BitmapFactory.decodeStream(mActivity.getContentResolver().openInputStream(uriSelectedImage), null, options);
+     }
+
+
+     private void playAudioFile() {
+         try {
+             MediaPlayer mediaPlayer = new MediaPlayer();
+             CDELog.j(TAG, "audio file:" + CDEUtils.getDataPath() + ggmlSampleFileName);
+             mediaPlayer.setDataSource(CDEUtils.getDataPath() + ggmlSampleFileName);
+             mediaPlayer.prepare();
+             mediaPlayer.start();
+         } catch (IOException ex) {
+             CDELog.j(TAG, "failed to play audio file:" + ex.toString());
+         } catch (Exception ex) {
+             CDELog.j(TAG, "failed to play audio file:" + ex.toString());
          }
      }
 
