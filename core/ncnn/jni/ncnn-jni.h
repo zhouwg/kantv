@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * JNI implementation of NCNN for Project KanTV
+ * JNI header file of ncnn-jni for Project KanTV
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

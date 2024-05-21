@@ -1,4 +1,23 @@
-// ref&author:https://github.com/nihui/ncnn-android-scrfd
+/*
+ * the following codes just for:
+ *
+ * study internal mechanism of NCNN(Nihui Convolutional Neural Network, https://github.com/Tencent/ncnn)
+ *
+ * study various open source pure C/C++ AI projects based on NCNN(such as https://github.com/k2-fsa/sherpa-ncnn)
+ *
+ * preparation for implementation of PoC https://github.com/zhouwg/kantv/issues/176
+ *
+ */
+
+// ref:https://github.com/Tencent/ncnn
+//     https://github.com/nihui/opencv-mobile
+//     https://github.com/nihui/ncnn_on_esp32
+//     https://github.com/nihui/ncnn-android-squeezenet
+//     https://github.com/yaoyi30/ResNet_ncnn_android
+//     https://github.com/k2-fsa/sherpa-ncnn
+//     https://github.com/WongKinYiu/yolov9
+//     ...
+//
 // Tencent is pleased to support the open source community by making ncnn available.
 //
 // Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -12,6 +31,26 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
+
+
+/*
+ * Copyright (c) 2024- KanTV Authors
+ *
+ * JNI implementation of ncnn-jni for Project KanTV
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 
 #include <android/asset_manager_jni.h>
 #include <android/native_window_jni.h>
