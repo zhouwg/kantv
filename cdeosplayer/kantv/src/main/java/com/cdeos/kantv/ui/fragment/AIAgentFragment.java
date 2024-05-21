@@ -124,13 +124,13 @@
 
      private boolean mCameraInit = false;
 
-     private ncnnjava scrfdncnn = new ncnnjava();
+     private ncnnjava ncnnjni = new ncnnjava();
      private int facing = 0;
 
      private Spinner spinnerModel;
-     private Spinner spinnerCPUGPU;
+     private Spinner spinnerNCNNBackend;
      private int current_model = 0;
-     private int current_cpugpu = 0;
+     private int current_ncnnbackend = CDEUtils.NCNN_BACKEND_CPU;
 
      private SurfaceView cameraView;
 
@@ -208,9 +208,9 @@
 
              int new_facing = 1 - facing;
 
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
 
-             scrfdncnn.openCamera(new_facing);
+             ncnnjni.openCamera(new_facing);
 
              facing = new_facing;
          });
@@ -233,14 +233,14 @@
              }
          });
 
-         spinnerCPUGPU = mActivity.findViewById(R.id.spinnerCPUGPU);
-         spinnerCPUGPU.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+         spinnerNCNNBackend = mActivity.findViewById(R.id.spinnerNCNNBackend);
+         spinnerNCNNBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
              {
-                 if (position != current_cpugpu)
+                 if (position != current_ncnnbackend)
                  {
-                     current_cpugpu = position;
+                     current_ncnnbackend = position;
                      reload();
                  }
              }
@@ -265,7 +265,7 @@
 
      private void reload()
      {
-         boolean ret_init = scrfdncnn.loadModel(mContext.getAssets(), current_model, current_cpugpu);
+         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 0, current_model, current_ncnnbackend);
          if (!ret_init)
          {
              CDELog.j(TAG, "ncnn loadModel failed");
@@ -275,7 +275,7 @@
      @Override
      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height)
      {
-         scrfdncnn.setOutputWindow(holder.getSurface());
+         ncnnjni.setOutputWindow(holder.getSurface());
      }
 
      @Override
@@ -297,7 +297,7 @@
 
          CDELog.j(TAG, "running service: " + CDEUtils.getRunningServicesInfo(mContext));
          try {
-             scrfdncnn.openCamera(facing);
+             ncnnjni.openCamera(facing);
              mCameraInit = true;
          } catch (Exception e) {
              e.printStackTrace();
@@ -309,7 +309,7 @@
 
      public void finalizeCamera() {
          if (mCameraInit) {
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
              mCameraInit = false;
          } else {
              CDELog.j(TAG, "camera already finalized");
@@ -372,7 +372,7 @@
          CDELog.j(TAG, "onResume");
          super.onResume();
          if (mCameraInit) {
-             scrfdncnn.openCamera(facing);
+             ncnnjni.openCamera(facing);
          }
      }
 
@@ -381,7 +381,7 @@
          CDELog.j(TAG, "onPause");
          super.onPause();
          if (mCameraInit) {
-             scrfdncnn.closeCamera();
+             ncnnjni.closeCamera();
          }
      }
 

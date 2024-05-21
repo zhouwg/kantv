@@ -15,17 +15,19 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <!--
             <ImageView
                 android:id="@+id/ggmlLogo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/ggml_logo" />
+                -->
 
             <TextView
                 android:id="@+id/ggmlInfo"
                 android:layout_width="match_parent"
-                android:layout_height="120dp" />
+                android:layout_height="140dp" />
 
             <TextView
                 android:id="@+id/ggmlStatus"
@@ -127,6 +129,23 @@
                 android:dropDownSelector="#63D81B60"
                 android:spinnerMode="dropdown" />
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSelectImage"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/button_drawable"
+                android:textAllCaps="false"
+                android:textColor="#ffffff"
+                android:text="Select Image" />
+
             <Button
                 android:id="@+id/btnBenchmark"
                 android:layout_width="80dp"
@@ -136,7 +155,6 @@
                 android:text="Benchmark"
                 android:textAllCaps="false"
                 android:textColor="#ffffff" />
-
 
         </LinearLayout>
 

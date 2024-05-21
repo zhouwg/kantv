@@ -1,1 +1,1 @@
-kantv 1.3.7 (based on customized FFmpeg 6.1, whisper.cpp, llama.cpp, bark.cpp, stablediffusion.cpp)
+kantv 1.3.7, based on customized FFmpeg 6.1, whisper.cpp(ASR), llama.cpp(LLM), bark.cpp(TTS), stablediffusion.cpp(Text2Image), ncnn, opencv-android

@@ -69,6 +69,8 @@
         <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
         <item>MNIST(ggml)</item>            <!-- MNIST(based on ggml) benchmark -->
         <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
+        <item>RESNET(ncnn)</item>           <!-- image classification via ResNet using NCNN -->
+        <item>SQUEEZENET(ncnn)</item>       <!-- image classification via SqueezeNet using NCNN-->
         <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn)benchmark -->
         <item>TTS(ncnn)</item>              <!-- TBD -->
     </string-array>
@@ -140,7 +142,7 @@
         <item>10g_kps</item>
         <item>34g</item>
     </string-array>
-    <string-array name="cpugpu_array">
+    <string-array name="ncnn_backend">
         <item>CPU</item>
         <item>GPU</item>
     </string-array>

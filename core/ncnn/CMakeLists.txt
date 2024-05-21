@@ -10,6 +10,7 @@ set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xi
 set(NCNN_JNI_QNN       ON)   # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn)
+set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(OpenCV_DIR                  ${NCNN_SRC_DIR}/opencv-mobile-4.9.0-android/sdk/native/jni)
 set(ncnn_DIR                    ${NCNN_SRC_DIR}/ncnn-20240410-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
 set(PREBUILT_LIB_PATH           ${NCNN_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
@@ -35,6 +36,7 @@ include_directories(${OpenCV_DIR}/include/)
 include_directories(${NCNN_SRC_DIR}/ncnn-20240410-android-vulkan/${ANDROID_ABI}/include/)
 include_directories(${PREBUILT_INC_PATH}/)
 include_directories(${QNN_INC_PATH}/)
+include_directories(${GGML_SRC_DIR}/jni) # kantv-asr.h
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
@@ -98,6 +100,6 @@ set_target_properties(kantvmedia
         IMPORTED_LOCATION
         ${PREBUILT_LIB_PATH}/libkantv-media.so)
 
-add_library(ncnn-jni SHARED jni/scrfdncnn.cpp jni/scrfd.cpp jni/ndkcamera.cpp)
+add_library(ncnn-jni SHARED jni/ncnn-jni.c jni/ncnn-jni-impl.cpp jni/scrfd.cpp jni/ndkcamera.cpp)
 
 target_link_libraries(ncnn-jni ncnn ${OpenCV_LIBS} camera2ndk mediandk ${LOG_LIB} kantvmedia android)
