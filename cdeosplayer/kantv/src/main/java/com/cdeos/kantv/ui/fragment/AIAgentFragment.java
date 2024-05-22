@@ -106,6 +106,7 @@
  import cdeos.media.player.KANTVMgr;
 
 
+ //TODO: verified ok on Xiaomi14, more validations on other Android phone
  public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implements AIAgentView, SurfaceHolder.Callback {
      private static final String TAG = AIAgentFragment.class.getName();
 
