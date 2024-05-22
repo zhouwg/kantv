@@ -328,7 +328,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 
   <li>
-   <a href="https://github.com/Tencent/ncnn">ncnn</a> by <a href="https://github.com/nihui">nihui</a>
+   <a href="https://github.com/Tencent/ncnn">NCNN</a> by <a href="https://github.com/nihui">nihui</a>
   </li>
   </ul>
 
