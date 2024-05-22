@@ -846,7 +846,7 @@
                                  //for keep (FSM) status sync accurately between UI and native source code, there are might be much efforts to do it
                                  //just like ggml_abort_callback in ggml.c
                                  //this is the gap between open source project(PoC/demo) and "real project"(commercial project)
-                                 //we don't care this during PoC stage
+                                 //don't care this during PoC stage
                              }
                          }
                      });
