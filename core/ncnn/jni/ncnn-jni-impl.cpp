@@ -161,6 +161,7 @@ static int draw_fps(cv::Mat &rgb) {
     return 0;
 }
 
+
 static SCRFD *g_scrfd = NULL;
 static ncnn::Mutex lock;
 
@@ -225,7 +226,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     ncnn::create_gpu_instance();
 
     g_camera = new MyNdkCamera;
-
 
     return JNI_VERSION_1_4;
 }
@@ -681,7 +681,6 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
     }
 
     LOGGD("Preparing input...");
-    LOGGD("bitmap is %p", bitmap);
     ncnn::Mat in;
     if (1) {
         //load image from bitmap which loaded from /sdcard/kantv/(mnist-4.png,mnist-5.png,mnist-7.png,minist-8.png, mnist-9.png...)
@@ -765,6 +764,45 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
     return result;
 }
 
+
+/**
+*
+* @param sz_ncnnmodel_param   param file of ncnn model
+* @param sz_ncnnmodel_bin     bin   file of ncnn model
+* @param sz_user_data         ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / ResNet&SqueezeNet&MNIST: image path / TTS: user input
+* @param bitmap
+* @param n_bench_type         1: NCNN_RESNET 2: NCNN_SQUEEZENET 3: NCNN_MNIST
+* @param n_threads            1 - 8
+* @param n_backend_type       0: NCNN_BACKEND_CPU  1: NCNN_BACKEND_GPU
+* @param n_op_type            type of NCNN OP
+* @return
+*/
+//TODO:refine codes in ncnn-jni-impl.cpp
+void ncnn_jni_bench(JNIEnv *env, const char * sz_ncnnmodel_param, const char * sz_ncnnmodel_bin, const char * sz_user_data, jobject bitmap, int n_bench_type, int num_threads, int n_backend_type, int n_op_type) {
+    LOGGD("model param:%s\n", sz_ncnnmodel_param);
+    LOGGD("model bin:%s\n", sz_ncnnmodel_bin);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("bench type:%d\n", n_bench_type);
+    LOGGD("backend type:%d\n", n_backend_type);
+    LOGGD("op type:%d\n", n_op_type);
+
+    switch (n_bench_type) {
+        case NCNN_RESNET:
+            Java_org_ncnn_ncnnjava_detectResNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            break;
+        case NCNN_SQUEEZENET:
+            Java_org_ncnn_ncnnjava_detectSqueezeNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            break;
+        case NCNN_MNIST:
+            Java_org_ncnn_ncnnjava_detectMnist(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            break;
+        default:
+            break;
+
+    }
 }
+
+}
+
 
 

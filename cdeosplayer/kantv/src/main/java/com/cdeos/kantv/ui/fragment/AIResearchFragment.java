@@ -119,6 +119,7 @@
      private String selectModeFileName = "";
 
      private Bitmap bitmapSelectedImage = null;
+     private String pathSelectedImage = "";
 
      Spinner spinnerOPType = null;
      String[] arrayOPType = null;
@@ -466,9 +467,26 @@
                          break;
                      }
                      case CDEUtils.BENCHMARK_CV_MNIST_NCNN:
+                         if (bitmapSelectedImage == null) {
+                             if (_ivInfo != null) {
+                                 _ivInfo.setVisibility(View.INVISIBLE);
+                                 _llInfoLayout.removeView(_ivInfo);
+                                 _ivInfo = null;
+                             }
+                             //hardcode to mnist-5.png
+                             String imgPath = CDEUtils.getDataPath() + "mnist-5.png";
+                             Uri uri = Uri.fromFile(new File(imgPath));
+                             try {
+                                 bitmapSelectedImage = decodeUri(uri, false);
+                             } catch (FileNotFoundException e) {
+                                 CDELog.j(TAG, "FileNotFoundException: " + e.toString());
+                                 CDEUtils.showMsgBox(mActivity, "FileNotFoundException: " + e.toString());
+                                 return;
+                             }
+                         }
                          break;
                      default:
-                         CDEUtils.showMsgBox(mActivity, "benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported curretnly");
+                         CDEUtils.showMsgBox(mActivity, "ncnn benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported currently");
                          return;
                  }
 
@@ -706,49 +724,21 @@
                          }
 
                      } else {
-
                          //NCNN inference was imported since v1.3.8
                          switch (benchmarkIndex) {
-                             case CDEUtils.BENCHMARK_CV_RESNET: {
+                             case CDEUtils.BENCHMARK_CV_RESNET:
+                             case CDEUtils.BENCHMARK_CV_SQUEEZENET:
+                             case CDEUtils.BENCHMARK_CV_MNIST_NCNN:
+                             {
+                                 //TODO: refine codes, remove ncnnjni.loadModel and merge codes to ncnnjni.ncnn_bench
                                  boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
                                  if (!ret_init) {
-                                     CDELog.j(TAG, "resnet init failed");
+                                     CDELog.j(TAG, "ncnn bench " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " init failed");
+                                     isBenchmarking.set(false);
                                  } else {
-                                     if (bitmapSelectedImage != null)
-                                         ncnnjni.detectResNet(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
-                                 }
-                             }
-                             break;
-
-                             case CDEUtils.BENCHMARK_CV_SQUEEZENET: {
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
-                                 if (!ret_init) {
-                                     CDELog.j(TAG, "squeezenet init failed");
-                                 } else {
-                                     if (bitmapSelectedImage != null)
-                                         ncnnjni.detectSqueezeNet(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
-                                 }
-                             }
-                             break;
-
-                             case CDEUtils.BENCHMARK_CV_MNIST_NCNN: {
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
-                                 if (!ret_init) {
-                                     CDELog.j(TAG, "mnist init failed");
-                                 } else {
-                                     if (bitmapSelectedImage != null)
-                                         ncnnjni.detectMnist(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
-                                     else {
-                                         String imgPath = CDEUtils.getDataPath() + "mnist-5.png";
-                                         Uri uri = Uri.fromFile(new File(imgPath));
-                                         try {
-                                             Bitmap bmpImage = decodeUri(uri, false);
-                                             ncnnjni.detectMnist(bmpImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
-                                         } catch (FileNotFoundException e) {
-                                             CDELog.j(TAG, "FileNotFoundException: " + e.toString());
-                                             isBenchmarking.set(false);
-                                             return;
-                                         }
+                                     if (bitmapSelectedImage != null) {
+                                         ncnnjni.ncnn_bench("ncnnmdelparam", "ncnnmodelbin", pathSelectedImage, bitmapSelectedImage,
+                                                 benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX,  nThreadCounts, backendIndex, 0);
                                      }
                                  }
                              }
@@ -929,6 +919,7 @@
                          CDELog.j(TAG, "image path:" + imgPath);
                          //image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
                          imgPath = imgPath.substring(6);
+                         pathSelectedImage = imgPath;
                          CDELog.j(TAG, "image path:" + imgPath);
                          displayImage(imgPath);
                      }

@@ -842,6 +842,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
 
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("bench type:%d\n", n_bench_type);
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
     if (3 == n_backend_type) { // 3 is fake QNN backend, just used for compare performance between QNN backend and original ggml
@@ -902,8 +903,6 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
     }
 }
-
-
 
 
 // =================================================================================================
