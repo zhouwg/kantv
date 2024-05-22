@@ -165,21 +165,16 @@ static int draw_fps(cv::Mat &rgb) {
 
 
 static SCRFD *g_scrfd = NULL;
+static NanoDet *g_nanodet = NULL;
 static ncnn::Mutex lock;
 
 static ncnn::UnlockedPoolAllocator g_blob_pool_allocator;
 static ncnn::PoolAllocator g_workspace_pool_allocator;
-static ncnn::Net resnet;
-
-
 static std::vector<std::string> squeezenet_words;
+static ncnn::Net resnet;
 static ncnn::Net squeezenet;
 static ncnn::Net squeezenet_gpu;
-
 static ncnn::Net mnist;
-
-static NanoDet* g_nanodet = 0;
-//static ncnn::Mutex lock;
 
 
 class MyNdkCamera : public NdkCameraWindow {
