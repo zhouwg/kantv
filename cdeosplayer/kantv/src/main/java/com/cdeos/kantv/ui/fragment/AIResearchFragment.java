@@ -731,7 +731,7 @@
                              case CDEUtils.BENCHMARK_CV_MNIST_NCNN:
                              {
                                  //TODO: refine codes, remove ncnnjni.loadModel and merge codes to ncnnjni.ncnn_bench
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex, false);
                                  if (!ret_init) {
                                      CDELog.j(TAG, "ncnn bench " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " init failed");
                                      isBenchmarking.set(false);

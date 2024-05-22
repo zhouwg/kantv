@@ -26,9 +26,10 @@ public class ncnnjava
      * @param netid
      * @param modelid
      * @param backend_type 0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
+     * @param is_live_inference
      * @return
      */
-    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type);
+    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type, boolean is_live_inference);
     public native boolean openCamera(int facing);
     public native boolean closeCamera();
     public native boolean setOutputWindow(Surface surface);

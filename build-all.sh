@@ -262,7 +262,7 @@ function dump_usage()
     echo "  $0 android"
     echo "  $0 linux"
     echo "  $0 ios"
-    echo "  $0 wasm"
+#   echo "  $0 wasm"
     echo -e "\n\n\n"
 }
 

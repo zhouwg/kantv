@@ -133,7 +133,7 @@
     </string-array>
 
 
-    <string-array name="model_array">
+    <string-array name="scrfd_model_array">
         <item>500m</item>
         <item>500m_kps</item>
         <item>1g</item>
@@ -142,9 +142,25 @@
         <item>10g</item>
         <item>10g_kps</item>
     </string-array>
+
+    <string-array name="nanodat_model_array">
+        <item>m</item>
+        <item>m-416</item>
+        <item>g</item>
+        <item>ELite0_320</item>
+        <item>ELite1_416</item>
+        <item>ELite2_512</item>
+        <item>RepVGG</item>
+    </string-array>
+
     <string-array name="ncnn_backend">
         <item>CPU</item>
         <item>GPU</item>
+    </string-array>
+
+    <string-array name="ncnn_liveinference_netid">
+        <item>scrfd</item>
+        <item>nanodat</item>
     </string-array>
 
 </resources>

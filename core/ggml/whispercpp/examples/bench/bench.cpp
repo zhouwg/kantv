@@ -162,7 +162,7 @@ int main(int argc, char ** argv) {
     switch (params.what) {
         case 0: ret = whisper_bench_full(params);                break;
         case 1: ret = whisper_bench_memcpy(params.n_threads);       break;
-        case 2: ret = whisper_bench_ggml_mul_mat(params.n_threads); break;
+        case 2: ret = whisper_bench_ggml_mul_mat(params.n_threads, 0); break;
         default: fprintf(stderr, "error: unknown benchmark: %d\n", params.what); break;
     }
 

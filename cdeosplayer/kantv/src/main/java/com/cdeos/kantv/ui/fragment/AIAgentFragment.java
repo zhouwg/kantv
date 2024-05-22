@@ -110,8 +110,6 @@
  public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implements AIAgentView, SurfaceHolder.Callback {
      private static final String TAG = AIAgentFragment.class.getName();
 
-     private String strBackend = "cpu";
-     private int backendIndex = 0; //QNN_CPU
 
      private Context mContext;
      private Activity mActivity;
@@ -128,10 +126,17 @@
      private ncnnjava ncnnjni = new ncnnjava();
      private int facing = 0;
 
-     private Spinner spinnerModel;
+     private Spinner spinnerNCNNModel;
      private Spinner spinnerNCNNBackend;
+     private Spinner spinnerNCNNNetid;
+     ArrayAdapter<String> adapterNCNNModelScrfd = null;
+     ArrayAdapter<String> adapterNCNNModelNanodat = null;
+
      private int current_model = 0;
      private int current_ncnnbackend = CDEUtils.NCNN_BACKEND_CPU;
+
+     //private int current_netid = CDEUtils.NCNN_LIVEINFERENCE_FACEDETECT;
+     private int current_netid = CDEUtils.NCNN_LIVEINFERENCE_NANODAT;
 
      private SurfaceView cameraView;
 
@@ -215,9 +220,45 @@
 
              facing = new_facing;
          });
+         spinnerNCNNNetid = mActivity.findViewById(R.id.spinnerNCNNNetid);
+         String[] arrayNetid = getResources().getStringArray(R.array.ncnn_liveinference_netid);
+         ArrayAdapter<String> adapterNCNNNetid = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNetid);
+         spinnerNCNNNetid.setAdapter(adapterNCNNNetid);
+         spinnerNCNNNetid.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
+             {
+                 if (position != current_netid)
+                 {
+                     current_netid = position;
+                     if (current_netid == CDEUtils.NCNN_LIVEINFERENCE_FACEDETECT)
+                         spinnerNCNNModel.setAdapter(adapterNCNNModelScrfd);
+                     else if (current_netid == CDEUtils.NCNN_LIVEINFERENCE_NANODAT)
+                         spinnerNCNNModel.setAdapter(adapterNCNNModelNanodat);
+                     reload();
+                 }
+             }
 
-         spinnerModel = mActivity.findViewById(R.id.spinnerModel);
-         spinnerModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onNothingSelected(AdapterView<?> arg0)
+             {
+             }
+         });
+
+
+         spinnerNCNNModel = mActivity.findViewById(R.id.spinnerNCNNModel);
+         String[] arrayScrfd = getResources().getStringArray(R.array.scrfd_model_array);
+         adapterNCNNModelScrfd = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayScrfd);
+
+         String[] arrayNanodat = getResources().getStringArray(R.array.nanodat_model_array);
+         adapterNCNNModelNanodat = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNanodat);
+
+         if (current_netid == CDEUtils.NCNN_LIVEINFERENCE_FACEDETECT)
+             spinnerNCNNModel.setAdapter(adapterNCNNModelScrfd);
+         else if (current_netid == CDEUtils.NCNN_LIVEINFERENCE_NANODAT)
+             spinnerNCNNModel.setAdapter(adapterNCNNModelNanodat);
+
+         spinnerNCNNModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
              public void onItemSelected(AdapterView<?> arg0, View arg1, int position, long id)
              {
@@ -266,7 +307,7 @@
 
      private void reload()
      {
-         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), 0, current_model, current_ncnnbackend);
+         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), current_netid, current_model, current_ncnnbackend, true);
          if (!ret_init)
          {
              CDELog.j(TAG, "ncnn loadModel failed");
