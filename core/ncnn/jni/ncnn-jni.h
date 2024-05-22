@@ -40,18 +40,36 @@ extern "C" {
 #define NCNN_FACEDETECT             0 //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
 #define NCNN_RESNET                 1
 #define NCNN_SQUEEZENET             2
+#define NCNN_MNIST                  3
+#define NCNN_BENCH_MAX              3
 
 
 #define NCNN_JNI_NOTIFY(...)        ncnn_jni_notify_c_impl(__VA_ARGS__)
+
 
 void         ncnn_jni_notify_c_impl(const char * format, ...);
 
 bool         is_zero_floatvalue(float value);
 
+/**
+*
+* @param sz_ncnnmodel_param   param file of ncnn model
+* @param sz_ncnnmodel_bin     bin   file of ncnn model
+* @param sz_user_data         ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / ResNet&SqueezeNet&MNIST: image path / TTS: user input
+* @param bitmap
+* @param n_bench_type         1: NCNN_RESNET 2: NCNN_SQUEEZENET 3: NCNN_MNIST
+* @param n_threads            1 - 8
+* @param n_backend_type       0: NCNN_BACKEND_CPU  1: NCNN_BACKEND_GPU
+* @param n_op_type            type of NCNN OP
+* @return
+*/
+void         ncnn_jni_bench(JNIEnv *env, const char * sz_ncnnmodel_param, const char * sz_ncnnmodel_bin, const char * sz_user_data, jobject bitmap, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
+
+
+
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif
 

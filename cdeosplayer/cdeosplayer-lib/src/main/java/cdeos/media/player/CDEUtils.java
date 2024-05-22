@@ -277,11 +277,13 @@
      //inference using NCNN
      public static final int BENCHMARK_CV_RESNET        = 9;
      public static final int BENCHMARK_CV_SQUEEZENET    = 10;
-     public static final int BENCHAMRK_ASR_NCNN         = 11;
-     public static final int BENCHAMRK_TTS_NCNN         = 12;
+     public static final int BENCHMARK_CV_MNIST_NCNN    = 11;
+     public static final int BENCHMARK_ASR_NCNN         = 12;
+     public static final int BENCHMARK_TTS_NCNN         = 13;
 
+     //ncnn backend
      public static final int NCNN_BACKEND_CPU           = 0;
-     public static final int NCNN_BACKEND_GPU           = 0;
+     public static final int NCNN_BACKEND_GPU           = 1;
 
 
      //keep sync with ggml-qnn.h
@@ -3959,11 +3961,15 @@
              case BENCHMARK_CV_SQUEEZENET:
                  return "SQUEEZENET inference using NCNN";
 
-             case BENCHAMRK_ASR_NCNN:
+             case BENCHMARK_ASR_NCNN:
                  return "ASR inference using NCNN";
 
-             case BENCHAMRK_TTS_NCNN:
+             case BENCHMARK_TTS_NCNN:
                  return "TTS inference using NCNN";
+
+             case BENCHMARK_CV_MNIST_NCNN:
+                 return "MNIST inference using NCNN";
+
          }
 
          return "unknown";

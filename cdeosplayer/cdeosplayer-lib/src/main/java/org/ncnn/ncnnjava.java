@@ -33,8 +33,19 @@ public class ncnnjava
     public native boolean closeCamera();
     public native boolean setOutputWindow(Surface surface);
 
-    public native String  detectResNet(Bitmap bitmap, boolean use_gpu);
-    public native String  detectSqueezeNet(Bitmap bitmap, boolean use_gpu);
+
+    /**
+     * @param ncnnmodelParam   param file of ncnn model
+     * @param ncnnmodelBin     bin   file of ncnn model
+     * @param userData         ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / ResNet&SqueezeNet&MNIST: image path / TTS: user input
+     * @param bitmap
+     * @param nBenchType       1: NCNN_RESNET 2: NCNN_SQUEEZENET 3: NCNN_MNIST
+     * @param nThreadCounts    1 - 8
+     * @param nBackendType     0: NCNN_BACKEND_CPU  1: NCNN_BACKEND_GPU
+     * @param nOpType          type of NCNN OP
+     * @return
+     */
+    public static native String ncnn_bench(String ncnnmodelParam, String ncnnmodelBin, String userData, Bitmap bitmap, int nBenchType, int nThreadCounts, int nBackendType, int nOpType);
 
     static {
         System.loadLibrary("ncnn-jni");
