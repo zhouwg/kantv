@@ -33,10 +33,6 @@ public class ncnnjava
     public native boolean closeCamera();
     public native boolean setOutputWindow(Surface surface);
 
-    public native String  detectResNet(Bitmap bitmap, boolean use_gpu);
-    public native String  detectSqueezeNet(Bitmap bitmap, boolean use_gpu);
-
-    public native String  detectMnist(Bitmap bitmap, boolean use_gpu);
 
     /**
      * @param ncnnmodelParam   param file of ncnn model
