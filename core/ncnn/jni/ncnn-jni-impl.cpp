@@ -269,20 +269,21 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
  * @param netid
  * @param modelid
  * @param backend_type 0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
+ * @param is_realtime_inference   1: realtime inference with live camera/online TV, 0: not realtime inference
  * @return
  */
 JNIEXPORT jboolean JNICALL
 Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint netid,
-                                 jint modelid, jint backend_type, jboolean is_live_inference) {
+                                 jint modelid, jint backend_type, jboolean is_realtime_inference) {
     LOGGD("netid %d", netid);
     LOGGD("modelid %d", modelid);
     LOGGD("backend_type %d", backend_type);
-    LOGGD("is_live_inference", is_live_inference);
+    LOGGD("is_realtime_inference", is_realtime_inference);
 
     AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
     LOGGD("ncnn load model with AAssetManager %p", mgr);
 
-    if (1 == is_live_inference) {
+    if (1 == is_realtime_inference) {
         //sanity check
         if ((NULL != g_scrfd) && (NULL != g_nanodet)) {
             LOGGW("it should not happen, pls check");
@@ -428,7 +429,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
 
     }
 
-    if (0 == is_live_inference) {
+    if (0 == is_realtime_inference) {
 
         if (NCNN_BENCHMARK_RESNET == netid) { //ResNet
             ncnn::Option opt;
@@ -897,7 +898,7 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
 * @param sz_ncnnmodel_bin     bin   file of ncnn model
 * @param sz_user_data         ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / ResNet&SqueezeNet&MNIST: image path / TTS: user input
 * @param bitmap
-* @param n_bench_type         1: NCNN_RESNET 2: NCNN_SQUEEZENET 3: NCNN_MNIST
+* @param n_bench_type         1: NCNN RESNET 2: NCNN SQUEEZENET 3: NCNN MNIST
 * @param n_threads            1 - 8
 * @param n_backend_type       0: NCNN_BACKEND_CPU  1: NCNN_BACKEND_GPU
 * @param n_op_type            type of NCNN OP
