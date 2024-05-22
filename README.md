@@ -364,8 +364,8 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 本项目适合如下用户：
 
-- Windows/iOS/Mac开发人员，希望学习一点Android开发（UI开发与NDK开发）；
-- 接受过大学教育（了解微积分，线性代数，数理统计与概率论）且有一定的C/C++开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how)；
+- 不论啥专业，了解微积分，线性代数，数理统计与概率论）且有一定的C/C++开发经验, 希望学习Android开发（UI开发与NDK开发与Android端侧AI应用开发）；
+- 职业程序员，有一定的C/C++/Java开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how)；
 - AI特定领域(ASR, TTS, CV, NLP, LLM,...)的算法研究/开发人员，对Android开发不太熟悉，可以在本项目提供的框架中调试/验证AI特定领域的算法；
 - AI推理框架的开发人员（比如ncnn,ggml的作者）/维护人员，对比ncnn与ggml两个推理框架的优点(目前只关注ggml与ncnn)
 
