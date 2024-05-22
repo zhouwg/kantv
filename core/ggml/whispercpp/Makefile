@@ -38,8 +38,8 @@ endif
 # Compile flags
 #
 
-CFLAGS   = -I. -I../llamacpp              -O3 -DNDEBUG -std=c11   -fPIC
-CXXFLAGS = -I. -I../llamacpp -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
+CFLAGS   = -I. -I../../../external/ffmpeg/ -I../llamacpp              -O3 -DNDEBUG -std=c11   -fPIC
+CXXFLAGS = -I. -I../../../external/ffmpeg/ -I../llamacpp -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
 LDFLAGS  =
 
 ifdef MACOSX_DEPLOYMENT_TARGET
@@ -325,7 +325,7 @@ ggml-backend.o: ../llamacpp/ggml-backend.c
 ggml-quants.o: ../llamacpp/ggml-quants.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-WHISPER_OBJ += ggml.o ggml-alloc.o ggml-backend.o ggml-quants.o
+WHISPER_OBJ += ggml.o ggml-alloc.o ggml-backend.o ggml-quants.o ../../../external/ffmpeg/libavutil/cde_log.o
 
 whisper.o: whisper.cpp whisper.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@

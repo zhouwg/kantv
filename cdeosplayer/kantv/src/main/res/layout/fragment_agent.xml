@@ -29,11 +29,20 @@
         android:layout_height="wrap_content">
 
         <Spinner
-            android:id="@+id/spinnerModel"
+            android:id="@+id/spinnerNCNNNetid"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:dropDownSelector="#63D81B60"
             android:drawSelectorOnTop="true"
-            android:entries="@array/model_array" />
+            android:spinnerMode="dropdown" />
+
+        <Spinner
+            android:id="@+id/spinnerNCNNModel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:dropDownSelector="#63D81B60"
+            android:drawSelectorOnTop="true"
+            android:spinnerMode="dropdown" />
 
         <Spinner
             android:id="@+id/spinnerNCNNBackend"

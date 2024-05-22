@@ -17,6 +17,7 @@ set(PREBUILT_LIB_PATH           ${NCNN_SRC_DIR}/../../cdeosplayer/kantv/src/main
 set(PREBUILT_INC_PATH           ${NCNN_SRC_DIR}/../../prebuilts/include/)
 set(QNN_INC_PATH                ${NCNN_SRC_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${NCNN_SRC_DIR}/../../prebuilts/lib/)
+set(NCNNJNI_SRC_DIR             ${NCNN_SRC_DIR}/jni/)
 
 message("NCNN_SRC_DIR         : ${NCNN_SRC_DIR}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
@@ -80,7 +81,13 @@ else()
 endif()
 
 
-
+set(SOURCE_FILES
+        ${NCNNJNI_SRC_DIR}/ncnn-jni.c
+        ${NCNNJNI_SRC_DIR}/ncnn-jni-impl.cpp
+        ${NCNNJNI_SRC_DIR}/scrfd.cpp
+        ${NCNNJNI_SRC_DIR}/ndkcamera.cpp
+        ${NCNNJNI_SRC_DIR}/nanodet.cpp
+)
 
 if (GGML_JNI_QNN)
     file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
@@ -100,6 +107,6 @@ set_target_properties(kantvmedia
         IMPORTED_LOCATION
         ${PREBUILT_LIB_PATH}/libkantv-media.so)
 
-add_library(ncnn-jni SHARED jni/ncnn-jni.c jni/ncnn-jni-impl.cpp jni/scrfd.cpp jni/ndkcamera.cpp)
+add_library(ncnn-jni SHARED ${SOURCE_FILES})
 
 target_link_libraries(ncnn-jni ncnn ${OpenCV_LIBS} camera2ndk mediandk ${LOG_LIB} kantvmedia android)

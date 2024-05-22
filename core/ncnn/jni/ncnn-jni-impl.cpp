@@ -13,6 +13,7 @@
 //     https://github.com/nihui/opencv-mobile
 //     https://github.com/nihui/ncnn_on_esp32
 //     https://github.com/nihui/ncnn-android-squeezenet
+//     https://github.com/nihui/ncnn-android-nanodet
 //     https://github.com/yaoyi30/ResNet_ncnn_android
 //     https://github.com/k2-fsa/sherpa-ncnn
 //     https://github.com/WongKinYiu/yolov9
@@ -85,6 +86,7 @@
 #include "res.img.h"            //mnist digit image -> array
 #include "mnist.mem.h"          //ncnn model
 #include "mnist-int8.mem.h"     //ncnn model
+#include "nanodet.h"
 
 #if __ARM_NEON
 
@@ -176,6 +178,10 @@ static ncnn::Net squeezenet_gpu;
 
 static ncnn::Net mnist;
 
+static NanoDet* g_nanodet = 0;
+//static ncnn::Mutex lock;
+
+
 class MyNdkCamera : public NdkCameraWindow {
 public:
     virtual void on_image_render(cv::Mat &rgb) const;
@@ -190,7 +196,13 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
             g_scrfd->detect(rgb, faceobjects);
 
             g_scrfd->draw(rgb, faceobjects);
-        } else {
+        } else if (g_nanodet) {
+            std::vector<Object> objects;
+            g_nanodet->detect(rgb, objects);
+
+            g_nanodet->draw(rgb, objects);
+        }
+        else {
             draw_unsupported(rgb);
         }
     }
@@ -236,8 +248,15 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
     {
         ncnn::MutexLockGuard g(lock);
 
-        delete g_scrfd;
-        g_scrfd = NULL;
+        if (g_scrfd) {
+            delete g_scrfd;
+            g_scrfd = NULL;
+        }
+
+        if (g_nanodet) {
+            delete g_nanodet;
+            g_nanodet = NULL;
+        }
     }
 
     ncnn::destroy_gpu_instance();
@@ -259,205 +278,317 @@ JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
  */
 JNIEXPORT jboolean JNICALL
 Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager, jint netid,
-                                 jint modelid, jint backend_type) {
+                                 jint modelid, jint backend_type, jboolean is_live_inference) {
     LOGGD("netid %d", netid);
     LOGGD("modelid %d", modelid);
     LOGGD("backend_type %d", backend_type);
+    LOGGD("is_live_inference", is_live_inference);
 
     AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
     LOGGD("ncnn load model with AAssetManager %p", mgr);
 
-    if (NCNN_FACEDETECT ==
-        netid) { // reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
-        if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
-            LOGGW("invalid params");
-            return JNI_FALSE;
+    if (1 == is_live_inference) {
+        //sanity check
+        if ((NULL != g_scrfd) && (NULL != g_nanodet)) {
+            LOGGW("it should not happen, pls check");
         }
-
-        const char *modeltypes[] =
-                {
-                        "500m",
-                        "500m_kps",
-                        "1g",
-                        "2.5g",
-                        "2.5g_kps",
-                        "10g",
-                        "10g_kps"
-                };
-
-        const char *modeltype = modeltypes[(int) modelid];
-        bool use_gpu = (backend_type == NCNN_BACKEND_GPU);
-
-        // reload
         {
             ncnn::MutexLockGuard g(lock);
 
-            if (use_gpu && ncnn::get_gpu_count() == 0) {
-                LOGGW("ncnn gpu backend not supported");
-                NCNN_JNI_NOTIFY("ncnn gpu backend not supported");
-                // no gpu
+            if (g_scrfd) {
                 delete g_scrfd;
-                g_scrfd = 0;
-            } else {
-                if (!g_scrfd)
-                    g_scrfd = new SCRFD;
-                g_scrfd->load(mgr, modeltype, use_gpu);
+                g_scrfd = NULL;
+            }
+
+            if (g_nanodet) {
+                delete g_nanodet;
+                g_nanodet = NULL;
             }
         }
-    } else if (NCNN_RESNET == netid) { //ResNet
-        ncnn::Option opt;
-        opt.lightmode = true;
-        opt.num_threads = 4;
-        opt.blob_allocator = &g_blob_pool_allocator;
-        opt.workspace_allocator = &g_workspace_pool_allocator;
+        //end sanity check
 
-        // use vulkan compute
-        if (ncnn::get_gpu_count() != 0)
-            opt.use_vulkan_compute = true;
-
-        resnet.opt = opt;
-
-        // init param
-        {
-            int ret = resnet.load_param_bin(mgr, "resnet.param.bin");
-            if (ret != 0) {
-                LOGGW("ResNet Ncnn: load_param_bin failed");
-                return JNI_FALSE;
-            }
-        }
-
-        // init bin
-        {
-            int ret = resnet.load_model(mgr, "resnet.bin");
-            if (ret != 0) {
-                LOGGW("ResNet Ncnn:load_model failed");
-                return JNI_FALSE;
-            }
-        }
-
-    } else if (NCNN_SQUEEZENET == netid) { //SqueezeNet
-        // init param
-        {
-            int ret = squeezenet.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
-            if (ret != 0) {
-                LOGGW("SqueezeNet Ncnn:load_param_bin failed");
-                return JNI_FALSE;
-            }
-        }
-
-        // init bin
-        {
-            int ret = squeezenet.load_model(mgr, "squeezenet_v1.1.bin");
-            if (ret != 0) {
-                LOGGW("SqueezeNet Ncnn:load_model failed");
-                return JNI_FALSE;
-            }
-        }
-
-        // use vulkan compute
-        if (ncnn::get_gpu_count() != 0) {
-            LOGGD("using ncnn gpu backend");
-            NCNN_JNI_NOTIFY("using ncnn gpu backend");
-            squeezenet_gpu.opt.use_vulkan_compute = true;
-
+        switch (netid) {
+            case NCNN_LIVEINFERENCE_FACEDETECT:
             {
-                int ret = squeezenet_gpu.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+                if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
+                    LOGGW("invalid params");
+                    return JNI_FALSE;
+                }
+
+                const char *modeltypes[] =
+                        {
+                                "500m",
+                                "500m_kps",
+                                "1g",
+                                "2.5g",
+                                "2.5g_kps",
+                                "10g",
+                                "10g_kps"
+                        };
+
+                const char *modeltype = modeltypes[(int) modelid];
+                bool use_gpu = (backend_type == NCNN_BACKEND_GPU);
+
+                // reload
+                {
+                    ncnn::MutexLockGuard g(lock);
+
+                    if (use_gpu && ncnn::get_gpu_count() == 0) {
+                        LOGGW("ncnn gpu backend not supported");
+                        NCNN_JNI_NOTIFY("ncnn gpu backend not supported");
+                        // no gpu
+                        delete g_scrfd;
+                        g_scrfd = 0;
+                    } else {
+                        if (!g_scrfd)
+                            g_scrfd = new SCRFD;
+                        g_scrfd->load(mgr, modeltype, use_gpu);
+                    }
+                }
+            }
+            break;
+
+            case NCNN_LIVEINFERENCE_NANODAT:
+            {
+                if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
+                    LOGGW("invalid params");
+                    return JNI_FALSE;
+                }
+
+                AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
+                const char* modeltypes[] =
+                        {
+                                "m",
+                                "m-416",
+                                "g",
+                                "ELite0_320",
+                                "ELite1_416",
+                                "ELite2_512",
+                                "RepVGG-A0_416"
+                        };
+
+                const int target_sizes[] =
+                        {
+                                320,
+                                416,
+                                416,
+                                320,
+                                416,
+                                512,
+                                416
+                        };
+
+                const float mean_vals[][3] =
+                        {
+                                {103.53f, 116.28f, 123.675f},
+                                {103.53f, 116.28f, 123.675f},
+                                {103.53f, 116.28f, 123.675f},
+                                {127.f, 127.f, 127.f},
+                                {127.f, 127.f, 127.f},
+                                {127.f, 127.f, 127.f},
+                                {103.53f, 116.28f, 123.675f}
+                        };
+
+                const float norm_vals[][3] =
+                        {
+                                {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
+                                {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
+                                {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
+                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
+                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
+                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
+                                {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f}
+                        };
+
+                const char* modeltype = modeltypes[(int)modelid];
+                int target_size = target_sizes[(int)modelid];
+                bool use_gpu = (backend_type == NCNN_BACKEND_GPU);
+
+                // reload
+                {
+                    ncnn::MutexLockGuard g(lock);
+
+                    if (use_gpu && ncnn::get_gpu_count() == 0)
+                    {
+                        LOGGD("using ncnn gpu but ncnn gpu backend not supported");
+                        NCNN_JNI_NOTIFY("using ncnn gpu backend but ncnn gpu backend not supported");
+                        // no gpu
+                        delete g_nanodet;
+                        g_nanodet = 0;
+                    }
+                    else
+                    {
+                        if (!g_nanodet)
+                            g_nanodet = new NanoDet;
+                        g_nanodet->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
+                    }
+                }
+            }
+            break;
+
+            default:
+                LOGGD("netid %d not supported with live inference", netid);
+                break;
+        }
+
+    }
+
+    if (0 == is_live_inference) {
+
+        if (NCNN_BENCHMARK_RESNET == netid) { //ResNet
+            ncnn::Option opt;
+            opt.lightmode = true;
+            opt.num_threads = 4;
+            opt.blob_allocator = &g_blob_pool_allocator;
+            opt.workspace_allocator = &g_workspace_pool_allocator;
+
+            // use vulkan compute
+            if (ncnn::get_gpu_count() != 0)
+                opt.use_vulkan_compute = true;
+
+            resnet.opt = opt;
+
+            // init param
+            {
+                int ret = resnet.load_param_bin(mgr, "resnet.param.bin");
                 if (ret != 0) {
-                    LOGGW("SqueezeNet Ncnn: load_param_bin failed");
+                    LOGGW("ResNet Ncnn: load_param_bin failed");
                     return JNI_FALSE;
                 }
             }
+
+            // init bin
             {
-                int ret = squeezenet_gpu.load_model(mgr, "squeezenet_v1.1.bin");
+                int ret = resnet.load_model(mgr, "resnet.bin");
+                if (ret != 0) {
+                    LOGGW("ResNet Ncnn:load_model failed");
+                    return JNI_FALSE;
+                }
+            }
+
+        } else if (NCNN_BENCHMARK_SQUEEZENET == netid) { //SqueezeNet
+            // init param
+            {
+                int ret = squeezenet.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+                if (ret != 0) {
+                    LOGGW("SqueezeNet Ncnn:load_param_bin failed");
+                    return JNI_FALSE;
+                }
+            }
+
+            // init bin
+            {
+                int ret = squeezenet.load_model(mgr, "squeezenet_v1.1.bin");
                 if (ret != 0) {
                     LOGGW("SqueezeNet Ncnn:load_model failed");
                     return JNI_FALSE;
                 }
             }
-        } else {
-            LOGGD("ncnn gpu backend not supported");
-            NCNN_JNI_NOTIFY("using ncnn gpu backend not supported");
-        }
 
-        // init words
-        {
-            AAsset *asset = AAssetManager_open(mgr, "synset_words.txt", AASSET_MODE_BUFFER);
-            if (!asset) {
-                LOGGW("SqueezeNet Ncnn:open synset_words.txt failed");
-                return JNI_FALSE;
-            }
+            // use vulkan compute
+            if (ncnn::get_gpu_count() != 0) {
+                LOGGD("using ncnn gpu backend");
+                NCNN_JNI_NOTIFY("using ncnn gpu backend");
+                squeezenet_gpu.opt.use_vulkan_compute = true;
 
-            int len = AAsset_getLength(asset);
-
-            std::string words_buffer;
-            words_buffer.resize(len);
-            int ret = AAsset_read(asset, (void *) words_buffer.data(), len);
-
-            AAsset_close(asset);
-
-            if (ret != len) {
-                LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
-                return JNI_FALSE;
-            }
-
-            squeezenet_words = split_string(words_buffer, "\n");
-        }
-    } else if (netid == NCNN_MNIST) {
-        LOGGD("load ncnn mnist model");
-        mnist.opt.use_local_pool_allocator = false;
-        mnist.opt.use_sgemm_convolution = false;
-
-        //05-22-2024,all cases(2 + 2*2) works fine/perfectly as expected on Xiaomi 14
-        if (0) {
-            //load ncnn model from memory
-            if (0) {
-                mnist.load_param(mnist_param_bin);
-                mnist.load_model(mnist_bin);
-            } else {
-                mnist.load_param(mnist_int8_param_bin);
-                mnist.load_model(mnist_int8_bin);
-            }
-        } else {
-            //load ncnn model from file
-            if (0) {
-                // init param
-                //int ret = mnist.load_param(mgr, "mnist.param");
-                int ret = mnist.load_param_bin(mgr, "mnist.param.bin");
-                if (ret != 0) {
-                    LOGGW("mnist Ncnn: load_param failed");
-                    NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
-                    return JNI_FALSE;
+                {
+                    int ret = squeezenet_gpu.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+                    if (ret != 0) {
+                        LOGGW("SqueezeNet Ncnn: load_param_bin failed");
+                        return JNI_FALSE;
+                    }
                 }
-                // init bin
-                ret = mnist.load_model(mgr, "mnist.bin");
-                if (ret != 0) {
-                    LOGGW("mnist Ncnn:load_model failed");
-                    NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
-                    return JNI_FALSE;
+                {
+                    int ret = squeezenet_gpu.load_model(mgr, "squeezenet_v1.1.bin");
+                    if (ret != 0) {
+                        LOGGW("SqueezeNet Ncnn:load_model failed");
+                        return JNI_FALSE;
+                    }
                 }
             } else {
-                // init param
-                int ret = mnist.load_param(mgr, "mnist-int8.param");
-                //int ret = mnist.load_param_bin(mgr, "mnist-int8.param.bin");
-                if (ret != 0) {
-                    LOGGW("mnist Ncnn: load_param failed");
-                    NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
+                LOGGD("ncnn gpu backend not supported");
+                NCNN_JNI_NOTIFY("using ncnn gpu backend not supported");
+            }
+
+            // init words
+            {
+                AAsset *asset = AAssetManager_open(mgr, "synset_words.txt", AASSET_MODE_BUFFER);
+                if (!asset) {
+                    LOGGW("SqueezeNet Ncnn:open synset_words.txt failed");
                     return JNI_FALSE;
                 }
-                // init bin
-                ret = mnist.load_model(mgr, "mnist-int8.bin");
-                if (ret != 0) {
-                    LOGGW("mnist Ncnn:load_model failed");
-                    NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
+
+                int len = AAsset_getLength(asset);
+
+                std::string words_buffer;
+                words_buffer.resize(len);
+                int ret = AAsset_read(asset, (void *) words_buffer.data(), len);
+
+                AAsset_close(asset);
+
+                if (ret != len) {
+                    LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
                     return JNI_FALSE;
+                }
+
+                squeezenet_words = split_string(words_buffer, "\n");
+            }
+        } else if (netid == NCNN_BENCHMARK_MNIST) {
+            LOGGD("load ncnn mnist model");
+            mnist.opt.use_local_pool_allocator = false;
+            mnist.opt.use_sgemm_convolution = false;
+
+            //05-22-2024,all cases(2 + 2*2) works fine/perfectly as expected on Xiaomi 14
+            if (0) {
+                //load ncnn model from memory
+                if (0) {
+                    mnist.load_param(mnist_param_bin);
+                    mnist.load_model(mnist_bin);
+                } else {
+                    mnist.load_param(mnist_int8_param_bin);
+                    mnist.load_model(mnist_int8_bin);
+                }
+            } else {
+                //load ncnn model from file
+                if (0) {
+                    // init param
+                    //int ret = mnist.load_param(mgr, "mnist.param");
+                    int ret = mnist.load_param_bin(mgr, "mnist.param.bin");
+                    if (ret != 0) {
+                        LOGGW("mnist Ncnn: load_param failed");
+                        NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
+                        return JNI_FALSE;
+                    }
+                    // init bin
+                    ret = mnist.load_model(mgr, "mnist.bin");
+                    if (ret != 0) {
+                        LOGGW("mnist Ncnn:load_model failed");
+                        NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
+                        return JNI_FALSE;
+                    }
+                } else {
+                    // init param
+                    int ret = mnist.load_param(mgr, "mnist-int8.param");
+                    //int ret = mnist.load_param_bin(mgr, "mnist-int8.param.bin");
+                    if (ret != 0) {
+                        LOGGW("mnist Ncnn: load_param failed");
+                        NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
+                        return JNI_FALSE;
+                    }
+                    // init bin
+                    ret = mnist.load_model(mgr, "mnist-int8.bin");
+                    if (ret != 0) {
+                        LOGGW("mnist Ncnn:load_model failed");
+                        NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
+                        return JNI_FALSE;
+                    }
                 }
             }
+        } else {
+            LOGGW("netid %d not supported using ncnn with non-live inference", netid);
+            NCNN_JNI_NOTIFY("netid %d not supported using ncnn with non-live inference", netid);
+            return JNI_FALSE;
         }
-
-    } else {
-        LOGGW("netid %d not supported using ncnn", netid);
-        NCNN_JNI_NOTIFY("netid %d not supported using ncnn", netid);
-        return JNI_FALSE;
     }
 
     return JNI_TRUE;
@@ -787,13 +918,13 @@ void ncnn_jni_bench(JNIEnv *env, const char * sz_ncnnmodel_param, const char * s
     LOGGD("op type:%d\n", n_op_type);
 
     switch (n_bench_type) {
-        case NCNN_RESNET:
+        case NCNN_BENCHMARK_RESNET:
             Java_org_ncnn_ncnnjava_detectResNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
             break;
-        case NCNN_SQUEEZENET:
+        case NCNN_BENCHMARK_SQUEEZENET:
             Java_org_ncnn_ncnnjava_detectSqueezeNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
             break;
-        case NCNN_MNIST:
+        case NCNN_BENCHMARK_MNIST:
             Java_org_ncnn_ncnnjava_detectMnist(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
             break;
         default:

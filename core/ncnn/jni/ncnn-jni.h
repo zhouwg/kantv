@@ -36,12 +36,13 @@ extern "C" {
 #define NCNN_BACKEND_GPU            1
 #define NCNN_BACKEND_MAX            1
 
-
-#define NCNN_FACEDETECT             0 //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
-#define NCNN_RESNET                 1
-#define NCNN_SQUEEZENET             2
-#define NCNN_MNIST                  3
+#define NCNN_BENCHMARK_RESNET       1
+#define NCNN_BENCHMARK_SQUEEZENET   2
+#define NCNN_BENCHMARK_MNIST        3
 #define NCNN_BENCH_MAX              3
+
+#define NCNN_LIVEINFERENCE_FACEDETECT             0 //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
+#define NCNN_LIVEINFERENCE_NANODAT                1
 
 
 #define NCNN_JNI_NOTIFY(...)        ncnn_jni_notify_c_impl(__VA_ARGS__)

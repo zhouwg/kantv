@@ -18,3 +18,4 @@ out.*/
 whispercpp/bench
 whispercpp/main
 whispercpp/quantize
+llamacpp/common/build-info.cpp

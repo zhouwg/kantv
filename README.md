@@ -251,6 +251,8 @@ here are some screenshots to demostrate CV inference by running the excellent <a
 
 ![1730654667](https://github.com/zhouwg/kantv/assets/6889919/83ef3e44-92ee-4c00-b000-840a13097544)
 
+![125036311](https://github.com/zhouwg/kantv/assets/6889919/07e5a6ca-4771-41ee-923c-5307a3d3d848)
+
 <details>
   <summary>some other screenshots</summary>
   <ol>
@@ -362,10 +364,10 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### This project is suitable for(本项目适合于)
 
-- Students:understand calculus/linear algebra/mathematical statistics and probability theory, have some experiences in C/C++ development, want to learn Android software development(UI development, NDK development and Android AI application development);  学生:了解微积分，线性代数，数理统计与概率论, 且有一定的C/C++开发经验, 希望学习Android开发（UI开发与NDK开发与Android端侧AI应用开发);
+- Students:understand calculus/linear algebra/mathematical statistics and probability theory, have some experiences in C/C++ development, want to learn Android software development(UI, NDK, streamming media, AI application);  学生:了解微积分，线性代数，数理统计与概率论, 且有一定的C/C++开发经验, 希望学习Android开发（UI, NDK, 音视频流媒体, 端侧AI应用);
 - Programmers: have some experiences in C/C++/Java software development, know nothing about real/hardcore AI technology, want to learn AI technology in depth(know how); 程序员:有一定的C/C++/Java开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how);
 - AI researchers/developers: validate/verify AI(ASR, TTS, CV, NLP, LLM...) algorithm in the framework provided in this project for Android device;  AI特定领域(ASR, TTS, CV, NLP, LLM,...)的算法研究/开发人员:在本项目提供的框架中调试/验证Android设备上的AI特定领域算法;
-- Authors/maintainers of AI inference framework: compare the advantages of <a href="https://github.com/ggerganov/ggml">ggml</a> and <a href="https://github.com/Tencent/ncnn">ncnn</a>; AI推理框架的开发人员: 对比ggml与ncnn两个端侧推理框架的优点，相互借鉴;
+- Authors/maintainers of AI inference framework: compare the advantages of <a href="https://github.com/ggerganov/ggml">ggml</a> and <a href="https://github.com/Tencent/ncnn">ncnn</a>; AI推理框架的开发人员: 对比两个端侧推理框架ggml与ncnn的优点;
 
 
 ### License
