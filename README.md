@@ -248,6 +248,9 @@ here are some screenshots to demostrate CV inference by running the excellent <a
 
 ![988568755](https://github.com/zhouwg/kantv/assets/6889919/49c7e22e-0e4c-4ece-b690-04d59ac1382f)
 
+
+![1730654667](https://github.com/zhouwg/kantv/assets/6889919/83ef3e44-92ee-4c00-b000-840a13097544)
+
 <details>
   <summary>some other screenshots</summary>
   <ol>

@@ -36,6 +36,8 @@ public class ncnnjava
     public native String  detectResNet(Bitmap bitmap, boolean use_gpu);
     public native String  detectSqueezeNet(Bitmap bitmap, boolean use_gpu);
 
+    public native String  detectMnist(Bitmap bitmap, boolean use_gpu);
+
     static {
         System.loadLibrary("ncnn-jni");
     }

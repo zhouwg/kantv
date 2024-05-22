@@ -65,13 +65,14 @@
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
         <item>ASR(whisper)</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
-        <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml) benchmark -->
-        <item>TEXT2IMAGE</item>             <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
-        <item>MNIST(ggml)</item>            <!-- MNIST(based on ggml) benchmark -->
+        <item>LLM(ggml)</item>              <!-- LLM(llama.cpp based on ggml) benchmark -->
+        <item>TEXT2IMAGE(ggml)</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
+        <item>MNIST(ggml)</item>            <!-- MNIST(using ggml) benchmark -->
         <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
         <item>RESNET(ncnn)</item>           <!-- image classification via ResNet using NCNN -->
         <item>SQUEEZENET(ncnn)</item>       <!-- image classification via SqueezeNet using NCNN-->
-        <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn)benchmark -->
+        <item>MNIST(ncnn)</item>            <!-- MNIST(using NCNN) benchmark -->
+        <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn, based on NCNN)benchmark, TBD -->
         <item>TTS(ncnn)</item>              <!-- TBD -->
     </string-array>
 
@@ -140,7 +141,6 @@
         <item>2.5g_kps</item>
         <item>10g</item>
         <item>10g_kps</item>
-        <item>34g</item>
     </string-array>
     <string-array name="ncnn_backend">
         <item>CPU</item>

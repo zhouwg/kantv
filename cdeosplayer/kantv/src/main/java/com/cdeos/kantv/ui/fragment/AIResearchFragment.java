@@ -457,8 +457,7 @@
 
                  switch (benchmarkIndex) {
                      case CDEUtils.BENCHMARK_CV_RESNET:
-                     case CDEUtils.BENCHMARK_CV_SQUEEZENET:
-                     {
+                     case CDEUtils.BENCHMARK_CV_SQUEEZENET: {
                          if (bitmapSelectedImage == null) {
                              CDELog.j(TAG, "image is empty");
                              CDEUtils.showMsgBox(mActivity, "please select a image for inference using NCNN");
@@ -466,6 +465,8 @@
                          }
                          break;
                      }
+                     case CDEUtils.BENCHMARK_CV_MNIST_NCNN:
+                         break;
                      default:
                          CDEUtils.showMsgBox(mActivity, "benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported curretnly");
                          return;
@@ -709,23 +710,46 @@
                          //NCNN inference was imported since v1.3.8
                          switch (benchmarkIndex) {
                              case CDEUtils.BENCHMARK_CV_RESNET: {
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, 0);
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
                                  if (!ret_init) {
                                      CDELog.j(TAG, "resnet init failed");
                                  } else {
                                      if (bitmapSelectedImage != null)
-                                         ncnnjni.detectResNet(bitmapSelectedImage, false);
+                                         ncnnjni.detectResNet(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
                                  }
                              }
                              break;
 
                              case CDEUtils.BENCHMARK_CV_SQUEEZENET: {
-                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, 0);
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
                                  if (!ret_init) {
                                      CDELog.j(TAG, "squeezenet init failed");
                                  } else {
                                      if (bitmapSelectedImage != null)
-                                         ncnnjni.detectSqueezeNet(bitmapSelectedImage, false);
+                                         ncnnjni.detectSqueezeNet(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
+                                 }
+                             }
+                             break;
+
+                             case CDEUtils.BENCHMARK_CV_MNIST_NCNN: {
+                                 boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.BENCHMARK_GGML_MAX, 0, backendIndex);
+                                 if (!ret_init) {
+                                     CDELog.j(TAG, "mnist init failed");
+                                 } else {
+                                     if (bitmapSelectedImage != null)
+                                         ncnnjni.detectMnist(bitmapSelectedImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
+                                     else {
+                                         String imgPath = CDEUtils.getDataPath() + "mnist-5.png";
+                                         Uri uri = Uri.fromFile(new File(imgPath));
+                                         try {
+                                             Bitmap bmpImage = decodeUri(uri, false);
+                                             ncnnjni.detectMnist(bmpImage, backendIndex == CDEUtils.NCNN_BACKEND_GPU);
+                                         } catch (FileNotFoundException e) {
+                                             CDELog.j(TAG, "FileNotFoundException: " + e.toString());
+                                             isBenchmarking.set(false);
+                                             return;
+                                         }
+                                     }
                                  }
                              }
                              break;
@@ -893,15 +917,18 @@
 
              try {
                  if (requestCode == SELECT_IMAGE) {
-                     Bitmap bitmap = decodeUri(selectedImageUri);
+                     Bitmap bitmap = decodeUri(selectedImageUri, false);
                      Bitmap rgba = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                      // resize to 227x227
-                     bitmapSelectedImage = Bitmap.createScaledBitmap(rgba, 227, 227, false);
+                     // bitmapSelectedImage = Bitmap.createScaledBitmap(rgba, 227, 227, false);
+                     // scale to 227x227 in native layer
+                     bitmapSelectedImage = Bitmap.createBitmap(rgba);
                      rgba.recycle();
                      {
                          String imgPath = selectedImageUri.getPath();
                          CDELog.j(TAG, "image path:" + imgPath);
-                         imgPath = imgPath.substring(6); //TODO:
+                         //image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
+                         imgPath = imgPath.substring(6);
                          CDELog.j(TAG, "image path:" + imgPath);
                          displayImage(imgPath);
                      }
@@ -1088,7 +1115,7 @@
      }
 
 
-     private Bitmap decodeUri(Uri uriSelectedImage) throws FileNotFoundException {
+     private Bitmap decodeUri(Uri uriSelectedImage, boolean scaled) throws FileNotFoundException {
          // Decode image size
          BitmapFactory.Options options = new BitmapFactory.Options();
          options.inJustDecodeBounds = true;
@@ -1113,7 +1140,10 @@
 
          // Decode with inSampleSize
          options = new BitmapFactory.Options();
-         options.inSampleSize = scale;
+         if (scaled)
+             options.inSampleSize = scale;
+         else
+             options.inSampleSize = 1;
          return BitmapFactory.decodeStream(mActivity.getContentResolver().openInputStream(uriSelectedImage), null, options);
      }
 
