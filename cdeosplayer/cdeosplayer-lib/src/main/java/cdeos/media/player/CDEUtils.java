@@ -281,7 +281,7 @@
      public static final int BENCHMARK_ASR_NCNN         = 12;
      public static final int BENCHMARK_TTS_NCNN         = 13;
 
-     //live inference using NCNN
+     //realtime inference with live camera / online TV using NCNN
      public static final int NCNN_LIVEINFERENCE_FACEDETECT = 0;
      public static final int NCNN_LIVEINFERENCE_NANODAT    = 1;
 

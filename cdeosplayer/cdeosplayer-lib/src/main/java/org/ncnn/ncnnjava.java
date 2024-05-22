@@ -25,11 +25,11 @@ public class ncnnjava
      * @param mgr
      * @param netid
      * @param modelid
-     * @param backend_type 0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
-     * @param is_live_inference
+     * @param backend_type            0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
+     * @param is_realtime_inference   1: realtime inference with live camera/online TV, 0: not realtime inference
      * @return
      */
-    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type, boolean is_live_inference);
+    public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type, boolean is_realtime_inference);
     public native boolean openCamera(int facing);
     public native boolean closeCamera();
     public native boolean setOutputWindow(Surface surface);
@@ -40,7 +40,7 @@ public class ncnnjava
      * @param ncnnmodelBin     bin   file of ncnn model
      * @param userData         ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / ResNet&SqueezeNet&MNIST: image path / TTS: user input
      * @param bitmap
-     * @param nBenchType       1: NCNN_RESNET 2: NCNN_SQUEEZENET 3: NCNN_MNIST
+     * @param nBenchType       1: NCNN RESNET 2: NCNN SQUEEZENET 3: NCNN MNIST
      * @param nThreadCounts    1 - 8
      * @param nBackendType     0: NCNN_BACKEND_CPU  1: NCNN_BACKEND_GPU
      * @param nOpType          type of NCNN OP
