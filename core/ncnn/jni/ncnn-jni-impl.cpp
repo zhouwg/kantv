@@ -407,7 +407,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
         mnist.opt.use_local_pool_allocator = false;
         mnist.opt.use_sgemm_convolution = false;
 
-        //05-22-2024,all cases(1 + 2*2) works fine/perfectly as expected on Xiaomi 14
+        //05-22-2024,all cases(2 + 2*2) works fine/perfectly as expected on Xiaomi 14
         if (0) {
             //load ncnn model from memory
             if (0) {
