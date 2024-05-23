@@ -14,6 +14,7 @@
 //     https://github.com/nihui/ncnn_on_esp32
 //     https://github.com/nihui/ncnn-android-squeezenet
 //     https://github.com/nihui/ncnn-android-nanodet
+//     https://github.com/nihui/ncnn-android-yolov5
 //     https://github.com/yaoyi30/ResNet_ncnn_android
 //     https://github.com/k2-fsa/sherpa-ncnn
 //     https://github.com/WongKinYiu/yolov9
