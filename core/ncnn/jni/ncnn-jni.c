@@ -86,13 +86,13 @@ Java_org_ncnn_ncnnjava_ncnn_1bench(JNIEnv *env, jclass clazz, jstring ncnnmodel_
     LOGGV("backend type:%d\n", n_backend_type);
     LOGGV("op type:%d\n", n_op_type);
 
-    if (n_bench_type > NCNN_BENCH_MAX) {
+    if (n_bench_type >= NCNN_BENCHMARK_MAX) {
         LOGGW("pls check bench type\n");
-        NCNN_JNI_NOTIFY("benchmark type %d not supported currently", n_bench_type);
+        NCNN_JNI_NOTIFY("ncnn benchmark type %d not supported currently", n_bench_type);
         goto failure;
     }
 
-    if (n_backend_type > NCNN_BACKEND_MAX) {
+    if (n_backend_type >= NCNN_BACKEND_MAX) {
         LOGGW("pls check ncnn backend type\n");
         goto failure;
     }

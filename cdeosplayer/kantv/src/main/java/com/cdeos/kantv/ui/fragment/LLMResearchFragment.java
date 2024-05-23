@@ -329,7 +329,7 @@
                          @Override
                          public void run() {
                              String benchmarkTip = "LLAMA inference " + "(model: " + ggmlModelFileName
-                                     + " ,threads: " + nThreadCounts + " , backend: " + CDEUtils.getBackendDesc(backendIndex)
+                                     + " ,threads: " + nThreadCounts + " , backend: " + CDEUtils.getGGMLBackendDesc(backendIndex)
                                      + " ) cost " + duration + " milliseconds";
 
                              //04-24-2024, add timestamp

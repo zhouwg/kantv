@@ -304,7 +304,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
         //end sanity check
 
         switch (netid) {
-            case NCNN_LIVEINFERENCE_FACEDETECT:
+            case NCNN_REALTIMEINFERENCE_FACEDETECT:
             {
                 if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
                     LOGGW("invalid params");
@@ -344,7 +344,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
             }
             break;
 
-            case NCNN_LIVEINFERENCE_NANODAT:
+            case NCNN_REALTIMEINFERENCE_NANODAT:
             {
                 if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
                     LOGGW("invalid params");

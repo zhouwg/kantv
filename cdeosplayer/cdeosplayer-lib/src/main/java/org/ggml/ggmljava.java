@@ -99,7 +99,7 @@ public class ggmljava {
     };
 
 
-    public static native int  asr_init(String strModelPath, int nThreadCounts, int nASRMode, int nBackendType);
+     public static native int  asr_init(String strModelPath, int nThreadCounts, int nASRMode, int nBackendType);
 
     public static native void asr_finalize();
 

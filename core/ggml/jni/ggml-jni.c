@@ -78,13 +78,13 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
     LOGGV("backend type:%d\n", backend_type);
     LOGGV("op type:%d\n", op_type);
 
-    if (bench_type > BENCHMAKR_MAX) {
+    if (bench_type >= GGML_BENCHMARK_MAX) {
         LOGGW("pls check bench type\n");
-        GGML_JNI_NOTIFY("benchmark type %d not supported currently", bench_type);
+        GGML_JNI_NOTIFY("ggml benchmark type %d not supported currently", bench_type);
         goto failure;
     }
 
-    if (backend_type > BACKEND_MAX) {
+    if (backend_type >= GGML_BACKEND_MAX) {
         LOGGW("pls check backend type\n");
         goto failure;
     }
@@ -94,7 +94,7 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
 
     ggml_jni_bench(sz_model_path, sz_user_data, bench_type, num_threads, backend_type, op_type);
 
-    if (BECHMARK_ASR == bench_type) { // asr
+    if (GGML_BENCHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
         sz_bench_result = "asr_result";
     }
