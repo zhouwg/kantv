@@ -51,4 +51,9 @@ There are some "killer/heavyweight" open-source AI application engines based on 
 
 
 
-4. I'm good at Android software developent(from UI to framework to kernel) but only know something about iOS application software development. my resource and capabilitiy is limited.
+4. AI model trainning and finetuning will be done by AI experts/algorithm engineers. this project is a workbench for learing&practising AI tech in real scenario on Android device, focus on AI inference and AI application.
+
+
+
+
+5. I'm good at Android software developent(from UI to framework to kernel) but only know something about iOS application software development. my resource and capabilitiy is limited.
