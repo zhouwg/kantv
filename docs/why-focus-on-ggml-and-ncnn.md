@@ -21,6 +21,8 @@
 - TTS(Text2Speech) [ bark.cpp](https://github.com/PABannier/bark.cpp)
 
 
+
+
 2. [NCNN](https://github.com/Tencent/ncnn) is a high-performance neural network inference computing framework <b>optimized for mobile platforms</b>. NCNN is deeply considerate about deployment and uses on mobile phones from the beginning of design.NCNN does <b>not have third-party dependencies</b>. It is cross-platform and runs faster than all known open-source frameworks on mobile phone cpu. Developers can easily deploy deep learning algorithm models to the mobile platform by using efficient ncnn implementation, creating intelligent APPs, and bringing artificial intelligence to your fingertips. NCNN is currently being used in many Tencent applications <b>with 1.3b+ users</b></b>, such as QQ, Qzone, WeChat, Pitu, ... and as well known Tecent is one of the most advanced/powerful IT gaint in China/our planet.  so it's <b>very very very useful/helpful/practical</b> for commerical programmers/developers/applications. In general, NCNN has following feaures:
 
 - Supports convolutional neural networks, supports multiple input and multi-branch structure, can calculate part of the branch
@@ -35,10 +37,12 @@
 - Can be registered with custom layer implementation and extended
 
 
-  There are some "killer/heavyweight" open-source AI application engines based on NCNN:
+
+There are some "killer/heavyweight" open-source AI application engines based on NCNN:
 
 - ASR(Automatic Speech Recognition, or Audio2Text)[sherpa-ncnn](https://github.com/k2-fsa/sherpa-ncnn)
 - ......
+
 
 
 
@@ -46,4 +50,5 @@
 
 
 
-4. I'm good at Android software developent(from UI to framework to kernel) but know something about iOS application software development. my resource and capabilitiy is limited.
+
+4. I'm good at Android software developent(from UI to framework to kernel) but only know something about iOS application software development. my resource and capabilitiy is limited.
