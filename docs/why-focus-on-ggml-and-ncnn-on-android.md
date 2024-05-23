@@ -56,4 +56,4 @@ There are some "killer/heavyweight" open-source AI application engines based on 
 
 
 
-5. I'm good at Android software developent(from UI to framework to kernel) but only know something about iOS application software development. my resource and capabilitiy is limited.
+5. I'm good at Android software developent(from UI to framework to kernel) but only know something about iOS application software development. I heard whisper.cpp & ggml since 01/2024 and ggml was born/open-sourced on 2022, I heard ncnn since 04/2024 and ncnn was born/open-sourced on 2017. my resource and capabilitiy is limited.
