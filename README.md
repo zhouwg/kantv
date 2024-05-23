@@ -29,8 +29,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 (depend on https://github.com/zhouwg/kantv/issues/121 and https://github.com/zhouwg/kantv/issues/176 )
 
-![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/b4f986f3-26ea-440c-931d-6262c2785ebb)
-
+![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/ffaaeb27-2f56-496d-896d-d9348823bc1f)
 
 ### How to build project
 
