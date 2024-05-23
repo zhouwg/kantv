@@ -10,7 +10,7 @@
 - On ppc64 architectures utilizes VSX intrinsics
 - <b>No third-party dependencies</b>
 - <b>Zero memory allocations during runtime</b>
-- [all in one source file](https://github.com/ggerganov/ggml/blob/master/src/ggml.c) and similar to [imgui](https://github.com/ocornut/imgui/blob/master/imgui.cpp)(this is just personal opinion and I really like it, this is a NEW coding style and the requirements for programmer is relatively high and very helpful for experienced programmer, this coding style may not be acceptable in large commercial IT companies because it violates some principles of modern software engineering)
+- [all in one source file](https://github.com/ggerganov/ggml/blob/master/src/ggml.c) and similar to [imgui](https://github.com/ocornut/imgui/blob/master/imgui.cpp)(this is just personal opinion and I really like it, this is a NEW coding style and the requirements for programmer is relatively high and very helpful for experienced programmer, this coding style may not be acceptable in large commercial IT companies because it violates some <b>principles of modern software engineering</b>)
 
 
  There are four "killer/heavyweight" open-source AI application engines based on GGML:
@@ -21,23 +21,26 @@
 - TTS(Text2Speech) [ bark.cpp](https://github.com/PABannier/bark.cpp)
 
 
-2. [NCNN](https://github.com/Tencent/ncnn) is a high-performance neural network inference computing framework optimized for mobile platforms. NCNN is deeply considerate about deployment and uses on mobile phones from the beginning of design.NCNN does <b>not have third-party dependencies</b>.It is cross-platform and runs faster than all known open-source frameworks on mobile phone cpu.Developers can easily deploy deep learning algorithm models to the mobile platform by using efficient ncnn implementation, creating intelligent APPs, and bringing artificial intelligence to your fingertips.NCNN is currently being used in many Tencent applications with 1.3b+ users</b>, such as QQ, Qzone, WeChat, Pitu, ... and as well known Tecent is one of the most advanced/powerful IT gaint in China/our planet.  so it's <b>very very very useful/helpful/practical</b> for commerical programmers/developers/applications. In general, NCNN has following feaures:
+2. [NCNN](https://github.com/Tencent/ncnn) is a high-performance neural network inference computing framework <b>optimized for mobile platforms</b>. NCNN is deeply considerate about deployment and uses on mobile phones from the beginning of design.NCNN does <b>not have third-party dependencies</b>. It is cross-platform and runs faster than all known open-source frameworks on mobile phone cpu. Developers can easily deploy deep learning algorithm models to the mobile platform by using efficient ncnn implementation, creating intelligent APPs, and bringing artificial intelligence to your fingertips. NCNN is currently being used in many Tencent applications <b>with 1.3b+ users</b></b>, such as QQ, Qzone, WeChat, Pitu, ... and as well known Tecent is one of the most advanced/powerful IT gaint in China/our planet.  so it's <b>very very very useful/helpful/practical</b> for commerical programmers/developers/applications. In general, NCNN has following feaures:
 
 - Supports convolutional neural networks, supports multiple input and multi-branch structure, can calculate part of the branch
-- No third-party library dependencies, does not rely on BLAS / NNPACK or any other computing framework
+- <b>No third-party library dependencies</b>
 - Pure C++ implementation, cross-platform, supports Android, iOS and so on
 - ARM NEON assembly level of careful optimization, calculation speed is extremely high
-- Sophisticated memory management and data structure design, very low memory footprint
+- Sophisticated memory management and data structure design, <b>very low memory footprint</b>
 - Supports multi-core parallel computing acceleration, ARM big.LITTLE CPU scheduling optimization
 - Supports GPU acceleration via the next-generation low-overhead Vulkan API
 - Extensible model design, supports 8bit quantization and half-precision floating point storage, can import caffe/pytorch/mxnet/onnx/darknet/keras/tensorflow(mlir) models
-- Support direct memory zero copy reference load network model
+- Support direct <b>memory zero copy</b> reference load network model
 - Can be registered with custom layer implementation and extended
 
- There are some "killer/heavyweight" open-source AI application engines based on NCNN:
+  There are some "killer/heavyweight" open-source AI application engines based on NCNN:
 
 - ASR(Automatic Speech Recognition, or Audio2Text)[sherpa-ncnn](https://github.com/k2-fsa/sherpa-ncnn)
+- ......
+
 
 3. GGML and NCNN both support Android & iOS which maintained their position as the leading mobile operating systems worldwide with a market share of 90+ percent. Android phone could be seen as a standard embedding development board/device and it's available everywhere.
+
 
 4. I'm good at Android software developent(from UI to framework to kernel) but know something about iOS application software development. my resource and capabilitiy is limited.
