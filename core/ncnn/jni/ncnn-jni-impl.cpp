@@ -423,7 +423,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
             break;
 
             default:
-                LOGGD("netid %d not supported with live inference", netid);
+                LOGGD("netid %d not supported with realtime inference for live camera/online TV", netid);
                 break;
         }
 
