@@ -34,13 +34,16 @@
 - Support direct <b>memory zero copy</b> reference load network model
 - Can be registered with custom layer implementation and extended
 
+
   There are some "killer/heavyweight" open-source AI application engines based on NCNN:
 
 - ASR(Automatic Speech Recognition, or Audio2Text)[sherpa-ncnn](https://github.com/k2-fsa/sherpa-ncnn)
 - ......
 
 
+
 3. GGML and NCNN both support Android & iOS which maintained their position as the leading mobile operating systems worldwide with a market share of 90+ percent. Android phone could be seen as a standard embedding development board/device and it's available everywhere.
+
 
 
 4. I'm good at Android software developent(from UI to framework to kernel) but know something about iOS application software development. my resource and capabilitiy is limited.
