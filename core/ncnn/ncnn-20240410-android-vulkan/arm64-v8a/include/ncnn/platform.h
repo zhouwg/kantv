@@ -29,7 +29,7 @@
 #define NCNN_PIXEL_ROTATE 1
 #define NCNN_PIXEL_AFFINE 1
 #define NCNN_PIXEL_DRAWING 1
-#define NCNN_VULKAN 1
+#define NCNN_VULKAN 0
 #define NCNN_SIMPLEVK 1
 #define NCNN_SYSTEM_GLSLANG 0
 #define NCNN_RUNTIME_CPU 1
@@ -63,7 +63,7 @@
 #define NCNN_BF16 1
 #define NCNN_FORCE_INLINE 1
 
-#define NCNN_VERSION_STRING "1.0.20240410"
+#define NCNN_VERSION_STRING "1.0.20240523"
 
 #include "ncnn_export.h"
 

@@ -69,6 +69,7 @@
 #include "platform.h"
 #include "benchmark.h"
 #include "net.h"
+#include "gpu.h"
 
 //opencv-android
 #include "opencv2/core/core.hpp"
@@ -175,6 +176,7 @@ static ncnn::Net resnet;
 static ncnn::Net squeezenet;
 static ncnn::Net squeezenet_gpu;
 static ncnn::Net mnist;
+static ncnn::Net yolov5;
 
 
 class MyNdkCamera : public NdkCameraWindow {
@@ -192,7 +194,7 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
 
             g_scrfd->draw(rgb, faceobjects);
         } else if (g_nanodet) {
-            std::vector<Object> objects;
+            std::vector<NanoObject> objects;
             g_nanodet->detect(rgb, objects);
 
             g_nanodet->draw(rgb, objects);
@@ -219,6 +221,229 @@ static std::vector<std::string> split_string(const std::string &str, const std::
     strings.push_back(str.substr(prev));
 
     return strings;
+}
+
+class YoloV5Focus : public ncnn::Layer {
+public:
+    YoloV5Focus() {
+        one_blob_only = true;
+    }
+
+    virtual int
+    forward(const ncnn::Mat &bottom_blob, ncnn::Mat &top_blob, const ncnn::Option &opt) const {
+        int w = bottom_blob.w;
+        int h = bottom_blob.h;
+        int channels = bottom_blob.c;
+
+        int outw = w / 2;
+        int outh = h / 2;
+        int outc = channels * 4;
+
+        top_blob.create(outw, outh, outc, 4u, 1, opt.blob_allocator);
+        if (top_blob.empty())
+            return -100;
+
+#pragma omp parallel for num_threads(opt.num_threads)
+        for (int p = 0; p < outc; p++) {
+            const float *ptr = bottom_blob.channel(p % channels).row((p / channels) % 2) +
+                               ((p / channels) / 2);
+            float *outptr = top_blob.channel(p);
+
+            for (int i = 0; i < outh; i++) {
+                for (int j = 0; j < outw; j++) {
+                    *outptr = *ptr;
+
+                    outptr += 1;
+                    ptr += 2;
+                }
+
+                ptr += w;
+            }
+        }
+
+        return 0;
+    }
+};
+
+DEFINE_LAYER_CREATOR(YoloV5Focus)
+
+struct YoloV5Object {
+    float x;
+    float y;
+    float w;
+    float h;
+    int label;
+    float prob;
+};
+
+static inline float intersection_area(const YoloV5Object &a, const YoloV5Object &b) {
+    if (a.x > b.x + b.w || a.x + a.w < b.x || a.y > b.y + b.h || a.y + a.h < b.y) {
+        // no intersection
+        return 0.f;
+    }
+
+    float inter_width = std::min(a.x + a.w, b.x + b.w) - std::max(a.x, b.x);
+    float inter_height = std::min(a.y + a.h, b.y + b.h) - std::max(a.y, b.y);
+
+    return inter_width * inter_height;
+}
+
+static void qsort_descent_inplace(std::vector<YoloV5Object> &faceobjects, int left, int right) {
+    int i = left;
+    int j = right;
+    float p = faceobjects[(left + right) / 2].prob;
+
+    while (i <= j) {
+        while (faceobjects[i].prob > p)
+            i++;
+
+        while (faceobjects[j].prob < p)
+            j--;
+
+        if (i <= j) {
+            // swap
+            std::swap(faceobjects[i], faceobjects[j]);
+
+            i++;
+            j--;
+        }
+    }
+
+#pragma omp parallel sections
+    {
+#pragma omp section
+        {
+            if (left < j) qsort_descent_inplace(faceobjects, left, j);
+        }
+#pragma omp section
+        {
+            if (i < right) qsort_descent_inplace(faceobjects, i, right);
+        }
+    }
+}
+
+static void qsort_descent_inplace(std::vector<YoloV5Object> &faceobjects) {
+    if (faceobjects.empty())
+        return;
+
+    qsort_descent_inplace(faceobjects, 0, faceobjects.size() - 1);
+}
+
+static void
+nms_sorted_bboxes(const std::vector<YoloV5Object> &faceobjects, std::vector<int> &picked,
+                  float nms_threshold) {
+    picked.clear();
+
+    const int n = faceobjects.size();
+
+    std::vector<float> areas(n);
+    for (int i = 0; i < n; i++) {
+        areas[i] = faceobjects[i].w * faceobjects[i].h;
+    }
+
+    for (int i = 0; i < n; i++) {
+        const YoloV5Object &a = faceobjects[i];
+
+        int keep = 1;
+        for (int j = 0; j < (int) picked.size(); j++) {
+            const YoloV5Object &b = faceobjects[picked[j]];
+
+            // intersection over union
+            float inter_area = intersection_area(a, b);
+            float union_area = areas[i] + areas[picked[j]] - inter_area;
+            // float IoU = inter_area / union_area
+            if (inter_area / union_area > nms_threshold)
+                keep = 0;
+        }
+
+        if (keep)
+            picked.push_back(i);
+    }
+}
+
+static inline float sigmoid(float x) {
+    return static_cast<float>(1.f / (1.f + exp(-x)));
+}
+
+static void generate_proposals(const ncnn::Mat &anchors, int stride, const ncnn::Mat &in_pad,
+                               const ncnn::Mat &feat_blob, float prob_threshold,
+                               std::vector<YoloV5Object> &objects) {
+    const int num_grid = feat_blob.h;
+
+    int num_grid_x;
+    int num_grid_y;
+    if (in_pad.w > in_pad.h) {
+        num_grid_x = in_pad.w / stride;
+        num_grid_y = num_grid / num_grid_x;
+    } else {
+        num_grid_y = in_pad.h / stride;
+        num_grid_x = num_grid / num_grid_y;
+    }
+
+    const int num_class = feat_blob.w - 5;
+
+    const int num_anchors = anchors.w / 2;
+
+    for (int q = 0; q < num_anchors; q++) {
+        const float anchor_w = anchors[q * 2];
+        const float anchor_h = anchors[q * 2 + 1];
+
+        const ncnn::Mat feat = feat_blob.channel(q);
+
+        for (int i = 0; i < num_grid_y; i++) {
+            for (int j = 0; j < num_grid_x; j++) {
+                const float *featptr = feat.row(i * num_grid_x + j);
+
+                // find class index with max class score
+                int class_index = 0;
+                float class_score = -FLT_MAX;
+                for (int k = 0; k < num_class; k++) {
+                    float score = featptr[5 + k];
+                    if (score > class_score) {
+                        class_index = k;
+                        class_score = score;
+                    }
+                }
+
+                float box_score = featptr[4];
+
+                float confidence = sigmoid(box_score) * sigmoid(class_score);
+
+                if (confidence >= prob_threshold) {
+                    // yolov5/models/yolo.py Detect forward
+                    // y = x[i].sigmoid()
+                    // y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i].to(x[i].device)) * self.stride[i]  # xy
+                    // y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
+
+                    float dx = sigmoid(featptr[0]);
+                    float dy = sigmoid(featptr[1]);
+                    float dw = sigmoid(featptr[2]);
+                    float dh = sigmoid(featptr[3]);
+
+                    float pb_cx = (dx * 2.f - 0.5f + j) * stride;
+                    float pb_cy = (dy * 2.f - 0.5f + i) * stride;
+
+                    float pb_w = pow(dw * 2.f, 2) * anchor_w;
+                    float pb_h = pow(dh * 2.f, 2) * anchor_h;
+
+                    float x0 = pb_cx - pb_w * 0.5f;
+                    float y0 = pb_cy - pb_h * 0.5f;
+                    float x1 = pb_cx + pb_w * 0.5f;
+                    float y1 = pb_cy + pb_h * 0.5f;
+
+                    YoloV5Object obj;
+                    obj.x = x0;
+                    obj.y = y0;
+                    obj.w = x1 - x0;
+                    obj.h = y1 - y0;
+                    obj.label = class_index;
+                    obj.prob = confidence;
+
+                    objects.push_back(obj);
+                }
+            }
+        }
+    }
 }
 
 
@@ -577,6 +802,42 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     }
                 }
             }
+        } else if (netid == NCNN_BENCHARK_YOLOV5) {
+            ncnn::Option opt;
+            opt.lightmode = true;
+            opt.num_threads = 4;
+            opt.blob_allocator = &g_blob_pool_allocator;
+            opt.workspace_allocator = &g_workspace_pool_allocator;
+            opt.use_packing_layout = true;
+
+            // use vulkan compute
+            if (ncnn::get_gpu_count() != 0)
+                opt.use_vulkan_compute = true;
+
+            AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+
+            yolov5.opt = opt;
+
+            yolov5.register_custom_layer("YoloV5Focus", YoloV5Focus_layer_creator);
+
+            // init param
+            {
+                int ret = yolov5.load_param(mgr, "yolov5s.param");
+                if (ret != 0) {
+                    LOGGD("YoloV5Ncnn:load_param failed");
+                    return JNI_FALSE;
+                }
+            }
+
+            // init bin
+            {
+                int ret = yolov5.load_model(mgr, "yolov5s.bin");
+                if (ret != 0) {
+                    LOGGD("YoloV5Ncnn:load_model failed");
+                    return JNI_FALSE;
+                }
+            }
+
         } else {
             LOGGW("netid %d not supported using ncnn with non-live inference", netid);
             NCNN_JNI_NOTIFY("netid %d not supported using ncnn with non-live inference", netid);
@@ -623,10 +884,10 @@ Java_org_ncnn_ncnnjava_setOutputWindow(JNIEnv *env, jobject thiz, jobject surfac
 
 
 //TODO: remove JNIENV
-static void detectResNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
-    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
-        LOGGW("gpu not supported");
-        NCNN_JNI_NOTIFY("gpu not supported");
+static void detectResNet(JNIEnv *env, jobject bitmap, bool use_gpu) {
+    if (use_gpu && ncnn::get_gpu_count() == 0) {
+        LOGGW("gpu backend not supported");
+        NCNN_JNI_NOTIFY("gpu backend not supported");
         return;
     }
 
@@ -701,7 +962,7 @@ static void detectResNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
 
     std::string result_str =
             "classification:" + vec[0].second + "  " + "probability:" + tmp + "%" + "  " +
-            "elapse time:" + time;
+            "elapsed time:" + time;
 
     LOGGD("ncnn resnet inference result:%s", result_str.c_str());
     NCNN_JNI_NOTIFY("ncnn resnet inference result:%s", result_str.c_str());
@@ -711,10 +972,10 @@ static void detectResNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
 
 
 //TODO: remove JNIENV
-static void detectSqueezeNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
-    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
-        LOGGW("gpu not supported");
-        NCNN_JNI_NOTIFY("gpu not supported");
+static void detectSqueezeNet(JNIEnv *env, jobject bitmap, bool use_gpu) {
+    if (use_gpu && ncnn::get_gpu_count() == 0) {
+        LOGGW("gpu backend not supported");
+        NCNN_JNI_NOTIFY("gpu backend not supported");
         return;
     }
 
@@ -783,20 +1044,20 @@ static void detectSqueezeNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
 
     // +10 to skip leading n03179701
     std::string result_str = std::string(word.c_str() + 10) + ", probability= " + tmp;
-    double elapse = ncnn::get_current_time() - start_time;
-    LOGGD("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(), elapse);
+    double elapsed = ncnn::get_current_time() - start_time;
+    LOGGD("ncnn squeezenet inference result:%s, elapsed %.2f ms", result_str.c_str(), elapsed);
     NCNN_JNI_NOTIFY("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(),
-                    elapse);
+                    elapsed);
 
     return;
 }
 
 
 //TODO: remove JNIENV
-void detectMnist(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
-    if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
-        LOGGW("gpu not supported");
-        NCNN_JNI_NOTIFY("gpu not supported");
+static void detectMnist(JNIEnv *env, jobject bitmap, bool use_gpu) {
+    if (use_gpu && ncnn::get_gpu_count() == 0) {
+        LOGGW("gpu backend not supported");
+        NCNN_JNI_NOTIFY("gpu backend not supported");
         return;
     }
 
@@ -883,7 +1144,190 @@ void detectMnist(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
     return;
 }
 
+//TODO: remove JNIENV
+static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
+    if (use_gpu && ncnn::get_gpu_count() == 0) {
+        LOGGW("gpu backend not supported");
+        NCNN_JNI_NOTIFY("gpu backend not supported");
+        return;
+    }
 
+    double start_time = ncnn::get_current_time();
+
+    AndroidBitmapInfo info;
+    AndroidBitmap_getInfo(env, bitmap, &info);
+    const int width = info.width;
+    const int height = info.height;
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGGW("bitmap is not RGBA_8888");
+        NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
+        return;
+    }
+
+    LOGGD("here");
+    // ncnn from bitmap
+    const int target_size = 640;
+
+    // letterbox pad to multiple of 32
+    int w = width;
+    int h = height;
+    float scale = 1.f;
+    if (w > h) {
+        scale = (float) target_size / w;
+        w = target_size;
+        h = h * scale;
+    } else {
+        scale = (float) target_size / h;
+        h = target_size;
+        w = w * scale;
+    }
+
+    ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_RGB, w, h);
+
+    // pad to target_size rectangle
+    // yolov5/utils/datasets.py letterbox
+    int wpad = (w + 31) / 32 * 32 - w;
+    int hpad = (h + 31) / 32 * 32 - h;
+    ncnn::Mat in_pad;
+    ncnn::copy_make_border(in, in_pad, hpad / 2, hpad - hpad / 2, wpad / 2, wpad - wpad / 2,
+                           ncnn::BORDER_CONSTANT, 114.f);
+
+    // yolov5
+    std::vector<YoloV5Object> objects;
+    {
+        const float prob_threshold = 0.25f;
+        const float nms_threshold = 0.45f;
+
+        const float norm_vals[3] = {1 / 255.f, 1 / 255.f, 1 / 255.f};
+        in_pad.substract_mean_normalize(0, norm_vals);
+
+        ncnn::Extractor ex = yolov5.create_extractor();
+
+        ex.set_vulkan_compute(use_gpu);
+
+        ex.input("images", in_pad);
+
+        std::vector<YoloV5Object> proposals;
+
+        // stride 8
+        {
+            ncnn::Mat out;
+            ex.extract("output", out);
+
+            ncnn::Mat anchors(6);
+            anchors[0] = 10.f;
+            anchors[1] = 13.f;
+            anchors[2] = 16.f;
+            anchors[3] = 30.f;
+            anchors[4] = 33.f;
+            anchors[5] = 23.f;
+
+            std::vector<YoloV5Object> objects8;
+            generate_proposals(anchors, 8, in_pad, out, prob_threshold, objects8);
+
+            proposals.insert(proposals.end(), objects8.begin(), objects8.end());
+        }
+
+        // stride 16
+        {
+            ncnn::Mat out;
+            ex.extract("781", out);
+
+            ncnn::Mat anchors(6);
+            anchors[0] = 30.f;
+            anchors[1] = 61.f;
+            anchors[2] = 62.f;
+            anchors[3] = 45.f;
+            anchors[4] = 59.f;
+            anchors[5] = 119.f;
+
+            std::vector<YoloV5Object> objects16;
+            generate_proposals(anchors, 16, in_pad, out, prob_threshold, objects16);
+
+            proposals.insert(proposals.end(), objects16.begin(), objects16.end());
+        }
+
+        // stride 32
+        {
+            ncnn::Mat out;
+            ex.extract("801", out);
+
+            ncnn::Mat anchors(6);
+            anchors[0] = 116.f;
+            anchors[1] = 90.f;
+            anchors[2] = 156.f;
+            anchors[3] = 198.f;
+            anchors[4] = 373.f;
+            anchors[5] = 326.f;
+
+            std::vector<YoloV5Object> objects32;
+            generate_proposals(anchors, 32, in_pad, out, prob_threshold, objects32);
+
+            proposals.insert(proposals.end(), objects32.begin(), objects32.end());
+        }
+
+        // sort all proposals by score from highest to lowest
+        qsort_descent_inplace(proposals);
+
+        // apply nms with nms_threshold
+        std::vector<int> picked;
+        nms_sorted_bboxes(proposals, picked, nms_threshold);
+
+        int count = picked.size();
+
+        objects.resize(count);
+        for (int i = 0; i < count; i++) {
+            objects[i] = proposals[picked[i]];
+
+            // adjust offset to original unpadded
+            float x0 = (objects[i].x - (wpad / 2)) / scale;
+            float y0 = (objects[i].y - (hpad / 2)) / scale;
+            float x1 = (objects[i].x + objects[i].w - (wpad / 2)) / scale;
+            float y1 = (objects[i].y + objects[i].h - (hpad / 2)) / scale;
+
+            // clip
+            x0 = std::max(std::min(x0, (float) (width - 1)), 0.f);
+            y0 = std::max(std::min(y0, (float) (height - 1)), 0.f);
+            x1 = std::max(std::min(x1, (float) (width - 1)), 0.f);
+            y1 = std::max(std::min(y1, (float) (height - 1)), 0.f);
+
+            objects[i].x = x0;
+            objects[i].y = y0;
+            objects[i].w = x1 - x0;
+            objects[i].h = y1 - y0;
+        }
+    }
+
+    // objects to Obj[]
+    static const char *class_names[] = {
+            "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+            "traffic light",
+            "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
+            "sheep", "cow",
+            "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie",
+            "suitcase", "frisbee",
+            "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+            "skateboard", "surfboard",
+            "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl",
+            "banana", "apple",
+            "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
+            "chair", "couch",
+            "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote",
+            "keyboard", "cell phone",
+            "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase",
+            "scissors", "teddy bear",
+            "hair drier", "toothbrush"
+    };
+
+    for (size_t i = 0; i < objects.size(); i++) {
+        LOGGD("x=%d, y=%d, w=%d, h=%d, label=%s, probability=%.2f", objects[i].x, objects[i].y, objects[i].w, objects[i].h, class_names[objects[i].label], objects[i].prob);
+        NCNN_JNI_NOTIFY("x=%d, y=%d, w=%d, h=%d, label=%s, probability=%.2f", objects[i].x, objects[i].y, objects[i].w, objects[i].h, class_names[objects[i].label], objects[i].prob);
+    }
+
+    double elapsed = ncnn::get_current_time() - start_time;
+    LOGGD("ncnn YoloV5 inference elapsed %.2f ms", elapsed);
+    NCNN_JNI_NOTIFY("ncnn squeezenet inference elapsed %.2f ms", elapsed);
+}
 /**
 *
 * @param sz_ncnnmodel_param   param file of ncnn model
@@ -898,7 +1342,7 @@ void detectMnist(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
 */
 //TODO: remove JNIEnv
 void ncnn_jni_bench(JNIEnv *env, const char *sz_ncnnmodel_param, const char *sz_ncnnmodel_bin,
-                    const char *sz_user_data, jobject bitmap, int n_bench_type, int num_threads,
+                    const char *sz_user_data, jobject bitmap, int n_bench_type, int n_threads,
                     int n_backend_type, int n_op_type) {
     LOGGD("model param:%s\n", sz_ncnnmodel_param);
     LOGGD("model bin:%s\n", sz_ncnnmodel_bin);
@@ -907,15 +1351,20 @@ void ncnn_jni_bench(JNIEnv *env, const char *sz_ncnnmodel_param, const char *sz_
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
 
+    bool use_gpu = (n_backend_type == NCNN_BACKEND_GPU ? true : false);
+
     switch (n_bench_type) {
         case NCNN_BENCHMARK_RESNET:
-            detectResNet(env, bitmap,n_bench_type == NCNN_BACKEND_GPU);
+            detectResNet(env, bitmap, use_gpu);
             break;
         case NCNN_BENCHMARK_SQUEEZENET:
-            detectSqueezeNet(env, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            detectSqueezeNet(env, bitmap, use_gpu);
             break;
         case NCNN_BENCHMARK_MNIST:
-            detectMnist(env,  bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            detectMnist(env, bitmap, use_gpu);
+            break;
+        case NCNN_BENCHARK_YOLOV5:
+            detectYoloV5(env, bitmap, use_gpu);
             break;
             //=============================================================================================
             //add new benchmark type for NCNN here

@@ -7,7 +7,7 @@ project(ncnn-jni)
 cmake_minimum_required(VERSION 3.22.1)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(NCNN_JNI_QNN       ON)   # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(NCNN_JNI_QNN       OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
@@ -45,6 +45,8 @@ add_definitions(-D__ARM_NEON)
 
 if (NCNN_JNI_QNN)
     add_definitions(-DNCNN_USE_QNN)
+else()
+    add_definitions(-DGGML_DISABLE_QNN)
 endif()
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "release")
@@ -58,7 +60,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "release")
             "-fdata-sections"
             "-frtti"
             "-Wno-unused-command-line-argument")
-    add_compile_options("-Wall" "-Werror" "-Wno-sign-compare")
+    add_compile_options("-Wall" "-Wno-sign-compare")
 else()
     add_definitions(-DDEBUG)
     add_compile_options("-Wall" "-Wno-sign-compare")

@@ -845,15 +845,23 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     LOGGD("bench type:%d\n", n_bench_type);
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
-    if (3 == n_backend_type) { // 3 is fake QNN backend, just used for compare performance between QNN backend and original ggml
+    if (GGML_BACKEND_GGML == n_backend_type) {
         p_asr_ctx->b_use_gpu = false;
-        p_asr_ctx->gpu_device = 3;
+        p_asr_ctx->gpu_device = GGML_BACKEND_GGML;// GGML_BACKEND_GGML is fake QNN backend, just used for compare performance between QNN backend and original ggml
     } else {
 #ifdef GGML_USE_QNN
         p_asr_ctx->b_use_gpu = true;
         p_asr_ctx->gpu_device = n_backend_type;
 #endif
     }
+
+#ifdef GGML_DISABLE_QNN
+    if (GGML_BACKEND_GGML != n_backend_type) {
+        LOGGW("QNN feature was disabled and backend is not ggml\n");
+        GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
+        return;
+    }
+#endif
     p_asr_ctx->n_threads                = n_threads;
     p_asr_ctx->n_benchmark_type         = n_bench_type;
     memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);

@@ -10,6 +10,7 @@ make/
 out.*/
 
 sherpa-ncnn/
+ncnn-src/
 
 opencv-mobile-4.9.0-android.zip
 ncnn-20240410-android-vulkan.zip

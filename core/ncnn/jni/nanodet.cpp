@@ -19,13 +19,13 @@
 
 #include "cpu.h"
 
-static inline float intersection_area(const Object& a, const Object& b)
+static inline float intersection_area(const NanoObject& a, const NanoObject& b)
 {
     cv::Rect_<float> inter = a.rect & b.rect;
     return inter.area();
 }
 
-static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, int right)
+static void qsort_descent_inplace(std::vector<NanoObject>& faceobjects, int left, int right)
 {
     int i = left;
     int j = right;
@@ -62,7 +62,7 @@ static void qsort_descent_inplace(std::vector<Object>& faceobjects, int left, in
     }
 }
 
-static void qsort_descent_inplace(std::vector<Object>& faceobjects)
+static void qsort_descent_inplace(std::vector<NanoObject>& faceobjects)
 {
     if (faceobjects.empty())
         return;
@@ -70,7 +70,7 @@ static void qsort_descent_inplace(std::vector<Object>& faceobjects)
     qsort_descent_inplace(faceobjects, 0, faceobjects.size() - 1);
 }
 
-static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vector<int>& picked, float nms_threshold)
+static void nms_sorted_bboxes(const std::vector<NanoObject>& faceobjects, std::vector<int>& picked, float nms_threshold)
 {
     picked.clear();
 
@@ -84,12 +84,12 @@ static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vecto
 
     for (int i = 0; i < n; i++)
     {
-        const Object& a = faceobjects[i];
+        const NanoObject& a = faceobjects[i];
 
         int keep = 1;
         for (int j = 0; j < (int)picked.size(); j++)
         {
-            const Object& b = faceobjects[picked[j]];
+            const NanoObject& b = faceobjects[picked[j]];
 
             // intersection over union
             float inter_area = intersection_area(a, b);
@@ -104,7 +104,7 @@ static void nms_sorted_bboxes(const std::vector<Object>& faceobjects, std::vecto
     }
 }
 
-static void generate_proposals(const ncnn::Mat& cls_pred, const ncnn::Mat& dis_pred, int stride, const ncnn::Mat& in_pad, float prob_threshold, std::vector<Object>& objects)
+static void generate_proposals(const ncnn::Mat& cls_pred, const ncnn::Mat& dis_pred, int stride, const ncnn::Mat& in_pad, float prob_threshold, std::vector<NanoObject>& objects)
 {
     const int num_grid = cls_pred.h;
 
@@ -189,7 +189,7 @@ static void generate_proposals(const ncnn::Mat& cls_pred, const ncnn::Mat& dis_p
                 float x1 = pb_cx + pred_ltrb[2];
                 float y1 = pb_cy + pred_ltrb[3];
 
-                Object obj;
+                NanoObject obj;
                 obj.rect.x = x0;
                 obj.rect.y = y0;
                 obj.rect.width = x1 - x0;
@@ -285,7 +285,7 @@ int NanoDet::load(AAssetManager* mgr, const char* modeltype, int _target_size, c
     return 0;
 }
 
-int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob_threshold, float nms_threshold)
+int NanoDet::detect(const cv::Mat& rgb, std::vector<NanoObject>& objects, float prob_threshold, float nms_threshold)
 {
     int width = rgb.cols;
     int height = rgb.rows;
@@ -321,7 +321,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
 
     ex.input("input.1", in_pad);
 
-    std::vector<Object> proposals;
+    std::vector<NanoObject> proposals;
 
     // stride 8
     {
@@ -330,7 +330,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
         ex.extract("cls_pred_stride_8", cls_pred);
         ex.extract("dis_pred_stride_8", dis_pred);
 
-        std::vector<Object> objects8;
+        std::vector<NanoObject> objects8;
         generate_proposals(cls_pred, dis_pred, 8, in_pad, prob_threshold, objects8);
 
         proposals.insert(proposals.end(), objects8.begin(), objects8.end());
@@ -343,7 +343,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
         ex.extract("cls_pred_stride_16", cls_pred);
         ex.extract("dis_pred_stride_16", dis_pred);
 
-        std::vector<Object> objects16;
+        std::vector<NanoObject> objects16;
         generate_proposals(cls_pred, dis_pred, 16, in_pad, prob_threshold, objects16);
 
         proposals.insert(proposals.end(), objects16.begin(), objects16.end());
@@ -356,7 +356,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
         ex.extract("cls_pred_stride_32", cls_pred);
         ex.extract("dis_pred_stride_32", dis_pred);
 
-        std::vector<Object> objects32;
+        std::vector<NanoObject> objects32;
         generate_proposals(cls_pred, dis_pred, 32, in_pad, prob_threshold, objects32);
 
         proposals.insert(proposals.end(), objects32.begin(), objects32.end());
@@ -397,7 +397,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
     // sort objects by area
     struct
     {
-        bool operator()(const Object& a, const Object& b) const
+        bool operator()(const NanoObject& a, const NanoObject& b) const
         {
             return a.rect.area() > b.rect.area();
         }
@@ -407,7 +407,7 @@ int NanoDet::detect(const cv::Mat& rgb, std::vector<Object>& objects, float prob
     return 0;
 }
 
-int NanoDet::draw(cv::Mat& rgb, const std::vector<Object>& objects)
+int NanoDet::draw(cv::Mat& rgb, const std::vector<NanoObject>& objects)
 {
     static const char* class_names[] = {
         "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
@@ -447,7 +447,7 @@ int NanoDet::draw(cv::Mat& rgb, const std::vector<Object>& objects)
 
     for (size_t i = 0; i < objects.size(); i++)
     {
-        const Object& obj = objects[i];
+        const NanoObject& obj = objects[i];
 
 //         fprintf(stderr, "%d = %.5f at %.2f %.2f %.2f x %.2f\n", obj.label, obj.prob,
 //                 obj.rect.x, obj.rect.y, obj.rect.width, obj.rect.height);
