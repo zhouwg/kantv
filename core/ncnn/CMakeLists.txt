@@ -49,7 +49,11 @@ else()
     add_definitions(-DGGML_DISABLE_QNN)
 endif()
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "release")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    add_definitions(-DDEBUG)
+    add_definitions(-g)
+    add_compile_options("-Wall" "-Wno-sign-compare")
+else()
     add_definitions(-DNDEBUG)
     add_definitions(-O3)
     add_link_options("-s")
@@ -60,9 +64,6 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "release")
             "-fdata-sections"
             "-frtti"
             "-Wno-unused-command-line-argument")
-    add_compile_options("-Wall" "-Wno-sign-compare")
-else()
-    add_definitions(-DDEBUG)
     add_compile_options("-Wall" "-Wno-sign-compare")
 endif()
 

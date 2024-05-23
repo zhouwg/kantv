@@ -726,7 +726,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 }
             } else {
                 LOGGD("ncnn gpu backend not supported");
-                NCNN_JNI_NOTIFY("using ncnn gpu backend not supported");
+                NCNN_JNI_NOTIFY("gpu backend not supported");
             }
 
             // init words
