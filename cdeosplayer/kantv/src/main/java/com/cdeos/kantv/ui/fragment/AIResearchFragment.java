@@ -726,6 +726,9 @@
                                          benchmarkIndex - CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal(), nThreadCounts, backendIndex, 0);
                              }
                          }
+                         //=============================================================================================
+                         //add new AI benchmark type for NCNN here
+                         //=============================================================================================
                      }
 
                      endTime = System.currentTimeMillis();

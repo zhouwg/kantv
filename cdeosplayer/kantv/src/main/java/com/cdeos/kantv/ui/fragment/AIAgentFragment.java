@@ -253,6 +253,9 @@ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implement
             spinnerNCNNModel.setAdapter(adapterNCNNModelScrfd);
         else if (current_netid == CDEUtils.ncnn_realtimeinference_type.NCNN_REALTIMEINFERENCE_NANODAT.ordinal())
             spinnerNCNNModel.setAdapter(adapterNCNNModelNanodat);
+        //=============================================================================================
+        //add new realtime inference type for NCNN here
+        //=============================================================================================
 
         spinnerNCNNModel.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

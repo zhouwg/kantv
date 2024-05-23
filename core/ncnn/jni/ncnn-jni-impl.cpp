@@ -196,8 +196,7 @@ void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
             g_nanodet->detect(rgb, objects);
 
             g_nanodet->draw(rgb, objects);
-        }
-        else {
+        } else {
             draw_unsupported(rgb);
         }
     }
@@ -304,8 +303,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
         //end sanity check
 
         switch (netid) {
-            case NCNN_REALTIMEINFERENCE_FACEDETECT:
-            {
+            case NCNN_REALTIMEINFERENCE_FACEDETECT: {
                 if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
                     LOGGW("invalid params");
                     return JNI_FALSE;
@@ -342,17 +340,16 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     }
                 }
             }
-            break;
+                break;
 
-            case NCNN_REALTIMEINFERENCE_NANODAT:
-            {
+            case NCNN_REALTIMEINFERENCE_NANODAT: {
                 if (modelid < 0 || modelid > 6 || backend_type > NCNN_BACKEND_MAX) {
                     LOGGW("invalid params");
                     return JNI_FALSE;
                 }
 
-                AAssetManager* mgr = AAssetManager_fromJava(env, assetManager);
-                const char* modeltypes[] =
+                AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+                const char *modeltypes[] =
                         {
                                 "m",
                                 "m-416",
@@ -379,9 +376,9 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                                 {103.53f, 116.28f, 123.675f},
                                 {103.53f, 116.28f, 123.675f},
                                 {103.53f, 116.28f, 123.675f},
-                                {127.f, 127.f, 127.f},
-                                {127.f, 127.f, 127.f},
-                                {127.f, 127.f, 127.f},
+                                {127.f,   127.f,   127.f},
+                                {127.f,   127.f,   127.f},
+                                {127.f,   127.f,   127.f},
                                 {103.53f, 116.28f, 123.675f}
                         };
 
@@ -390,40 +387,40 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                                 {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
                                 {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
                                 {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f},
-                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
-                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
-                                {1.f / 128.f, 1.f / 128.f, 1.f / 128.f},
+                                {1.f / 128.f,   1.f / 128.f,  1.f / 128.f},
+                                {1.f / 128.f,   1.f / 128.f,  1.f / 128.f},
+                                {1.f / 128.f,   1.f / 128.f,  1.f / 128.f},
                                 {1.f / 57.375f, 1.f / 57.12f, 1.f / 58.395f}
                         };
 
-                const char* modeltype = modeltypes[(int)modelid];
-                int target_size = target_sizes[(int)modelid];
+                const char *modeltype = modeltypes[(int) modelid];
+                int target_size = target_sizes[(int) modelid];
                 bool use_gpu = (backend_type == NCNN_BACKEND_GPU);
 
                 // reload
                 {
                     ncnn::MutexLockGuard g(lock);
 
-                    if (use_gpu && ncnn::get_gpu_count() == 0)
-                    {
+                    if (use_gpu && ncnn::get_gpu_count() == 0) {
                         LOGGD("using ncnn gpu but ncnn gpu backend not supported");
-                        NCNN_JNI_NOTIFY("using ncnn gpu backend but ncnn gpu backend not supported");
+                        NCNN_JNI_NOTIFY(
+                                "using ncnn gpu backend but ncnn gpu backend not supported");
                         // no gpu
                         delete g_nanodet;
                         g_nanodet = 0;
-                    }
-                    else
-                    {
+                    } else {
                         if (!g_nanodet)
                             g_nanodet = new NanoDet;
-                        g_nanodet->load(mgr, modeltype, target_size, mean_vals[(int)modelid], norm_vals[(int)modelid], use_gpu);
+                        g_nanodet->load(mgr, modeltype, target_size, mean_vals[(int) modelid],
+                                        norm_vals[(int) modelid], use_gpu);
                     }
                 }
             }
-            break;
+                break;
 
             default:
-                LOGGD("netid %d not supported with realtime inference for live camera/online TV", netid);
+                LOGGD("netid %d not supported with realtime inference for live camera/online TV",
+                      netid);
                 break;
         }
 
@@ -625,12 +622,12 @@ Java_org_ncnn_ncnnjava_setOutputWindow(JNIEnv *env, jobject thiz, jobject surfac
 }
 
 
-JNIEXPORT jstring JNICALL
-Java_org_ncnn_ncnnjava_detectResNet(JNIEnv *env, jobject thiz, jobject bitmap, jboolean use_gpu) {
+//TODO: remove JNIENV
+static void detectResNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
     if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
         LOGGW("gpu not supported");
         NCNN_JNI_NOTIFY("gpu not supported");
-        return env->NewStringUTF("no vulkan capable gpu");
+        return;
     }
 
     double start_time = ncnn::get_current_time();
@@ -641,7 +638,7 @@ Java_org_ncnn_ncnnjava_detectResNet(JNIEnv *env, jobject thiz, jobject bitmap, j
     if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
         LOGGW("bitmap is not RGBA_8888");
         NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
-        return NULL;
+        return;
     }
 
     ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_RGB, 224,
@@ -709,19 +706,16 @@ Java_org_ncnn_ncnnjava_detectResNet(JNIEnv *env, jobject thiz, jobject bitmap, j
     LOGGD("ncnn resnet inference result:%s", result_str.c_str());
     NCNN_JNI_NOTIFY("ncnn resnet inference result:%s", result_str.c_str());
 
-    jstring result = env->NewStringUTF(result_str.c_str());
-
-    return result;
+    return;
 }
 
 
-JNIEXPORT jstring JNICALL
-Java_org_ncnn_ncnnjava_detectSqueezeNet(JNIEnv *env, jobject thiz, jobject bitmap,
-                                        jboolean use_gpu) {
+//TODO: remove JNIENV
+static void detectSqueezeNet(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
     if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
         LOGGW("gpu not supported");
         NCNN_JNI_NOTIFY("gpu not supported");
-        return env->NewStringUTF("no vulkan capable gpu");
+        return;
     }
 
     double start_time = ncnn::get_current_time();
@@ -734,13 +728,13 @@ Java_org_ncnn_ncnnjava_detectSqueezeNet(JNIEnv *env, jobject thiz, jobject bitma
     if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
         LOGGW("bitmap format is not RGBA_8888");
         NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
-        return NULL;
+        return;
     }
     ncnn::Mat in;
     if (width != 227 || height != 227) {
         LOGGW("width and height is not 227");
         NCNN_JNI_NOTIFY("width and height is not 227");
-        in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_BGR, 227,227);
+        in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_BGR, 227, 227);
         //return NULL;
     } else {
         in = ncnn::Mat::from_android_bitmap(env, bitmap, ncnn::Mat::PIXEL_BGR);
@@ -784,27 +778,26 @@ Java_org_ncnn_ncnnjava_detectSqueezeNet(JNIEnv *env, jobject thiz, jobject bitma
     if (is_zero_floatvalue(max_score)) {
         LOGGD("ncnn squeezenet inference failure");
         NCNN_JNI_NOTIFY("ncnn squeezenet inference failure");
-        return env->NewStringUTF("ncnn squeezenet inference failure");
+        return;
     }
+
     // +10 to skip leading n03179701
     std::string result_str = std::string(word.c_str() + 10) + ", probability= " + tmp;
-    jstring result = env->NewStringUTF(result_str.c_str());
-
     double elapse = ncnn::get_current_time() - start_time;
     LOGGD("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(), elapse);
     NCNN_JNI_NOTIFY("ncnn squeezenet inference result:%s, elapse %.2f ms", result_str.c_str(),
                     elapse);
 
-    return result;
+    return;
 }
 
 
-JNIEXPORT jstring JNICALL
-Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jboolean use_gpu) {
+//TODO: remove JNIENV
+void detectMnist(JNIEnv *env, jobject bitmap, jboolean use_gpu) {
     if (use_gpu == JNI_TRUE && ncnn::get_gpu_count() == 0) {
         LOGGW("gpu not supported");
         NCNN_JNI_NOTIFY("gpu not supported");
-        return env->NewStringUTF("no vulkan capable gpu");
+        return;
     }
 
     LOGGD("Preparing input...");
@@ -820,14 +813,14 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
         if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
             LOGGW("bitmap format is not RGBA_8888");
             NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
-            return NULL;
+            return;
         }
 
         if (width != 28 || height != 28) {
             LOGGW("width and height are not 28");
             NCNN_JNI_NOTIFY("width and height of input image are not 28, scale it to 28x28");
             //return NULL;
-            in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_GRAY, 28,28);
+            in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_GRAY, 28, 28);
         } else {
             in = ncnn::Mat::from_android_bitmap(env, bitmap, ncnn::Mat::PIXEL_GRAY);
         }
@@ -887,8 +880,7 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
     NCNN_JNI_NOTIFY("Latency, avg: %.2fms, max: %.2f, min: %.2f. Avg Flops: %.2fMFlops\n",
                     total_latency / 10.0, max, min, 0.78 / (total_latency / 10.0 / 1000.0));
 
-    jstring result = env->NewStringUTF(result_str.c_str());
-    return result;
+    return;
 }
 
 
@@ -904,8 +896,10 @@ Java_org_ncnn_ncnnjava_detectMnist(JNIEnv *env, jobject thiz, jobject bitmap, jb
 * @param n_op_type            type of NCNN OP
 * @return
 */
-//TODO:refine codes in ncnn-jni-impl.cpp
-void ncnn_jni_bench(JNIEnv *env, const char * sz_ncnnmodel_param, const char * sz_ncnnmodel_bin, const char * sz_user_data, jobject bitmap, int n_bench_type, int num_threads, int n_backend_type, int n_op_type) {
+//TODO: remove JNIEnv
+void ncnn_jni_bench(JNIEnv *env, const char *sz_ncnnmodel_param, const char *sz_ncnnmodel_bin,
+                    const char *sz_user_data, jobject bitmap, int n_bench_type, int num_threads,
+                    int n_backend_type, int n_op_type) {
     LOGGD("model param:%s\n", sz_ncnnmodel_param);
     LOGGD("model bin:%s\n", sz_ncnnmodel_bin);
     LOGGD("user data: %s\n", sz_user_data);
@@ -915,14 +909,17 @@ void ncnn_jni_bench(JNIEnv *env, const char * sz_ncnnmodel_param, const char * s
 
     switch (n_bench_type) {
         case NCNN_BENCHMARK_RESNET:
-            Java_org_ncnn_ncnnjava_detectResNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            detectResNet(env, bitmap,n_bench_type == NCNN_BACKEND_GPU);
             break;
         case NCNN_BENCHMARK_SQUEEZENET:
-            Java_org_ncnn_ncnnjava_detectSqueezeNet(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            detectSqueezeNet(env, bitmap, n_bench_type == NCNN_BACKEND_GPU);
             break;
         case NCNN_BENCHMARK_MNIST:
-            Java_org_ncnn_ncnnjava_detectMnist(env, NULL, bitmap, n_bench_type == NCNN_BACKEND_GPU);
+            detectMnist(env,  bitmap, n_bench_type == NCNN_BACKEND_GPU);
             break;
+            //=============================================================================================
+            //add new benchmark type for NCNN here
+            //=============================================================================================
         default:
             break;
 
