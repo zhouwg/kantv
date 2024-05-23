@@ -451,7 +451,10 @@
                  }
 
                  // - 1 used to skip bench_type.GGML_BENCHMARK_MAX
-                 if (benchmarkIndex > CDEUtils.bench_type.NCNN_BENCHMARK_MNIST.ordinal() - 1) {
+                 if (
+                         (benchmarkIndex == (CDEUtils.bench_type.NCNN_BENCHMARK_ASR.ordinal() - 1))
+                      || (benchmarkIndex == (CDEUtils.bench_type.NCNN_BENCHMARK_TTS.ordinal() - 1))
+                 ) {
                      CDEUtils.showMsgBox(mActivity, "ncnn benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported currently");
                      return;
                  }

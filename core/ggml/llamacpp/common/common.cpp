@@ -1172,8 +1172,8 @@ bool gpt_params_find_arg(int argc, char ** argv, const std::string & arg, gpt_pa
     }
     if (arg == "--version") {
 #ifndef GGML_USE_QNN
-        fprintf(stderr, "version: %d (%s)\n", LLAMA_BUILD_NUMBER, LLAMA_COMMIT);
-        fprintf(stderr, "built with %s for %s\n", LLAMA_COMPILER, LLAMA_BUILD_TARGET);
+        //fprintf(stderr, "version: %d (%s)\n", LLAMA_BUILD_NUMBER, LLAMA_COMMIT);
+        //fprintf(stderr, "built with %s for %s\n", LLAMA_COMPILER, LLAMA_BUILD_TARGET);
 #endif
         exit(0);
     }
@@ -2537,8 +2537,8 @@ void dump_non_result_info_yaml(FILE * stream, const gpt_params & params, const l
     const llama_sampling_params & sparams = params.sparams;
 
 #ifndef GGML_USE_QNN
-    fprintf(stream, "build_commit: %s\n",        LLAMA_COMMIT);
-    fprintf(stream, "build_number: %d\n",        LLAMA_BUILD_NUMBER);
+    //fprintf(stream, "build_commit: %s\n",        LLAMA_COMMIT);
+    //fprintf(stream, "build_number: %d\n",        LLAMA_BUILD_NUMBER);
 #endif
     fprintf(stream, "cpu_has_arm_fma: %s\n",     ggml_cpu_has_arm_fma()     ? "true" : "false");
     fprintf(stream, "cpu_has_avx: %s\n",         ggml_cpu_has_avx()         ? "true" : "false");

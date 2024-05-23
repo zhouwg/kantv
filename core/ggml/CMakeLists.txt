@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_JNI_QNN       ON)   # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_JNI_QNN       OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 
@@ -108,6 +108,8 @@ add_definitions(-D__ARM_NEON)
 
 if (GGML_JNI_QNN)
 add_definitions(-DGGML_USE_QNN)
+else()
+add_definitions(-DGGML_DISABLE_QNN)
 endif()
 
 add_definitions(-DNDEBUG)
