@@ -1329,6 +1329,8 @@ static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
     LOGGD("ncnn YoloV5 inference elapsed %.2f ms", elapsed);
     NCNN_JNI_NOTIFY("ncnn squeezenet inference elapsed %.2f ms", elapsed);
 }
+
+
 /**
 *
 * @param sz_ncnnmodel_param   param file of ncnn model

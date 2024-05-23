@@ -193,11 +193,11 @@ cd kantv
     ```
 
     # open $ANDROID_NDK/build/cmake/android.toolchain.cmake for ndk < r23
-# or $ANDROID_NDK/build/cmake/android-legacy.toolchain.cmake for ndk >= r23
-# delete "-g" line
-list(APPEND ANDROID_COMPILER_FLAGS
-  -g
-  -DANDROID
+    # or $ANDROID_NDK/build/cmake/android-legacy.toolchain.cmake for ndk >= r23
+    # delete "-g" line
+    list(APPEND ANDROID_COMPILER_FLAGS
+    -g
+    -DANDROID
 
     ```
 

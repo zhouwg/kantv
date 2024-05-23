@@ -2,7 +2,7 @@
 
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build libncnn.a for target Android
+# Description: build libncnn.a for project KanTV
 #
 
 set -e
