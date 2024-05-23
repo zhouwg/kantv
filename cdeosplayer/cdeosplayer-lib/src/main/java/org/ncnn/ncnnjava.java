@@ -26,7 +26,7 @@ public class ncnnjava
      * @param netid
      * @param modelid
      * @param backend_type            0: NCNN_BACKEND_CPU, 1: NCNN_BACKEND_GPU
-     * @param is_realtime_inference   1: realtime inference with live camera/online TV, 0: not realtime inference
+     * @param is_realtime_inference   true: realtime inference with live camera/online TV, false: not realtime inference
      * @return
      */
     public native boolean loadModel(AssetManager mgr, int netid, int modelid, int backend_type, boolean is_realtime_inference);

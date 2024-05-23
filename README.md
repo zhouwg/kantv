@@ -364,10 +364,11 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### This project is suitable for(本项目适合于)
 
-- Students:understand calculus/linear algebra/mathematical statistics and probability theory, have some experiences in C/C++ software development, want to learn Android software development(UI, NDK, streamming media, AI application);  学生:了解微积分，线性代数，数理统计与概率论, 且有一定的C/C++开发经验, 希望学习Android开发（UI, NDK, 音视频流媒体, 端侧AI应用);
-- Programmers: have some experiences in C/C++/Java software development, know nothing about real/hardcore AI technology, want to learn AI technology in depth(know how); 程序员:有一定的或丰富的C/C++/Java开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how);
-- AI researchers/developers: validate/verify AI(ASR, TTS, CV, NLP, LLM...) algorithm in the framework provided in this project for Android device;  AI特定领域(ASR, TTS, CV, NLP, LLM,...)的算法研究/开发人员:在本项目提供的框架中调试/验证Android设备上的AI特定领域算法;
-- Authors/maintainers of AI inference framework: compare the advantages of <a href="https://github.com/ggerganov/ggml">ggml</a> and <a href="https://github.com/Tencent/ncnn">ncnn</a>; AI推理框架的开发人员: 对比两个端侧推理框架ggml与ncnn的优点;
+- Students:understand calculus/linear algebra/mathematical statistics and probability theory, have a little / some experiences in C/C++/Java software development, want to learn Android software development(UI, NDK, streamming media, AI application);  学生:了解微积分，线性代数，数理统计与概率论, 且有一定的C/C++开发经验, 希望学习Android开发（UI, NDK, 音视频流媒体, 端侧AI应用);
+- Programmers: have good experiences in C/C++ software development, know a little/nothing about <b>real/hardcore</b> AI technology, want to learn AI technology in depth(know how); 程序员:有丰富的C/C++开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how);
+- Authors/maintainers of AI inference framework: compare the advantages of <a href="https://github.com/ggerganov/ggml">ggml</a> and <a href="https://github.com/Tencent/ncnn">ncnn</a>(<a href="./docs/why-focus-on-ggml-and-ncnn.md">why focus on ggml & ncnn</a>); AI推理框架的开发人员: 对比两个端侧推理框架ggml与ncnn的优点;
+- AI experts/algorithm engineers: validate/verify AI(ASR, TTS, CV, NLP, LLM...) algorithm on Android with framework provided in this project(<a href="./docs/how-to-validate-ai-algorithm-models-on-android-using-this-project.md">how to validate AI algorithm/models on Android using this project</a>);  AI特定领域(ASR, TTS, CV, NLP, LLM,...)的专家/算法工程师:使用本项目提供的框架在Android设备上调试/验证AI特定领域算法;
+
 
 
 ### License
