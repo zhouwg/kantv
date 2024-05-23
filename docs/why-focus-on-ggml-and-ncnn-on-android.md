@@ -23,7 +23,7 @@
 
 
 
-2. [NCNN](https://github.com/Tencent/ncnn) is a high-performance neural network inference computing framework <b>optimized for mobile platforms</b>. NCNN is deeply considerate about deployment and uses on mobile phones from the beginning of design.NCNN does <b>not have third-party dependencies</b>. It is cross-platform and runs faster than all known open-source frameworks on mobile phone cpu. Developers can easily deploy deep learning algorithm models to the mobile platform by using efficient ncnn implementation, creating intelligent APPs, and bringing artificial intelligence to your fingertips. NCNN is currently being used in many Tencent applications <b>with 1.3b+ users</b></b>, such as QQ, Qzone, WeChat, Pitu, ... and as well known Tecent is one of the most advanced/powerful IT gaint in China/our planet.  so it's <b>very very very useful/helpful/practical</b> for commerical programmers/developers/applications. In general, NCNN has following feaures:
+2. [NCNN](https://github.com/Tencent/ncnn) is a high-performance neural network inference computing framework <b>optimized for mobile platforms</b>. NCNN is deeply considerate about deployment and uses on mobile phones from the beginning of design.NCNN does <b>not have third-party dependencies</b>. It is cross-platform and runs faster than all known open-source frameworks on mobile phone cpu. Developers can easily deploy deep learning algorithm models to the mobile platform by using efficient ncnn implementation, creating intelligent APPs, and bringing artificial intelligence to your fingertips. NCNN is currently being used in many Tencent applications <b>with 1.3b+ users</b></b>, such as QQ, Qzone, WeChat, Pitu, ... and as well known Tencent is one of the most advanced/powerful IT gaints in China/our planet.  so it's <b>very very very useful/helpful/practical</b> for commerical programmers/developers/applications. In general, NCNN has following feaures:
 
 - Supports convolutional neural networks, supports multiple input and multi-branch structure, can calculate part of the branch
 - <b>No third-party library dependencies</b>
@@ -51,7 +51,7 @@ There are some "killer/heavyweight" open-source AI application engines based on 
 
 
 
-4. AI model trainning and finetuning will be done by AI experts/algorithm engineers. this project is a workbench for learing&practising AI tech in real scenario on Android device, focus on AI inference and AI application.
+4. AI model trainning and finetuning will be done by AI experts/algorithm engineers. this project is a workbench for learing&practising AI tech in real scenario on Android device, focus on AI inference and AI application on Android.
 
 
 
