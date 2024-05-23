@@ -21,6 +21,7 @@ set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
+set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 
 
 #03-26-2024, integrate llama.cpp to kantv
@@ -59,6 +60,8 @@ include_directories(${QNN_SRC_DIR}/PAL/include)
 aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
 include_directories(${SDCPP_SRC_DIR})
 include_directories(${BARKCPP_SRC_DIR})
+
+include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred

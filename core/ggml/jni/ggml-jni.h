@@ -22,33 +22,44 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "libavutil/cde_log.h"
+#include "kantv-asr.h"
+#include "kantv-media.h"
+
 #include "ggml.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define JNI_BUF_LEN                 4096
-#define JNI_TMP_LEN                 256
+//=============================================================================================
+//add new AI benchmark type / new backend for GGML here, keep sync with CDEUtils.java
+
+// available bench type for GGML
+enum ggml_jni_bench_type {
+    GGML_BENCHMARK_MEMCPY = 0,                //memcpy  benchmark
+    GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
+    GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
+    GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+    GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
+    GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
+    GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
+    GGML_BENCHMARK_CV_MNIST,                  //MNIST inference using GGML
+    GGML_BENCHMARK_TTS,                       //TTS(bark.cpp) benchmark using GGML
+    GGML_BENCHMARK_MAX
+};
 
 
-#define BECHMARK_MEMCPY             0       //memcpy  benchmark
-#define BECHMARK_MULMAT             1       //mulmat  benchmark
-#define BENCHMARK_QNN_GGML_OP       2       //UT for PoC-S49: implementation of GGML OPs using QNN API
-#define BENCHMARK_QNN_AUTO_UT       3       //automation UT for PoC-S49: implementation of GGML OPs using QNN API
-#define BECHMARK_ASR                4       //ASR(whisper.cpp) benchmark using GGML
-#define BENCHMARK_LLM               5       //LLM(llama.cpp) benchmark using GGML
-#define BENCHMARK_TEXT2IMAGE        6       //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
-#define BENCHMARK_CV_MNIST          7       //MNIST inference using GGML
-#define BENCHMARK_TTS               8       //TTS(bark.cpp) benchmark using GGML
-#define BENCHMAKR_MAX               8
-
-#define BACKEND_CPU                 0
-#define BACKEND_GPU                 1
-#define BACKEND_DSP                 2
-#define BACKEND_GGML                3       //"fake" QNN backend just for compare performance between QNN and original GGML
-#define BACKEND_MAX                 3
+// available backend for GGML
+enum ggml_jni_backend_type {
+    GGML_BACKEND_CPU = 0,
+    GGML_BACKEND_GPU,
+    GGML_BACKEND_DSP,
+    GGML_BACKEND_GGML, //"fake" QNN backend just for compare performance between QNN and original GGML
+    GGML_BACKEND_MAX
+};
+//=============================================================================================
 
 
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)

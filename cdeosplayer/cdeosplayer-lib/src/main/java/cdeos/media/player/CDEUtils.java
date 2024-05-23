@@ -114,6 +114,14 @@
  import static cdeos.media.player.CDEMediaType.MEDIA_MOVIE;
  import static cdeos.media.player.CDEMediaType.MEDIA_RADIO;
  import static cdeos.media.player.CDEMediaType.MEDIA_TV;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_ASR;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_CV_MNIST;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_LLM;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_MEMCPY;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_MULMAT;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_QNN_AUTO_UT;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_QNN_GGML_OP;
+ import static cdeos.media.player.CDEUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE;
 
  import androidx.annotation.Nullable;
  import androidx.annotation.RequiresApi;
@@ -258,45 +266,6 @@
      public static final int  ASR_MODE_PRESURETEST  = 1;     // pressure test of asr subsystem
      public static final int  ASR_MODE_BECHMARK     = 2;     // asr peformance benchamrk
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
-
-     //keep sync with ggml-jni.h
-
-     public static final int BENCHMARK_MEMCPY           = 0;
-     public static final int BENCHMARK_MULMAT           = 1;
-     public static final int BENCHMARK_QNN_GGML_OP      = 2;
-     public static final int BENCHMARK_QNN_AUTO_UT      = 3;
-
-     //inference using GGML
-     public static final int BENCHMARK_ASR              = 4; //whisper.cpp
-     public static final int BENCHMARK_LLM              = 5;
-     public static final int BENCHMARK_TEXT2IMAGE       = 6;
-     public static final int BENCHMARK_CV_MNIST         = 7;
-     public static final int BENCHMARK_TTS              = 8;
-     public static final int BENCHMARK_GGML_MAX         = 8;
-
-     //benchmark inference using NCNN
-     public static final int BENCHMARK_CV_RESNET        = 9;
-     public static final int BENCHMARK_CV_SQUEEZENET    = 10;
-     public static final int BENCHMARK_CV_MNIST_NCNN    = 11;
-     public static final int BENCHMARK_ASR_NCNN         = 12;
-     public static final int BENCHMARK_TTS_NCNN         = 13;
-
-     //realtime inference with live camera / online TV using NCNN
-     public static final int NCNN_LIVEINFERENCE_FACEDETECT = 0;
-     public static final int NCNN_LIVEINFERENCE_NANODAT    = 1;
-
-     //ncnn backend
-     public static final int NCNN_BACKEND_CPU           = 0;
-     public static final int NCNN_BACKEND_GPU           = 1;
-
-
-     //keep sync with ggml-qnn.h
-     public static final int QNN_BACKEND_CPU           = 0;
-     public static final int QNN_BACKEND_GPU           = 1;
-     public static final int QNN_BACKEND_HTP           = 2;
-     public static final int QNN_BACKEND_GGML          = 3; //"fake" QNN backend, just for compare performance between QNN and original GGML
-
-
      private static int       mASRMode = ASR_MODE_NORMAL;
 
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
@@ -3931,49 +3900,17 @@
 
 
      public static String getBenchmarkDesc(int benchmarkIndex) {
-         switch (benchmarkIndex) {
-             case BENCHMARK_MEMCPY:
-                 return "GGML memcpy";
-
-             case BENCHMARK_MULMAT:
-                 return "GGML matrix multiply";
-
-             case BENCHMARK_ASR:
-                 return "ASR inference using GGML";
-
-             case BENCHMARK_LLM:
-                 return "LLM inference using GGML";
-
-             case BENCHMARK_TEXT2IMAGE:
-                 return "Text2Image inference using GGML";
-
-             case BENCHMARK_QNN_GGML_OP:
-                 return "GGML QNN OP UT"; //UT for PoC-S49: implementation of GGML OPs using QNN API
-
-             case BENCHMARK_QNN_AUTO_UT:
-                 return "GGML QNN OP UT automation"; //automation UT for PoC-S49: implementation of GGML OPs using QNN API
-
-             case BENCHMARK_CV_MNIST:
-                 return "MNIST inference using GGML";
-                 
-             case BENCHMARK_TTS:
-                 return "TTS inference using GGML";
-
-             case BENCHMARK_CV_RESNET:
-                 return "RESNET inference using NCNN";
-
-             case BENCHMARK_CV_SQUEEZENET:
-                 return "SQUEEZENET inference using NCNN";
-
-             case BENCHMARK_ASR_NCNN:
-                 return "ASR inference using NCNN";
-
-             case BENCHMARK_TTS_NCNN:
-                 return "TTS inference using NCNN";
-
-             case BENCHMARK_CV_MNIST_NCNN:
-                 return "MNIST inference using NCNN";
-
+         bench_type[] benchTypes = bench_type.values();
+         for (bench_type item : benchTypes) {
+             if (benchmarkIndex < bench_type.GGML_BENCHMARK_MAX.ordinal()) {
+                 if (item.ordinal() == benchmarkIndex) {
+                     return item.name();
+                 }
+             } else {
+                 if (item.ordinal() == benchmarkIndex + 1) {
+                     return item.name();
+                 }
+             }
          }
 
          return "unknown";
@@ -3982,7 +3919,7 @@
 
      //keep sync with ggml-qnn.cpp
      //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/HTP(aka DSP) backend currently
-     public static String getBackendDesc(int n_backend_type) {
+     public static String getGGMLBackendDesc(int n_backend_type) {
          switch (n_backend_type) {
              case 0:
                  return "QNN-CPU";
@@ -3993,7 +3930,7 @@
              case 3:
                  return "ggml";      //fake QNN backend, just used to compare performance between QNN and original GGML
 
-/*
+/*           not used currently
              case 3:
                  return "QNN-cDSP";
              case 4:
@@ -4078,7 +4015,6 @@
          }
      }
 
-
      public static void setASRSubsystemInit(boolean bEnabled) {
          mASRSubsystemInit.set(bEnabled);
      }
@@ -4086,6 +4022,47 @@
      public static boolean getASRSubsystemInit() {
          return mASRSubsystemInit.get();
      }
+
+
+     //=============================================================================================
+     //add new AI benchmark type / new backend / new realtime inference type for GGML/NCNN here
+     //
+     //keep sync with ggml-jni.h & ncnn-jni.h, bench type
+     public enum bench_type {
+         GGML_BENCHMARK_MEMCPY,                    //memcpy  benchmark
+         GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
+         GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
+         GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+         GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
+         GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
+         GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
+         GGML_BENCHMARK_CV_MNIST,                  //MNIST inference using GGML
+         GGML_BENCHMARK_TTS,                       //TTS(bark.cpp) benchmark using GGML
+         GGML_BENCHMARK_MAX,                       //used for separate GGML and NCNN
+         NCNN_BENCHMARK_RESNET,
+         NCNN_BENCHMARK_SQUEEZENET,
+         NCNN_BENCHMARK_MNIST,
+         NCNN_BENCHMARK_ASR,
+         NCNN_BENCHMARK_TTS,
+         NCNN_BENCHMARK_MAX,
+     };
+
+     //keep sync with ggml-qnn.h
+     public static final int QNN_BACKEND_CPU           = 0;
+     public static final int QNN_BACKEND_GPU           = 1;
+     public static final int QNN_BACKEND_HTP           = 2;
+     public static final int QNN_BACKEND_GGML          = 3; //"fake" QNN backend, just for compare performance between QNN and original GGML
+
+
+     //keep sync with ncnn-jni.h, realtime inference with live camera / online TV using NCNN
+     public enum ncnn_realtimeinference_type {
+         NCNN_REALTIMEINFERENCE_FACEDETECT,
+         NCNN_REALTIMEINFERENCE_NANODAT,
+     };
+     //keep sync with ncnn-jni.h, ncnn backend
+     public static final int NCNN_BACKEND_CPU           = 0;
+     public static final int NCNN_BACKEND_GPU           = 1;
+     //=============================================================================================
 
      public static native int kantv_anti_remove_rename_this_file();
  }

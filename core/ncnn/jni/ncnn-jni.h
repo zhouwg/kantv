@@ -22,27 +22,41 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "libavutil/cde_log.h"
 #include "kantv-asr.h"
+#include "kantv-media.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define JNI_BUF_LEN                 4096
-#define JNI_TMP_LEN                 256
+//=============================================================================================
+//add new AI benchmark type / new realtime inference / new backend for NCNN here, keep sync with CDEUtils.java
 
-#define NCNN_BACKEND_CPU            0
-#define NCNN_BACKEND_GPU            1
-#define NCNN_BACKEND_MAX            1
+// available bench type for NCNN
+enum ncnn_jni_bench_type {
+    NCNN_BENCHMARK_RESNET = 0,
+    NCNN_BENCHMARK_SQUEEZENET,
+    NCNN_BENCHMARK_MNIST,
+    NCNN_BENCHMARK_ASR,
+    NCNN_BENCHMARK_TTS,
+    NCNN_BENCHMARK_MAX
+};
 
-#define NCNN_BENCHMARK_RESNET       1
-#define NCNN_BENCHMARK_SQUEEZENET   2
-#define NCNN_BENCHMARK_MNIST        3
-#define NCNN_BENCH_MAX              3
+// available realtime inference type for NCNN
+enum ncnn_jni_realtimeinference_type {
+    NCNN_REALTIMEINFERENCE_FACEDETECT = 0,  //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
+    NCNN_REALTIMEINFERENCE_NANODAT
+};
 
-#define NCNN_LIVEINFERENCE_FACEDETECT             0 //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
-#define NCNN_LIVEINFERENCE_NANODAT                1
+// available backend for NCNN
+enum ncnn_jni_backend_type {
+    NCNN_BACKEND_CPU = 0,
+    NCNN_BACKEND_GPU,
+    NCNN_BACKEND_MAX
+};
+//=============================================================================================
 
 
 #define NCNN_JNI_NOTIFY(...)        ncnn_jni_notify_c_impl(__VA_ARGS__)

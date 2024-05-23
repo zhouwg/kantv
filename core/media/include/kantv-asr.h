@@ -17,6 +17,7 @@
 #ifndef __KANTV_ASR_H__
 #define __KANTV_ASR_H__
 
+#include <inttypes.h>
 
 #ifdef __cplusplus
     extern "C" {

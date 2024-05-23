@@ -18,6 +18,7 @@ set(PREBUILT_INC_PATH           ${NCNN_SRC_DIR}/../../prebuilts/include/)
 set(QNN_INC_PATH                ${NCNN_SRC_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${NCNN_SRC_DIR}/../../prebuilts/lib/)
 set(NCNNJNI_SRC_DIR             ${NCNN_SRC_DIR}/jni/)
+set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 
 message("NCNN_SRC_DIR         : ${NCNN_SRC_DIR}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
@@ -37,7 +38,7 @@ include_directories(${OpenCV_DIR}/include/)
 include_directories(${NCNN_SRC_DIR}/ncnn-20240410-android-vulkan/${ANDROID_ABI}/include/)
 include_directories(${PREBUILT_INC_PATH}/)
 include_directories(${QNN_INC_PATH}/)
-include_directories(${GGML_SRC_DIR}/jni) # kantv-asr.h
+include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)

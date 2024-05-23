@@ -862,40 +862,40 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     kantv_asr_notify_benchmark_c("reset");
 
     switch (n_bench_type) {
-        case BECHMARK_MEMCPY:
+        case GGML_BENCHMARK_MEMCPY:
             whisper_bench_memcpy(n_threads);
             break;
 
-        case BECHMARK_MULMAT:
+        case GGML_BENCHMARK_MULMAT:
             whisper_bench_ggml_mul_mat(n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_QNN_GGML_OP: //UT for PoC-S49: implementation of GGML OPs using QNN API
+        case GGML_BENCHMARK_QNN_GGML_OP: //UT for PoC-S49: implementation of GGML OPs using QNN API
             qnn_ggml_op(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
-        case BENCHMARK_QNN_AUTO_UT: //automation UT for PoC-S49: implementation of GGML OPs using QNN API
+        case GGML_BENCHMARK_QNN_AUTO_UT: //automation UT for PoC-S49: implementation of GGML OPs using QNN API
             qnn_ggml_op_automation_ut(sz_model_path, n_threads, n_backend_type, n_op_type);
             break;
 
-        case BECHMARK_ASR:
+        case GGML_BENCHMARK_ASR:
             whisper_transcribe_from_file(sz_model_path, sz_user_data, n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_LLM:
+        case GGML_BENCHMARK_LLM:
             llama_inference(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_TEXT2IMAGE:
+        case GGML_BENCHMARK_TEXT2IMAGE:
             stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_CV_MNIST:
+        case GGML_BENCHMARK_CV_MNIST:
             GGML_JNI_NOTIFY("input data is %s\n", sz_user_data);
             mnist_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
-        case BENCHMARK_TTS:
+        case GGML_BENCHMARK_TTS:
             tts_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
