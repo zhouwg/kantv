@@ -1,4 +1,4 @@
-# astyle -n -r "benchmark/*.h,*.cpp" "src/*.h,*.cpp" "tests/*.h,*.cpp" "tools/*.h,*.cpp" "examples/*.h,*.cpp"
+# astyle -n -r "benchmark/*.h,*.cpp" "src/*.h,*.cpp"
 
 # brace style
 --style=allman
