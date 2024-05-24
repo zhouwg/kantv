@@ -230,7 +230,7 @@ cd kantv
 
 ### Run Android APK on Android phone
 
-This project is focus on learning&practising real AI tech on Android device, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone and the following four permissions are required:
+This project is focus on learning&practising real AI tech on Android device, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone(report issue in various Android phone to this project is greatly welcomed) and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
@@ -326,6 +326,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
 - [How to reduce the size of build apk](./docs/how-to-reduce-the-size-of-build-apk.md)
+- [How to sign apk](./docs/how-to-sign-apk.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [F.A.Q](./docs/FAQ.md)
