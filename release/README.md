@@ -203,6 +203,6 @@
                  <ul>
                     <li>import Tencent ncnn infernece framework</li>
                     <li>add ncnn-jni</li>
-                    <li>refine codes, the project is more closer to commericial software</li>
+                    <li>refine codes, the project is more closer to commercial software</li>
                     <li>refine docs and update software arch</li>
                  </ul>
