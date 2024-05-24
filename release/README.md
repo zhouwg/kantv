@@ -201,8 +201,8 @@
 
 - v1.3.8 2024-05-24,
                  <ul>
-                    <li>import Tencent ncnn infernece framework</li>
+                    <li>import Tencent ncnn inference framework</li>
                     <li>add ncnn-jni</li>
-                    <li>refine codes, the project is more closer to commercial software</li>
-                    <li>refine docs and update software arch</li>
+                    <li>refine codes and the project is more closer to commercial software</li>
+                    <li>refine docs</li>
                  </ul>
