@@ -241,15 +241,12 @@ public class IApplication extends Application {
         CDEUtils.copyAssetFile(mContext, "res/png2.png", CDEUtils.getDataPath(mContext) + "png2.png");
         CDEUtils.copyAssetFile(mContext, "res/simhei.ttf", CDEUtils.getDataPath(mContext) + "simhei.ttf");
 
-        //copy asset files to /sdcard/kantv/, these two files are needed for AI subtitle with online TV and ASR research
-        String ggmlModelFileName = "models/ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred for AI subtitle with online TV
+        //copy asset files to /sdcard/kantv/, this file is needed for ASR benchmark
         String ggmlSampleFileName = "jfk.wav";
-        CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
         CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
-        //prebuilt model and data for MNIST inference using ggml
+
         CDEAssetLoader.copyAssetFile(mContext, "mnist-5.png", CDEUtils.getDataPath() + "mnist-5.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-7.png", CDEUtils.getDataPath() + "mnist-7.png");
-        CDEAssetLoader.copyAssetFile(mContext, "models/mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
 
 
         //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
@@ -265,7 +262,7 @@ public class IApplication extends Application {
         //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.cdeos.kantv-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
         CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
 
-        
+
         //TIP: move assets/models to /sdcard/kantv/models manually
         //     for purpose of reduce size of APK, the APK size would be smaller significantly
         CDEAssetLoader.copyAssetDir(mContext, "models", CDEUtils.getDataPath() + "models");
@@ -391,7 +388,7 @@ public class IApplication extends Application {
         int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
         CDELog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
         CDELog.j(TAG, "GGML mode name: " + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()));
-        String modelPath = CDEUtils.getDataPath() + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
+        String modelPath = CDEUtils.getDataPath() + "/models/" + "ggml-" + CDEUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
         CDELog.j(TAG, "modelPath:" + modelPath);
 
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
