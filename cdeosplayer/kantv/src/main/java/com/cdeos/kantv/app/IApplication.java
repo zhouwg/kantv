@@ -241,45 +241,34 @@ public class IApplication extends Application {
         CDEUtils.copyAssetFile(mContext, "res/png2.png", CDEUtils.getDataPath(mContext) + "png2.png");
         CDEUtils.copyAssetFile(mContext, "res/simhei.ttf", CDEUtils.getDataPath(mContext) + "simhei.ttf");
 
-        //copy asset files to /sdcard/kantv/, these two files are needed for AI subtitle of online TV and AI research
-        String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
+        //copy asset files to /sdcard/kantv/, these two files are needed for AI subtitle with online TV and ASR research
+        String ggmlModelFileName = "models/ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred for AI subtitle with online TV
         String ggmlSampleFileName = "jfk.wav";
         CDEAssetLoader.copyAssetFile(mContext, ggmlModelFileName, CDEUtils.getDataPath() + ggmlModelFileName);
         CDEAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, CDEUtils.getDataPath() + ggmlSampleFileName);
-
-        //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
-        //not used since v1.3.8 for purpose of reduce size of APK
-        //CDEAssetLoader.copyAssetFile(mContext, "libInception_v3.so", CDEUtils.getDataPath(mContext) + "libInception_v3.so");
-        //qualcomm's prebuilt QNN userspace library
-        /*
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnCpu.so", CDEUtils.getDataPath(mContext) + "libQnnCpu.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnGpu.so", CDEUtils.getDataPath(mContext) + "libQnnGpu.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnDsp.so", CDEUtils.getDataPath(mContext) + "libQnnDsp.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtp.so", CDEUtils.getDataPath(mContext) + "libQnnHtp.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpNetRunExtensions.so", CDEUtils.getDataPath(mContext) + "libQnnHtpNetRunExtensions.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpPrepare.so", CDEUtils.getDataPath(mContext) + "libQnnHtpPrepare.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Stub.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Stub.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnHtpV75Skel.so", CDEUtils.getDataPath(mContext) + "libQnnHtpV75Skel.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnSystem.so", CDEUtils.getDataPath(mContext) + "libQnnSystem.so");
-        CDEAssetLoader.copyAssetFile(mContext, "libQnnSaver.so", CDEUtils.getDataPath(mContext) + "libQnnSaver.so");
-        */
-
-        //TODO: move to /sdcard/kantv/qnnlib for purpose of reduce size of APK because size of prebuilt qnnlibs is about 49M and the size of APK is about 110M
-        CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
-
-        //qualcomm's prebuilt binary file
-        /* not used since v1.3.8 for purpose of reduce size of APK
-        CDEAssetLoader.copyAssetFile(mContext, "raw_list.txt", CDEUtils.getDataPath() + "raw_list.txt");
-        CDEAssetLoader.copyAssetDir(mContext, "data", CDEUtils.getDataPath() + "data");
-        CDEAssetLoader.copyAssetFile(mContext, "params.bin", CDEUtils.getDataPath() + "params.bin");
-        */
-
-        //copy asset files to /sdcard/kantv/
-        //or just upload dependent files to /sdcard/kantv/ accordingly so the APK size would be smaller significantly
-        //prebuilt model and data for MNIST
+        //prebuilt model and data for MNIST inference using ggml
         CDEAssetLoader.copyAssetFile(mContext, "mnist-5.png", CDEUtils.getDataPath() + "mnist-5.png");
         CDEAssetLoader.copyAssetFile(mContext, "mnist-7.png", CDEUtils.getDataPath() + "mnist-7.png");
-        CDEAssetLoader.copyAssetFile(mContext, "mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
+        CDEAssetLoader.copyAssetFile(mContext, "models/mnist-ggml-model-f32.gguf", CDEUtils.getDataPath() + "mnist-ggml-model-f32.gguf");
+
+
+        //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
+        //TODO: fix following issue and then modify from
+        //      CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
+        //      to
+        //      CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath() + "qnnlib");
+        //      or
+        //      move assets/qnnlib to /sdcard/kantv/qnnlib manually for purpose of reduce size of APK because size of prebuilt qnnlibs is about 49M
+        //   QNN issue:
+        //   can not open QNN library /sdcard/kantv/qnnlib/libQnnSystem.so,
+        //   error: dlopen failed: library "/sdcard/kantv/qnnlib/libQnnSystem.so"
+        //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.cdeos.kantv-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
+        CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
+
+        
+        //TIP: move assets/models to /sdcard/kantv/models manually
+        //     for purpose of reduce size of APK, the APK size would be smaller significantly
+        CDEAssetLoader.copyAssetDir(mContext, "models", CDEUtils.getDataPath() + "models");
 
 
         //step-4:

@@ -1,4 +1,4 @@
-1. mv models & qnnlib in directory assets to /sdcard/kantv/ manually, it will reduce the size of buid apk significantly(from 267M to 60M)
+1. mv assets/models to /sdcard/kantv/ manually, it will reduce the size of buid apk significantly
 
     ```
 

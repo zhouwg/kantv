@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_JNI_QNN       OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 
@@ -107,7 +107,7 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
 
-if (GGML_JNI_QNN)
+if (GGML_ENABLE_QNN)
 add_definitions(-DGGML_USE_QNN)
 else()
 add_definitions(-DGGML_DISABLE_QNN)
@@ -156,7 +156,7 @@ else()
             "-Wno-unused-command-line-argument")
 endif()
 
-if (GGML_JNI_QNN)
+if (GGML_ENABLE_QNN)
     file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
 
     #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
@@ -190,7 +190,7 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    if (GGML_JNI_QNN)
+    if (GGML_ENABLE_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)

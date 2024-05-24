@@ -4,6 +4,10 @@
 
 # Description: build libncnn.a for project KanTV
 #
+# TIP:RTTI and EXCEPTION should be enabled in CMakeLists.txt of ncnn source codes
+#     otherwise some NCNN inference cases would be failure or even crash
+#    option(NCNN_DISABLE_RTTI "disable rtti" OFF)
+#    option(NCNN_DISABLE_EXCEPTION "disable exception" OFF)
 
 set -e
 
