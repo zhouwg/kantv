@@ -230,7 +230,7 @@ cd kantv
 
 ### Run Android APK on Android phone
 
-This Android APK works well on any <b>mainstream</b> Android phone and the following four permissions are required:
+This project is focus on learning&practising real AI tech on Android device, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
