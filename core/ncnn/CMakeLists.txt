@@ -9,20 +9,20 @@ cmake_minimum_required(VERSION 3.22.1)
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 set(NCNN_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
-set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn)
+set(NCNN_DIR                    ${CMAKE_SOURCE_DIR}/ncnn)
+set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn/ncnn-src)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
-set(OpenCV_DIR                  ${NCNN_SRC_DIR}/opencv-mobile-4.9.0-android/sdk/native/jni)
-set(ncnn_DIR                    ${NCNN_SRC_DIR}/ncnn-20240410-android-vulkan/${ANDROID_ABI}/lib/cmake/ncnn)
-set(PREBUILT_LIB_PATH           ${NCNN_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUILT_INC_PATH           ${NCNN_SRC_DIR}/../../prebuilts/include/)
-set(QNN_INC_PATH                ${NCNN_SRC_DIR}/../../prebuilts/include/QNN)
-set(QNN_LIB_PATH                ${NCNN_SRC_DIR}/../../prebuilts/lib/)
-set(NCNNJNI_SRC_DIR             ${NCNN_SRC_DIR}/jni/)
+set(OpenCV_DIR                  ${NCNN_DIR}/opencv-mobile-4.9.0-android/sdk/native/jni)
+set(PREBUILT_LIB_PATH           ${NCNN_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_INC_PATH           ${NCNN_DIR}/../../prebuilts/include/)
+set(QNN_INC_PATH                ${NCNN_DIR}/../../prebuilts/include/QNN)
+set(QNN_LIB_PATH                ${NCNN_DIR}/../../prebuilts/lib/)
+set(NCNNJNI_SRC_DIR             ${NCNN_DIR}/jni/)
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 
+message("NCNN_DIR             : ${NCNN_DIR}")
 message("NCNN_SRC_DIR         : ${NCNN_SRC_DIR}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
-message("ncnn_DIR             : ${ncnn_DIR}")
 message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
 message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
@@ -32,10 +32,8 @@ message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 
 find_package(OpenCV REQUIRED core imgproc)
 
-find_package(ncnn REQUIRED)
-
 include_directories(${OpenCV_DIR}/include/)
-include_directories(${NCNN_SRC_DIR}/ncnn-20240410-android-vulkan/${ANDROID_ABI}/include/)
+include_directories(${NCNN_SRC_DIR}/include/) # prebuild header files of ncnn
 include_directories(${PREBUILT_INC_PATH}/)
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
@@ -111,6 +109,9 @@ set_target_properties(kantvmedia
         IMPORTED_LOCATION
         ${PREBUILT_LIB_PATH}/libkantv-media.so)
 
+
 add_library(ncnn-jni SHARED ${SOURCE_FILES})
 
 target_link_libraries(ncnn-jni ncnn ${OpenCV_LIBS} camera2ndk mediandk ${LOG_LIB} kantvmedia android)
+
+

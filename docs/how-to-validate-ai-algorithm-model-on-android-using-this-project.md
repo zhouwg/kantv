@@ -1,5 +1,8 @@
 
-modify following files to add new bench type / new backend / new realtime inference for NCNN:
+modify following files to add new inference bench type / new inference backend / new realtime inference for NCNN:
+
+<a href="https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/res/values/arrays.xml#L77">arrays.xml</a>
+
 
 <a href="https://github.com/zhouwg/kantv/blob/master/cdeosplayer/cdeosplayer-lib/src/main/java/cdeos/media/player/CDEUtils.java#L4027">CDEUtils.java</a>
 

@@ -196,5 +196,13 @@
                  <ul>
                     <li>PoC:QNN backend</li>
                     <li>Build:add command-line mode and docker mode</li>
-                    <li>JNI:add mnist-ggml example</li>
+                    <li>ggml-jni:add mnist-ggml example</li>
+                 </ul>
+
+- v1.3.8 2024-05-24,
+                 <ul>
+                    <li>import Tencent ncnn infernece framework</li>
+                    <li>add ncnn-jni</li>
+                    <li>refine codes, the project is more closer to commercial software</li>
+                    <li>refine docs and update software arch</li>
                  </ul>

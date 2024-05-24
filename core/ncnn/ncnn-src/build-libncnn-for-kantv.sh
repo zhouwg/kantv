@@ -48,15 +48,11 @@ make install
 
 show_pwd
 ls -lah src/libncnn.a
-#${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip src/libncnn.a
-ls -lah src/libncnn.a
 
-show_pwd
 cd -
 show_pwd
-/bin/rm -rf ../ncnn-20240410-android-vulkan/arm64-v8a/*
-/bin/cp -rf ./out/arm64-v8a/install/* ../ncnn-20240410-android-vulkan/arm64-v8a/
-ls -lah ../ncnn-20240410-android-vulkan/arm64-v8a/lib/libncnn.a
+#generate prebuild header files of ncnn for JNI codes
+/bin/cp -rf ./out/arm64-v8a/install/include/ncnn/* ./include/
 }
 
 
