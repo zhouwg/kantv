@@ -29,7 +29,9 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 (depend on https://github.com/zhouwg/kantv/issues/121 and https://github.com/zhouwg/kantv/issues/176 )
 
-![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/ffaaeb27-2f56-496d-896d-d9348823bc1f)
+
+![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/86dc0296-467a-40e2-b77b-9540a430c3c0)
+
 
 ### How to build project
 
@@ -230,7 +232,7 @@ cd kantv
 
 ### Run Android APK on Android phone
 
-This project is focus on learning&practising real AI tech on Android device, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone(report issue in various Android phone to this project is greatly welcomed) and the following four permissions are required:
+This project is a learning&research project, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone(report issue in various Android phone to this project is greatly welcomed) and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
@@ -361,15 +363,7 @@ Report issue in various Android-based phone or even submit PR to this project is
   </li>
 
   <li>
-   TTS engine <a href="https://github.com/PABannier/bark.cpp">bark.cpp</a> by <a href="https://github.com/PABannier">PABannier</a>
-  </li>
-
-  <li>
-   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stablediffusion.cpp</a> by <a href="https://github.com/leejet">leejet</a>
-  </li>
-
-  <li>
-   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an open-source ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with <a href="https://github.com/Tencent/ncnn">ncnn</a>) by <a href="https://github.com/k2-fsa">k2-fsa</a>
+   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with <a href="https://github.com/Tencent/ncnn">ncnn</a>) by <a href="https://github.com/k2-fsa">k2-fsa</a>
   </li>
 
   </ul>
