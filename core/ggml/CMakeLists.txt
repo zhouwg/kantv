@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_JNI_QNN       OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 
@@ -48,6 +48,7 @@ message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")
 message("QNN_INC_PATH         : ${QNN_INC_PATH}")
 message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
+message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 
 
 include_directories(${QNN_INC_PATH}/)
@@ -106,7 +107,7 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
 
-if (GGML_JNI_QNN)
+if (GGML_ENABLE_QNN)
 add_definitions(-DGGML_USE_QNN)
 else()
 add_definitions(-DGGML_DISABLE_QNN)
@@ -138,7 +139,13 @@ endif()
 #add_compile_options("-Wall" "-Werror" "-Wno-sign-compare")
 add_compile_options("-Wall" "-Wno-sign-compare")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_definitions(-DDEBUG)
+    add_definitions(-g)
+    add_compile_options("-Wall" "-Wno-sign-compare")
+else()
+    add_definitions(-DNDEBUG)
+    add_definitions(-O3)
     add_link_options("-s")
     set(CMAKE_C_VISIBILITY_PRESET hidden)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -149,7 +156,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             "-Wno-unused-command-line-argument")
 endif()
 
-if (GGML_JNI_QNN)
+if (GGML_ENABLE_QNN)
     file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
 
     #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
@@ -183,7 +190,7 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    if (GGML_JNI_QNN)
+    if (GGML_ENABLE_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)

@@ -188,6 +188,20 @@ cd kantv
 
  - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L10">ncnn/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
 
+ - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
+
+    ```
+
+    # open $ANDROID_NDK/build/cmake/android.toolchain.cmake for ndk < r23
+    # or $ANDROID_NDK/build/cmake/android-legacy.toolchain.cmake for ndk >= r23
+    # delete "-g" line
+    list(APPEND ANDROID_COMPILER_FLAGS
+    -g
+    -DANDROID
+
+    ```
+
+
 
 #### Build native codes
 
@@ -216,7 +230,7 @@ cd kantv
 
 ### Run Android APK on Android phone
 
-This Android APK works well on any <b>mainstream</b> Android phone and the following four permissions are required:
+This project is focus on learning&practising real AI tech on Android device, so the Android APK will <a href="./docs/compliance-statement.md">not collect/upload user data in Android device</a>. The Android APK should be works well on any <b>mainstream</b> Android phone(report issue in various Android phone to this project is greatly welcomed) and the following four permissions are required:
 
 - Access to storage is required to generate necessary temporary files
 - Access to device information is required to obtain current phone network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
@@ -311,6 +325,8 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
+- [How to reduce the size of build apk](./docs/how-to-reduce-the-size-of-build-apk.md)
+- [How to sign apk](./docs/how-to-sign-apk.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [F.A.Q](./docs/FAQ.md)

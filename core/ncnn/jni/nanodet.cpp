@@ -230,8 +230,8 @@ int NanoDet::load(const char* modeltype, int _target_size, const float* _mean_va
 
     char parampath[256];
     char modelpath[256];
-    sprintf(parampath, "nanodet-%s.param", modeltype);
-    sprintf(modelpath, "nanodet-%s.bin", modeltype);
+    sprintf(parampath, "/sdcard/kantv/models/nanodet-%s.param", modeltype);
+    sprintf(modelpath, "/sdcard/kantv/models/nanodet-%s.bin", modeltype);
 
     nanodet.load_param(parampath);
     nanodet.load_model(modelpath);

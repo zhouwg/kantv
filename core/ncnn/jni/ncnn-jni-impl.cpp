@@ -64,6 +64,8 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 #include <cmath>
 
 //ncnn
@@ -505,8 +507,8 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
     LOGGD("backend_type %d", backend_type);
     LOGGD("is_realtime_inference", is_realtime_inference);
 
-    AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
-    LOGGD("ncnn load model with AAssetManager %p", mgr);
+    //AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+    //LOGGD("ncnn load model with AAssetManager %p", mgr);
 
     if (1 == is_realtime_inference) {
         //sanity check
@@ -562,7 +564,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     } else {
                         if (!g_scrfd)
                             g_scrfd = new SCRFD;
-                        g_scrfd->load(mgr, modeltype, use_gpu);
+                        g_scrfd->load(modeltype, use_gpu);
                     }
                 }
             }
@@ -574,7 +576,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     return JNI_FALSE;
                 }
 
-                AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+                //AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
                 const char *modeltypes[] =
                         {
                                 "m",
@@ -637,7 +639,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     } else {
                         if (!g_nanodet)
                             g_nanodet = new NanoDet;
-                        g_nanodet->load(mgr, modeltype, target_size, mean_vals[(int) modelid],
+                        g_nanodet->load(modeltype, target_size, mean_vals[(int) modelid],
                                         norm_vals[(int) modelid], use_gpu);
                     }
                 }
@@ -669,18 +671,28 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
 
             // init param
             {
+#if 0
                 int ret = resnet.load_param_bin(mgr, "resnet.param.bin");
+#else
+                int ret = resnet.load_param_bin("/sdcard/kantv/models/resnet.param.bin");
+#endif
                 if (ret != 0) {
                     LOGGW("ResNet Ncnn: load_param_bin failed");
+                    NCNN_JNI_NOTIFY("ResNet Ncnn: load_param_bin failed");
                     return JNI_FALSE;
                 }
             }
 
             // init bin
             {
+#if 0
                 int ret = resnet.load_model(mgr, "resnet.bin");
+#else
+                int ret = resnet.load_model("/sdcard/kantv/models/resnet.bin");
+#endif
                 if (ret != 0) {
                     LOGGW("ResNet Ncnn:load_model failed");
+                    NCNN_JNI_NOTIFY("ResNet Ncnn:load_model failed");
                     return JNI_FALSE;
                 }
             }
@@ -688,18 +700,28 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
         } else if (NCNN_BENCHMARK_SQUEEZENET == netid) { //SqueezeNet
             // init param
             {
+#if 0
                 int ret = squeezenet.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+#else
+                int ret = squeezenet.load_param_bin("/sdcard/kantv/models/squeezenet_v1.1.param.bin");
+#endif
                 if (ret != 0) {
                     LOGGW("SqueezeNet Ncnn:load_param_bin failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:load_param_bin failed");
                     return JNI_FALSE;
                 }
             }
 
             // init bin
             {
+#if 0
                 int ret = squeezenet.load_model(mgr, "squeezenet_v1.1.bin");
+#else
+                int ret = squeezenet.load_model("/sdcard/kantv/models/squeezenet_v1.1.bin");
+#endif
                 if (ret != 0) {
                     LOGGW("SqueezeNet Ncnn:load_model failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:load_model failed");
                     return JNI_FALSE;
                 }
             }
@@ -711,29 +733,41 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 squeezenet_gpu.opt.use_vulkan_compute = true;
 
                 {
+#if 0
                     int ret = squeezenet_gpu.load_param_bin(mgr, "squeezenet_v1.1.param.bin");
+#else
+                    int ret = squeezenet_gpu.load_param_bin( "/sdcard/kantv/models/squeezenet_v1.1.param.bin");
+#endif
                     if (ret != 0) {
                         LOGGW("SqueezeNet Ncnn: load_param_bin failed");
+                        NCNN_JNI_NOTIFY("SqueezeNet Ncnn: load_param_bin failed");
                         return JNI_FALSE;
                     }
                 }
                 {
+#if 0
                     int ret = squeezenet_gpu.load_model(mgr, "squeezenet_v1.1.bin");
+#else
+                    int ret = squeezenet_gpu.load_model( "/sdcard/kantv/models/squeezenet_v1.1.bin");
+#endif
                     if (ret != 0) {
                         LOGGW("SqueezeNet Ncnn:load_model failed");
+                        NCNN_JNI_NOTIFY("SqueezeNet Ncnn:load_model failed");
                         return JNI_FALSE;
                     }
                 }
             } else {
                 LOGGD("ncnn gpu backend not supported");
-                NCNN_JNI_NOTIFY("using ncnn gpu backend not supported");
+                NCNN_JNI_NOTIFY("gpu backend not supported");
             }
 
             // init words
             {
+#if 0
                 AAsset *asset = AAssetManager_open(mgr, "synset_words.txt", AASSET_MODE_BUFFER);
                 if (!asset) {
                     LOGGW("SqueezeNet Ncnn:open synset_words.txt failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:open synset_words.txt failed");
                     return JNI_FALSE;
                 }
 
@@ -744,9 +778,39 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 int ret = AAsset_read(asset, (void *) words_buffer.data(), len);
 
                 AAsset_close(asset);
+#else
+                std::ifstream file("/sdcard/kantv/models/synset_words.txt");
+                size_t len = 0;
+                size_t ret = 0;
+                if (file.is_open()) {
+                    std::streampos begin = file.tellg();
+                    file.seekg(0, std::ios::end);
+                    std::streampos end   = file.tellg();
+                    len   = end - begin;
+                    file.seekg(0, std::ios::beg);
+                    file.close();
+                } else {
+                    LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:read synset_words.txt failed");
+                    return JNI_FALSE;
+                }
+                std::string words_buffer;
+                words_buffer.resize(len);
 
+                FILE *fp = fopen("/sdcard/kantv/models/synset_words.txt", "r");
+                if (fp) {
+                    ret = fread((void *) words_buffer.data(), 1, len, fp);
+                    fclose(fp);
+                    fp = NULL;
+                } else {
+                    LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:read synset_words.txt failed");
+                    return JNI_FALSE;
+                }
+#endif
                 if (ret != len) {
                     LOGGW("SqueezeNet Ncnn:read synset_words.txt failed");
+                    NCNN_JNI_NOTIFY("SqueezeNet Ncnn:read synset_words.txt failed");
                     return JNI_FALSE;
                 }
 
@@ -771,15 +835,15 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 //load ncnn model from file
                 if (0) {
                     // init param
-                    //int ret = mnist.load_param(mgr, "mnist.param");
-                    int ret = mnist.load_param_bin(mgr, "mnist.param.bin");
+                    //int ret = mnist.load_param("/sdcard/kantv/models/mnist.param");
+                    int ret = mnist.load_param_bin("/sdcard/kantv/models/mnist.param.bin");
                     if (ret != 0) {
                         LOGGW("mnist Ncnn: load_param failed");
                         NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
                         return JNI_FALSE;
                     }
                     // init bin
-                    ret = mnist.load_model(mgr, "mnist.bin");
+                    ret = mnist.load_model("/sdcard/kantv/models/mnist.bin");
                     if (ret != 0) {
                         LOGGW("mnist Ncnn:load_model failed");
                         NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
@@ -787,15 +851,15 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                     }
                 } else {
                     // init param
-                    int ret = mnist.load_param(mgr, "mnist-int8.param");
-                    //int ret = mnist.load_param_bin(mgr, "mnist-int8.param.bin");
+                    int ret = mnist.load_param("/sdcard/kantv/models/mnist-int8.param");
+                    //int ret = mnist.load_param_bin("/sdcard/kantv/models/mnist-int8.param.bin");
                     if (ret != 0) {
                         LOGGW("mnist Ncnn: load_param failed");
                         NCNN_JNI_NOTIFY("mnist Ncnn: load_param failed");
                         return JNI_FALSE;
                     }
                     // init bin
-                    ret = mnist.load_model(mgr, "mnist-int8.bin");
+                    ret = mnist.load_model("/sdcard/kantv/models/mnist-int8.bin");
                     if (ret != 0) {
                         LOGGW("mnist Ncnn:load_model failed");
                         NCNN_JNI_NOTIFY("mnist Ncnn:load_model failed");
@@ -815,7 +879,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
             if (ncnn::get_gpu_count() != 0)
                 opt.use_vulkan_compute = true;
 
-            AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
+            //AAssetManager *mgr = AAssetManager_fromJava(env, assetManager);
 
             yolov5.opt = opt;
 
@@ -823,18 +887,20 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
 
             // init param
             {
-                int ret = yolov5.load_param(mgr, "yolov5s.param");
+                int ret = yolov5.load_param("/sdcard/kantv/models/yolov5s.param");
                 if (ret != 0) {
                     LOGGD("YoloV5Ncnn:load_param failed");
+                    NCNN_JNI_NOTIFY("YoloV5Ncnn:load_param failed");
                     return JNI_FALSE;
                 }
             }
 
             // init bin
             {
-                int ret = yolov5.load_model(mgr, "yolov5s.bin");
+                int ret = yolov5.load_model("/sdcard/kantv/models/yolov5s.bin");
                 if (ret != 0) {
                     LOGGD("YoloV5Ncnn:load_model failed");
+                    NCNN_JNI_NOTIFY("YoloV5Ncnn:load_model failed");
                     return JNI_FALSE;
                 }
             }
@@ -849,6 +915,7 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
     return JNI_TRUE;
 }
 
+
 // public native boolean openCamera(int facing);
 JNIEXPORT jboolean JNICALL
 Java_org_ncnn_ncnnjava_openCamera(JNIEnv *env, jobject thiz, jint facing) {
@@ -862,6 +929,7 @@ Java_org_ncnn_ncnnjava_openCamera(JNIEnv *env, jobject thiz, jint facing) {
     return JNI_TRUE;
 }
 
+
 // public native boolean closeCamera();
 JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_closeCamera(JNIEnv *env, jobject thiz) {
     LOGGD("ncnn closeCamera");
@@ -870,6 +938,7 @@ JNIEXPORT jboolean JNICALL Java_org_ncnn_ncnnjava_closeCamera(JNIEnv *env, jobje
 
     return JNI_TRUE;
 }
+
 
 // public native boolean setOutputWindow(Surface surface);
 JNIEXPORT jboolean JNICALL
@@ -1145,6 +1214,7 @@ static void detectMnist(JNIEnv *env, jobject bitmap, bool use_gpu) {
     return;
 }
 
+
 //TODO: remove JNIENV
 static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
     if (use_gpu && ncnn::get_gpu_count() == 0) {
@@ -1329,6 +1399,8 @@ static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
     LOGGD("ncnn YoloV5 inference elapsed %.2f ms", elapsed);
     NCNN_JNI_NOTIFY("ncnn squeezenet inference elapsed %.2f ms", elapsed);
 }
+
+
 /**
 *
 * @param sz_ncnnmodel_param   param file of ncnn model

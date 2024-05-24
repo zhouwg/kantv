@@ -226,6 +226,7 @@ static void generate_proposals(const ncnn::Mat& anchors, int feat_stride, const 
     }
 }
 
+
 int SCRFD::load(const char* modeltype, bool use_gpu)
 {
     scrfd.clear();
@@ -243,39 +244,11 @@ int SCRFD::load(const char* modeltype, bool use_gpu)
 
     char parampath[256];
     char modelpath[256];
-    sprintf(parampath, "scrfd_%s-opt2.param", modeltype);
-    sprintf(modelpath, "scrfd_%s-opt2.bin", modeltype);
+    sprintf(parampath, "/sdcard/kantv/models/scrfd_%s-opt2.param", modeltype);
+    sprintf(modelpath, "/sdcard/kantv/models/scrfd_%s-opt2.bin", modeltype);
 
-    scrfd.load_param(parampath);
-    scrfd.load_model(modelpath);
-
-    has_kps = strstr(modeltype, "_kps") != NULL;
-
-    return 0;
-}
-
-int SCRFD::load(AAssetManager* mgr, const char* modeltype, bool use_gpu)
-{
-    scrfd.clear();
-
-    ncnn::set_cpu_powersave(2);
-    ncnn::set_omp_num_threads(ncnn::get_big_cpu_count());
-
-    scrfd.opt = ncnn::Option();
-
-#if NCNN_VULKAN
-    scrfd.opt.use_vulkan_compute = use_gpu;
-#endif
-
-    scrfd.opt.num_threads = ncnn::get_big_cpu_count();
-
-    char parampath[256];
-    char modelpath[256];
-    sprintf(parampath, "scrfd_%s-opt2.param", modeltype);
-    sprintf(modelpath, "scrfd_%s-opt2.bin", modeltype);
-
-    scrfd.load_param(mgr, parampath);
-    scrfd.load_model(mgr, modelpath);
+    scrfd.load_param( parampath);
+    scrfd.load_model( modelpath);
 
     has_kps = strstr(modeltype, "_kps") != NULL;
 

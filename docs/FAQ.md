@@ -12,7 +12,7 @@ If you plan to use kantv in your own project, keep in mind the above. although I
 
 - Is there any IPR concern/risk in kantv?
 
-Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee in MNC company).
+Project KanTV was almost/completely done by myself since 05-2021 and NO IPR concern/risk(some parts with IPR risk(implementation of ChinaDRM, widevine, wiseplay, TEE...) have been removed accordingly because I had been received good IPR compliance training when I was a full-time employee/programmer in MNC IT company).
 
 <hr>
 

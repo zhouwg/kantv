@@ -580,6 +580,8 @@
                      }
                  }
 
+                 selectModeFileName = "/models/" + selectModeFileName;
+
                  if (!isQNNModel)
                      selectModelFilePath = CDEUtils.getDataPath() + selectModeFileName;
                  else {
@@ -596,7 +598,7 @@
                  }
                  File sampleFile = new File(CDEUtils.getDataPath() + ggmlSampleFileName);
                  if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                     CDEUtils.showMsgBox(mActivity, "pls check whether model file:" + selectModeFileName + " exist in /sdcard/kantv/");
+                     CDEUtils.showMsgBox(mActivity, "pls check whether model file:" + selectModeFile.getAbsolutePath() + " exist");
                      return;
                  }
 
@@ -616,7 +618,7 @@
              ggmlModelFileName = selectModeFileName;
              CDELog.j(TAG, "model file:" + CDEUtils.getDataPath() + selectModeFileName);
              if (isASRModel) { //avoid crash
-                 ggmljava.asr_reset(CDEUtils.getDataPath() + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
+                 ggmljava.asr_reset(CDEUtils.getDataPath() + "/models/" + selectModeFileName, ggmljava.get_cpu_core_counts() / 2, CDEUtils.ASR_MODE_BECHMARK, backendIndex);
              }
 
              nLogCounts = 0;
@@ -745,7 +747,7 @@
                              if (isNCNNInference()) {
                                  backendDesc = CDEUtils.getNCNNBackendDesc(backendIndex);
                              }
-                             String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
+                             String benchmarkTip = "Bench:" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + CDEUtils.getDataPath() + selectModeFileName
                                      + " ,threads: " + nThreadCounts
                                      + " ,backend: " + backendDesc
                                      + " ) cost " + duration + " milliseconds";
