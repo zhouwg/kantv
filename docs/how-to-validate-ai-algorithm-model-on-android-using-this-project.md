@@ -1,5 +1,9 @@
 
-modify following files to add new inference bench type / new inference backend / new realtime inference for NCNN:
+for GGML inference framework, pls refer to https://github.com/zhouwg/kantv/commit/1bbf5345011ff452796a813f95794a27a97dd23f
+
+
+
+for NCNN inference framework, modify following files to add new inference bench type / new inference backend / new realtime inference type
 
 <a href="https://github.com/zhouwg/kantv/blob/master/cdeosplayer/kantv/src/main/res/values/arrays.xml#L77">arrays.xml</a>
 
