@@ -1,5 +1,5 @@
 
-for GGML inference framework, pls refer to https://github.com/zhouwg/kantv/commit/1bbf5345011ff452796a813f95794a27a97dd23f
+for GGML inference framework, pls refer to https://github.com/zhouwg/kantv/commit/204036648d5d6779f73fe3eafea59edd3cce3843
 
 
 
