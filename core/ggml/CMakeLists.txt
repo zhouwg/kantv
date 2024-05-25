@@ -115,6 +115,7 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
+add_definitions(-DGGML_USE_LLAMAFILE)
 
 if (GGML_ENABLE_QNN)
 add_definitions(-DGGML_USE_QNN)

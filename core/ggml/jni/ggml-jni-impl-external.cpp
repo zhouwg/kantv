@@ -2200,7 +2200,6 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
 #include <unordered_set>
 #include <utility>
 
-
 #include "QnnTypes.h"
 #include "QnnCommon.h"
 #include "QnnContext.h"

@@ -1,3 +1,4 @@
+//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv/clip.h
 #include "ggml.h"
 #include "log.h"
 #include "common.h"
