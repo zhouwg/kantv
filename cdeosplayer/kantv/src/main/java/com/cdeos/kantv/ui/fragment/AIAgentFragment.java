@@ -220,7 +220,7 @@ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implement
             facing = new_facing;
         });
         spinnerNCNNNetid = mActivity.findViewById(R.id.spinnerNCNNNetid);
-        String[] arrayNetid = getResources().getStringArray(R.array.ncnn_liveinference_netid);
+        String[] arrayNetid = getResources().getStringArray(R.array.ncnn_realtimeinference_netid);
         ArrayAdapter<String> adapterNCNNNetid = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNetid);
         spinnerNCNNNetid.setAdapter(adapterNCNNNetid);
         spinnerNCNNNetid.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
