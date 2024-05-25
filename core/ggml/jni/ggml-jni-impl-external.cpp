@@ -8576,7 +8576,7 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
                           "-p", sz_user_data,
                           "-t", std::to_string(num_threads).c_str()
     };
-    //crash on Xiaomi 14 and many issues
+    //many issues and latest source code of llama.cpp should be used with dev version but dev version crash on Xiaomi 14
     //ret = minicpmv_main(argc, const_cast<char **>(argv));
 
     return ret;

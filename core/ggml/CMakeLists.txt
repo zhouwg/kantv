@@ -11,8 +11,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(TARGET_XIAOMI14    ON)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_ENABLE_QNN    ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+set(GGML_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 
@@ -51,13 +51,6 @@ message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
 message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 
 
-include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
-include_directories(${SDCPP_SRC_DIR})
-include_directories(${BARKCPP_SRC_DIR})
-
-if (GGML_ENABLE_QNN)
-aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
-
 include_directories(${QNN_INC_PATH}/)
 include_directories(${QNN_SRC_DIR}/)
 include_directories(${QNN_SRC_DIR}/Utils)
@@ -65,7 +58,11 @@ include_directories(${QNN_SRC_DIR}/Log)
 include_directories(${QNN_SRC_DIR}/WrapperUtils)
 include_directories(${QNN_SRC_DIR}/PAL/include)
 
-add_definitions(-DGGML_USE_QNN)
+aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
+include_directories(${SDCPP_SRC_DIR})
+include_directories(${BARKCPP_SRC_DIR})
+
+include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred
@@ -76,11 +73,10 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
-        ${LLAMACPP_SRC_DIR}/unicode-data.cpp
         ${LLAMACPP_SRC_DIR}/sgemm.cpp
+        ${LLAMACPP_SRC_DIR}/unicode-data.cpp
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
-        ${LLAMACPP_SRC_DIR}/common/build-info.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
@@ -100,40 +96,13 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
 
         #05-25-2024, import MiniCPM-V(A GPT-4V Level Multimodal LLM), https://github.com/OpenBMB/MiniCPM-V
-        ${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
-    )
-else()
+        #many issues and latest source code of llama.cpp should be used with dev version but dev version crash on Xiaomi 14
+        #${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
 
-add_definitions(-DGGML_DISABLE_QNN)
-
-set(SOURCE_FILES
-        ${LLAMACPP_SRC_DIR}/ggml.c
-        ${LLAMACPP_SRC_DIR}/ggml-alloc.c
-        ${LLAMACPP_SRC_DIR}/ggml-backend.c
-        ${LLAMACPP_SRC_DIR}/ggml-quants.c
-
-        ${LLAMACPP_SRC_DIR}/llama.cpp
-        ${LLAMACPP_SRC_DIR}/unicode.cpp
-        ${LLAMACPP_SRC_DIR}/unicode-data.cpp
-        ${LLAMACPP_SRC_DIR}/sgemm.cpp
-        ${LLAMACPP_SRC_DIR}/common/sampling.cpp
-        ${LLAMACPP_SRC_DIR}/common/common.cpp
-        ${LLAMACPP_SRC_DIR}/common/build-info.cpp
-        ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
-        ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
-
-        ${WHISPERCPP_SRC_DIR}/whisper.cpp
-
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
-        ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
-    )
-endif()
+)
 
 include_directories(${WHISPERCPP_SRC_DIR}/)
 include_directories(${GGML_SRC_DIR}/)
@@ -146,9 +115,15 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
-add_definitions(-DGGML_USE_LLAMAFILE)
-add_definitions(-O3)
 
+if (GGML_ENABLE_QNN)
+add_definitions(-DGGML_USE_QNN)
+else()
+add_definitions(-DGGML_DISABLE_QNN)
+endif()
+
+
+add_definitions(-O3)
 
 if (TARGET_XIAOMI14)
 
@@ -170,14 +145,16 @@ add_definitions(-mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8)
 
 endif()
 
+#add_compile_options("-Wall" "-Werror" "-Wno-sign-compare")
+add_compile_options("-Wall" "-Wno-sign-compare")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
     add_definitions(-g)
     add_compile_options("-Wall" "-Wno-sign-compare")
-    #add_compile_options("-Wall" "-Werror" "-Wno-sign-compare")
 else()
     add_definitions(-DNDEBUG)
+    add_definitions(-O3)
     add_link_options("-s")
     set(CMAKE_C_VISIBILITY_PRESET hidden)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
