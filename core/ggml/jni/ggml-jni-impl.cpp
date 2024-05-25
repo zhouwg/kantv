@@ -897,11 +897,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_TEXT2IMAGE:
-#ifdef GGML_USE_QNN
             stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-#else
-            GGML_JNI_NOTIFY("Text2Image not supported");
-#endif
             break;
 
         case GGML_BENCHMARK_CV_MNIST:
@@ -910,11 +906,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_TTS:
-#ifdef GGML_USE_QNN
             tts_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-#else
-            GGML_JNI_NOTIFY("TTS not supported");
-#endif
             break;
 
         default:

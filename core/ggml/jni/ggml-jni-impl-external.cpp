@@ -1816,7 +1816,7 @@ static void sd_log_cb(enum sd_log_level_t level, const char* log, void* data) {
     LOGGD("[%-5s]%s ", level_str, log);
 }
 
-#ifdef GGML_USE_QNN
+
 static int stablediffusion_main(int argc, const char* argv[]) {
     SDParams params;
     parse_args(argc, argv, params);
@@ -2143,9 +2143,9 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
 
     return result;
 }
-#endif
 
 
+#ifdef GGML_USE_QNN
 /*
  * MIT license
  * Copyright (C) 2024 KanTV Authors
@@ -2201,7 +2201,6 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
 #include <utility>
 
 
-#ifdef GGML_USE_QNN
 #include "QnnTypes.h"
 #include "QnnCommon.h"
 #include "QnnContext.h"
