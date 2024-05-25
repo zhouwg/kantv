@@ -517,6 +517,12 @@
                  } else if (strModeName.startsWith("qnn")) {
                      //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
                      isQNNModel = true;
+                 } else if (strModeName.contains("minicpm-v")) {
+                     //MiniCPM-V:A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V/
+                     //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
+                     //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
+                     selectModeFileName = "ggml-model-Q4_K_M.gguf";
+                     isLLMModel = true;
                  } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_CV_MNIST.ordinal())) {
                      isMNISTModel = true;
                      //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
