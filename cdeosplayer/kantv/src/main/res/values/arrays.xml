@@ -69,6 +69,7 @@
         <item>TEXT2IMAGE(ggml)</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
         <item>MNIST(ggml)</item>            <!-- MNIST(using ggml) benchmark -->
         <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
+        <!-- the following is NCNN inference -->
         <item>RESNET(ncnn)</item>           <!-- image classification via ResNet using NCNN -->
         <item>SQUEEZENET(ncnn)</item>       <!-- image classification via SqueezeNet using NCNN-->
         <item>MNIST(ncnn)</item>            <!-- MNIST(using NCNN) benchmark -->
@@ -110,6 +111,7 @@
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
         <item>yi-chat-6b</item>
+        <item>minicpm-v</item>
         <item>text2image</item>
         <item>mnist</item>
         <item>tts-small</item>
@@ -159,7 +161,7 @@
         <item>GPU</item>
     </string-array>
 
-    <string-array name="ncnn_liveinference_netid">
+    <string-array name="ncnn_realtimeinference_netid">
         <item>scrfd</item>
         <item>nanodat</item>
     </string-array>
