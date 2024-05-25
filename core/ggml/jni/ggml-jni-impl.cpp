@@ -84,6 +84,7 @@
 #include <unordered_map>
 #include <vector>
 
+#ifdef GGML_USE_QNN
 //03-31-2024,18:00, for PoC https://github.com/zhouwg/kantv/issues/121
 #include "ggml-qnn.h"
 
@@ -95,6 +96,7 @@
 #include "QnnProperty.h"
 #include "QnnTensor.h"
 #include "QnnInterface.h"
+#endif
 
 extern "C" {
 #include <inttypes.h>
@@ -237,7 +239,7 @@ static int read_data_from_file(const char * sz_file_name, uint8_t ** pp_data, si
         fp = fopen(sz_file_name, "rb");
         if (NULL == fp) {
             result = -errno;
-            LOGD("open file %s failed(reason:%s)", file_name, strerror(errno));
+            LOGD("open file %s failed(reason:%s)", sz_file_name, strerror(errno));
         }
     }
 
@@ -895,7 +897,11 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_TEXT2IMAGE:
+#ifdef GGML_USE_QNN
             stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
+#else
+            GGML_JNI_NOTIFY("Text2Image not supported");
+#endif
             break;
 
         case GGML_BENCHMARK_CV_MNIST:
@@ -904,7 +910,11 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_TTS:
+#ifdef GGML_USE_QNN
             tts_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
+#else
+            GGML_JNI_NOTIFY("TTS not supported");
+#endif
             break;
 
         default:
@@ -912,6 +922,30 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     }
 }
 
+
+//"m" for "multimodal"
+void ggml_jni_bench_m(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int n_bench_type, int n_num_threads, int n_backend_type) {
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("img path:%s\n", sz_img_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("bench type:%d\n", n_bench_type);
+    LOGGD("backend type:%d\n", n_backend_type);
+
+    switch (n_bench_type) {
+        case GGML_BENCHMARK_LLM_V:  //A GPT-4V style multimodal LLM inference
+            LOGGD("GGML_BENCHMARK_LLM_V");
+            minicpmv_inference(sz_model_path, sz_img_path, sz_user_data, n_num_threads, n_backend_type);
+            break;
+
+        case GGML_BENCHMARK_LLM_O: //A GPT-4o style multimodal LLM inference
+            LOGGD("GGML_BENCHMARK_LLM_O");
+            GGML_JNI_NOTIFY("GGML_BENCHMARK_LLM_O");
+            break;
+
+        default:
+            break;
+    }
+}
 
 // =================================================================================================
 //

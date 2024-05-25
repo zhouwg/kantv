@@ -29,6 +29,7 @@
 .idea/
 
 ggml-metal-embed.metal
+common/CMakeLists.txt
 
 lcov-report/
 gcovr-report/

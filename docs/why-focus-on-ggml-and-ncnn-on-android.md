@@ -56,4 +56,4 @@ There are some "killer/heavyweight" open-source AI application engines based on 
 
 
 
-5. I'm good at Android software developent(from UI to framework to kernel) but only know a few things about iOS application software development. I heard whisper.cpp since end of January 2024 and started learning ggml since end of February 2024 and ggml was born/open-sourced on 2022, I heard ncnn since end of April 2024 and started learning ncnn since mid-May 2024 and ncnn was born/open-sourced on 2017. my resource and capability is limited.
+5. I'm good at Android software developent(from UI to framework to kernel) but only know a few things about iOS application software development. I heard whisper.cpp(used for generate subtitle with some English short videos in my Wechat public account) since mid-January 2024 and started <a href="https://github.com/zhouwg/kantv/issues/64">learning ggml</a> since 03-05(March 5) 2024 and ggml was born/open-sourced on 2022, I heard ncnn since end of April 2024 and started learning ncnn since mid-May 2024 and ncnn was born/open-sourced on 2017. my resource and capability is limited.

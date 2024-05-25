@@ -92,7 +92,9 @@ extern "C" {
 
 #include "llama.h"
 
+#ifdef GGML_USE_QNN
 #include "ggml-qnn.h"
+#endif
 
 #include "stable-diffusion.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -116,16 +118,86 @@ extern "C" {
 
 #define log_tostr(var) log_var_to_string_impl(var).c_str()
 
+static const char * get_qnn_backend_name(int n_backend_type) {
+    switch (n_backend_type) {
+        case 0:
+            return "QNN-CPU";
+        case 1:
+            return "QNN-GPU";
+        case 2:
+            return "QNN-HTP(DSP)";
+        case 3:
+            return "ggml";
+        default:
+            return "unknown";
+    }
+}
 
-static const char * get_qnn_backend_name(int n_backend_type);
-static float tensor_sum_elements(const ggml_tensor * tensor);
+
 static bool ggml_graph_compute_helper(
         struct ggml_cgraph * graph,
         std::vector<uint8_t> & buf,
         int   n_threads,
         ggml_abort_callback   abort_callback,
-        void * abort_callback_data);
-static void tensor_dump(const ggml_tensor * tensor, const char * name);
+        void * abort_callback_data) {
+    struct ggml_cplan plan = ggml_graph_plan(graph, n_threads);
+
+    plan.abort_callback      = abort_callback;
+    plan.abort_callback_data = abort_callback_data;
+
+    if (plan.work_size > 0) {
+        buf.resize(plan.work_size);
+        plan.work_data = buf.data();
+    }
+
+    return ggml_graph_compute(graph, &plan);
+}
+
+
+static float tensor_sum_elements(const ggml_tensor * tensor) {
+    double sum = 0;
+    float  value = 0;
+    std::ostringstream tmposs;
+    if (tensor->type == GGML_TYPE_F32) {
+        for (int h = 0; h < tensor->ne[3]; h++) {
+            for (int i = 0; i < tensor->ne[2]; i++) {
+                for (int j = 0; j < tensor->ne[1]; j++) {
+                    for (int k = 0; k < tensor->ne[0]; k++) {
+                        value = ((float *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] + j * tensor->ne[0] + k];
+                        sum += value;
+                        //LOGGD("[%d][%d][%d][%d]%.2f \t", h, i, j, k, value);
+                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value << "\t";
+                    }
+                    if (strlen(tmposs.str().c_str()) > 4000) {
+
+                    } else {
+                        LOGGD("%s", tmposs.str().c_str());
+                        GGML_JNI_NOTIFY("%s", tmposs.str().c_str());
+                    }
+                    tmposs.clear();
+                    tmposs.str("");
+                    //LOGGD("\n");
+                }
+            }
+        }
+    }
+    //LOGGD("\n");
+    return sum;
+}
+
+static void tensor_dump(const ggml_tensor * tensor, const char * name) {
+    LOGGD("dump ggml tensor %s(%s)", name, tensor->name);
+    GGML_JNI_NOTIFY("dump ggml tensor %s(%s)",name, tensor->name);
+    LOGGD("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)", name,
+          tensor->type, ggml_type_name(tensor->type),
+          tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
+    float sum = tensor_sum_elements(tensor);
+
+    LOGGD("\n");
+    //LOGGD("Sum of tensor %s is %6.2f\n", name, sum);
+}
+
+
 #define TENSOR_DUMP(tensor) tensor_dump(tensor, #tensor)
 
 static uint32_t get_tensor_data_size(const ggml_tensor * tensor) {
@@ -351,8 +423,8 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
     // print system information
     {
-        LOG_TEE("\n");
-        LOG_TEE("%s\n", get_system_info(params).c_str());
+        //LOG_TEE("\n");
+        //LOG_TEE("%s\n", get_system_info(params).c_str());
     }
 
     std::string path_session = params.path_prompt_cache;
@@ -1744,7 +1816,7 @@ static void sd_log_cb(enum sd_log_level_t level, const char* log, void* data) {
     LOGGD("[%-5s]%s ", level_str, log);
 }
 
-
+#ifdef GGML_USE_QNN
 static int stablediffusion_main(int argc, const char* argv[]) {
     SDParams params;
     parse_args(argc, argv, params);
@@ -2071,6 +2143,7 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
 
     return result;
 }
+#endif
 
 
 /*
@@ -2127,6 +2200,8 @@ int  stablediffusion_inference(const char * sz_model_path, const char * prompt, 
 #include <unordered_set>
 #include <utility>
 
+
+#ifdef GGML_USE_QNN
 #include "QnnTypes.h"
 #include "QnnCommon.h"
 #include "QnnContext.h"
@@ -2800,22 +2875,6 @@ inline void setQnnTensorMemHandle(Qnn_Tensor_t* tensor, Qnn_MemHandle_t handle) 
 //  internal helper function
 //
 // =================================================================================================
-static const char * get_qnn_backend_name(int n_backend_type) {
-    switch (n_backend_type) {
-        case 0:
-            return "QNN-CPU";
-        case 1:
-            return "QNN-GPU";
-        case 2:
-            return "QNN-HTP(DSP)";
-        case 3:
-            return "ggml";
-        default:
-            return "unknown";
-    }
-}
-
-
 static size_t memscpy(void *dst, size_t dstSize, const void *src, size_t copySize) {
     if (!dst || !src || !dstSize || !copySize) return 0;
 
@@ -3459,69 +3518,6 @@ static intptr_t alignTo(size_t alignment, intptr_t offset) {
                                       offset % static_cast<intptr_t>(alignment));
 }
 
-
-
-static bool ggml_graph_compute_helper(
-        struct ggml_cgraph * graph,
-        std::vector<uint8_t> & buf,
-        int   n_threads,
-        ggml_abort_callback   abort_callback,
-        void * abort_callback_data) {
-    struct ggml_cplan plan = ggml_graph_plan(graph, n_threads);
-
-    plan.abort_callback      = abort_callback;
-    plan.abort_callback_data = abort_callback_data;
-
-    if (plan.work_size > 0) {
-        buf.resize(plan.work_size);
-        plan.work_data = buf.data();
-    }
-
-    return ggml_graph_compute(graph, &plan);
-}
-
-static float tensor_sum_elements(const ggml_tensor * tensor) {
-    double sum = 0;
-    float  value = 0;
-    std::ostringstream tmposs;
-    if (tensor->type == GGML_TYPE_F32) {
-        for (int h = 0; h < tensor->ne[3]; h++) {
-            for (int i = 0; i < tensor->ne[2]; i++) {
-                for (int j = 0; j < tensor->ne[1]; j++) {
-                    for (int k = 0; k < tensor->ne[0]; k++) {
-                        value = ((float *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] + j * tensor->ne[0] + k];
-                        sum += value;
-                        //LOGGD("[%d][%d][%d][%d]%.2f \t", h, i, j, k, value);
-                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value << "\t";
-                    }
-                    if (strlen(tmposs.str().c_str()) > 4000) {
-
-                    } else {
-                        LOGGD("%s", tmposs.str().c_str());
-                        GGML_JNI_NOTIFY("%s", tmposs.str().c_str());
-                    }
-                    tmposs.clear();
-                    tmposs.str("");
-                    //LOGGD("\n");
-                }
-            }
-        }
-    }
-    //LOGGD("\n");
-    return sum;
-}
-
-static void tensor_dump(const ggml_tensor * tensor, const char * name) {
-    LOGGD("dump ggml tensor %s(%s)", name, tensor->name);
-    GGML_JNI_NOTIFY("dump ggml tensor %s(%s)",name, tensor->name);
-    LOGGD("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)", name,
-          tensor->type, ggml_type_name(tensor->type),
-          tensor->ne[0], tensor->ne[1], tensor->ne[2], tensor->nb[0], tensor->nb[1], tensor->nb[2]);
-    float sum = tensor_sum_elements(tensor);
-
-    LOGGD("\n");
-    //LOGGD("Sum of tensor %s is %6.2f\n", name, sum);
-}
 
 
 
@@ -8105,6 +8101,7 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
 
     return result;
 }
+#endif
 
 
 /**
@@ -8546,4 +8543,41 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     LOGGD("leave qnn_ggml_op_automation_ut(automation unit test)\n");
 
     return 0;
+}
+
+
+//05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+extern int minicpmv_main(int argc, char *argv[]);
+int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const char *sz_user_data,
+                       int num_threads, int n_backend_type) {
+    int ret = 0;
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("img path:%s\n", sz_img_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("num_threads:%d\n", num_threads);
+    LOGGD("backend type:%d\n", n_backend_type);
+    GGML_JNI_NOTIFY("in minicpmv_inference");
+
+    if (nullptr == sz_model_path || nullptr == sz_img_path || nullptr == sz_user_data)
+        return 1;
+    //TODO: this is a lazy/quick method, just for fun with MiniCPM-V on Xiaomi 14
+    //./minicpmv-cli -m /home/weiguo/models/ggml-model-Q4_K_M.gguf --mmproj /home/weiguo/models/mmproj-model-f16.gguf
+    // -c 4096 --temp 0.7 --top-p 0.8 --top-k 100 --repeat-penalty 1.05 --image /home/weiguo/Downloads/airplane.jpeg  -p "What is in the image?"
+    int argc = 21;
+    const char *argv[] = {"minicpmv-main",
+                          "-m", sz_model_path,
+                          "--mmproj", "/sdcard/kantv/models/mmproj-model-f16.gguf"/*hardcoded*/,
+                          "-c", "4096",
+                          "--temp", "0.7",
+                          "--top-p", "0.8",
+                          "--top-k", "100",
+                          "--repeat-penalty", "1.05",
+                          "--image", sz_img_path,
+                          "-p", sz_user_data,
+                          "-t", std::to_string(num_threads).c_str()
+    };
+    //crash on Xiaomi 14 and many issues
+    //ret = minicpmv_main(argc, const_cast<char **>(argv));
+
+    return ret;
 }

@@ -127,6 +127,10 @@ public class ggmljava {
      */
     public static native String ggml_bench(String modelPath, String userData, int nBenchType, int nThreadCounts, int nBackendType, int nOpType);
 
+    //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+    //"m" for "multimodal"
+    public static native String ggml_bench_m(String modelPath, String imgPath, String userData, int nBenchType, int nThreadCounts, int nBackendType);
+
 
     public static native String llm_get_systeminfo();
 

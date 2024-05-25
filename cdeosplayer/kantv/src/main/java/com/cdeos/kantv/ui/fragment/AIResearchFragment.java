@@ -131,6 +131,7 @@
      ArrayAdapter<String> adapterNCNNBackendType = null;
 
      Spinner spinnerBackend = null;
+     Spinner spinnerModelName = null;
 
 
      private long beginTime = 0;
@@ -144,6 +145,10 @@
      private boolean isMNISTModel = false;
      private boolean isTTSModel = false;
      private boolean isASRModel = false;
+
+     //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+     private boolean isLLMVModel = false; //A GPT-4V style multimodal LLM
+     private boolean isLLMOModel = false; //A GPT-4o style multimodal LLM
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -284,6 +289,11 @@
                  benchmarkIndex = Integer.valueOf(position);
                  CDELog.j(TAG, "benchmark index:" + benchmarkIndex);
 
+                 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
+                     spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model of validate MiniCP-V more easily on Android phone
+                 }
+
                  if ((previousBenchmakrIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
                      previousBenchmakrIndex = benchmarkIndex;
                      return;
@@ -333,7 +343,7 @@
          });
          spinnerThreadsCounts.setSelection(4);
 
-         Spinner spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
+         spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
          String[] arrayModelName = getResources().getStringArray(R.array.modelName);
          ArrayAdapter<String> adapterModel = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayModelName);
          spinnerModelName.setAdapter(adapterModel);
@@ -441,6 +451,8 @@
              //TODO: better method
              //sanity check begin
              if (isNCNNInference()) {
+                 //inference using NCNN framework
+
                  if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {
                      CDEUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
                      return;
@@ -455,7 +467,7 @@
                          (benchmarkIndex == (CDEUtils.bench_type.NCNN_BENCHMARK_ASR.ordinal() - 1))
                       || (benchmarkIndex == (CDEUtils.bench_type.NCNN_BENCHMARK_TTS.ordinal() - 1))
                  ) {
-                     CDEUtils.showMsgBox(mActivity, "ncnn benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported currently");
+                     CDEUtils.showMsgBox(mActivity, "ncnn inference benchmark " + benchmarkIndex + "(" + CDEUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported currently");
                      return;
                  }
 
@@ -484,12 +496,19 @@
                      return;
                  }
              } else {
-                 if (!isMNISTModel) {
+                 //inference using GGML framework
+
+                 if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
                      if (_ivInfo != null) {
                          _ivInfo.setVisibility(View.INVISIBLE);
                          _llInfoLayout.removeView(_ivInfo);
                          _ivInfo = null;
                      }
+                 }
+
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_O.ordinal()) {
+                     CDEUtils.showMsgBox(mActivity, "GGML_BENCHMARK_LLM_O(GPT-4o style) inference not support currently");
+                     return;
                  }
 
                  if (strModeName.contains("llama")) {
@@ -522,7 +541,7 @@
                      //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
                      //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
                      selectModeFileName = "ggml-model-Q4_K_M.gguf";
-                     isLLMModel = true;
+                     isLLMVModel = true;
                  } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_CV_MNIST.ordinal())) {
                      isMNISTModel = true;
                      //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
@@ -583,6 +602,25 @@
                          CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                          CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                          return;
+                     }
+
+                     //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+                     if (isLLMVModel && (benchmarkIndex != CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal())) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                     if (!isLLMVModel && (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal())) {
+                         CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
+                         return;
+                     }
+                     if (isLLMVModel || isLLMOModel) {
+                         if (pathSelectedImage.isEmpty()) {
+                             CDELog.j(TAG, "image is empty");
+                             CDEUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
+                             return;
+                         }
                      }
                  }
 
@@ -659,6 +697,8 @@
          isMNISTModel = false;
          isTTSModel = false;
          isASRModel = false;
+         isLLMVModel = false;
+         isLLMOModel = false;
 
          selectModeFileName = "";
      }
@@ -706,6 +746,16 @@
                                          "this is an audio generated by bark.cpp"/*strUserInput*/,
                                          benchmarkIndex,
                                          nThreadCounts, backendIndex, optypeIndex);
+                             } else if (isLLMVModel) {
+                                 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V)
+                                 //"m" for "multimodal": GPT-4V style or GPT-4o style
+                                 CDELog.j(TAG, "image path:" + pathSelectedImage);
+                                 strBenchmarkInfo = ggmljava.ggml_bench_m(
+                                         CDEUtils.getDataPath() + ggmlModelFileName,
+                                         pathSelectedImage,
+                                         "What is in the image?"/*strUserInput*/,
+                                         benchmarkIndex,
+                                         nThreadCounts, backendIndex);
                              } else {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
                                          CDEUtils.getDataPath() + ggmlModelFileName,
@@ -789,6 +839,11 @@
                                  if (isMNISTModel) {
                                      String imgPath = CDEUtils.getDataPath() + ggmlMNISTImageFile;
                                      displayImage(imgPath);
+                                 }
+
+                                 if (isLLMVModel) {
+                                     if (!pathSelectedImage.isEmpty())
+                                        displayImage(pathSelectedImage);
                                  }
 
                                  _txtASRInfo.scrollTo(0, 0);
@@ -909,8 +964,9 @@
                      {
                          String imgPath = selectedImageUri.getPath();
                          CDELog.j(TAG, "image path:" + imgPath);
-                         //image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
-                         imgPath = imgPath.substring(6);
+                         //xiaomi14: image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
+                         if (imgPath.startsWith("/raw/"))
+                            imgPath = imgPath.substring(6);
                          pathSelectedImage = imgPath;
                          CDELog.j(TAG, "image path:" + imgPath);
                          displayImage(imgPath);

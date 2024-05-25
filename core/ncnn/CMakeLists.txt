@@ -2,9 +2,15 @@
 
 # Description: build libncnn-jni.so for Project KanTV
 
+cmake_minimum_required(VERSION 3.22.1)
 project(ncnn-jni)
 
-cmake_minimum_required(VERSION 3.22.1)
+set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 set(NCNN_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
@@ -19,6 +25,7 @@ set(QNN_INC_PATH                ${NCNN_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${NCNN_DIR}/../../prebuilts/lib/)
 set(NCNNJNI_SRC_DIR             ${NCNN_DIR}/jni/)
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
+
 
 message("NCNN_DIR             : ${NCNN_DIR}")
 message("NCNN_SRC_DIR         : ${NCNN_SRC_DIR}")
@@ -40,6 +47,7 @@ include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
+add_definitions(-O3)
 
 if (NCNN_ENABLE_QNN)
     add_definitions(-DNCNN_USE_QNN)
@@ -53,7 +61,6 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_compile_options("-Wall" "-Wno-sign-compare")
 else()
     add_definitions(-DNDEBUG)
-    add_definitions(-O3)
     add_link_options("-s")
     set(CMAKE_C_VISIBILITY_PRESET hidden)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -113,5 +120,3 @@ set_target_properties(kantvmedia
 add_library(ncnn-jni SHARED ${SOURCE_FILES})
 
 target_link_libraries(ncnn-jni ncnn ${OpenCV_LIBS} camera2ndk mediandk ${LOG_LIB} kantvmedia android)
-
-

@@ -288,3 +288,75 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 
     va_end(va);
 }
+
+
+//05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
+//"m" for "multimodal"
+JNIEXPORT jstring JNICALL
+Java_org_ggml_ggmljava_ggml_1bench_1m(JNIEnv *env, jclass clazz, jstring model_path,
+                                      jstring img_path, jstring user_data, jint n_bench_type,
+                                      jint n_thread_counts, jint n_backend_type) {
+    UNUSED(clazz);
+
+    const char *sz_model_path = NULL;
+    const char *sz_user_data = NULL;
+    const char *sz_img_path  = NULL;
+    const char *sz_bench_result = "unknown";
+    const char *bench_result = NULL;
+
+    sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
+    sz_img_path = (*env)->GetStringUTFChars(env, img_path, NULL);
+    if (NULL == sz_model_path || NULL == sz_img_path) {
+        LOGGW("JNI failure, pls check why?");
+        GGML_JNI_NOTIFY("[%s,%s,%d]JNI failure, pls check why?", __FILE__, __FUNCTION__, __LINE__);
+        goto failure;
+    }
+    sz_user_data = (*env)->GetStringUTFChars(env, user_data, NULL);
+    if (NULL == sz_user_data) {
+        LOGGW("JNI failure, pls check why?");
+        GGML_JNI_NOTIFY("[%s,%s,%d]JNI failure, pls check why?", __FILE__, __FUNCTION__, __LINE__);
+        goto failure;
+    }
+
+    LOGGV("model path:%s\n", sz_model_path);
+    LOGGV("img path:%s\n", sz_img_path);
+    LOGGV("user_data:%s\n", sz_user_data);
+    LOGGV("bench type: %d\n", n_bench_type);
+    LOGGV("thread counts:%d\n", n_thread_counts);
+    LOGGV("backend type:%d\n", n_backend_type);
+
+    if (n_bench_type >= GGML_BENCHMARK_MAX) {
+        LOGGW("pls check bench type\n");
+        GGML_JNI_NOTIFY("[%s,%s,%d]ggml benchmark type %d not supported currently", __FILE__, __FUNCTION__, __LINE__, n_bench_type);
+        goto failure;
+    }
+
+    if (n_backend_type >= GGML_BACKEND_MAX) {
+        GGML_JNI_NOTIFY("[%s,%s,%d]pls check backend type", __FILE__, __FUNCTION__, __LINE__);
+        goto failure;
+    }
+
+    if (0 == n_thread_counts)
+        n_thread_counts = 1;
+
+    ggml_jni_bench_m(sz_model_path, sz_img_path, sz_user_data, n_bench_type, n_thread_counts, n_backend_type);
+
+
+    failure:
+    if (NULL != sz_model_path) {
+        (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
+    }
+
+    if (NULL != sz_img_path) {
+        (*env)->ReleaseStringUTFChars(env, model_path, sz_img_path);
+    }
+
+
+    if (NULL != sz_user_data) {
+        (*env)->ReleaseStringUTFChars(env, user_data, sz_user_data);
+    }
+
+    jstring string = (*env)->NewStringUTF(env, sz_bench_result);
+
+    return string;
+}
