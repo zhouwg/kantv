@@ -4035,6 +4035,8 @@
          GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
          GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
+         GGML_BENCHMARK_LLM_V,                     //A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML
+         GGML_BENCHMARK_LLM_O,                     //A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML
          GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
          GGML_BENCHMARK_CV_MNIST,                  //MNIST inference using GGML
          GGML_BENCHMARK_TTS,                       //TTS(bark.cpp) benchmark using GGML

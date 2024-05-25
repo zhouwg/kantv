@@ -43,7 +43,9 @@ enum ggml_jni_bench_type {
     GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
     GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
     GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
-    GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
+    GGML_BENCHMARK_LLM,                       //A GPT-4  style LLM benchmark using llama.cpp based on GGML
+    GGML_BENCHMARK_LLM_V,                     //A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML
+    GGML_BENCHMARK_LLM_O,                     //A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML
     GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
     GGML_BENCHMARK_CV_MNIST,                  //MNIST inference using GGML
     GGML_BENCHMARK_TTS,                       //TTS(bark.cpp) benchmark using GGML
@@ -80,6 +82,8 @@ enum ggml_jni_backend_type {
     */
     void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
 
+    //"m" for "multimodal", GPT4-V or GPT4-o
+    void         ggml_jni_bench_m(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type);
 
     const char * whisper_get_ggml_type_str(enum ggml_type wtype);
 
@@ -174,6 +178,12 @@ int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int
 // TTS inference using ggml
 // =================================================================================================
 int  tts_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
+
+
+// =================================================================================================
+// MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) inference using ggml
+// =================================================================================================
+int minicpmv_inference(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int num_threads, int n_backend_type);
 
 #ifdef __cplusplus
 }

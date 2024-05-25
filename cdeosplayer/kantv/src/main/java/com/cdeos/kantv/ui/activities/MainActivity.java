@@ -203,7 +203,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     return true;
 
                 case R.id.navigation_aiagent:
-                    setTitle("AI Agent Demo");
+                    setTitle("Realtime Inference");
                     switchFragment(AIAgentFragment.class);
                     //menuNetItem.setVisible(false);
                     showAIAgentMenu();

@@ -65,7 +65,9 @@
         <item>qnn-ggml-op</item>            <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-auto-ut</item>            <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
         <item>ASR(whisper)</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
-        <item>LLM(ggml)</item>              <!-- LLM(llama.cpp based on ggml) benchmark -->
+        <item>LLM(ggml)</item>              <!-- A GPT-4  style LLM benchmark using llama.cpp based on GGML -->
+        <item>LLM-V(ggml)</item>            <!-- A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML -->
+        <item>LLM-O(ggml)</item>            <!-- A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML -->
         <item>TEXT2IMAGE(ggml)</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
         <item>MNIST(ggml)</item>            <!-- MNIST(using ggml) benchmark -->
         <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->

@@ -73,6 +73,7 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
+        ${LLAMACPP_SRC_DIR}/sgemm.cpp
         ${LLAMACPP_SRC_DIR}/unicode-data.cpp
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
@@ -93,6 +94,14 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
+
+        #05-25-2024, import MiniCPM-V(A GPT-4V Level Multimodal LLM), https://github.com/OpenBMB/MiniCPM-V
+        #many issues and latest source code of llama.cpp should be used with dev version but dev version crash on Xiaomi 14
+        #${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
+        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
+
 )
 
 include_directories(${WHISPERCPP_SRC_DIR}/)
@@ -106,6 +115,7 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
+add_definitions(-DGGML_USE_LLAMAFILE)
 
 if (GGML_ENABLE_QNN)
 add_definitions(-DGGML_USE_QNN)
@@ -113,7 +123,7 @@ else()
 add_definitions(-DGGML_DISABLE_QNN)
 endif()
 
-add_definitions(-DNDEBUG)
+
 add_definitions(-O3)
 
 if (TARGET_XIAOMI14)
