@@ -1076,6 +1076,51 @@ static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
 }
 
 
+static uint32_t qnn_datatype_size(Qnn_DataType_t data_type) {
+    switch (data_type) {
+        case QNN_DATATYPE_INT_8:
+        case QNN_DATATYPE_UINT_8:
+        case QNN_DATATYPE_SFIXED_POINT_8:
+        case QNN_DATATYPE_UFIXED_POINT_8:
+        case QNN_DATATYPE_BOOL_8:
+            return 1;
+        case QNN_DATATYPE_INT_16:
+        case QNN_DATATYPE_UINT_16:
+        case QNN_DATATYPE_FLOAT_16:
+        case QNN_DATATYPE_SFIXED_POINT_16:
+        case QNN_DATATYPE_UFIXED_POINT_16:
+            return 2;
+        case QNN_DATATYPE_INT_32:
+        case QNN_DATATYPE_UINT_32:
+        case QNN_DATATYPE_FLOAT_32:
+        case QNN_DATATYPE_SFIXED_POINT_32:
+        case QNN_DATATYPE_UFIXED_POINT_32:
+            return 4;
+        case QNN_DATATYPE_INT_64:
+        case QNN_DATATYPE_UINT_64:
+            return 8;
+        default:
+            LOGGD("wrong data type: %d\n", static_cast<int>(data_type));
+            return 0;
+    }
+}
+
+
+static std::string qnn_tensortype_to_string(const Qnn_TensorType_t type) {
+    switch (type) {
+        case QNN_TENSOR_TYPE_APP_WRITE: return "QNN_TENSOR_TYPE_APP_WRITE";
+        case QNN_TENSOR_TYPE_APP_READ: return "QNN_TENSOR_TYPE_APP_READ";
+        case QNN_TENSOR_TYPE_APP_READWRITE: return "QNN_TENSOR_TYPE_APP_READWRITE";
+        case QNN_TENSOR_TYPE_NATIVE: return "QNN_TENSOR_TYPE_NATIVE";
+        case QNN_TENSOR_TYPE_STATIC: return "QNN_TENSOR_TYPE_STATIC";
+        case QNN_TENSOR_TYPE_NULL: return "QNN_TENSOR_TYPE_NULL";
+        case QNN_TENSOR_TYPE_UNDEFINED: return "QNN_TENSOR_TYPE_UNDEFINED";
+        default: return std::string("UNKNOWN: ") + std::to_string(static_cast<int>(type));
+    }
+}
+
+
+
 //TODO:
 static const char * qnn_opname_from_ggmlop(enum ggml_op ggmlop) {
     switch (ggmlop) {
