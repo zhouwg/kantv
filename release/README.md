@@ -206,3 +206,8 @@
                     <li>refine codes and the project is more closer to commercial software</li>
                     <li>refine docs</li>
                  </ul>
+
+- v1.3.9 2024-05-26,
+                 <ul>
+                    <li>ggml-jni:add code skeleton for minicpm-v(a GPT-4V style multimodal LLM MiniCPM-Llama3-V 2.5) and minicp-v inference crash on Xiaomi 14 because latest llama.cpp source code is required for minicpm-v</li>
+                 </ul>

@@ -13,6 +13,8 @@ android {
 
         externalNativeBuild {
             cmake {
+                //modify to -DCMAKE_BUILD_TYPE=Release before prepare release apk
+                arguments += "-DCMAKE_BUILD_TYPE=Debug"
                 cppFlags ""
             }
         }
