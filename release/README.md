@@ -216,6 +216,6 @@
 - v1.3.10 TBD,
                  <ul>
                     <li>update latest source code of ggml/whispercpp/llamacpp from upstream</li>
-                    <li>refine codes and the project is more closer to commercial software</li>
+                    <li>refine codes</li>
                     <li>refine docs</li>
                  </ul>

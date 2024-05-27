@@ -776,7 +776,7 @@ void ggml_jni_set_benchmark_status(int b_exit_benchmark) {
 
 /**
   *
-  * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
+  * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
   * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
   * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
   * @param n_threads       1 - 8

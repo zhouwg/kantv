@@ -63,6 +63,7 @@ enum ggml_jni_backend_type {
 };
 //=============================================================================================
 
+
 // =================================================================================================
 // JNI helper function in ggml-jni
 // =================================================================================================
@@ -74,7 +75,7 @@ enum ggml_jni_backend_type {
     void         ggml_jni_set_benchmark_status(int b_exit_benchmark);
     /**
     *
-    * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
+    * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
     * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
     * @param n_threads       1 - 8
@@ -119,15 +120,12 @@ enum ggml_jni_backend_type {
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
 
-
-
-
 // =================================================================================================
 // trying to integrate llama.cpp from 03/26/2024 to 03/28/2024
 // =================================================================================================
     /**
     *
-    * @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
+    * @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
@@ -141,6 +139,8 @@ enum ggml_jni_backend_type {
 // =================================================================================================
 // PoC#121:Add/implement Qualcomm mobile SoC native backend for GGML inference framework from 03-29-2024 to 04-26-2024
 // https://github.com/zhouwg/kantv/issues/121
+// PR to upstream llama.cpp
+// https://github.com/ggerganov/llama.cpp/pull/6869
 // =================================================================================================
     /**
      * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
@@ -169,7 +169,7 @@ enum ggml_jni_backend_type {
 // =================================================================================================
 /**
 *
-* @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
+* @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
 * @param prompt
 * @param bench_type            not used currently
 * @param n_threads             1 - 8

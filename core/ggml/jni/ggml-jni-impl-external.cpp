@@ -2401,7 +2401,7 @@ static int stablediffusion_main(int argc, const char* argv[]) {
 
 /**
  *
- * @param sz_model_path         /sdcard/kantv/v2-1_768-nonema-pruned.q8_0.gguf
+ * @param sz_model_path         /sdcard/kantv/models/v2-1_768-nonema-pruned.q8_0.gguf
  * @param prompt
  * @param bench_type            not used currently
  * @param n_threads             1 - 8
@@ -8881,7 +8881,7 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
                           "-p", sz_user_data,
                           "-t", std::to_string(num_threads).c_str()
     };
-    //TODO: crash on Xiaomi 14
+    //TODO: crash on Xiaomi 14 but works fine on Ubuntu 20.04
     //ret = minicpmv_inference_main(argc, const_cast<char **>(argv));
     GGML_JNI_NOTIFY("MiniCPM-V inference not supported currently");
 
