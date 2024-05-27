@@ -163,6 +163,7 @@ static int get_key_idx(const gguf_context * ctx, const char * key) {
     int i = gguf_find_key(ctx, key);
     if (i == -1) {
         LOG_TEE("key %s not found in file\n", key);
+        LOG_TEE("key %s not found in file and throw std::runtime_error: Missing required key: %s\n", key, key);
 #ifdef ANDROID
         GGML_JNI_NOTIFY("pls check why key %s not found in file on Android\n", key);
 #endif
