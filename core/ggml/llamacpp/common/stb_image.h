@@ -390,7 +390,7 @@ extern "C" {
 
 #ifndef STBIDEF
 #ifdef STB_IMAGE_STATIC
-#define STBIDEF inline static
+#define STBIDEF static
 #else
 #define STBIDEF extern
 #endif

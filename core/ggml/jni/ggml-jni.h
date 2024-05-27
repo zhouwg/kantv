@@ -34,15 +34,15 @@ extern "C" {
 #endif
 
 //=============================================================================================
-//add new AI benchmark type / new backend for GGML here, keep sync with CDEUtils.java
+//add new AI benchmark type / new backend using GGML inference framework here, keep sync with CDEUtils.java
 
-// available bench type for GGML
+// available bench type for ggml-jni
 enum ggml_jni_bench_type {
     GGML_BENCHMARK_MEMCPY = 0,                //memcpy  benchmark
     GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
     GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
     GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
-    GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
+    GGML_BENCHMARK_ASR,                       //ASR(using whisper.cpp based on GGML) benchmark
     GGML_BENCHMARK_LLM,                       //A GPT-4  style LLM benchmark using llama.cpp based on GGML
     GGML_BENCHMARK_LLM_V,                     //A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML
     GGML_BENCHMARK_LLM_O,                     //A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML
@@ -53,7 +53,7 @@ enum ggml_jni_bench_type {
 };
 
 
-// available backend for GGML
+// available backend for ggml-jni
 enum ggml_jni_backend_type {
     GGML_BACKEND_CPU = 0,
     GGML_BACKEND_GPU,
@@ -64,15 +64,18 @@ enum ggml_jni_backend_type {
 //=============================================================================================
 
 
+// =================================================================================================
+// JNI helper function in ggml-jni
+// =================================================================================================
+
 #define GGML_JNI_NOTIFY(...)        ggml_jni_notify_c_impl(__VA_ARGS__)
 
-// JNI helper function for whisper.cpp benchmark
     void         ggml_jni_notify_c_impl(const char * format, ...);
-    int          whisper_get_cpu_core_counts(void);
-    void         whisper_set_benchmark_status(int b_exit_benchmark);
+    int          ggml_jni_get_cpu_core_counts(void);
+    void         ggml_jni_set_benchmark_status(int b_exit_benchmark);
     /**
     *
-    * @param sz_model_path   /sdcard/kantv/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
+    * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
     * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
     * @param n_threads       1 - 8
@@ -81,14 +84,22 @@ enum ggml_jni_backend_type {
     * @return
     */
     void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
-
     //"m" for "multimodal", GPT4-V or GPT4-o
     void         ggml_jni_bench_m(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type);
 
-    const char * whisper_get_ggml_type_str(enum ggml_type wtype);
+    const char * ggml_jni_bench_memcpy(int n_threads);
+
+    const char * ggml_jni_bench_mulmat(int n_threads, int n_backend);
+
+    const char * ggml_jni_get_ggmltype_str(enum ggml_type wtype);
+
+    bool         ggml_jni_is_valid_utf8(const char * string);
 
 
-    // JNI helper function for ASR(whisper.cpp)
+// =================================================================================================
+// PoC#64:Add/implement realtime AI subtitle for online English TV using whisper.cpp from 03-05-2024 to 03-16-2024
+// https://github.com/zhouwg/kantv/issues/64
+// =================================================================================================
     /**
     * @param sz_model_path
     * @param n_threads
@@ -109,15 +120,12 @@ enum ggml_jni_backend_type {
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
 
-
-
-
 // =================================================================================================
 // trying to integrate llama.cpp from 03/26/2024 to 03/28/2024
 // =================================================================================================
     /**
     *
-    * @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
+    * @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
@@ -125,14 +133,17 @@ enum ggml_jni_backend_type {
     * @return
     */
     int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
+    int          llama_inference_ng(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
 
 
 // =================================================================================================
-// PoC#121:Add Qualcomm mobile SoC native backend for GGML from 03-29-2024
+// PoC#121:Add/implement Qualcomm mobile SoC native backend for GGML inference framework from 03-29-2024 to 04-26-2024
+// https://github.com/zhouwg/kantv/issues/121
+// PR to upstream llama.cpp
+// https://github.com/ggerganov/llama.cpp/pull/6869
 // =================================================================================================
     /**
-     * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
-     * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
+     * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
      *
      * this function will calling GGML QNN backend directly
      *
@@ -158,7 +169,7 @@ enum ggml_jni_backend_type {
 // =================================================================================================
 /**
 *
-* @param sz_model_path         /sdcard/kantv/xxxxxx.gguf
+* @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
 * @param prompt
 * @param bench_type            not used currently
 * @param n_threads             1 - 8
@@ -169,19 +180,19 @@ int  stablediffusion_inference(const char * model_path, const char * prompt, int
 
 
 // =================================================================================================
-// MNIST inference using ggml
+// trying to integrate MNIST inference using ggml
 // =================================================================================================
 int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type);
 
 
 // =================================================================================================
-// TTS inference using ggml
+// trying to integrate TTS(bark.cpp) inference using ggml
 // =================================================================================================
 int  tts_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
 
 
 // =================================================================================================
-// MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) inference using ggml
+// trying to integrate MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) inference using llama.cpp on 05-25-2024
 // =================================================================================================
 int minicpmv_inference(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int num_threads, int n_backend_type);
 

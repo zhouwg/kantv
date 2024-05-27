@@ -11,16 +11,17 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+#TODO: QNN backend for NCNN not supported currently
 set(NCNN_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(NCNN_DIR                    ${CMAKE_SOURCE_DIR}/ncnn)
 set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn/ncnn-src)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
-set(OpenCV_DIR                  ${NCNN_DIR}/opencv-mobile-4.9.0-android/sdk/native/jni)
+set(PREBUILT_PATH               ${NCNN_DIR}/../../prebuilts/)
 set(PREBUILT_LIB_PATH           ${NCNN_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${NCNN_DIR}/../../prebuilts/include/)
+set(OpenCV_DIR                  ${PREBUILT_PATH}/opencv-mobile-4.9.0-android/sdk/native/jni)
 set(QNN_INC_PATH                ${NCNN_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${NCNN_DIR}/../../prebuilts/lib/)
 set(NCNNJNI_SRC_DIR             ${NCNN_DIR}/jni/)
@@ -48,6 +49,7 @@ include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
 add_definitions(-O3)
+add_compile_options("-Wall" "-Wno-sign-compare")
 
 if (NCNN_ENABLE_QNN)
     add_definitions(-DNCNN_USE_QNN)
@@ -58,7 +60,7 @@ endif()
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     add_definitions(-DDEBUG)
     add_definitions(-g)
-    add_compile_options("-Wall" "-Wno-sign-compare")
+
 else()
     add_definitions(-DNDEBUG)
     add_link_options("-s")
@@ -67,9 +69,7 @@ else()
     add_compile_options("-O3"
             "-ffunction-sections"
             "-fdata-sections"
-            "-frtti"
             "-Wno-unused-command-line-argument")
-    add_compile_options("-Wall" "-Wno-sign-compare")
 endif()
 
 

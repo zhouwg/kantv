@@ -32,9 +32,9 @@ extern "C" {
 #endif
 
 //=============================================================================================
-//add new AI benchmark type / new realtime inference / new backend for NCNN here, keep sync with CDEUtils.java
+//add new AI benchmark type / new realtime inference / new backend using NCNN inference framework here, keep sync with CDEUtils.java
 
-// available bench type for NCNN
+// available bench type for ncnn-jni
 enum ncnn_jni_bench_type {
     NCNN_BENCHMARK_RESNET = 0,
     NCNN_BENCHMARK_SQUEEZENET,
@@ -45,13 +45,13 @@ enum ncnn_jni_bench_type {
     NCNN_BENCHMARK_MAX
 };
 
-// available realtime inference type for NCNN
+// available realtime inference type for ncnn-jni
 enum ncnn_jni_realtimeinference_type {
-    NCNN_REALTIMEINFERENCE_FACEDETECT = 0,  //reserved for multimodal poc(CV, NLP, LLM, TTS... with live camera)
+    NCNN_REALTIMEINFERENCE_FACEDETECT = 0,  //reserved for GTP-4o style multimodal poc(CV, NLP, LLM, TTS... with live camera on Android phone)
     NCNN_REALTIMEINFERENCE_NANODAT
 };
 
-// available backend for NCNN
+// available backend for ncnn-jni
 enum ncnn_jni_backend_type {
     NCNN_BACKEND_CPU = 0,
     NCNN_BACKEND_GPU,

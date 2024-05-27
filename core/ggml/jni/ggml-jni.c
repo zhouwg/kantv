@@ -45,7 +45,7 @@ Java_org_ggml_ggmljava_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
     UNUSED(env);
     UNUSED(clazz);
 
-    whisper_set_benchmark_status((int) b_exit_benchmark);
+    ggml_jni_set_benchmark_status((int) b_exit_benchmark);
 }
 
 
@@ -118,7 +118,7 @@ Java_org_ggml_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
-    return whisper_get_cpu_core_counts();
+    return ggml_jni_get_cpu_core_counts();
 }
 
 
@@ -253,7 +253,7 @@ Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_p
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llama_inference(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend);
+    result = llama_inference_ng(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend);
     LOGGD("result %d", result);
 
 failure:

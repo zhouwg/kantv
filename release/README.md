@@ -157,7 +157,7 @@
                      <li> online TV record and online TV transcription can work at the same time for the first time</li>
                      <li> save audio data to file when transcription was launched for further usage/scenario </li>
                      <li> rename kantv_anti_tamper to kantv_anti_remove_rename_this_file to avoid confusion or misunderstanding</li>
-                     <li> implmement AI English subtitle for English online TV by great whisper.cpp for the first time(NOT real "real-time" and bugfix is required)</li>
+                     <li> <a href="https://github.com/zhouwg/kantv/issues/64">implmement AI English subtitle for English online TV by great whisper.cpp </a>for the first time(NOT real "real-time" and bugfix is required)</li>
                  </ul>
 
 - v1.3.3 2024-03-18,
@@ -192,9 +192,9 @@
                     <li>regular cleanup/refine files/codes/README</li>
                  </ul>
 
-- v1.3.7 2024-05-16,
+- v1.3.7 2024-05-16, milestone branch
                  <ul>
-                    <li>PoC:QNN backend</li>
+                    <li><a href="https://github.com/zhouwg/kantv/issues/121">PoC:QNN backend for ggml</a></li>
                     <li>Build:add command-line mode and docker mode</li>
                     <li>ggml-jni:add mnist-ggml example</li>
                  </ul>
@@ -203,11 +203,19 @@
                  <ul>
                     <li>import Tencent ncnn inference framework</li>
                     <li>add ncnn-jni</li>
-                    <li>refine codes and the project is more closer to commercial software</li>
+                    <li>refine codes</li>
                     <li>refine docs</li>
                  </ul>
 
-- v1.3.9 2024-05-26,
+- v1.3.9 2024-05-26, backup branch before update latest source code of ggml/whispercpp/llamacpp from upstream
                  <ul>
                     <li>ggml-jni:add code skeleton for minicpm-v(a GPT-4V style multimodal LLM MiniCPM-Llama3-V 2.5) and minicp-v inference crash on Xiaomi 14 because latest llama.cpp source code is required for minicpm-v</li>
+                 </ul>
+
+
+- v1.3.10 TBD,
+                 <ul>
+                    <li>update latest source code of ggml/whispercpp/llamacpp from upstream</li>
+                    <li>refine codes</li>
+                    <li>refine docs</li>
                  </ul>

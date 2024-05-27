@@ -109,6 +109,7 @@ GGML_CALL void ggml_backend_buffer_init_tensor(ggml_backend_buffer_t buffer, str
     }
 }
 
+
 void ggml_backend_buffer_free_tensor(ggml_backend_buffer_t buffer, struct ggml_tensor * tensor) {
     //if (buffer->iface.free_tensor) {
     //    buffer->iface.free_tensor(buffer, tensor);
@@ -458,6 +459,7 @@ GGML_CALL static void ggml_backend_registry_init(void) {
     ggml_backend_qnn_reg_devices();
 #endif
 }
+
 
 GGML_CALL void ggml_backend_register(const char * name, ggml_backend_init_fn init_fn, ggml_backend_buffer_type_t default_buffer_type, void * user_data) {
     GGML_ASSERT(ggml_backend_registry_count < GGML_REG_MAX_BACKENDS);
@@ -1194,9 +1196,9 @@ static int ggml_backend_sched_backend_id_from_cur(ggml_backend_sched_t sched, st
 static char * fmt_size(size_t size) {
     static char buffer[128];
     if (size >= 1024*1024) {
-        sprintf(buffer, "%zuM", size/1024/1024);
+        snprintf(buffer, sizeof(buffer), "%zuM", size/1024/1024);
     } else {
-        sprintf(buffer, "%zuK", size/1024);
+        snprintf(buffer, sizeof(buffer), "%zuK", size/1024);
     }
     return buffer;
 }
@@ -1796,12 +1798,14 @@ void ggml_backend_sched_free(ggml_backend_sched_t sched) {
 
 void ggml_backend_sched_reset(ggml_backend_sched_t sched) {
     // reset state for the next run
-    size_t hash_size = sched->hash_set.size;
-    memset(sched->hash_set.keys,      0, sizeof(sched->hash_set.keys[0])     * hash_size); // NOLINT
-    memset(sched->tensor_backend_id, -1, sizeof(sched->tensor_backend_id[0]) * hash_size);
-    memset(sched->tensor_copies,      0, sizeof(sched->tensor_copies[0])     * hash_size);
+    if (!sched->is_reset) {
+        size_t hash_size = sched->hash_set.size;
+        memset(sched->hash_set.keys,      0, sizeof(sched->hash_set.keys[0])     * hash_size); // NOLINT
+        memset(sched->tensor_backend_id, -1, sizeof(sched->tensor_backend_id[0]) * hash_size);
+        memset(sched->tensor_copies,      0, sizeof(sched->tensor_copies[0])     * hash_size);
 
-    sched->is_reset = true;
+        sched->is_reset = true;
+    }
     sched->is_alloc = false;
 }
 
@@ -1905,7 +1909,6 @@ void ggml_backend_view_init(ggml_backend_buffer_t buffer, struct ggml_tensor * t
 
     tensor->buffer = buffer;
     tensor->data = (char *)tensor->view_src->data + tensor->view_offs;
-    tensor->backend = tensor->view_src->backend;
     ggml_backend_buffer_init_tensor(buffer, tensor);
 }
 

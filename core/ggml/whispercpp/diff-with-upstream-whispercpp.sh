@@ -33,7 +33,7 @@ echo -e  "local    whispercpp path: ${LOCAL_WHISPERCPP_PATH}\n"
 
 #the following method borrow from bench-all.sh in GGML's project whisper.cpp
 #WHISPERCPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml.c ggml.h ggml-quants.c ggml-quants.h whisper.cpp whisper.h)
-WHISPERCPP_SRCS=(whisper.cpp whisper.h)
+WHISPERCPP_SRCS=(whisper.cpp whisper.h examples/bench/bench.cpp examples/main/main.cpp examples/quantize/quantize.cpp examples/common-ggml.h  examples/common.h  examples/common-sdl.h  examples/dr_wav.h  examples/grammar-parser.h examples/common.cpp  examples/common-ggml.cpp  examples/common-sdl.cpp  examples/grammar-parser.cpp)
 for file in "${WHISPERCPP_SRCS[@]}"; do
     echo "diff $file     ${UPSTREAM_WHISPERCPP_PATH}/$file"
     diff ${LOCAL_WHISPERCPP_PATH}/$file     ${UPSTREAM_WHISPERCPP_PATH}/$file
