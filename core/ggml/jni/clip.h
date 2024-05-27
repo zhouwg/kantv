@@ -1,4 +1,4 @@
-//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv/clip.h
+//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv
 #ifndef CLIP_H
 #define CLIP_H
 

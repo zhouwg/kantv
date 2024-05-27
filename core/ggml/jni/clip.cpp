@@ -1,13 +1,15 @@
-//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv/clip.h
+//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv
 // NOTE: This is modified from clip.cpp only for LLaVA,
 // so there might be still unnecessary artifacts hanging around
 // I'll gradually clean and extend it
 // Note: Even when using identical normalized image inputs (see normalize_image_u8_to_f32()) we have a significant difference in resulting embeddings compared to pytorch
 #include "clip.h"
+#include "common.h"
 #include "log.h"
 #include "ggml.h"
 #include "ggml-alloc.h"
 #include "ggml-backend.h"
+#include "ggml-jni.h"
 
 #ifdef GGML_USE_CUDA
 #include "ggml-cuda.h"
@@ -161,6 +163,9 @@ static int get_key_idx(const gguf_context * ctx, const char * key) {
     int i = gguf_find_key(ctx, key);
     if (i == -1) {
         LOG_TEE("key %s not found in file\n", key);
+#ifdef ANDROID
+        GGML_JNI_NOTIFY("pls check why key %s not found in file on Android\n", key);
+#endif
         throw std::runtime_error(format("Missing required key: %s", key));
     }
 
@@ -550,43 +555,93 @@ struct clip_ctx {
     ggml_gallocr_t compute_alloc = NULL;
 };
 
-void print_tensor_info(const struct ggml_tensor *tensor, const std::string &name) {
-    std::cout << "Tensor " << name << ": ("
-              << tensor->ne[0] << ", " << tensor->ne[1] << ", " << tensor->ne[2] << ")" << std::endl;
-    for (int i = 0; i < tensor->ne[0]; ++i) {
-        for (int j = 0; j < tensor->ne[1]; ++j) {
-            for (int k = 0; k < tensor->ne[2]; ++k) {
-                std::cout << ((float *)tensor->data)[i * tensor->ne[1] * tensor->ne[2] + j * tensor->ne[2] + k] << " ";
+std::vector<std::vector<std::vector<float>>> get_1d_sincos_pos_embed_from_grid_new(int embed_dim, const std::vector<std::vector<float>>& pos) {
+    assert(embed_dim % 2 == 0);
+    int H = pos.size();
+    int W = pos[0].size();
+
+    std::vector<float> omega(embed_dim / 2);
+    for (int i = 0; i < embed_dim / 2; ++i) {
+        omega[i] = 1.0 / pow(10000.0, static_cast<float>(i) / (embed_dim / 2));
+    }
+
+    std::vector<std::vector<std::vector<float>>> emb(H, std::vector<std::vector<float>>(W, std::vector<float>(embed_dim)));
+    for (int h = 0; h < H; ++h) {
+        for (int w = 0; w < W; ++w) {
+            for (int d = 0; d < embed_dim / 2; ++d) {
+                float out_value = pos[h][w] * omega[d];
+                emb[h][w][d] = sin(out_value);
+                emb[h][w][d + embed_dim / 2] = cos(out_value);
             }
-            std::cout << std::endl;
         }
-        std::cout << std::endl;
-    }
-}
-
-struct ggml_tensor *ggml_sin(struct ggml_context *ctx, struct ggml_tensor *input) {
-    int size = input->ne[0] * input->ne[1] * input->ne[2];
-    struct ggml_tensor *out = ggml_new_tensor_3d(ctx, GGML_TYPE_F32, input->ne[0], input->ne[1], input->ne[2]);
-
-    for (int i = 0; i < size; ++i) {
-        ((float *)out->data)[i] = std::sin(((float *)input->data)[i]);
     }
 
-    return out;
+    return emb;
 }
 
-struct ggml_tensor *ggml_cos(struct ggml_context *ctx, struct ggml_tensor *input) {
-    int size = input->ne[0] * input->ne[1] * input->ne[2];
-    struct ggml_tensor *out = ggml_new_tensor_3d(ctx, GGML_TYPE_F32, input->ne[0], input->ne[1], input->ne[2]);
+std::vector<std::vector<std::vector<float>>> get_2d_sincos_pos_embed_from_grid(int embed_dim, const std::vector<std::vector<std::vector<float>>>& grid) {
+    assert(embed_dim % 2 == 0);
+    std::vector<std::vector<std::vector<float>>> emb_h = get_1d_sincos_pos_embed_from_grid_new(embed_dim / 2, grid[0]); // (H, W, D/2)
+    std::vector<std::vector<std::vector<float>>> emb_w = get_1d_sincos_pos_embed_from_grid_new(embed_dim / 2, grid[1]); // (H, W, D/2)
 
-    for (int i = 0; i < size; ++i) {
-        ((float *)out->data)[i] = std::cos(((float *)input->data)[i]);
+    int H = emb_h.size();
+    int W = emb_h[0].size();
+    std::vector<std::vector<std::vector<float>>> emb(H, std::vector<std::vector<float>>(W, std::vector<float>(embed_dim)));
+
+    for (int h = 0; h < H; ++h) {
+        for (int w = 0; w < W; ++w) {
+            for (int d = 0; d < embed_dim / 2; ++d) {
+                emb[h][w][d] = emb_h[h][w][d];
+                emb[h][w][d + embed_dim / 2] = emb_w[h][w][d];
+            }
+        }
+    }
+    return emb;
+}
+
+std::vector<std::vector<float>> get_2d_sincos_pos_embed(int embed_dim, const std::pair<int, int> image_size) {
+    int grid_h_size = image_size.first;
+    int grid_w_size = image_size.second;
+
+    std::vector<float> grid_h(grid_h_size);
+    std::vector<float> grid_w(grid_w_size);
+
+    for (int i = 0; i < grid_h_size; ++i) {
+        grid_h[i] = static_cast<float>(i);
+    }
+    for (int i = 0; i < grid_w_size; ++i) {
+        grid_w[i] = static_cast<float>(i);
     }
 
-    return out;
+    std::vector<std::vector<float>> grid(grid_h_size, std::vector<float>(grid_w_size));
+    for (int h = 0; h < grid_h_size; ++h) {
+        for (int w = 0; w < grid_w_size; ++w) {
+            grid[h][w] = grid_w[w];
+        }
+    }
+    std::vector<std::vector<std::vector<float>>> grid_2d = {grid, grid};
+    for (int h = 0; h < grid_h_size; ++h) {
+        for (int w = 0; w < grid_w_size; ++w) {
+            grid_2d[0][h][w] = grid_h[h];
+            grid_2d[1][h][w] = grid_w[w];
+        }
+    }
+
+    std::vector<std::vector<std::vector<float>>> pos_embed_3d = get_2d_sincos_pos_embed_from_grid(embed_dim, grid_2d);
+
+    int H = image_size.first;
+    int W = image_size.second;
+    std::vector<std::vector<float>> pos_embed_2d(H * W, std::vector<float>(embed_dim));
+    for (int h = 0; h < H; ++h) {
+        for (int w = 0; w < W; ++w) {
+            pos_embed_2d[w * H + h] = pos_embed_3d[h][w];
+        }
+    }
+
+    return pos_embed_2d;
 }
 
-static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32_batch * imgs, std::pair<int, int> load_image_size = {70, 70}) {
+static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32_batch * imgs, std::pair<int, int> load_image_size = {448, 448}) {
     if (!ctx->has_vision_encoder) {
         LOG_TEE("This gguf file seems to have no vision encoder\n");
         return nullptr;
@@ -595,10 +650,10 @@ static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32
     const auto & model = ctx->vision_model;
     const auto & hparams = model.hparams;
 
-    const int image_size           = hparams.image_size;
+    const int image_size_width     = load_image_size.first;
+    const int image_size_height    = load_image_size.second;
     const int patch_size           = hparams.patch_size;
-    const int num_patches          = ((image_size / patch_size) * (image_size / patch_size));
-    const int num_patches_per_side = image_size / patch_size; GGML_UNUSED(num_patches_per_side);
+    const int num_patches          = ((image_size_width / patch_size) * (image_size_height / patch_size));
     const int num_positions        = num_patches;
     const int hidden_size          = hparams.hidden_size;
     const int n_head               = hparams.n_head;
@@ -621,8 +676,9 @@ static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32
     LOG_TEE("%s: ctx->buf_compute_meta.size(): %d \n", __func__, ctx->buf_compute_meta.size());
     struct ggml_context * ctx0 = ggml_init(params);
     struct ggml_cgraph * gf = ggml_new_graph(ctx0);
-
-    struct ggml_tensor * inp_raw = ggml_new_tensor_4d(ctx0, GGML_TYPE_F32, image_size, image_size, 3, batch_size);
+    
+    LOG_TEE("%s: load_image_size: %d %d\n", __func__, load_image_size.first, load_image_size.second);
+    struct ggml_tensor * inp_raw = ggml_new_tensor_4d(ctx0, GGML_TYPE_F32, image_size_width, image_size_height, 3, batch_size);
     ggml_set_name(inp_raw, "inp_raw");
     ggml_set_input(inp_raw);
 
@@ -650,6 +706,12 @@ static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32
     struct ggml_tensor * embeddings =
         ggml_add(ctx0, inp, ggml_get_rows(ctx0, model.position_embeddings, positions));
     
+    int pos_w = image_size_width/patch_size;
+    int pos_h = image_size_height/patch_size;
+    struct ggml_tensor * pos_embed = ggml_new_tensor_3d(ctx0, GGML_TYPE_F32, 4096, pos_w * pos_h, 1);
+    ggml_set_name(pos_embed, "pos_embed");
+    ggml_set_input(pos_embed);
+
     // // pre-layernorm
     // {
         // embeddings = ggml_norm(ctx0, embeddings, eps);
@@ -935,7 +997,7 @@ static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32
             }
             { // position
                 // q = ggml_add(ctx0, q, model.mm_model_pos_embed);
-                k = ggml_add(ctx0, v, model.mm_model_pos_embed_k);
+                k = ggml_add(ctx0, v, pos_embed);
             }
 
             { // attention
@@ -987,7 +1049,7 @@ static ggml_cgraph * clip_image_build_graph(clip_ctx * ctx, const clip_image_f32
 }
 
 // read and create ggml_context containing the tensors and their data
-struct clip_ctx * clip_model_load(const char * fname, const int verbosity = 1, std::pair<int, int> load_image_size = {70, 70}) {
+struct clip_ctx * clip_model_load(const char * fname, const int verbosity = 1, std::pair<int, int> load_image_size = {448, 448}) {
     struct ggml_context * meta = NULL;
 
     struct gguf_init_params params = {
@@ -1720,95 +1782,103 @@ bool clip_image_preprocess(struct clip_ctx * ctx, const clip_image_u8 * img, cli
     // see https://github.com/haotian-liu/LLaVA/blob/e854a2bf85118c504f6f16bf5c3c7c92f8fa8c6b/llava/conversation.py#L113-L156
 
     clip_image_u8 * temp = clip_image_u8_init(); // we will keep the input image data here temporarily
+    temp->nx = img->nx;
+    temp->ny = img->ny;
+    temp->buf.resize(img->buf.size());
+    memcpy(temp->buf.data(), img->buf.data(), temp->buf.size());
 
-    if (pad_to_square && img->nx != img->ny) {
-        int longer_side = std::max(img->nx, img->ny);
-        temp->nx = longer_side;
-        temp->ny = longer_side;
-        temp->buf.resize(3 * longer_side * longer_side);
-        const uint8_t bc[3] = {122, 116, 104}; // background color in RGB from LLaVA (this is the mean rgb color * 255)
+    // if (pad_to_square && img->nx != img->ny) {
+    //     int longer_side = std::max(img->nx, img->ny);
+    //     temp->nx = img->nx;
+    //     temp->ny = longer_side;
+    //     temp->buf.resize(3 * longer_side * longer_side);
+    //     const uint8_t bc[3] = {122, 116, 104}; // background color in RGB from LLaVA (this is the mean rgb color * 255)
 
-        // fill with background color
-        for (size_t i = 0; i < temp->buf.size(); i++) {
-            temp->buf[i] = bc[i % 3];
-        }
+    //     // fill with background color
+    //     for (size_t i = 0; i < temp->buf.size(); i++) {
+    //         temp->buf[i] = bc[i % 3];
+    //     }
 
-        // copy from the input image
-        for (int y = 0; y < img->ny; y++) {
-            for (int x = 0; x < img->nx; x++) {
-                const int i = 3 * (y * img->nx + x);
-                const int j = 3 * (y * temp->nx + x);
-                temp->buf[j]   = img->buf[i];
-                temp->buf[j+1] = img->buf[i+1];
-                temp->buf[j+2] = img->buf[i+2];
-            }
-        }
-    } else {
-        if (params.image_grid_pinpoints[0] != 0) {
-            // "spatial_unpad" with "anyres" processing for llava-1.6
-            std::vector<std::pair<int, int>> possible_resolutions;
-            for (int i = 0; i < 32 && params.image_grid_pinpoints[i] != 0; i+=2) {
-                possible_resolutions.push_back({params.image_grid_pinpoints[i], params.image_grid_pinpoints[i+1]});
-            }
-            std::pair<int, int> best_resolution = select_best_resolution({img->nx, img->ny}, possible_resolutions);
-            // clip_image_save_to_bmp(*img, "input.bmp");
-            resize_and_pad_image(*img, *temp, best_resolution);  // we do not pad with mean-bg color anymore in llava-1.6
-            // clip_image_save_to_bmp(*temp, "resized.bmp");
-            // visually verify normalized image:
-            // normalize_image_u8_to_f32(*temp, *res, ctx->image_mean, ctx->image_std);
-            // {
-            //     clip_image_u8 * temp2 = clip_image_u8_init();
-            //     clip_image_convert_f32_to_u8(*res, *temp2);
-            //     clip_image_save_to_bmp(*temp2, "resized_normalized_f32.bmp");
-            //     clip_image_u8_free(temp2);
-            // }
+    //     // copy from the input image
+    //     for (int y = 0; y < img->ny; y++) {
+    //         for (int x = 0; x < img->nx; x++) {
+    //             const int i = 3 * (y * img->nx + x);
+    //             const int j = 3 * (y * temp->nx + x);
+    //             temp->buf[j]   = img->buf[i];
+    //             temp->buf[j+1] = img->buf[i+1];
+    //             temp->buf[j+2] = img->buf[i+2];
+    //         }
+    //     }
+    // } else {
+    //     if (params.image_grid_pinpoints[0] != 0) {
+    //         // "spatial_unpad" with "anyres" processing for llava-1.6
+    //         std::vector<std::pair<int, int>> possible_resolutions;
+    //         for (int i = 0; i < 32 && params.image_grid_pinpoints[i] != 0; i+=2) {
+    //             possible_resolutions.push_back({params.image_grid_pinpoints[i], params.image_grid_pinpoints[i+1]});
+    //         }
+    //         std::pair<int, int> best_resolution = select_best_resolution({img->nx, img->ny}, possible_resolutions);
+    //         // clip_image_save_to_bmp(*img, "input.bmp");
+    //         resize_and_pad_image(*img, *temp, best_resolution);  // we do not pad with mean-bg color anymore in llava-1.6
+    //         // clip_image_save_to_bmp(*temp, "resized.bmp");
+    //         // visually verify normalized image:
+    //         // normalize_image_u8_to_f32(*temp, *res, ctx->image_mean, ctx->image_std);
+    //         // {
+    //         //     clip_image_u8 * temp2 = clip_image_u8_init();
+    //         //     clip_image_convert_f32_to_u8(*res, *temp2);
+    //         //     clip_image_save_to_bmp(*temp2, "resized_normalized_f32.bmp");
+    //         //     clip_image_u8_free(temp2);
+    //         // }
 
-            std::vector<clip_image_u8 *> patches = divide_to_patches_u8(*temp, params.image_size); // prepare spatial sorted main patches of image_size each (336 in llava-1.6)
+    //         std::vector<clip_image_u8 *> patches = divide_to_patches_u8(*temp, params.image_size); // prepare spatial sorted main patches of image_size each (336 in llava-1.6)
 
-            clip_image_u8 *image_original_resize = clip_image_u8_init();
-            // bilinear_resize(*img, *image_original_resize, params.image_size, params.image_size); // in python this is "shortest_edge", but all CLIP are square
-            bicubic_resize(*img, *image_original_resize, params.image_size, params.image_size); // in python this is "shortest_edge", but all CLIP are square
-            patches.insert(patches.begin(), image_original_resize);
-            // clip_image_f32_batch_init(patches.size());
-            res_imgs->size = patches.size();
-            res_imgs->data = new clip_image_f32[res_imgs->size];
-            int num=0;
-            for (auto& patch : patches) {
-                normalize_image_u8_to_f32(patch, &res_imgs->data[num], ctx->image_mean, ctx->image_std);
-                num++;
-            }
+    //         clip_image_u8 *image_original_resize = clip_image_u8_init();
+    //         // bilinear_resize(*img, *image_original_resize, params.image_size, params.image_size); // in python this is "shortest_edge", but all CLIP are square
+    //         bicubic_resize(*img, *image_original_resize, params.image_size, params.image_size); // in python this is "shortest_edge", but all CLIP are square
+    //         patches.insert(patches.begin(), image_original_resize);
+    //         // clip_image_f32_batch_init(patches.size());
+    //         res_imgs->size = patches.size();
+    //         res_imgs->data = new clip_image_f32[res_imgs->size];
+    //         int num=0;
+    //         for (auto& patch : patches) {
+    //             normalize_image_u8_to_f32(patch, &res_imgs->data[num], ctx->image_mean, ctx->image_std);
+    //             num++;
+    //         }
 
-            for (size_t i = 0; i < patches.size(); i++) {
-                // LOG_TEE("patch %d: %d %d\n", i, patches[i]->nx, patches[i]->ny);
-                clip_image_u8_free(patches[i]);
-            }
+    //         for (size_t i = 0; i < patches.size(); i++) {
+    //             // LOG_TEE("patch %d: %d %d\n", i, patches[i]->nx, patches[i]->ny);
+    //             clip_image_u8_free(patches[i]);
+    //         }
 
-            clip_image_u8_free(temp);
+    //         clip_image_u8_free(temp);
 
-            return true;
-        } else {
-            temp->nx = img->nx;
-            temp->ny = img->ny;
-            temp->buf.resize(img->buf.size());
-            memcpy(temp->buf.data(), img->buf.data(), temp->buf.size());
-        }
-    }
+    //         return true;
+    //     } else {
+    //         temp->nx = img->nx;
+    //         temp->ny = img->ny;
+    //         temp->buf.resize(img->buf.size());
+    //         memcpy(temp->buf.data(), img->buf.data(), temp->buf.size());
+    //     }
+    // }
 
     const int nx = temp->nx;
     const int ny = temp->ny;
     // clip_image_save_to_bmp(*temp, "resized_vanilla.bmp");
 
-    const int nx2 = ctx->vision_model.hparams.image_size;
-    const int ny2 = ctx->vision_model.hparams.image_size;
+    const int nx2 = temp->nx;
+    const int ny2 = temp->ny;
+    
     clip_image_f32 * res = clip_image_f32_init();
     res->nx = nx2;
     res->ny = ny2;
     res->buf.resize(3 * nx2 * ny2);
 
-    const float scale = std::max(nx, ny) / (float)ctx->vision_model.hparams.image_size;
+    // const float scale = std::max(nx, ny) / (float)ctx->vision_model.hparams.image_size;
 
-    const int nx3 = int(nx / scale + 0.5f);
-    const int ny3 = int(ny / scale + 0.5f);
+    // const int nx3 = int(nx / scale + 0.5f);
+    // const int ny3 = int(ny / scale + 0.5f);
+
+    const int nx3 = nx;
+    const int ny3 = ny;
 
     const auto & m3 = ctx->image_mean; // {0.48145466f, 0.4578275f, 0.40821073f};
     const auto & s3 = ctx->image_std;  // {0.26862954f, 0.26130258f, 0.27577711f};
@@ -1817,8 +1887,8 @@ bool clip_image_preprocess(struct clip_ctx * ctx, const clip_image_u8 * img, cli
         for (int x = 0; x < nx3; x++) {
             for (int c = 0; c < 3; c++) {
                 // linear interpolation
-                const float sx = (x + 0.5f) * scale - 0.5f;
-                const float sy = (y + 0.5f) * scale - 0.5f;
+                const float sx = x;
+                const float sy = y;
 
                 const int x0 = std::max(0, (int)std::floor(sx));
                 const int y0 = std::max(0, (int)std::floor(sy));
@@ -1922,7 +1992,7 @@ int clip_n_patches(const struct clip_ctx * ctx) {
     return n_patches;
 }
 
-bool clip_image_encode(struct clip_ctx * ctx, const int n_threads, clip_image_f32 * img, float * vec, std::pair<int, int> load_image_size = {70, 70}) {
+bool clip_image_encode(struct clip_ctx * ctx, const int n_threads, clip_image_f32 * img, float * vec, std::pair<int, int> load_image_size = {448, 448}) {
     if (!ctx->has_vision_encoder) {
         LOG_TEE("This gguf file seems to have no vision encoder\n");
         return false;
@@ -1934,7 +2004,7 @@ bool clip_image_encode(struct clip_ctx * ctx, const int n_threads, clip_image_f3
     return clip_image_batch_encode(ctx, n_threads, &imgs, vec, load_image_size);
 }
 
-bool clip_image_batch_encode(clip_ctx * ctx, const int n_threads, const clip_image_f32_batch * imgs, float * vec, std::pair<int, int> load_image_size = {70, 70}) {
+bool clip_image_batch_encode(clip_ctx * ctx, const int n_threads, const clip_image_f32_batch * imgs, float * vec, std::pair<int, int> load_image_size = {448, 448}) {
     if (!ctx->has_vision_encoder) {
         LOG_TEE("This gguf file seems to have no vision encoder\n");
         return false;
@@ -1953,10 +2023,11 @@ bool clip_image_batch_encode(clip_ctx * ctx, const int n_threads, const clip_ima
     const auto & model = ctx->vision_model;
     const auto & hparams = model.hparams;
 
-    const int image_size    = hparams.image_size;
-    const int patch_size    = hparams.patch_size;
-    const int num_patches   = ((image_size / patch_size) * (image_size / patch_size));
-    const int num_positions = num_patches;
+    const int image_size_width     = load_image_size.first;
+    const int image_size_height    = load_image_size.second;
+    const int patch_size           = hparams.patch_size;
+    const int num_patches          = ((image_size_width / patch_size) * (image_size_height / patch_size));
+    const int num_positions        = num_patches;
 
     {
         struct ggml_tensor * inp_raw = ggml_graph_get_tensor(gf, "inp_raw");
@@ -1965,7 +2036,7 @@ bool clip_image_batch_encode(clip_ctx * ctx, const int n_threads, const clip_ima
         for (size_t i = 0; i < imgs->size; i++) {
             const int nx = imgs->data[i].nx;
             const int ny = imgs->data[i].ny;
-            GGML_ASSERT(nx == image_size && ny == image_size);
+            // GGML_ASSERT(nx == image_size && ny == image_size);
 
             const int n = nx * ny;
 
@@ -1987,11 +2058,33 @@ bool clip_image_batch_encode(clip_ctx * ctx, const int n_threads, const clip_ima
         struct ggml_tensor * positions = ggml_graph_get_tensor(gf, "positions");
 
         int* positions_data = (int*)malloc(ggml_nbytes(positions));
+        int n = 0;
+        float t = 0;
         for (int i = 0; i < num_positions; i++) {
-            positions_data[i] = i;
+            positions_data[i] = n;
+            t=70.0*i/num_positions-1;
+            if(t>n)n++;
         }
         ggml_backend_tensor_set(positions, positions_data, 0, ggml_nbytes(positions));
         free(positions_data);
+    }
+
+    {
+        struct ggml_tensor * pos_embed = ggml_graph_get_tensor(gf, "pos_embed");
+        int pos_w = image_size_width/patch_size;
+        int pos_h = image_size_height/patch_size;
+        int embed_dim = 4096;
+        auto pos_embed_t = get_2d_sincos_pos_embed(embed_dim, std::make_pair(pos_w, pos_h));
+
+        float * pos_embed_data = (float *)malloc(ggml_nbytes(pos_embed));
+        for(int i=0;i<pos_w * pos_h;++i){
+            for(int j=0;j<embed_dim;++j){
+                pos_embed_data[i*embed_dim+j]=pos_embed_t[i][j];
+            }
+        }
+
+        ggml_backend_tensor_set(pos_embed, pos_embed_data, 0, ggml_nbytes(pos_embed));
+        free(pos_embed_data);
     }
 
     // {

@@ -2,7 +2,7 @@
 BUILD_TARGETS = \
 	main imatrix  \
 	simple llama-bench baby-llama  \
-	benchmark-matmult
+	benchmark-matmult minicpmv-cli
 
 # Code coverage output files
 COV_TARGETS = *.gcno tests/*.gcno *.gcda tests/*.gcda *.gcov tests/*.gcov lcov-report gcovr-report
@@ -811,6 +811,13 @@ llava-cli: examples/llava/llava-cli.cpp examples/llava/clip.h examples/llava/cli
 baby-llama: examples/baby-llama/baby-llama.cpp ggml.o llama.o $(COMMON_DEPS) train.o $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
 	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
+
+minicpmv-cli: ../jni/minicpmv-cli.cpp ../jni/clip.h ../jni/clip.cpp ../jni/minicpmv.h ../jni/minicpmv.cpp ../jni/minicpmv_io.h ../jni/minicpmv_io.cpp ggml.o llama.o $(COMMON_DEPS) $(OBJS)
+	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
+	$(CXX) $(CXXFLAGS) -c ../jni/clip.cpp  -o $(call GET_OBJ_FILE, ../jni/clip.cpp) -Wno-cast-qual
+	$(CXX) $(CXXFLAGS) -c ../jni/minicpmv.cpp -o $(call GET_OBJ_FILE, ../jni/minicpmv.cpp)
+	$(CXX) $(CXXFLAGS) -c ../jni/minicpmv_io.cpp  -o $(call GET_OBJ_FILE, ../jni/minicpmv_io.cpp)
+	$(CXX) $(CXXFLAGS) $(filter-out %.h $< ../jni/clip.cpp ../jni/minicpmv.cpp ../jni/minicpmv_io.cpp,$^) $(call GET_OBJ_FILE, $<) $(call GET_OBJ_FILE, ../jni/clip.cpp) $(call GET_OBJ_FILE, ../jni/minicpmv.cpp) $(call GET_OBJ_FILE, ../jni/minicpmv_io.cpp) -o $@ $(LDFLAGS)
 
 beam-search: examples/beam-search/beam-search.cpp ggml.o llama.o $(COMMON_DEPS) $(OBJS)
 	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)

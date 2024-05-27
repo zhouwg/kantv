@@ -65,6 +65,7 @@ models-mnt
 /lookup-merge
 /lookup-stats
 /main
+/minicpmv-cli
 /metal
 /passkey
 /perplexity
