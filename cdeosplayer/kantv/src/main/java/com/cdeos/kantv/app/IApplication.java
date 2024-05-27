@@ -261,11 +261,10 @@ public class IApplication extends Application {
         //   error: dlopen failed: library "/sdcard/kantv/qnnlib/libQnnSystem.so"
         //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.cdeos.kantv-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
         CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
-
+        CDELog.j(TAG, "qnn lib path:" + CDEUtils.getDataPath(mContext) + "qnnlib");
 
         //TIP: move assets/models to /sdcard/kantv/models manually
         //     for purpose of reduce size of APK, the APK size would be smaller significantly
-        CDEAssetLoader.copyAssetDir(mContext, "models", CDEUtils.getDataPath() + "models");
 
 
         //step-4:
@@ -319,7 +318,7 @@ public class IApplication extends Application {
         } else {
             CDEUtils.setReleaseMode(true);
         }
-
+        CDELog.j(TAG, "qnn lib path        : " + CDEUtils.getDataPath(mContext) + "qnnlib");
         CDELog.j(TAG, "dev  mode           : " + mSettings.getDevMode());
         CDEUtils.setExpertMode(mSettings.getDevMode());
 

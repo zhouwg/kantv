@@ -1397,7 +1397,7 @@ static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
 
     double elapsed = ncnn::get_current_time() - start_time;
     LOGGD("ncnn YoloV5 inference elapsed %.2f ms", elapsed);
-    NCNN_JNI_NOTIFY("ncnn squeezenet inference elapsed %.2f ms", elapsed);
+    NCNN_JNI_NOTIFY("ncnn YoloV5 inference elapsed %.2f ms", elapsed);
 }
 
 

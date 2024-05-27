@@ -933,7 +933,7 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
         }
 
         if (this_size > max_size) {
-            LOGGD("%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu, max buffer size: %zu)\n",
+            fprintf(stderr, "%s: tensor %s is too large to fit in a %s buffer (tensor size: %zu, max buffer size: %zu)\n",
                     __func__, t->name,
                     ggml_backend_buft_name(buft),
                     this_size, max_size);
@@ -947,7 +947,6 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
         if ((cur_buf_size + this_size) > max_size) {
             // allocate tensors in the current buffer
             if (!alloc_tensor_range(ctx, first, t, buft, cur_buf_size, &buffers, &n_buffers)) {
-                LOGGD("failure");
                 return NULL;
             }
             first = t;
@@ -960,14 +959,13 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
     // allocate remaining tensors
     if (cur_buf_size > 0) {
         if (!alloc_tensor_range(ctx, first, NULL, buft, cur_buf_size, &buffers, &n_buffers)) {
-            LOGGD("failure");
             return NULL;
         }
     }
 
     if (n_buffers == 0) {
 #ifndef NDEBUG
-        LOGGD("%s: all tensors in the context are already allocated\n", __func__);
+        fprintf(stderr, "%s: all tensors in the context are already allocated\n", __func__);
 #endif
         return NULL;
     }

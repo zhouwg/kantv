@@ -30,6 +30,7 @@
 
 ggml-metal-embed.metal
 common/CMakeLists.txt
+common/build-info.cpp
 
 lcov-report/
 gcovr-report/

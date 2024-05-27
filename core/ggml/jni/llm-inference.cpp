@@ -3,6 +3,8 @@
 #include "console.h"
 #include "llama.h"
 
+#include "ggml-jni.h"
+
 #include <cassert>
 #include <cinttypes>
 #include <cmath>
@@ -117,14 +119,28 @@ static void llama_log_callback_logTee(ggml_log_level level, const char * text, v
     LOG_TEE("%s", text);
 }
 
-int main(int argc, char ** argv) {
+int llama_inference_main(int argc, char ** argv, int backend) {
     gpt_params params;
     g_params = &params;
+    int max_tokens = 0;
 
     if (!gpt_params_parse(argc, argv, params)) {
         return 1;
     }
     llama_sampling_params & sparams = params.sparams;
+
+    if (backend != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
+#ifdef GGML_USE_QNN
+        LOGGD("using QNN backend %d", backend);
+        params.main_gpu = backend;
+        params.n_gpu_layers = 1; //TODO:
+#else
+        LOGGW("QNN feature was disabled and backend is not ggml\n");
+        GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
+        return 1;
+#endif
+    }
+
 
 #ifndef LOG_DISABLE_LOGS
     log_set_target(log_filename_generator("main", "log"));
@@ -744,7 +760,12 @@ int main(int argc, char ** argv) {
 
                 // Console/Stream Output
                 fprintf(stdout, "%s", token_str.c_str());
-
+                max_tokens++;
+#ifdef TARGET_ANDROID
+                if (ggml_jni_is_valid_utf8(token_str.c_str())) {
+                    kantv_asr_notify_benchmark_c(token_str.c_str());
+                }
+#endif
                 // Record Displayed Tokens To Log
                 // Note: Generated tokens are created one by one hence this check
                 if (embd.size() > 1) {
@@ -935,8 +956,17 @@ int main(int argc, char ** argv) {
         }
 
         // end of generation
+        if (max_tokens > 300) { //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+#ifdef TARGET_ANDROID
+            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+#endif
+            break;
+        }
         if (!embd.empty() && llama_token_is_eog(model, embd.back()) && !(params.instruct || params.interactive || params.chatml)) {
             LOG_TEE(" [end of text]\n");
+#ifdef TARGET_ANDROID
+            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+#endif
             break;
         }
 
@@ -957,8 +987,14 @@ int main(int argc, char ** argv) {
     write_logfile(ctx, params, model, input_tokens, output_ss.str(), output_tokens);
 
     if (ctx_guidance) { llama_free(ctx_guidance); }
-    llama_free(ctx);
-    llama_free_model(model);
+
+    LOGGD("here");
+    //TODO:crash here on Xiaomi 14 and memory leak after comment it
+    //llama_free(ctx);
+    LOGGD("here");
+    //TODO:crash here on Xiaomi 14 and memory leak after comment it
+    //llama_free_model(model);
+    LOGGD("here");
 
     llama_sampling_free(ctx_sampling);
     llama_backend_free();

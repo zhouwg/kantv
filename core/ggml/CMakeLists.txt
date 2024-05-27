@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    OFF)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_ENABLE_QNN    ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 
@@ -32,7 +32,7 @@ set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
 
 set(BARKCPP_SRC_DIR             ${GGML_SRC_DIR}/barkcpp/)
 
-#03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML
+#03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML,https://github.com/zhouwg/kantv/issues/121
 set(QNN_INC_PATH                ${GGML_SRC_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${GGML_SRC_DIR}/../../prebuilts/lib/)
 set(QNN_SRC_DIR                 ${GGML_SRC_DIR}/qnnsample/)
@@ -64,19 +64,26 @@ include_directories(${BARKCPP_SRC_DIR})
 
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
+if (GGML_ENABLE_QNN)
+    set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp)  # implementation of PoC#121:Add Qualcomm mobile SoC native backend for GGML
+endif()
+
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred
         ${LLAMACPP_SRC_DIR}/ggml.c
         ${LLAMACPP_SRC_DIR}/ggml-alloc.c
         ${LLAMACPP_SRC_DIR}/ggml-backend.c
         ${LLAMACPP_SRC_DIR}/ggml-quants.c
-        ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp # implementation of PoC S4, https://github.com/zhouwg/kantv/issues/121
+        ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp
+        ${QNN_BACKEND_SRCS}
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
         ${LLAMACPP_SRC_DIR}/sgemm.cpp
         ${LLAMACPP_SRC_DIR}/unicode-data.cpp
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
+        ${LLAMACPP_SRC_DIR}/common/console.cpp
+        ${LLAMACPP_SRC_DIR}/common/build-info.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
@@ -92,15 +99,15 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
+        ${KANTV_GGMLJNI_SRC_DIR}/llm-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
 
         #05-25-2024, import MiniCPM-V(A GPT-4V Level Multimodal LLM), https://github.com/OpenBMB/MiniCPM-V
-        #many issues and latest source code of llama.cpp should be used with dev version but dev version crash on Xiaomi 14
-        #${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
-        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
-        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
-        #${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
 
 )
 
@@ -123,8 +130,7 @@ else()
 add_definitions(-DGGML_DISABLE_QNN)
 endif()
 
-
-add_definitions(-O3)
+add_definitions(-O3) #otherwise performance will be very low on Xiaomi14 with debug build
 
 if (TARGET_XIAOMI14)
 
@@ -152,7 +158,6 @@ add_compile_options("-Wall" "-Wno-sign-compare")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
     add_definitions(-g)
-    add_compile_options("-Wall" "-Wno-sign-compare")
 else()
     add_definitions(-DNDEBUG)
     add_definitions(-O3)
@@ -162,7 +167,6 @@ else()
     add_compile_options("-O3"
             "-ffunction-sections"
             "-fdata-sections"
-            "-frtti"
             "-Wno-unused-command-line-argument")
 endif()
 

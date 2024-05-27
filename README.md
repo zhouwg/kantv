@@ -6,7 +6,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- AI subtitle(Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>)(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14</a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
+- AI subtitle(Real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>)(<a href="https://github.com/zhouwg/kantv/issues/64">PoC finished on Xiaomi 14 from 03/05/2024 to 03/16/2024 </a>. Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for real-time subtitle feature otherwise unexpected behavior would happen)
 
 - 2D graphic performance
 
@@ -18,7 +18,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Android phone/device using the magic llama.cpp
 
-- Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study and practise GGML inference framework on Android phone/device
+- Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study and practise GGML inference framework on Android phone/device(<a href="https://github.com/zhouwg/kantv/issues/121">PoC:Qualcomm QNN backend for ggml finished from 03/29/2024-04/26/2024</a>)
 
 - Well-maintained "workbench" for <a href="https://github.com/Tencent/ncnn">NCNN</a> beginners to study and practise NCNN inference framework on Android phone/device
 
@@ -248,7 +248,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![196896722](https://github.com/zhouwg/kantv/assets/6889919/d190c039-6254-4713-83ce-557c0fda4c83)
+![965870652](https://github.com/zhouwg/kantv/assets/6889919/03b81f23-0d31-491a-b984-01af6c32e7aa)
 
 ----
 

@@ -81,7 +81,7 @@ const char * llama_loop(struct minicpmv_context * ctx_llava,struct llama_samplin
 }
 
 
-int minicpmv_main(int argc, char *argv[]) {
+int minicpmv_inference_main(int argc, char *argv[]) {
     ggml_time_init();
 
     gpt_params params;
@@ -128,6 +128,9 @@ int minicpmv_main(int argc, char *argv[]) {
                 if (strstr(tmp, "###")) break; // Yi-VL behavior
                 have_tmp = true;
                 printf("%s", tmp);
+#ifdef TARGET_ANDROID
+                kantv_asr_notify_benchmark_c(tmp);
+#endif
                 if (strstr(response.c_str(), "<user>")) break; // minicpm-v 
 
                 fflush(stdout);

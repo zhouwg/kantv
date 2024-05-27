@@ -29,6 +29,7 @@
 
  import android.annotation.SuppressLint;
  import android.app.Activity;
+ import android.app.ActivityManager;
  import android.app.AlertDialog;
  import android.app.ProgressDialog;
  import android.content.Context;
@@ -40,6 +41,7 @@
  import android.media.MediaPlayer;
  import android.net.Uri;
  import android.os.Build;
+ import android.os.Debug;
  import android.view.Gravity;
  import android.view.View;
  import android.view.ViewGroup;
@@ -266,13 +268,54 @@
              return;
          }
 
+         ActivityManager am = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
+         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+         am.getMemoryInfo(memoryInfo);
+         long totalMem = memoryInfo.totalMem;
+         long availMem = memoryInfo.availMem;
+         boolean isLowMemory = memoryInfo.lowMemory;
+         long threshold = memoryInfo.threshold;
+         Debug.MemoryInfo debugInfo = new Debug.MemoryInfo();
+         Debug.getMemoryInfo(debugInfo);
+         int totalPrivateClean = debugInfo.getTotalPrivateClean();
+         int totalPrivateDirty = debugInfo.getTotalPrivateDirty();
+         int totalPss = debugInfo.getTotalPss();
+         int totalSharedClean = debugInfo.getTotalSharedClean();
+         int totalSharedDirty = debugInfo.getTotalSharedDirty();
+         int totalSwappablePss = debugInfo.getTotalSwappablePss();
+         int totalUsageMemory = totalPrivateClean + totalPrivateDirty + totalPss + totalSharedClean + totalSharedDirty + totalSwappablePss;
+         int Bytes2MBytes = (1 << 20);
+         //VSS - Virtual Set Size
+         //RSS - Resident Set Size
+         //PSS - Proportional Set Size
+         //USS - Unique Set Size
+         String memoryInfoString =
+                    "total mem              ：" + (totalMem >> 20) + "MB" + "  "
+                     + "isLowMeory:" + isLowMemory + " "
+                     + "threshold of low mem：" + threshold / Bytes2MBytes + "MB" + "  "
+                     + "available mem：" + availMem / Bytes2MBytes + "MB" + " "
+                     + "NativeHeapSize：" + (Debug.getNativeHeapSize() >> 20) + "MB" + "  "
+                     + "NativeHeapAllocatedSize：" + (Debug.getNativeHeapAllocatedSize() >> 20) + "MB" + " "
+                     + "NativeHeapFreeSize：" + (Debug.getNativeHeapFreeSize() >> 20) + "MB " + " "
+                     + "total private dirty memory：" + totalPrivateDirty / 1024 + "MB" + " "
+                     + "total shared  dirty memory：" + totalSharedDirty / 1024 + "MB" + " "
+                     + "total PSS memory               ：" + totalPss / 1024 + "MB" + " "
+                     + "total swappable memory  ：" + totalSwappablePss / 1024 + "MB" + " "
+                     + "total usage memory           ：" + totalUsageMemory / 1024 + "MB" + " ";
+         CDELog.j(TAG, "memory info: " + memoryInfoString);
+
          CDELog.j(TAG, "load ggml's whispercpp info");
          String systemInfo = ggmljava.asr_get_systeminfo();
          String phoneInfo = "Device info:" + " "
                  + Build.BRAND + " "
                  + Build.HARDWARE + " "
                  + "Android " + android.os.Build.VERSION.RELEASE + " "
-                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
+                 + "Arch:" + Build.CPU_ABI + " "
+                 + "(" + systemInfo + ")" + " "
+                 + "Mem:total " + (totalMem >> 20) + "MB"  + " "
+                 + "available " + (availMem >> 20) + "MB"   + " "
+                 + "usage " + (totalUsageMemory >> 10) + "MB";
+
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by GGML(https://github.com/ggerganov/ggml)\n");
@@ -289,9 +332,21 @@
                  benchmarkIndex = Integer.valueOf(position);
                  CDELog.j(TAG, "benchmark index:" + benchmarkIndex);
 
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+                     spinnerModelName.setSelection(3); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
+                 }
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                     spinnerModelName.setSelection(17); //hardcode to qwen1_5-1_8b-chat-q4_0.gguf for purpose of validate various models more easily on Android phone
+                 }
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
+                     spinnerModelName.setSelection(22); //hardcdoe to v2-1_768-nonema-pruned.q8_0.gguf for purpose of validate various models more easily on Android phone
+                 }
+                 if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_TTS.ordinal()) {
+                     spinnerModelName.setSelection(24); //hardcode to ggml-bark-small.bin for purpose of validate various models more easily on Android phone
+                 }
                  //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
                  if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
-                     spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model of validate MiniCP-V more easily on Android phone
+                     spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
                  }
 
                  if ((previousBenchmakrIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -397,7 +452,7 @@
              ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
              int idx = 0;
              for (ggmljava.ggml_op op : ggmlops) {
-                 CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
+                 //CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
                  //if (op.name().contains("GGML_OP_NONE"))
                  //    continue;
 
@@ -526,7 +581,7 @@
                  } else if (strModeName.contains("gemma")) {
                      isLLMModel = true;
                      selectModeFileName = "gemma-2b.Q4_K_M.gguf";
-                     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
+                     // https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
                      selectModeFileName = "gemma-2b.Q8_0.gguf";
                  } else if (strModeName.contains("yi-chat")) {
                      isLLMModel = true;

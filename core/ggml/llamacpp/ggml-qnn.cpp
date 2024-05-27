@@ -99,7 +99,7 @@
 class qnn_instance;
 
 //TODO: should be removed because this is a workaround method during development stage
-extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor);
+extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor, struct ggml_compute_state * state);
 
 static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
 
@@ -3562,13 +3562,13 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
 
     if ((!use_hwaccel) && (!supported_op)) {
         //TODO: should be removed because this is a workaround method during development stage
-        ggml_compute_forward(params, tensor);
+        ggml_compute_forward(params, tensor, nullptr);
         return false;
     }
 
     if ((!use_hwaccel) && (!ggml_qnn_can_handle_op(tensor->src[0], tensor->src[1], tensor))) {
         //TODO: should be removed because this is a workaround method during development stage
-        ggml_compute_forward(params, tensor);
+        ggml_compute_forward(params, tensor, nullptr);
         return false;
     }
     //end sanity check
@@ -3688,9 +3688,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
             break;
         case GGML_OP_ROPE:
             func = ggml_qnn_rope;
-            break;
-        case GGML_OP_ALIBI:
-            func = ggml_qnn_alibi;
             break;
         case GGML_OP_IM2COL:
             func = ggml_qnn_im2col;
@@ -4485,10 +4482,6 @@ static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads, int n_cur_
             n_tasks = n_threads;
         }
             break;
-        case GGML_OP_ALIBI: {
-            n_tasks = 1;
-        }
-            break;
         case GGML_OP_CLAMP: {
             n_tasks = 1;
         }
@@ -4531,14 +4524,6 @@ static int ggml_get_n_tasks(struct ggml_tensor * node, int n_threads, int n_cur_
         }
             break;
         case GGML_OP_ARGSORT: {
-            n_tasks = n_threads;
-        }
-            break;
-        case GGML_OP_FLASH_ATTN: {
-            n_tasks = n_threads;
-        }
-            break;
-        case GGML_OP_FLASH_FF: {
             n_tasks = n_threads;
         }
             break;

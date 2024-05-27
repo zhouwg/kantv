@@ -32,7 +32,7 @@ echo -e  "upstream llamacpp path: ${UPSTREAM_LLAMACPP_PATH}\n"
 echo -e  "local    llamacpp path: ${LOCAL_LLAMACPP_PATH}\n"
 
 #the following method borrow from bench-all.sh in GGML's project whisper.cpp
-LLAMACPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml.c ggml.h ggml-quants.c ggml-quants.h llama.cpp llama.h unicode.h unicode.cpp unicode-data.h unicode-data.cpp ggml-common.h examples/main/main.cpp)
+LLAMACPP_SRCS=(ggml-alloc.c ggml-alloc.h ggml-backend.c ggml-backend.h ggml-backend-impl.h ggml.c ggml.h ggml-impl.h ggml-sycl.cpp ggml-sycl.h ggml-metal.h ggml-metal.m ggml-metal.metal ggml-quants.c ggml-quants.h llama.cpp llama.h unicode.h unicode.cpp unicode-data.h unicode-data.cpp ggml-common.h sgemm.h sgemm.cpp examples/main/main.cpp ggml-vulkan.h ggml-vulkan.cpp ggml-vulkan-shaders.hpp)
 for file in "${LLAMACPP_SRCS[@]}"; do
     echo "diff $file     ${UPSTREAM_LLAMACPP_PATH}/$file"
     diff ${LOCAL_LLAMACPP_PATH}/$file     ${UPSTREAM_LLAMACPP_PATH}/$file

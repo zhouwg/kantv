@@ -214,10 +214,360 @@ static uint32_t get_tensor_data_size(const ggml_tensor * tensor) {
 }
 
 
+const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
+    static std::string s;
+    s = "";
+    char strbuf[256];
+
+#ifdef TARGET_ANDROID
+    static std::string tipString;
+    tipString = "";
+
+    tipString += "calling ggml_time_init";
+    kantv_asr_notify_benchmark_c("calling ggml_time_init\n");
+#endif
+
+    ggml_time_init();
+
+    const int n_max = 128;
+
+    const std::vector<size_t> sizes = {
+            64, 128, 256, 512, 1024, 2048, 4096,
+    };
+
+    const size_t N_max = sizes.back();
+
+    // a: N*N*sizeof(float)
+    // b: N*N*sizeof(float)
+    // c: N*N*sizeof(float)
+    // when F16 is used, there is an extra work buffer of size N*N*sizeof(float)
+    std::vector<uint8_t> buf(3llu*N_max*N_max*sizeof(float) + 3*ggml_tensor_overhead() + ggml_graph_overhead());
+    std::vector<uint8_t> work;
+
+#ifdef TARGET_ANDROID
+    tipString += "\nprepare matrix";
+    kantv_asr_notify_benchmark_c("prepare matrix\n");
+#endif
+
+    // put a bunch of random data in the buffer
+    for (size_t i = 0; i < buf.size(); i++) buf[i] = i;
+
+    for (int j = 0; j < (int) sizes.size(); j++) {
+        int n_q4_0 = 0;
+        int n_q4_1 = 0;
+        int n_q5_0 = 0;
+        int n_q5_1 = 0;
+        int n_q8_0 = 0;
+        int n_fp16 = 0;
+        int n_fp32 = 0;
+
+        // GFLOPS/s
+        double s_q4_0 = 0.0;
+        double s_q4_1 = 0.0;
+        double s_q5_0 = 0.0;
+        double s_q5_1 = 0.0;
+        double s_q8_0 = 0.0;
+        double s_fp16 = 0.0;
+        double s_fp32 = 0.0;
+
+        const size_t N = sizes[j];
+
+#if 1
+        for (int k = 0; k < 7; ++k) {
+            const ggml_type wtype =
+                    k == 0 ? GGML_TYPE_Q4_0 :
+                    k == 1 ? GGML_TYPE_Q4_1 :
+                    k == 2 ? GGML_TYPE_Q5_0 :
+                    k == 3 ? GGML_TYPE_Q5_1 :
+                    k == 4 ? GGML_TYPE_Q8_0 :
+                    k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
+#else
+            for (int k = 0; k < 1; ++k) {
+            const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
+            k = 6; //hardcode to 6 make following code happy
+#endif
+
+            double & s = k == 0 ? s_q4_0 : k == 1 ? s_q4_1 : k == 2 ? s_q5_0 : k == 3 ? s_q5_1 : k == 4 ? s_q8_0 : k == 5 ? s_fp16 : /*k == 6*/ s_fp32;
+            int    & n = k == 0 ? n_q4_0 : k == 1 ? n_q4_1 : k == 2 ? n_q5_0 : k == 3 ? n_q5_1 : k == 4 ? n_q8_0 : k == 5 ? n_fp16 : /*k == 6*/ n_fp32;
+
+            struct ggml_init_params gparams = {
+                    /*.mem_size   =*/ buf.size(),
+                    /*.mem_buffer =*/ buf.data(),
+                    /*.no_alloc   =*/ false,
+            };
+            ggml_backend_t backend = nullptr;
+            ggml_backend_buffer_t buffer = nullptr;
+#ifdef GGML_USE_QNN
+            if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                gparams.use_hwaccel = true;
+                gparams.no_alloc    = true;
+
+                backend = ggml_backend_qnn_init(n_backend, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
+                if (nullptr == backend) {
+                    LOGGD("create qnn backend %d failed", n_backend);
+                    GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend);
+                    return "unknown";
+                }
+                n_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
+            }
+#endif
+            struct ggml_context * ctx0 = ggml_init(gparams);
+
+            struct ggml_tensor * a = ggml_new_tensor_2d(ctx0, wtype,         N, N);
+            struct ggml_tensor * b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+            ggml_set_input(a);
+            ggml_set_input(b);
+
+            struct ggml_tensor * c = ggml_mul_mat(ctx0, a, b);
+            ggml_set_output(c);
+
+#ifdef GGML_USE_QNN
+            if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                LOGGD("creating backend buffer\n");
+                buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
+                if (!buffer) {
+                    LOGGD("%s: failed to allocate backend buffer\n", __func__);
+                    //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
+                    //ggml_backend_free(backend);
+                    return "unknown";
+                }
+            }
+#endif
+
+            struct ggml_cgraph * gf = ggml_new_graph(ctx0);
+
+            ggml_build_forward_expand(gf, c);
+
+            double tsum = 0.0;
+
+            // heat-up
+            ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
+
+            for (int i = 0; i < n_max; ++i) {
+                const int64_t t0 = ggml_time_us();
+
+#ifdef TARGET_ANDROID
+                kantv_asr_notify_benchmark_c("reset");
+                tipString = "calling ggml_graphic_compute_helper:\n";
+                tipString += "j= " + std::to_string(j) + "(matrix dimension = " + std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
+                             + ",k=" + std::to_string(k) + "(ggml quant type=" + std::string(ggml_jni_get_ggmltype_str(static_cast<ggml_type>(wtype))) + ")"
+                             + ",i=" + std::to_string(i) + "\n";
+
+                kantv_asr_notify_benchmark(tipString);
+                //WHISPER_LOG_INFO("%s\n", tipString.c_str());
+#endif
+
+                ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
+
+                const int64_t t1 = ggml_time_us();
+
+                tsum += (t1 - t0)*1e-6;
+                n++;
+
+                if (tsum > 1.0 && n >= 3) {
+                    break;
+                }
+            }
+
+            ggml_free(ctx0);
+
+            s = ((2.0*N*N*N*n)/tsum)*1e-9;
+        }
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c("reset");
+#endif
+        // Q4_0 | Q4_1
+        snprintf(strbuf, sizeof(strbuf), "%4zu x %4zu: Q4_0 %7.1f GFLOPS (%3d runs) | Q4_1 %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_q4_0, n_q4_0, s_q4_1, n_q4_1);
+        s += strbuf;
+
+        // Q5_0 | Q5_1 | Q8_0
+        snprintf(strbuf, sizeof(strbuf), "%4zu x %4zu: Q5_0 %7.1f GFLOPS (%3d runs) | Q5_1 %7.1f GFLOPS (%3d runs) | Q8_0 %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_q5_0, n_q5_0, s_q5_1, n_q5_1, s_q8_0, n_q8_0);
+        s += strbuf;
+
+        // F16 | F32
+        snprintf(strbuf, sizeof(strbuf), "%4zu x %4zu: F16  %7.1f GFLOPS (%3d runs) | F32  %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_fp16, n_fp16, s_fp32, n_fp32);
+        s += strbuf;
+
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark(s);
+#endif
+
+    }
+
+    return s.c_str();
+}
+
+
+const char * ggml_jni_bench_memcpy(int n_threads) {
+    static std::string s;
+    s = "";
+    char strbuf[256];
+
+#ifdef TARGET_ANDROID
+    kantv_asr_notify_benchmark_c("calling ggml_time_init\n");
+#endif
+
+    ggml_time_init();
+
+    size_t n    = 20;
+    size_t arr  = n_threads > 0 ? 1024llu : n_threads; // trick to avoid compiler optimizations
+
+    // 1GB array
+    const size_t size = arr*1e6;
+
+    double sum  = 0.0;
+
+    // heat-up
+    {
+        char * src = (char *) malloc(size);
+        char * dst = (char *) malloc(size);
+
+        for (size_t i = 0; i < size; i++) src[i] = i;
+
+        memcpy(dst, src, size); // heat-up
+
+        double tsum = 0.0;
+
+        for (size_t i = 0; i < n; i++) {
+            const int64_t t0 = ggml_time_us();
+
+            memcpy(dst, src, size);
+
+            const int64_t t1 = ggml_time_us();
+
+            tsum += (t1 - t0)*1e-6;
+
+            src[rand() % size] = rand() % 256;
+        }
+
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n", (double) (n*size)/(tsum*1e9));
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
+        s += strbuf;
+
+
+        // needed to prevent the compiler from optimizing the memcpy away
+        {
+            for (size_t i = 0; i < size; i++) sum += dst[i];
+        }
+
+        free(src);
+        free(dst);
+    }
+
+    // single-thread
+    {
+        char * src = (char *) malloc(size);
+        char * dst = (char *) malloc(size);
+
+        for (size_t i = 0; i < size; i++) src[i] = i;
+
+        memcpy(dst, src, size); // heat-up
+
+        double tsum = 0.0;
+
+        for (size_t i = 0; i < n; i++) {
+            const int64_t t0 = ggml_time_us();
+
+            memcpy(dst, src, size);
+
+            const int64_t t1 = ggml_time_us();
+
+            tsum += (t1 - t0)*1e-6;
+
+            src[rand() % size] = rand() % 256;
+        }
+
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n", (double) (n*size)/(tsum*1e9));
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
+        s += strbuf;
+
+
+        // needed to prevent the compiler from optimizing the memcpy away
+        {
+            for (size_t i = 0; i < size; i++) sum += dst[i];
+        }
+
+        free(src);
+        free(dst);
+    }
+
+    // multi-thread
+
+    for (int32_t k = 1; k <= n_threads; k++) {
+        char * src = (char *) malloc(size);
+        char * dst = (char *) malloc(size);
+
+        for (size_t i = 0; i < size; i++) src[i] = i;
+
+        memcpy(dst, src, size); // heat-up
+
+        double tsum = 0.0;
+
+        auto helper = [&](int th) {
+            const int64_t i0 = (th + 0)*size/k;
+            const int64_t i1 = (th + 1)*size/k;
+
+            for (size_t i = 0; i < n; i++) {
+                memcpy(dst + i0, src + i0, i1 - i0);
+
+                src[i0 + rand() % (i1 - i0)] = rand() % 256;
+            };
+        };
+
+        const int64_t t0 = ggml_time_us();
+
+        std::vector<std::thread> threads(k - 1);
+        for (int32_t th = 0; th < k - 1; ++th) {
+            threads[th] = std::thread(helper, th);
+        }
+
+        helper(k - 1);
+
+        for (int32_t th = 0; th < k - 1; ++th) {
+            threads[th].join();
+        }
+
+        const int64_t t1 = ggml_time_us();
+
+        tsum += (t1 - t0)*1e-6;
+
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n", (double) (n*size)/(tsum*1e9), k);
+#ifdef TARGET_ANDROID
+        kantv_asr_notify_benchmark_c(strbuf);
+#endif
+        s += strbuf;
+
+
+        // needed to prevent the compiler from optimizing the memcpy away
+        {
+            for (size_t i = 0; i < size; i++) sum += dst[i];
+        }
+
+        free(src);
+        free(dst);
+    }
+
+    snprintf(strbuf, sizeof(strbuf), "sum:    %f\n", sum);
+#ifdef TARGET_ANDROID
+    kantv_asr_notify_benchmark_c(strbuf);
+#endif
+    s += strbuf;
+
+    return s.c_str();
+}
+
+
 // 03-26-2024,
 // this function was referenced by this PR:https://github.com/ggerganov/llama.cpp/pull/5935/
-// double check although this special case has been handled at the JNI layer
-static bool is_valid_utf8(const char * string) {
+// ref:https://github.com/ggerganov/llama.cpp/pull/5935/
+bool ggml_jni_is_valid_utf8(const char * string) {
     if (!string) {
         return true;
     }
@@ -254,83 +604,17 @@ static bool is_valid_utf8(const char * string) {
     return true;
 }
 
-#if 0
-static inline std::string log_var_to_string_impl(bool var)
-{
-    return var ? "true" : "false";
-}
-
-static inline std::string log_var_to_string_impl(std::string var)
-{
-    return var;
-}
-
-static inline std::string log_var_to_string_impl(const std::vector<int> & var)
-{
-    std::stringstream buf;
-    buf << "[ ";
-    bool first = true;
-    for (auto e : var)
-    {
-        if (first)
-        {
-            first = false;
-        }
-        else
-        {
-            buf << ", ";
-        }
-        buf << std::to_string(e);
-    }
-    buf << " ]";
-
-    return buf.str();
-}
-
-
-template <typename C, typename T>
-static inline std::string LOG_TOKENS_TOSTR_PRETTY(const C & ctx, const T & tokens)
-{
-    std::stringstream buf;
-    buf << "[ ";
-
-    bool first = true;
-    for (const auto &token : tokens)
-    {
-        if (!first) {
-            buf << ", ";
-        } else {
-            first = false;
-        }
-
-        auto detokenized = llama_token_to_piece(ctx, token);
-
-        detokenized.erase(
-                std::remove_if(
-                        detokenized.begin(),
-                        detokenized.end(),
-                        [](const unsigned char c) { return !std::isprint(c); }),
-                detokenized.end());
-
-        buf
-                << "'" << detokenized << "'"
-                << ":" << std::to_string(token);
-    }
-    buf << " ]";
-
-    return buf.str();
-}
-#endif
 
 /**
  *
- * @param sz_model_path         /sdcard/kantv/gemma-2b.Q8_0.gguf,https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf(2.67 GB)
+ * @param sz_model_path
  * @param prompt
  * @param bench_type            not used currently
  * @param n_threads             1 - 8
  * @param n_backend             0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
  * @return
 */
+//don't remove and keep it for compare with llama inference using latest source code from upstream llama.cpp
 int  llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend) {
     llama_context **g_ctx;
     llama_model **g_model;
@@ -866,8 +1150,7 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
                 printf("%s", token_str.c_str());
                 max_tokens++;
 #ifdef TARGET_ANDROID
-                if (is_valid_utf8(
-                        token_str.c_str())) { //ref:https://github.com/ggerganov/llama.cpp/pull/5935/
+                if (ggml_jni_is_valid_utf8(token_str.c_str())) { //ref:https://github.com/ggerganov/llama.cpp/pull/5935/
                     kantv_asr_notify_benchmark_c(token_str.c_str());
                 }
 #endif
@@ -8476,7 +8759,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                 tipString += "j= " + std::to_string(j) + "(matrix dimension = " +
                              std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
                              + ",k=" + std::to_string(k) + "(ggml quant type=" +
-                             std::string(whisper_get_ggml_type_str(
+                             std::string(ggml_jni_get_ggmltype_str(
                                      static_cast<ggml_type>(wtype))) + ")"
                              + ",i=" + std::to_string(i) + "\n";
 
@@ -8543,9 +8826,34 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     return 0;
 }
 
+extern int llama_inference_main(int argc, char *argv[], int backend);
+
+int  llama_inference_ng(const char * sz_model_path, const char * sz_user_data, int bench_type, int n_threads, int n_backend_type) {
+    int ret = 0;
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("num_threads:%d\n", n_threads);
+    LOGGD("backend type:%d\n", n_backend_type);
+
+    if (nullptr == sz_model_path || nullptr == sz_user_data) {
+        LOGGD("pls check params\n");
+        return 1;
+    }
+    //TODO: this is a lazy/dirty/quick method, just for merge latest source codes of llama.cpp from upstream quickly
+    int argc = 7;
+    const char *argv[] = {"llama-inference-main",
+                          "-m", sz_model_path,
+                          "-p", sz_user_data,
+                          "-t", std::to_string(n_threads).c_str()
+    };
+    ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+
+    return ret;
+}
+
 
 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-extern int minicpmv_main(int argc, char *argv[]);
+extern int minicpmv_inference_main(int argc, char *argv[]);
 int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const char *sz_user_data,
                        int num_threads, int n_backend_type) {
     int ret = 0;
@@ -8554,11 +8862,10 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("num_threads:%d\n", num_threads);
     LOGGD("backend type:%d\n", n_backend_type);
-    GGML_JNI_NOTIFY("in minicpmv_inference");
 
     if (nullptr == sz_model_path || nullptr == sz_img_path || nullptr == sz_user_data)
         return 1;
-    //TODO: this is a lazy/quick method, just for fun with MiniCPM-V on Xiaomi 14
+    //TODO: this is a lazy/dirty/quick method, just for fun with MiniCPM-V on Xiaomi 14
     //./minicpmv-cli -m /home/weiguo/models/ggml-model-Q4_K_M.gguf --mmproj /home/weiguo/models/mmproj-model-f16.gguf
     // -c 4096 --temp 0.7 --top-p 0.8 --top-k 100 --repeat-penalty 1.05 --image /home/weiguo/Downloads/airplane.jpeg  -p "What is in the image?"
     int argc = 21;
@@ -8574,8 +8881,9 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
                           "-p", sz_user_data,
                           "-t", std::to_string(num_threads).c_str()
     };
-    //many issues and latest source code of llama.cpp should be used with dev version but dev version crash on Xiaomi 14
-    //ret = minicpmv_main(argc, const_cast<char **>(argv));
+    //TODO: crash on Xiaomi 14
+    //ret = minicpmv_inference_main(argc, const_cast<char **>(argv));
+    GGML_JNI_NOTIFY("MiniCPM-V inference not supported currently");
 
     return ret;
 }
