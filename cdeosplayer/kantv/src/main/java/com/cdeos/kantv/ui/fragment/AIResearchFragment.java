@@ -351,6 +351,8 @@
                  }
                  //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
                  if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
+                     isLLMVModel = true;
+                     strModeName="minicpm-v";
                      spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
                      displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
                  }
@@ -558,15 +560,6 @@
                  }
              } else {
                  //inference using GGML framework
-
-                 if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
-                     if (_ivInfo != null) {
-                         _ivInfo.setVisibility(View.INVISIBLE);
-                         _llInfoLayout.removeView(_ivInfo);
-                         _ivInfo = null;
-                     }
-                 }
-
                  if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_O.ordinal()) {
                      CDEUtils.showMsgBox(mActivity, "GGML_BENCHMARK_LLM_O(GPT-4o style) inference not support currently");
                      return;
@@ -676,8 +669,17 @@
                          CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                          return;
                      }
+
+                     if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
+                         if (_ivInfo != null) {
+                             _ivInfo.setVisibility(View.INVISIBLE);
+                             _llInfoLayout.removeView(_ivInfo);
+                             _ivInfo = null;
+                         }
+                     }
+
                      if (isLLMVModel || isLLMOModel) {
-                         if (pathSelectedImage.isEmpty()) {
+                         if ((bitmapSelectedImage == null) ||  (pathSelectedImage.isEmpty())) {
                              CDELog.j(TAG, "image is empty");
                              CDEUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
                              return;

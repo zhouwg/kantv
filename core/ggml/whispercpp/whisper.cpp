@@ -4261,7 +4261,7 @@ const char * whisper_print_system_info(void) {
     s += "CUDA = "      + std::to_string(ggml_cpu_has_cuda())      + " | ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
 #ifdef GGML_USE_QNN
-    s += "QNN = "       + std::to_string(1)                            + " | ";
+    s += "QNN = "       + std::to_string(1)                        + " | ";
 #else
     s += "QNN = "       + std::to_string(0)                        + " | ";
 #endif
