@@ -96,7 +96,7 @@ TBD
 
 Any **mainstream** Android phone based on Qualcomm's mobile SoC should be supported by llama.cpp + QNN. Qualcomm SM8650-AB Snapdragon 8 Gen 3 based Android phone is preferred.
 
-### 2. Build llama.cpp + QNN backend and Run UT in command line mode on Android phone
+### 2. Run QNN backend in command line mode on Android phone
 
 - for QNN backend developers, download and install QNN SDK from Qualcomm offcial website
 
@@ -121,7 +121,7 @@ Any **mainstream** Android phone based on Qualcomm's mobile SoC should be suppor
 
 ```
 
-### 3. Run QNN backend on Android APK
+### 3. Run QNN backend in Android APK on Android phone
 
 pls refer to <a href="./README.md">README.md</a>
 
