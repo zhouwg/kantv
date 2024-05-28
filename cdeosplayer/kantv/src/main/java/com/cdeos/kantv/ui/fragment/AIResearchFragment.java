@@ -780,9 +780,7 @@
 
                      if (isGGMLInfernce()) {
                          //GGML inference
-                         if (isASRModel) {
-                             ggmljava.asr_set_benchmark_status(0);
-                         }
+                         ggmljava.ggml_set_benchmark_status(0);
 
                          if (!isQNNModel) {
                              if (isLLMModel) {
@@ -944,19 +942,20 @@
                          public void onCancel(DialogInterface dialogInterface) {
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
-                                 ggmljava.asr_set_benchmark_status(1);
-                                 isBenchmarking.set(false);
+
+                                 //terminate background ggml thread when user cancel time-consuming bench task in UI layer
+                                 //
+                                 //background computing task(it's a blocked task) in native layer might be not finished
+                                 //
+                                 //for keep (FSM) status sync accurately between UI and native source code, there are might be much efforts to do it
+                                 //
+                                 //this is the gap between open source project and commercial project
+                                 ggmljava.ggml_set_benchmark_status(1);
+
                                  mProgressDialog.dismiss();
                                  mProgressDialog = null;
-
-                                 //background computing task(it's a blocked task) in native layer might be not finished,
-                                 //so don't update UI status here
-
-                                 //TODO:
-                                 //for keep (FSM) status sync accurately between UI and native source code, there are might be much efforts to do it
-                                 //just like ggml_abort_callback in ggml.c
-                                 //this is the gap between open source project(PoC/demo) and "real project"(commercial project)
-                                 //don't care this during PoC stage
+                                 isBenchmarking.set(false);
+                                 _btnBenchmark.setEnabled(true);
                              }
                          }
                      });

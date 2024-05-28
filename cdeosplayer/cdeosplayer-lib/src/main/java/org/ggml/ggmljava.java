@@ -113,8 +113,11 @@ public class ggmljava {
 
     public static native int get_cpu_core_counts();
 
-    //TODO: not work as expected
-    public static native void asr_set_benchmark_status(int bExitBenchmark);
+
+     /**
+      * @param bExitBenchmark  0: reset internal status  1: exit/abort time-consuming bench task(such as LLM inference)
+      */
+    public static native void ggml_set_benchmark_status(int bExitBenchmark);
 
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""

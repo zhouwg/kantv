@@ -40,12 +40,12 @@ Java_org_ggml_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_ggmljava_asr_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
-                                                           jint b_exit_benchmark) {
+Java_org_ggml_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
+                                                    jint b_exit_benchmark) {
     UNUSED(env);
     UNUSED(clazz);
 
-    ggml_jni_set_benchmark_status((int) b_exit_benchmark);
+    ggml_jni_set_abortbenchmark_flag((int) b_exit_benchmark);
 }
 
 
