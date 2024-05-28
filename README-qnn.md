@@ -5,7 +5,7 @@
 - [OS](#os)
 - [Hardware](#hardware)
 - [Android](#android)
-- [Windows](#windows)
+- [Windows over ARM](#windows)
 - [Q&A](#qa)
 - [TODO](#todo)
 
@@ -51,7 +51,7 @@ The llama.cpp QNN backend is intented to support **Qualcomm mobile SoC** firstly
 ## News
 
 - 2024.4.24
-  - PR to ggml community
+  - <a href="https://github.com/ggerganov/llama.cpp/pull/6869">PR to upstream ggml community</a>
   - data path works fine as expected with whisper.cpp and llama.cpp using QNN backend and verified on both low-end and high-end Android phones based on Qualcomm mobile SoC
   - Support OPs
     - GGML_OP_ADD
@@ -59,7 +59,7 @@ The llama.cpp QNN backend is intented to support **Qualcomm mobile SoC** firstly
     - GGML_OP_MUL_MAT
 
 - 2024.3.29
-  - launch "PoC:add QNN backend for Qualcomm mobile SoC"
+  - launch <a href="https://github.com/zhouwg/kantv/issues/121">PoC:add QNN backend for Qualcomm mobile SoC</a>
 
 ## OS
 
@@ -92,7 +92,7 @@ Any **mainstream** Android phone based on Qualcomm's mobile SoC should be suppor
 
 ### 2. Build llama.cpp + QNN backend and Run UT in command line mode on Android phone
 
-- download and install QNN SDK from Qualcomm offcial website
+- for QNN backend developers, download and install QNN SDK from Qualcomm offcial website
 
 ```
   https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
@@ -104,12 +104,14 @@ Any **mainstream** Android phone based on Qualcomm's mobile SoC should be suppor
   the default installation path is /opt/qcom/aistack/qnn/2.20.0.240223/
 
 
-- using test-backend-ops.cpp to verify QNN backend on Qualcomm mobile SoC based Android phone
+- for programmers, using test-backend-ops.cpp to verify QNN backend on Qualcomm mobile SoC based Android phone
 
 ```
-  cd tests/ggml-qnn
+  cd core/ggml/llamacpp/tests/ggml-qnn/
 
   ./build-ggml-qnn.sh
+
+  ./run-ggml-qnn.sh
 
 ```
 
