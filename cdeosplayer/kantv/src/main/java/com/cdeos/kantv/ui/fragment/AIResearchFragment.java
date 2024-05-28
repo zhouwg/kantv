@@ -943,12 +943,13 @@
                              if (mProgressDialog != null) {
                                  CDELog.j(TAG, "stop GGML benchmark");
 
-                                 //TODO:terminate background ggml thread when user cancel bench task in UI layer
-                                 //background computing task(it's a blocked task) in native layer might be not finished,
+                                 //terminate background ggml thread when user cancel time-consuming bench task in UI layer
+                                 //
+                                 //background computing task(it's a blocked task) in native layer might be not finished
+                                 //
                                  //for keep (FSM) status sync accurately between UI and native source code, there are might be much efforts to do it
-                                 //just like ggml_abort_callback in ggml.c
-                                 //this is the gap between open source project(PoC/demo) and commercial project
-                                 //don't care this during PoC stage
+                                 //
+                                 //this is the gap between open source project and commercial project
                                  ggmljava.ggml_set_benchmark_status(1);
 
                                  mProgressDialog.dismiss();
