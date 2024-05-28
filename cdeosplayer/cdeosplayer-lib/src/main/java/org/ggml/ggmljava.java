@@ -114,6 +114,9 @@ public class ggmljava {
     public static native int get_cpu_core_counts();
 
 
+     /**
+      * @param bExitBenchmark  0: reset internal status  1: exit/abort time-consuming bench task(such as LLM inference)
+      */
     public static native void ggml_set_benchmark_status(int bExitBenchmark);
 
     /**
