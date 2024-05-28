@@ -75,6 +75,7 @@ enum ggml_jni_backend_type {
     void         ggml_jni_notify_c_impl(const char * format, ...);
     int          ggml_jni_get_cpu_core_counts(void);
     void         ggml_jni_set_benchmark_status(int b_exit_benchmark);
+    int          ggml_jni_get_abortbenchmark_value(void);
     /**
     *
     * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""

@@ -764,9 +764,25 @@ int ggml_jni_get_cpu_core_counts() {
 }
 
 
+//NOTE: dirty method for fix UI issue when user cancel time-consuming bench task in UI layer
+static int s_ggml_jni_abort_benchmark = 0;
+static std::mutex s_ggml_jni_abort_mutex;
+int ggml_jni_get_abortbenchmark_value() {
+    int n_abortbenchmark_value = 0;
+    {
+        std::lock_guard<std::mutex> lock(s_ggml_jni_abort_mutex);
+        n_abortbenchmark_value = s_ggml_jni_abort_benchmark;
+    }
+    return n_abortbenchmark_value;
+}
+
+
 void ggml_jni_set_benchmark_status(int b_exit_benchmark) {
     LOGGI("set b_abort_benchmark to %d", b_exit_benchmark);
-
+    {
+        std::lock_guard<std::mutex> lock(s_ggml_jni_abort_mutex);
+        s_ggml_jni_abort_benchmark = b_exit_benchmark;
+    }
     if (NULL == p_asr_ctx)
         return;
 

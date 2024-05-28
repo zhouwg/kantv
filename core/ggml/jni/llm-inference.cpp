@@ -119,6 +119,13 @@ static void llama_log_callback_logTee(ggml_log_level level, const char * text, v
     LOG_TEE("%s", text);
 }
 
+
+//NOTE: dirty method for fix UI issue when user cancel time-consuming bench task in UI layer
+static bool llama_abort_callback(void * data) {
+    return ggml_jni_get_abortbenchmark_value();
+}
+
+
 int llama_inference_main(int argc, char ** argv, int backend) {
     gpt_params params;
     g_params = &params;
@@ -222,6 +229,7 @@ int llama_inference_main(int argc, char ** argv, int backend) {
         LOG_TEE("%s: error: unable to load model\n", __func__);
         return 1;
     }
+    llama_set_abort_callback(ctx, llama_abort_callback, NULL);
 
     const int n_ctx_train = llama_n_ctx_train(model);
     const int n_ctx = llama_n_ctx(ctx);
