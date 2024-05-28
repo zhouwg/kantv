@@ -752,29 +752,29 @@ static fifo_buffer_t  * whisper_asr_getfifo() {
 // when user cancel time-consuming bench task in UI layer
 //
 // =================================================================================================
-static int s_ggml_jni_abort_benchmark = 0;
-static std::mutex s_ggml_jni_abort_mutex;
+static int s_ggml_jni_abortbenchmark_flag = 0;
+static std::mutex s_ggml_jni_abortbenchmark_mutex;
 
-int ggml_jni_get_abortbenchmark_value() {
+int ggml_jni_get_abortbenchmark_flag() {
     int n_abortbenchmark_value = 0;
     {
-        std::lock_guard<std::mutex> lock(s_ggml_jni_abort_mutex);
-        n_abortbenchmark_value = s_ggml_jni_abort_benchmark;
+        std::lock_guard<std::mutex> lock(s_ggml_jni_abortbenchmark_mutex);
+        n_abortbenchmark_value = s_ggml_jni_abortbenchmark_flag;
     }
     return n_abortbenchmark_value;
 }
 
 
 bool ggml_jni_abort_callback(void * data) {
-    return ggml_jni_get_abortbenchmark_value();
+    return ggml_jni_get_abortbenchmark_flag();
 }
 
 
-void ggml_jni_set_benchmark_status(int b_exit_benchmark) {
+void ggml_jni_set_abortbenchmark_flag(int b_exit_benchmark) {
     LOGGI("set b_abort_benchmark to %d", b_exit_benchmark);
     {
-        std::lock_guard<std::mutex> lock(s_ggml_jni_abort_mutex);
-        s_ggml_jni_abort_benchmark = b_exit_benchmark;
+        std::lock_guard<std::mutex> lock(s_ggml_jni_abortbenchmark_mutex);
+        s_ggml_jni_abortbenchmark_flag = b_exit_benchmark;
     }
     if (NULL == p_asr_ctx)
         return;
