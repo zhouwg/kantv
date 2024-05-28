@@ -86,12 +86,11 @@ TBD
 
 ## Android
 
-<<<<<<< HEAD
 ### 1. Setup Environment
 
 Any **mainstream** Android phone based on Qualcomm's mobile SoC should be supported by llama.cpp + QNN. Qualcomm SM8650-AB Snapdragon 8 Gen 3 based Android phone is preferred.
 
-### 2. Build llama.cpp + QNN backend
+### 2. Build llama.cpp + QNN backend and Run UT in command line mode on Android phone
 
 - download and install QNN SDK from Qualcomm offcial website
 
@@ -114,34 +113,10 @@ Any **mainstream** Android phone based on Qualcomm's mobile SoC should be suppor
 
 ```
 
-### 3. Run UT of QNN backend on Qualcomm mobile SoC based Android phone
+### 3. Run QNN backend on Android APK
 
-```
+pls refer to <a href="./README.md">README.md</a>
 
-  ./run-ggml-qnn.sh
-
-```
-
-### 4. Run the inference on Qualcomm mobile SoC based Android phone
-
-Pls refer to [project kantv](https://github.com/zhouwg/kantv) firstly.
-=======
-### I. Setup Environment
-
-Any **mainstream** Android phone based on Qualcomm's mobile SoC should be supported by llama.cpp + QNN. Qualcomm SM8650-AB Snapdragon 8 Gen 3 based Android phone is preferred.
-
-### II. Build llama.cpp + QNN backend
-
-
-Please refer to [project kantv](https://github.com/zhouwg/kantv) firstly.
-
-
-A small and standalone Android example(or re-use [the existing Android example in llama.cpp](https://github.com/ggerganov/llama.cpp/tree/master/examples/llama.android)) for purpose of facilitate community developers to participate in develop/verify QNN backend.
-
-
-### III. Run the inference on Qualcomm mobile SoC based Android phone
-
->>>>>>> follow project's style
 
 ![504893116](https://github.com/zhouwg/kantv/assets/6889919/51f0b277-eca4-4938-86f5-415dbf5897e7)
 
@@ -161,10 +136,9 @@ Please add the **[ggml-qnn]** prefix/tag in issues/PRs titles to help the commun
 
 - only support FP32 / FP16 and the input and output tensors must be of the <b>same data type</b>
 
-- lack of [implementation of other GGML-OPs using QNN API](https://github.com/zhouwg/llama.cpp/blob/qualcomm_qnn_backend_for_ggml/ggml-qnn.cpp#L3452). this work is very similar to <a href="https://github.com/zhouwg/llama.cpp/blob/qualcomm_qnn_backend_for_ggml/ggml-qnn.cpp#L2983">GGML_OP_ADD / GGML_OP_MUL / GGML_OP_MULMAT</a> in ggml-qnn.cpp
+- lack of [implementation of other GGML-OPs using QNN API](./core/ggml/llamacpp/ggml-qnn.cpp#L3560)
 
 - multithreading not working with QNN GPU&HTP (aka DSP) backend
-
 
 - QNN's RPC feature(which useful for QNN HTP(aka DSP) backend) not used
 
