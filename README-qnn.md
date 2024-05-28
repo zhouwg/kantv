@@ -51,7 +51,7 @@ The llama.cpp QNN backend is intented to support **Qualcomm mobile SoC** firstly
 ## News
 
 - 2024.4.24
-  - <a href="https://github.com/ggerganov/llama.cpp/pull/6869">PR to upstream ggml community</a>
+  - a very beginning <a href="https://github.com/ggerganov/llama.cpp/pull/6869">PR to upstream ggml community</a>
   - data path works fine as expected with whisper.cpp and llama.cpp using QNN backend and verified on both low-end and high-end Android phones based on Qualcomm mobile SoC
   - Support OPs
     - GGML_OP_ADD
