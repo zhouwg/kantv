@@ -1,4 +1,5 @@
-//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv/clip.h
+//ref&author: https://github.com/OpenBMB/llama.cpp/blob/minicpm-v2.5/examples/minicpmv
+#include "ggml-jni.h"
 #include "ggml.h"
 #include "log.h"
 #include "common.h"
@@ -6,8 +7,6 @@
 #include "minicpmv.h"
 #include "minicpmv_io.h"
 #include "llama.h"
-
-#include "ggml-jni.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -80,17 +79,31 @@ const char * llama_loop(struct minicpmv_context * ctx_llava,struct llama_samplin
     return tmp;
 }
 
-
-int minicpmv_inference_main(int argc, char *argv[]) {
+#ifdef ANDROID
+int minicpmv_inference_main(int argc, char ** argv, int backend) {
+#else //for build and run MiniCPM-V command line application on Linux
+//works fine on Ubuntu20.04
+//./minicpmv-cli -m /home/weiguo/models/ggml-model-Q4_K_M.gguf --mmproj /home/weiguo/models/mmproj-model-f16.gguf  --image /home/weiguo/Downloads/airplane.jpeg  -t 4 -p "What is in the image?"
+int main(int argc, char ** argv) {
+#endif
     ggml_time_init();
 
     gpt_params params;
 
     if (!gpt_params_parse(argc, argv, params)) {
-        LOGGD("gpt_params_parse failed");
-        GGML_JNI_NOTIFY("gpt_params_parse failed");
         show_additional_info(argc, argv);
         return 1;
+    }
+    if (backend != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
+#ifdef GGML_USE_QNN
+        LOGGD("using QNN backend %d", backend);
+        params.main_gpu = backend;
+        params.n_gpu_layers = 1;
+#else
+        LOGGW("QNN feature was disabled and backend is not ggml\n");
+        GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
+        return 1;
+#endif
     }
 
 #ifndef LOG_DISABLE_LOGS
@@ -101,13 +114,12 @@ int minicpmv_inference_main(int argc, char *argv[]) {
 #endif // LOG_DISABLE_LOGS
 
     if (params.mmproj.empty() || (params.image.empty())) {
-        //gpt_params_print_usage(argc, argv, params);
+        gpt_params_print_usage(argc, argv, params);
         show_additional_info(argc, argv);
         return 1;
     }
 
-    for (auto & image : params.image)
-    {
+    for (auto & image : params.image) {
         int n_past = 0;
         auto ctx_llava = minicpmv_init(&params, image, n_past);
 
@@ -128,10 +140,11 @@ int minicpmv_inference_main(int argc, char *argv[]) {
                 if (strstr(tmp, "###")) break; // Yi-VL behavior
                 have_tmp = true;
                 printf("%s", tmp);
-#ifdef TARGET_ANDROID
+#ifdef ANDROID
                 kantv_asr_notify_benchmark_c(tmp);
 #endif
-                if (strstr(response.c_str(), "<user>")) break; // minicpm-v 
+
+                if (strstr(response.c_str(), "<user>")) break; // minicpm-v
 
                 fflush(stdout);
             }
@@ -151,7 +164,6 @@ int minicpmv_inference_main(int argc, char *argv[]) {
                     if (strcmp(tmp, "</s>") == 0) break;
                     if (strstr(tmp, "###")) break; // Yi-VL behavior
                     printf("%s", tmp);// mistral llava-1.6
-                    LOGGD("%s", tmp);
                     if (strstr(response.c_str(), "<user>")) break; // minicpm-v 
                     fflush(stdout);
                 }
@@ -159,6 +171,9 @@ int minicpmv_inference_main(int argc, char *argv[]) {
             }
         }
         printf("\n");
+#ifdef ANDROID
+        kantv_asr_notify_benchmark_c("\n[end of text]\n");
+#endif
         llama_print_timings(ctx_llava->ctx_llama);        
 
         ctx_llava->model = NULL;

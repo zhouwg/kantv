@@ -74,7 +74,6 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml-alloc.c
         ${LLAMACPP_SRC_DIR}/ggml-backend.c
         ${LLAMACPP_SRC_DIR}/ggml-quants.c
-        ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp
         ${QNN_BACKEND_SRCS}
         ${LLAMACPP_SRC_DIR}/llama.cpp
         ${LLAMACPP_SRC_DIR}/unicode.cpp
@@ -132,6 +131,7 @@ endif()
 
 add_definitions(-O3) #otherwise app's performance will be very bad on Xiaomi14 with debug build
 
+
 if (TARGET_XIAOMI14)
 
 #weiguo:2024-03-11
@@ -169,6 +169,12 @@ else()
             "-fdata-sections"
             "-Wno-unused-command-line-argument")
 endif()
+
+#weiguo:2024-05-28, fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
+add_definitions(-fexceptions)
+add_definitions(-D_LIBCPP_EXCEPTIONS)
+add_definitions(-D_LIBCXXABI_EXCEPTIONS)
+add_link_options( "-lc++_shared" )
 
 if (GGML_ENABLE_QNN)
     file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")

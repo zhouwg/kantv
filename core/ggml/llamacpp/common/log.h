@@ -309,7 +309,12 @@ inline std::string log_filename_generator_impl(LogTriState multilog, const std::
 //  by defining LOG_TEE_TARGET
 //
 #if !defined(_MSC_VER) || defined(__clang__)
+#ifdef TARGET_ANDROID
+#include "libavutil/cde_log.h"
+    #define LOG_TEE LOGGD
+#else
     #define LOG_TEE(...) LOG_TEE_IMPL(__VA_ARGS__, "")
+#endif
 #else
     #define LOG_TEE(str, ...) LOG_TEE_IMPL("%s" str, "", ##__VA_ARGS__, "")
 #endif

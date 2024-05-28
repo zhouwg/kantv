@@ -161,6 +161,11 @@
      private String ggmlMNISTImageFile = "mnist-5.png";
      private String ggmlMNISTModelFile = "mnist-ggml-model-f32.gguf";
 
+     //MiniCPM-V:A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V/
+     //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
+     //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
+     private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
+
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/tree/main
      // https://huggingface.co/TheBloke/Llama-2-7B-GGUF
      // https://huggingface.co/TheBloke/Llama-2-13B-GGUF
@@ -347,6 +352,7 @@
                  //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
                  if (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
                      spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
+                     displayFileStatus(CDEUtils.getDataPath() + ggmlSampleFileName, CDEUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
                  }
 
                  if ((previousBenchmakrIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -595,7 +601,7 @@
                      //MiniCPM-V:A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V/
                      //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
                      //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
-                     selectModeFileName = "ggml-model-Q4_K_M.gguf";
+                     selectModeFileName = ggmlMiniCPMVModelFile;
                      isLLMVModel = true;
                  } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_CV_MNIST.ordinal())) {
                      isMNISTModel = true;

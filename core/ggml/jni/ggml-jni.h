@@ -24,8 +24,10 @@
 #include <stdbool.h>
 
 #include "libavutil/cde_log.h"
+#ifdef ANDROID //for build MiniCPM-V command line application on Linux
 #include "kantv-asr.h"
 #include "kantv-media.h"
+#endif
 
 #include "ggml.h"
 

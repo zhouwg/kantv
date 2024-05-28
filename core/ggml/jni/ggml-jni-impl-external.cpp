@@ -8853,7 +8853,7 @@ int  llama_inference_ng(const char * sz_model_path, const char * sz_user_data, i
 
 
 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-extern int minicpmv_inference_main(int argc, char *argv[]);
+extern int minicpmv_inference_main(int argc, char *argv[], int backend);
 int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const char *sz_user_data,
                        int num_threads, int n_backend_type) {
     int ret = 0;
@@ -8868,22 +8868,22 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
     //TODO: this is a lazy/dirty/quick method, just for fun with MiniCPM-V on Xiaomi 14
     //./minicpmv-cli -m /home/weiguo/models/ggml-model-Q4_K_M.gguf --mmproj /home/weiguo/models/mmproj-model-f16.gguf
     // -c 4096 --temp 0.7 --top-p 0.8 --top-k 100 --repeat-penalty 1.05 --image /home/weiguo/Downloads/airplane.jpeg  -p "What is in the image?"
-    int argc = 21;
+    int argc = 11;
     const char *argv[] = {"minicpmv-main",
                           "-m", sz_model_path,
                           "--mmproj", "/sdcard/kantv/models/mmproj-model-f16.gguf"/*hardcoded*/,
+                          /*
                           "-c", "4096",
                           "--temp", "0.7",
                           "--top-p", "0.8",
                           "--top-k", "100",
                           "--repeat-penalty", "1.05",
+                           */
                           "--image", sz_img_path,
                           "-p", sz_user_data,
                           "-t", std::to_string(num_threads).c_str()
     };
-    //TODO: crash on Xiaomi 14 but works fine on Ubuntu 20.04
-    //ret = minicpmv_inference_main(argc, const_cast<char **>(argv));
-    GGML_JNI_NOTIFY("MiniCPM-V inference not supported currently");
+    ret = minicpmv_inference_main(argc, const_cast<char **>(argv), n_backend_type);
 
     return ret;
 }
