@@ -51,7 +51,8 @@ The llama.cpp QNN backend is intented to support **Qualcomm mobile SoC** firstly
 ## News
 
 - 2024.5.28
-  - re-launch activity of <a href="https://github.com/ggerganov/llama.cpp/pull/6869">PR in upstream ggml community</a> and rebase the branch of PR and refine code accordingly
+  - re-launch activity of <a href="https://github.com/ggerganov/llama.cpp/pull/6869">PR in upstream ggml community</a>
+    
 - 2024.4.26
   - refine PR according to coding stye and pricinples of upstream ggml community
   - add command line test using <a href="https://github.com/ggerganov/llama.cpp/blob/master/tests/test-backend-ops.cpp">test-backend-ops.cpp</a>
