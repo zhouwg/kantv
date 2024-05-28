@@ -42,13 +42,15 @@ enum ncnn_jni_bench_type {
     NCNN_BENCHMARK_ASR,
     NCNN_BENCHMARK_TTS,
     NCNN_BENCHARK_YOLOV5,
+    NCNN_BENCHARK_YOLOV10,
     NCNN_BENCHMARK_MAX
 };
 
 // available realtime inference type for ncnn-jni
 enum ncnn_jni_realtimeinference_type {
     NCNN_REALTIMEINFERENCE_FACEDETECT = 0,  //reserved for GTP-4o style multimodal poc(CV, NLP, LLM, TTS... with live camera on Android phone)
-    NCNN_REALTIMEINFERENCE_NANODAT
+    NCNN_REALTIMEINFERENCE_NANODAT,
+    NCNN_REALTIMEINFERENCE_YOLOV10
 };
 
 // available backend for ncnn-jni
