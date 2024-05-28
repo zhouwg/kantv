@@ -180,7 +180,7 @@ static ncnn::Net squeezenet;
 static ncnn::Net squeezenet_gpu;
 static ncnn::Net mnist;
 static ncnn::Net yolov5;
-
+static ncnn::Net yolov10;
 
 class MyNdkCamera : public NdkCameraWindow {
 public:
@@ -905,6 +905,9 @@ Java_org_ncnn_ncnnjava_loadModel(JNIEnv *env, jobject thiz, jobject assetManager
                 }
             }
 
+        } else if (netid == NCNN_BENCHARK_YOLOV10) {
+            LOGGD("[%s,%s,%d]load YoloV10 model", __FILE__, __FUNCTION__, __LINE__);
+            NCNN_JNI_NOTIFY("[%s,%s,%d]load YoloV10 model", __FILE__, __FUNCTION__, __LINE__);
         } else {
             LOGGW("netid %d not supported using ncnn with non-live inference", netid);
             NCNN_JNI_NOTIFY("netid %d not supported using ncnn with non-live inference", netid);
@@ -1401,6 +1404,69 @@ static void detectYoloV5(JNIEnv *env, jobject bitmap, bool use_gpu) {
 }
 
 
+static void detectYoloV10(JNIEnv *env, jobject bitmap, bool use_gpu) {
+    if (use_gpu && ncnn::get_gpu_count() == 0) {
+        LOGGW("gpu backend not supported");
+        NCNN_JNI_NOTIFY("gpu backend not supported");
+        return;
+    }
+
+    double start_time = ncnn::get_current_time();
+
+    AndroidBitmapInfo info;
+    AndroidBitmap_getInfo(env, bitmap, &info);
+    const int width = info.width;
+    const int height = info.height;
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        LOGGW("bitmap is not RGBA_8888");
+        NCNN_JNI_NOTIFY("bitmap format is not RGBA_8888");
+        return;
+    }
+    NCNN_JNI_NOTIFY("image w=%d,h=%d", width, height);
+
+    // scale to 640 x 640
+    const int target_size = 640;
+    int w = target_size;
+    int h = target_size;
+    ncnn::Mat in = ncnn::Mat::from_android_bitmap_resize(env, bitmap, ncnn::Mat::PIXEL_RGB, w, h);
+    NCNN_JNI_NOTIFY("mat w=%d h=%d", in.w, in.h);
+    //reuse YoloV5Object for YoloV10
+    std::vector<YoloV5Object> objects;
+    {
+        //do YoloV10 inference using NCNN here
+    }
+
+    static const char *class_names[] = {
+            "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+            "traffic light",
+            "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse",
+            "sheep", "cow",
+            "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie",
+            "suitcase", "frisbee",
+            "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+            "skateboard", "surfboard",
+            "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl",
+            "banana", "apple",
+            "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
+            "chair", "couch",
+            "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote",
+            "keyboard", "cell phone",
+            "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase",
+            "scissors", "teddy bear",
+            "hair drier", "toothbrush"
+    };
+
+    for (size_t i = 0; i < objects.size(); i++) {
+        LOGGD("x=%d, y=%d, w=%d, h=%d, label=%s, probability=%.2f", objects[i].x, objects[i].y, objects[i].w, objects[i].h, class_names[objects[i].label], objects[i].prob);
+        NCNN_JNI_NOTIFY("x=%d, y=%d, w=%d, h=%d, label=%s, probability=%.2f", objects[i].x, objects[i].y, objects[i].w, objects[i].h, class_names[objects[i].label], objects[i].prob);
+    }
+
+    double elapsed = ncnn::get_current_time() - start_time;
+    LOGGD("ncnn YoloV10 inference elapsed %.2f ms", elapsed);
+    NCNN_JNI_NOTIFY("ncnn YoloV10 inference elapsed %.2f ms", elapsed);
+}
+
+
 /**
 *
 * @param sz_ncnnmodel_param   param file of ncnn model
@@ -1438,6 +1504,9 @@ void ncnn_jni_bench(JNIEnv *env, const char *sz_ncnnmodel_param, const char *sz_
             break;
         case NCNN_BENCHARK_YOLOV5:
             detectYoloV5(env, bitmap, use_gpu);
+            break;
+        case NCNN_BENCHARK_YOLOV10:
+            detectYoloV10(env, bitmap, use_gpu);
             break;
             //=============================================================================================
             //add new benchmark type for NCNN here

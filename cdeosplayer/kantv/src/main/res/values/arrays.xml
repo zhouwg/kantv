@@ -78,6 +78,7 @@
         <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn, based on NCNN)benchmark, TBD -->
         <item>TTS(ncnn)</item>              <!-- TBD -->
         <item>YoloV5(ncnn)</item>
+        <item>YoloV10(ncnn)</item>
     </string-array>
 
     <string-array name="threadCounts">
@@ -166,6 +167,7 @@
     <string-array name="ncnn_realtimeinference_netid">
         <item>scrfd</item>
         <item>nanodat</item>
+        <item>yolov10</item>
     </string-array>
 
 </resources>

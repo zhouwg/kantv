@@ -4047,6 +4047,7 @@
          NCNN_BENCHMARK_ASR,
          NCNN_BENCHMARK_TTS,
          NCNN_BENCHARK_YOLOV5,
+         NCNN_BENCHARK_YOLOV10,
          NCNN_BENCHMARK_MAX,
      };
 
@@ -4061,6 +4062,7 @@
      public enum ncnn_realtimeinference_type {
          NCNN_REALTIMEINFERENCE_FACEDETECT,
          NCNN_REALTIMEINFERENCE_NANODAT,
+         NCNN_REALTIMEINFERENCE_YOLOV10
      };
      //keep sync with ncnn-jni.h, ncnn backend
      public static final int NCNN_BACKEND_CPU           = 0;
