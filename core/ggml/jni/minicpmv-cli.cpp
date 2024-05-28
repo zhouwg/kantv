@@ -122,6 +122,7 @@ int main(int argc, char ** argv) {
     for (auto & image : params.image) {
         int n_past = 0;
         auto ctx_llava = minicpmv_init(&params, image, n_past);
+        llama_set_abort_callback(ctx_llava->ctx_llama, ggml_jni_abort_callback, NULL);
 
         if (!params.prompt.empty()) {
             LOGGD("<user>%s\n", params.prompt.c_str());

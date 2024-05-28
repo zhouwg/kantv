@@ -470,14 +470,6 @@ static std::string whisper_get_time_string()
 }
 
 
-static bool whisper_abort_callback(void * data) {
-    if (NULL == p_asr_ctx)
-        return false;
-
-    return p_asr_ctx->b_abort_benchmark;
-}
-
-
 static int whisper_bench_full() {
     if (NULL == p_asr_ctx) {
         LOGGW("pls check whether asr_ctx already initialized?\n");
@@ -742,7 +734,7 @@ failure:
 }
 
 
-static fifo_buffer_t  *whisper_asr_getfifo() {
+static fifo_buffer_t  * whisper_asr_getfifo() {
     if (NULL == p_asr_ctx)
         return NULL;
 
@@ -755,18 +747,14 @@ static fifo_buffer_t  *whisper_asr_getfifo() {
 
 // =================================================================================================
 //
-// JNI helper function for benchmark
-// referenced with codes in examples/bench/bench.cpp of project whisper.cpp
+// dirty method for fix UI issue when user cancel time-consuming bench task in UI layer.
+// background computing task(it's a blocked task) in native layer might be not finished
+// when user cancel time-consuming bench task in UI layer
 //
 // =================================================================================================
-int ggml_jni_get_cpu_core_counts() {
-    return std::thread().hardware_concurrency();
-}
-
-
-//NOTE: dirty method for fix UI issue when user cancel time-consuming bench task in UI layer
 static int s_ggml_jni_abort_benchmark = 0;
 static std::mutex s_ggml_jni_abort_mutex;
+
 int ggml_jni_get_abortbenchmark_value() {
     int n_abortbenchmark_value = 0;
     {
@@ -774,6 +762,11 @@ int ggml_jni_get_abortbenchmark_value() {
         n_abortbenchmark_value = s_ggml_jni_abort_benchmark;
     }
     return n_abortbenchmark_value;
+}
+
+
+bool ggml_jni_abort_callback(void * data) {
+    return ggml_jni_get_abortbenchmark_value();
 }
 
 
@@ -787,6 +780,17 @@ void ggml_jni_set_benchmark_status(int b_exit_benchmark) {
         return;
 
     p_asr_ctx->b_abort_benchmark = ((1 == b_exit_benchmark) ? true : false);
+}
+
+
+// =================================================================================================
+//
+// JNI helper function for benchmark
+// referenced with codes in examples/bench/bench.cpp of project whisper.cpp
+//
+// =================================================================================================
+int ggml_jni_get_cpu_core_counts() {
+    return std::thread().hardware_concurrency();
 }
 
 
