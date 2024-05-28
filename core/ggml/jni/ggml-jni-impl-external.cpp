@@ -8853,7 +8853,7 @@ int  llama_inference_ng(const char * sz_model_path, const char * sz_user_data, i
 
 
 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-extern int minicpmv_inference_main(int argc, char *argv[]);
+extern int minicpmv_inference_main(int argc, char *argv[], int backend);
 int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const char *sz_user_data,
                        int num_threads, int n_backend_type) {
     int ret = 0;
@@ -8883,9 +8883,7 @@ int minicpmv_inference(const char *sz_model_path, const char *sz_img_path, const
                           "-p", sz_user_data,
                           "-t", std::to_string(num_threads).c_str()
     };
-    //TODO: crash on Xiaomi 14 but works fine on Ubuntu 20.04
-    ret = minicpmv_inference_main(argc, const_cast<char **>(argv));
-    GGML_JNI_NOTIFY("MiniCPM-V inference not supported currently");
+    ret = minicpmv_inference_main(argc, const_cast<char **>(argv), n_backend_type);
 
     return ret;
 }

@@ -38,6 +38,7 @@ if(POLICY CMP0025)
 endif()
 
 project(ncnn)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 if(MSVC AND NOT CMAKE_VERSION VERSION_LESS "3.15")
     option(NCNN_BUILD_WITH_STATIC_CRT "Enables use of statically linked CRT for statically linked ncnn" OFF)

@@ -80,8 +80,8 @@ const char * llama_loop(struct minicpmv_context * ctx_llava,struct llama_samplin
 }
 
 #ifdef ANDROID
-int minicpmv_inference_main(int argc, char ** argv) {
-#else //for build MiniCPM-V command line application on Linux
+int minicpmv_inference_main(int argc, char ** argv, int backend) {
+#else //for build and run MiniCPM-V command line application on Linux
 //works fine on Ubuntu20.04
 //./minicpmv-cli -m /home/weiguo/models/ggml-model-Q4_K_M.gguf --mmproj /home/weiguo/models/mmproj-model-f16.gguf  --image /home/weiguo/Downloads/airplane.jpeg  -t 4 -p "What is in the image?"
 int main(int argc, char ** argv) {
@@ -93,6 +93,17 @@ int main(int argc, char ** argv) {
     if (!gpt_params_parse(argc, argv, params)) {
         show_additional_info(argc, argv);
         return 1;
+    }
+    if (backend != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
+#ifdef GGML_USE_QNN
+        LOGGD("using QNN backend %d", backend);
+        params.main_gpu = backend;
+        params.n_gpu_layers = 1;
+#else
+        LOGGW("QNN feature was disabled and backend is not ggml\n");
+        GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
+        return 1;
+#endif
     }
 
 #ifndef LOG_DISABLE_LOGS
@@ -160,6 +171,9 @@ int main(int argc, char ** argv) {
             }
         }
         printf("\n");
+#ifdef ANDROID
+        kantv_asr_notify_benchmark_c("\n[end of text]\n");
+#endif
         llama_print_timings(ctx_llava->ctx_llama);        
 
         ctx_llava->model = NULL;
