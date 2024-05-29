@@ -94,6 +94,7 @@ int main(int argc, char ** argv) {
         show_additional_info(argc, argv);
         return 1;
     }
+#ifdef ANDROID
     if (backend != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
 #ifdef GGML_USE_QNN
         LOGGD("using QNN backend %d", backend);
@@ -105,6 +106,7 @@ int main(int argc, char ** argv) {
         return 1;
 #endif
     }
+#endif
 
 #ifndef LOG_DISABLE_LOGS
     log_set_target(log_filename_generator("llava", "log"));
@@ -122,7 +124,9 @@ int main(int argc, char ** argv) {
     for (auto & image : params.image) {
         int n_past = 0;
         auto ctx_llava = minicpmv_init(&params, image, n_past);
+#ifdef ANDROID
         llama_set_abort_callback(ctx_llava->ctx_llama, ggml_jni_abort_callback, NULL);
+#endif
 
         if (!params.prompt.empty()) {
             LOGGD("<user>%s\n", params.prompt.c_str());
@@ -174,12 +178,13 @@ int main(int argc, char ** argv) {
         printf("\n");
 #ifdef ANDROID
         kantv_asr_notify_benchmark_c("\n[end of text]\n");
-#endif
         ggml_jni_llama_print_timings(ctx_llava->ctx_llama);
+#else
+        llama_print_timings(ctx_llava->ctx_llama);
+#endif
 
         ctx_llava->model = NULL;
-        //TODO:crash here on Xiaomi 14 and memory leak after comment it
-        //llava_free(ctx_llava);
+        llava_free(ctx_llava);
     }
 
     return 0;
