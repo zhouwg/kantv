@@ -215,9 +215,9 @@
 
 - v1.3.10 2024-05-29,
                  <ul>
-                    <li>update latest source code of ggml/whispercpp/llamacpp from upstream</li>
-                    <li>troubleshooting MiniCPM-V inferenenc in Android APK and enable it works fine</li>
-                    <li>add code skeleton for yolo-v10 for NCNN </li>
+                    <li><a href="https://github.com/zhouwg/kantv/pull/203">update latest source code of ggml/whispercpp/llamacpp from upstream</a></li>
+                    <li><a href="https://github.com/zhouwg/kantv/pull/204">troubleshooting MiniCPM-V inferenenc</a> in Android APK and enable it works fine</li>
+                    <li><a href="https://github.com/zhouwg/kantv/pull/206">add code skeleton for yolo-v10 for NCNN</a> </li>
                     <li>fix ui issue when user cancel time-consuming LLM bench task in ui layer</li>
                     <li>update source code of test-backend-ops.cpp from upstream</li>
                     <li>refine codes</li>
