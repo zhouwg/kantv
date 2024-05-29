@@ -4905,10 +4905,22 @@ struct ggml_tensor * ggml_repeat_back(
 // ggml_concat
 
 struct ggml_tensor * ggml_concat(
-    struct ggml_context* ctx,
-    struct ggml_tensor* a,
-    struct ggml_tensor* b) {
-    GGML_ASSERT(a->ne[0] == b->ne[0] && a->ne[1] == b->ne[1] && a->ne[3] == b->ne[3]);
+    struct ggml_context * ctx,
+    struct ggml_tensor * a,
+    struct ggml_tensor * b,
+    int dim ) {
+
+    GGML_ASSERT(dim >= 0 && dim < GGML_MAX_DIMS);
+
+    int64_t ne[GGML_MAX_DIMS];
+    for (int d = 0; d < GGML_MAX_DIMS; ++d) {
+        if (d == dim) {
+            ne[d] = a->ne[d] + b->ne[d];
+            continue;
+        }
+        GGML_ASSERT(a->ne[d] == b->ne[d]);
+        ne[d] = a->ne[d];
+    }
 
     bool is_node = false;
 
@@ -4916,7 +4928,9 @@ struct ggml_tensor * ggml_concat(
         is_node = true;
     }
 
-    struct ggml_tensor * result = ggml_new_tensor_4d(ctx, a->type, a->ne[0], a->ne[1], a->ne[2] + b->ne[2], a->ne[3]);
+    struct ggml_tensor * result = ggml_new_tensor(ctx, a->type, GGML_MAX_DIMS, ne);
+
+    ggml_set_op_params_i32(result, 0, dim);
 
     result->op = GGML_OP_CONCAT;
     result->grad = is_node ? ggml_dup_tensor(ctx, result) : NULL;
