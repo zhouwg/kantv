@@ -27,7 +27,7 @@
 
 - Supports convolutional neural networks, supports multiple input and multi-branch structure, can calculate part of the branch
 - <b>No third-party library dependencies</b>
-- Pure C++ implementation, cross-platform, supports Android, iOS and so on
+- <b>Pure C++ implementation</b>, cross-platform, supports Android, iOS and so on
 - ARM NEON assembly level of careful optimization, calculation speed is extremely high
 - Sophisticated memory management and data structure design, <b>very low memory footprint</b>
 - Supports multi-core parallel computing acceleration, ARM big.LITTLE CPU scheduling optimization

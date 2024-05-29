@@ -605,6 +605,64 @@ bool ggml_jni_is_valid_utf8(const char * string) {
 }
 
 
+//similar with original llama_print_timings and dedicated for project kantv, for merge/update latest source code of llama.cpp more easily and quickly
+void ggml_jni_llama_print_timings(struct llama_context * ctx) {
+    const llama_timings timings = llama_get_timings(ctx);
+    std::ostringstream timing;
+    timing << "llama-timings:\t";
+
+    LOGGV("\n");
+    LOGGV("%s:        load time = %10.2f ms\n", __func__, timings.t_load_ms);
+    LOGGV("%s:      sample time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_sample_ms, timings.n_sample, timings.t_sample_ms / timings.n_sample,
+          1e3 / timings.t_sample_ms * timings.n_sample);
+    LOGGV("%s: prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_p_eval_ms, timings.n_p_eval, timings.t_p_eval_ms / timings.n_p_eval,
+          1e3 / timings.t_p_eval_ms * timings.n_p_eval);
+    LOGGV("%s:        eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+          __func__, timings.t_eval_ms, timings.n_eval, timings.t_eval_ms / timings.n_eval,
+          1e3 / timings.t_eval_ms * timings.n_eval);
+    LOGGV("%s:       total time = %10.2f ms / %5d tokens\n", __func__,
+          (timings.t_end_ms - timings.t_start_ms), (timings.n_p_eval + timings.n_eval));
+
+
+    timing << "   load time  = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << (timings.t_load_ms) << " ms";
+
+    timing << "\n";
+    timing << " sample time  = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << (timings.t_sample_ms) << " ms / "
+           << timings.n_sample << " runs ("
+           << (timings.t_sample_ms / timings.n_sample) << " ms per token, "
+
+           << (1e3 / timings.t_sample_ms * timings.n_sample) << " tokens per second)";
+    timing << "\n";
+
+    timing << "prompt eval time = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << timings.t_p_eval_ms << " ms / "
+           << timings.n_p_eval << " tokens ("
+           << (timings.t_p_eval_ms / timings.n_p_eval) << " ms per token, "
+           << (1e3 / timings.t_p_eval_ms * timings.n_p_eval)
+           << " tokens per second)";
+    timing << "\n";
+
+    timing << "eval time " << std::setw(10) << std::fixed << std::setprecision(2)
+           << timings.t_eval_ms << " ms / "
+           << timings.n_eval << " runs"
+           << "(" << timings.t_eval_ms / timings.n_eval << " ms per token, "
+           << (1e3 / timings.t_eval_ms * timings.n_eval) << " tokens per second)";
+    timing << "\n";
+
+    timing << "   total time = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << ((timings.t_end_ms - timings.t_start_ms)) << " ms / "
+           << (timings.n_p_eval + timings.n_eval)
+           << "  tokens\n";
+
+    std::string result = timing.str();
+    kantv_asr_notify_benchmark(result);
+}
+
+
 /**
  *
  * @param sz_model_path
@@ -1253,17 +1311,17 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
         }
     }
 
-    llama_print_timings(ctx);
+    ggml_jni_llama_print_timings(ctx);
     if (ctx_guidance) {
         LOGGD("here");
         llama_free(ctx_guidance);
     }
     LOGGD("here");
-    //TODO:crash here on Xiaomi 14
-    //llama_free(ctx); //TODO: memory leak after comment it
+    //TODO:crash here on Xiaomi 14 and memory leak after comment it
+    //llama_free(ctx); //TODO:
     LOGGD("here");
-    //TODO:crash here on Xiaomi 14
-    //llama_free_model(model);//TODO: memory leak after comment it
+    //TODO:crash here on Xiaomi 14 and memory leak after comment it
+    //llama_free_model(model);
     LOGGD("here");
 
     llama_sampling_free(ctx_sampling);
@@ -8826,8 +8884,8 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     return 0;
 }
 
-extern int llama_inference_main(int argc, char *argv[], int backend);
 
+extern int llama_inference_main(int argc, char *argv[], int backend);
 int  llama_inference_ng(const char * sz_model_path, const char * sz_user_data, int bench_type, int n_threads, int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);

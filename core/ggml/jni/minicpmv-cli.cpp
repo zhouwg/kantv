@@ -175,10 +175,11 @@ int main(int argc, char ** argv) {
 #ifdef ANDROID
         kantv_asr_notify_benchmark_c("\n[end of text]\n");
 #endif
-        llama_print_timings(ctx_llava->ctx_llama);        
+        ggml_jni_llama_print_timings(ctx_llava->ctx_llama);
 
         ctx_llava->model = NULL;
-        llava_free(ctx_llava);
+        //TODO:crash here on Xiaomi 14 and memory leak after comment it
+        //llava_free(ctx_llava);
     }
 
     return 0;

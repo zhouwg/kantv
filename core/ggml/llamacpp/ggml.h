@@ -2459,7 +2459,7 @@ extern "C" {
     GGML_API ggml_type_traits_t ggml_internal_get_type_traits(enum ggml_type type);
 
     //
-    // customized for purpose of comptiable for other GGML-based projects
+    // the following are deprecated functions in upstream, keep them for purpose of comptiable for other GGML-based projects
     //
 
     GGML_API struct ggml_tensor * ggml_pad_reflec_1d(
@@ -2486,6 +2486,10 @@ extern "C" {
 
     GGML_API size_t ggml_quantize_chunk_bark(enum ggml_type type, const float * src, void * dst, int start, int n, int64_t * hist);
 
+    GGML_API struct ggml_tensor * ggml_concat_org(
+            struct ggml_context * ctx,
+            struct ggml_tensor  * a,
+            struct ggml_tensor  * b);
 
 #include "libavutil/cde_log.h"
 
