@@ -659,7 +659,9 @@ void ggml_jni_llama_print_timings(struct llama_context * ctx) {
            << "  tokens\n";
 
     std::string result = timing.str();
+#ifdef ANDROID
     kantv_asr_notify_benchmark(result);
+#endif
 }
 
 
