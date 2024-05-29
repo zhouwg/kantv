@@ -100,6 +100,9 @@ enum ggml_jni_backend_type {
 
     bool         ggml_jni_is_valid_utf8(const char * string);
 
+    //similar with original llama_print_timings and dedicated for project kantv, for merge/update latest source code of llama.cpp more easily and quickly
+    void         ggml_jni_llama_print_timings(struct llama_context * ctx);
+
 
 // =================================================================================================
 // PoC#64:Add/implement realtime AI subtitle for online English TV using whisper.cpp from 03-05-2024 to 03-16-2024
