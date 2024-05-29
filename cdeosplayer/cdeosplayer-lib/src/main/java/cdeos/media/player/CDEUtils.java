@@ -4054,7 +4054,7 @@
      //keep sync with ggml-qnn.h
      public static final int QNN_BACKEND_CPU           = 0;
      public static final int QNN_BACKEND_GPU           = 1;
-     public static final int QNN_BACKEND_HTP           = 2;
+     public static final int QNN_BACKEND_NPU           = 2; //aka HTP/DSP
      public static final int QNN_BACKEND_GGML          = 3; //"fake" QNN backend, just for compare performance between QNN and original GGML
 
 

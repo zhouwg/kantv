@@ -84,7 +84,7 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
         goto failure;
     }
 
-    if (backend_type >= GGML_BACKEND_MAX) {
+    if (backend_type > QNN_BACKEND_GGML) {
         LOGGW("pls check backend type\n");
         goto failure;
     }
@@ -331,7 +331,7 @@ Java_org_ggml_ggmljava_ggml_1bench_1m(JNIEnv *env, jclass clazz, jstring model_p
         goto failure;
     }
 
-    if (n_backend_type >= GGML_BACKEND_MAX) {
+    if (n_backend_type > QNN_BACKEND_GGML) {
         GGML_JNI_NOTIFY("[%s,%s,%d]pls check backend type", __FILE__, __FUNCTION__, __LINE__);
         goto failure;
     }

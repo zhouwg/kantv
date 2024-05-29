@@ -1280,7 +1280,7 @@ static ggml_backend_t whisper_backend_init(const whisper_context_params & params
 #ifdef GGML_USE_QNN
     WHISPER_LOG_INFO("use_gpu %d", params.use_gpu);
     if (params.use_gpu) {
-        if (params.gpu_device != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is "fake" QNN backend, just used for compare performance between QNN backend and original GGML
+        if (params.gpu_device != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is "fake" QNN backend, just used for compare performance between QNN backend and original GGML
             WHISPER_LOG_INFO("%s: using QNN backend\n", __func__);
             backend_gpu = ggml_backend_qnn_init(params.gpu_device, "/data/data/com.cdeos.kantv/qnnlib/");// the second param can be got by JNI from Java layer
             if (!backend_gpu) {

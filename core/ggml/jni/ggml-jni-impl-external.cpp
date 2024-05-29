@@ -7287,15 +7287,15 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                     n_backend_type, get_qnn_backend_name(n_backend_type), n_op_type);
 
     switch (n_backend_type) {
-        case QNN_CPU:
+        case QNN_BACKEND_CPU:
             qnn_backend_lib = "libQnnCpu.so";
             break;
 
-        case QNN_GPU:
+        case QNN_BACKEND_GPU:
             qnn_backend_lib = "libQnnGpu.so";
             break;
 
-        case QNN_HTP: {
+        case QNN_BACKEND_NPU: {
             qnn_backend_lib = "libQnnHtp.so";
             std::string path = "/data/data/com.cdeos.kantv/qnnlib/";
             LOGGI("path:%s\n", path.c_str());
@@ -7480,7 +7480,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
         LOGGI("error = %d\n", error);
 
-        if (QNN_HTP == n_backend_type) {
+        if (QNN_BACKEND_NPU == n_backend_type) {
             qnn_buffer_0 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(128, 4));
             if (nullptr == qnn_buffer_0) {
                 LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
@@ -7585,7 +7585,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                 GGML_JNI_NOTIFY("output matrix:");
                 for (size_t i = 0; i < 1; i++) {
                     float * temp = nullptr;
-                    if (QNN_HTP == n_backend_type)
+                    if (QNN_BACKEND_NPU == n_backend_type)
                         temp = (float*)qnn_buffer_2;
                     else
                         temp = output_matrix[i];
@@ -8419,10 +8419,10 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
                     n_backend_type, get_qnn_backend_name(n_backend_type), n_graph_type);
 
     switch (n_graph_type) {
-        case 0: // MNIST手写数字识别推理, https://github.com/StudyingLover/ggml-tutorial
+        case 0: // MNIST CV inference of digital number, https://github.com/StudyingLover/ggml-tutorial
         {
             GGML_JNI_NOTIFY("input data is mnist-5.png\n");
-            mnist_inference("/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png", 0, 4, GGML_BACKEND_GGML);
+            mnist_inference("/sdcard/kantv/mnist-ggml-model-f32.gguf", "/sdcard/kantv/mnist-5.png", 0, 4, QNN_BACKEND_GGML);
             break;
         }
         case 1:
