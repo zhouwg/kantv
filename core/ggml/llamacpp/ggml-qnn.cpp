@@ -19,14 +19,16 @@
  *
  * todo:
  *
- * 1. lack of implementation of other GGML-OPs using QNN API(only support GGML_OP_MUL_MAT,
- *    GGML_OP_MUL, GGML_OP_ADD, would be done by community in upstream GGML community)
+ * 1. lack of implementation of other GGML OPs using QNN API(only support GGML_OP_MUL_MAT,
+ *    GGML_OP_MUL, GGML_OP_ADD currently), would be done in upstream GGML community
  *
- * 2. only support FP32 / FP16 (other data type not used currently, would be done by community in upstream GGML community)
+ * 2. only support FP32 / FP16, other(quantized) GGML data type not used currently, data type of
+ *    input tensor and output tensor must be same(this is a real big limitation in this backend).
+ *    would be done in upstream GGML community
  *
- * 3. data type of input tensors and output tensor must be same(this is a big limitation)
+ * 3. QNN's RPC feature(which is required for QNN NPU backend) not used
  *
- * 4. QNN's RPC feature(which is required for QNN NPU backend) not used
+ * 4. performance fine-tune using QNN backend(mixed inference between CPU&GPU&NPU)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -988,7 +990,7 @@ static uint32_t ggml_get_tensor_rank(const ggml_tensor * tensor) {
 }
 
 
-//TODO:
+//TODO: mapping more ggml data type to QNN data type
 //ref:explanation of k-quants, https://github.com/ggerganov/llama.cpp/pull/1684
 static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
     switch (ggmltype) {
@@ -2462,26 +2464,58 @@ int qnn_instance::finalize_qnn_graph() {
 //  implementation of GGML's QNN backend
 //
 // =================================================================================================
-static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct ggml_tensor * src1,
-                                 struct ggml_tensor * dst) {
-    const int64_t ne00 = src0->ne[0];
-    const int64_t ne01 = src0->ne[1];
+static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dump_tensor_info) {
+    if (nullptr == tensor)
+        return false;
 
-    const int64_t ne10 = src1->ne[0];
-    const int64_t ne11 = src1->ne[1];
+    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
+        return false;
+    }
 
-    const int64_t ne0 = dst->ne[0];
-    const int64_t ne1 = dst->ne[1];
+    if (b_dump_tensor_info) {
+        QNN_LOG_DEBUG("op name:%s, tensor type:%s", ggml_op_name(tensor->op),
+                      ggml_type_name(tensor->type));
+        if (nullptr != tensor->src[0]) {
+            QNN_LOG_DEBUG("src0 type:%s", ggml_type_name(tensor->src[0]->type));
+        }
+        if (nullptr != tensor->src[1]) {
+            QNN_LOG_DEBUG("src1 type:%s", ggml_type_name(tensor->src[1]->type));
+        }
+    }
 
-    if (dst->op == GGML_OP_ADD) {
+    //ensure tensor->src[0] and tensor->src[1] is not nullptr
+    bool supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
+    if (!supported_op) {
+        return false;
+    }
+
+    const struct ggml_tensor * src0 = tensor->src[0];
+    const struct ggml_tensor * src1 = tensor->src[1];
+
+    const int64_t ne00 = tensor->src[0]->ne[0];
+    const int64_t ne01 = tensor->src[0]->ne[1];
+
+    const int64_t ne10 = tensor->src[1]->ne[0];
+    const int64_t ne11 = tensor->src[1]->ne[1];
+
+    const int64_t ne0 = tensor->ne[0];
+    const int64_t ne1 = tensor->ne[1];
+
+    //make ggml_get_tensor_rank and QNN SDK happy
+    if ((ne00 <= 1 || ne01 <= 1 || ne10 <= 1 || ne11 <= 1)) {
+        return false;
+    }
+
+    if (tensor->op == GGML_OP_ADD) {
+        //TODO: this is limitation
         return (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16)
                && (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16)
-               && (dst->type == GGML_TYPE_F32 || dst->type == GGML_TYPE_F16) && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1));
+               && (tensor->type == GGML_TYPE_F32 || tensor->type == GGML_TYPE_F16);
 
     }
 
-    if (dst->op == GGML_OP_MUL_MAT) {
-        if (0) {
+    if (tensor->op == GGML_OP_MUL_MAT) {
+        if (b_dump_tensor_info) {
             QNN_LOG_DEBUG("GGML_OP_MUL_MAT");
             QNN_LOG_DEBUG(
                     "%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
@@ -2495,18 +2529,18 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * src0, const struct
                     src1->nb[0], src1->nb[1], src1->nb[2]);
             QNN_LOG_DEBUG(
                     "%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-                    dst->name,
-                    dst->type, ggml_type_name(dst->type), dst->ne[0], dst->ne[1], dst->ne[2],
-                    dst->nb[0],
-                    dst->nb[1], dst->nb[2]);
+                    tensor->name,
+                    tensor->type, ggml_type_name(tensor->type), tensor->ne[0], tensor->ne[1], tensor->ne[2],
+                    tensor->nb[0],
+                    tensor->nb[1], tensor->nb[2]);
         }
 
     }
 
+    //TODO: this is limitation
     return  (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16)
             && (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16)
-            && (src0->type == src1->type) && (src0->type == dst->type)
-            && ((ne00 > 1 && ne01 > 1 && ne10 > 1 && ne11 > 1));
+            && (src0->type == src1->type) && (src0->type == tensor->type);
 }
 
 
@@ -3361,37 +3395,16 @@ static void ggml_qnn_nop(const ggml_tensor * src0, const ggml_tensor * src1, ggm
 bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor) {
     ggml_qnn_func_t func                = nullptr;
     ggml_qnn_func_common_t  func_common = nullptr;
-    bool supported_op                   = false;
 
-    if (nullptr == g_qnn_backend) {
-        QNN_LOG_ERROR("pls check why qnn subsystem not initialized");
-        return false;
-    }
-
-    if (0) {
-        QNN_LOG_DEBUG("op name:%s, tensor type:%s", ggml_op_name(tensor->op),
-                      ggml_type_name(tensor->type));
-        if (nullptr != tensor->src[0]) {
-            QNN_LOG_DEBUG("src0 type:%s", ggml_type_name(tensor->src[0]->type));
-        }
-        if (nullptr != tensor->src[1]) {
-            QNN_LOG_DEBUG("src1 type:%s", ggml_type_name(tensor->src[1]->type));
-        }
-    }
-
-    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
-        return false;
-    }
-
-    supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
 #if NOT_IN_PR // not in PR, should be removed before PR because this is a workaround method during development stage
     bool use_hwaccel                    = false;
     use_hwaccel = (tensor->src[0]->backend == GGML_BACKEND_TYPE_GPU);
-    if ((!use_hwaccel) && (!supported_op)) {
+    bool supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
+    if (!use_hwaccel && !supported_op) {
         ggml_compute_forward(params, tensor, nullptr);
         return false;
     }
-    if ((!use_hwaccel) && (!ggml_qnn_can_handle_op(tensor->src[0], tensor->src[1], tensor))) {
+    if ((!use_hwaccel) && (!ggml_qnn_can_handle_op(tensor, true))) {
         ggml_compute_forward(params, tensor, nullptr);
         return false;
     }
@@ -3642,10 +3655,6 @@ static void ggml_backend_qnn_buffer_init_tensor(ggml_backend_buffer_t buffer, gg
     }
     tensor->extra = p_qnn_tensor;
     ctx->qnn_tensors.push_back(p_qnn_tensor);
-
-    if (ggml_is_quantized(tensor->type)) {
-        QNN_LOG_DEBUG("is quantized");
-    }
 }
 
 
@@ -3873,13 +3882,14 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
 }
 
 
+//note: this function will be used in new/proposal/refined ggml backend subsystem(will be available in a standalone PR)
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * tensor) {
     GGML_UNUSED(backend);
 
-    const int min_batch_size = 32;
-    bool supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
-
-    return tensor->ne[1] >= min_batch_size && supported_op;
+    if (ggml_qnn_can_handle_op(tensor, false))
+        return true;
+    else
+        return false;
 }
 
 
