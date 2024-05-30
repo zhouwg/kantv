@@ -30,6 +30,7 @@
 #endif
 
 #include "ggml.h"
+#include "ggml-qnn.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,15 +55,16 @@ enum ggml_jni_bench_type {
     GGML_BENCHMARK_MAX
 };
 
-
+#if 0 //remove it sine v1.3.11 to avoid confusion/duplication between ggml-jni.h and ggml-qnn.h
 // available backend for ggml-jni
 enum ggml_jni_backend_type {
     GGML_BACKEND_CPU = 0,
     GGML_BACKEND_GPU,
-    GGML_BACKEND_DSP,
+    GGML_BACKEND_NPU,  // aka HTP/DSP
     GGML_BACKEND_GGML, //"fake" QNN backend just for compare performance between QNN and original GGML
     GGML_BACKEND_MAX
 };
+#endif
 //=============================================================================================
 
 

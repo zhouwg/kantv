@@ -95,7 +95,7 @@ int main(int argc, char ** argv) {
         return 1;
     }
 #ifdef ANDROID
-    if (backend != GGML_BACKEND_GGML) { // GGML_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
+    if (backend != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is the original GGML, used to compare performance between QNN backend and original GGML
 #ifdef GGML_USE_QNN
         LOGGD("using QNN backend %d", backend);
         params.main_gpu = backend;
