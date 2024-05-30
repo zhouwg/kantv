@@ -168,7 +168,7 @@ public class IApplication extends Application {
     public void initGlobal() {
         long startTime = System.currentTimeMillis();
         String buildTime = BuildConfig.BUILD_TIME;
-        CDEUtils.setReleaseMode(true);
+        CDEUtils.setReleaseMode(false);
         CDELog.j(TAG, "*************************enter initGlobal *********************************");
         CDELog.j(TAG, "buildTime: " + buildTime);
         CDELog.j(TAG, "init app");
@@ -263,9 +263,9 @@ public class IApplication extends Application {
         CDEAssetLoader.copyAssetDir(mContext, "qnnlib", CDEUtils.getDataPath(mContext) + "qnnlib");
         CDELog.j(TAG, "qnn lib path:" + CDEUtils.getDataPath(mContext) + "qnnlib");
 
-        //TIP: move assets/models to /sdcard/kantv/models manually
+        //note: move assets/models to /sdcard/kantv/models manually
         //     for purpose of reduce size of APK, the APK size would be smaller significantly
-
+        CDEAssetLoader.copyAssetDir(mContext, "models", CDEUtils.getDataPath() + "/models");
 
         //step-4:
         String configString = CDEAssetLoader.readTextFromFile(CDEAssetLoader.getDataPath(mContext) + "config.json");

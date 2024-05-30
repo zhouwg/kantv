@@ -516,7 +516,7 @@
              if (isNCNNInference()) {
                  //inference using NCNN framework
 
-                 if (backendIndex == CDEUtils.QNN_BACKEND_HTP) {
+                 if (backendIndex == CDEUtils.QNN_BACKEND_NPU) {
                      CDEUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
                      return;
                  }
