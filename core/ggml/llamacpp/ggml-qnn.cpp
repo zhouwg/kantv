@@ -311,35 +311,7 @@ struct ggml_backend_qnn_context {
 // =================================================================================================
 static ggml_backend_t g_qnn_backend = nullptr;
 
-static int g_current_device        = QNN_BACKEND_GGML; // QNN_BACKEND_GGML is the default ggml backend
-
-static bool GGML_OP_HAS_INIT    [GGML_OP_COUNT] = { 0 };
-static bool GGML_OP_HAS_FINALIZE[GGML_OP_COUNT] = { 0 };
-static void ggml_setup_op_has_task_pass(void) {
-    {   // INIT
-        bool * p = GGML_OP_HAS_INIT;
-
-        p[GGML_OP_ACC                    ] = true;
-        p[GGML_OP_MUL_MAT                ] = true;
-        p[GGML_OP_MUL_MAT_ID             ] = true;
-        p[GGML_OP_OUT_PROD               ] = true;
-        p[GGML_OP_SET                    ] = true;
-        p[GGML_OP_GET_ROWS_BACK          ] = true;
-        p[GGML_OP_DIAG_MASK_INF          ] = true;
-        p[GGML_OP_DIAG_MASK_ZERO         ] = true;
-        p[GGML_OP_CONV_TRANSPOSE_1D      ] = true;
-        p[GGML_OP_CONV_TRANSPOSE_2D      ] = true;
-        p[GGML_OP_FLASH_ATTN_BACK        ] = true;
-        p[GGML_OP_CROSS_ENTROPY_LOSS     ] = true;
-        p[GGML_OP_ADD_REL_POS            ] = true;
-    }
-
-    {   // FINALIZE
-        bool * p = GGML_OP_HAS_FINALIZE;
-
-        p[GGML_OP_CROSS_ENTROPY_LOSS     ] = true;
-    }
-}
+static int g_current_device         = QNN_BACKEND_GGML;
 
 
 //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/NPU(aka HTP/DSP) backend currently
@@ -1420,11 +1392,9 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 #else
             __android_log_print(level, "ggml-qnn", "%s\n", s_ggml_qnn_log_internal_buf);
 #endif
-            //for Android command line application
-            printf("%s\n", s_ggml_qnn_log_internal_buf);
-#else
-            printf("%s\n", s_ggml_qnn_log_internal_buf);
 #endif
+            //for Android command line application or WoA
+            printf("%s\n", s_ggml_qnn_log_internal_buf);
         }
         va_end(args);
     }
@@ -2483,10 +2453,6 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
     if (nullptr == tensor)
         return false;
 
-    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
-        return false;
-    }
-
     if (b_dump_tensor_info) {
         QNN_LOG_DEBUG("op name:%s, tensor type:%s", ggml_op_name(tensor->op),
                       ggml_type_name(tensor->type));
@@ -2496,6 +2462,10 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
         if (nullptr != tensor->src[1]) {
             QNN_LOG_DEBUG("src1 type:%s", ggml_type_name(tensor->src[1]->type));
         }
+    }
+
+    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
+        return false;
     }
 
     //ensure tensor->src[0] and tensor->src[1] is not nullptr
@@ -2548,6 +2518,10 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
                     tensor->type, ggml_type_name(tensor->type), tensor->ne[0], tensor->ne[1], tensor->ne[2],
                     tensor->nb[0],
                     tensor->nb[1], tensor->nb[2]);
+        }
+
+        if (tensor->ne[1] < 32) { // GPU/NPU inference will slower then CPU inference when tensor->ne[1] < min batch size
+            return false;
         }
 
     }
@@ -3410,20 +3384,6 @@ bool ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_t
     ggml_qnn_func_t func                = nullptr;
     ggml_qnn_func_common_t  func_common = nullptr;
 
-#if 1// NOT_IN_PR // not in PR, should be removed before PR because this is a workaround method during development stage
-    bool use_hwaccel                    = false;
-    use_hwaccel = (tensor->src[0]->backend == GGML_BACKEND_TYPE_GPU);
-    bool supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
-    if (!use_hwaccel && !supported_op) {
-        ggml_compute_forward(params, tensor, nullptr);
-        return false;
-    }
-    if ((!use_hwaccel) && (!ggml_qnn_can_handle_op(tensor, false))) {
-        ggml_compute_forward(params, tensor, nullptr);
-        return false;
-    }
-#endif
-
     switch (tensor->op) {
         case GGML_OP_ADD:
             func = ggml_qnn_add;
@@ -3847,65 +3807,32 @@ static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_
 }
 
 
-static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tensor * op) {
-    GGML_UNUSED(backend);
+static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
+    enum ggml_status result         = GGML_STATUS_SUCCESS;
+    ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
 
-    switch (op->op) {
-        case GGML_OP_MUL_MAT:
-        case GGML_OP_MUL:
-        case GGML_OP_ADD:
-            return true;
-        default:
-            return false;
+    ggml_compute_params params = {};
+    params.type = GGML_TASK_TYPE_COMPUTE;
+    params.ith = 0;
+    for (int i = 0; i < cgraph->n_nodes; i++) {
+        ggml_tensor * node = cgraph->nodes[i];
+        if (ggml_is_empty(node) || node->op == GGML_OP_RESHAPE || node->op == GGML_OP_TRANSPOSE || node->op == GGML_OP_VIEW || node->op == GGML_OP_PERMUTE || node->op == GGML_OP_NONE) {
+            continue;
+        }
+        bool ok = ggml_qnn_compute_forward(&params, node);
+        if (!ok) {
+            QNN_LOG_DEBUG("%s: error: op not supported %s (%s)\n", __func__, node->name, ggml_op_name(node->op));
+        }
     }
+
+    return result;
 }
 
 
-static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
-    enum ggml_status result         = GGML_STATUS_SUCCESS;
-    int node_n                      = -1;
-    ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
+static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tensor * op) {
+    GGML_UNUSED(backend);
 
-    struct ggml_cplan plan          = ggml_graph_plan(cgraph, 1);
-    if (plan.work_size > 0) {
-#if NOT_IN_PR
-        plan.work_data = static_cast<uint8_t *>(ctx->buffer_pool->buffer_pool_base);
-#else
-        plan.work_data = static_cast<uint8_t *>(malloc(plan.work_size));
-        if (nullptr == plan.work_data) {
-            QNN_LOG_ERROR("malloc failed");
-            return result;
-        }
-#endif
-    }
-
-    struct ggml_compute_params params = {
-            /*.type  =*/ GGML_TASK_TYPE_FINALIZE,
-            /*.ith   =*/ 0,
-            /*.nth   =*/ 0,
-            /*.wsize =*/ plan.work_size,
-            /*.wdata =*/ plan.work_data,
-    };
-    while (++node_n < cgraph->n_nodes) {
-        struct ggml_tensor * node = cgraph->nodes[node_n];
-        params.nth = 1;
-        if (GGML_OP_HAS_INIT[node->op]) {
-            params.type = GGML_TASK_TYPE_INIT;
-            ggml_qnn_compute_forward(&params, node);
-        }
-        params.type = GGML_TASK_TYPE_COMPUTE;
-        ggml_qnn_compute_forward(&params, node);
-        if (GGML_OP_HAS_FINALIZE[node->op]) {
-            params.type = GGML_TASK_TYPE_FINALIZE;
-            ggml_qnn_compute_forward(&params, node);
-        }
-    }
-
-#if NOT_IN_PR
-    free(plan.work_data);
-#endif
-
-    return result;
+    return (ggml_qnn_can_handle_op(op, false));
 }
 
 
@@ -3913,10 +3840,7 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * tensor) {
     GGML_UNUSED(backend);
 
-    if (ggml_qnn_can_handle_op(tensor, false))
-        return true;
-    else
-        return false;
+    return ggml_qnn_compute_forward(nullptr, (ggml_tensor*)tensor);
 }
 
 
@@ -4052,12 +3976,6 @@ ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
             QNN_LOG_INFO("delete previous backend %d(%s)", device, get_qnn_backend_name(device));
             ggml_backend_qnn_free(g_qnn_backend);
         }
-    }
-
-    static bool is_first_call = true;
-    if (is_first_call) {
-        ggml_setup_op_has_task_pass();
-        is_first_call = false;
     }
 
     if (QNN_BACKEND_NPU == device) {
