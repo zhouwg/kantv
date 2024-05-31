@@ -989,15 +989,8 @@ int llama_inference_main(int argc, char ** argv, int backend) {
     write_logfile(ctx, params, model, input_tokens, output_ss.str(), output_tokens);
 
     if (ctx_guidance) { llama_free(ctx_guidance); }
-
-    LOGGD("here");
-    //TODO:crash here on Xiaomi 14 and memory leak after comment it
-    //llama_free(ctx);
-    LOGGD("here");
-    //TODO:crash here on Xiaomi 14 and memory leak after comment it
-    //llama_free_model(model);
-    LOGGD("here");
-
+    llama_free(ctx);
+    llama_free_model(model);
     llama_sampling_free(ctx_sampling);
     llama_backend_free();
 
