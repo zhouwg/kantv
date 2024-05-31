@@ -1348,21 +1348,12 @@ int  llama_inference(const char * model_path, const char * prompt, int bench_typ
 
     ggml_jni_llama_print_timings(ctx);
     if (ctx_guidance) {
-        LOGGD("here");
         llama_free(ctx_guidance);
     }
-    LOGGD("here");
-    //TODO:crash here on Xiaomi 14 and memory leak after comment it
-    //llama_free(ctx); //TODO:
-    LOGGD("here");
-    //TODO:crash here on Xiaomi 14 and memory leak after comment it
-    //llama_free_model(model);
-    LOGGD("here");
-
+    llama_free(ctx);
+    llama_free_model(model);
     llama_sampling_free(ctx_sampling);
-    LOGGD("here");
     llama_backend_free();
-    LOGGD("here");
 
     return 0;
 }
