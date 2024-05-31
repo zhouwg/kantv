@@ -3829,7 +3829,11 @@ static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tens
 }
 
 
-//note: this function will be used in new/proposal/refined ggml backend subsystem(will be available in a standalone PR)
+//note: this function be used in new/proposal/refined ggml backend subsystem:
+// https://github.com/zhouwg/kantv/pull/216 in this project
+// https://github.com/ggerganov/llama.cpp/pull/7641 in upstream
+// new ggml backend can following this style for mixed inference between CPU&GPU / CPU&NPU very easily
+// and the complex/complicated "Backend Sched" feature in ggml backend subsystem could be not used along this new approach
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * tensor) {
     GGML_UNUSED(backend);
 
@@ -3960,7 +3964,7 @@ ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
     }
 
     if (nullptr != g_qnn_mgr[device].backend) {
-        QNN_LOG_ERROR("qnn backend %d(%s) already loaded, it should not happened, pls check why?", device, get_qnn_backend_name(device));
+        QNN_LOG_ERROR("qnn backend %d(%s) already loaded", device, get_qnn_backend_name(device));
         if (device == g_current_device) {
             g_qnn_backend = g_qnn_mgr[device].backend;
             QNN_LOG_INFO("re-use cached backend %d(%s)", device, get_qnn_backend_name(device));

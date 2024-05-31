@@ -168,7 +168,7 @@ public class IApplication extends Application {
     public void initGlobal() {
         long startTime = System.currentTimeMillis();
         String buildTime = BuildConfig.BUILD_TIME;
-        CDEUtils.setReleaseMode(false);
+        CDEUtils.setReleaseMode(true);
         CDELog.j(TAG, "*************************enter initGlobal *********************************");
         CDELog.j(TAG, "buildTime: " + buildTime);
         CDELog.j(TAG, "init app");

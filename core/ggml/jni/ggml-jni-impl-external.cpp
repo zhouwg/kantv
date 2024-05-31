@@ -135,6 +135,7 @@ static const char * get_qnn_backend_name(int n_backend_type) {
 
 
 static bool ggml_graph_compute_helper(
+        struct ggml_backend * backend,
         struct ggml_cgraph * graph,
         std::vector<uint8_t> & buf,
         int   n_threads,
@@ -150,7 +151,21 @@ static bool ggml_graph_compute_helper(
         plan.work_data = buf.data();
     }
 
-    return ggml_graph_compute(graph, &plan);
+    if (ggml_backend_is_cpu(backend)) {
+        ggml_backend_cpu_set_n_threads(backend, n_threads);
+    }
+
+#ifdef GGML_USE_QNN
+    if (ggml_backend_is_qnn(backend)) {
+        ggml_backend_qnn_set_n_threads(backend, n_threads);
+    }
+#endif
+
+    //a new approch of mixed inference
+    if (nullptr != backend)
+        return ggml_backend_graph_compute(backend, graph) == GGML_STATUS_SUCCESS;
+    else
+        return ggml_graph_compute(graph, &plan);
 }
 
 
@@ -249,6 +264,20 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
     kantv_asr_notify_benchmark_c("prepare matrix\n");
 #endif
 
+    ggml_backend_t backend = nullptr;
+    ggml_backend_buffer_t buffer = nullptr;
+#ifdef GGML_USE_QNN
+    if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        backend = ggml_backend_qnn_init(n_backend, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d failed", n_backend);
+            GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend);
+            return "unknown";
+        }
+        n_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
+    }
+#endif
+
     // put a bunch of random data in the buffer
     for (size_t i = 0; i < buf.size(); i++) buf[i] = i;
 
@@ -272,6 +301,10 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
 
         const size_t N = sizes[j];
 
+        if (1 == ggml_jni_get_abortbenchmark_flag()) {
+            break;
+        }
+
 #if 1
         for (int k = 0; k < 7; ++k) {
             const ggml_type wtype =
@@ -282,10 +315,14 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
                     k == 4 ? GGML_TYPE_Q8_0 :
                     k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
 #else
-            for (int k = 0; k < 1; ++k) {
-            const ggml_type wtype = GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
-            k = 6; //hardcode to 6 make following code happy
+            for (int k = 5; k < 7; ++k) {
+                const ggml_type wtype =
+                        k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
 #endif
+
+            if (1 == ggml_jni_get_abortbenchmark_flag()) {
+                break;
+            }
 
             double & s = k == 0 ? s_q4_0 : k == 1 ? s_q4_1 : k == 2 ? s_q5_0 : k == 3 ? s_q5_1 : k == 4 ? s_q8_0 : k == 5 ? s_fp16 : /*k == 6*/ s_fp32;
             int    & n = k == 0 ? n_q4_0 : k == 1 ? n_q4_1 : k == 2 ? n_q5_0 : k == 3 ? n_q5_1 : k == 4 ? n_q8_0 : k == 5 ? n_fp16 : /*k == 6*/ n_fp32;
@@ -295,20 +332,11 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
                     /*.mem_buffer =*/ buf.data(),
                     /*.no_alloc   =*/ false,
             };
-            ggml_backend_t backend = nullptr;
-            ggml_backend_buffer_t buffer = nullptr;
+
 #ifdef GGML_USE_QNN
             if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 gparams.use_hwaccel = true;
                 gparams.no_alloc    = true;
-
-                backend = ggml_backend_qnn_init(n_backend, "/data/data/com.cdeos.kantv/"); // the second param can be got by JNI from Java layer
-                if (nullptr == backend) {
-                    LOGGD("create qnn backend %d failed", n_backend);
-                    GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend);
-                    return "unknown";
-                }
-                n_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
             }
 #endif
             struct ggml_context * ctx0 = ggml_init(gparams);
@@ -323,10 +351,11 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
 
 #ifdef GGML_USE_QNN
             if (n_backend != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-                LOGGD("creating backend buffer\n");
+                //LOGGD("creating backend buffer\n");
                 buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
                 if (!buffer) {
                     LOGGD("%s: failed to allocate backend buffer\n", __func__);
+                    GGML_JNI_NOTIFY("%s: failed to allocate backend buffer\n", __func__);
                     //attention here:don't call this function here otherwise app would crash, no memory leak, because I handle it in other place
                     //ggml_backend_free(backend);
                     return "unknown";
@@ -341,10 +370,14 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
             double tsum = 0.0;
 
             // heat-up
-            ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
+            ggml_graph_compute_helper(backend, gf, work, n_threads, nullptr, nullptr);
 
             for (int i = 0; i < n_max; ++i) {
                 const int64_t t0 = ggml_time_us();
+
+                if (1 == ggml_jni_get_abortbenchmark_flag()) {
+                    break;
+                }
 
 #ifdef TARGET_ANDROID
                 kantv_asr_notify_benchmark_c("reset");
@@ -357,7 +390,7 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
                 //WHISPER_LOG_INFO("%s\n", tipString.c_str());
 #endif
 
-                ggml_graph_compute_helper(gf, work, n_threads, nullptr, nullptr);
+                ggml_graph_compute_helper(backend, gf, work, n_threads, nullptr, nullptr);
 
                 const int64_t t1 = ggml_time_us();
 
@@ -1393,9 +1426,24 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
             /* no_alloc   =*/ 0
     };
 
+    ggml_backend_t backend = nullptr;
+    ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-    if (backend_type != 3) //original ggml
-        params.use_hwaccel   = true;
+    if (backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        params.use_hwaccel = true;
+        params.no_alloc    = true;
+
+        backend = ggml_backend_qnn_init(backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d failed", backend_type);
+            GGML_JNI_NOTIFY("create qnn backend %d failed", backend_type);
+            return;
+        }
+    } else {
+        backend = ggml_backend_get_default_cpu_backend();
+    }
+#else
+    backend = ggml_backend_get_default_cpu_backend();
 #endif
 
     ctx = ggml_init(params);
@@ -1430,7 +1478,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
     std::vector<uint8_t> work_buffer;
 
-    ggml_graph_compute_helper(gf,work_buffer, n_threads, nullptr, nullptr);
+    ggml_graph_compute_helper(backend, gf,work_buffer, n_threads, nullptr, nullptr);
 
     if (get_tensor_data_size(m11) < 100) {
         TENSOR_DUMP(m11);
@@ -1508,7 +1556,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
         long long int start = ggml_time_us();
         //GGML_JNI_NOTIFY("Running ggml_graph_compute\n");
-        ggml_graph_compute_helper(gf31,work_buffer, n_threads, nullptr, nullptr);
+        ggml_graph_compute_helper(backend, gf31,work_buffer, n_threads, nullptr, nullptr);
 
         long long int stop = ggml_time_us();
         long long int usec = stop-start;
@@ -1539,7 +1587,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
         }
 
         // Running a different graph computation to make sure we override the CPU cache lines
-        ggml_graph_compute_helper(gf,work_buffer, n_threads, nullptr, nullptr);
+        ggml_graph_compute_helper(backend, gf,work_buffer, n_threads, nullptr, nullptr);
     }
     GGML_JNI_NOTIFY("\n");
     GGML_JNI_NOTIFY("Average%78.2f\n",gflops_sum/((double)n_iterations));
@@ -7326,6 +7374,23 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
             break;
     }
 
+    ggml_backend_t backend = nullptr;
+    ggml_backend_buffer_t buffer = nullptr;
+#ifdef GGML_USE_QNN
+    if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d failed", n_backend_type);
+            GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend_type);
+            return 1;
+        }
+    } else {
+        backend = ggml_backend_get_default_cpu_backend();
+    }
+#else
+    backend = ggml_backend_get_default_cpu_backend();
+#endif
+
     if (3 == n_backend_type) {  //this "fake" backend is just used for compare performance
         const int sizey                             = 2;
         const int sizex                             = 2;
@@ -7361,7 +7426,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         m2              = ggml_add(ctx, m0, m1); // GGML_OP_ADD
         gf              = ggml_new_graph(ctx);
         ggml_build_forward_expand(gf, m2);
-        ggml_graph_compute_helper(gf, work_buffer,  4, nullptr, nullptr);
+        ggml_graph_compute_helper(backend, gf, work_buffer,  4, nullptr, nullptr);
         TENSOR_DUMP(m0);
         TENSOR_DUMP(m1);
         TENSOR_DUMP(m2);
@@ -7712,6 +7777,22 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
             break;
     }
 
+    ggml_backend_t backend = nullptr;
+#ifdef GGML_USE_QNN
+    if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d failed", n_backend_type);
+            GGML_JNI_NOTIFY("create qnn backend %d failed", n_backend_type);
+            return 1;
+        }
+    } else {
+        backend = ggml_backend_get_default_cpu_backend();
+    }
+#else
+    backend = ggml_backend_get_default_cpu_backend();
+#endif
+
     ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
     ctx_size        += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
     ctx_size        += ggml_row_size(qtype,         sizex * sizey);
@@ -7761,7 +7842,7 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
         gf              = ggml_new_graph(ctx);
         ggml_set_f32(m2, 0.0f);
         ggml_build_forward_expand(gf, m2);
-        ggml_graph_compute_helper(gf,work_buffer,  4, nullptr, nullptr);
+        ggml_graph_compute_helper(backend, gf,work_buffer,  4, nullptr, nullptr);
 
         TENSOR_DUMP(m0);
         TENSOR_DUMP(m1);
@@ -8530,7 +8611,11 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         }
         //ggml_backend_qnn_set_n_threads(backend, 1);
         num_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
+    } else {
+        backend = ggml_backend_get_default_cpu_backend();
     }
+#else
+    backend = ggml_backend_get_default_cpu_backend();
 #endif
 
     ctx = ggml_init(params);
@@ -8595,7 +8680,7 @@ int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, in
         return false;
     }
 #endif
-    ggml_graph_compute_helper(gf,work_buffer, num_threads, nullptr, nullptr);
+    ggml_graph_compute_helper(backend, gf,work_buffer, num_threads, nullptr, nullptr);
     if (get_tensor_data_size(dst) < 100) {
         TENSOR_DUMP(src0);
         TENSOR_DUMP(src1);
@@ -8673,6 +8758,19 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
         return 1;
     }
 
+    ggml_backend_t backend = nullptr;
+    ggml_backend_buffer_t buffer = nullptr;
+#ifdef GGML_USE_QNN
+    if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
+        if (nullptr == backend) {
+            LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+            GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
+            return 1;
+        }
+    }
+    num_threads = 1;
+#endif
 
     char strbuf[256];
     std::string tipString = "";
@@ -8720,6 +8818,11 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
         double s_fp32 = 0.0;
 
         const size_t N = sizes[j];
+
+        if (1 == ggml_jni_get_abortbenchmark_flag()) {
+            break;
+        }
+
 #if 0
         for (int k = 0; k < 7; ++k) {
             const ggml_type wtype =
@@ -8746,31 +8849,29 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                                                                            k == 5 ? n_fp16
                                                                                   : /*k == 6*/ n_fp32;
 
+            if (1 == ggml_jni_get_abortbenchmark_flag()) {
+                break;
+            }
             struct ggml_init_params gparams = {
                     /*.mem_size   =*/ buf.size(),
                     /*.mem_buffer =*/ buf.data(),
                     /*.no_alloc   =*/ false,
             };
-            ggml_backend_t backend = nullptr;
-            ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-            if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-                gparams.use_hwaccel = true;
-                gparams.no_alloc    = true;
-
-                backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
-                if (nullptr == backend) {
-                    LOGGD("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
-                    GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type, get_qnn_backend_name(n_backend_type));
-                    return 1;
+                if (n_backend_type != 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                    gparams.use_hwaccel = true;
+                    gparams.no_alloc    = true;
                 }
-                //ggml_backend_qnn_set_n_threads(backend, 1);
-                num_threads = 1; // make QNN backend happy because this scenario is in JNI, data path here is totally different with whisper.cpp/llama.cpp
-            }
 #endif
             struct ggml_context *ctx0 = ggml_init(gparams);
 
-            struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, wtype, N, N);
+            struct ggml_tensor *a = nullptr;
+            if (n_ggml_op_type != GGML_OP_MUL) {
+               a = ggml_new_tensor_2d(ctx0, wtype, N, N);
+            } else {
+              ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //only F32 supported with GGML_OP_MUL in ggml.c
+            }
+
             struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
             ggml_set_input(a);
             ggml_set_input(b);
@@ -8809,10 +8910,14 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
             double tsum = 0.0;
 
             // heat-up
-            ggml_graph_compute_helper(gf, work, num_threads, nullptr, nullptr);
+            ggml_graph_compute_helper(backend, gf, work, num_threads, nullptr, nullptr);
 
             for (int i = 0; i < n_max; ++i) {
                 const int64_t t0 = ggml_time_us();
+
+                if (1 == ggml_jni_get_abortbenchmark_flag()) {
+                    break;
+                }
 
                 kantv_asr_notify_benchmark_c("reset");
                 tipString = "calling ggml_graphic_compute_helper:\n";
@@ -8825,7 +8930,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
 
                 kantv_asr_notify_benchmark(tipString);
 
-                ggml_graph_compute_helper(gf, work, num_threads, nullptr, nullptr);
+                ggml_graph_compute_helper(backend, gf, work, num_threads, nullptr, nullptr);
 
                 const int64_t t1 = ggml_time_us();
 

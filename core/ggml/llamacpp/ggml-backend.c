@@ -309,6 +309,14 @@ static void ggml_setup_op_has_task_pass(void) {
     }
 }
 
+ggml_backend_t  ggml_backend_get_default_cpu_backend() {
+    if (NULL == g_cpu_backend) {
+        ggml_backend_cpu_init();
+    }
+
+    return g_cpu_backend;
+}
+
 struct ggml_compute_state;
 extern void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor, struct ggml_compute_state * state);
 static enum ggml_status ggml_backend_graph_compute_mixed(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
