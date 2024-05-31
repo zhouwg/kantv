@@ -123,8 +123,9 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 #define BUF_MAJOR_MASK                                  0xFF000000
 #define BUF_CONTROL_BASE                                0xEE000000
 
-#define GGML_QNN_DEBUG                                  1
-#define NOT_IN_PR                                       1  //for submit/update PR(ggml-qnn.cpp&ggml.h) to upstream more easily and quickly
+#define GGML_QNN_DEBUG                                  1  //for troubleshooting QNN backend, should be changed to 0 in product envs
+#define NOT_IN_PR                                       1  //for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
+
 
 #define QNN_LOG_ERROR(...) ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define QNN_LOG_WARN(...)  ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
