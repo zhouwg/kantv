@@ -124,7 +124,7 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 #define BUF_CONTROL_BASE                                0xEE000000
 
 #define GGML_QNN_DEBUG                                  1  //for troubleshooting QNN backend, should be changed to 0 in product envs
-#define NOT_IN_PR                                       1  //for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
+#define NOT_IN_PR                                       0  //for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
 
 
 #define QNN_LOG_ERROR(...) ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -3521,6 +3521,7 @@ struct ggml_backend_qnn_buffer_context {
         if (buffer) {
             free(buffer);
         }
+
         for (auto * sub_buffer : sub_buffers) {
             free(sub_buffer);
         }
@@ -3529,16 +3530,6 @@ struct ggml_backend_qnn_buffer_context {
             free_qnn_tensor(*qnn_tensor);
             free(qnn_tensor);
         }
-
-        std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>>::iterator graph_it;
-        struct ggml_backend_qnn_context * ctx = (struct ggml_backend_qnn_context *) g_qnn_backend->context;
-        QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->instance->get_qnn_raw_interface();
-        for (graph_it = backend_ctx->instance->_qnn_graph_map.begin(); graph_it != backend_ctx->instance->_qnn_graph_map.end(); graph_it++) {
-            auto & graph_item = graph_it->second;
-            Qnn_GraphHandle_t & graph_handle = std::get<0>(graph_item);
-            QNN_LOG_DEBUG("graph type:%s", graph_it->first.c_str());
-        }
-        backend_ctx->instance->_qnn_graph_map.clear();
 
         sub_buffers.clear();
         qnn_tensors.clear();
@@ -3771,6 +3762,15 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
 
     qnn_instance * instance = (qnn_instance*)g_qnn_mgr[ctx->device].instance;
     if (instance != nullptr) {
+        std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>>::iterator graph_it;
+        QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->instance->get_qnn_raw_interface();
+        for (graph_it = instance->_qnn_graph_map.begin(); graph_it != instance->_qnn_graph_map.end(); graph_it++) {
+            auto & graph_item = graph_it->second;
+            Qnn_GraphHandle_t & graph_handle = std::get<0>(graph_item);
+            QNN_LOG_DEBUG("graph type:%s", graph_it->first.c_str());
+        }
+        instance->_qnn_graph_map.clear();
+
         instance->qnn_finalize();
         delete instance;
         g_qnn_mgr[ctx->device].instance = nullptr;
@@ -3832,7 +3832,9 @@ static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tens
 //note: this function be used in new/proposal/refined ggml backend subsystem:
 // https://github.com/zhouwg/kantv/pull/216 in this project
 // https://github.com/ggerganov/llama.cpp/pull/7641 in upstream
-// new ggml backend can following this style for mixed inference between CPU&GPU / CPU&NPU very easily
+//
+// new ggml backend(only using system memory: ggml_backend_xxx_buffer_is_host return true)
+// can following this style for mixed inference between CPU&GPU / CPU&NPU very easily
 // and the complex/complicated "Backend Sched" feature in ggml backend subsystem could be not used along this new approach
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * tensor) {
     GGML_UNUSED(backend);
