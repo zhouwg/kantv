@@ -892,7 +892,7 @@ static int deep_copy_qnn_tensors(Qnn_Tensor_t & src, Qnn_Tensor_t & dst) {
         *scales                                    = (float *)malloc(scaleSize);
         memscpy(*scales, scaleSize, srcQParam.bwAxisScaleOffsetEncoding.scales, scaleSize);
 
-        // Only copy offsets if present, nullptr implies all offsets are 0
+        // only copy offsets if present, nullptr implies all offsets are 0
         if (bwAxisScaleOffset.offsets != nullptr) {
             size_t offsetSize = bwAxisScaleOffset.numElements * sizeof(int32_t);
             *offsets          = (int32_t *)malloc(offsetSize);
@@ -903,7 +903,7 @@ static int deep_copy_qnn_tensors(Qnn_Tensor_t & src, Qnn_Tensor_t & dst) {
         QNN_TENSOR_SET_QUANT_PARAMS(dst, srcQParam);
     }
 
-    // need to allocate and copy memory for all the pointer members
+    // allocate and copy memory for all the pointer members
     uint32_t rank = QNN_TENSOR_GET_RANK(src);
     QNN_TENSOR_SET_RANK(dst, rank);
     size_t dim_size       = rank * sizeof(uint32_t);
@@ -922,20 +922,8 @@ static int deep_copy_qnn_tensors(Qnn_Tensor_t & src, Qnn_Tensor_t & dst) {
 static int free_qnn_tensor(Qnn_Tensor_t & tensor) {
     int err = 0;
     VALIDATE_TENSOR_VERSION(tensor, err);
-
-    if (nullptr == QNN_TENSOR_GET_NAME(tensor)) {
-        QNN_LOG_INFO("it should not happen, pls check");
-    } else {
-        //QNN_LOG_DEBUG("QNN tensor name %s", QNN_TENSOR_GET_NAME(tensor));
-        free((void *) QNN_TENSOR_GET_NAME(tensor));
-    }
-    if (nullptr == QNN_TENSOR_GET_DIMENSIONS(tensor)) {
-        QNN_LOG_INFO("it should not happen, pls check");
-    } else {
-        //TODO:why crash in here? why pointer changed with mul_mat?
-        //memory leak after comment below line
-        //free(QNN_TENSOR_GET_DIMENSIONS(tensor));
-    }
+    free((void *) QNN_TENSOR_GET_NAME(tensor));
+    free(QNN_TENSOR_GET_DIMENSIONS(tensor));
 
     return err;
 }
