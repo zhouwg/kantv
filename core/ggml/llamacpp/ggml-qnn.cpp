@@ -923,7 +923,8 @@ static int free_qnn_tensor(Qnn_Tensor_t & tensor) {
     int err = 0;
     VALIDATE_TENSOR_VERSION(tensor, err);
     free((void *) QNN_TENSOR_GET_NAME(tensor));
-    free(QNN_TENSOR_GET_DIMENSIONS(tensor));
+    //FIXME:memory leak
+    //free(QNN_TENSOR_GET_DIMENSIONS(tensor));
 
     return err;
 }
