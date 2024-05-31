@@ -1,7 +1,3 @@
-#define NOT_IN_PR   1
-
-
-#if NOT_IN_PR
 /*
  * Copyright (c) 2024- KanTV Authors
  *
@@ -42,7 +38,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -110,10 +105,6 @@ __attribute__((__format__(printf, 3, 4)));
 #endif
 static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
 
-#if 1// NOT_IN_PR //should be removed before PR because this is a workaround method during development stage
-extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor, struct ggml_compute_state * state);
-#endif
-
 
 // =================================================================================================
 //
@@ -133,6 +124,7 @@ extern "C" void ggml_compute_forward(struct ggml_compute_params * params, struct
 #define BUF_CONTROL_BASE                                0xEE000000
 
 #define GGML_QNN_DEBUG                                  1
+#define NOT_IN_PR                                       1  //for submit/update PR(ggml-qnn.cpp&ggml.h) to upstream more easily and quickly
 
 #define QNN_LOG_ERROR(...) ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define QNN_LOG_WARN(...)  ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)

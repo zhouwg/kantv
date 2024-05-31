@@ -309,7 +309,7 @@ static void ggml_setup_op_has_task_pass(void) {
     }
 }
 
-
+struct ggml_compute_state;
 extern void ggml_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor, struct ggml_compute_state * state);
 static enum ggml_status ggml_backend_graph_compute_mixed(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
     enum ggml_status result         = GGML_STATUS_SUCCESS;
@@ -371,7 +371,19 @@ static enum ggml_status ggml_backend_graph_compute_mixed(ggml_backend_t backend,
     return result;
 }
 
+#ifdef GGML_USE_QNN
 extern bool ggml_backend_is_qnn(ggml_backend_t backend);
+#endif
+
+static bool is_qnn_backend(ggml_backend_t backend) {
+#ifdef GGML_USE_QNN
+    return ggml_backend_is_qnn(backend);
+#else
+    GGML_UNUSED(backend);
+    return false;
+#endif
+}
+
 enum ggml_status ggml_backend_graph_compute(ggml_backend_t backend, struct ggml_cgraph * cgraph) {
     enum ggml_status err = GGML_STATUS_SUCCESS;
 
@@ -379,7 +391,8 @@ enum ggml_status ggml_backend_graph_compute(ggml_backend_t backend, struct ggml_
         ggml_backend_cpu_init();
     }
     if (backend != g_cpu_backend) {
-        if (ggml_backend_is_qnn(backend)) { // or if (backend->iface.offload_op != NULL) but sycl backend's iface.offload_op is not NULL
+        if (is_qnn_backend(backend)) { // or if (backend->iface.offload_op != NULL) but sycl backend's iface.offload_op is not NULL
+            //mixed inference between Qualcomm's CPU/GPU or CPU/NPU
             err = ggml_backend_graph_compute_mixed(backend, cgraph);
         } else {  //compatible for sycl backend or other existing backend
             err = backend->iface.graph_compute(backend, cgraph);
@@ -400,7 +413,8 @@ enum ggml_status ggml_backend_graph_compute_async(ggml_backend_t backend, struct
         ggml_backend_cpu_init();
     }
     if (backend != g_cpu_backend) {
-        if (ggml_backend_is_qnn(backend)) { // or if (backend->iface.offload_op != NULL) but sycl backend's iface.offload_op is not NULL
+        if (is_qnn_backend(backend)) { // or if (backend->iface.offload_op != NULL) but sycl backend's iface.offload_op is not NULL
+            //mixed inference between Qualcomm's CPU/GPU or CPU/NPU
             err = ggml_backend_graph_compute_mixed(backend, cgraph);
         } else {  //compatible for sycl backend or other existing backend
             err = backend->iface.graph_compute(backend, cgraph);
@@ -409,7 +423,7 @@ enum ggml_status ggml_backend_graph_compute_async(ggml_backend_t backend, struct
         //compatible for existing backend
         err = backend->iface.graph_compute(backend, cgraph);;
     }
-    ggml_backend_synchronize(backend);
+
     return err;
 }
 
@@ -418,7 +432,7 @@ bool ggml_backend_supports_op(ggml_backend_t backend, const struct ggml_tensor *
 }
 
 bool ggml_backend_offload_op(ggml_backend_t backend, const struct ggml_tensor * op) {
-    if (ggml_backend_is_qnn(backend)) { //compatible for sycl backend or other existing backend
+    if (is_qnn_backend(backend)) { //compatible for sycl backend or other existing backend
         return false;
     }
 
