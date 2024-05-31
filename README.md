@@ -306,8 +306,6 @@ here are some screenshots to demostrate CV inference by running the excellent <a
 
 ### Hot topics
 
-- <a href="https://github.com/zhouwg/kantv/issues/176"> Android multimodal AI agent(ASR, LLM, TTS, CV, NLP, ..., an open source GPT-4o style multimodal AI agent on Android phone) by <a href="https://github.com/ggerganov/ggml">GGML</a> + <a href="https://github.com/Tencent/ncnn">NCNN</a></a>
-
 - <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
 
 - bugfix in UI layer(Java)
@@ -332,6 +330,8 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
 - [How to reduce the size of apk](./docs/how-to-reduce-the-size-of-apk.md)
 - [How to sign apk](./docs/how-to-sign-apk.md)
+- [How to validate AI algorithm/model on Android using this project](./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md)
+- [Why focus on ggml & ncnn edge-AI inference framework](./docs/why-focus-on-ggml-and-ncnn-on-android.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [F.A.Q](./docs/FAQ.md)
@@ -365,23 +365,9 @@ Report issue in various Android-based phone or even submit PR to this project is
   LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
   </li>
 
-  <li>
-   ASR engine <a href="https://github.com/k2-fsa/sherpa-ncnn">sherpa-ncnn</a>(an ASR engine using next-generation <a href="https://github.com/kaldi-asr/kaldi">Kaldi</a> with <a href="https://github.com/Tencent/ncnn">ncnn</a>) by <a href="https://github.com/k2-fsa">k2-fsa</a>
-  </li>
-
   </ul>
 
   </ul>
-
-
-### This project is suitable for(本项目适合于)
-
-- Students:understand calculus/linear algebra/mathematical statistics and probability theory, have a little / some experiences in C/C++/Java software development, want to learn Android software development(UI, NDK, streamming media, AI application);  学生:了解微积分，线性代数，数理统计与概率论, 且有一定的C/C++/Java开发经验, 希望学习Android开发(UI, NDK, 音视频(FFmpeg), 流媒体(HLS, RTMP, WebRTC), 端侧AI应用);
-
-- Programmers: have good experiences in C/C++ software development, know a little/nothing about <b>real/hardcore</b> AI technology, want to learn AI technology in depth(know how) and validate AI(ASR, TTS, CV, NLP, LLM...) algorithm/model on Android with framework provided in this project easily and quickly(<a href="./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md">how to validate AI algorithm/model on Android using this project</a>); 程序员:有丰富的C/C++开发经验，几乎不懂真正的AI技术，希望深入学习AI技术(know how)并使用本项目提供的框架在Android设备上快速调试/验证AI特定领域算法/模型(<a href="./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md">如何使用本项目在Android设备上调试/验证AI特定领域算法/模型</a>);
-
-- Authors/maintainers of AI inference framework: compare the advantages of <a href="https://github.com/ggerganov/ggml">ggml</a> and <a href="https://github.com/Tencent/ncnn">ncnn</a> on Android(<a href="./docs/why-focus-on-ggml-and-ncnn-on-android.md">why focus on ggml & ncnn</a>); AI推理框架的开发人员: 对比两个端侧推理框架ggml与ncnn的优点(<a href="./docs/why-focus-on-ggml-and-ncnn-on-android.md">为啥只关注ggml与ncnn这两个AI推理框架</a>);
-
 
 
 
