@@ -131,7 +131,7 @@ static const char *get_qnn_backend_name(int n_backend_type) {
         case 1:
             return "QNN-GPU";
         case 2:
-            return "QNN-HTP(DSP)";
+            return "QNN-NPU(HTP/DSP)";
         case 3:
             return "ggml";
         default:
@@ -204,6 +204,33 @@ static float tensor_sum_elements(const ggml_tensor *tensor) {
             }
         }
     }
+
+    if (tensor->type == GGML_TYPE_Q8_0) {
+        for (int h = 0; h < tensor->ne[3]; h++) {
+            for (int i = 0; i < tensor->ne[2]; i++) {
+                for (int j = 0; j < tensor->ne[1]; j++) {
+                    for (int k = 0; k < tensor->ne[0]; k++) {
+                        value = ((int8_t *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] +
+                                                         j * tensor->ne[0] + k];
+                        sum += value;
+                        //LOGGD("[%d][%d][%d][%d]%.2f \t", h, i, j, k, value);
+                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
+                               << "\t";
+                    }
+                    if (strlen(tmposs.str().c_str()) > 4000) {
+
+                    } else {
+                        LOGGD("%s", tmposs.str().c_str());
+                        GGML_JNI_NOTIFY("%s", tmposs.str().c_str());
+                    }
+                    tmposs.clear();
+                    tmposs.str("");
+                    //LOGGD("\n");
+                }
+            }
+        }
+    }
+
     //LOGGD("\n");
     return sum;
 }
@@ -224,17 +251,28 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
 
 
 #define TENSOR_DUMP(tensor) tensor_dump(tensor, #tensor)
+static uint32_t get_tensor_rank(const ggml_tensor * tensor) {
+    uint32_t rank = 0;
+    for (int i = 0; i < GGML_MAX_DIMS; i++) {
+        if ((0 != tensor->ne[i]) && (1 != tensor->ne[i])) {
+            rank++;
+        }
+    }
+    LOGGD("tensor->rank %d\n", tensor->rank);
+    LOGGD("get_tensor_rank %d\n", rank);
+
+    return rank;
+}
 
 static uint32_t get_tensor_data_size(const ggml_tensor *tensor) {
-    /*
     size_t data_size = ggml_row_size(tensor->type, tensor->ne[0]);
     size_t n_dims = get_tensor_rank(tensor);
     for (int i = 1; i < n_dims; i++) {
         data_size *= tensor->ne[i];
     }
 
-    return data_size;
-     */
+    LOGGD("get_tensor_data_size %d", data_size);
+    LOGGD("ggml_nbytes(tensor) %d", ggml_nbytes(tensor));
     return ggml_nbytes(tensor);
 }
 
@@ -8521,6 +8559,68 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
 #endif
 
 
+static void init_tensor_uniform(ggml_tensor * tensor, float min = -1.0f, float max = 1.0f) {
+    // static RNG initialization (revisit if n_threads stops being constant)
+    static const size_t n_threads = std::thread::hardware_concurrency();
+    static std::vector<std::default_random_engine> generators = []() {
+        std::random_device rd;
+        std::vector<std::default_random_engine> vec;
+        vec.reserve(n_threads);
+        //for (size_t i = 0; i < n_threads; i++) { vec.emplace_back(1234 + i); } // fixed seed
+        for (size_t i = 0; i < n_threads; i++) { vec.emplace_back(rd()); }
+        return vec;
+    }();
+
+    size_t size = ggml_nelements(tensor);
+    std::vector<float> data(size);
+
+    auto init_thread = [&](size_t ith, size_t start, size_t end) {
+        std::uniform_real_distribution<float> distribution(min, max);
+        for (size_t i = start; i < end; i++) {
+            data[i] = distribution(generators[ith]);
+        }
+    };
+
+    std::vector<std::thread> threads;
+    threads.reserve(n_threads);
+    for (size_t i = 0; i < n_threads; i++) {
+        size_t start =     i*size/n_threads;
+        size_t end   = (i+1)*size/n_threads;
+        threads.emplace_back(init_thread, i, start, end);
+    }
+    for (auto & t : threads) {
+        t.join();
+    }
+    if (tensor->type == GGML_TYPE_F32 || tensor->type == GGML_TYPE_I32) {
+        ggml_backend_tensor_set(tensor, data.data(), 0, size * sizeof(float));
+    } else if (ggml_is_quantized(tensor->type) || tensor->type == GGML_TYPE_F16 || tensor->type == GGML_TYPE_BF16) {
+        GGML_ASSERT(size % ggml_blck_size(tensor->type) == 0);
+        std::vector<uint8_t> dataq(ggml_row_size(tensor->type, size));
+        std::vector<float> imatrix(tensor->ne[0], 1.0f); // dummy importance matrix
+        const float * im = imatrix.data();
+        if (!ggml_quantize_requires_imatrix(tensor->type)) {
+            // when the imatrix is optional, we want to test both quantization with and without imatrix
+            // use one of the random numbers to decide
+            if (data[0] > 0.5f*(min + max)) {
+                im = nullptr;
+            }
+        }
+        ggml_quantize_chunk(tensor->type, data.data(), dataq.data(), 0, size/tensor->ne[0], tensor->ne[0], im);
+        GGML_ASSERT(ggml_validate_row_data(tensor->type, dataq.data(), dataq.size()));
+        ggml_backend_tensor_set(tensor, dataq.data(), 0, dataq.size());
+    } else if (tensor->type == GGML_TYPE_I8 || tensor->type == GGML_TYPE_I16 || tensor->type == GGML_TYPE_I32) {
+        // This is going to create some weird integers though.
+        ggml_backend_tensor_set(tensor, data.data(), 0, ggml_nbytes(tensor));
+    } else {
+        GGML_ASSERT(false);
+    }
+}
+
+static void initialize_tensors(ggml_context * ctx) {
+    for (ggml_tensor * t = ggml_get_first_tensor(ctx); t != nullptr; t = ggml_get_next_tensor(ctx, t)) {
+        init_tensor_uniform(t);
+    }
+}
 /**
   * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API, https://github.com/zhouwg/kantv/issues/121
   * it's similar to qnn_ggml but different with qnn_ggml, because data path in these two function is totally different
@@ -8538,6 +8638,7 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
   * @param n_op_type GGML OP type
   * @return
   */
+#define TEST_F32 0
 int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int n_ggml_op_type) {
     int result = 0;
     int64_t n_begin_time = 0LL;
@@ -8557,9 +8658,8 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     LOGGI("backend_type:%d(%s)", n_backend_type, get_qnn_backend_name(n_backend_type));
     LOGGI("ggml op:%d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type));
 
-
     GGML_JNI_NOTIFY("starting qnn_ggml_op UT(unit test)\n");
-#if 1 // for performance comparison between QNN backend and original GGML
+#if 0 // for performance comparison between QNN backend and original GGML
     // on Xiaomi14,      4x performance gain for GGML_OP_MUL_MAT with 1 thread
     const int sizey = 4096;
     const int sizex = 4096;
@@ -8570,19 +8670,16 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     int sizex = 2;
     int sizez = 1;
 #endif
-
+#if TEST_F32
     const ggml_type qtype = GGML_TYPE_F32;
+#else
+    const ggml_type qtype = GGML_TYPE_Q8_0;
+#endif
 
     n_begin_time = ggml_time_us();
     srand(time(NULL));
 
-
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex * sizey);
-    ctx_size += ggml_row_size(GGML_TYPE_F32, sizex * sizez);
-    ctx_size += ggml_row_size(qtype, sizex * sizey);
-    ctx_size += ggml_row_size(qtype, sizex * sizey);
-    ctx_size += 1024 * 1024 * 16;
+    ctx_size += 1024 * 1024 * 32;
     GGML_JNI_NOTIFY("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size,
                     (ctx_size / 1024 / 1024));
 
@@ -8625,7 +8722,13 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
 
     GGML_JNI_NOTIFY("creating new tensors\n");
     LOGGD("creating new tensors\n");
-    src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    LOGGD("ggml_blck_size(%s) %d", ggml_type_name(qtype), ggml_blck_size(qtype));
+    LOGGD("ggml_type_size(%s) %d", ggml_type_name(qtype), ggml_type_size(qtype));
+    if (qtype != GGML_TYPE_F32) {
+        sizex = ggml_blck_size(qtype);
+        sizey = 1;
+    }
+    src0 = ggml_new_tensor_2d(ctx, qtype, sizex, sizey);
     ggml_set_input(src0);
     //src0->flags |= GGML_TENSOR_FLAG_INPUT;
     src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
@@ -8649,6 +8752,7 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
                             get_qnn_backend_name(n_backend_type));
             LOGGD("leave qnn_ggml_op UT(unit test)\n");
             ggml_free(ctx);
+            ggml_backend_free(backend);
             return 2;
             //break;
     }
@@ -8661,31 +8765,34 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
         buffer = ggml_backend_alloc_ctx_tensors(ctx, backend);
         if (!buffer) {
             LOGGD("%s: failed to allocate backend buffer\n", __func__);
+            ggml_free(ctx);
+            ggml_backend_free(backend);
             return false;
         }
     }
 #endif
-#if 0
-    ggml_gallocr_t alloc = nullptr;
-    alloc = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
-#endif
-    ggml_set_f32(src0, (rand() % 100 + 1));
-    ggml_set_f32(src1, (rand() % 100 + 1));
-    ggml_set_f32(dst, 0.0f);
 
     GGML_JNI_NOTIFY("creating compute graph\n");
     LOGGD("creating compute graph\n");
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
-#if 0
-    if (!ggml_gallocr_alloc_graph(alloc, gf)) {
-        // failed to allocate the compute buffer
-        LOGGW("%s: failed to allocate the compute buffer\n", __func__);
-        return false;
+
+#if TEST_F32
+    if (ggml_backend_is_cpu(backend)) {
+        ggml_set_f32(src0, (rand() % 100 + 1));
+        ggml_set_f32(src1, (rand() % 100 + 1));
+        ggml_set_f32(dst, 0.0f);
+    } else {
+        initialize_tensors(ctx);
+    }
+#else
+    if (n_backend_type != QNN_BACKEND_GGML) {
+        initialize_tensors(ctx);
     }
 #endif
+
     ggml_graph_compute_helper(backend, gf, work_buffer, num_threads, nullptr, nullptr);
-    if (get_tensor_data_size(dst) < 100) {
+    if (get_tensor_data_size(dst) < (32 * 32)) {
         TENSOR_DUMP(src0);
         TENSOR_DUMP(src1);
         TENSOR_DUMP(dst);

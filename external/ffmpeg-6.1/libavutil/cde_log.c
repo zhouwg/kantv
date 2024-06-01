@@ -374,7 +374,6 @@ void  LOG_PRI_ZWG_IMPL(const char *file, const char *func, unsigned int line,  i
             __android_log_print(priority, tag, "%s", logBuf);
             __android_log_print(priority, tag, NONE);
 #ifdef GGML_USE_QNN
-            printf("%s", logBuf);
             printf("%s%s", logBuf, NONE);
 #endif
         #else

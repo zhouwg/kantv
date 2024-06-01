@@ -23,7 +23,7 @@ set(SOURCE_FILES
         ../../ggml-quants.c
         ../../ggml-qnn.cpp
         ../../../../../external/ffmpeg/libavutil/cde_log.c
-        ../test-backend-ops.cpp
+        test-qnn-ops.cpp
 )
 
 

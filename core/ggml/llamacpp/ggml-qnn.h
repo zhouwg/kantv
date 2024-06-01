@@ -25,7 +25,6 @@ extern "C" {
 #endif
 
 
-#define GGML_QNN_NAME           "QNN"
 #define GGML_QNN_MAX_DEVICES    3
 
 //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/NPU(aka HTP/DSP) backend currently
