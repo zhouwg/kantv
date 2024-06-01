@@ -49,14 +49,16 @@ There are some "killer/heavyweight" open-source AI application engines based on 
 
 4. GGML and NCNN both support Android & iOS which maintained their position as the leading mobile operating systems worldwide with a market share of 90+ percent. Android phone could be seen as a standard embedding development board/device and it's available everywhere.
 
-
-5. AI model trainning and finetuning will be done by AI experts/algorithm engineers. this project is a workbench for learing&practising AI tech in real scenario on Android device, focus on AI inference and AI application on Android.
-
-
-6. GGML based command line application(which provided in upstream ggml/whispercpp/llamacpp) works fine/well as expected on Linux/Windows/Mac, but it might be not work properly as expected on Android because Android phone could be seen as a special/standard embedding development board. A dedicated ggml/whispercpp/llamacpp derived project focus on Android might be useful for community.
+5. Comparison between the two excellent AI edge inference framework.
 
 
-7. Android maintained its position as the leading mobile operating system worldwide in the fourth quarter of 2023 with a market share of 70.1 percent.
+6. AI model trainning and finetuning will be done by AI experts/algorithm engineers. this project is a workbench for learing&practising AI tech in real scenario on Android device, focus on AI inference and AI application on Android.
 
 
-8. I'm good at Android software developent(from UI to framework to kernel) and know a few things about iOS application software development although I know nothing(or a little) about real/hardcore AI tech. I heard whisper.cpp(used for generate subtitle with some English short videos in my Wechat public account) since mid-January 2024 and started <a href="https://github.com/zhouwg/kantv/issues/64">learning ggml</a> since 03-05(March 5) 2024 and ggml was born/open-sourced on 2022, I heard ncnn since end of April 2024 and started learning ncnn since mid-May 2024 and ncnn was born/open-sourced on 2017. my resource and capability is limited.
+7. GGML based command line application(which provided in upstream ggml/whispercpp/llamacpp) works fine/well as expected on Linux/Windows/Mac, but it might be not work properly as expected on Android because Android phone could be seen as a special/standard embedding development board. A dedicated ggml/whispercpp/llamacpp derived project focus on Android might be useful for community.
+
+
+8. Android maintained its position as the leading mobile operating system worldwide in the fourth quarter of 2023 with a market share of 70.1 percent.
+
+
+9. I'm good at Android software developent(from UI to framework to kernel) and know a few things about iOS application software development although I know nothing(or a little) about real/hardcore AI tech. I heard whisper.cpp(used for generate subtitle with some English short videos in my Wechat public account) since mid-January 2024 and started <a href="https://github.com/zhouwg/kantv/issues/64">learning ggml</a> since 03-05(March 5) 2024 and ggml was born/open-sourced on 2022, I heard ncnn since end of April 2024 and started learning ncnn since mid-May 2024 and ncnn was born/open-sourced on 2017. my resource and capability is limited.
