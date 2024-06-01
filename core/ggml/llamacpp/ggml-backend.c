@@ -12,6 +12,8 @@
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
+static ggml_backend_t g_cpu_backend = NULL;
+
 // backend buffer type
 
 const char * ggml_backend_buft_name(ggml_backend_buffer_type_t buft) {
@@ -185,6 +187,10 @@ void ggml_backend_free(ggml_backend_t backend) {
         return;
     }
 
+    if (backend == g_cpu_backend) {
+        g_cpu_backend = NULL;
+    }
+
     backend->iface.free(backend);
 }
 
@@ -280,7 +286,6 @@ enum ggml_status ggml_backend_graph_plan_compute(ggml_backend_t backend, ggml_ba
     return backend->iface.graph_plan_compute(backend, plan);
 }
 
-static ggml_backend_t g_cpu_backend = NULL;
 static bool GGML_OP_HAS_INIT    [GGML_OP_COUNT] = { 0 };
 static bool GGML_OP_HAS_FINALIZE[GGML_OP_COUNT] = { 0 };
 static void ggml_setup_op_has_task_pass(void) {
