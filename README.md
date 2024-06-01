@@ -332,7 +332,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to sign apk](./docs/how-to-sign-apk.md)
 - [How to validate AI algorithm/model on Android using this project](./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md)
 - [Why focus on ggml & ncnn edge-AI inference framework](./docs/why-focus-on-ggml-and-ncnn-on-android.md)
-- [What is the most difficult problme in this project](./docs/what-is-the-most-difficult-problem-for-this-project.md)
+- [What is the most difficult problem for this project](./docs/what-is-the-most-difficult-problem-for-this-project.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [F.A.Q](./docs/FAQ.md)
