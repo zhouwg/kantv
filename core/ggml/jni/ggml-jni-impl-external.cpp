@@ -9000,15 +9000,14 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
 #endif
             struct ggml_context *ctx0 = ggml_init(gparams);
 
-            struct ggml_tensor *a = nullptr;
+            struct ggml_tensor *b = nullptr;
             if (n_ggml_op_type != GGML_OP_MUL) {
-                a = ggml_new_tensor_2d(ctx0, wtype, N, N);
+                b = ggml_new_tensor_2d(ctx0, wtype, N, N);
             } else {
-                a = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N,
-                                   N); //only F32 supported with GGML_OP_MUL in ggml.c
+                b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //only F32 supported with GGML_OP_MUL in ggml.c
             }
 
-            struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+            struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
             ggml_set_input(a);
             ggml_set_input(b);
 
