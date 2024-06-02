@@ -81,14 +81,24 @@ function main()
 
 check_qnn_sdk
 
-unset $ggmlop
-unset $qnnbackend
+unset ggmlop
+unset qnnbackend
 if [ $# == 0 ]; then
     ggmlop="GGML_OP_ADD"
     qnnbackend=0
 elif [ $# == 1 ]; then
-    ggmlop=$1
-    qnnbackend=0
+    if [ "$1" == "-h" ]; then
+        #avoid upload command line program to Android phone in this scenario
+        show_usage
+        exit 1
+    elif [ "$1" == "help" ]; then
+        #avoid upload command line program to Android phone in this scenario
+        show_usage
+        exit 1
+    else
+        ggmlop=$1
+        qnnbackend=0
+    fi
 elif [ $# == 2 ]; then
     ggmlop=$1
     qnnbackend=$2

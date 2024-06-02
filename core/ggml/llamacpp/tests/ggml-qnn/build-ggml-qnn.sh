@@ -7,8 +7,9 @@ set -e
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
 QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
 
-
-ANDROID_NDK=`pwd`/android-ndk-r26c
+#for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly
+#for upstream PR, check and download ANDROID_NDK in this directory when this script is used at the first time
+#ANDROID_NDK=`pwd`/android-ndk-r26c
 ANDROID_PLATFORM=android-34
 TARGET=ggml-qnn-test
 
@@ -87,6 +88,16 @@ function remove_temp_dir()
         rm -rf out
     fi
 }
+
+
+#for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly
+show_pwd
+if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
+    echo "pwd is `pwd`"
+    echo "pls run . build/envsetup in project's toplevel directory firstly"
+    exit 1
+fi
+. ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 
 show_pwd
 check_and_download_ndk
