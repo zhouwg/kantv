@@ -53,11 +53,7 @@ GGML_API int            ggml_backend_qnn_get_device_count(void);
 
 GGML_API void           ggml_backend_qnn_get_device_description(int device, char * description, size_t description_size);
 
-
 GGML_API ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t dev_num);
-
-//temporary APIs, should be removed before PR to upstream
-GGML_API bool           ggml_qnn_compute_forward(struct ggml_compute_params * params, struct ggml_tensor * tensor);
 
 #ifdef __cplusplus
 }

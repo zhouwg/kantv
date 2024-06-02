@@ -290,6 +290,7 @@ static void show_usage() {
         "\n" \
         "Options:\n" \
         " -t GGML_OP_ADD / GGML_OP_MUL / GGML_OP_MULMAT\n" \
+        " -b 0(QNN_CPU) 1(QNN_GPU) 2(QNN_NPU)\n" \
         " ?/h print usage infomation\n\n"
     );
 }
@@ -319,17 +320,28 @@ int main(int argc, char * argv[]) {
     for (int i = 1; i < argc; i++) {
         if (0 == strcmp(argv[i], "-t")) {
             if (i + 1 < argc) {
-                if (0 == memcmp(argv[i+1], "GGML_OP_ADD", 11)) {
+                if (0 == memcmp(argv[i + 1], "GGML_OP_ADD", 11)) {
                     n_ggml_op_type = GGML_OP_ADD;
-                } else if (0 == memcmp(argv[i+1], "GGML_OP_MUL_MAT", 15)) {
+                } else if (0 == memcmp(argv[i + 1], "GGML_OP_MUL_MAT", 15)) {
                     n_ggml_op_type = GGML_OP_MUL_MAT;
-                } else if (0 == memcmp(argv[i+1], "GGML_OP_MUL", 11)) {
+                } else if (0 == memcmp(argv[i + 1], "GGML_OP_MUL", 11)) {
                     n_ggml_op_type = GGML_OP_MUL;
+                } else {
+                    show_usage();
+                    return 1;
                 }
-                break;
-            } else {
-                show_usage();
-                return 1;
+                i++;
+            }
+        } else if (0 == strcmp(argv[i], "-b")) {
+            if (i + 1 < argc) {
+                int backend = atoi(argv[i + 1]);
+                if (backend <= QNN_BACKEND_NPU)
+                    n_backend_type     = backend;
+                else {
+                    show_usage();
+                    return 1;
+                }
+                i++;
             }
         } else {
             show_usage();
@@ -452,7 +464,7 @@ int main(int argc, char * argv[]) {
 
     n_end_time = ggml_time_us();
     n_duration = (n_end_time - n_begin_time) / 1000;
-    QNN_LOG_DEBUG("duration of ut %s : %lld milliseconds\n", ggml_op_name((enum ggml_op)n_ggml_op_type), n_duration);
+    QNN_LOG_DEBUG("duration of ut GGML_OP_%s using QNN backend %s: %lld milliseconds\n", ggml_op_name((enum ggml_op)n_ggml_op_type), get_qnn_backend_name(n_backend_type), n_duration);
 
     return 0;
 }

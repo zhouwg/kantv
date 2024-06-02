@@ -111,14 +111,6 @@ GGML_CALL void ggml_backend_buffer_init_tensor(ggml_backend_buffer_t buffer, str
     }
 }
 
-
-void ggml_backend_buffer_free_tensor(ggml_backend_buffer_t buffer, struct ggml_tensor * tensor) {
-    //if (buffer->iface.free_tensor) {
-    //    buffer->iface.free_tensor(buffer, tensor);
-    //}
-}
-
-
 size_t ggml_backend_buffer_get_alignment (ggml_backend_buffer_t buffer) {
     return ggml_backend_buft_get_alignment(ggml_backend_buffer_get_type(buffer));
 }

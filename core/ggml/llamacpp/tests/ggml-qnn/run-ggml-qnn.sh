@@ -18,8 +18,6 @@ function check_qnn_sdk()
 
 function check_qnn_libs()
 {
-
-
     #reuse the cached qnn libs in Android phone
     adb shell ls ${REMOTE_PATH}/libQnnCpu.so
     if [ $? -eq 0 ]; then
@@ -42,9 +40,9 @@ function check_qnn_libs()
 function show_usage()
 {
     echo "Usage:"
-    echo "  $0 GGML_OP_ADD"
-    echo "  $0 GGML_OP_MUL"
-    echo "  $0 GGML_OP_MUL_MAT"
+    echo "  $0 GGML_OP_ADD      0/1/2"
+    echo "  $0 GGML_OP_MUL      0/1/2"
+    echo "  $0 GGML_OP_MUL_MAT  0/1/2"
     echo -e "\n\n\n"
 }
 
@@ -57,17 +55,18 @@ function main()
     adb push ${GGML_QNN_TEST} ${REMOTE_PATH}
     adb shell chmod +x ${REMOTE_PATH}/${GGML_QNN_TEST}
 
-    case "$arg" in
+    case "$ggmlop" in
         GGML_OP_ADD)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_ADD
+            echo "adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_ADD -b $qnnbackend"
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_ADD -b $qnnbackend
         ;;
 
         GGML_OP_MUL)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL -b $qnnbackend
         ;;
 
         GGML_OP_MUL_MAT)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL_MAT
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL_MAT -b $qnnbackend
         ;;
 
         *)
@@ -81,10 +80,19 @@ function main()
 
 check_qnn_sdk
 
-unset $arg
+unset $ggmlop
+unset $qnnbackend
 if [ $# == 0 ]; then
-    arg="GGML_OP_ADD"
+    ggmlop="GGML_OP_ADD"
+    qnnbackend=0
+elif [ $# == 1 ]; then
+    ggmlop=$1
+    qnnbackend=0
+elif [ $# == 2 ]; then
+    ggmlop=$1
+    qnnbackend=$2
 else
-    arg=$1
+    show_usage
+    exit 1
 fi
 main $arg
