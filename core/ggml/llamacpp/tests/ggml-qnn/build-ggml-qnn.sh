@@ -1,3 +1,4 @@
+# Copyright (c) 2024- KanTV Authors
 #!/bin/bash
 
 set -e

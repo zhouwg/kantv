@@ -1,3 +1,4 @@
+# Copyright (c) 2024- KanTV Authors
 #!/bin/bash
 
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
