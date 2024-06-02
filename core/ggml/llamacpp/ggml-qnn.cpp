@@ -2582,7 +2582,7 @@ static void ggml_qnn_hanlde_op(const enum ggml_op ggmlop, const ggml_tensor * sr
     n_begin_time                                = ggml_time_us();
 #if 1
     QNN_LOG_DEBUG("call %s\n", __func__);
-    QNN_LOG_DEBUG("%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+    QNN_LOG_DEBUG("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           src0->name,
           src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
           src0->nb[0], src0->nb[1], src0->nb[2]);
