@@ -8,5 +8,3 @@ The most important difficult problem for this project is interference of GFW: a 
 
 
 The cost of purchase a paid proxy is really not cheap for an independent programmer(the LLM models is so big and I have to downgrade the bandwidth of proxy after complete downloading the LLM models, of course, open/close the paid proxy on demand is essential for purpose of costdown):
-
-![Screenshot from 2024-06-01 08-09-36](https://github.com/zhouwg/kantv/assets/6889919/9a098b47-19ab-428f-a3c3-8aecd1decb06)
