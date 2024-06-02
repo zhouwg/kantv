@@ -306,7 +306,9 @@ here are some screenshots to demostrate CV inference by running the excellent <a
 
 ### Hot topics
 
-- <a href="https://github.com/zhouwg/kantv/issues/121">improve the quality of Qualcomm QNN backend for GGML</a>
+- improve the quality of <a href="https://github.com/zhouwg/kantv/issues/121"> Qualcomm QNN backend for GGML</a>
+
+- improve the performance of edge-AI inference on Android phone
 
 - bugfix in UI layer(Java)
 
@@ -324,6 +326,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Docs
 
+- [How to verify Qualcomm QNN backend for GGML on Qualcomm mobile SoC based android device](./docs/how-to-verify-ggml-qnn-backend-on-android.md)
 - [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
 - [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)

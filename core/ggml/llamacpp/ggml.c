@@ -23521,4 +23521,14 @@ UseGgmlGemm2:;
         }
     }
 }
+
+
+//make stable-diffusion.cpp happy
+void ggml_backend_buffer_free_tensor(ggml_backend_buffer_t buffer, struct ggml_tensor * tensor) {
+    /*
+    if (buffer->iface.free_tensor) {
+        buffer->iface.free_tensor(buffer, tensor);
+    }
+    */
+}
 ////////////////////////////////////////////////////////////////////////////////

@@ -2491,6 +2491,13 @@ extern "C" {
             struct ggml_tensor  * a,
             struct ggml_tensor  * b);
 
+    //make stable-diffusion.cpp happy
+    GGML_API void  ggml_backend_buffer_free_tensor   (struct ggml_backend_buffer * buffer, struct ggml_tensor * tensor);
+
+    //for PR(https://github.com/ggerganov/llama.cpp/pull/7641):refine ggml backend subsystem for mixed inference between
+    //CPU&GPU / CPU&GPU easily for any ggml backends which ggml_backend_xx_buffer_is_host return true
+    GGML_API struct ggml_backend *  ggml_backend_get_default_cpu_backend(void);
+
 #include "libavutil/cde_log.h"
 
 #ifdef  __cplusplus

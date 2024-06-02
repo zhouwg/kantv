@@ -117,15 +117,9 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 #define GGML_DUMP_TENSOR(tensor)                        ggml_tensor_dump(tensor, #tensor)
 
 #define GGML_QNN_LOGBUF_LEN                             4096
-#define GGML_QNN_MAX_BUFFERS                            128
-#define MATRIX_ROW_PADDING                              512
-
-#define BUF_MAJOR_MASK                                  0xFF000000
-#define BUF_CONTROL_BASE                                0xEE000000
 
 #define GGML_QNN_DEBUG                                  1  //for troubleshooting QNN backend, should be changed to 0 in product envs
 #define NOT_IN_PR                                       0  //for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
-
 
 #define QNN_LOG_ERROR(...) ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define QNN_LOG_WARN(...)  ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -202,7 +196,6 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 #define QNN_TENSOR_SET_MEM_HANDLE(tensor, value)        set_qnn_tensor_memhandle(tensor, value)
 
 
-
 using pfn_rpc_mem_init                                  = void (*)(void);
 using pfn_rpc_mem_deinit                                = void (*)(void);
 using pfn_rpc_mem_alloc                                 = void *(*)(int, uint32_t, int);
@@ -224,73 +217,12 @@ enum class ggml_qnn_profile_level {
 };
 
 
-#if NOT_IN_PR
-typedef struct qnn_buf_s qnn_buf_t;
-typedef struct qnn_buf_s qnn_buf_buffer_t;
-typedef struct buf_element_s buf_element_t;
-struct buf_element_s {
-    buf_element_t         * next;
-
-    unsigned char         * mem;
-    unsigned char         * content;   /* start of raw content in mem  */
-
-    uint32_t              size ;      /* size of content  */
-    int32_t               max_size;   /* size of pre-allocated memory pointed to by mem   */
-    uint32_t              type;
-    void (* free_buffer) (buf_element_t * buf);
-    void                  * source;   /* CPU, GPU, NPU */
-    int                   id;
-} ;
-
-
-struct qnn_buf_s {
-    buf_element_t  * first, * last;
-
-    size_t          qnn_buf_size;
-    uint32_t        qnn_buf_data_size;
-    void            * qnn_buf_empty_cb_data;
-    const           char * name;
-
-    pthread_mutex_t mutex;
-    pthread_cond_t  not_empty;
-
-    void (* put) (qnn_buf_t * fifo, buf_element_t * buf);
-
-    buf_element_t * (* get) (qnn_buf_t * fifo);
-
-    void (* clear) (qnn_buf_t * fifo) ;
-
-    int (* size) (qnn_buf_t * fifo);
-
-    int (* num_free) (qnn_buf_t * fifo);
-
-    uint32_t (* data_size) (qnn_buf_t * fifo);
-
-    void (* destroy) (qnn_buf_t * fifo);
-
-    buf_element_t * (* buffer_alloc) (qnn_buf_t * self);
-
-    buf_element_t * (* buffer_try_alloc) (qnn_buf_t * self);
-
-    buf_element_t   * buffer_pool_top;
-    pthread_mutex_t  buffer_pool_mutex;
-    pthread_cond_t   buffer_pool_cond_not_empty;
-    int              buffer_pool_num_free;
-    int              buffer_pool_capacity;
-    int              buffer_pool_buf_size;
-    void            * buffer_pool_base; /* used to free mem pool */
-} ;
-#endif
-
 struct ggml_backend_qnn_context {
     int device;
     int threads;
     char name[GGML_MAX_NAME];
     char lib[GGML_MAX_NAME];
     qnn_instance * instance;
-#if NOT_IN_PR
-    qnn_buf_t * buffer_pool;
-#endif
     struct ggml_backend * backend;
     QNN_INTERFACE_VER_TYPE raw_interface;
     QNN_SYSTEM_INTERFACE_VER_TYPE raw_system_interface;
@@ -308,24 +240,16 @@ static int g_current_device         = QNN_BACKEND_GGML;
 
 
 //QNN cDSP and HTA backend would not be used currently, just focus on QNN CPU/GPU/NPU(aka HTP/DSP) backend currently
-#if NOT_IN_PR
 static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
-        [QNN_BACKEND_CPU]   = {.device = 0, .threads = 1, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_BACKEND_GPU]   = {.device = 1, .threads = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_BACKEND_NPU]   = {.device = 2, .threads = 1, .name =   "qnn-npu(aka htp/dsp)", .lib = "libQnnHtp.so", .instance = nullptr, .buffer_pool = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
+        [QNN_BACKEND_CPU]   = {.device = 0, .threads = 1, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .backend = nullptr, .raw_interface = {}, .raw_system_interface = {}},
+        [QNN_BACKEND_GPU]   = {.device = 1, .threads = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .backend = nullptr, .raw_interface = {}, .raw_system_interface = {}},
+        [QNN_BACKEND_NPU]   = {.device = 2, .threads = 1, .name =   "qnn-npu", .lib = "libQnnHtp.so", .instance = nullptr, .backend = nullptr, .raw_interface = {}, .raw_system_interface = {}},
 };
-#else
-static struct ggml_backend_qnn_context g_qnn_mgr[GGML_QNN_MAX_DEVICES] = {
-        [QNN_BACKEND_CPU]   = {.device = 0, .threads = 1, .name =   "qnn-cpu", .lib = "libQnnCpu.so", .instance = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_BACKEND_GPU]   = {.device = 1, .threads = 1, .name =   "qnn-gpu", .lib = "libQnnGpu.so", .instance = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-        [QNN_BACKEND_NPU]   = {.device = 2, .threads = 1, .name =   "qnn-npu(aka htp/dsp)", .lib = "libQnnHtp.so", .instance = nullptr, .backend = nullptr, .raw_interface = nullptr, .raw_system_interface = nullptr},
-};
-#endif
 
 
 // =================================================================================================
 //
-//  internal helper functions
+//  QNN helper functions and other internal helper functions
 //
 // =================================================================================================
 static inline int validate_tensor_version(Qnn_Tensor_t tensor) {
@@ -339,7 +263,7 @@ static inline int validate_tensor_version(Qnn_Tensor_t tensor) {
 }
 
 
-static inline int validate_op_config_version(Qnn_OpConfig_t op_config) {
+[[maybe_unused]] static inline int validate_op_config_version(Qnn_OpConfig_t op_config) {
     if (op_config.version != QNN_OPCONFIG_VERSION_1) {
         QNN_LOG_WARN("validate_op_config_version() op %s, got unsupported version %d\n",
               op_config.v1.name,
@@ -358,7 +282,7 @@ static inline const char * get_qnn_oponfig_name(const Qnn_OpConfig_t & op_config
 }
 
 
-static inline const char * get_qnn_oponfig_name(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const char * get_qnn_oponfig_name(const Qnn_OpConfig_t * op_config) {
     return get_qnn_oponfig_name(*op_config);
 }
 
@@ -371,7 +295,7 @@ static inline const char * get_qnn_op_config_packagename(const Qnn_OpConfig_t & 
 }
 
 
-static inline const char * get_qnn_op_config_packagename(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const char * get_qnn_op_config_packagename(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_packagename(*op_config);
 }
 
@@ -384,7 +308,7 @@ static inline const char * get_qnn_op_config_typename(const Qnn_OpConfig_t & op_
 }
 
 
-static inline const char * get_qnn_op_config_typename(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const char * get_qnn_op_config_typename(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_typename(*op_config);
 }
 
@@ -397,7 +321,7 @@ static inline uint32_t get_qnn_op_config_numparams(const Qnn_OpConfig_t & op_con
 }
 
 
-static inline uint32_t get_qnn_op_config_numparams(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline uint32_t get_qnn_op_config_numparams(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_numparams(*op_config);
 }
 
@@ -410,7 +334,7 @@ static inline const Qnn_Param_t * get_qnn_op_config_params(const Qnn_OpConfig_t 
 }
 
 
-static inline const Qnn_Param_t * get_qnn_op_config_params(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const Qnn_Param_t * get_qnn_op_config_params(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_params(*op_config);
 }
 
@@ -423,7 +347,7 @@ static inline uint32_t get_qnn_op_config_numinputs(const Qnn_OpConfig_t & op_con
 }
 
 
-static inline uint32_t get_qnn_op_config_numinputs(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline uint32_t get_qnn_op_config_numinputs(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_numinputs(*op_config);
 }
 
@@ -436,7 +360,7 @@ static inline const Qnn_Tensor_t * get_qnn_op_config_inputs(const Qnn_OpConfig_t
 }
 
 
-static inline const Qnn_Tensor_t * get_qnn_op_config_inputs(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const Qnn_Tensor_t * get_qnn_op_config_inputs(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_inputs(*op_config);
 }
 
@@ -449,7 +373,7 @@ static inline uint32_t get_qnn_op_config_numoutputs(const Qnn_OpConfig_t & op_co
 }
 
 
-static inline uint32_t get_qnn_op_config_numoutputs(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline uint32_t get_qnn_op_config_numoutputs(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_numoutputs(*op_config);
 }
 
@@ -462,7 +386,7 @@ static inline const Qnn_Tensor_t * get_qnn_op_config_outputs(const Qnn_OpConfig_
 }
 
 
-static inline const Qnn_Tensor_t * get_qnn_op_config_outputs(const Qnn_OpConfig_t * op_config) {
+[[maybe_unused]] static inline const Qnn_Tensor_t * get_qnn_op_config_outputs(const Qnn_OpConfig_t * op_config) {
     return get_qnn_op_config_outputs(*op_config);
 }
 
@@ -474,32 +398,32 @@ static inline void set_qnn_op_config_name(Qnn_OpConfig_t & op_config, const char
 }
 
 
-static inline void set_qnn_op_config_name(Qnn_OpConfig_t * op_config, const char * name) {
+[[maybe_unused]] static inline void set_qnn_op_config_name(Qnn_OpConfig_t * op_config, const char * name) {
     set_qnn_op_config_name(*op_config, name);
 }
 
 
-static inline void set_qnn_op_config_packagename(Qnn_OpConfig_t & op_config, const char * packageName) {
+static inline void set_qnn_op_config_packagename(Qnn_OpConfig_t & op_config, const char * package_name) {
     if (op_config.version == QNN_OPCONFIG_VERSION_1) {
-        op_config.v1.packageName = packageName;
+        op_config.v1.packageName = package_name;
     }
 }
 
 
-static inline void set_qnn_op_config_packagename(Qnn_OpConfig_t * op_config, const char * packageName) {
-    set_qnn_op_config_packagename(*op_config, packageName);
+[[maybe_unused]] static inline void set_qnn_op_config_packagename(Qnn_OpConfig_t * op_config, const char * package_name) {
+    set_qnn_op_config_packagename(*op_config, package_name);
 }
 
 
-static inline void set_qnn_op_config_typename(Qnn_OpConfig_t & op_config, const char * typeName) {
+static inline void set_qnn_op_config_typename(Qnn_OpConfig_t & op_config, const char * type_name) {
     if (op_config.version == QNN_OPCONFIG_VERSION_1) {
-        op_config.v1.typeName = typeName;
+        op_config.v1.typeName = type_name;
     }
 }
 
 
-static inline void set_qnn_op_config_typename(Qnn_OpConfig_t * op_config, const char * typeName) {
-    set_qnn_op_config_typename(*op_config, typeName);
+[[maybe_unused]] static inline void set_qnn_op_config_typename(Qnn_OpConfig_t * op_config, const char * type_name) {
+    set_qnn_op_config_typename(*op_config, type_name);
 }
 
 
@@ -513,7 +437,7 @@ static inline void set_qnn_op_config_params(Qnn_OpConfig_t & op_config,
 }
 
 
-static inline void set_qnn_op_config_params(Qnn_OpConfig_t * op_config,
+[[maybe_unused]] static inline void set_qnn_op_config_params(Qnn_OpConfig_t * op_config,
                                  uint32_t num_of_params,
                                  Qnn_Param_t * params) {
     set_qnn_op_config_params(*op_config, num_of_params, params);
@@ -522,18 +446,18 @@ static inline void set_qnn_op_config_params(Qnn_OpConfig_t * op_config,
 
 static inline void set_qnn_op_config_inputs(Qnn_OpConfig_t & op_config,
                                  uint32_t num_of_inputs,
-                                 Qnn_Tensor_t * inputTensors) {
+                                 Qnn_Tensor_t * input_tensors) {
     if (op_config.version == QNN_OPCONFIG_VERSION_1) {
         op_config.v1.numOfInputs  = num_of_inputs;
-        op_config.v1.inputTensors = inputTensors;
+        op_config.v1.inputTensors = input_tensors;
     }
 }
 
 
-static inline void set_qnn_op_config_inputs(Qnn_OpConfig_t * op_config,
+[[maybe_unused]] static inline void set_qnn_op_config_inputs(Qnn_OpConfig_t * op_config,
                                  uint32_t num_of_inputs,
-                                 Qnn_Tensor_t * inputTensors) {
-    set_qnn_op_config_inputs(*op_config, num_of_inputs, inputTensors);
+                                 Qnn_Tensor_t * input_tensors) {
+    set_qnn_op_config_inputs(*op_config, num_of_inputs, input_tensors);
 }
 
 
@@ -547,7 +471,7 @@ static inline void set_qnn_op_config_outputs(Qnn_OpConfig_t & op_config,
 }
 
 
-static inline void set_qnn_op_config_outputs(Qnn_OpConfig_t * op_config,
+[[maybe_unused]] static inline void set_qnn_op_config_outputs(Qnn_OpConfig_t * op_config,
                                   uint32_t num_of_outputs,
                                   Qnn_Tensor_t * output_tensors) {
     set_qnn_op_config_outputs(*op_config, num_of_outputs, output_tensors);
@@ -558,11 +482,14 @@ static inline uint32_t get_qnn_tensorid(const Qnn_Tensor_t & tensor) {
     if (tensor.version == QNN_TENSOR_VERSION_1) {
         return tensor.v1.id;
     }
+
     return 0u;
 }
 
 
-static inline uint32_t get_qnn_tensorid(const Qnn_Tensor_t * tensor) { return get_qnn_tensorid(*tensor); }
+[[maybe_unused]] static inline uint32_t get_qnn_tensorid(const Qnn_Tensor_t * tensor) {
+    return get_qnn_tensorid(*tensor);
+}
 
 
 static inline const char * get_qnn_tensorname(const Qnn_Tensor_t & tensor) {
@@ -586,7 +513,7 @@ static inline Qnn_TensorType_t get_qnn_tensortype(const Qnn_Tensor_t & tensor) {
 }
 
 
-static inline Qnn_TensorType_t get_qnn_tensortype(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_TensorType_t get_qnn_tensortype(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensortype(*tensor);
 }
 
@@ -599,7 +526,7 @@ static inline Qnn_TensorDataFormat_t get_qnn_tensor_dataformat(const Qnn_Tensor_
 }
 
 
-static inline Qnn_TensorDataFormat_t get_qnn_tensor_dataformat(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_TensorDataFormat_t get_qnn_tensor_dataformat(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_dataformat(*tensor);
 }
 
@@ -612,7 +539,7 @@ static inline Qnn_DataType_t get_qnn_tensor_datatype(const Qnn_Tensor_t & tensor
 }
 
 
-static inline Qnn_DataType_t get_qnn_tensor_datatype(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_DataType_t get_qnn_tensor_datatype(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_datatype(*tensor);
 }
 
@@ -625,7 +552,7 @@ static inline Qnn_QuantizeParams_t get_qnn_tensor_quantparams(const Qnn_Tensor_t
 }
 
 
-static inline Qnn_QuantizeParams_t get_qnn_tensor_quantparams(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_QuantizeParams_t get_qnn_tensor_quantparams(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_quantparams(*tensor);
 }
 
@@ -638,7 +565,9 @@ static inline uint32_t get_qnn_tensor_rank(const Qnn_Tensor_t & tensor) {
 }
 
 
-static inline uint32_t get_qnn_tensor_rank(const Qnn_Tensor_t * tensor) { return get_qnn_tensor_rank(*tensor); }
+[[maybe_unused]] static inline uint32_t get_qnn_tensor_rank(const Qnn_Tensor_t * tensor) {
+    return get_qnn_tensor_rank(*tensor);
+}
 
 
 static inline uint32_t * get_qnn_tensor_dimensions(const Qnn_Tensor_t & tensor) {
@@ -649,7 +578,7 @@ static inline uint32_t * get_qnn_tensor_dimensions(const Qnn_Tensor_t & tensor) 
 }
 
 
-static inline uint32_t * get_qnn_tensor_dimensions(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline uint32_t * get_qnn_tensor_dimensions(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_dimensions(*tensor);
 }
 
@@ -662,7 +591,7 @@ static inline Qnn_TensorMemType_t get_qnn_tensor_memtype(const Qnn_Tensor_t & te
 }
 
 
-static inline Qnn_TensorMemType_t get_qnn_tensor_memtype(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_TensorMemType_t get_qnn_tensor_memtype(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_memtype(*tensor);
 }
 
@@ -675,7 +604,7 @@ static inline Qnn_ClientBuffer_t get_qnn_tensor_clientbuf(const Qnn_Tensor_t & t
 }
 
 
-static inline Qnn_ClientBuffer_t get_qnn_tensor_clientbuf(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_ClientBuffer_t get_qnn_tensor_clientbuf(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_clientbuf(*tensor);
 }
 
@@ -688,7 +617,7 @@ static inline Qnn_MemHandle_t get_qnn_tensor_memhandle(const Qnn_Tensor_t & tens
 }
 
 
-static inline Qnn_MemHandle_t get_qnn_tensor_memhandle(const Qnn_Tensor_t * tensor) {
+[[maybe_unused]] static inline Qnn_MemHandle_t get_qnn_tensor_memhandle(const Qnn_Tensor_t * tensor) {
     return get_qnn_tensor_memhandle(*tensor);
 }
 
@@ -700,7 +629,9 @@ static inline void set_qnn_tensor_id(Qnn_Tensor_t & tensor, uint32_t id) {
 }
 
 
-static inline void set_qnn_tensor_id(Qnn_Tensor_t * tensor, uint32_t id) { set_qnn_tensor_id(*tensor, id); }
+[[maybe_unused]] static inline void set_qnn_tensor_id(Qnn_Tensor_t * tensor, uint32_t id) {
+    set_qnn_tensor_id(*tensor, id);
+}
 
 
 static inline void set_qnn_tensor_name(Qnn_Tensor_t & tensor, const char * name) {
@@ -710,7 +641,7 @@ static inline void set_qnn_tensor_name(Qnn_Tensor_t & tensor, const char * name)
 }
 
 
-static inline void set_qnn_tensor_name(Qnn_Tensor_t * tensor, const char * name) {
+[[maybe_unused]] static inline void set_qnn_tensor_name(Qnn_Tensor_t * tensor, const char * name) {
     set_qnn_tensor_name(*tensor, name);
 }
 
@@ -722,7 +653,7 @@ static inline void set_qnn_tensor_type(Qnn_Tensor_t & tensor, Qnn_TensorType_t t
 }
 
 
-static inline void set_qnn_tensor_type(Qnn_Tensor_t * tensor, Qnn_TensorType_t type) {
+[[maybe_unused]] static inline void set_qnn_tensor_type(Qnn_Tensor_t * tensor, Qnn_TensorType_t type) {
     set_qnn_tensor_type(*tensor, type);
 }
 
@@ -734,7 +665,7 @@ static inline void set_qnn_tensor_dataformat(Qnn_Tensor_t & tensor, Qnn_TensorDa
 }
 
 
-static inline void set_qnn_tensor_dataformat(Qnn_Tensor_t * tensor, Qnn_TensorDataFormat_t format) {
+[[maybe_unused]] static inline void set_qnn_tensor_dataformat(Qnn_Tensor_t * tensor, Qnn_TensorDataFormat_t format) {
     set_qnn_tensor_dataformat(*tensor, format);
 }
 
@@ -746,7 +677,7 @@ static inline void set_qnn_tensor_datatype(Qnn_Tensor_t & tensor, Qnn_DataType_t
 }
 
 
-static inline void set_qnn_tensor_datatype(Qnn_Tensor_t * tensor, Qnn_DataType_t dataType) {
+[[maybe_unused]] static inline void set_qnn_tensor_datatype(Qnn_Tensor_t * tensor, Qnn_DataType_t dataType) {
     set_qnn_tensor_datatype(*tensor, dataType);
 }
 
@@ -758,7 +689,7 @@ static inline void set_qnn_tensor_quantparams(Qnn_Tensor_t & tensor, Qnn_Quantiz
 }
 
 
-static inline void set_qnn_tensor_quantparams(Qnn_Tensor_t * tensor, Qnn_QuantizeParams_t params) {
+[[maybe_unused]] static inline void set_qnn_tensor_quantparams(Qnn_Tensor_t * tensor, Qnn_QuantizeParams_t params) {
     set_qnn_tensor_quantparams(*tensor, params);
 }
 
@@ -770,7 +701,7 @@ static inline void set_qnn_tensor_rank(Qnn_Tensor_t & tensor, uint32_t rank) {
 }
 
 
-static inline void set_qnn_tensor_rank(Qnn_Tensor_t * tensor, uint32_t rank) {
+[[maybe_unused]] static inline void set_qnn_tensor_rank(Qnn_Tensor_t * tensor, uint32_t rank) {
     set_qnn_tensor_rank(*tensor, rank);
 }
 
@@ -782,7 +713,7 @@ static inline void set_qnn_tensor_dimensions(Qnn_Tensor_t & tensor, uint32_t * d
 }
 
 
-static inline void set_qnn_tensor_dimensions(Qnn_Tensor_t * tensor, uint32_t * dims) {
+[[maybe_unused]] static inline void set_qnn_tensor_dimensions(Qnn_Tensor_t * tensor, uint32_t * dims) {
     set_qnn_tensor_dimensions(*tensor, dims);
 }
 
@@ -794,7 +725,7 @@ static inline void set_qnn_tensor_memtype(Qnn_Tensor_t & tensor, Qnn_TensorMemTy
 }
 
 
-static inline void set_qnn_tensor_memtype(Qnn_Tensor_t * tensor, Qnn_TensorMemType_t memType) {
+[[maybe_unused]] static inline void set_qnn_tensor_memtype(Qnn_Tensor_t * tensor, Qnn_TensorMemType_t memType) {
     set_qnn_tensor_memtype(*tensor, memType);
 }
 
@@ -806,7 +737,7 @@ static inline void set_qnn_tensor_clientbuf(Qnn_Tensor_t & tensor, Qnn_ClientBuf
 }
 
 
-static inline void set_qnn_tensor_clientbuf(Qnn_Tensor_t * tensor, Qnn_ClientBuffer_t clientBuf) {
+[[maybe_unused]] static inline void set_qnn_tensor_clientbuf(Qnn_Tensor_t * tensor, Qnn_ClientBuffer_t clientBuf) {
     set_qnn_tensor_clientbuf(*tensor, clientBuf);
 }
 
@@ -818,10 +749,9 @@ static inline void set_qnn_tensor_memhandle(Qnn_Tensor_t & tensor, Qnn_MemHandle
 }
 
 
-static inline void set_qnn_tensor_memhandle(Qnn_Tensor_t * tensor, Qnn_MemHandle_t handle) {
+[[maybe_unused]] static inline void set_qnn_tensor_memhandle(Qnn_Tensor_t * tensor, Qnn_MemHandle_t handle) {
     set_qnn_tensor_memhandle(*tensor, handle);
 }
-
 
 
 static size_t memscpy(void * dst, size_t dstSize, const void * src, size_t copySize) {
@@ -922,15 +852,16 @@ static int deep_copy_qnn_tensors(Qnn_Tensor_t & src, Qnn_Tensor_t & dst) {
 static int free_qnn_tensor(Qnn_Tensor_t & tensor) {
     int err = 0;
     VALIDATE_TENSOR_VERSION(tensor, err);
+
     free((void *) QNN_TENSOR_GET_NAME(tensor));
-    //FIXME:memory leak
+    //FIXME:bug in here
     //free(QNN_TENSOR_GET_DIMENSIONS(tensor));
 
     return err;
 }
 
 
-static int free_qnn_tensors(Qnn_Tensor_t *& tensors, uint32_t num_tensors) {
+[[maybe_unused]] static int free_qnn_tensors(Qnn_Tensor_t *& tensors, uint32_t num_tensors) {
     int err = 0;
 
     // free all pointer allocations in struct
@@ -962,6 +893,8 @@ static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
             return QNN_DATATYPE_FLOAT_16;
         case GGML_TYPE_F32:
             return QNN_DATATYPE_FLOAT_32;
+        default:
+            break;
 
     }
     return QNN_DATATYPE_UNDEFINED;
@@ -977,6 +910,8 @@ static const char * qnn_opname_from_ggmlop(enum ggml_op ggmlop) {
             return QNN_OP_ELEMENT_WISE_MULTIPLY;
         case GGML_OP_MUL_MAT:
             return QNN_OP_MAT_MUL;
+        default:
+            break;
     }
 
     return nullptr;
@@ -1003,327 +938,6 @@ Fn load_qnn_functionpointers(void * handle, const char * function_name) {
 }
 
 
-static void qnn_xfree(void * ptr) {
-    if (nullptr != ptr) {
-        free(ptr);
-        ptr = nullptr;
-    }
-}
-
-
-static void * qnn_xmalloc(size_t size) {
-    void * ptr;
-
-    if (!size)
-        size++;
-
-    if ((ptr = calloc(1, size)) == nullptr) {
-        QNN_LOG_WARN("malloc(%d) failed: %s\n",size, strerror(errno));
-        return nullptr;
-    }
-
-    return ptr;
-}
-
-
-static void * qnn_xmalloc_aligned(size_t alignment, size_t size, void ** base) {
-    char * ptr;
-
-    *base = ptr = static_cast<char *>(qnn_xmalloc(size + alignment));
-
-    while ((size_t) ptr % alignment)
-        ptr++;
-
-    return ptr;
-}
-
-#if NOT_IN_PR
-static void buffer_pool_free (buf_element_t * element) {
-    qnn_buf_t * self = (qnn_buf_t *) element->source;
-
-    pthread_mutex_lock(&self->buffer_pool_mutex);
-
-    element->next = self->buffer_pool_top;
-    self->buffer_pool_top = element;
-
-    self->buffer_pool_num_free++;
-    if (self->buffer_pool_num_free > self->buffer_pool_capacity) {
-        QNN_LOG_DEBUG("TOO MANY FREE\n");
-    }
-
-    pthread_cond_signal (&self->buffer_pool_cond_not_empty);
-
-    pthread_mutex_unlock (&self->buffer_pool_mutex);
-}
-
-
-static buf_element_t * buffer_pool_alloc (qnn_buf_t * self) {
-    buf_element_t * buf = nullptr;
-    int i;
-
-    pthread_mutex_lock (&self->buffer_pool_mutex);
-
-    while (self->buffer_pool_num_free < 2) {
-        pthread_cond_wait (&self->buffer_pool_cond_not_empty, &self->buffer_pool_mutex);
-    }
-
-    buf = self->buffer_pool_top;
-    self->buffer_pool_top = self->buffer_pool_top->next;
-    self->buffer_pool_num_free--;
-
-    buf->content = buf->mem;
-    buf->size = 0;
-    buf->type = 0;
-
-    pthread_mutex_unlock (&self->buffer_pool_mutex);
-
-    return buf;
-}
-
-
-static buf_element_t * buffer_pool_try_alloc (qnn_buf_t * self) {
-    buf_element_t * buf = nullptr;
-
-    pthread_mutex_lock (&self->buffer_pool_mutex);
-
-    if (self->buffer_pool_top) {
-        buf = self->buffer_pool_top;
-        self->buffer_pool_top = self->buffer_pool_top->next;
-        self->buffer_pool_num_free--;
-    } else {
-        buf = nullptr;
-    }
-
-    pthread_mutex_unlock (&self->buffer_pool_mutex);
-
-    if (buf) {
-        buf->content = buf->mem;
-        buf->size = 0;
-    }
-
-    return buf;
-}
-
-
-static void qnn_buf_buffer_put(qnn_buf_t * fifo, buf_element_t * element) {
-    pthread_mutex_lock (&fifo->mutex);
-
-    if (fifo->last)
-        fifo->last->next = element;
-    else
-        fifo->first = element;
-
-    fifo->last = element;
-    element->next = nullptr;
-    fifo->qnn_buf_size++;
-    fifo->qnn_buf_data_size += element->size;
-
-    pthread_cond_signal (&fifo->not_empty);
-
-    pthread_mutex_unlock (&fifo->mutex);
-}
-
-
-static buf_element_t * qnn_buf_buffer_get (qnn_buf_t * fifo) {
-    buf_element_t * buf = nullptr;
-
-    pthread_mutex_lock (&fifo->mutex);
-    if (fifo->first == nullptr) {
-        pthread_mutex_unlock (&fifo->mutex);
-        return nullptr;
-    }
-
-    buf = fifo->first;
-
-    fifo->first = fifo->first->next;
-    if (fifo->first==nullptr)
-        fifo->last = nullptr;
-
-    fifo->qnn_buf_size--;
-    fifo->qnn_buf_data_size -= buf->size;
-
-    pthread_mutex_unlock (&fifo->mutex);
-
-    return buf;
-}
-
-
-static void qnn_buf_buffer_clear (qnn_buf_t * fifo) {
-    buf_element_t * buf, * next, * prev;
-
-    pthread_mutex_lock (&fifo->mutex);
-
-    buf = fifo->first;
-    prev = nullptr;
-
-    while (buf != nullptr) {
-        next = buf->next;
-        if ((buf->type & BUF_MAJOR_MASK) !=  BUF_CONTROL_BASE) {
-            if (prev)
-                prev->next = next;
-            else
-                fifo->first = next;
-
-            if (!next)
-                fifo->last = prev;
-
-            fifo->qnn_buf_size--;
-            fifo->qnn_buf_data_size -= buf->size;
-
-            buf->free_buffer(buf);
-        } else {
-            prev = buf;
-        }
-
-        buf = next;
-    }
-
-    QNN_LOG_DEBUG("free buffers after clear: %d\n", fifo->buffer_pool_num_free);
-    pthread_mutex_unlock (&fifo->mutex);
-}
-
-
-static int qnn_buf_buffer_size (qnn_buf_t * self) {
-    int size = 0;
-
-    pthread_mutex_lock(&self->mutex);
-    size = self->qnn_buf_size;
-    pthread_mutex_unlock(&self->mutex);
-
-    return size;
-}
-
-
-static uint32_t qnn_buf_buffer_data_size (qnn_buf_t * self) {
-    uint32_t data_size;
-
-    pthread_mutex_lock(&self->mutex);
-    data_size = self->qnn_buf_data_size;
-    pthread_mutex_unlock(&self->mutex);
-
-    return data_size;
-}
-
-
-static int qnn_buf_buffer_num_free (qnn_buf_t * self) {
-    int buffer_pool_num_free = 0;
-
-    pthread_mutex_lock(&self->mutex);
-    buffer_pool_num_free = self->buffer_pool_num_free;
-    pthread_mutex_unlock(&self->mutex);
-
-    return buffer_pool_num_free;
-}
-
-
-static void qnn_buf_buffer_dispose (qnn_buf_t * self) {
-    buf_element_t * buf, * next;
-    int received = 0;
-
-    self->clear( self );
-    buf = self->buffer_pool_top;
-
-    while (buf != nullptr) {
-        next = buf->next;
-        qnn_xfree(buf);
-        received++;
-
-        buf = next;
-    }
-
-    while (received < self->buffer_pool_capacity) {
-        buf = self->get(self);
-        qnn_xfree(buf);
-        received++;
-    }
-
-    qnn_xfree(self->buffer_pool_base);
-    pthread_mutex_destroy(&self->mutex);
-    pthread_cond_destroy(&self->not_empty);
-    pthread_mutex_destroy(&self->buffer_pool_mutex);
-    pthread_cond_destroy(&self->buffer_pool_cond_not_empty);
-    qnn_xfree((void *)self->name);
-    qnn_xfree (self);
-}
-
-
-static qnn_buf_t * qnn_buf_new(const char * name, int num_buffers, uint32_t buf_size) {
-    int    i                = 0;
-    int    alignment        = 4;
-    qnn_buf_t * self        = nullptr;
-    uint8_t  * multi_buffer = nullptr;
-
-    self = (qnn_buf_t*)qnn_xmalloc(sizeof(qnn_buf_t));
-    if (nullptr == self) {
-        QNN_LOG_WARN("malloc memory failed\n");
-        return nullptr;
-    }
-
-    self->name                = strdup(name);
-    self->first               = nullptr;
-    self->last                = nullptr;
-    self->qnn_buf_size        = 0;
-    self->put                 = qnn_buf_buffer_put;
-    self->get                 = qnn_buf_buffer_get;
-    self->clear               = qnn_buf_buffer_clear;
-    self->size                = qnn_buf_buffer_size;
-    self->num_free            = qnn_buf_buffer_num_free;
-    self->data_size           = qnn_buf_buffer_data_size;
-    self->destroy             = qnn_buf_buffer_dispose;
-    pthread_mutex_init (&self->mutex, nullptr);
-    pthread_cond_init (&self->not_empty, nullptr);
-
-
-    if (buf_size % alignment != 0)
-        buf_size += alignment - (buf_size % alignment);
-
-    QNN_LOG_INFO("[%s]allocating %d Mbytes memory(alignment = %d)\n", name, (num_buffers * buf_size) / (1 << 20), alignment);
-
-    multi_buffer = (uint8_t *)qnn_xmalloc_aligned (alignment, num_buffers * buf_size, &self->buffer_pool_base);
-    if (nullptr == multi_buffer) {
-        QNN_LOG_WARN("malloc memory failed\n");
-        free(self);
-        return nullptr;
-    }
-
-    self->buffer_pool_top       = nullptr;
-
-    pthread_mutex_init (&self->buffer_pool_mutex, nullptr);
-    pthread_cond_init (&self->buffer_pool_cond_not_empty, nullptr);
-
-    self->buffer_pool_num_free  = 0;
-    self->buffer_pool_capacity  = num_buffers;
-    self->buffer_pool_buf_size  = buf_size;
-    self->buffer_alloc          = buffer_pool_alloc;
-    self->buffer_try_alloc      = buffer_pool_try_alloc;
-
-    for (i = 0; i < num_buffers; i++) {
-        buf_element_t * buf = nullptr;
-
-        buf = (buf_element_t *)qnn_xmalloc(sizeof (buf_element_t));
-        if (nullptr == buf) {
-            QNN_LOG_WARN("malloc memory failed");
-            free(multi_buffer);
-            free(self);
-            return nullptr;
-        }
-
-        buf->id          = i;
-        buf->mem         = multi_buffer;
-        multi_buffer     += buf_size;
-
-        buf->max_size    = buf_size;
-        buf->free_buffer = buffer_pool_free;
-        buf->source      = self;
-
-        buffer_pool_free(buf);
-    }
-
-    return self;
-}
-#endif
-
-
 static const char * get_qnn_backend_name(int n_backend_type) {
     switch (n_backend_type) {
         case 0:
@@ -1341,7 +955,6 @@ static const char * get_qnn_backend_name(int n_backend_type) {
         case 4:
             return "QNN-HTA";
 #endif
-
         default:
             return "unknown";
     }
@@ -1724,7 +1337,6 @@ private:
     qnn_interface _qnn_interface;
 
     void *_system_lib_handle = nullptr;
-    void *_model_lib_handle = nullptr;
 
     Qnn_GraphHandle_t _qnn_graph_handle = nullptr;
 
@@ -2132,25 +1744,25 @@ static void ggml_qnn_logcallback(const char * fmt,
     static std::mutex log_mutex;
     static unsigned char s_ggml_qnn_logbuf[GGML_QNN_LOGBUF_LEN];
 
-    const char * levelStr = "";
+    const char * log_level_desc = "";
     switch (level) {
         case QNN_LOG_LEVEL_ERROR:
-            levelStr = " ERROR ";
+            log_level_desc = " ERROR ";
             break;
         case QNN_LOG_LEVEL_WARN:
-            levelStr = "WARNING";
+            log_level_desc = "WARNING";
             break;
         case QNN_LOG_LEVEL_INFO:
-            levelStr = "  INFO ";
+            log_level_desc = "  INFO ";
             break;
         case QNN_LOG_LEVEL_DEBUG:
-            levelStr = " DEBUG ";
+            log_level_desc = " DEBUG ";
             break;
         case QNN_LOG_LEVEL_VERBOSE:
-            levelStr = "VERBOSE";
+            log_level_desc = "VERBOSE";
             break;
         case QNN_LOG_LEVEL_MAX:
-            levelStr = "UNKNOWN";
+            log_level_desc = "UNKNOWN";
             break;
     }
 
@@ -2159,10 +1771,9 @@ static void ggml_qnn_logcallback(const char * fmt,
     {
         std::lock_guard<std::mutex> lock(log_mutex);
 
-        int len_content = 0;
         memset(s_ggml_qnn_logbuf, 0, GGML_QNN_LOGBUF_LEN);
-        len_content = vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
-        QNN_LOG_DEBUG("%8.1fms [%-7s] %s ", ms, levelStr, s_ggml_qnn_logbuf);
+        vsnprintf(reinterpret_cast<char *const>(s_ggml_qnn_logbuf), GGML_QNN_LOGBUF_LEN, fmt, argp);
+        QNN_LOG_DEBUG("%8.1fms [%-7s] %s ", ms, log_level_desc, s_ggml_qnn_logbuf);
     }
 }
 
@@ -2435,22 +2046,7 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
     if (nullptr == tensor)
         return false;
 
-    if (b_dump_tensor_info) {
-        QNN_LOG_DEBUG("op name:%s, tensor type:%s", ggml_op_name(tensor->op),
-                      ggml_type_name(tensor->type));
-        if (nullptr != tensor->src[0]) {
-            QNN_LOG_DEBUG("src0 type:%s", ggml_type_name(tensor->src[0]->type));
-        }
-        if (nullptr != tensor->src[1]) {
-            QNN_LOG_DEBUG("src1 type:%s", ggml_type_name(tensor->src[1]->type));
-        }
-    }
-
-    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
-        return false;
-    }
-
-    //ensure tensor->src[0] and tensor->src[1] is not nullptr
+    //only support the following 3 OPs currently and ensure tensor->src[0] and tensor->src[1] is not nullptr
     bool supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL) || (tensor->op == GGML_OP_MUL_MAT));
     if (!supported_op) {
         return false;
@@ -2468,6 +2064,45 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
     const int64_t ne0 = tensor->ne[0];
     const int64_t ne1 = tensor->ne[1];
 
+    GGML_UNUSED(ne0);
+    GGML_UNUSED(ne1);
+
+    if (b_dump_tensor_info) {
+        QNN_LOG_DEBUG("op name:%s, tensor type:%s", ggml_op_name(tensor->op),
+                      ggml_type_name(tensor->type));
+        if (nullptr != tensor->src[0]) {
+            QNN_LOG_DEBUG("src0 type:%s", ggml_type_name(tensor->src[0]->type));
+        }
+        if (nullptr != tensor->src[1]) {
+            QNN_LOG_DEBUG("src1 type:%s", ggml_type_name(tensor->src[1]->type));
+        }
+
+        if (tensor->op == GGML_OP_MUL_MAT) {
+                QNN_LOG_DEBUG("GGML_OP_MUL_MAT");
+                QNN_LOG_DEBUG(
+                        "src0 %15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+                        src0->name,
+                        src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
+                        src0->nb[0], src0->nb[1], src0->nb[2]);
+                QNN_LOG_DEBUG(
+                        "src1 %15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+                        src1->name,
+                        src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
+                        src1->nb[0], src1->nb[1], src1->nb[2]);
+                QNN_LOG_DEBUG(
+                        "     %15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+                        tensor->name,
+                        tensor->type, ggml_type_name(tensor->type), tensor->ne[0], tensor->ne[1], tensor->ne[2],
+                        tensor->nb[0],
+                        tensor->nb[1], tensor->nb[2]);
+
+        }
+    }
+
+    if (ggml_is_empty(tensor) || tensor->op == GGML_OP_RESHAPE || tensor->op == GGML_OP_TRANSPOSE || tensor->op == GGML_OP_VIEW || tensor->op == GGML_OP_PERMUTE || tensor->op == GGML_OP_NONE) {
+        return false;
+    }
+
     //make ggml_get_tensor_rank and QNN SDK happy
     if ((ne00 <= 1 || ne01 <= 1 || ne10 <= 1 || ne11 <= 1)) {
         return false;
@@ -2482,25 +2117,10 @@ static bool ggml_qnn_can_handle_op(const struct ggml_tensor * tensor, bool b_dum
     }
 
     if (tensor->op == GGML_OP_MUL_MAT) {
-        if (b_dump_tensor_info) {
-            QNN_LOG_DEBUG("GGML_OP_MUL_MAT");
-            QNN_LOG_DEBUG(
-                    "%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-                    src0->name,
-                    src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
-                    src0->nb[0], src0->nb[1], src0->nb[2]);
-            QNN_LOG_DEBUG(
-                    "%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-                    src1->name,
-                    src1->type, ggml_type_name(src1->type), src1->ne[0], src1->ne[1], src1->ne[2],
-                    src1->nb[0], src1->nb[1], src1->nb[2]);
-            QNN_LOG_DEBUG(
-                    "%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-                    tensor->name,
-                    tensor->type, ggml_type_name(tensor->type), tensor->ne[0], tensor->ne[1], tensor->ne[2],
-                    tensor->nb[0],
-                    tensor->nb[1], tensor->nb[2]);
-        }
+        //TODO: this is limitation
+        return  (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16)
+                && (src1->type == GGML_TYPE_F32 || src1->type == GGML_TYPE_F16)
+                && (src0->type == src1->type) && (src0->type == tensor->type);
 
         if (tensor->ne[1] < 32) { // GPU/NPU inference will slower then CPU inference when tensor->ne[1] < min batch size
             return false;
@@ -2520,7 +2140,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     bool graph_initialized                      = false;
     int64_t n_begin_time                        = 0LL;
     int64_t n_end_time                          = 0LL;
-    int64_t n_durtion                           = 0LL;
+    int64_t n_duration                          = 0LL;
 
     qnn_instance * instance                     = nullptr;
     struct ggml_backend_qnn_context * ctx       = nullptr;
@@ -2530,11 +2150,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     Qnn_Tensor_t * tensor_0                     = nullptr;
     Qnn_Tensor_t * tensor_1                     = nullptr;
     Qnn_Tensor_t * tensor_2                     = nullptr;
-
-    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
-    Qnn_OpConfig_t qnn_op_config                 = QNN_OPCONFIG_INIT;
     Qnn_Param_t qnn_params[]                    = {};
-
     enum ggml_op ggmlop                         = GGML_OP_ADD;
     Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
     Qnn_DataType_t src1_qnn_type                = QNN_DATATYPE_FLOAT_32;
@@ -2566,7 +2182,7 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     n_begin_time                                = ggml_time_us();
 #if 1
     QNN_LOG_DEBUG("call %s\n", __func__);
-    QNN_LOG_DEBUG("%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+    QNN_LOG_DEBUG("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           src0->name,
           src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
           src0->nb[0], src0->nb[1], src0->nb[2]);
@@ -2587,13 +2203,6 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
     QNN_VER_PTR(*tensor_0)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_1)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_2)->type = QNN_TENSOR_TYPE_APP_READ;
-
-    uint32_t dimensions_input_0[]   = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                     (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-    uint32_t dimensions_input_1[]   = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                     (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-    uint32_t dimensions_output[]    = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                     (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 
     src0_qnn_type                   = qnn_datatype_from_ggml_datatype(src0->type);
     src1_qnn_type                   = qnn_datatype_from_ggml_datatype(src1->type);
@@ -2710,9 +2319,8 @@ static void ggml_qnn_add(const ggml_tensor * src0, const ggml_tensor * src1, ggm
         }
     }
     n_end_time = ggml_time_us();
-    n_durtion = (n_end_time - n_begin_time) / 1000;
-    //QNN_LOG_DEBUG("duration of ggml_qnn_add : %lld milliseconds\n", n_durtion);
-    //QNN_LOG_DEBUG("call %s done\n", __func__);
+    n_duration = (n_end_time - n_begin_time) / 1000;
+    QNN_LOG_DEBUG("duration of ggml_qnn_add : %lld milliseconds\n", n_duration);
 }
 
 
@@ -2731,7 +2339,7 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
     bool graph_initialized                      = false;
     int64_t n_begin_time                        = 0LL;
     int64_t n_end_time                          = 0LL;
-    int64_t n_durtion                           = 0LL;
+    int64_t n_duration                          = 0LL;
 
     qnn_instance * instance                     = nullptr;
     struct ggml_backend_qnn_context * ctx       = nullptr;
@@ -2742,8 +2350,6 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
     Qnn_Tensor_t * tensor_1                     = nullptr;
     Qnn_Tensor_t * tensor_2                     = nullptr;
 
-    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
-    Qnn_OpConfig_t qnn_op_config                 = QNN_OPCONFIG_INIT;
     Qnn_Param_t qnn_params[]                    = {};
 
     enum ggml_op ggmlop                         = GGML_OP_ADD;
@@ -2777,7 +2383,7 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
     n_begin_time                                = ggml_time_us();
 #if 1
     QNN_LOG_DEBUG("call %s\n", __func__);
-    QNN_LOG_DEBUG("%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+    QNN_LOG_DEBUG("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           src0->name,
           src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
           src0->nb[0], src0->nb[1], src0->nb[2]);
@@ -2798,13 +2404,6 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
     QNN_VER_PTR(*tensor_0)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_1)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_2)->type = QNN_TENSOR_TYPE_APP_READ;
-
-    uint32_t dimensions_input_0[]   = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                       (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-    uint32_t dimensions_input_1[]   = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                       (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-    uint32_t dimensions_output[]    = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                       (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 
     src0_qnn_type                   = qnn_datatype_from_ggml_datatype(src0->type);
     src1_qnn_type                   = qnn_datatype_from_ggml_datatype(src1->type);
@@ -2917,8 +2516,8 @@ static void ggml_qnn_mul_mat(const ggml_tensor * src0, const ggml_tensor * src1,
         }
     }
     n_end_time = ggml_time_us();
-    n_durtion = (n_end_time - n_begin_time) / 1000;
-    QNN_LOG_DEBUG("duration of ggml_qnn_mul_mat : %lld milliseconds\n", n_durtion);
+    n_duration = (n_end_time - n_begin_time) / 1000;
+    QNN_LOG_DEBUG("duration of ggml_qnn_mul_mat : %lld milliseconds\n", n_duration);
     QNN_LOG_DEBUG("call %s done\n", __func__);
 }
 
@@ -2929,21 +2528,19 @@ static void ggml_qnn_hanlde_op(const enum ggml_op ggmlop, const ggml_tensor * sr
     bool graph_initialized                      = false;
     int64_t n_begin_time                        = 0LL;
     int64_t n_end_time                          = 0LL;
-    int64_t n_durtion                           = 0LL;
+    int64_t n_duration                          = 0LL;
 
     qnn_instance * instance                     = nullptr;
     struct ggml_backend_qnn_context * ctx       = nullptr;
 
     std::string qnn_graph_name                  = "ggml_qnn_graph";
-    std::string qnn_op_config_name               = "ggml_qnn_op_config";
+    std::string qnn_op_config_name              = "ggml_qnn_op_config";
     const char * qnn_op_name                    = nullptr;
     Qnn_GraphHandle_t graph_handle              = nullptr;
     Qnn_Tensor_t * tensor_0                     = nullptr;
     Qnn_Tensor_t * tensor_1                     = nullptr;
     Qnn_Tensor_t * tensor_2                     = nullptr;
 
-    Qnn_QuantizeParams_t quantize_param         = QNN_QUANTIZE_PARAMS_INIT;
-    Qnn_OpConfig_t qnn_op_config                 = QNN_OPCONFIG_INIT;
     Qnn_Param_t qnn_params[]                    = {};
 
     Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
@@ -2985,7 +2582,7 @@ static void ggml_qnn_hanlde_op(const enum ggml_op ggmlop, const ggml_tensor * sr
     n_begin_time                                = ggml_time_us();
 #if 1
     QNN_LOG_DEBUG("call %s\n", __func__);
-    QNN_LOG_DEBUG("%15s: type = %i (%5s)  ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+    QNN_LOG_DEBUG("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
           src0->name,
           src0->type, ggml_type_name(src0->type), src0->ne[0], src0->ne[1], src0->ne[2],
           src0->nb[0], src0->nb[1], src0->nb[2]);
@@ -3006,13 +2603,6 @@ static void ggml_qnn_hanlde_op(const enum ggml_op ggmlop, const ggml_tensor * sr
     QNN_VER_PTR(*tensor_0)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_1)->type = QNN_TENSOR_TYPE_APP_WRITE;
     QNN_VER_PTR(*tensor_2)->type = QNN_TENSOR_TYPE_APP_READ;
-
-    uint32_t dimensions_input_0[]   = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
-                                       (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
-    uint32_t dimensions_input_1[]   = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
-                                       (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
-    uint32_t dimensions_output[]    = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
-                                       (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
 
     std::string map_entry           = std::string(ggml_op_name(ggmlop));
     if (instance->_qnn_graph_map.find(map_entry) != instance->_qnn_graph_map.end()) {
@@ -3124,8 +2714,8 @@ static void ggml_qnn_hanlde_op(const enum ggml_op ggmlop, const ggml_tensor * sr
         }
     }
     n_end_time = ggml_time_us();
-    n_durtion = (n_end_time - n_begin_time) / 1000;
-    QNN_LOG_DEBUG("duration of ggml_qnn_%s : %lld milliseconds\n", ggml_op_name(ggmlop), n_durtion);
+    n_duration = (n_end_time - n_begin_time) / 1000;
+    QNN_LOG_DEBUG("duration of ggml_qnn_%s : %lld milliseconds\n", ggml_op_name(ggmlop), n_duration);
     QNN_LOG_DEBUG("call %s done\n", __func__);
 }
 
@@ -3593,7 +3183,6 @@ static void ggml_backend_qnn_buffer_init_tensor(ggml_backend_buffer_t buffer, gg
         QNN_LOG_WARN("init tensor failed");
         return;
     }
-    Qnn_Tensor_t tensor_copy;
     error = deep_copy_qnn_tensors(qnn_tensor, *p_qnn_tensor);
     if (error != QNN_SUCCESS) {
         free(p_qnn_tensor);
@@ -3636,7 +3225,7 @@ static void ggml_backend_qnn_buffer_clear(ggml_backend_buffer_t buffer, uint8_t 
 }
 
 
-static void ggml_backend_qnn_buffer_reset(ggml_backend_buffer_t buffer) {
+[[maybe_unused]] static void ggml_backend_qnn_buffer_reset(ggml_backend_buffer_t buffer) {
     ggml_backend_qnn_buffer_context * ctx = (ggml_backend_qnn_buffer_context *) buffer->context;
     for (auto * sub_buffer : ctx->sub_buffers) {
         free(sub_buffer);
@@ -3728,17 +3317,6 @@ static bool ggml_backend_qnn_buffer_is_host(ggml_backend_buffer_type_t buft) {
 }
 
 
-static ggml_backend_buffer_type_i ggml_backend_qnn_buffer_type_interface = {
-        /* .get_name         = */ ggml_backend_qnn_buffer_type_name,
-        /* .alloc_buffer     = */ ggml_backend_qnn_buffer_type_alloc_buffer,
-        /* .get_alignment    = */ ggml_backend_qnn_buffer_type_get_alignment,
-        /* .get_max_size     = */ ggml_backend_qnn_buffer_type_get_max_size,
-        /* .get_alloc_size   = */ nullptr,
-        /* .supports_backend = */ ggml_backend_qnn_buffer_type_supports_backend,
-        /* .is_host          = */ ggml_backend_qnn_buffer_is_host
-};
-
-
 static const char * ggml_backend_qnn_name(ggml_backend_t backend) {
     return "QNN";
 }
@@ -3752,10 +3330,10 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
     qnn_instance * instance = (qnn_instance*)g_qnn_mgr[ctx->device].instance;
     if (instance != nullptr) {
         std::map<std::string, std::tuple<Qnn_GraphHandle_t, Qnn_Tensor_t *, Qnn_Tensor_t *, Qnn_Tensor_t *>>::iterator graph_it;
-        QNN_INTERFACE_VER_TYPE qnn_raw_interface = ctx->instance->get_qnn_raw_interface();
         for (graph_it = instance->_qnn_graph_map.begin(); graph_it != instance->_qnn_graph_map.end(); graph_it++) {
             auto & graph_item = graph_it->second;
             Qnn_GraphHandle_t & graph_handle = std::get<0>(graph_item);
+            GGML_UNUSED(graph_handle);
             QNN_LOG_DEBUG("graph type:%s", graph_it->first.c_str());
         }
         instance->_qnn_graph_map.clear();
@@ -3764,14 +3342,6 @@ static void ggml_backend_qnn_free(ggml_backend_t backend) {
         delete instance;
         g_qnn_mgr[ctx->device].instance = nullptr;
     }
-
-#if NOT_IN_PR
-    qnn_buf_t * buffer_pool = (qnn_buf_t*)g_qnn_mgr[ctx->device].buffer_pool;
-    if (buffer_pool != nullptr) {
-        buffer_pool->destroy(buffer_pool);
-        g_qnn_mgr[ctx->device].buffer_pool = nullptr;
-    }
-#endif
 
     if (g_qnn_mgr[ctx->device].backend      != nullptr) {
         delete backend;
@@ -3792,6 +3362,7 @@ static ggml_backend_buffer_type_t ggml_backend_qnn_get_default_buffer_type(ggml_
 static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_cgraph * cgraph) {
     enum ggml_status result         = GGML_STATUS_SUCCESS;
     ggml_backend_qnn_context * ctx  = (ggml_backend_qnn_context *) backend->context;
+    GGML_UNUSED(ctx);
 
     ggml_compute_params params = {};
     params.type = GGML_TASK_TYPE_COMPUTE;
@@ -3814,17 +3385,19 @@ static ggml_status ggml_backend_qnn_graph_compute(ggml_backend_t backend, ggml_c
 static bool ggml_backend_qnn_supports_op(ggml_backend_t backend, const ggml_tensor * op) {
     GGML_UNUSED(backend);
 
-    return (ggml_qnn_can_handle_op(op, false));
+    return (ggml_qnn_can_handle_op(op, true));
 }
 
 
-//note: this function be used in new/proposal/refined ggml backend subsystem:
+//note: this function be used with proposal/refined ggml backend subsystem in this PR:
+#if NOT_IN_PR
 // https://github.com/zhouwg/kantv/pull/216 in this project
 // https://github.com/ggerganov/llama.cpp/pull/7641 in upstream
-//
+#else
+// https://github.com/ggerganov/llama.cpp/pull/7641
+#endif
 // new ggml backend(only using system memory: ggml_backend_xxx_buffer_is_host return true)
 // can following this style for mixed inference between CPU&GPU / CPU&NPU very easily
-// and the complex/complicated "Backend Sched" feature in ggml backend subsystem could be not used along this new approach
 static bool ggml_backend_qnn_offload_op(ggml_backend_t backend, const ggml_tensor * tensor) {
     GGML_UNUSED(backend);
 
@@ -4001,17 +3574,12 @@ ggml_backend_t ggml_backend_qnn_init(size_t device, const char * qnn_lib_path) {
         return nullptr;
     }
 
-    std::string device_name = GGML_QNN_NAME + std::string("_") + std::to_string(device) + std::string("_") + get_qnn_backend_name(device);
+    std::string device_name = get_qnn_backend_name(device);
     QNN_LOG_INFO("qnn device name %s", device_name.c_str());
     instance->init_qnn_graph(device_name.c_str(), false);
     g_qnn_mgr[device].instance                  = instance;
     g_qnn_mgr[device].raw_interface             = instance->get_qnn_raw_interface();
     g_qnn_mgr[device].raw_system_interface      = instance->get_qnn_raw_system_interface();
-#if NOT_IN_PR
-    //TODO:refine internal buffer management
-    g_qnn_mgr[device].buffer_pool               = qnn_buf_new(get_qnn_backend_name(device), GGML_QNN_MAX_BUFFERS, (1 << 20));
-    GGML_ASSERT(g_qnn_mgr[device].buffer_pool != nullptr);
-#endif
 
     ggml_backend_t qnn_backend = new ggml_backend{
                 /* .guid      = */ ggml_backend_qnn_guid(),
@@ -4030,7 +3598,6 @@ extern "C" int ggml_backend_qnn_reg_devices(void);
 
 int ggml_backend_qnn_reg_devices() {
     for (size_t idx = 0; idx < GGML_QNN_MAX_DEVICES; idx++) {
-        int id = g_qnn_mgr[idx].device;
         char name[GGML_MAX_NAME];
         ggml_backend_qnn_get_device_description(idx, name, GGML_MAX_NAME);
         ggml_backend_register(name, ggml_backend_qnn_reg_init, ggml_backend_qnn_buffer_type(idx),

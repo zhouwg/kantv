@@ -1,3 +1,4 @@
+# Copyright (c) 2024- KanTV Authors
 cmake_minimum_required(VERSION 3.22.1)
 project(ggml-qnn-test)
 
@@ -23,7 +24,7 @@ set(SOURCE_FILES
         ../../ggml-quants.c
         ../../ggml-qnn.cpp
         ../../../../../external/ffmpeg/libavutil/cde_log.c
-        ../test-backend-ops.cpp
+        test-qnn-ops.cpp
 )
 
 
