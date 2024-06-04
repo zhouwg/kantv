@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * this is implementation of Android command line application for verify GGML QNN backend
+ * this is implementation of Android command line application for verify GGML QNN backend, used for update PR in upstream
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,8 +148,7 @@ static bool ggml_graph_compute_helper(
 }
 
 
-static float tensor_sum_elements(const ggml_tensor * tensor) {
-    double sum = 0;
+static void tensor_dump_elements(const ggml_tensor * tensor) {
     float value = 0;
     std::ostringstream tmposs;
     if (tensor->type == GGML_TYPE_F32) {
@@ -159,7 +158,6 @@ static float tensor_sum_elements(const ggml_tensor * tensor) {
                     for (int k = 0; k < tensor->ne[0]; k++) {
                         value = ((float *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] +
                                                          j * tensor->ne[0] + k];
-                        sum += value;
                         tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
                                << " ";
                     }
@@ -168,14 +166,13 @@ static float tensor_sum_elements(const ggml_tensor * tensor) {
                     }
                     tmposs.clear();
                     tmposs.str("");
-                    QNN_LOG_DEBUG("\n");
+                    //QNN_LOG_DEBUG("\n");
                 }
             }
         }
     }
 
-    QNN_LOG_DEBUG("\n");
-    return sum;
+    //QNN_LOG_DEBUG("\n");
 }
 
 
@@ -186,7 +183,7 @@ static void tensor_dump(const ggml_tensor * tensor, const char * name) {
           tensor->type, ggml_type_name(tensor->type),
           tensor->ne[0], tensor->ne[1], tensor->ne[2],
           tensor->nb[0], tensor->nb[1], tensor->nb[2]);
-    tensor_sum_elements(tensor);
+    tensor_dump_elements(tensor);
 
     QNN_LOG_DEBUG("\n");
 }

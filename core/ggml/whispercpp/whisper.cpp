@@ -54,6 +54,7 @@
 #include <random>
 #include <functional>
 #include <codecvt>
+#include <sstream>
 
 #if defined(_MSC_VER)
 #pragma warning(disable: 4244 4267) // possible loss of data
@@ -1282,7 +1283,11 @@ static ggml_backend_t whisper_backend_init(const whisper_context_params & params
     if (params.use_gpu) {
         if (params.gpu_device != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is "fake" QNN backend, just used for compare performance between QNN backend and original GGML
             WHISPER_LOG_INFO("%s: using QNN backend\n", __func__);
+#ifdef TARGET_ANDROID
             backend_gpu = ggml_backend_qnn_init(params.gpu_device, "/data/data/com.cdeos.kantv/qnnlib/");// the second param can be got by JNI from Java layer
+#else
+            backend_gpu = ggml_backend_qnn_init(params.gpu_device, "/data/local/tmp/");// the second param can be got by JNI from Java layer
+#endif
             if (!backend_gpu) {
                 char device_name[GGML_MAX_NAME];
                 ggml_backend_qnn_get_device_description(params.gpu_device, device_name, GGML_MAX_NAME);
@@ -4146,7 +4151,7 @@ whisper_token whisper_token_transcribe(struct whisper_context * ctx) {
     return ctx->vocab.token_transcribe;
 }
 
-#ifndef ANDROID
+#ifndef TARGET_ANDROID
 void whisper_print_timings(struct whisper_context * ctx) {
     const int64_t t_end_us = ggml_time_us();
 

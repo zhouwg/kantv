@@ -40,20 +40,20 @@ GGML_API int            ggml_backend_qnn_reg_devices(void);
 /**
  *
  * @param device            0: QNN_BACKEND_CPU 1: QNN_BACKEND_GPU 2: QNN_BACKEND_NPU(aka HTP/DSP)
- * @param qnn_lib_path      qnn library path, such as "/data/local/tmp/" on Android or APK's internal data path on Android
+ * @param qnn_lib_path      qnn library path, such as "/data/local/tmp/" on Android or specified in JNI layer
  * @return
  */
 GGML_API ggml_backend_t ggml_backend_qnn_init(size_t dev_num, const char * qnn_lib_path);
 
 GGML_API bool           ggml_backend_is_qnn(ggml_backend_t backend);
 
-GGML_API void           ggml_backend_qnn_set_n_threads(ggml_backend_t backend, int n_threads);
+GGML_API void           ggml_backend_qnn_set_n_threads(ggml_backend_t backend, int thread_counts);
 
 GGML_API int            ggml_backend_qnn_get_device_count(void);
 
-GGML_API void           ggml_backend_qnn_get_device_description(int device, char * description, size_t description_size);
+GGML_API void           ggml_backend_qnn_get_device_description(size_t dev_num, char * description, size_t description_size);
 
-GGML_API ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t dev_num);
+GGML_API GGML_CALL ggml_backend_buffer_type_t ggml_backend_qnn_buffer_type(size_t dev_num);
 
 #ifdef __cplusplus
 }

@@ -41,9 +41,10 @@ function check_qnn_libs()
 function show_usage()
 {
     echo "Usage:"
-    echo "  $0 GGML_OP_ADD      0/1/2"
-    echo "  $0 GGML_OP_MUL      0/1/2"
-    echo "  $0 GGML_OP_MUL_MAT  0/1/2"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_ADD     0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL     0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL_MAT 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 2(whisper) 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
     echo -e "\n\n\n"
 }
 
@@ -55,19 +56,19 @@ function main()
     #upload the latest ggml_qnn_test
     adb push ${GGML_QNN_TEST} ${REMOTE_PATH}
     adb shell chmod +x ${REMOTE_PATH}/${GGML_QNN_TEST}
+    adb shell "export LD_LIBRARY_PATH="/data/local/tmp:$LD_LIBRARY_PATH""
 
-    case "$ggmlop" in
+    case "$TEST_GGMLOP" in
         GGML_OP_ADD)
-            echo "adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_ADD -b $qnnbackend"
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_ADD -b $qnnbackend
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST} -t $TEST_TYPE -o ADD -b $TEST_BACKEND
         ;;
 
         GGML_OP_MUL)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL -b $qnnbackend
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MUL -b $TEST_BACKEND
         ;;
 
         GGML_OP_MUL_MAT)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t GGML_OP_MUL_MAT -b $qnnbackend
+            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MULMAT -b $TEST_BACKEND
         ;;
 
         *)
@@ -81,8 +82,13 @@ function main()
 
 check_qnn_sdk
 
-unset ggmlop
-unset qnnbackend
+unset TEST_TYPE
+unset TEST_GGMLOP
+unset TEST_BACKEND
+TEST_TYPE=0
+TEST_GGMLOP="GGML_OP_ADD"
+TEST_BACKEND=0
+
 if [ $# == 0 ]; then
     show_usage
     exit 1
@@ -96,14 +102,22 @@ elif [ $# == 1 ]; then
         show_usage
         exit 1
     else
-        ggmlop=$1
-        qnnbackend=0
+        TEST_TYPE=$1
+        TEST_GGMLOP="GGML_OP_ADD"
+        TEST_BACKEND=0
     fi
 elif [ $# == 2 ]; then
-    ggmlop=$1
-    qnnbackend=$2
+    #whisper.cpp UT
+    TEST_TYPE=$1
+    TEST_GGMLOP="GGML_OP_ADD"
+    TEST_BACKEND=$2
+elif [ $# == 3 ]; then
+    TEST_TYPE=$1
+    TEST_GGMLOP=$2
+    TEST_BACKEND=$3
 else
     show_usage
     exit 1
 fi
-main $arg
+
+main
