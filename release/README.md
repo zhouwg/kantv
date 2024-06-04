@@ -224,3 +224,14 @@
                     <li>refine docs</li>
                     <li>prepare for refine ggml qnn backend(MS's onnxruntime might be referenced)</li>
                  </ul>
+
+- v1.3.11 2024-06-04,
+                 <ul>
+                    <li>refine ggml qnn backend(ggml-qnn.cpp) and update PR in upstream accordingly</li>
+                    <li><a href="https://github.com/zhouwg/kantv/pull/216">refine ggml backend subsystem</a>, provide a general approach for mixed inference between Qualcomm's CPU&GPU / CPU&NPU easily</li>
+                    <li>provide a dedicated Android command line program for verify ggml qnn backend in Android command line mode and update PR in upstream accordingly</li>
+                    <li>add a more proven Android UT case(whisper.cpp using qnn backend) in Android command line mode</li>
+                    <li>bug-free in ggml-qnn.cpp</li>
+                    <li>bug-free in ggml-jni</li>
+                 </ul>
+
