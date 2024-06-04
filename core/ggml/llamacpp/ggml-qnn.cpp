@@ -125,7 +125,7 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char * file, const
 
 #define GGML_QNN_LOGBUF_LEN                             4096
 
-#define GGML_QNN_DEBUG                                  1  //for troubleshooting QNN backend, should be changed to 0 in product envs
+#define GGML_QNN_DEBUG                                  1  //for troubleshooting QNN backend
 #define NOT_IN_PR                                       0  //for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
 
 #define QNN_LOG_ERROR(...) ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)

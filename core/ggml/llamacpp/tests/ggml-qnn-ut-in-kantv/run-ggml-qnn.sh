@@ -41,10 +41,10 @@ function check_qnn_libs()
 function show_usage()
 {
     echo "Usage:"
-    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_ADD     0(CPU)/1(GPU)/2(NPU)"
-    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL     0(CPU)/1(GPU)/2(NPU)"
-    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL_MAT 0(CPU)/1(GPU)/2(NPU)"
-    echo "  $0 2(whisper) 0(CPU)/1(GPU)/2(NPU)"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_ADD     0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL     0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL_MAT 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 2(whisper) 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
     echo -e "\n\n\n"
 }
 

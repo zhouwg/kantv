@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * this is implementation of Android command line application for verify GGML QNN backend
+ * this is implementation of Android command line application for verify GGML QNN backend, only used in this project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -475,13 +475,7 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
 #endif
             struct ggml_context *ctx0 = ggml_init(gparams);
 
-            struct ggml_tensor *b = nullptr;
-            if (n_ggml_op_type != GGML_OP_MUL) {
-                b = ggml_new_tensor_2d(ctx0, wtype, N, N);
-            } else {
-                b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //only F32 supported with GGML_OP_MUL in ggml.c
-            }
-
+            struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //avoid assert failure in ggml.c
             struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
             ggml_set_input(a);
             ggml_set_input(b);
@@ -525,7 +519,8 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
             for (int i = 0; i < n_max; ++i) {
                 const int64_t t0 = ggml_time_us();
 
-                tipString = "calling ggml_graphic_compute_helper:\n";
+                //tipString = "calling ggml_graphic_compute_helper:\n";
+                tipString = "";
                 tipString += "j= " + std::to_string(j) + "(matrix dimension = " +
                              std::to_string(N) + ",n_max=" + std::to_string(n_max) + ")"
                              + ",k=" + std::to_string(k) + "(ggml quant type=" +
@@ -1350,12 +1345,12 @@ static int qnn_test_whispercpp(const char * sz_model_path, const char * sz_audio
     QNN_LOG_INFO("num threads: %d\n", num_threads);
 
     if (0 != access(sz_model_path, F_OK)) {
-        QNN_LOG_WARN("pls check whether file %s is exist", sz_model_path);
+        QNN_LOG_WARN("pls check whether the ggml model file %s is exist", sz_model_path);
         return NULL;
     }
 
     if (0 != access(sz_audio_path, F_OK)) {
-        QNN_LOG_WARN("pls check whether file %s is exist", sz_audio_path);
+        QNN_LOG_WARN("pls check whether the ggml sample file %s is exist", sz_audio_path);
         return NULL;
     }
 
@@ -1501,7 +1496,7 @@ static void show_usage() {
         "Options:\n" \
         " -t 0(simple UT) 1(automation UT) 2(whisper)\n" \
         " -o ADD / MUL / MULMAT\n" \
-        " -b 0(QNN_CPU) 1(QNN_GPU) 2(QNN_NPU)\n" \
+        " -b 0(QNN_CPU) 1(QNN_GPU) 2(QNN_NPU) 3(ggml)\n" \
         " ?/h print usage infomation\n\n"
     );
 }
@@ -1538,7 +1533,7 @@ int main(int argc, char * argv[]) {
         } else if (0 == strcmp(argv[i], "-b")) { //QNN backend
             if (i + 1 < argc) {
                 int backend = atoi(argv[i + 1]);
-                if (backend <= QNN_BACKEND_NPU)
+                if (backend <= QNN_BACKEND_GGML)
                     n_backend_type     = backend;
                 else {
                     show_usage();
@@ -1568,7 +1563,7 @@ int main(int argc, char * argv[]) {
                                 num_threads,
                                 n_backend_type);
             break;
-            
+
         default:
             break;
     }

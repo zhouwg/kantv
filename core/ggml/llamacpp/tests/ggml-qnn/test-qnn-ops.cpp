@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024- KanTV Authors
  *
- * this is implementation of Android command line application for verify GGML QNN backend
+ * this is implementation of Android command line application for verify GGML QNN backend, used for update PR in upstream
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
