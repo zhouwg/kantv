@@ -24,20 +24,18 @@ set(SOURCE_FILES
         ../../ggml-quants.c
         ../../ggml-qnn.cpp
         ../../../../../external/ffmpeg/libavutil/cde_log.c
-        test-qnn-ops.cpp
+        ggml-qnn-ut.cpp
 )
 
 
 message("QNN_SDK_PATH         : ${QNN_SDK_PATH}")
 message("QNN_INC_PATH         : ${QNN_INC_PATH}")
 message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
-message("target name          : ${TARGET_NAME}")
-
 
 add_definitions(-D__ARM_NEON)
 add_definitions(-DGGML_USE_QNN)
 
-if(CMAKE_BUILD_TYPE STREQUAL "release")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
 add_definitions(-DNDEBUG)
 add_definitions(-O3)
 endif()
