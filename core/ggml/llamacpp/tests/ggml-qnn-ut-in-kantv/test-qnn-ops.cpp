@@ -569,7 +569,7 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
         s += strbuf;
 
 
-        QNN_LOG_DEBUG("%s\n", s.c_str());
+        QNN_LOG_DEBUG("\n%s\n", s.c_str());
     }
 
     n_end_time = ggml_time_us();

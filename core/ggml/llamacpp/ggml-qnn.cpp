@@ -5,7 +5,7 @@
  *
  *
  * IPR statement:
- * The QNN helper macros and functions are referenced from:
+ * The QNN helper macros and functions are referenced(reverse engineering by many experiments) from:
  * (1) https://github.com/pytorch/executorch/tree/main/backends/qualcomm  (provided by Qualcomm Technologies, Inc.)
  * (2) QNN samples (Qualcomm Technologies, Inc.)
  * (3) /opt/qcom/aistack/qnn/2.20.0.240223/examples/Models/InceptionV3/model/Inception_v3.cpp which is
@@ -16,22 +16,28 @@
  *
  *
  * status:
- * 1. core implementation(data path works fine as expected with whisper.cpp using QNN CPU/GPU backend)
+ * 1. core implementation(data path works fine as expected with whisper.cpp&llama.cpp using QNN CPU/GPU backend)
  *    on Qualcomm's SoC based low-end phone
- * 2. core implementation(data path works fine as expected with whisper.cpp using QNN NPU(aka HTP/DSP)
+ * 2. core implementation(data path works fine as expected with whisper.cpp&llama.cpp using QNN NPU(aka HTP/DSP)
  *    backend on Qualcomm's soC based high-end phone
  * 3. GGML_OP_MUL_MAT & GGML_OP_MUL & GGML_OP_ADD using QNN API has been completed and the dedicated
- *    Android command line UT program passed on Qualcomm's SoC based Andriod phone
+ *    Android command line UT program works fine as expected on Qualcomm's SoC based Android phone
  * 4. PR to upstream GGML community on 04-24-2024: https://github.com/ggerganov/llama.cpp/pull/6869
  *
  * todo:
  * 1. lack of implementation of other GGML OPs using QNN API(only support GGML_OP_MUL_MAT,
- *    GGML_OP_MUL, GGML_OP_ADD currently), would be done in upstream GGML community
+ *    GGML_OP_MUL, GGML_OP_ADD currently). this problem has been done by s standalone PR
+ *    https://github.com/zhouwg/kantv/pull/216 in this project or a standalone PR
+ *    https://github.com/ggerganov/llama.cpp/pull/7641 in upstream.
+ *    it's a general approach for mixed inference between Qualcomm's CPU&GPU / CPU&NPU very
+ *    easily and re-use/refine the existing GGML backend subsystem and no any side-effect to
+ *    any existing backends/codes.
  * 2. only support FP32 / FP16, other(quantized) GGML data type not used currently, data type of
  *    input tensor and output tensor must be same(this is a real big limitation in this backend).
- *    would be done in upstream GGML community
- * 3. QNN's RPC feature(which is required for QNN NPU backend) not used
- * 4. performance fine-tune using QNN backend(mixed inference between CPU&GPU&NPU)
+ *    would be done in upstream GGML community if the PR of ggml-qnn-backend in upstream could be accepted.
+ * 3. QNN's RPC feature(which is required for QNN NPU backend) not used,would be done in upstream
+ *    GGML community if the PR of ggml-qnn-backend in upstream could be accepted.
+ * 4. performance fine-tune(long-term task)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3175,6 +3181,10 @@ GGML_CALL static void ggml_backend_qnn_buffer_init_tensor(ggml_backend_buffer_t 
     Qnn_ErrorHandle_t error = QNN_SUCCESS;
     ggml_backend_qnn_buffer_context * ctx = (ggml_backend_qnn_buffer_context *)buffer->context;
 
+    static int idx = 0;
+    char tensor_name[GGML_MAX_NAME] = { 0 };
+    snprintf(tensor_name, GGML_MAX_NAME, "tensor_%2d", idx++);
+
     uint32_t dimensions[] = {(uint32_t) tensor->ne[0], (uint32_t) tensor->ne[1], (uint32_t) tensor->ne[2], (uint32_t) tensor->ne[3]};
     //TODO:only support FP32 & FP16
     Qnn_DataType_t  qnn_data_type = QNN_DATATYPE_FLOAT_32;
@@ -3189,7 +3199,7 @@ GGML_CALL static void ggml_backend_qnn_buffer_init_tensor(ggml_backend_buffer_t 
             .version= QNN_TENSOR_VERSION_1,
             {.v1= {
                     .id = 0,
-                    .name = tensor->name,
+                    .name = tensor_name,
                     .type = qnn_tensor_type,
                     .dataFormat = QNN_TENSOR_DATA_FORMAT_FLAT_BUFFER,
                     .dataType = qnn_data_type,
