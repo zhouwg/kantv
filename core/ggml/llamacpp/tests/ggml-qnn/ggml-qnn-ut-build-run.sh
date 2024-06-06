@@ -5,7 +5,8 @@ set -e
 
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
-QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
+#QNN SDK released on 20240531
+QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 
 #for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly
 #for upstream PR, check and download ANDROID_NDK in this directory when this script is used at the first time
@@ -92,6 +93,23 @@ function remove_temp_dir()
 }
 
 
+function update_qnn_libs()
+{
+    check_qnn_sdk
+
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnSystem.so              ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnCpu.so                 ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnGpu.so                 ${REMOTE_PATH}/
+
+    #the QNN NPU(aka HTP/DSP) backend only verified on Xiaomi14(Qualcomm SM8650-AB Snapdragon 8 Gen 3) successfully
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtp.so                 ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpNetRunExtensions.so ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpPrepare.so          ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpV75Stub.so          ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/hexagon-v75/unsigned/libQnnHtpV75Skel.so     ${REMOTE_PATH}/
+}
+
+
 function check_qnn_libs()
 {
     #reuse the cached qnn libs in Android phone
@@ -99,16 +117,7 @@ function check_qnn_libs()
     if [ $? -eq 0 ]; then
         printf "QNN libs already exist on Android phone\n"
     else
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnSystem.so              ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnCpu.so                 ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnGpu.so                 ${REMOTE_PATH}/
-
-        #the QNN NPU(aka HTP/DSP) backend only verified on Xiaomi14(Qualcomm SM8650-AB Snapdragon 8 Gen 3) successfully
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtp.so                 ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpNetRunExtensions.so ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpPrepare.so          ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpV75Stub.so          ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/hexagon-v75/unsigned/libQnnHtpV75Skel.so     ${REMOTE_PATH}/
+        update_qnn_libs
     fi
 }
 
@@ -158,7 +167,8 @@ function run_ggml_qnn_ut()
 function show_usage()
 {
     echo "Usage:"
-    echo "  $0 build"
+    echo "  $0 build            (build Android command line UT program)"
+    echo "  $0 updateqnnlibs    (upload the latest QNN libs to Android phone)"
     echo "  $0 GGML_OP_ADD      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
     echo "  $0 GGML_OP_MUL      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
     echo "  $0 GGML_OP_MUL_MAT  0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
@@ -195,9 +205,13 @@ elif [ $# == 1 ]; then
     elif [ "$1" == "build" ]; then
         build_ggml_qnn_ut
         exit 0
+    elif [ "$1" == "updateqnnlibs" ]; then
+        update_qnn_libs
+        exit 0
     else
         ggmlop=$1
         qnnbackend=0
+        run_ggml_qnn_ut
     fi
 elif [ $# == 2 ]; then
     ggmlop=$1

@@ -4,6 +4,7 @@
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
 QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
+QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 GGML_QNN_TEST=ggml-qnn-test
 REMOTE_PATH=/data/local/tmp/
 

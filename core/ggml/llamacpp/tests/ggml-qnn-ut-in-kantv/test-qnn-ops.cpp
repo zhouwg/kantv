@@ -14,6 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * many codes references from:
+ * https://github.com/zhouwg/kantv/blob/master/core/ggml/jni/ggml-jni-impl.cpp
+ * https://github.com/zhouwg/kantv/blob/master/core/ggml/jni/ggml-jni-impl-external.cpp
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -187,6 +191,21 @@ static bool ggml_graph_compute_helper(
 }
 
 
+#define QK8_0 32
+typedef struct {
+    uint16_t d;       // delta
+    int8_t  qs[QK8_0]; // quants
+} block_q8_0;
+
+
+static inline float ggml_compute_fp16_to_fp32(uint16_t h) {
+    __fp16 tmp;
+    memcpy(&tmp, &h, sizeof(uint16_t));
+    return (float)tmp;
+}
+#define GGML_FP16_TO_FP32(x) ggml_compute_fp16_to_fp32(x)
+
+
 static void tensor_dump_elements(const ggml_tensor * tensor) {
     float value = 0;
     std::ostringstream tmposs;
@@ -194,6 +213,27 @@ static void tensor_dump_elements(const ggml_tensor * tensor) {
         QNN_LOG_WARN("tensor is null");
         return;
     }
+    if (tensor->type == GGML_TYPE_I8) {
+        for (int h = 0; h < tensor->ne[3]; h++) {
+            for (int i = 0; i < tensor->ne[2]; i++) {
+                for (int j = 0; j < tensor->ne[1]; j++) {
+                    for (int k = 0; k < tensor->ne[0]; k++) {
+                        value = ((int8_t *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] +
+                                                         j * tensor->ne[0] + k];
+                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
+                               << " ";
+                    }
+                    tmposs << "\n";
+                }
+            }
+        }
+        if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
+            QNN_LOG_DEBUG("\n%s\n", tmposs.str().c_str());
+            tmposs.clear();
+            tmposs.str("");
+        }
+    }
+
     if (tensor->type == GGML_TYPE_F32) {
         for (int h = 0; h < tensor->ne[3]; h++) {
             for (int i = 0; i < tensor->ne[2]; i++) {
@@ -204,14 +244,57 @@ static void tensor_dump_elements(const ggml_tensor * tensor) {
                         tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
                                << " ";
                     }
-                    if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
-                        QNN_LOG_DEBUG("%s\n", tmposs.str().c_str());
-                    }
-                    tmposs.clear();
-                    tmposs.str("");
-                    //QNN_LOG_DEBUG("\n");
+                    tmposs << "\n";
                 }
             }
+        }
+        if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
+            QNN_LOG_DEBUG("\n%s\n", tmposs.str().c_str());
+            tmposs.clear();
+            tmposs.str("");
+        }
+    }
+
+    if (tensor->type == GGML_TYPE_F16) {
+        for (int h = 0; h < tensor->ne[3]; h++) {
+            for (int i = 0; i < tensor->ne[2]; i++) {
+                for (int j = 0; j < tensor->ne[1]; j++) {
+                    for (int k = 0; k < tensor->ne[0]; k++) {
+                        unsigned short tmpvalue = ((unsigned short *) tensor->data)[h * tensor->ne[2] + i * tensor->ne[1] +
+                                                         j * tensor->ne[0] + k];
+                        value = GGML_FP16_TO_FP32(tmpvalue);
+                        tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
+                               << " ";
+                    }
+                    tmposs << "\n";
+                }
+            }
+        }
+        if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
+            QNN_LOG_DEBUG("\n%s\n", tmposs.str().c_str());
+            tmposs.clear();
+            tmposs.str("");
+        }
+    }
+
+    if (tensor->type == GGML_TYPE_Q8_0) {
+          block_q8_0 * tmp = ((block_q8_0 *)tensor->data);
+          for (int j = 0; j < tensor->ne[1]; j++) {
+            int n = tensor->ne[0] / QK8_0; //blocks per row
+            for (int z = 0; z < n; z++) {
+                const float d = GGML_FP16_TO_FP32(tmp[ j * n + z ].d);
+                for (int k = 0; k < QK8_0; k++) {
+                    value = tmp[j * n + z].qs[k] * d;
+                    tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
+                               << " ";
+                }
+            }
+            tmposs << "\n";
+        }
+        if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
+            QNN_LOG_DEBUG("\n%s\n", tmposs.str().c_str());
+            tmposs.clear();
+            tmposs.str("");
         }
     }
 
@@ -220,9 +303,8 @@ static void tensor_dump_elements(const ggml_tensor * tensor) {
 
 
 static void tensor_dump(const ggml_tensor * tensor, const char * name) {
-    QNN_LOG_DEBUG("dump ggml tensor %s(%s)\n", name, tensor->name);
-    QNN_LOG_DEBUG("%15s: type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
-          name,
+    QNN_LOG_DEBUG("dump ggml tensor %s(%s): type = %i (%5s) ne = %5" PRIi64 " x %5" PRIi64 " x %5" PRIi64 ", nb = (%5zi, %5zi, %5zi)\n",
+          name, tensor->name,
           tensor->type, ggml_type_name(tensor->type),
           tensor->ne[0], tensor->ne[1], tensor->ne[2],
           tensor->nb[0], tensor->nb[1], tensor->nb[2]);
@@ -291,7 +373,8 @@ static void init_tensor_uniform(ggml_tensor * tensor, float min = -1.0f, float m
         t.join();
     }
     if (tensor->type == GGML_TYPE_F32 || tensor->type == GGML_TYPE_I32) {
-        ggml_backend_tensor_set(tensor, data.data(), 0, size * sizeof(float));
+        //ggml_backend_tensor_set(tensor, data.data(), 0, size * sizeof(float));
+        memcpy((char*)tensor->data, data.data(), size * sizeof(float));
     } else if (ggml_is_quantized(tensor->type) || tensor->type == GGML_TYPE_F16 || tensor->type == GGML_TYPE_BF16) {
         GGML_ASSERT(size % ggml_blck_size(tensor->type) == 0);
         std::vector<uint8_t> dataq(ggml_row_size(tensor->type, size));
@@ -306,10 +389,12 @@ static void init_tensor_uniform(ggml_tensor * tensor, float min = -1.0f, float m
         }
         ggml_quantize_chunk(tensor->type, data.data(), dataq.data(), 0, size/tensor->ne[0], tensor->ne[0], im);
         GGML_ASSERT(ggml_validate_row_data(tensor->type, dataq.data(), dataq.size()));
-        ggml_backend_tensor_set(tensor, dataq.data(), 0, dataq.size());
+        //ggml_backend_tensor_set(tensor, dataq.data(), 0, dataq.size());
+        memcpy((char*)tensor->data, dataq.data(), dataq.size());
     } else if (tensor->type == GGML_TYPE_I8 || tensor->type == GGML_TYPE_I16 || tensor->type == GGML_TYPE_I32) {
         // This is going to create some weird integers though.
-        ggml_backend_tensor_set(tensor, data.data(), 0, ggml_nbytes(tensor));
+        //ggml_backend_tensor_set(tensor, data.data(), 0, ggml_nbytes(tensor));
+        memcpy((char*)tensor->data, data.data(), ggml_nbytes(tensor));
     } else {
         GGML_ASSERT(false);
     }
@@ -430,10 +515,10 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
                     k == 4 ? GGML_TYPE_Q8_0 :
                     k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
 #else
-        for (int k = 5; k < 7; ++k) {
+        for (int k = 4; k < 7; ++k) {
             const ggml_type wtype =
-                    k == 5 ? GGML_TYPE_F16
-                           : GGML_TYPE_F32; //TODO: only f16&f32 supported with QNN backend
+                    k == 4 ? GGML_TYPE_Q8_0 :
+                    k == 5 ? GGML_TYPE_F16  : GGML_TYPE_F32;
 #endif
 
 
@@ -476,7 +561,12 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
             struct ggml_context *ctx0 = ggml_init(gparams);
 
             struct ggml_tensor *b = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //avoid assert failure in ggml.c
-            struct ggml_tensor *a = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N);
+            struct ggml_tensor *a = nullptr;
+            if (n_ggml_op_type != GGML_OP_MUL) {
+                a = ggml_new_tensor_2d(ctx0, wtype, N, N);
+            } else {
+                a = ggml_new_tensor_2d(ctx0, GGML_TYPE_F32, N, N); //avoid assert failure in ggml.c
+            }
             ggml_set_input(a);
             ggml_set_input(b);
 
@@ -556,12 +646,19 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
                  N, N, s_q4_0, n_q4_0, s_q4_1, n_q4_1);
         s += strbuf;
 
+
         // Q5_0 | Q5_1 | Q8_0
         snprintf(strbuf, sizeof(strbuf),
                  "%4zu x %4zu: Q5_0 %7.1f GFLOPS (%3d runs) | Q5_1 %7.1f GFLOPS (%3d runs) | Q8_0 %7.1f GFLOPS (%3d runs)\n",
                  N, N, s_q5_0, n_q5_0, s_q5_1, n_q5_1, s_q8_0, n_q8_0);
         s += strbuf;
 #endif
+        // Q8_0
+        snprintf(strbuf, sizeof(strbuf),
+                 "%4zu x %4zu: Q8_0 %7.1f GFLOPS (%3d runs)\n",
+                 N, N, s_q8_0, n_q8_0);
+        s += strbuf;
+
         // F16 | F32
         snprintf(strbuf, sizeof(strbuf),
                  "%4zu x %4zu: F16  %10.1f GFLOPS (%3d runs) | F32  %8.1f GFLOPS (%3d runs)\n",
@@ -598,7 +695,12 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     struct ggml_tensor  * dst   = nullptr;
     ggml_backend_t backend      = nullptr;
     ggml_backend_buffer_t buffer= nullptr;
-    ggml_type qtype             = GGML_TYPE_F32;
+
+    ggml_type qtype             = GGML_TYPE_I8;
+    qtype             = GGML_TYPE_F32;
+    qtype             = GGML_TYPE_F16;
+    qtype             = GGML_TYPE_Q8_0;
+
     std::vector<uint8_t> work_buffer;
     QNN_LOG_DEBUG("enter qnn_ggml_op\n");
     QNN_LOG_DEBUG("ggml op:%d(%s)\n", n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type));
@@ -635,13 +737,23 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     QNN_LOG_DEBUG("creating new tensors\n");
     QNN_LOG_DEBUG("ggml_blck_size(%s) %d\n", ggml_type_name(qtype), ggml_blck_size(qtype));
     QNN_LOG_DEBUG("ggml_type_size(%s) %d\n", ggml_type_name(qtype), ggml_type_size(qtype));
-    if (qtype != GGML_TYPE_F32) {
+    if (ggml_is_quantized(qtype)) {
         sizex = ggml_blck_size(qtype);
-    }
 
-    src0 = ggml_new_tensor_2d(ctx, qtype, sizex, sizey);
+        if (n_ggml_op_type == GGML_OP_MUL_MAT) {
+            sizex = ggml_blck_size(qtype) * 2;
+        }
+    }
+    QNN_LOG_DEBUG("sizex %d\n", sizex);
+
+    if (n_ggml_op_type == GGML_OP_MUL) {
+        src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+        src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    } else {
+        src0 = ggml_new_tensor_2d(ctx, qtype, sizex, sizey);
+        src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
+    }
     ggml_set_input(src0);
-    src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     ggml_set_input(src1);
 
     switch (n_ggml_op_type) {
@@ -679,15 +791,17 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
 
-#if 0
-    ggml_set_f32(src0, (rand() % 100 + 1));
-    ggml_set_f32(src1, (rand() % 100 + 1));
-    ggml_set_f32(dst, 0.0f);
-#else
     if (n_backend_type != QNN_BACKEND_GGML) {
         initialize_tensors(ctx);
+    } else {
+        if (qtype == GGML_TYPE_F32) {
+            ggml_set_f32(src0, (rand() % 100 + 1));
+        } else {
+            initialize_tensors(ctx);
+        }
+        ggml_set_f32(src1, (rand() % 100 + 1));
+        //ggml_set_f32(dst, 0.0f);
     }
-#endif
 
     ggml_graph_compute_helper(backend, gf, work_buffer, num_threads, nullptr, nullptr);
 
@@ -786,6 +900,8 @@ static std::string whisper_get_time_string()
     std::chrono::system_clock::time_point t = std::chrono::system_clock::now();
     return to_string(t);
 }
+
+
 static bool ggml_jni_is_valid_utf8(const char *string) {
     if (!string) {
         return true;
@@ -1429,7 +1545,7 @@ static int qnn_test_whispercpp(const char * sz_model_path, const char * sz_audio
         }
         QNN_LOG_INFO("whispercpp inference successfully\n");
         num_segments = whisper_full_n_segments(context);
-        QNN_LOG_DEBUG("num_segments:%d\n", num_segments);
+        //QNN_LOG_DEBUG("num_segments:%d\n", num_segments);
         for (index = 0; index < num_segments; index++) {
             text = whisper_full_get_segment_text(context, index);
             if (NULL == text) {
@@ -1441,20 +1557,22 @@ static int qnn_test_whispercpp(const char * sz_model_path, const char * sz_audio
             t1_segment = whisper_full_get_segment_t1(context, index);
 
             std::string cur_line = "";
+            /*
             QNN_LOG_INFO("text[%d]:[%s --> %s] %s\n",
                   index,
                   to_timestamp(t0_segment).c_str(),
                   to_timestamp(t1_segment).c_str(),
                   text);
+            */
             cur_line +=
                     "[ " + to_timestamp(t0_segment) + " ---> " + to_timestamp(t1_segment) + "  ]" +
                     std::string(text);
             asr_result += cur_line + "\n";
-            QNN_LOG_DEBUG("asr result:\n%s\n", cur_line.c_str());
+            //QNN_LOG_DEBUG("asr result:\n%s\n", cur_line.c_str());
         }
         end_time = ggml_time_ms();
-        QNN_LOG_INFO("inference cost %d ms\n", end_time - begin_time);
-        QNN_LOG_INFO("after calling whisper_full\n");
+        QNN_LOG_INFO("wshipercpp inference cost %d ms\n", end_time - begin_time);
+        //QNN_LOG_INFO("after calling whisper_full\n");
     }
 
 failure:
@@ -1474,6 +1592,7 @@ failure:
     }
 
     whisper_asr_finalize();
+    QNN_LOG_DEBUG("whispercpp UT using QNN backend %s: %lld milliseconds\n",  get_qnn_backend_name(n_backend_type), (end_time - begin_time));
 
     if (0 == result) {
         if (num_segments != 0) {
