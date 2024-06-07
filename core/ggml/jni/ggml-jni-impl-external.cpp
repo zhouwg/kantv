@@ -8592,7 +8592,8 @@ static void init_tensor_uniform(ggml_tensor * tensor, float min = -1.0f, float m
         t.join();
     }
     if (tensor->type == GGML_TYPE_F32 || tensor->type == GGML_TYPE_I32) {
-        ggml_backend_tensor_set(tensor, data.data(), 0, size * sizeof(float));
+        //ggml_backend_tensor_set(tensor, data.data(), 0, size * sizeof(float));
+        memcpy((char*)tensor->data, data.data(), size * sizeof(float));
     } else if (ggml_is_quantized(tensor->type) || tensor->type == GGML_TYPE_F16 || tensor->type == GGML_TYPE_BF16) {
         GGML_ASSERT(size % ggml_blck_size(tensor->type) == 0);
         std::vector<uint8_t> dataq(ggml_row_size(tensor->type, size));
@@ -8607,10 +8608,12 @@ static void init_tensor_uniform(ggml_tensor * tensor, float min = -1.0f, float m
         }
         ggml_quantize_chunk(tensor->type, data.data(), dataq.data(), 0, size/tensor->ne[0], tensor->ne[0], im);
         GGML_ASSERT(ggml_validate_row_data(tensor->type, dataq.data(), dataq.size()));
-        ggml_backend_tensor_set(tensor, dataq.data(), 0, dataq.size());
+        //ggml_backend_tensor_set(tensor, dataq.data(), 0, dataq.size());
+        memcpy((char*)tensor->data, dataq.data(), dataq.size());
     } else if (tensor->type == GGML_TYPE_I8 || tensor->type == GGML_TYPE_I16 || tensor->type == GGML_TYPE_I32) {
         // This is going to create some weird integers though.
-        ggml_backend_tensor_set(tensor, data.data(), 0, ggml_nbytes(tensor));
+        //ggml_backend_tensor_set(tensor, data.data(), 0, ggml_nbytes(tensor));
+        memcpy((char*)tensor->data, data.data(), ggml_nbytes(tensor));
     } else {
         GGML_ASSERT(false);
     }

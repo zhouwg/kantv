@@ -72,6 +72,7 @@ set_target_properties(kantvmedia
 
 
 link_libraries(${LOG_LIB} android kantvmedia)
+#link_libraries(${LOG_LIB} android)
 
 add_executable(${TARGET_NAME}
     ${SOURCE_FILES}
