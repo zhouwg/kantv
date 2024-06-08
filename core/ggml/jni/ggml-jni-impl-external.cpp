@@ -3219,10 +3219,6 @@ inline void setQnnTensorMemHandle(Qnn_Tensor_t *tensor, Qnn_MemHandle_t handle) 
 }
 
 
-
-
-
-
 // Accessors for QNN Op Config
 #define QNN_OP_CFG_GET_NAME(opConfig)         getQnnOpConfigName(opConfig)
 #define QNN_OP_CFG_GET_PACKAGE_NAME(opConfig) getQnnOpConfigPackageName(opConfig)

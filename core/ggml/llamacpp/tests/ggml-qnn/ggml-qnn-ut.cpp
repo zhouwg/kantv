@@ -490,7 +490,6 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
             initialize_tensors(ctx);
         }
         ggml_set_f32(src1, (rand() % 100 + 1));
-        //ggml_set_f32(dst, 0.0f);
     }
 
     ggml_graph_compute_helper(backend, gf, work_buffer, num_threads, nullptr, nullptr);

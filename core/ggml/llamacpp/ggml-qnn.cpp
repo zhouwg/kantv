@@ -1332,6 +1332,7 @@ static void ggml_qnn_logcallback(const char * fmt,
                                  uint64_t timestamp,
                                  va_list argp) {
 
+#if ENABLE_QNN_LOG
     static std::mutex log_mutex;
     static unsigned char s_ggml_qnn_logbuf[GGML_QNN_LOGBUF_LEN];
 
@@ -1358,7 +1359,6 @@ static void ggml_qnn_logcallback(const char * fmt,
     }
 
     double ms = (double) timestamp / 1000000.0;
-#if ENABLE_QNN_LOG
     {
         std::lock_guard<std::mutex> lock(log_mutex);
 
