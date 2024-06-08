@@ -117,6 +117,7 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char *file, const 
 #define GGML_QNN_DEBUG              1
 #define GGML_QNN_LOGBUF_LEN         4096
 #define ENABLE_TEST_WHISPERCPP      0
+#define ENABLE_QNN_LOG              0  //enable/disable QNN internal log
 
 #define QNN_LOG_ERROR(...)  ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define QNN_LOG_WARN(...)   ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -127,6 +128,10 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char *file, const 
 #else
 #define QNN_LOG_DEBUG(...)
 #endif
+
+#define ENTER_FUNC()
+
+#define LEAVE_FUNC()
 
 #define RPCMEM_DEFAULT_FLAGS        1
 #define RPCMEM_HEAP_ID_SYSTEM       25
@@ -4501,7 +4506,7 @@ public:
                                     QnnLog_Level_t level,
                                     uint64_t timestamp,
                                     va_list argp) {
-
+#if ENABLE_QNN_LOG
         //don't care static variable in PoC stage
         static std::mutex _log_mutex;
         static unsigned char s_qnn_jni_buf[JNI_BUF_LEN];
@@ -4544,6 +4549,7 @@ public:
                 LOGGD("%8.1fms [%-7s] %s ", ms, levelStr, s_qnn_jni_buf);
             }
         }
+#endif
     }
 
 
@@ -5162,6 +5168,24 @@ private:
 
 };
 
+static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
+    switch (ggmltype) {
+        case GGML_TYPE_F16:
+            return QNN_DATATYPE_FLOAT_16;
+        case GGML_TYPE_F32:
+            return QNN_DATATYPE_FLOAT_32;
+        case GGML_TYPE_I8:
+            return QNN_DATATYPE_INT_8;
+        case GGML_TYPE_Q8_0:
+            return QNN_DATATYPE_SFIXED_POINT_8;
+        default:
+            break;
+
+    }
+    return QNN_DATATYPE_UNDEFINED;
+}
+
+
 #define ENABLE_MIX_GGML_QNN 1
 static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
     int result = 0;
@@ -5232,8 +5256,8 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
     }
 
     size_t ctx_size = 0;
-    int sizey = 384;
-    int sizex = 1500;
+    int sizex = 384;
+    int sizey = 1500;
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
     struct ggml_tensor *src0 = nullptr;
@@ -5243,8 +5267,8 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
     ggml_backend_buffer_t buffer = nullptr;
     ggml_type qtype = GGML_TYPE_I8;
     qtype = GGML_TYPE_F16;
-    qtype = GGML_TYPE_Q8_0;
     qtype = GGML_TYPE_F32;
+    qtype = GGML_TYPE_Q8_0;
     ctx_size += 1024 * 1024 * 32;
     QNN_LOG_DEBUG("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size, (ctx_size / 1024 / 1024));
     struct ggml_init_params params = {
@@ -5261,9 +5285,12 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
     QNN_LOG_DEBUG("ggml_blck_size(%s) %d\n", ggml_type_name(qtype), ggml_blck_size(qtype));
     QNN_LOG_DEBUG("ggml_type_size(%s) %d\n", ggml_type_name(qtype), ggml_type_size(qtype));
     if (ggml_is_quantized(qtype)) {
-        sizex = ggml_blck_size(qtype);
-        if (n_ggml_op_type == GGML_OP_MUL_MAT) {
-            sizex = ggml_blck_size(qtype) * 2;
+        int blksize = ggml_blck_size(qtype);
+        if (sizex % blksize  != 0) {
+            sizex = sizex / blksize * blksize + blksize;
+            if (n_ggml_op_type == GGML_OP_MUL_MAT) {
+                //sizex = blksize * 2;
+            }
         }
     }
     QNN_LOG_DEBUG("sizex %d\n", sizex);
@@ -5351,13 +5378,27 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
         Qnn_GraphHandle_t graph_handle = nullptr;
         error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(), "qnn_rpc_test", nullptr, &graph_handle);
         LOGGI("error = %d\n", error);
+
+#if ENABLE_MIX_GGML_QNN
+        Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
+        Qnn_DataType_t src1_qnn_type                = QNN_DATATYPE_FLOAT_32;
+        Qnn_DataType_t dst_qnn_type                 = QNN_DATATYPE_FLOAT_32;
+
+        uint32_t dimensions_input_0[] = {(uint32_t) src0->ne[0], (uint32_t) src0->ne[1],
+                                         (uint32_t) src0->ne[2], (uint32_t) src0->ne[3]};
+        uint32_t dimensions_input_1[] = {(uint32_t) src1->ne[0], (uint32_t) src1->ne[1],
+                                         (uint32_t) src1->ne[2], (uint32_t) src1->ne[3]};
+        uint32_t dimensions_output[]  = {(uint32_t) dst->ne[0], (uint32_t) dst->ne[1],
+                                         (uint32_t) dst->ne[2], (uint32_t) dst->ne[3]};
+#else
         uint32_t dimensions_input_0[] = {2, 2};
         uint32_t dimensions_input_1[] = {2, 2};
         uint32_t dimensions_output[] = {2, 2};
-
         float input_matrix[2][4] = {{1, 1, 1, 1},
                                     {2, 2, 2, 2}};
         float output_matrix[1][4] = {{1.0, 1.0, 1.0, 1.0}};
+#endif
+
 
         tensor_0 = {
                 .version= QNN_TENSOR_VERSION_1,
@@ -5420,6 +5461,21 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
         error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
         LOGGI("error = %d\n", error);
 
+#if ENABLE_MIX_GGML_QNN
+        src0_qnn_type                = qnn_datatype_from_ggml_datatype(src0->type);
+        src1_qnn_type                = qnn_datatype_from_ggml_datatype(src1->type);
+        dst_qnn_type                 = qnn_datatype_from_ggml_datatype(dst->type);
+        QNN_VER_PTR(tensor_0)->dimensions = dimensions_input_0;
+        QNN_VER_PTR(tensor_0)->rank = get_tensor_rank(src0);
+        QNN_VER_PTR(tensor_0)->dataType = src0_qnn_type;
+        QNN_VER_PTR(tensor_1)->dimensions = dimensions_input_1;
+        QNN_VER_PTR(tensor_1)->rank = get_tensor_rank(src1);
+        QNN_VER_PTR(tensor_1)->dataType = src1_qnn_type;
+        QNN_VER_PTR(tensor_2)->dimensions = dimensions_output;
+        QNN_VER_PTR(tensor_2)->rank = get_tensor_rank(dst);
+        QNN_VER_PTR(tensor_2)->dataType = dst_qnn_type;
+#endif
+
         if (QNN_BACKEND_NPU == n_backend_type) {
             qnn_buffer_0 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(ggml_nbytes(src0), 4));
             if (nullptr == qnn_buffer_0) {
@@ -5436,7 +5492,6 @@ static int qnn_test_rpc(int n_backend_type, int n_ggml_op_type) {
             memcpy(qnn_buffer_0, input_matrix[0], 16);
             QNN_VER_PTR(tensor_0)->clientBuf = {qnn_buffer_0, 16};
 #endif
-
 
             qnn_buffer_1 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(ggml_nbytes(src1), 4));
             if (nullptr == qnn_buffer_1) {
@@ -5682,7 +5737,7 @@ int main(int argc, char *argv[]) {
                                 num_threads,
                                 n_backend_type);
 #else
-            LOGGD("not supported\n");
+            LOGGD("whispercpp UT disabled\n");
 #endif
             break;
 
