@@ -71,8 +71,8 @@ set_target_properties(kantvmedia
         ${PREBUILT_LIB_PATH}/libkantv-media.so)
 
 
-#link_libraries(${LOG_LIB} android kantvmedia)
-link_libraries(${LOG_LIB} android)
+link_libraries(${LOG_LIB} android kantvmedia)
+#link_libraries(${LOG_LIB} android)
 
 add_executable(${TARGET_NAME}
     ${SOURCE_FILES}
