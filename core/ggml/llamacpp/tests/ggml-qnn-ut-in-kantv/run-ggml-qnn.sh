@@ -77,7 +77,7 @@ function main()
         GGML_OP_MUL)
             adb shell "cd ${DEVICE_DIR} \
                 && export LD_LIBRARY_PATH=${DEVICE_DIR} \
-                &&& ${DEVICE_DIR}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MUL -b $TEST_BACKEND"
+                && ${DEVICE_DIR}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MUL -b $TEST_BACKEND"
         ;;
 
         GGML_OP_MUL_MAT)

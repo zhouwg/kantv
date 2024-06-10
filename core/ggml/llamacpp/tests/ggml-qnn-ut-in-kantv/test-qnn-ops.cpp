@@ -1301,7 +1301,13 @@ typedef struct {
 
 
 static inline float ggml_compute_fp16_to_fp32(uint16_t h) {
+#if defined(__ARM_NEON)
     __fp16 tmp;
+#else
+    #ifdef _MSC_VER
+    uint16_t tmp;
+    #endif
+#endif
     memcpy(&tmp, &h, sizeof(uint16_t));
     return (float) tmp;
 }
@@ -1347,7 +1353,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
     }
 
     if (tensor->type == GGML_TYPE_F32) {
-        if (get_tensor_data_size(tensor) < (32 * 32)) {
+        if (get_tensor_data_size(tensor) < (8 * 8)) {
             for (int h = 0; h < tensor->ne[3]; h++) {
                 for (int i = 0; i < tensor->ne[2]; i++) {
                     for (int j = 0; j < tensor->ne[1]; j++) {
@@ -1367,15 +1373,17 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
                 tmposs.str("");
             }
         } else {
-            for (int j = 0; j < 8; j++) {
-                for (int k = 0; k < 8; k++) {
+            int rows = ((8 >= tensor->ne[1]) ? tensor->ne[1] : 8);
+            int cols = ((8 >= tensor->ne[0]) ? tensor->ne[0] : 8);
+            for (int j = 0; j < rows; j++) {
+                for (int k = 0; k < cols; k++) {
                     value = ((float *) tensor->data)[j * tensor->ne[0] + k];
                     tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value << " ";
                 }
                 tmposs << "\n";
             }
             if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
-                QNN_LOG_DEBUG("(8x8 in %dx%d)\n%s\n", tensor->ne[0], tensor->ne[1], tmposs.str().c_str());
+                QNN_LOG_DEBUG("(%dx%d in %dx%d)\n%s\n", cols, rows, tensor->ne[0], tensor->ne[1], tmposs.str().c_str());
                 tmposs.clear();
                 tmposs.str("");
             }
@@ -1406,7 +1414,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
     }
 
     if (tensor->type == GGML_TYPE_Q8_0) {
-        if (get_tensor_data_size(tensor) < (32 * 32)) {
+        if (get_tensor_data_size(tensor) < (8 * 8)) {
             block_q8_0 *tmp = ((block_q8_0 *) tensor->data);
             for (int j = 0; j < tensor->ne[1]; j++) {
                 int n = tensor->ne[0] / QK8_0; //blocks per row
@@ -1426,8 +1434,10 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
                 tmposs.str("");
             }
         } else {
+            int rows = ((8 >= tensor->ne[1]) ? tensor->ne[1] : 8);
+            int cols = ((8 >= tensor->ne[0]) ? tensor->ne[0] : 8);
             block_q8_0 *tmp = ((block_q8_0 *) tensor->data);
-            for (int j = 0; j < 8; j++) {
+            for (int j = 0; j < rows; j++) {
                 int n = tensor->ne[0] / QK8_0; //blocks per row
                 for (int z = 0; z < n; z++) {
                     int block_index = j * n + z;
@@ -1443,7 +1453,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
                 }
             }
             if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
-                QNN_LOG_DEBUG("(8x8 in %dx%d)\n%s\n", tensor->ne[0], tensor->ne[1], tmposs.str().c_str());
+                QNN_LOG_DEBUG("(%dx%d in %dx%d)\n%s\n",  cols, rows, tensor->ne[0], tensor->ne[1], tmposs.str().c_str());
                 tmposs.clear();
             }
         }
@@ -1736,7 +1746,7 @@ static int qnn_op_ut_automation(int num_threads, int n_backend_type, int n_ggml_
                                      static_cast<ggml_type>(wtype))) + ")"
                              + ",i=" + std::to_string(i) + "\n";
 
-                QNN_LOG_DEBUG("%s\n", tipString.c_str());
+                //QNN_LOG_DEBUG("%s\n", tipString.c_str());
 
                 ggml_graph_compute_helper(backend, gf, work, num_threads, nullptr, nullptr);
 
@@ -1804,8 +1814,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     int64_t n_end_time = 0LL;
     int64_t n_duration = 0LL;
     size_t ctx_size = 0;
-    int sizey = 4;
-    int sizex = 4;
+    int sizey = 8;
+    int sizex = 16;
 
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
@@ -1870,8 +1880,6 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
         src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
         src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, sizex, sizey);
     } else if (n_ggml_op_type == GGML_OP_ADD) {
-        sizex = 384;
-        sizey = 1500;
         if (ggml_is_quantized(qtype)) {
             assert(sizex % ggml_blck_size(qtype) == 0);
         }
