@@ -43,6 +43,8 @@ add_definitions(-DGGML_USE_QNN)
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 add_definitions(-DNDEBUG)
 add_definitions(-O3)
+else()
+add_definitions(-O3)
 endif()
 
 if (TARGET_SNAPDRAGON_8_GEN3)

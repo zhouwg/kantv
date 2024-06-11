@@ -61,6 +61,7 @@
 #include <cassert>
 #include <unordered_set>
 #include <utility>
+#include <HTP/QnnHtpGraph.h>
 
 extern "C" {
 #include "libavutil/avstring.h"
@@ -118,7 +119,9 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char *file, const 
 #define GGML_QNN_DEBUG              1
 #define GGML_QNN_LOGBUF_LEN         4096
 #define ENABLE_TEST_WHISPERCPP      1
-#define ENABLE_QNN_LOG              1  //enable/disable QNN internal log
+#define ENABLE_TEST_LLM             0
+#define ENABLE_QNN_LOG              0  //enable/disable QNN internal log
+#define ENABLE_QNNSDK_LOG           0     // enable/disable QNN SDK's internal log
 
 #define QNN_LOG_ERROR(...)  ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG,  __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define QNN_LOG_WARN(...)   ggml_qnn_log_internal(GGML_LOG_LEVEL_DEBUG , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
@@ -1214,6 +1217,7 @@ enum ut_test_type {
     TEST_WHISPERCPP,
     TEST_QNN_FUZZ,
     TEST_QNN_RPC,
+    TEST_LLM,
     UT_COUNTS
 };
 
@@ -1814,8 +1818,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     int64_t n_end_time = 0LL;
     int64_t n_duration = 0LL;
     size_t ctx_size = 0;
-    int sizey = 8;
-    int sizex = 16;
+    int sizey = 4;
+    int sizex = 4;
 
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
@@ -1826,9 +1830,9 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     ggml_backend_buffer_t buffer = nullptr;
 
     ggml_type qtype = GGML_TYPE_I8;
-    qtype = GGML_TYPE_F32;
     qtype = GGML_TYPE_F16;
     qtype = GGML_TYPE_Q8_0;
+    qtype = GGML_TYPE_F32;
 
     std::vector<uint8_t> work_buffer;
     QNN_LOG_DEBUG("enter qnn_ggml_op\n");
@@ -1838,7 +1842,7 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     n_begin_time = ggml_time_us();
     srand(time(NULL));
 
-    ctx_size += 1024 * 1024 * 32;
+    ctx_size += 1024 * 1024 * 64;
     QNN_LOG_DEBUG("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size,
                   (ctx_size / 1024 / 1024));
 
@@ -1896,8 +1900,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
         src0 = ggml_new_tensor_2d(ctx, qtype, 384, 384);
         src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 1500);
         */
-        src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_Q8_0, 384, 384 * 3);
-        src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 2400);
+        src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 384);
+        src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 384);
     }
     ggml_set_input(src0);
     ggml_set_input(src1);
@@ -3919,7 +3923,14 @@ public:
             rpc_pollingTime.option =
                     QNN_HTP_PERF_INFRASTRUCTURE_POWER_CONFIGOPTION_RPC_POLLING_TIME;
             rpc_pollingTime.rpcPollingTimeConfig = _qnn_rpc_pollingtime;
-            const QnnHtpPerfInfrastructure_PowerConfig_t *powerConfigs[] = {&rpc_pollingTime, NULL};
+
+            // set RPC Control Latency
+            QnnHtpPerfInfrastructure_PowerConfig_t rpcControlLatency;            // refer QnnHtpPerfInfrastructure.h
+            memset(&rpcControlLatency, 0, sizeof(rpcControlLatency));
+            rpcControlLatency.option = QNN_HTP_PERF_INFRASTRUCTURE_POWER_CONFIGOPTION_RPC_CONTROL_LATENCY;
+            rpcControlLatency.rpcControlLatencyConfig = 40;         // use rpc control latency recommended 100 us, refer hexagon sdk
+
+            const QnnHtpPerfInfrastructure_PowerConfig_t *powerConfigs[] = {&rpc_pollingTime, &rpcControlLatency, nullptr};
             if (_qnn_htp_perfinfra) {
                 _qnn_htp_perfinfra->setPowerConfig(_qnn_power_configid, powerConfigs);
             }
@@ -4708,11 +4719,12 @@ public:
         }
 
         QnnDevice_Infrastructure_t device_infra = nullptr;
-        Qnn_ErrorHandle_t error = _qnn_interface.qnn_device_get_infrastructure(&device_infra);
+        Qnn_ErrorHandle_t error = _qnn_raw_interface.deviceGetInfrastructure(&device_infra);
         if (error != QNN_SUCCESS) {
             LOGGW("HTP backend perf_infrastructure creation failed. Error %d", QNN_GET_ERROR_CODE(error));
             //return 9;
         } else {
+            LOGGW("HTP backend perf_infrastructure creation ok\n");
             auto* htp_infra = static_cast<QnnHtpDevice_Infrastructure_t*>(device_infra);
             if (htp_infra->infraType != QNN_HTP_DEVICE_INFRASTRUCTURE_TYPE_PERF) {
                 LOGGW("HTP infra type = %d, which is not perf infra type", htp_infra->infraType);
@@ -4721,6 +4733,18 @@ public:
                 QnnHtpDevice_PerfInfrastructure_t  p_out = htp_infra->perfInfra;
             }
         }
+
+#if 1
+            if (init_htp_perfinfra()) {
+                QNN_LOG_WARN("initialize HTP performance failure\n");
+            }
+            if (set_rpc_polling()) {
+                QNN_LOG_WARN("set RPC polling failure\n");
+            }
+            if (set_high_performance_mode()) {
+                LOGGI("set HTP high performance mode failure\n");
+            }
+#endif
 
         LOGGD("leave qni_init\n");
 
@@ -5850,9 +5874,6 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     int result = 0;
     std::string graph_name = "qnn_rpc_test2";
     const char *qnn_backend_lib = "libQnnCpu.so";
-    uint32_t matrix_input_0[] = {1, 2, 3, 4};
-    uint32_t matrix_input_1[] = {1, 2, 3, 4};
-
     int64_t n_begin_time = 0LL;
     int64_t n_end_time = 0LL;
     int64_t n_durtion = 0LL;
@@ -5915,8 +5936,8 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     }
 
     size_t ctx_size = 0;
-    int sizex = 1024;
-    int sizey = 1024;
+    int sizex = 384;
+    int sizey = 384;
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
     struct ggml_tensor *src0 = nullptr;
@@ -5929,7 +5950,7 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     qtype = GGML_TYPE_F32;
     qtype = GGML_TYPE_Q8_0;
     qtype = GGML_TYPE_F32;
-    ctx_size += 1024 * 1024 * 32;
+    ctx_size += sizex * sizey * 32 * 4;
     QNN_LOG_DEBUG("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size, (ctx_size / 1024 / 1024));
     struct ggml_init_params params = {
             /*.mem_size   =*/ ctx_size,
@@ -6036,7 +6057,29 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     {
         int error = 0;
         Qnn_GraphHandle_t graph_handle = nullptr;
-        error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(), graph_name.c_str(), nullptr, &graph_handle);
+        if (n_backend_type == QNN_BACKEND_NPU) {
+            QnnHtpGraph_CustomConfig_t custom_config;
+            custom_config.option = QNN_HTP_GRAPH_CONFIG_OPTION_NUM_HVX_THREADS;
+            custom_config.numHvxThreads = 8; // set a number. MAX = number of HVX HW blocks for that SoC
+            QnnGraph_Config_t graph_config;
+            graph_config.option = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
+            graph_config.customConfig = &custom_config;
+
+
+             QnnHtpGraph_CustomConfig_t customConfig;
+            customConfig.option = QNN_HTP_GRAPH_CONFIG_OPTION_OPTIMIZATION;
+            customConfig.optimizationOption.type = QNN_HTP_GRAPH_OPTIMIZATION_TYPE_ENABLE_DLBC;
+            customConfig.optimizationOption.floatValue = 0; // set to 0 to turn off
+
+            QnnGraph_Config_t graphConfig;
+            graphConfig.option       = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
+            graphConfig.customConfig = &customConfig;
+
+            const QnnGraph_Config_t *p_graphconfig[] = {&graph_config, &graphConfig, NULL};
+            error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(),graph_name.c_str(), p_graphconfig, &graph_handle);
+        } else {
+            error = qnn_raw_interface.graphCreate(qnn_backend.get_qnn_context_handle(),graph_name.c_str(), nullptr, &graph_handle);
+        }
         LOGGI("error = %d\n", error);
 
         Qnn_DataType_t src0_qnn_type                = QNN_DATATYPE_FLOAT_32;
@@ -6233,6 +6276,32 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
 }
 // ==================== verify/develop QNN NPU backend(RPC,....)==================================
 
+extern int llama_inference_main(int argc, char *argv[], int backend);
+
+static int llama_inference_ut(const char *sz_model_path, const char *sz_user_data,
+                       int n_threads, int n_backend_type) {
+    int ret = 0;
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("num_threads:%d\n", n_threads);
+    LOGGD("backend type:%d\n", n_backend_type);
+
+    if (nullptr == sz_model_path || nullptr == sz_user_data) {
+        LOGGD("pls check params\n");
+        return 1;
+    }
+    //TODO: this is a lazy/dirty/quick method, just for merge latest source codes of llama.cpp from upstream quickly
+    int argc = 7;
+    const char *argv[] = {"llama-inference-main",
+                          "-m", sz_model_path,
+                          "-p", sz_user_data,
+                          "-t", std::to_string(n_threads).c_str()
+    };
+    ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+
+    return ret;
+}
+
 
 #ifndef TARGET_ANDROID
 static void show_usage() {
@@ -6312,6 +6381,15 @@ int main(int argc, char *argv[]) {
             LOGGD("whispercpp UT disabled\n");
 #endif
             break;
+#if ENABLE_TEST_LLM_
+        case TEST_LLM:
+            llama_inference_ut("/sdcard/kantv/models/qwen1_5-1_8b-chat-q4_0.gguf",
+                       "what's the population of China, less then 100 words",
+                       num_threads,
+                       n_backend_type);
+#else
+            LOGGD("LLM UT disabled\n");
+#endif
         case TEST_QNN_FUZZ:
             qnn_fuzz(n_backend_type, n_ggml_op_type);
             break;

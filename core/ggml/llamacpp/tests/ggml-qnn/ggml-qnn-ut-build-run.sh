@@ -6,6 +6,7 @@ set -e
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
 #QNN SDK released on 20240531
+QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
 QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 
 #for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly
@@ -15,6 +16,8 @@ ANDROID_PLATFORM=android-34
 
 GGML_QNN_UT=ggml-qnn-ut
 REMOTE_PATH=/data/local/tmp/
+BUILDTYPE=Debug
+BUILDTYPE=Release
 
 
 function dump_vars()
@@ -73,7 +76,7 @@ function check_and_download_ndk()
 
 function build_arm64
 {
-    cmake -H. -B./out/arm64-v8a -DTARGET_NAME=${GGML_QNN_UT} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DANDROID_NDK=${ANDROID_NDK}  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DQNN_SDK_PATH=${QNN_SDK_PATH}
+    cmake -H. -B./out/arm64-v8a -DTARGET_NAME=${GGML_QNN_UT} -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DANDROID_NDK=${ANDROID_NDK}  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DQNN_SDK_PATH=${QNN_SDK_PATH}
 
     cd ./out/arm64-v8a
     make
@@ -169,9 +172,9 @@ function show_usage()
     echo "Usage:"
     echo "  $0 build            (build Android command line UT program)"
     echo "  $0 updateqnnlibs    (upload the latest QNN libs to Android phone)"
-    echo "  $0 GGML_OP_ADD      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
-    echo "  $0 GGML_OP_MUL      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
-    echo "  $0 GGML_OP_MUL_MAT  0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU)"
+    echo "  $0 GGML_OP_ADD      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
+    echo "  $0 GGML_OP_MUL      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
+    echo "  $0 GGML_OP_MUL_MAT  0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
     echo -e "\n\n\n"
 }
 

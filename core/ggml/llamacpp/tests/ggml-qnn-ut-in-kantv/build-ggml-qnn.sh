@@ -5,7 +5,7 @@ set -e
 
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
-QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
+#QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
 QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 
 #for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly
@@ -13,6 +13,8 @@ QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 #ANDROID_NDK=`pwd`/android-ndk-r26c
 ANDROID_PLATFORM=android-34
 TARGET=ggml-qnn-test
+BUILDTYPE=Debug
+BUILDTYPE=Release
 
 
 function dump_vars()
@@ -71,7 +73,7 @@ function check_and_download_ndk()
 
 function build_arm64
 {
-    cmake -H. -B./out/arm64-v8a -DPRJ_ROOT_PATH=${PROJECT_ROOT_PATH} -DTARGET_NAME=${TARGET} -DCMAKE_BUILD_TYPE=Release -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DANDROID_NDK=${ANDROID_NDK}  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DQNN_SDK_PATH=${QNN_SDK_PATH}
+    cmake -H. -B./out/arm64-v8a -DPRJ_ROOT_PATH=${PROJECT_ROOT_PATH} -DTARGET_NAME=${TARGET} -DCMAKE_BUILD_TYPE=${BUILDTYPE} -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DANDROID_NDK=${ANDROID_NDK}  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DQNN_SDK_PATH=${QNN_SDK_PATH}
 
     cd ./out/arm64-v8a
     make

@@ -15,7 +15,7 @@ lunch 1
 ensure an Android phone/device has been connected to the dev machine and adb connect works fine firstly.
 
 ```
-cd core/ggml/llamacpp/tests/ggml-qnn/
+cd core/ggml/llamacpp/tests/ggml-qnn-ut-in-kantv
 
 ./build-ggml-qnn.sh
 
@@ -26,7 +26,8 @@ cd core/ggml/llamacpp/tests/ggml-qnn/
 the following is an example log of the QNN UT Android command line program:
 
 ```
-:$ ./run-ggml-qnn.sh
+:$ ./run-ggml-qnn.sh 0 GGML_OP_ADD 0
+
 /data/local/tmp//libQnnCpu.so
 QNN libs already exist on Android phone
 ggml-qnn-test: 1 file pushed. 21.9 MB/s (4564560 bytes in 0.199s)
