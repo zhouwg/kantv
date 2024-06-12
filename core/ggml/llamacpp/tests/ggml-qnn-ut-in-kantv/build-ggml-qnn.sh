@@ -5,7 +5,7 @@ set -e
 
 #https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
-#QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
+QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
 QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 
 #for this project, re-use the existing ANDROID_NDK in prebuilts/toolchain/android-ndk-r26c directly

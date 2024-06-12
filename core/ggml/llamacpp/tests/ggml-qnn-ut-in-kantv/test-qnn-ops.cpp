@@ -143,6 +143,31 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char *file, const 
 #define JNI_BUF_LEN                 4096
 #define JNI_TMP_LEN                 256
 
+class qnn_perf {
+public:
+    qnn_perf(const std::string & perf_name) : _perf_name(std::move(perf_name)) {};
+    qnn_perf() = delete;
+    qnn_perf(const qnn_perf & ) = delete;
+    qnn_perf & operator= (const qnn_perf & ) = delete;
+
+    void start() {
+        ggml_time_init();
+        _begin_time = ggml_time_us();
+    }
+
+    void info() {
+        _end_time = ggml_time_us();
+        _duration = (_end_time - _begin_time);
+        QNN_LOG_DEBUG("duration of %s : %lld microseconds\n", _perf_name.c_str(), _duration);
+    }
+
+private:
+    int64_t _begin_time = 0LL;
+    int64_t _end_time   = 0LL;
+    int64_t _duration   = 0LL;
+    std::string _perf_name;
+};
+
 enum class OutputDataType {
     FLOAT_ONLY, NATIVE_ONLY, FLOAT_AND_NATIVE, INVALID
 };
@@ -231,6 +256,57 @@ static uint32_t get_tensor_data_size(const ggml_tensor *tensor) {
     return ggml_nbytes(tensor);
 }
 
+enum qcom_htp_arch {
+    NONE = 0,
+    V68 = 68,
+    V69 = 69,
+    V73 = 73,
+    V75 = 75,
+};
+
+enum qcom_chipset {
+    UNKNOWN_SM = 0,
+    SM8450 = 36,  // v69
+    SM8475 = 42,  // v69
+    SM8550 = 43,  // v73
+    SM8650 = 57,  // v75
+};
+
+struct qcom_socinfo {
+    uint32_t soc_model;
+    size_t htp_arch;
+    size_t vtcm_size_in_mb;
+};
+
+static const char * qnn_get_chipset_desc(uint32_t chipset_id) {
+    switch (chipset_id) {
+        case SM8450:
+            return "SM8450";
+        case SM8475:
+            return "SM8475";
+        case SM8550:
+            return "SM8550";
+        case SM8650:
+            return "SM8650";
+        default:
+            return "unknown";
+    }
+}
+
+static const char * qnn_get_htparch_desc(size_t htp_arch) {
+    switch (htp_arch) {
+        case V68:
+            return "QCOM_HTP_V68";
+        case V69:
+            return "QCOM_HTP_V69";
+        case V73:
+            return "QCOM_HTP_V73";
+        case V75:
+            return "QCOM_HTP_V75";
+        default:
+            return "unknown";
+    }
+}
 
 inline int validateTensorVersion(Qnn_Tensor_t tensor) {
     if (tensor.version != QNN_TENSOR_VERSION_1) {
@@ -1818,8 +1894,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     int64_t n_end_time = 0LL;
     int64_t n_duration = 0LL;
     size_t ctx_size = 0;
-    int sizey = 4;
-    int sizex = 4;
+    int sizey = 384;
+    int sizex = 384;
 
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
@@ -4639,7 +4715,51 @@ public:
             }
         }
 
-        auto qnnStatus = _qnn_raw_interface.deviceCreate(_qnn_log_handle, nullptr, &_qnn_device_handle);
+        QnnHtpDevice_Arch_t htp_arch;
+        QnnHtpDevice_OnChipDeviceInfoExtension_t chipinfo;
+        if (_backend_name.find("Htp") != std::variant_npos) {
+            const QnnDevice_PlatformInfo_t *p_info = nullptr;
+            _qnn_raw_interface.deviceGetPlatformInfo(nullptr, &p_info);
+            QNN_LOG_INFO("device counts %d\n", p_info->v1.numHwDevices);
+            QnnDevice_HardwareDeviceInfo_t *infos = p_info->v1.hwDevices;
+            for (int i = 0; i < p_info->v1.numHwDevices; i++) {
+                QNN_LOG_INFO("deviceID:%d, deviceType:%d, numCores %d\n", infos[i].v1.deviceId,
+                             infos[i].v1.deviceType, infos[i].v1.numCores);
+                QnnDevice_DeviceInfoExtension_t devinfo = infos[i].v1.deviceInfoExtension;
+                chipinfo = devinfo->onChipDevice;
+                htp_arch = chipinfo.arch;
+                QNN_LOG_INFO("htp_type:%d(%s)\n", devinfo->devType,
+                             (devinfo->devType == QNN_HTP_DEVICE_TYPE_ON_CHIP) ? "ON_CHIP" : "");
+                QNN_LOG_INFO("qualcomm soc_model:%d(%s), htp_arch:%d(%s), vtcm_size:%d MB\n", \
+                             chipinfo.socModel, qnn_get_chipset_desc(chipinfo.socModel), \
+                             htp_arch, qnn_get_htparch_desc(htp_arch), chipinfo.vtcmSize);
+
+            }
+            _qnn_raw_interface.deviceFreePlatformInfo(nullptr, p_info);
+        }
+
+        int qnnStatus = 0;
+        if (_backend_name.find("Htp") != std::variant_npos) {
+            QnnHtpDevice_CustomConfig_t soc_customConfig;
+            soc_customConfig.option = QNN_HTP_DEVICE_CONFIG_OPTION_SOC;
+            soc_customConfig.socModel = chipinfo.socModel;
+            QnnDevice_Config_t soc_devConfig;
+            soc_devConfig.option = QNN_DEVICE_CONFIG_OPTION_CUSTOM;
+            soc_devConfig.customConfig = &soc_customConfig;
+
+            QnnHtpDevice_CustomConfig_t arch_customConfig;
+            arch_customConfig.option    = QNN_HTP_DEVICE_CONFIG_OPTION_ARCH;
+            arch_customConfig.arch.arch = chipinfo.arch;
+            arch_customConfig.arch.deviceId = 0;  // Id of device to be used. If single device is used by default 0.
+            QnnDevice_Config_t arch_devConfig;
+            arch_devConfig.option = QNN_DEVICE_CONFIG_OPTION_CUSTOM;
+            arch_devConfig.customConfig = &arch_customConfig;
+            const QnnDevice_Config_t* pDeviceConfig[] = {&soc_devConfig, &soc_devConfig, NULL};
+            qnnStatus = _qnn_raw_interface.deviceCreate(_qnn_log_handle, pDeviceConfig, &_qnn_device_handle);
+        } else {
+            qnnStatus = _qnn_raw_interface.deviceCreate(_qnn_log_handle, nullptr, &_qnn_device_handle);
+        }
+
         if (QNN_SUCCESS != qnnStatus && QNN_DEVICE_ERROR_UNSUPPORTED_FEATURE != qnnStatus) {
             LOGGW("failed to create QNN device\n");
             LOGGD("failed to create QNN device\n");
@@ -5230,41 +5350,6 @@ static Qnn_DataType_t qnn_datatype_from_ggml_datatype(enum ggml_type ggmltype) {
     return QNN_DATATYPE_UNDEFINED;
 }
 
-enum qcom_htp_arch {
-    NONE = 0,
-    V68 = 68,
-    V69 = 69,
-    V73 = 73,
-    V75 = 75,
-};
-
-enum qcom_chipset {
-    UNKNOWN_SM = 0,
-    SM8450 = 36,  // v69
-    SM8475 = 42,  // v69
-    SM8550 = 43,  // v73
-    SM8650 = 57,  // v75
-};
-
-struct qcom_socinfo {
-    int soc_model;
-    int htp_arch;
-    int vtcm_size_in_mb;
-};
-
-static const char * qcom_chipset_str(uint32_t chipset) {
-    switch (chipset) {
-        case 36:
-            return "SM8450";
-        case 42:
-            return "SM8475";
-        case 43:
-            return "SM8550";
-        case 57:
-            return "SM8650";
-
-    }
-}
 #define ENABLE_MIX_GGML_QNN 1
 static int qnn_fuzz(int n_backend_type, int n_ggml_op_type) {
     int result = 0;
@@ -5358,7 +5443,7 @@ static int qnn_fuzz(int n_backend_type, int n_ggml_op_type) {
             QnnHtpDevice_OnChipDeviceInfoExtension_t chipinfo = devinfo->onChipDevice;
             QnnHtpDevice_Arch_t chiparch = chipinfo.arch;//QNN_HTP_DEVICE_ARCH_V75
             LOGGI("%d", devinfo->devType);//QNN_HTP_DEVICE_TYPE_ON_CHIP
-            LOGGI("soc_model:%d(%s), htp_arch:%d, vtcm_size_in_mb:%d MB", chipinfo.socModel, qcom_chipset_str(chipinfo.socModel), chiparch, chipinfo.vtcmSize);
+            LOGGI("soc_model:%d(%s), htp_arch:%d, vtcm_size_in_mb:%d MB", chipinfo.socModel, qnn_get_chipset_desc(chipinfo.socModel), chiparch, chipinfo.vtcmSize);
             //Got soc_model=SM8650, arch=75, vtcm=8,
         }
         qnn_raw_interface.deviceFreePlatformInfo(nullptr, p_info);
@@ -5874,9 +5959,6 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     int result = 0;
     std::string graph_name = "qnn_rpc_test2";
     const char *qnn_backend_lib = "libQnnCpu.so";
-    int64_t n_begin_time = 0LL;
-    int64_t n_end_time = 0LL;
-    int64_t n_durtion = 0LL;
 
     auto is_io_tensor = [](Qnn_TensorType_t type) {
         return type < QNN_TENSOR_TYPE_STATIC;
@@ -5892,8 +5974,8 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     const char * qnn_op_name = QNN_OP_ELEMENT_WISE_ADD;
 
     srand(time(NULL));
-    ggml_time_init();
-    n_begin_time = ggml_time_us();
+    qnn_perf perf("qnn_rpc_test2");
+    perf.start();
 
     LOGGD("enter qnn_rpc_test backend type:%d(%s), ggml op type:%d\n",
           n_backend_type, get_qnn_backend_name(n_backend_type), n_ggml_op_type);
@@ -6199,7 +6281,7 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
                 LOGGD("alloc rpcmem successfully\n");
             }
             qnn_backend.register_rpcmem(qnn_buffer_2, &tensor_2);
-            memcpy(qnn_buffer_2, dst->data, ggml_nbytes(dst));
+            //memcpy(qnn_buffer_2, dst->data, ggml_nbytes(dst));
             //QNN_VER_PTR(tensor_2)->clientBuf = {qnn_buffer_2, static_cast<uint32_t>(ggml_nbytes(dst))};
 
         } else {
@@ -6266,10 +6348,8 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
 
     ggml_free(ctx);
 
-    n_end_time = ggml_time_us();
-    n_durtion = (n_end_time - n_begin_time) / 1000;
-    LOGGD("duration of qnn_rpc_test is: %lld milliseconds\n", n_durtion);
-
+    perf.info();
+    
     LOGGD("leave qnn_rpc_test\n");
 
     return result;
