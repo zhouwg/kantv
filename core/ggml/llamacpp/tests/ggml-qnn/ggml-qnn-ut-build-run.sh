@@ -16,8 +16,8 @@ ANDROID_PLATFORM=android-34
 
 GGML_QNN_UT=ggml-qnn-ut
 REMOTE_PATH=/data/local/tmp/
-BUILDTYPE=Debug
 BUILDTYPE=Release
+BUILDTYPE=Debug
 
 
 function dump_vars()
@@ -146,12 +146,7 @@ function run_ggml_qnn_ut()
 
     case "$ggmlop" in
         GGML_OP_ADD)
-            echo "adb shell ${REMOTE_PATH}/${GGML_QNN_UT}  -t GGML_OP_ADD -b $qnnbackend"
             adb shell ${REMOTE_PATH}/${GGML_QNN_UT}  -t GGML_OP_ADD -b $qnnbackend
-        ;;
-
-        GGML_OP_MUL)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_UT}  -t GGML_OP_MUL -b $qnnbackend
         ;;
 
         GGML_OP_MUL_MAT)
@@ -173,7 +168,6 @@ function show_usage()
     echo "  $0 build            (build Android command line UT program)"
     echo "  $0 updateqnnlibs    (upload the latest QNN libs to Android phone)"
     echo "  $0 GGML_OP_ADD      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
-    echo "  $0 GGML_OP_MUL      0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
     echo "  $0 GGML_OP_MUL_MAT  0 (QNN_CPU) / 1(QNN_GPU) / 2(QNN_NPU) / 3(ggml)"
     echo -e "\n\n\n"
 }

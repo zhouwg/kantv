@@ -7,8 +7,8 @@ set(CMAKE_CXX_STANDARD              17)
 set(CMAKE_CXX_STANDARD_REQUIRED     ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-#set to ON if target Android phone is based on Qualcomm Snapdragon 8 Gen 3
-set(TARGET_SNAPDRAGON_8_GEN3        OFF)
+#set to OFF if target Android phone is not equipped with Qualcomm Snapdragon 8 Gen 3
+set(TARGET_SNAPDRAGON_8_GEN3        ON)
 
 set(QNN_INC_PATH                    ${QNN_SDK_PATH}/include/QNN)
 set(QNN_LIB_PATH                    ${QNN_SDK_PATH}/lib/aarch64-android)
@@ -49,7 +49,7 @@ add_definitions(-mcpu=cortex-x1)
 add_definitions(-mtune=cortex-x1)
 
 else()
-# the below build optimization might be works well on ALL mainstream Android phone based on Qualcomm mobile SoC
+# the below build optimization might be works well on ALL mainstream Android phone equipped with Qualcomm mainstream mobile SoC
 add_definitions(-mcpu=cortex-a72)
 
 endif()

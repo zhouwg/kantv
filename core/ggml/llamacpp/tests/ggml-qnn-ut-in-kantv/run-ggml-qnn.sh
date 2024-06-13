@@ -5,7 +5,7 @@
 #https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools
 QNN_SDK_PATH=/opt/qcom/aistack/qnn/2.20.0.240223/
 QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
-GGML_QNN_TEST=ggml-qnn-test
+GGML_QNN_TEST=test-qnn-npu
 DEVICE_DIR=/data/local/tmp/
 
 

@@ -85,7 +85,7 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/common/build-info.cpp
         ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
-        ${LLAMACPP_SRC_DIR}/tests/ggml-qnn-ut-in-kantv/test-qnn-ops.cpp
+        ${LLAMACPP_SRC_DIR}/tests/ggml-qnn-ut-in-kantv/test-qnn-npu.cpp
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 

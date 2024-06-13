@@ -12,9 +12,9 @@ QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 #for upstream PR, check and download ANDROID_NDK in this directory when this script is used at the first time
 #ANDROID_NDK=`pwd`/android-ndk-r26c
 ANDROID_PLATFORM=android-34
-TARGET=ggml-qnn-test
-BUILDTYPE=Debug
+TARGET=test-qnn-npu
 BUILDTYPE=Release
+BUILDTYPE=Debug
 
 
 function dump_vars()

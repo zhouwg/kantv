@@ -27,7 +27,7 @@ set(SOURCE_FILES
         ../../ggml-qnn.cpp
         ../../../whispercpp/whisper.cpp
         ../../../../../external/ffmpeg/libavutil/cde_log.c
-        test-qnn-ops.cpp
+        test-qnn-npu.cpp
 )
 
 

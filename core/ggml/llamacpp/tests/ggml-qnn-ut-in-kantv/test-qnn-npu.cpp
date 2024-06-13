@@ -157,8 +157,8 @@ public:
 
     void info() {
         _end_time = ggml_time_us();
-        _duration = (_end_time - _begin_time);
-        QNN_LOG_DEBUG("duration of %s : %lld microseconds\n", _perf_name.c_str(), _duration);
+        _duration = (_end_time - _begin_time) / 1000;
+        QNN_LOG_DEBUG("duration of %s : %lld milliseconds\n", _perf_name.c_str(), _duration);
     }
 
 private:
@@ -1894,8 +1894,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     int64_t n_end_time = 0LL;
     int64_t n_duration = 0LL;
     size_t ctx_size = 0;
-    int sizey = 384;
-    int sizex = 384;
+    int sizey = 4;
+    int sizex = 4;
 
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
@@ -1918,7 +1918,7 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     n_begin_time = ggml_time_us();
     srand(time(NULL));
 
-    ctx_size += 1024 * 1024 * 64;
+    ctx_size += 4024 * 4024 * 4;
     QNN_LOG_DEBUG("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size,
                   (ctx_size / 1024 / 1024));
 
@@ -2065,6 +2065,7 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     QNN_LOG_DEBUG("duration of ut GGML_OP_%s using QNN backend %s: %lld milliseconds\n",
                   ggml_op_name((enum ggml_op) n_ggml_op_type), get_qnn_backend_name(n_backend_type),
                   n_duration);
+    LOGGD("leave qnn_op_test\n");
     return 0;
 }
 
@@ -5955,7 +5956,7 @@ failure:
 }
 
 
-static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
+static int qnn_test_qnnnpu_2(int n_backend_type, int n_ggml_op_type) {
     int result = 0;
     std::string graph_name = "qnn_rpc_test2";
     const char *qnn_backend_lib = "libQnnCpu.so";
@@ -5974,7 +5975,9 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     const char * qnn_op_name = QNN_OP_ELEMENT_WISE_ADD;
 
     srand(time(NULL));
-    qnn_perf perf("qnn_rpc_test2");
+    std::string perf_name = std::string("qnn_nputest_2_") + ggml_op_name(
+            static_cast<ggml_op>(n_ggml_op_type));
+    qnn_perf perf(perf_name);
     perf.start();
 
     LOGGD("enter qnn_rpc_test backend type:%d(%s), ggml op type:%d\n",
@@ -6018,8 +6021,8 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     }
 
     size_t ctx_size = 0;
-    int sizex = 384;
-    int sizey = 384;
+    int sizex = 4;
+    int sizey = 4;
     struct ggml_context *ctx = nullptr;
     struct ggml_cgraph *gf = nullptr;
     struct ggml_tensor *src0 = nullptr;
@@ -6032,7 +6035,8 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     qtype = GGML_TYPE_F32;
     qtype = GGML_TYPE_Q8_0;
     qtype = GGML_TYPE_F32;
-    ctx_size += sizex * sizey * 32 * 4;
+    ctx_size += 1024 * 1024 * 64;
+
     QNN_LOG_DEBUG("Allocating Memory of size %zi bytes, %zi MB\n", ctx_size, (ctx_size / 1024 / 1024));
     struct ggml_init_params params = {
             /*.mem_size   =*/ ctx_size,
@@ -6318,14 +6322,16 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
         LOGGI("error = %d\n", error);
         error = qnn_raw_interface.graphFinalize(graph_handle, nullptr, nullptr);
         LOGGI("error = %d\n", error);
-        LOGGD("dump tensor:\n");
-        TENSOR_DUMP(src0);
-        TENSOR_DUMP(src1);
+
         error = qnn_raw_interface.graphExecute(graph_handle, tensor_inputs, 2, tensor_outputs, 1,
                                                nullptr, nullptr);
         LOGGI("error = %d\n", error);
+        perf.info();
         if (0 == error) {
             if (0 == result) {
+                LOGGD("dump input tensor:\n");
+                TENSOR_DUMP(src0);
+                TENSOR_DUMP(src1);
                 LOGGD("output matrix:");
                 if (QNN_BACKEND_NPU == n_backend_type) {
                     memcpy(dst->data, qnn_buffer_2, ggml_nbytes(dst));
@@ -6349,7 +6355,7 @@ static int qnn_test_rpc_2(int n_backend_type, int n_ggml_op_type) {
     ggml_free(ctx);
 
     perf.info();
-    
+
     LOGGD("leave qnn_rpc_test\n");
 
     return result;
@@ -6475,7 +6481,7 @@ int main(int argc, char *argv[]) {
             break;
         case TEST_QNN_RPC:
             //qnn_test_rpc_1(n_backend_type, n_ggml_op_type);
-            qnn_test_rpc_2(n_backend_type, n_ggml_op_type);
+            qnn_test_qnnnpu_2(n_backend_type, n_ggml_op_type);
             break;
         default:
             break;
