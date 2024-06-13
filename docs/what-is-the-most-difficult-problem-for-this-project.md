@@ -7,4 +7,4 @@ The most important difficult problem for this project is the <b>big interference
 ![Screenshot from 2024-06-01 08-00-20](https://github.com/zhouwg/kantv/assets/6889919/eb9a5c35-dd63-478f-8510-c4913f4c4038)
 
 
-I hope there is no GFW in my country in the future also I may not see that day is coming.
+I hope there is no GFW in my country in the future although I may not see that day is coming.
