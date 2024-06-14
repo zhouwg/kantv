@@ -129,7 +129,7 @@ static int free_qnn_tensor(Qnn_Tensor_t & tensor);
 #ifdef NDEBUG
 #define ENABLE_QNNBACKEND_DEBUG     0     // for troubleshooting QNN backend
 #define ENABLE_QNNSDK_LOG           0     // enable/disable QNN SDK's internal log
-#define ENABLE_QNNBACKEND_PERF      0     // enable/disable op's perf info
+#define ENABLE_QNNBACKEND_PERF      1     // enable/disable op's perf info
 #else
 #define ENABLE_QNNBACKEND_DEBUG     1     // for troubleshooting QNN backend
 #define ENABLE_QNNSDK_LOG           1     // enable/disable QNN SDK's internal log
@@ -166,6 +166,24 @@ struct qcom_socinfo {
     size_t vtcm_size_in_mb;
 };
 
+#define QK8_0 32
+typedef struct {
+    uint16_t d;       // delta
+    int8_t qs[QK8_0]; // quants
+} block_q8_0;
+
+struct ggml_backend_qnn_context {
+    int                           device;
+    int                           threads;
+    char                          name[GGML_MAX_NAME];
+    char                          lib[GGML_MAX_NAME];
+    qnn_instance *                instance;
+    struct ggml_backend *         backend;
+    QNN_INTERFACE_VER_TYPE        raw_interface;
+    QNN_SYSTEM_INTERFACE_VER_TYPE raw_system_interface;
+    struct qcom_socinfo           socinfo;
+};
+
 static struct qcom_socinfo g_qnn_soc_info_table[] = {
         /* Qualcomm SnapDragon 8 Gen 1 */
         [SM8450] = {
@@ -191,18 +209,6 @@ static struct qcom_socinfo g_qnn_soc_info_table[] = {
                 .htp_arch          = V75,
                 .vtcm_size_in_mb   = 8},
 
-};
-
-struct ggml_backend_qnn_context {
-    int                           device;
-    int                           threads;
-    char                          name[GGML_MAX_NAME];
-    char                          lib[GGML_MAX_NAME];
-    qnn_instance *                instance;
-    struct ggml_backend *         backend;
-    QNN_INTERFACE_VER_TYPE        raw_interface;
-    QNN_SYSTEM_INTERFACE_VER_TYPE raw_system_interface;
-    struct qcom_socinfo           socinfo;
 };
 
 // according to the QNN SDK Reference Guide,
@@ -1099,6 +1105,11 @@ class qnn_instance {
             for (int i = 0; i < p_info->v1.numHwDevices; i++) {
                 QNN_LOG_INFO("deviceID:%d, deviceType:%d, numCores %d", infos[i].v1.deviceId,
                              infos[i].v1.deviceType, infos[i].v1.numCores);
+                QnnDevice_CoreInfo_t * coreinfo = infos[i].v1.cores;
+                for (int j = 0; j < infos[i].v1.numCores; j++) {
+                    QNN_LOG_INFO("coreID:%d", coreinfo[j].v1.coreId);
+                    QNN_LOG_INFO("coreType:%d", coreinfo[j].v1.coreType);
+                }
                 QnnDevice_DeviceInfoExtension_t devinfo = infos[i].v1.deviceInfoExtension;
                 chipinfo = devinfo->onChipDevice;
                 QnnHtpDevice_Arch_t htp_arch = chipinfo.arch;
@@ -1438,7 +1449,12 @@ class qnn_instance {
         uint32_t power_configid = 1;
         uint32_t device_id      = 0;
         uint32_t core_id        = 0;
-        htp_perfinfra->createPowerConfigId(device_id, core_id, &power_configid);
+        error = htp_perfinfra->createPowerConfigId(device_id, core_id, &power_configid);
+        if (error != QNN_SUCCESS) {
+            QNN_LOG_WARN("failed to create power config id\n");
+        } else {
+            QNN_LOG_INFO("create power config id ok\n");
+        }
         if (htp_infra->infraType != QNN_HTP_DEVICE_INFRASTRUCTURE_TYPE_PERF) {
             QNN_LOG_INFO("HTP infra type = %d, which is not perf infra type", htp_infra->infraType);
         } else {
@@ -1492,55 +1508,32 @@ class qnn_instance {
         QnnHtpPerfInfrastructure_PowerConfig_t power_config;
         memset(&power_config, 0, sizeof(power_config));
         power_config.option = QNN_HTP_PERF_INFRASTRUCTURE_POWER_CONFIGOPTION_DCVS_V3;
-#if 0
-        power_config.dcvsV3Config.dcvsEnable    = 1;
-        power_config.dcvsV3Config.setDcvsEnable = 1;
-        power_config.dcvsV3Config.contextId     = _qnn_power_configid;
-        power_config.dcvsV3Config.powerMode     = QNN_HTP_PERF_INFRASTRUCTURE_POWERMODE_PERFORMANCE_MODE;
-        power_config.dcvsV3Config.setSleepLatency =
-            1; // true to consider Latency parameter otherwise false
-        power_config.dcvsV3Config.sleepLatency = 40;
-        power_config.dcvsV3Config.setBusParams =
-            1; // true to consider Bus parameter otherwise false
-        power_config.dcvsV3Config.setCoreParams =
-            1; // true to consider Core parameter otherwise false
-        power_config.dcvsV3Config.sleepDisable =
-            1; // true to consider sleep/LPM modes, false to enable
-        power_config.dcvsV3Config.setSleepDisable =
-            1; // true to consider sleep disable/enable parameter otherwise false set sleep latency parameter
-        // set Bus Clock Parameters
-        power_config.dcvsV3Config.busVoltageCornerMin =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        power_config.dcvsV3Config.busVoltageCornerTarget =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        power_config.dcvsV3Config.busVoltageCornerMax =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        // set Core Clock Parameters
-        power_config.dcvsV3Config.coreVoltageCornerMin =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        power_config.dcvsV3Config.coreVoltageCornerTarget =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        power_config.dcvsV3Config.coreVoltageCornerMax =
-            DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-#else   //ref: https://github.com/microsoft/onnxruntime/blob/main/onnxruntime/core/providers/qnn/builder/qnn_backend_manager.cc#L765
+
         QnnHtpPerfInfrastructure_DcvsV3_t & dcvs_v3 = power_config.dcvsV3Config;
+        dcvs_v3.contextId       = _qnn_power_configid;
+        dcvs_v3.powerMode       = QNN_HTP_PERF_INFRASTRUCTURE_POWERMODE_PERFORMANCE_MODE;
+        dcvs_v3.dcvsEnable      = 1;
+        dcvs_v3.setDcvsEnable   = 1;
         dcvs_v3.setSleepLatency = 1;
-        dcvs_v3.sleepLatency = 40;
-        dcvs_v3.dcvsEnable = 1;
-        dcvs_v3.setBusParams = 1;
-        dcvs_v3.busVoltageCornerMin = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        dcvs_v3.busVoltageCornerTarget = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        dcvs_v3.busVoltageCornerMax = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        dcvs_v3.setCoreParams = 1;
-        dcvs_v3.coreVoltageCornerMin = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
+        dcvs_v3.sleepLatency    = 40;
+        dcvs_v3.setBusParams    = 1;
+        dcvs_v3.setCoreParams   = 1;
+        dcvs_v3.sleepDisable    = 1;
+        dcvs_v3.setSleepDisable = 1;
+        dcvs_v3.busVoltageCornerMin     = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
+        dcvs_v3.busVoltageCornerTarget  = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
+        dcvs_v3.busVoltageCornerMax     = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
+        dcvs_v3.coreVoltageCornerMin    = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
         dcvs_v3.coreVoltageCornerTarget = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-        dcvs_v3.coreVoltageCornerMax = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
-#endif
-        // set power config with different performance parameters
+        dcvs_v3.coreVoltageCornerMax    = DCVS_VOLTAGE_VCORNER_MAX_VOLTAGE_CORNER;
+
         const QnnHtpPerfInfrastructure_PowerConfig_t * power_configs[] = {
-            &power_config, nullptr};
+                                        &power_config,
+                                        nullptr
+        };
         Qnn_ErrorHandle_t qnn_status = QNN_SUCCESS;
-        qnn_status = _qnn_htp_perfinfra->setPowerConfig(_qnn_power_configid, power_configs);
+        qnn_status = _qnn_htp_perfinfra->setPowerConfig(_qnn_power_configid,
+                                                        power_configs);
         if (qnn_status != QNN_SUCCESS) {
             QNN_LOG_WARN("set htp high performance mode failed\n");
         } else {
@@ -2099,7 +2092,7 @@ static void ggml_qnn_add(ggml_backend_qnn_context * ctx, const ggml_tensor * src
         if (ctx->device == QNN_BACKEND_NPU) {
             QnnHtpGraph_CustomConfig_t hvx_config;
             hvx_config.option = QNN_HTP_GRAPH_CONFIG_OPTION_NUM_HVX_THREADS;
-            hvx_config.numHvxThreads = 8;
+            hvx_config.numHvxThreads = 4;
             QnnGraph_Config_t graph_hvx_config;
             graph_hvx_config.option = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
             graph_hvx_config.customConfig = &hvx_config;
@@ -2114,7 +2107,7 @@ static void ggml_qnn_add(ggml_backend_qnn_context * ctx, const ggml_tensor * src
 
             QnnHtpGraph_CustomConfig_t opt_config;
             opt_config.optimizationOption.type = QNN_HTP_GRAPH_OPTIMIZATION_TYPE_FINALIZE_OPTIMIZATION_FLAG;
-            opt_config.optimizationOption.floatValue = 1;    // 1 / 3
+            opt_config.optimizationOption.floatValue = 3;    // 1 / 3
             QnnGraph_Config_t graph_opt_config;
             graph_opt_config.option = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
             graph_opt_config.customConfig = &opt_config;
@@ -2126,10 +2119,18 @@ static void ggml_qnn_add(ggml_backend_qnn_context * ctx, const ggml_tensor * src
             graph_vtcm_config.option = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
             graph_vtcm_config.customConfig = &vtcm_config;
 
+            QnnHtpGraph_CustomConfig_t precision_config;
+            precision_config.option = QNN_HTP_GRAPH_CONFIG_OPTION_PRECISION;
+            precision_config.precision = QNN_PRECISION_FLOAT16;
+            QnnGraph_Config_t graph_precision_config;
+            graph_precision_config.option       = QNN_GRAPH_CONFIG_OPTION_CUSTOM;
+            graph_precision_config.customConfig = &precision_config;
+
             const QnnGraph_Config_t * p_graphconfig[] = {&graph_hvx_config,
                                                          &graph_dlbc_config,
                                                          &graph_vtcm_config,
                                                          &graph_opt_config,
+                                                         &graph_precision_config,
                                                          NULL};
             error = qnn_raw_interface.graphCreate(
                     instance->get_qnn_context_handle(), graph_name.c_str(), p_graphconfig,
@@ -2451,6 +2452,18 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
     //      pass-1: dequantize src0 to FP32
     //      pass-2: dq-src0 * src1
     //      the performance gains is worth although there is performance loss in pass-1
+    float * float32 = nullptr;
+    if (ggml_is_quantized(src0->type)) {
+        block_q8_0 * tmp = ((block_q8_0 *) src0->data);
+        float32 = (float*)malloc(src0->ne[1] * src0->ne[0] * sizeof(float));
+        if (nullptr == float32) {
+            QNN_LOG_WARN("malloc failed");
+            goto failure;
+        }
+        ggml_type_traits_t qtype = ggml_internal_get_type_traits(src0->type);
+        qtype.to_float(tmp, float32, src0->ne[0] * src0->ne[1]);
+        src0_qnn_type = QNN_DATATYPE_FLOAT_32;
+    }
 
     if (!graph_initialized) {
         graph_name = graph_name + "_" + std::to_string(ctx->threads) +
@@ -2565,7 +2578,11 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
                 QNN_LOG_INFO("alloc rpcmem successfully\n");
             }
             instance->register_rpcmem(qnn_buffer_0, tensor_0);
-            memcpy(qnn_buffer_0, src0->data, ggml_nbytes(src0));
+            if (ggml_is_quantized(src0->type)) {
+                memcpy(qnn_buffer_0, float32, ggml_nbytes(src0));
+            } else {
+                memcpy(qnn_buffer_0, src0->data, ggml_nbytes(src0));
+            }
 
             qnn_buffer_1 = static_cast<uint8_t *>(instance->alloc_rpcmem(
                     ggml_nbytes(src1), 4));
@@ -2703,6 +2720,10 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
     }
 
 failure:
+    if (nullptr != float32) {
+        free(float32);
+        float32 = nullptr;
+    }
     if (QNN_SUCCESS != error) {
         QNN_LOG_DEBUG("tensor0 name %s", QNN_TENSOR_GET_NAME(*tensor_0));
         QNN_LOG_DEBUG("tensor1 name %s", QNN_TENSOR_GET_NAME(*tensor_1));

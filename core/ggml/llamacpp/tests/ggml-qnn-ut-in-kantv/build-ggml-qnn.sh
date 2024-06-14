@@ -13,8 +13,8 @@ QNN_SDK_PATH=/opt/qcom/aistack/qairt/2.23.0.240531/
 #ANDROID_NDK=`pwd`/android-ndk-r26c
 ANDROID_PLATFORM=android-34
 TARGET=test-qnn-npu
-BUILDTYPE=Release
 BUILDTYPE=Debug
+BUILDTYPE=Release
 
 
 function dump_vars()

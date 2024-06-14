@@ -1496,10 +1496,26 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
     if (tensor->type == GGML_TYPE_Q8_0) {
         if (get_tensor_data_size(tensor) < (8 * 8)) {
             block_q8_0 *tmp = ((block_q8_0 *) tensor->data);
+#if 1 //ref:https://github.com/ggerganov/llama.cpp/pull/7844
+            std::vector<float> f32out(ggml_nelements(tensor));
+            ggml_type_traits_t qtype = ggml_internal_get_type_traits(tensor->type);
+            qtype.to_float((void *) tensor->data, f32out.data(), f32out.size());
+            int idx = 0;
+            for (float value : f32out) {
+                idx++;
+                tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value  << " ";
+                if (idx == tensor->ne[0]) {
+                    tmposs << "\n";
+                    idx = 0;
+                }
+            }
+#else
             for (int j = 0; j < tensor->ne[1]; j++) {
                 int n = tensor->ne[0] / QK8_0; //blocks per row
+
                 for (int z = 0; z < n; z++) {
                     const float d = GGML_FP16_TO_FP32(tmp[j * n + z].d);
+
                     for (int k = 0; k < QK8_0; k++) {
                         value = tmp[j * n + z].qs[k] * d;
                         tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value
@@ -1508,6 +1524,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
                 }
                 tmposs << "\n";
             }
+#endif
             if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
                 QNN_LOG_DEBUG("\n%s\n", tmposs.str().c_str());
                 tmposs.clear();
@@ -1516,6 +1533,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
         } else {
             int rows = ((8 >= tensor->ne[1]) ? tensor->ne[1] : 8);
             int cols = ((8 >= tensor->ne[0]) ? tensor->ne[0] : 8);
+#if 0
             block_q8_0 *tmp = ((block_q8_0 *) tensor->data);
             for (int j = 0; j < rows; j++) {
                 int n = tensor->ne[0] / QK8_0; //blocks per row
@@ -1532,6 +1550,17 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
                     }
                 }
             }
+#else
+            std::vector<float> f32out(ggml_nelements(tensor));
+            ggml_type_traits_t qtype = ggml_internal_get_type_traits(tensor->type);
+            qtype.to_float((void *) tensor->data, f32out.data(), f32out.size());
+            for (int j = 0; j < rows; j++) {
+                for (int i = 0; i < cols; i++) {
+                    tmposs << std::setw(8) << std::fixed << std::setprecision(2) << f32out[j * tensor->ne[0] + i];
+                }
+                tmposs << "\n";
+            }
+#endif
             if (strlen(tmposs.str().c_str()) <= (GGML_QNN_LOGBUF_LEN - 96)) {
                 QNN_LOG_DEBUG("(%dx%d in %dx%d)\n%s\n",  cols, rows, tensor->ne[0], tensor->ne[1], tmposs.str().c_str());
                 tmposs.clear();
@@ -1907,8 +1936,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
 
     ggml_type qtype = GGML_TYPE_I8;
     qtype = GGML_TYPE_F16;
-    qtype = GGML_TYPE_Q8_0;
     qtype = GGML_TYPE_F32;
+    qtype = GGML_TYPE_Q8_0;
 
     std::vector<uint8_t> work_buffer;
     QNN_LOG_DEBUG("enter qnn_ggml_op\n");
@@ -1976,7 +2005,7 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
         src0 = ggml_new_tensor_2d(ctx, qtype, 384, 384);
         src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 1500);
         */
-        src0 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 384);
+        src0 = ggml_new_tensor_2d(ctx, qtype, 384, 384);
         src1 = ggml_new_tensor_2d(ctx, GGML_TYPE_F32, 384, 384);
     }
     ggml_set_input(src0);
@@ -2017,6 +2046,7 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
     gf = ggml_new_graph(ctx);
     ggml_build_forward_expand(gf, dst);
 
+#if 0
     if (n_backend_type != QNN_BACKEND_GGML) {
         initialize_tensors(ctx);
     } else {
@@ -2028,6 +2058,8 @@ static int qnn_op_ut(int num_threads, int n_backend_type, int n_ggml_op_type) {
         ggml_set_f32(src1, (rand() % 100 + 1));
         //ggml_set_f32(dst, 0.0f);
     }
+#endif
+    initialize_tensors(ctx);
 
     ggml_graph_compute_helper(backend, gf, work_buffer, num_threads, nullptr, nullptr);
 
