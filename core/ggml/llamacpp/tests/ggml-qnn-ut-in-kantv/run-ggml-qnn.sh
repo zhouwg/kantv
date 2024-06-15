@@ -16,6 +16,21 @@ function check_qnn_sdk()
     fi
 }
 
+function update_qnn_libs()
+{
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnSystem.so              ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnCpu.so                 ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnGpu.so                 ${REMOTE_PATH}/
+
+    #the QNN NPU(aka HTP/DSP) backend only verified on Xiaomi14(Qualcomm SM8650-AB Snapdragon 8 Gen 3) successfully
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtp.so                 ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpNetRunExtensions.so ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpPrepare.so          ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpV75Stub.so          ${REMOTE_PATH}/
+    adb push ${QNN_SDK_PATH}/lib/hexagon-v75/unsigned/libQnnHtpV75Skel.so     ${REMOTE_PATH}/
+
+    adb push ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/libkantv-media.so ${REMOTE_PATH}/
+}
 
 function check_qnn_libs()
 {
@@ -24,19 +39,9 @@ function check_qnn_libs()
     if [ $? -eq 0 ]; then
         printf "QNN libs already exist on Android phone\n"
     else
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnSystem.so              ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnCpu.so                 ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnGpu.so                 ${REMOTE_PATH}/
-
-        #the QNN NPU(aka HTP/DSP) backend only verified on Xiaomi14(Qualcomm SM8650-AB Snapdragon 8 Gen 3) successfully
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtp.so                 ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpNetRunExtensions.so ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpPrepare.so          ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/aarch64-android/libQnnHtpV75Stub.so          ${REMOTE_PATH}/
-        adb push ${QNN_SDK_PATH}/lib/hexagon-v75/unsigned/libQnnHtpV75Skel.so     ${REMOTE_PATH}/
+        update_qnn_libs
     fi
 }
-
 
 function show_usage()
 {
@@ -45,6 +50,7 @@ function show_usage()
     echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL     0(CPU)/1(GPU)/2(NPU)/3(ggml)"
     echo "  $0 0(simple UT) / 1(automation UT) / 2(whisper) GGML_OP_MUL_MAT 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
     echo "  $0 2(whisper) 0(CPU)/1(GPU)/2(NPU)/3(ggml)"
+    echo "  $0 updateqnnlibs    (upload the latest QNN libs to Android phone)"
     echo -e "\n\n\n"
 }
 
@@ -60,15 +66,21 @@ function main()
 
     case "$TEST_GGMLOP" in
         GGML_OP_ADD)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST} -t $TEST_TYPE -o ADD -b $TEST_BACKEND
+            adb shell "cd ${REMOTE_PATH} \
+                && export LD_LIBRARY_PATH=${REMOTE_PATH} \
+                && ${REMOTE_PATH}/${GGML_QNN_TEST} -t $TEST_TYPE -o ADD -b $TEST_BACKEND"
         ;;
 
         GGML_OP_MUL)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MUL -b $TEST_BACKEND
+            adb shell "cd ${REMOTE_PATH} \
+                && export LD_LIBRARY_PATH=${REMOTE_PATH} \
+                && ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MUL -b $TEST_BACKEND"
         ;;
 
         GGML_OP_MUL_MAT)
-            adb shell ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MULMAT -b $TEST_BACKEND
+            adb shell "cd ${REMOTE_PATH} \
+                && export LD_LIBRARY_PATH=${REMOTE_PATH} \
+                && ${REMOTE_PATH}/${GGML_QNN_TEST}  -t $TEST_TYPE -o MULMAT -b $TEST_BACKEND"
         ;;
 
         *)
@@ -79,6 +91,13 @@ function main()
     esac
 }
 
+
+echo "pwd is `pwd`"
+if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
+    echo "pls run . build/envsetup in project's toplevel directory firstly"
+    exit 1
+fi
+. ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 
 check_qnn_sdk
 
@@ -101,6 +120,9 @@ elif [ $# == 1 ]; then
         #avoid upload command line program to Android phone in this scenario
         show_usage
         exit 1
+    elif [ "$1" == "updateqnnlibs" ]; then
+        update_qnn_libs
+        exit 0
     else
         TEST_TYPE=$1
         TEST_GGMLOP="GGML_OP_ADD"
