@@ -119,7 +119,7 @@ static void ggml_qnn_log_internal(ggml_log_level level, const char *file, const 
 #define GGML_QNN_DEBUG              1
 #define GGML_QNN_LOGBUF_LEN         4096
 #define ENABLE_TEST_WHISPERCPP      1
-#define ENABLE_TEST_LLM             0
+#define ENABLE_TEST_LLM             0  //don't set to 1 becasue some issues
 #define ENABLE_QNN_LOG              0  //enable/disable QNN internal log
 #define ENABLE_QNNSDK_LOG           0     // enable/disable QNN SDK's internal log
 
@@ -1501,7 +1501,7 @@ static void tensor_dump(const ggml_tensor *tensor, const char *name) {
             ggml_type_traits_t qtype = ggml_internal_get_type_traits(tensor->type);
             qtype.to_float((void *) tensor->data, f32out.data(), f32out.size());
             int idx = 0;
-            for (float value : f32out) {
+            for (const float & value : f32out) {
                 idx++;
                 tmposs << std::setw(8) << std::fixed << std::setprecision(2) << value  << " ";
                 if (idx == tensor->ne[0]) {
@@ -6499,7 +6499,7 @@ int main(int argc, char *argv[]) {
             LOGGD("whispercpp UT disabled\n");
 #endif
             break;
-#if ENABLE_TEST_LLM_
+#if ENABLE_TEST_LLM //not work perfectly becasue some issues
         case TEST_LLM:
             llama_inference_ut("/sdcard/kantv/models/qwen1_5-1_8b-chat-q4_0.gguf",
                        "what's the population of China, less then 100 words",

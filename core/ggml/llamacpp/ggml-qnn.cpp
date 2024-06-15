@@ -22,14 +22,14 @@
  *    QNN CPU/GPU backend) on Qualcomm's SoC equipped low-end phone
  * 2. core implementation(data path works fine as expected with whisper.cpp&llama.cpp using
  *    QNN NPU backend on Qualcomm's soC equipped high-end phone
- * 3. GGML_OP_MUL_MAT & GGML_OP_MUL & GGML_OP_ADD using QNN API has been completed and the dedicated
+ * 3. GGML_OP_MUL_MAT & GGML_OP_ADD using QNN API has been completed and the dedicated
  *    Android command line UT program works fine as expected on Qualcomm's SoC based Android phone
  * 4. PR to upstream GGML community on 04-24-2024: https://github.com/ggerganov/llama.cpp/pull/6869
  * 5. QNN RPC feature was used
  *
  * todo:
  * 1. lack of implementation of other GGML OPs using QNN API(only support GGML_OP_MUL_MAT,
- *    GGML_OP_MUL, GGML_OP_ADD currently). this problem has been fixed by s standalone
+ *    GGML_OP_ADD currently). this problem has been fixed by s standalone
  *    PR https://github.com/zhouwg/kantv/pull/216 in this project
  *    or a standalone PR https://github.com/ggerganov/llama.cpp/pull/7641
  *    in upstream. it's a general approach for mixed inference between Qualcomm's CPU&GPU / CPU&NPU
@@ -125,10 +125,10 @@ static int free_qnn_tensor(Qnn_Tensor_t & tensor);
 //  self-defined macro / data structure
 //
 // =================================================================================================
-#define NOT_IN_PR                   0     // for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
+#define NOT_IN_PR                   1     // for update PR(https://github.com/ggerganov/llama.cpp/pull/6869) in upstream easily and quickly
 #ifdef NDEBUG
-#define ENABLE_QNNBACKEND_DEBUG     0     // for troubleshooting QNN backend
-#define ENABLE_QNNSDK_LOG           0     // enable/disable QNN SDK's internal log
+#define ENABLE_QNNBACKEND_DEBUG     1     // for troubleshooting QNN backend
+#define ENABLE_QNNSDK_LOG           1     // enable/disable QNN SDK's internal log
 #define ENABLE_QNNBACKEND_PERF      1     // enable/disable op's perf info
 #else
 #define ENABLE_QNNBACKEND_DEBUG     1     // for troubleshooting QNN backend
@@ -445,7 +445,7 @@ static void qnn_internal_log(ggml_log_level level, const char * file,
         if (len < (QNN_LOGBUF_LEN - len_prefix)) {
 #if (defined __ANDROID__) || (defined ANDROID)
             // for Android APK
-#if 1 // NOT_IN_PR
+#if NOT_IN_PR
             __android_log_print(level, "KANTV", "%s\n", s_qnn_internal_log_buf);
 #else
             __android_log_print(level, "ggml-qnn", "%s\n", s_qnn_internal_log_buf);
@@ -2004,8 +2004,11 @@ static bool ggml_qnn_can_handle_op(ggml_backend_qnn_context * ctx,
     // https://github.com/ggerganov/llama.cpp/pull/7641
 #endif
     bool supported_op = false;
+#if NOT_IN_PR
     supported_op = (tensor->op == GGML_OP_ADD);
+#else
     supported_op = ((tensor->op == GGML_OP_ADD) || (tensor->op == GGML_OP_MUL_MAT));
+#endif
     if (!supported_op) {
         return false;
     }
@@ -2452,16 +2455,10 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
     //      pass-1: dequantize src0 to FP32
     //      pass-2: dq-src0 * src1
     //      the performance gains is worth although there is performance loss in pass-1
-    float * float32 = nullptr;
+    std::vector<float> f32out(ggml_nelements(src0));
     if (ggml_is_quantized(src0->type)) {
-        block_q8_0 * tmp = ((block_q8_0 *) src0->data);
-        float32 = (float*)malloc(src0->ne[1] * src0->ne[0] * sizeof(float));
-        if (nullptr == float32) {
-            QNN_LOG_WARN("malloc failed");
-            goto failure;
-        }
         ggml_type_traits_t qtype = ggml_internal_get_type_traits(src0->type);
-        qtype.to_float(tmp, float32, src0->ne[0] * src0->ne[1]);
+        qtype.to_float((void *)src0->data, f32out.data(), f32out.size());
         src0_qnn_type = QNN_DATATYPE_FLOAT_32;
     }
 
@@ -2579,7 +2576,7 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
             }
             instance->register_rpcmem(qnn_buffer_0, tensor_0);
             if (ggml_is_quantized(src0->type)) {
-                memcpy(qnn_buffer_0, float32, ggml_nbytes(src0));
+                memcpy(qnn_buffer_0, f32out.data(), f32out.size());
             } else {
                 memcpy(qnn_buffer_0, src0->data, ggml_nbytes(src0));
             }
@@ -2720,10 +2717,6 @@ static void ggml_qnn_mul_mat(ggml_backend_qnn_context * ctx,
     }
 
 failure:
-    if (nullptr != float32) {
-        free(float32);
-        float32 = nullptr;
-    }
     if (QNN_SUCCESS != error) {
         QNN_LOG_DEBUG("tensor0 name %s", QNN_TENSOR_GET_NAME(*tensor_0));
         QNN_LOG_DEBUG("tensor1 name %s", QNN_TENSOR_GET_NAME(*tensor_1));
