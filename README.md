@@ -269,9 +269,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
-- improve the quality of <a href="https://github.com/zhouwg/kantv/issues/121"> Qualcomm QNN backend for GGML</a>
-
-- integrate DeepSeek-R1
+- integrate <a href="https://github.com/deepseek-ai">DeepSeek AI</a>
 
 - bugfix in UI layer(Java)
 
