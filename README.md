@@ -21,8 +21,6 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study internal mechanism of GGML inference framework on Android phone/device(<a href="https://github.com/zhouwg/kantv/issues/121">PoC:Qualcomm QNN backend for ggml finished from 03/29/2024 to 04/26/2024</a>)
 
-- Well-maintained "workbench" for <a href="https://github.com/Tencent/ncnn">NCNN</a> beginners to study and practise NCNN inference framework on Android phone/device
-
 - Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
@@ -186,9 +184,9 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L14">ncnn/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L16">ncnn/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
 
  - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
 
@@ -334,8 +332,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 - [How to reduce the size of apk](./docs/how-to-reduce-the-size-of-apk.md)
 - [How to sign apk](./docs/how-to-sign-apk.md)
 - [How to validate AI algorithm/model on Android using this project](./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md)
-- [Why focus on ggml & ncnn edge-AI inference framework](./docs/why-focus-on-ggml-and-ncnn-on-android.md)
-- [What is the most difficult problem for this project](./docs/what-is-the-most-difficult-problem-for-this-project.md)
+- [Why focus on ggml for Android device](./docs/why-focus-on-ggml-for-android.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [F.A.Q](./docs/FAQ.md)
@@ -351,9 +348,6 @@ Report issue in various Android-based phone or even submit PR to this project is
    </li>
 
 
-  <li>
-   <a href="https://github.com/Tencent/ncnn">NCNN</a> by <a href="https://github.com/Tencent">Tencent</a>
-  </li>
   </ul>
 
   </ul>

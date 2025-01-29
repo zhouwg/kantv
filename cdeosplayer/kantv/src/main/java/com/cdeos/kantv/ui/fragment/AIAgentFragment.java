@@ -219,6 +219,7 @@ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implement
 
             facing = new_facing;
         });
+        /*
         spinnerNCNNNetid = mActivity.findViewById(R.id.spinnerNCNNNetid);
         String[] arrayNetid = getResources().getStringArray(R.array.ncnn_realtimeinference_netid);
         ArrayAdapter<String> adapterNCNNNetid = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNetid);
@@ -286,6 +287,8 @@ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implement
             }
         });
 
+        */
+
         reload();
 
         endTime = System.currentTimeMillis();
@@ -299,10 +302,13 @@ public class AIAgentFragment extends BaseMvpFragment<AIAgentPresenter> implement
     }
 
     private void reload() {
+        /*
         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), current_netid, current_model, current_ncnnbackend, true);
         if (!ret_init) {
             CDELog.j(TAG, "ncnn loadModel failed");
         }
+
+        */
     }
 
     @Override
