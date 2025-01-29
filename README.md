@@ -288,17 +288,10 @@ Report issue in various Android-based phone or even submit PR to this project is
 ### Docs
 
 - [How to verify Qualcomm QNN backend for GGML on Qualcomm mobile SoC based android device](./docs/how-to-verify-ggml-qnn-backend-on-android.md)
-- [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
-- [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
-- [How to reduce the size of apk](./docs/how-to-reduce-the-size-of-apk.md)
-- [How to sign apk](./docs/how-to-sign-apk.md)
-- [How to validate AI algorithm/model on Android using this project](./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md)
-- [Why focus on ggml for Android device](./docs/why-focus-on-ggml-for-android.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
-- [F.A.Q](./docs/FAQ.md)
 
 
 ### Special Acknowledgement
