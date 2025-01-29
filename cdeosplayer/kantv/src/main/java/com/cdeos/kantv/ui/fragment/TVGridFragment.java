@@ -188,6 +188,7 @@
          beginTime = System.currentTimeMillis();
          CDELog.d(TAG, "epg updated status:" + CDEUtils.getEPGUpdatedStatus(mMediaType));
          mContentList.clear();
+         /* 2025-01-29, remove encrypted kantv.bin
          String encryptedEPGFileName = "kantv.bin";
          KANTVJNIDecryptBuffer dataEntity = KANTVJNIDecryptBuffer.getInstance();
          KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
@@ -343,9 +344,39 @@
              }
              CDELog.d(TAG, "content counts:" + mContentList.size());
          }
+         */
 
+         //2025-01-29,customize TV program in non-encrypted tv.xml
+         {
+             CDEUtils.copyAssetFile(mContext, "tv.xml", CDEUtils.getDataPath(mContext) + "/tv.xml");
+             File file = new File(CDEUtils.getDataPath(mContext), "tv.xml");
+             beginTime = System.currentTimeMillis();
+             int fileLength = (int) file.length();
+             CDELog.j(TAG, "clear file len:" + fileLength);
+             mData.clear();
+             mContentList.clear();
 
-         CDELog.d(TAG, "epg items: " + mContentList.size());
+             try {
+                 byte[] fileContent = new byte[fileLength];
+                 FileInputStream in = new FileInputStream(file);
+                 in.read(fileContent);
+                 in.close();
+                 if (fileLength < 2) {
+                     CDELog.j(TAG, "shouldn't happen, pls check tv.xml");
+                     return;
+                 }
+                 mContentList = CDEUtils.EPGXmlParser.getContentDescriptors(fileContent);
+             } catch (Exception ex) {
+                 CDELog.j(TAG, "load tv xml failed:" + ex.toString());
+                 CDELog.d(TAG, "shouldn't happen, pls check tv.xml");
+                 return;
+             }
+         }
+
+         if ((mContentList == null) || (0 == mContentList.size())) {
+             CDELog.j(TAG, "shouldn't happen, pls check tv.xml");
+             return;
+         }
          CDELog.d(TAG, "epg items: " + mContentList.size());
 
          if (CDEMediaType.MEDIA_TV == mMediaType) {

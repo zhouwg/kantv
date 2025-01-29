@@ -64,21 +64,13 @@
         <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>qnn-op-ut</item>              <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
         <item>qnn-op-autout</item>          <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
-        <item>ASR(whisper)</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
-        <item>LLM(ggml)</item>              <!-- A GPT-4  style LLM benchmark using llama.cpp based on GGML -->
-        <item>LLM-V(ggml)</item>            <!-- A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML -->
-        <item>LLM-O(ggml)</item>            <!-- A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML -->
-        <item>TEXT2IMAGE(ggml)</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
-        <item>MNIST(ggml)</item>            <!-- MNIST(using ggml) benchmark -->
-        <item>TTS(ggml)</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
-        <!-- the following is NCNN inference -->
-        <item>RESNET(ncnn)</item>           <!-- image classification via ResNet using NCNN -->
-        <item>SQUEEZENET(ncnn)</item>       <!-- image classification via SqueezeNet using NCNN-->
-        <item>MNIST(ncnn)</item>            <!-- MNIST(using NCNN) benchmark -->
-        <item>ASR(ncnn)</item>              <!-- ASR(https://github.com/k2-fsa/sherpa-ncnn, based on NCNN)benchmark, TBD -->
-        <item>TTS(ncnn)</item>              <!-- TBD -->
-        <item>YoloV5(ncnn)</item>
-        <item>YoloV10(ncnn)</item>
+        <item>ASR</item>           <!-- ASR(whisper.cpp based on ggml)benchmark -->
+        <item>LLM</item>              <!-- A GPT-4  style LLM benchmark using llama.cpp based on GGML -->
+        <item>LLM-V</item>            <!-- A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML -->
+        <item>LLM-O</item>            <!-- A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML -->
+        <item>TEXT2IMAGE</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
+        <item>MNIST</item>            <!-- MNIST(using ggml) benchmark -->
+        <item>TTS</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
     </string-array>
 
     <string-array name="threadCounts">

@@ -23,6 +23,7 @@
 
     </LinearLayout>
 
+    <!--
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
@@ -53,6 +54,7 @@
 
     </LinearLayout>
 
+     -->
     <SurfaceView
         android:id="@+id/cameraview"
         android:layout_width="fill_parent"

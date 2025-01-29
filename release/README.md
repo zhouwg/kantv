@@ -236,3 +236,4 @@
                     <li>fix bugs(caused by assertion failure in ggml.c) in ggml-jni</li>
                  </ul>
 
+- v1.5.0-pre 2025-01-29, cleanup project to align upstream llama.cpp
