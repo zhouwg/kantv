@@ -17,20 +17,16 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 - Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers/programmers who was interested in practise state-of-the-art AI tech(such as [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in <b>real scenario on Android phone/device</b>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC: realtime AI subtitle for online-TV(aka OTT TV) on Xiaomi 14 finished from 03/05/2024 to 03/16/2024</a>)
 
 
-- Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b) on Android phone/device using the magic llama.cpp
+- Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b, DeepSeek) on Android phone/device using the magic llama.cpp
 
 - Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study internal mechanism of GGML inference framework on Android phone/device(<a href="https://github.com/zhouwg/kantv/issues/121">PoC:Qualcomm QNN backend for ggml finished from 03/29/2024 to 04/26/2024</a>)
-
-- Well-maintained "workbench" for <a href="https://github.com/Tencent/ncnn">NCNN</a> beginners to study and practise NCNN inference framework on Android phone/device
 
 - Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
 
 ### Software architecture of KanTV Android
 
-(depend on https://github.com/zhouwg/kantv/issues/121)
-
-![kantv-software-arch](https://github.com/zhouwg/kantv/assets/6889919/a75109c2-ee9d-4cec-b70d-08e5369a6e62)
+![Image](https://github.com/user-attachments/assets/974a83f7-e49f-4346-9f4d-83d7eb897de8)
 
 
 ### How to build project
@@ -186,9 +182,9 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L14">ncnn/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> and <a href="https://github.com/zhouwg/kantv/blob/master/core/ncnn/CMakeLists.txt#L16">ncnn/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
 
  - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
 
@@ -249,56 +245,23 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
 
-![1204894425](https://github.com/zhouwg/kantv/assets/6889919/68f9fe1a-4328-43a0-a180-7584357d66c7)
+![Image](https://github.com/user-attachments/assets/1eeade87-8e9b-4ca9-b730-4c27a6d01a8e)
 
 ----
 
 here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
 
-![840460054](https://github.com/zhouwg/kantv/assets/6889919/ed27055b-0685-43f9-837e-3b99f7648fd1)
+![Image](https://github.com/user-attachments/assets/39fc67eb-5a7a-4c09-ac68-766715028dec)
 
 
-----
-here are some screenshots to demostrate CV inference by running the excellent <a href="https://github.com/Tencent/ncnn"> ncnn </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-![2015869763](https://github.com/zhouwg/kantv/assets/6889919/9b4c8325-8f7c-4bea-9cae-ee4627f9d199)
-
-![988568755](https://github.com/zhouwg/kantv/assets/6889919/49c7e22e-0e4c-4ece-b690-04d59ac1382f)
-
-
-![1730654667](https://github.com/zhouwg/kantv/assets/6889919/83ef3e44-92ee-4c00-b000-840a13097544)
-
-![1301547964](https://github.com/zhouwg/kantv/assets/6889919/07a4cc76-afa7-40cb-80bc-151e77220f4d)
 
 <details>
   <summary>some other screenshots</summary>
   <ol>
 
-![784269893](https://github.com/zhouwg/kantv/assets/6889919/8fe74b2a-21bc-452c-a6bb-5fb7fb2a567a)
-![205726588](https://github.com/zhouwg/kantv/assets/6889919/16411854-c67b-4975-9ca1-fabcfe95a62b)
-
-
-![1714239572](https://github.com/zhouwg/kantv/assets/6889919/20e23c8d-4656-4bb3-bb84-e0cef71cb532)
-
-![1778831978](https://github.com/zhouwg/kantv/assets/6889919/92774cbc-c716-4819-a0c1-6bc0ae495d1d)
-
-![Screenshot_2024_0304_131033](https://github.com/zhouwg/kantv/assets/6889919/6c5bd531-5577-4570-bc87-aa3a87822d6b)
-
-![154248860](https://github.com/zhouwg/kantv/assets/6889919/071ac55c-a5d7-4bd6-aece-83cbc8a487ff)
-
-![1118975128](https://github.com/zhouwg/kantv/assets/6889919/ef2b256c-02fb-4318-a430-b4cd15ed5b44)
-![Screenshot_20240301_000609_com cdeos kantv](https://github.com/zhouwg/kantv/assets/6889919/cf3a77ef-1409-4137-8236-487a8de7fe81)
-
-![1966093505](https://github.com/zhouwg/kantv/assets/6889919/44e6d6c7-0ebb-41c0-a576-9f7457e0dd23)
-
-![1179733910](https://github.com/zhouwg/kantv/assets/6889919/eb6ff245-3f04-4689-b998-2b6b06dec432)
-
-![2138671817](https://github.com/zhouwg/kantv/assets/6889919/513a0676-d2f3-464b-be50-436eabd99715)
-
-![1634808790](https://github.com/zhouwg/kantv/assets/6889919/f69ca9a7-5d25-46da-a160-ab00ff059db9)
-
-![991182277](https://github.com/zhouwg/kantv/assets/6889919/46306999-973c-4fc4-b294-48025acf9cf5)
+![Image](https://github.com/user-attachments/assets/3bc04e19-22ed-4bc8-be01-ed0f97cdd6b3)
 
   </ol>
 </details>
@@ -306,9 +269,7 @@ here are some screenshots to demostrate CV inference by running the excellent <a
 
 ### Hot topics
 
-- improve the quality of <a href="https://github.com/zhouwg/kantv/issues/121"> Qualcomm QNN backend for GGML</a>
-
-- improve the performance of edge-AI inference on Android phone
+- integrate <a href="https://github.com/deepseek-ai">DeepSeek AI</a>
 
 - bugfix in UI layer(Java)
 
@@ -327,18 +288,10 @@ Report issue in various Android-based phone or even submit PR to this project is
 ### Docs
 
 - [How to verify Qualcomm QNN backend for GGML on Qualcomm mobile SoC based android device](./docs/how-to-verify-ggml-qnn-backend-on-android.md)
-- [How to setup customized KanTV server in local dev env](./docs/how-to-setup-customized-kantvserver-in-local.md)
-- [How to create customized playlist for kantv apk](./docs/how-to-create-customized-playlist-in-cloud-server.md)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [How to use whisper.cpp and ffmpeg to add subtitle to video](./docs/how-to-use-whispercpp-ffmpeg-add-subtitle-to-video.md)
-- [How to reduce the size of apk](./docs/how-to-reduce-the-size-of-apk.md)
-- [How to sign apk](./docs/how-to-sign-apk.md)
-- [How to validate AI algorithm/model on Android using this project](./docs/how-to-validate-ai-algorithm-model-on-android-using-this-project.md)
-- [Why focus on ggml & ncnn edge-AI inference framework](./docs/why-focus-on-ggml-and-ncnn-on-android.md)
-- [What is the most difficult problem for this project](./docs/what-is-the-most-difficult-problem-for-this-project.md)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
-- [F.A.Q](./docs/FAQ.md)
 
 
 ### Special Acknowledgement
@@ -351,9 +304,6 @@ Report issue in various Android-based phone or even submit PR to this project is
    </li>
 
 
-  <li>
-   <a href="https://github.com/Tencent/ncnn">NCNN</a> by <a href="https://github.com/Tencent">Tencent</a>
-  </li>
   </ul>
 
   </ul>

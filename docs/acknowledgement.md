@@ -1,6 +1,6 @@
 Many/sincerely thanks to all contributors of the great open source community, especially all original authors and all contributors of the great Linux & Android & FFmpeg && whisper.cpp and other excellent projects.
 
-Project KanTV has used/tried following open-source projects(list in here is not incomplete):
+Project KanTV has used/tried following open-source projects(list in here is incomplete):
 
 <ul>
      <li><a href="https://github.com/torvalds/linux"     target="_blank">Linux</a></li>
