@@ -214,7 +214,7 @@
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
 
-     private ncnnjava ncnnjni = new ncnnjava();
+     //private ncnnjava ncnnjni = new ncnnjava();
 
      public static AIResearchFragment newInstance() {
          return new AIResearchFragment();
@@ -324,7 +324,6 @@
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
          _txtGGMLInfo.append("Powered by GGML(https://github.com/ggerganov/ggml)\n");
-         _txtGGMLInfo.append("Powered by NCNN(https://github.com/Tencent/ncnn)\n");
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -837,20 +836,7 @@
                          }
 
                      } else {
-                         //NCNN inference was imported since v1.3.8
-                         boolean ret_init = ncnnjni.loadModel(mContext.getAssets(), benchmarkIndex - CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal(), 0, backendIndex, false);
-                         if (!ret_init) {
-                             CDELog.j(TAG, "ncnn bench " + CDEUtils.getBenchmarkDesc(benchmarkIndex) + " init failed");
-                             isBenchmarking.set(false);
-                         } else {
-                             if (bitmapSelectedImage != null) {
-                                 ncnnjni.ncnn_bench("ncnnmdelparam", "ncnnmodelbin", pathSelectedImage, bitmapSelectedImage,
-                                         benchmarkIndex - CDEUtils.bench_type.GGML_BENCHMARK_MAX.ordinal(), nThreadCounts, backendIndex, 0);
-                             }
-                         }
-                         //=============================================================================================
-                         //add new AI benchmark type for NCNN here
-                         //=============================================================================================
+
                      }
 
                      endTime = System.currentTimeMillis();

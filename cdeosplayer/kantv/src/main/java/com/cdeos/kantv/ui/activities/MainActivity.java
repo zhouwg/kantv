@@ -76,9 +76,9 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     private LocalMediaFragment LocalMediaFragment;
     private PersonalFragment personalFragment;
     private BaseMvpFragment previousFragment;
-    private AIResearchFragment asrFragment;
-    //private LLMResearchFragment llmFragment;
-    private AIAgentFragment agentFragment;
+    private AIResearchFragment airesearchFragment;
+    private LLMResearchFragment llmFragment;
+    //private AIAgentFragment agentFragment;
 
     private Menu      optionMenu;
     private MenuItem  menuNetItem;
@@ -169,14 +169,14 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 fragmentTransaction.remove(homeFragment);
             if (LocalMediaFragment != null)
                 fragmentTransaction.remove(LocalMediaFragment);
-            //if (llmFragment != null)
-            //    fragmentTransaction.remove(llmFragment);
+            if (llmFragment != null)
+                fragmentTransaction.remove(llmFragment);
             if (personalFragment != null)
                 fragmentTransaction.remove(personalFragment);
-            if (asrFragment != null)
-                fragmentTransaction.remove(asrFragment);
-            if (agentFragment != null)
-                fragmentTransaction.remove(agentFragment);
+            if (airesearchFragment != null)
+                fragmentTransaction.remove(airesearchFragment);
+            //if (agentFragment != null)
+            //    fragmentTransaction.remove(agentFragment);
 
             fragmentTransaction.commitAllowingStateLoss();
         }
@@ -203,10 +203,12 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     return true;
 
                 case R.id.navigation_aiagent:
-                    setTitle("Realtime Inference");
-                    switchFragment(AIAgentFragment.class);
+                    //setTitle("Realtime Inference");
+                    //switchFragment(AIAgentFragment.class);
+                    setTitle("LLM Inference");
+                    switchFragment(LLMResearchFragment.class);
                     //menuNetItem.setVisible(false);
-                    showAIAgentMenu();
+                    //showAIAgentMenu();
                     return true;
 
                 case R.id.navigation_asr:
@@ -289,8 +291,8 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 new CommonEditTextDialog(this, CommonEditTextDialog.NETWORK_LINK).show();
                 break;
             default:
-                if (agentFragment != null)
-                    agentFragment.onMenuItemSelected(item);
+                //if (agentFragment != null)
+                //    agentFragment.onMenuItemSelected(item);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -367,17 +369,17 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             String fragmentName = previousFragment.getClass().getName();
             if (fragmentName.contains("AIResearchFragment")) {
                 CDELog.d(TAG, "release ASR resource");
-                asrFragment.release();
+                airesearchFragment.release();
             }
 
             if (fragmentName.contains("LLMResearchFragment")) {
                 CDELog.d(TAG, "release LLM resource");
-                //llmFragment.release();
+                llmFragment.release();
             }
 
             if (fragmentName.contains("AgentFragment")) {
                 CDELog.d(TAG, "release Agent resource");
-                agentFragment.release();
+                //agentFragment.release();
             }
         }
 
@@ -406,7 +408,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 getFragmentTransaction().show(LocalMediaFragment).commit();
             }
             previousFragment = LocalMediaFragment;
-        }/* else if (clazz == LLMResearchFragment.class) {
+        } else if (clazz == LLMResearchFragment.class) {
             if (llmFragment == null) {
                 llmFragment = LLMResearchFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
@@ -414,15 +416,15 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 getFragmentTransaction().show(llmFragment).commit();
             }
             previousFragment = llmFragment;
-        }*/ else if (clazz == AIResearchFragment.class) {
-            if (asrFragment == null) {
-                asrFragment = AIResearchFragment.newInstance();
-                getFragmentTransaction().add(R.id.fragment_container, asrFragment).commit();
+        } else if (clazz == AIResearchFragment.class) {
+            if (airesearchFragment == null) {
+                airesearchFragment = AIResearchFragment.newInstance();
+                getFragmentTransaction().add(R.id.fragment_container, airesearchFragment).commit();
             } else {
-                getFragmentTransaction().show(asrFragment).commit();
+                getFragmentTransaction().show(airesearchFragment).commit();
             }
-            previousFragment = asrFragment;
-        } else if (clazz == AIAgentFragment.class) {
+            previousFragment = airesearchFragment;
+        } /*else if (clazz == AIAgentFragment.class) {
             if (agentFragment == null) {
                 agentFragment = AIAgentFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, agentFragment).commit();
@@ -431,7 +433,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 agentFragment.initCamera();
             }
             previousFragment = agentFragment;
-        }
+        } */
     }
 
 
