@@ -19,10 +19,12 @@
 
 #include "whispercpp/whisper.h"
 
-#include "llamacpp/llama.h"
+#include "llamacpp/include/llama.h"
 
 #include "kantv-asr.h"
 #include "ggml-jni.h"
+
+#include "llamacpp/include/ggml-qnn.h"
 
 #define UNUSED(x)       (void)(x)
 

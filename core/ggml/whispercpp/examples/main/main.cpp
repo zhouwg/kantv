@@ -1106,7 +1106,6 @@ int main(int argc, char ** argv) {
             wparams.split_on_word    = params.split_on_word;
             wparams.audio_ctx        = params.audio_ctx;
 
-            wparams.speed_up         = params.speed_up;
             wparams.debug_mode       = params.debug_mode;
 
             wparams.tdrz_enable      = params.tinydiarize; // [TDRZ]

@@ -2,6 +2,7 @@
 #define WHISPER_H
 
 #include "ggml.h"
+#include "ggml-cpu.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -99,6 +100,7 @@ extern "C" {
         WHISPER_AHEADS_LARGE_V1,
         WHISPER_AHEADS_LARGE_V2,
         WHISPER_AHEADS_LARGE_V3,
+        WHISPER_AHEADS_LARGE_V3_TURBO,
     };
 
     typedef struct whisper_ahead {
@@ -238,6 +240,13 @@ extern "C" {
     //                     GPU, by caching compiled 'blobs' there.
     //                     Set to nullptr if not used.
     // Returns 0 on success. If OpenVINO is not enabled in build, this simply returns 1.
+    WHISPER_API int whisper_ctx_init_openvino_encoder_with_state(
+        struct whisper_context * ctx,
+          struct whisper_state * state,
+                    const char * model_path,
+                    const char * device,
+                    const char * cache_dir);
+
     WHISPER_API int whisper_ctx_init_openvino_encoder(
         struct whisper_context * ctx,
                     const char * model_path,
@@ -265,22 +274,6 @@ extern "C" {
                        const float * samples,
                                int   n_samples,
                                int   n_threads);
-
-    // Convert RAW PCM audio to log mel spectrogram but applies a Phase Vocoder to speed up the audio x2.
-    // The resulting spectrogram is stored inside the default state of the provided whisper context.
-    // Returns 0 on success
-    WHISPER_API int whisper_pcm_to_mel_phase_vocoder(
-        struct whisper_context * ctx,
-                   const float * samples,
-                           int   n_samples,
-                           int   n_threads);
-
-    WHISPER_API int whisper_pcm_to_mel_phase_vocoder_with_state(
-        struct whisper_context * ctx,
-          struct whisper_state * state,
-                   const float * samples,
-                           int   n_samples,
-                           int   n_threads);
 
     // This can be used to set a custom log mel spectrogram inside the default state of the provided whisper context.
     // Use this instead of whisper_pcm_to_mel() if you want to provide your own log mel spectrogram.
@@ -351,7 +344,7 @@ extern "C" {
     int whisper_token_count(struct whisper_context * ctx, const char * text);
 
     // Largest language id (i.e. number of available languages - 1)
-    WHISPER_API int whisper_lang_max_id();
+    WHISPER_API int whisper_lang_max_id(void);
 
     // Return the id of the specified language, returns -1 if not found
     // Examples:
@@ -431,6 +424,14 @@ extern "C" {
     WHISPER_API whisper_token whisper_token_transcribe(struct whisper_context * ctx);
 
     // Performance information from the default state.
+    struct whisper_timings {
+        float sample_ms;
+        float encode_ms;
+        float decode_ms;
+        float batchd_ms;
+        float prompt_ms;
+    };
+    WHISPER_API struct whisper_timings * whisper_get_timings(struct whisper_context * ctx);
     WHISPER_API void whisper_print_timings(struct whisper_context * ctx);
     WHISPER_API void whisper_reset_timings(struct whisper_context * ctx);
 
@@ -499,7 +500,6 @@ extern "C" {
 
         // [EXPERIMENTAL] speed-up techniques
         // note: these can significantly reduce the quality of the output
-        bool speed_up;          // speed-up the audio by 2x using Phase Vocoder
         bool debug_mode;        // enable debug_mode provides extra info (eg. Dump log_mel)
         int  audio_ctx;         // overwrite the audio context size (0 = use default)
 
@@ -522,8 +522,8 @@ extern "C" {
         bool detect_language;
 
         // common decoding parameters:
-        bool suppress_blank;    // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L89
-        bool suppress_non_speech_tokens; // ref: https://github.com/openai/whisper/blob/7858aa9c08d98f75575035ecd6481f462d66ca27/whisper/tokenizer.py#L224-L253
+        bool suppress_blank; // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L89
+        bool suppress_nst;   // non-speech tokens, ref: https://github.com/openai/whisper/blob/7858aa9c08d98f75575035ecd6481f462d66ca27/whisper/tokenizer.py#L224-L253
 
         float temperature;      // initial decoding temperature, ref: https://ai.stackexchange.com/a/32478
         float max_initial_ts;   // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/decoding.py#L97
@@ -534,7 +534,7 @@ extern "C" {
         float temperature_inc;
         float entropy_thold;    // similar to OpenAI's "compression_ratio_threshold"
         float logprob_thold;
-        float no_speech_thold;  // TODO: not implemented
+        float no_speech_thold;
 
         struct {
             int best_of;    // ref: https://github.com/openai/whisper/blob/f82bc59f5ea234d4b97fb2860842ed38519f7e65/whisper/transcribe.py#L264
@@ -573,10 +573,10 @@ extern "C" {
     };
 
     // NOTE: this function allocates memory, and it is the responsibility of the caller to free the pointer - see whisper_free_context_params & whisper_free_params()
-    WHISPER_API struct whisper_context_params * whisper_context_default_params_by_ref();
-    WHISPER_API struct whisper_context_params whisper_context_default_params(void);
+    WHISPER_API struct whisper_context_params * whisper_context_default_params_by_ref(void);
+    WHISPER_API struct whisper_context_params   whisper_context_default_params       (void);
     WHISPER_API struct whisper_full_params * whisper_full_default_params_by_ref(enum whisper_sampling_strategy strategy);
-    WHISPER_API struct whisper_full_params whisper_full_default_params(enum whisper_sampling_strategy strategy);
+    WHISPER_API struct whisper_full_params   whisper_full_default_params       (enum whisper_sampling_strategy strategy);
 
     // Run the entire model: PCM -> log mel spectrogram -> encoder -> decoder -> text
     // Not thread safe for same context
@@ -665,6 +665,9 @@ extern "C" {
 
     WHISPER_API void whisper_log_set(ggml_log_callback log_callback, void * user_data);
 
+    // Get the no_speech probability for the specified segment
+    WHISPER_API float whisper_full_get_segment_no_speech_prob           (struct whisper_context * ctx, int i_segment);
+    WHISPER_API float whisper_full_get_segment_no_speech_prob_from_state(struct whisper_state * state, int i_segment);
 #ifdef __cplusplus
 }
 #endif

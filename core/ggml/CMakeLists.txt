@@ -12,15 +12,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(TARGET_XIAOMI14    ON)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_ENABLE_QNN    ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(GGML_ENABLE_QNN    OFF)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
+set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
+
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
+
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
-set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
+
 set(QNN_INC_PATH                ${GGML_SRC_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${GGML_SRC_DIR}/../../prebuilts/lib/)
 
@@ -37,6 +40,11 @@ message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
 message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 
 
+include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
+include_directories(${LLAMACPP_SRC_DIR}/include)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu)
+
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
@@ -46,20 +54,51 @@ endif()
 
 set(SOURCE_FILES
         #03-30-2024, upstream source code in llama.cpp is preferred
-        ${LLAMACPP_SRC_DIR}/ggml.c
-        ${LLAMACPP_SRC_DIR}/ggml-alloc.c
-        ${LLAMACPP_SRC_DIR}/ggml-backend.c
-        ${LLAMACPP_SRC_DIR}/ggml-quants.c
-        ${QNN_BACKEND_SRCS}
-        ${LLAMACPP_SRC_DIR}/llama.cpp
-        ${LLAMACPP_SRC_DIR}/unicode.cpp
-        ${LLAMACPP_SRC_DIR}/sgemm.cpp
-        ${LLAMACPP_SRC_DIR}/unicode-data.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-alloc.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-backend.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-backend-reg.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-quants.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-opt.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-threading.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/gguf.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/cpu-feats-x86.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-aarch64.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-hbm.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-quants.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-traits.cpp
+
+        ${LLAMACPP_SRC_DIR}/src/llama.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-adapter.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-arch.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-batch.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-chat.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-context.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-cparams.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-grammar.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-hparams.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-impl.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-kv-cache.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-mmap.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-model.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-model-loader.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-quant.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-sampling.cpp
+        ${LLAMACPP_SRC_DIR}/src/llama-vocab.cpp
+        ${LLAMACPP_SRC_DIR}/src/unicode.cpp
+        ${LLAMACPP_SRC_DIR}/src/unicode-data.cpp
+
+        ${LLAMACPP_SRC_DIR}/common/arg.cpp
+        ${LLAMACPP_SRC_DIR}/common/log.cpp
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
+        ${LLAMACPP_SRC_DIR}/common/speculative.cpp
+        ${LLAMACPP_SRC_DIR}/common/ngram-cache.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
+        ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/console.cpp
         ${LLAMACPP_SRC_DIR}/common/build-info.cpp
-        ${LLAMACPP_SRC_DIR}/common/grammar-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/json-schema-to-grammar.cpp
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
@@ -68,15 +107,6 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
-        ${KANTV_GGMLJNI_SRC_DIR}/llm-inference.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
-
-        #05-25-2024, import MiniCPM-V(A GPT-4V Level Multimodal LLM), https://github.com/OpenBMB/MiniCPM-V
-        ${KANTV_GGMLJNI_SRC_DIR}/clip.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv_io.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/minicpmv-cli.cpp
-
 )
 
 include_directories(${WHISPERCPP_SRC_DIR}/)

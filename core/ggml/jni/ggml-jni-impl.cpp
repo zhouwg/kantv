@@ -636,11 +636,14 @@ static const char * ggml_jni_transcribe_from_file(const char * sz_model_path, co
         struct whisper_context_params wcp = whisper_context_default_params();
         LOGGD("backend %d", n_backend_type);
         wcp.gpu_device  = n_backend_type;//added on 04-17-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
+        wcp.use_gpu     = false;
+#ifdef GGML_USE_QNN
         if (n_backend_type != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is a fake QNN backend, just used to compare performance between QNN backend and original GGML
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
         }
+#endif
         context = whisper_init_from_file_with_params(sz_model_path, wcp);
         //PoC-S53: fix stability issue during toggle between different backend(QNN CPU/GPU/DSP backend, ggml...) in ggml-qnn.cpp(4th milestone)
         p_asr_ctx->p_context = context;
@@ -827,23 +830,28 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     LOGGD("bench type:%d\n", n_bench_type);
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("op type:%d\n", n_op_type);
+#ifdef GGML_USE_QNN
     if (QNN_BACKEND_GGML == n_backend_type) {
         p_asr_ctx->b_use_gpu = false;
         p_asr_ctx->gpu_device = QNN_BACKEND_GGML;// QNN_BACKEND_GGML is a fake QNN backend, just used for compare performance between QNN backend and original ggml
     } else {
-#ifdef GGML_USE_QNN
         p_asr_ctx->b_use_gpu = true;
         p_asr_ctx->gpu_device = n_backend_type;
-#endif
     }
+#endif
 
-#ifdef GGML_DISABLE_QNN
+#ifdef GGML_USE_QNN
     if (GGML_BACKEND_GGML != n_backend_type) {
         LOGGW("QNN feature was disabled and backend is not ggml\n");
         GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
         return;
     }
 #endif
+    if (n_backend_type != 3) {
+        GGML_JNI_NOTIFY("QNN feature was disabled and backend is not ggml\n");
+        return;
+    }
+
     p_asr_ctx->n_threads                = n_threads;
     p_asr_ctx->n_benchmark_type         = n_bench_type;
     memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
@@ -876,11 +884,6 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             llama_inference_ng(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type);
             break;
 
-        case GGML_BENCHMARK_CV_MNIST:
-            GGML_JNI_NOTIFY("input data is %s\n", sz_user_data);
-            mnist_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-            break;
-
         default:
             break;
     }
@@ -894,21 +897,7 @@ void ggml_jni_bench_m(const char * sz_model_path, const char * sz_img_path, cons
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("bench type:%d\n", n_bench_type);
     LOGGD("backend type:%d\n", n_backend_type);
-
-    switch (n_bench_type) {
-        case GGML_BENCHMARK_LLM_V:  //A GPT-4V style multimodal LLM inference
-            LOGGD("GGML_BENCHMARK_LLM_V");
-            minicpmv_inference(sz_model_path, sz_img_path, sz_user_data, n_num_threads, n_backend_type);
-            break;
-
-        case GGML_BENCHMARK_LLM_O: //A GPT-4o style multimodal LLM inference
-            LOGGD("GGML_BENCHMARK_LLM_O");
-            GGML_JNI_NOTIFY("GGML_BENCHMARK_LLM_O");
-            break;
-
-        default:
-            break;
-    }
+    GGML_JNI_NOTIFY("not supported");
 }
 
 // =================================================================================================
@@ -1522,11 +1511,14 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, i
      // the user could specify to use devices cpu, sycl_igpu0 and sycl_dgpu0 to select CPU, iGPU and dGPU
      //c_params.gpu_device    = QNN_HTP;//TODO:Failed in loading stub: dlopen failed: library "libQnnHtpV66Stub.so" not found
      c_params.gpu_device  = n_backend;
+     c_params.use_gpu     = false;
+#ifdef GGML_USE_QNN
      if (n_backend != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is a fake QNN backend, just used to compare performance between QNN backend and original GGML
          c_params.use_gpu = true;
      } else {
          c_params.use_gpu = false;
      }
+#endif
      p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
 #endif
      if (nullptr == p_asr_ctx->p_context) {
@@ -1557,13 +1549,10 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, i
      params.single_segment          = true;
      params.no_timestamps           = true;
 
-     params.speed_up                = false;
      params.debug_mode              = false;
      params.audio_ctx               = 0;
 
      params.suppress_blank              = true;
-     params.suppress_non_speech_tokens  = true;
-
 
      //ref: https://github.com/ggerganov/whisper.cpp/issues/1507
      //reduce the maximum context size (--max-context). By default it is 224. Setting it to 64 or 32 can reduce the repetitions significantly. Setting it to 0 will most likely eliminate all repetitions, but the transcription quality can be affected because it will be losing the context from the previous transcript
@@ -1707,11 +1696,14 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
         }
         struct whisper_context_params wcp = whisper_context_default_params();
         wcp.gpu_device  = n_backend;//added on 04-17-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
+        wcp.use_gpu     = false;
+#ifdef GGML_USE_QNN
         if (n_backend != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is a fake QNN backend, just used to compare performance between QNN backend and original GGML
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
         }
+#endif
         p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, wcp);
         memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
         memcpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
@@ -1722,11 +1714,14 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
         }
         struct whisper_context_params wcp = whisper_context_default_params();
         wcp.gpu_device  = n_backend;//added on 04-17-2024, for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
+        wcp.use_gpu     = false;
+#ifdef GGML_USE_QNN
         if (n_backend != QNN_BACKEND_GGML) { // QNN_BACKEND_GGML is a "fake" QNN backend, just used to compare performance between QNN backend and original GGML
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
         }
+#endif
         p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, wcp);
         p_asr_ctx->n_backend = n_backend;
     } else {
