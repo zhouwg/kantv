@@ -14,33 +14,19 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(TARGET_XIAOMI14    ON)  # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
 set(GGML_ENABLE_QNN    ON)  # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
 
+set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
-
-#03-05-2024, PoC#64: English realtime subtitle for English on-line TV by whisper.cpp
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
-set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
-
-
-#03-26-2024, integrate llama.cpp to kantv
 set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
-
-
-set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
-
-set(BARKCPP_SRC_DIR             ${GGML_SRC_DIR}/barkcpp/)
-
-#03-29-2024, PoC#121:Add Qualcomm mobile SoC native backend for GGML,https://github.com/zhouwg/kantv/issues/121
 set(QNN_INC_PATH                ${GGML_SRC_DIR}/../../prebuilts/include/QNN)
 set(QNN_LIB_PATH                ${GGML_SRC_DIR}/../../prebuilts/lib/)
-set(QNN_SRC_DIR                 ${GGML_SRC_DIR}/qnnsample/)
 
 message("GGML_SRC_DIR         : ${GGML_SRC_DIR}")
 message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
 message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
-message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
 message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
 message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
@@ -52,20 +38,10 @@ message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 
 
 include_directories(${QNN_INC_PATH}/)
-include_directories(${QNN_SRC_DIR}/)
-include_directories(${QNN_SRC_DIR}/Utils)
-include_directories(${QNN_SRC_DIR}/Log)
-include_directories(${QNN_SRC_DIR}/WrapperUtils)
-include_directories(${QNN_SRC_DIR}/PAL/include)
-
-aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
-include_directories(${SDCPP_SRC_DIR})
-include_directories(${BARKCPP_SRC_DIR})
-
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 if (GGML_ENABLE_QNN)
-    set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp)  # implementation of PoC#121:Add Qualcomm mobile SoC native backend for GGML
+    set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml-qnn.cpp)
 endif()
 
 set(SOURCE_FILES
@@ -88,19 +64,12 @@ set(SOURCE_FILES
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
-        ${stablediffusioncpp}
-
-        ${BARKCPP_SRC_DIR}/bark.cpp
-        ${BARKCPP_SRC_DIR}/encodec.cpp
-        ${BARKCPP_SRC_DIR}/ggml-allocr.c
-
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/llm-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/mnist-inference.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/tts-inference.cpp
 
         #05-25-2024, import MiniCPM-V(A GPT-4V Level Multimodal LLM), https://github.com/OpenBMB/MiniCPM-V
         ${KANTV_GGMLJNI_SRC_DIR}/clip.cpp

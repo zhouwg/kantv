@@ -69,7 +69,6 @@
 
 
  import org.ggml.ggmljava;
- import org.ncnn.ncnnjava;
 
  import java.io.File;
  import java.io.FileNotFoundException;

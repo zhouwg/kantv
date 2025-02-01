@@ -122,7 +122,7 @@ public class ggmljava {
     /**
      * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/kantv/xxxxxx.gguf or qualcomm's prebuilt dedicated model.so or ""
      * @param userData      ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
-     * @param nBenchType    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
+     * @param nBenchType    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: MNIST
      * @param nThreadCounts 1 - 8
      * @param nBackendType  0: CPU  1: GPU  2: NPU 3: ggml("fake" QNN backend, just for compare performance)
      * @param nOpType       type of matrix manipulate / GGML OP / type of various complex/complicated computation graph

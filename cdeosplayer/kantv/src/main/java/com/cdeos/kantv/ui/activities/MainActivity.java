@@ -37,7 +37,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.blankj.utilcode.util.AppUtils;
 import com.blankj.utilcode.util.ToastUtils;
 import com.cdeos.kantv.ui.fragment.AIResearchFragment;
-import com.cdeos.kantv.ui.fragment.AIAgentFragment;
 import com.cdeos.kantv.ui.fragment.LLMResearchFragment;
 import com.cdeos.kantv.ui.fragment.TVGridFragment;
 import com.cdeos.kantv.utils.Settings;

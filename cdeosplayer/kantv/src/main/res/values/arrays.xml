@@ -68,9 +68,7 @@
         <item>LLM</item>              <!-- A GPT-4  style LLM benchmark using llama.cpp based on GGML -->
         <item>LLM-V</item>            <!-- A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML -->
         <item>LLM-O</item>            <!-- A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML -->
-        <item>TEXT2IMAGE</item>       <!-- TEXT2IMAGE(stablediffusion.cpp based on ggml) benchmark -->
         <item>MNIST</item>            <!-- MNIST(using ggml) benchmark -->
-        <item>TTS</item>              <!-- TTS(bark.cpp based on ggml) benchmark -->
     </string-array>
 
     <string-array name="threadCounts">

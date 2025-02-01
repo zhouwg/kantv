@@ -83,8 +83,8 @@ enum ggml_jni_backend_type {
     /**
     *
     * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
-    * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
-    * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: TEXT2IMAGE(stablediffusion.cpp) 7:MNIST 8: TTS
+    * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / MNIST: image path
+    * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp) 6: MNIST
     * @param n_threads       1 - 8
     * @param n_backend_type  0: CPU  1: GPU  2: NPU 3: ggml("fake" QNN backend, just for compare performance)
     * @param n_op_type       type of GGML OP
@@ -175,31 +175,9 @@ enum ggml_jni_backend_type {
 
 
 // =================================================================================================
-// trying to integrate stablediffusion.cpp on 04-06-2024(Apri,6,2024)
-// =================================================================================================
-/**
-*
-* @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
-* @param prompt
-* @param bench_type            not used currently
-* @param n_threads             1 - 8
-* @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance)
-* @return
-*/
-int  stablediffusion_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
-
-
-// =================================================================================================
 // trying to integrate MNIST inference using ggml
 // =================================================================================================
 int  mnist_inference(const char * sz_model_path, const char * sz_image_path, int bench_type, int num_threads, int n_backend_type);
-
-
-// =================================================================================================
-// trying to integrate TTS(bark.cpp) inference using ggml
-// =================================================================================================
-int  tts_inference(const char * sz_model_path, const char * prompt, int bench_type, int num_threads, int n_backend_type);
-
 
 // =================================================================================================
 // trying to integrate MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) inference using llama.cpp on 05-25-2024

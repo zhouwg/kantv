@@ -876,17 +876,9 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             llama_inference_ng(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type);
             break;
 
-        case GGML_BENCHMARK_TEXT2IMAGE:
-            stablediffusion_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-            break;
-
         case GGML_BENCHMARK_CV_MNIST:
             GGML_JNI_NOTIFY("input data is %s\n", sz_user_data);
             mnist_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
-            break;
-
-        case GGML_BENCHMARK_TTS:
-            tts_inference(sz_model_path, sz_user_data, 0, n_threads, n_backend_type);
             break;
 
         default:
