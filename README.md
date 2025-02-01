@@ -252,7 +252,7 @@ here is a screenshot to demostrate LLM inference by running the magic <a href="h
 here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
 
-![Image](https://github.com/user-attachments/assets/39fc67eb-5a7a-4c09-ac68-766715028dec)
+![Image](https://github.com/user-attachments/assets/3bed779c-2297-4b09-bf13-9776d0b9d4e3)
 
 
 
@@ -261,7 +261,7 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
   <summary>some other screenshots</summary>
   <ol>
 
-![Image](https://github.com/user-attachments/assets/3bc04e19-22ed-4bc8-be01-ed0f97cdd6b3)
+![Image](https://github.com/user-attachments/assets/2d95bd5e-bd02-4810-aa70-a81cc0469fcc)
 
   </ol>
 </details>
