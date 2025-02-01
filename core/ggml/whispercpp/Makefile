@@ -38,8 +38,8 @@ endif
 # Compile flags
 #
 
-CFLAGS   = -I. -I../../../external/ffmpeg/ -I../llamacpp              -O3 -DNDEBUG -std=c11   -fPIC
-CXXFLAGS = -I. -I../../../external/ffmpeg/ -I../llamacpp -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
+CFLAGS   = -I. -I../../../external/ffmpeg/ -I../llamacpp/ggml/include -I../llamacpp/ggml/src/ -O3 -DNDEBUG -std=c11   -fPIC
+CXXFLAGS = -I. -I../../../external/ffmpeg/ -I../llamacpp/ggml/include -I../llamacpp/ggml/src/ -I./examples -O3 -DNDEBUG -std=c++11 -fPIC
 LDFLAGS  =
 
 ifdef MACOSX_DEPLOYMENT_TARGET
@@ -313,16 +313,16 @@ $(info )
 # Build library
 #
 
-ggml.o: ../llamacpp/ggml.c
+ggml.o: ../llamacpp/ggml/src/ggml.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-alloc.o: ../llamacpp/ggml-alloc.c
+ggml-alloc.o: ../llamacpp/ggml/src/ggml-alloc.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-backend.o: ../llamacpp/ggml-backend.c
+ggml-backend.o: ../llamacpp/ggml/src/ggml-backend.cpp
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
-ggml-quants.o: ../llamacpp/ggml-quants.c
+ggml-quants.o: ../llamacpp/ggml/src/ggml-quants.c
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
 WHISPER_OBJ += ggml.o ggml-alloc.o ggml-backend.o ggml-quants.o ../../../external/ffmpeg/libavutil/cde_log.o

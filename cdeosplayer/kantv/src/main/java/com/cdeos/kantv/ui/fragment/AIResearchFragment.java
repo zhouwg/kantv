@@ -69,7 +69,6 @@
 
 
  import org.ggml.ggmljava;
- import org.ncnn.ncnnjava;
 
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -174,29 +173,6 @@
      // https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF
      // https://huggingface.co/TheBloke/Llama-2-70B-Chat-GGUF
 
-     // https://huggingface.co/Xorbits/Qwen-7B-Chat-GGUF/blob/main/Qwen-7B-Chat.Q4_K_M.gguf  //4.9 GB
-
-     // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/tree/main
-     // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q2_K.gguf //2.62 GB
-     // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q4_0.gguf //3.48 GB
-
-
-     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
-
-
-     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF
-     // https://huggingface.co/shaowenchen/baichuan2-7b-chat-gguf
-     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf // 4.61 GB
-
-
-     // https://huggingface.co/mlabonne/gemma-2b-GGUF/tree/main
-     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q4_K_M.gguf  // 1.5 GB
-     // https://huggingface.co/mlabonne/gemma-2b-GGUF/resolve/main/gemma-2b.Q8_0.gguf    // 2.67 GB
-
-     // https://huggingface.co/TheBloke/Yi-34B-Chat-GGUF/tree/main
-     // https://huggingface.co/second-state/Yi-34B-Chat-GGUF/blob/a93fd377944179153cc8477eef2e69645c1a8ff9/Yi-34B-Chat-Q2_K.gguf // 12.8 GB
-
-
      //private String ggmlModelFileName = "llama-2-7b.Q4_K_M.gguf";    //4.08 GB
      //private String ggmlModelFileName = "llama-2-7b-chat.Q4_K_M.gguf"; //4.08 GB
      //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; // 1.1 GB
@@ -213,8 +189,6 @@
 
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
-
-     //private ncnnjava ncnnjni = new ncnnjava();
 
      public static AIResearchFragment newInstance() {
          return new AIResearchFragment();
