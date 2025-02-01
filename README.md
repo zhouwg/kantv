@@ -328,9 +328,8 @@ Report issue in various Android-based phone or even submit PR to this project is
 ### License
 
 ```
-Copyright (c) 2021 - 2023 Project KanTV
 
-Copyright (c) 2024 -  Authors of Project KanTV
+Copyright (c) 2021 -  Authors of Project KanTV
 
 Licensed under Apachev2.0 or later
 ```
