@@ -43,12 +43,26 @@ include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
 include_directories(${LLAMACPP_SRC_DIR}/include)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/)
 
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs/stddef)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/incs)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rpcmem/inc)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_Debug_aarch64)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs/qnx)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/common/qnx/ship/android_Debug_aarch64)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/utils/examples)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rtld/ship/android_aarch64)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/inc)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/android_Debug_aarch64/ship)
+
 if (GGML_ENABLE_QNN)
-    set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-qnn.cpp)
+    #set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-qnn.cpp)
+    file(GLOB QNN_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn//*.c")
 endif()
 
 set(SOURCE_FILES
@@ -208,6 +222,22 @@ set_target_properties(kantvffmpeg
         IMPORTED_LOCATION
         ${PREBUILT_LIB_PATH}/libkantv-ffmpeg.so)
 
+add_library(cdsprpc
+        SHARED
+        IMPORTED)
+set_target_properties(cdsprpc
+        PROPERTIES
+        IMPORTED_LOCATION
+        /opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_aarch64/libcdsprpc.so)
+
+add_library(hexagon_skel
+        SHARED
+        IMPORTED)
+set_target_properties(hexagon_skel
+        PROPERTIES
+        IMPORTED_LOCATION
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/libcalculator.so)
+
 function(build_library target_name)
     add_library(
             ${target_name}
@@ -218,9 +248,9 @@ function(build_library target_name)
     if (GGML_ENABLE_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc hexagon_skel)
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc hexagon_skel)
     endif()
 
 endfunction()

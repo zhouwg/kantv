@@ -128,12 +128,6 @@ static bool ggml_graph_compute_helper(
         ggml_backend_cpu_set_n_threads(backend, n_threads);
     }
 
-#ifdef GGML_USE_QNN
-    if (ggml_backend_is_qnn(backend)) {
-        ggml_backend_qnn_set_n_threads(backend, n_threads);
-    }
-#endif
-
     //a new approch of mixed inference
     if (nullptr != backend)
         return ggml_backend_graph_compute(backend, graph) == GGML_STATUS_SUCCESS;
