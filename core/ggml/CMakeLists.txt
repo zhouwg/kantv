@@ -43,7 +43,8 @@ include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
 include_directories(${LLAMACPP_SRC_DIR}/include)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels)
 
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
@@ -62,7 +63,7 @@ include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/android_Debug_aarc
 
 if (GGML_ENABLE_QNN)
     #set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-qnn.cpp)
-    file(GLOB QNN_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn//*.c")
+    file(GLOB QNN_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels/ggmlop_ap_skel.c")
 endif()
 
 set(SOURCE_FILES
@@ -230,13 +231,13 @@ set_target_properties(cdsprpc
         IMPORTED_LOCATION
         /opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_aarch64/libcdsprpc.so)
 
-add_library(hexagon_skel
+add_library(ggmlop_skel
         SHARED
         IMPORTED)
-set_target_properties(hexagon_skel
+set_target_properties(ggmlop_skel
         PROPERTIES
         IMPORTED_LOCATION
-        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/libcalculator.so)
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels/libggmlop.so)
 
 function(build_library target_name)
     add_library(
@@ -248,9 +249,10 @@ function(build_library target_name)
     if (GGML_ENABLE_QNN)
         file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc hexagon_skel)
+        #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc ggmlop_skel)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc hexagon_skel)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
     endif()
 
 endfunction()
