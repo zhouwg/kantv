@@ -92,7 +92,7 @@
      private int benchmarkIndex = 0;
 
      private String strBackend = "ggml";
-     private int backendIndex = 3; //ggml
+     private int backendIndex = 1; //ggml
 
      private long beginTime = 0;
      private long endTime = 0;
@@ -224,7 +224,7 @@
 
              }
          });
-         spinnerBackend.setSelection(3);
+         spinnerBackend.setSelection(1);
 
          _btnInference.setOnClickListener(v -> {
              String strPrompt = _txtUserInput.getText().toString();

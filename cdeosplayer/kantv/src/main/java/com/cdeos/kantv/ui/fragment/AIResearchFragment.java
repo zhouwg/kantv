@@ -113,8 +113,8 @@
      private int benchmarkIndex = CDEUtils.bench_type.GGML_BENCHMARK_ASR.ordinal();
      private int previousBenchmakrIndex = 0;
      private String strModeName = "tiny.en-q8_0";
-     private String strBackend = "cpu";
-     private int backendIndex = 0; //CPU
+     private String strBackend = "npu";
+     private int backendIndex = 0; //NPU
      private String strOPType = "add";
      private int optypeIndex = 0; //matrix addition operation
      private String selectModeFileName = "";
@@ -159,15 +159,8 @@
      private String ggmlMNISTImageFile = "mnist-5.png";
      private String ggmlMNISTModelFile = "mnist-ggml-model-f32.gguf";
 
-     //MiniCPM-V:A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V/
-     //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
-     //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
-     //https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf // 2.67 GB
-     //private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
-     //https://huggingface.co/ggml-org/DeepSeek-R1-Distill-Qwen-1.5B-Q4_0-GGUF/blob/main/deepseek-r1-distill-qwen-1.5b-q4_0.gguf //1.07 GB
-     //https://huggingface.co/ggml-org/DeepSeek-R1-Distill-Qwen-32B-Q8_0-GGUF/resolve/main/deepseek-r1-distill-qwen-32b-q8_0.gguf //34.8 GB
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly.\n";
 
      private Context mContext;
@@ -333,9 +326,6 @@
                      adapterGGMLBackendType.notifyDataSetChanged();
                  }
 
-                 //spinnerOPType.setAdapter(adapterOPType);
-                 //adapterOPType.notifyDataSetChanged();
-
                  previousBenchmakrIndex = benchmarkIndex;
              }
 
@@ -389,9 +379,6 @@
          String[] arrayBackend = getResources().getStringArray(R.array.backend);
          adapterGGMLBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
 
-         String[] arrayNCNNBackend = getResources().getStringArray(R.array.ncnn_backend);
-         adapterNCNNBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayNCNNBackend);
-
          spinnerBackend.setAdapter(adapterGGMLBackendType);
          spinnerBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
              @Override
@@ -407,51 +394,7 @@
 
              }
          });
-         spinnerBackend.setSelection(CDEUtils.QNN_BACKEND_GGML);
-
-         spinnerOPType = mActivity.findViewById(R.id.spinnerOPType);
-         arrayGraphType = getResources().getStringArray(R.array.graphtype);
-
-         {
-             int max_idx = ggmljava.ggml_op.valueOf("GGML_OP_MUL_MAT").ordinal();
-             arrayOPType = new String[max_idx + 1];
-             ggmljava.ggml_op[] ggmlops = ggmljava.ggml_op.values();
-             int idx = 0;
-             for (ggmljava.ggml_op op : ggmlops) {
-                 //CDELog.j(TAG, "ggml op index:" + op.ordinal() + ", name:" + op.name());
-                 //if (op.name().contains("GGML_OP_NONE"))
-                 //    continue;
-
-                 arrayOPType[idx] = op.name();
-                 idx++;
-
-                 if (op.name().contains("GGML_OP_MUL_MAT")) {
-                     break;
-                 }
-             }
-         }
-         spinnerOPType.setSelection(0);
-
-         adapterOPType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayOPType);
-         adapterGraphType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayGraphType);
-
-         spinnerOPType.setAdapter(adapterOPType);
-
-         spinnerOPType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-             @Override
-             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 CDELog.j(TAG, "GGML op type:" + arrayOPType[position]);
-                 strOPType = arrayOPType[position];
-                 optypeIndex = Integer.valueOf(position);
-                 CDELog.j(TAG, "strOPType:" + strOPType);
-                 CDELog.j(TAG, "optypeIndex:" + optypeIndex);
-             }
-
-             @Override
-             public void onNothingSelected(AdapterView<?> parent) {
-
-             }
-         });
+         spinnerBackend.setSelection(CDEUtils.HEXAGON_BACKEND_GGML);
 
 
          _btnSelectImage.setOnClickListener(arg0 -> {
@@ -474,11 +417,11 @@
              if (isNCNNInference()) {
                  //inference using NCNN framework
 
-                 if (backendIndex == CDEUtils.QNN_BACKEND_NPU) {
+                 if (backendIndex == CDEUtils.HEXAGON_BACKEND_NPU) {
                      CDEUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
                      return;
                  }
-                 if (backendIndex == CDEUtils.QNN_BACKEND_GGML) {
+                 if (backendIndex == CDEUtils.HEXAGON_BACKEND_GGML) {
                      CDEUtils.showMsgBox(mActivity, "NCNN inference only support CPU/GPU backend");
                      return;
                  }
@@ -579,10 +522,7 @@
                  }
                  CDELog.j(TAG, "selectModeFileName:" + selectModeFileName);
 
-                 if ((benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_QNN_GGML_OP.ordinal()) || (benchmarkIndex == CDEUtils.bench_type.GGML_BENCHMARK_QNN_AUTO_UT.ordinal())) {
-                     resetInternalVars();
-                     selectModeFileName = "ggml-tiny.en-q8_0.bin";
-                 } else {
+                {
                      if (isLLMModel && (benchmarkIndex != CDEUtils.bench_type.GGML_BENCHMARK_LLM.ordinal())) {
                          CDELog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));
                          CDEUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + CDEUtils.getBenchmarkDesc(benchmarkIndex));

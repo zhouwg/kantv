@@ -2784,17 +2784,57 @@ llama_perf_context_data llama_perf_context(const llama_context * ctx) {
     return data;
 }
 
+#if defined(__ANDROID__)
+#include "kantv-asr.h"
+#include "ggml-jni.h"
+#include <sstream>
+#include <iomanip>
+#endif
+
 void llama_perf_context_print(const llama_context * ctx) {
     const auto data = llama_perf_context(ctx);
 
     const double t_end_ms = 1e-3 * ggml_time_us();
+#if defined(__ANDROID__)
+    const auto timings = llama_perf_context(ctx);
+    std::ostringstream timing;
+    timing << "llama-timings:\t";
 
+    timing << "   load time  = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << (timings.t_load_ms) << " ms";
+
+    timing << "\n";
+    timing << "prompt eval time = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << timings.t_p_eval_ms << " ms / "
+           << timings.n_p_eval << " tokens ("
+           << (timings.t_p_eval_ms / timings.n_p_eval) << " ms per token, "
+           << (1e3 / timings.t_p_eval_ms * timings.n_p_eval)
+           << " tokens per second)";
+    timing << "\n";
+
+    timing << " eval time = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << timings.t_eval_ms << " ms / "
+           << timings.n_eval << " tokens ("
+           << (timings.t_eval_ms / timings.n_eval) << " ms per token, "
+           << (1e3 / timings.t_eval_ms * timings.n_eval)
+           << " tokens per second)";
+    timing << "\n";
+
+    timing << "   total time = " << std::setw(10) << std::fixed << std::setprecision(2)
+           << ((t_end_ms - timings.t_start_ms)) << " ms / "
+           << (timings.n_p_eval + timings.n_eval)
+           << "  tokens\n\n";
+
+    std::string result = timing.str();
+    kantv_asr_notify_benchmark(result);
+#else
     LLAMA_LOG_INFO("%s:        load time = %10.2f ms\n", __func__, data.t_load_ms);
     LLAMA_LOG_INFO("%s: prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n",
             __func__, data.t_p_eval_ms, data.n_p_eval, data.t_p_eval_ms / data.n_p_eval, 1e3 / data.t_p_eval_ms * data.n_p_eval);
     LLAMA_LOG_INFO("%s:        eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
             __func__, data.t_eval_ms, data.n_eval, data.t_eval_ms / data.n_eval, 1e3 / data.t_eval_ms * data.n_eval);
     LLAMA_LOG_INFO("%s:       total time = %10.2f ms / %5d tokens\n", __func__, (t_end_ms - data.t_start_ms), (data.n_p_eval + data.n_eval));
+#endif
 }
 
 void llama_perf_context_reset(llama_context * ctx) {

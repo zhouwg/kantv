@@ -19,7 +19,7 @@ extern "C" {
 #include "libavutil/cde_log.h"
 #include "libavutil/cde_assert.h"
 }
-#include "llamacpp/ggml/include/ggml-qnn.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
 #include "ggml-jni.h"
 
 
@@ -104,14 +104,14 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
-    if (backend_type != QNN_BACKEND_GGML) {
-#ifdef GGML_USE_QNN
-        LOGGD("using QNN backend %d", backend_type);
+    if (backend_type != HEXAGON_BACKEND_GGML) {
+#ifdef GGML_USE_HEXAGON
+        LOGGD("using hexagon backend %d", backend_type);
         params.main_gpu = backend_type;
         params.n_gpu_layers = 4096;
 #else
-        LOGGW("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(backend_type));
-        GGML_JNI_NOTIFY("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(backend_type));
+        LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
+        GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
         return 1;
 #endif
     } else {

@@ -62,8 +62,6 @@
     <string-array name="benchType">
         <item>memcpy</item>                 <!-- memcopy benchmark -->
         <item>mulmat</item>                 <!-- mulmat benchmark -->
-        <item>qnn-op-ut</item>              <!-- UT for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API  -->
-        <item>qnn-op-autout</item>          <!-- automation UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API -->
         <item>ASR</item>                    <!-- ASR(whisper.cpp based on ggml)benchmark -->
         <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml)benchmark -->
     </string-array>
@@ -108,8 +106,6 @@
     </string-array>
 
     <string-array name="backend">
-        <item>cpu</item>
-        <item>gpu</item>
         <item>npu</item>
         <item>ggml</item>
     </string-array>

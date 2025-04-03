@@ -232,7 +232,8 @@ public class IApplication extends Application {
         mKANTVDRM.ANDROID_JNI_Init(mContext, CDEUtils.getDataPath(mContext));
         mKANTVDRM.ANDROID_JNI_SetLocalEMS(CDEUtils.getLocalEMS());
         CDEAssetLoader.copyAssetFile(mContext, "config.json", CDEAssetLoader.getDataPath(mContext) + "config.json");
-        CDEAssetLoader.copyAssetFile(mContext, "ggml-qnn.cfg", CDEAssetLoader.getDataPath(mContext) + "/qnnlib/ggml-qnn.cfg");
+        CDEAssetLoader.copyAssetFile(mContext, "ggml-hexagon.cfg", CDEAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
+        CDEAssetLoader.copyAssetFile(mContext, "libggmlop_skel.so", CDEAssetLoader.getDataPath(mContext) + "libggmlop_skel.so");
 
         CDEUtils.copyAssetFile(mContext, "res/apple.png", CDEUtils.getDataPath(mContext) + "apple.png");
         CDEUtils.copyAssetFile(mContext, "res/colorkey.png", CDEUtils.getDataPath(mContext) + "colorkey.png");
@@ -268,6 +269,7 @@ public class IApplication extends Application {
         //note: move assets/models to /sdcard/kantv/models manually
         //     for purpose of reduce size of APK, the APK size would be smaller significantly
         CDEAssetLoader.copyAssetDir(mContext, "models", CDEUtils.getDataPath() + "/models");
+        CDEAssetLoader.copyAssetFile(mContext, "/models/ggml-tiny.en-q8_0.bin", CDEUtils.getSDCardDataPath() + "ggml-tiny.en-q8_0.bin");
 
         //step-4:
         String configString = CDEAssetLoader.readTextFromFile(CDEAssetLoader.getDataPath(mContext) + "config.json");
@@ -340,7 +342,6 @@ public class IApplication extends Application {
             CDEUtils.setDecryptMode(CDEUtils.DECRYPT_SOFT);
         }
 
-
         CDEUtils.setUsingFFmpegCodec(mSettings.getUsingFFmpegCodec());
         CDELog.j(TAG, "using ffmpeg codec for audio:" + CDEUtils.getUsingFFmpegCodec());
 
@@ -399,9 +400,9 @@ public class IApplication extends Application {
             CDELog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             CDELog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL, CDEUtils.QNN_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL, CDEUtils.HEXAGON_BACKEND_GGML);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST, CDEUtils.QNN_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST, CDEUtils.HEXAGON_BACKEND_GGML);
             }
             CDEUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             CDEUtils.setTVASR(false);

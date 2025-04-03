@@ -19,13 +19,13 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b, DeepSeek) on Android phone/device using the magic llama.cpp
 
-- Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study internal mechanism of GGML inference framework on Android phone/device(<a href="https://github.com/zhouwg/kantv/issues/121">PoC:Qualcomm QNN backend for ggml finished from 03/29/2024 to 04/26/2024</a>)
+- Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study internal mechanism of GGML inference framework on Android phone/device
 
 - Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
 
 ### Highlight
 
-As far as I know, probably be the first <a href="https://github.com/zhouwg/kantv/issues/246">open-source implmentation of ggml-qnn</a>
+As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18">open-source implmentation of ggml-qnn/ggml-hexagon</a>
 
 ### Supported Chipset
 
@@ -33,8 +33,7 @@ As far as I know, probably be the first <a href="https://github.com/zhouwg/kantv
     Snapdragon 8 Gen 1+
     Snapdragon 8 Gen 2
     Snapdragon 8 Gen 3
-    Snapdragon 8 Gen 4
-    Snapdragon 8 Elite
+    Snapdragon 8 Elite(aka 8 Gen4)
 
 
 ### Software architecture of KanTV Android
@@ -195,9 +194,9 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite(aka 8Gen4) SoC based Android phone
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable ggml-hexagon backend for AI inference on Qualcomm SoC based Android phone
 
  - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
 
@@ -238,25 +237,19 @@ cd kantv
 
 ### How to build project from Github
 
-https://github.com/kantv-ai/kantv/actions
 
-The latest prebuit APK could be found at https://github.com/kantv-ai/kantv/actions/runs/13477810505 accordingly.
-
-The size of generated APK is about 100M, this might be not make sense for APP's user, we are working on it.
-![Screenshot from 2025-02-23 09-09-47](https://github.com/user-attachments/assets/668d839e-8858-407b-a656-e5c4bbb22875)
-![Screenshot from 2025-02-23 09-11-24](https://github.com/user-attachments/assets/eb2ee580-c3d1-4ea4-b60e-8e6306329a6f)
-![Screenshot from 2025-02-23 09-10-51](https://github.com/user-attachments/assets/30e1d64c-cf3c-43dc-b029-1c09ec6ac0ec)
+The latest prebuit APK could be found at https://github.com/kantv-ai/kantv/actions accordingly.
 
 
 ### Run Android APK on Android phone
 
 You will need an Android smartphone with adb-connected running on one of below Qualcomm SoCs:
 
-    SM8450    (Snapdragon 8 Gen 1+)
-    SM8550    (Snapdragon 8 Gen 2)
-    SM8650    (Snapdragon 8 Gen 3)
-    SM8750    (Snapdragon 8 Gen 4)
-    SM8750-AB (Snapdragon 8 Elite)
+    Snapdragon 8 Gen 1
+    Snapdragon 8 Gen 1+
+    Snapdragon 8 Gen 2
+    Snapdragon 8 Gen 3
+    Snapdragon 8 Elite(aka 8 Gen4)
 
 
 This project is a <b>pure AI learning&study</b> project, so the Android APK is a green Android APP and will not collect/upload user data in Android device. The Android APK should be works well on any Qualcomm mobile SoC equipped <b>mainstream</b> Android phone and the following permissions are required:
@@ -312,7 +305,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
 ### Docs
 
-- [How to verify ggml-qnn backend on Qualcomm mobile SoC equipped Android phone](./README-qnn.md)
+- [About ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
@@ -341,7 +334,7 @@ Report issue in various Android-based phone or even submit PR to this project is
   </li>
 
    <li>
-  LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
   </li>
 
   </ul>

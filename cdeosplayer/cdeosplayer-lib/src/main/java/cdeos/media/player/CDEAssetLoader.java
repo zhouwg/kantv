@@ -51,7 +51,7 @@
              File destFile = new File(destFilePath);
 
              if (destFile.exists()) {
-                 if (destFilePath.contains("ggml-qnn.cfg")) {
+                 if (destFilePath.contains("ggml-hexagon.cfg")) {
                      destFile.delete();
                  }
              }

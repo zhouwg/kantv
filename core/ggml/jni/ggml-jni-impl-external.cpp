@@ -92,7 +92,7 @@ extern "C" {
 
 #include "llama.h"
 
-#include "llamacpp/ggml/include/ggml-qnn.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
 
 
 // =================================================================================================
@@ -337,8 +337,8 @@ const char *ggml_jni_bench_mulmat(int n_threads, int n_backend) {
             ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
             if (n_backend !=
-                QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-                backend = ggml_backend_qnn_init(n_backend,
+                HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                backend = ggml_backend_hexagon_init(n_backend,
                                                 "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
                 if (nullptr == backend) {
                     LOGGD("create qnn backend %d failed", n_backend);
@@ -373,7 +373,7 @@ const char *ggml_jni_bench_mulmat(int n_threads, int n_backend) {
 
 #ifdef GGML_USE_QNN
             if (n_backend !=
-                QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
                 if (!buffer) {
                     LOGGD("%s: failed to allocate backend buffer\n", __func__);
@@ -753,11 +753,11 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
     ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
     if (backend_type !=
-        QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
         //params.use_hwaccel = true;
         params.no_alloc = true;
 
-        backend = ggml_backend_qnn_init(backend_type,
+        backend = ggml_backend_hexagon_init(backend_type,
                                         "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
         if (nullptr == backend) {
             LOGGD("create qnn backend %d failed", backend_type);
@@ -840,9 +840,9 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of matrix with backend %d(%s) is: %lld milliseconds\n", backend_type,
-          ggml_backend_qnn_get_devname(backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of matrix with backend %d(%s) is: %lld milliseconds\n", backend_type,
-                    ggml_backend_qnn_get_devname(backend_type), n_durtion);
+                    ggml_backend_hexagon_get_devname(backend_type), n_durtion);
     ggml_free(ctx);
     ggml_backend_buffer_free(buffer);
     ggml_backend_free(backend);
@@ -924,7 +924,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 #include "System/QnnSystemInterface.h"
 #include "HTP/QnnHtpDevice.h"
 
-#include "ggml-qnn.h"
+#include "ggml-hexagon.h"
 
 #include "ggml-jni.h"
 
@@ -5727,20 +5727,20 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     n_begin_time = ggml_time_us();
     LOGGD("enter qnn_matrix\n");
     LOGGI("qnn matrix addition operation, backend type:%d(%s), op type:%d\n",
-          n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_op_type);
+          n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_op_type);
     GGML_JNI_NOTIFY("qnn matrix addition operation, backend_type:%d(%s), op type:%d",
-                    n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_op_type);
+                    n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_op_type);
 
     switch (n_backend_type) {
-        case QNN_BACKEND_CPU:
+        case HEXAGON_BACKEND_QNNCPU:
             qnn_backend_lib = "libQnnCpu.so";
             break;
 
-        case QNN_BACKEND_GPU:
+        case HEXAGON_BACKEND_QNNGPU:
             qnn_backend_lib = "libQnnGpu.so";
             break;
 
-        case QNN_BACKEND_NPU: {
+        case HEXAGON_BACKEND_QNNNPU: {
             qnn_backend_lib = "libQnnHtp.so";
             std::string path = "/data/data/com.cdeos.kantv/qnnlib/";
             LOGGI("path:%s\n", path.c_str());
@@ -5794,8 +5794,8 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
         if (n_backend_type !=
-            QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-            backend = ggml_backend_qnn_init(n_backend_type,
+            HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+            backend = ggml_backend_hexagon_init(n_backend_type,
                                             "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
             if (nullptr == backend) {
                 LOGGD("create qnn backend %d failed", n_backend_type);
@@ -5855,9 +5855,9 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
     result = qnn_backend.qnn_init(nullptr);
     if (0 != result) {
         LOGGW("init qnn subsystem failed with qnn backend %s, pls check why\n",
-              ggml_backend_qnn_get_devname(n_backend_type));
+              ggml_backend_hexagon_get_devname(n_backend_type));
         GGML_JNI_NOTIFY("init qnn subsystem failed with qnn backend %s, pls check why\n",
-                        ggml_backend_qnn_get_devname(n_backend_type));
+                        ggml_backend_hexagon_get_devname(n_backend_type));
         result = 1;
         return 1;
     }
@@ -5955,7 +5955,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
         error = qnn_raw_interface.tensorCreateGraphTensor(graph_handle, &tensor_2);
         LOGGI("error = %d\n", error);
 
-        if (QNN_BACKEND_NPU == n_backend_type) {
+        if (HEXAGON_BACKEND_QNNNPU == n_backend_type) {
             qnn_buffer_0 = static_cast<uint8_t *>(qnn_backend.alloc_rpcmem(128, 4));
             if (nullptr == qnn_buffer_0) {
                 LOGGW("alloc rpcmem failure, %s\n", strerror(errno));
@@ -6062,7 +6062,7 @@ int qnn_matrix(int n_backend_type, int n_op_type) {
                 GGML_JNI_NOTIFY("output matrix:");
                 for (size_t i = 0; i < 1; i++) {
                     float *temp = nullptr;
-                    if (QNN_BACKEND_NPU == n_backend_type)
+                    if (HEXAGON_BACKEND_QNNNPU  == n_backend_type)
                         temp = (float *) qnn_buffer_2;
                     else
                         temp = output_matrix[i];
@@ -6147,9 +6147,9 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
 
     LOGGD("enter qnn_ggml\n");
     LOGGI("[%s], backend type:%d(%s), op type:%d\n", __func__,
-          n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_ggml_op_type);
+          n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_ggml_op_type);
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), ggml op type:%d", __func__,
-                    n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_ggml_op_type);
+                    n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_ggml_op_type);
     switch (n_backend_type) {
         case 0:
             qnn_backend_lib = "libQnnCpu.so";
@@ -6195,8 +6195,8 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
     if (n_backend_type !=
-        QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-        backend = ggml_backend_qnn_init(n_backend_type,
+        HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+        backend = ggml_backend_hexagon_init(n_backend_type,
                                         "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
         if (nullptr == backend) {
             LOGGD("create qnn backend %d failed", n_backend_type);
@@ -6414,9 +6414,9 @@ int qnn_ggml(int n_backend_type, int n_ggml_op_type) {
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_ggml with qnn backend %s is: %lld milliseconds\n",
-          ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of qnn_ggml with qnn backend %s is: %lld milliseconds\n",
-                    ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+                    ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
 
 
     LOGGD("leave qnn_ggml\n");
@@ -6445,9 +6445,9 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
     n_graph_type = 1; //TODO: hardcode to 1
 
     LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
-          n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_graph_type);
+          n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_graph_type);
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
-                    n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_graph_type);
+                    n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_graph_type);
 
     qnn_implementation qnn_backend = qnn_implementation("/data/data/com.cdeos.kantv/qnnlib/",
                                                         qnn_backend_lib, "");
@@ -6810,10 +6810,10 @@ static int qnn_complex_graph_inception(int n_backend_type, int n_graph_type) {
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_complex_graph_inception with qnn backend %s is: %lld milliseconds\n",
-          ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY(
             "duration of qnn_complex_graph_inception with qnn backend %s is: %lld milliseconds\n",
-            ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+            ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
 
     LOGGD("leave qnn_complex_graph_inception\n");
 
@@ -6832,9 +6832,9 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     n_begin_time = ggml_time_us();
     LOGGD("enter qnn_complex_graph\n");
     LOGGI("[%s], backend type:%d(%s), graph type:%d\n", __func__,
-          n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_graph_type);
+          n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_graph_type);
     GGML_JNI_NOTIFY("[%s], backend_type:%d(%s), graph type:%d", __func__,
-                    n_backend_type, ggml_backend_qnn_get_devname(n_backend_type), n_graph_type);
+                    n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type), n_graph_type);
 
     switch (n_graph_type) {
         case 0: // MNIST CV inference of digital number, https://github.com/StudyingLover/ggml-tutorial
@@ -6854,9 +6854,9 @@ int qnn_complex_graph(int n_backend_type, int n_graph_type) {
     n_end_time = ggml_time_us();
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n",
-          ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of qnn_complex_graph with qnn backend %s is: %lld milliseconds\n",
-                    ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+                    ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     LOGGD("leave qnn_complex_graph\n");
 
     return result;
@@ -6952,7 +6952,7 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     LOGGD("enter qnn_ggml_op\n");
     LOGGI("mode path:%s", model_path);
     LOGGI("num_threads:%d", num_threads);
-    LOGGI("backend_type:%d(%s)", n_backend_type, ggml_backend_qnn_get_devname(n_backend_type));
+    LOGGI("backend_type:%d(%s)", n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type));
     LOGGI("ggml op:%d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type));
 
     GGML_JNI_NOTIFY("starting qnn_ggml_op UT(unit test)\n");
@@ -6987,15 +6987,15 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     ggml_backend_t backend = nullptr;
     ggml_backend_buffer_t buffer = nullptr;
 #ifdef GGML_USE_QNN
-    if (n_backend_type != QNN_BACKEND_GGML) {
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
         //params.use_hwaccel = true;
         params.no_alloc = true;
-        backend = ggml_backend_qnn_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/");
+        backend = ggml_backend_hexagon_init(n_backend_type, "/data/data/com.cdeos.kantv/qnnlib/");
         if (nullptr == backend) {
             LOGGD("create qnn backend %d(%s) failed", n_backend_type,
-                  ggml_backend_qnn_get_devname(n_backend_type));
+                  ggml_backend_hexagon_get_devname(n_backend_type));
             GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type,
-                            ggml_backend_qnn_get_devname(n_backend_type));
+                            ggml_backend_hexagon_get_devname(n_backend_type));
             return 1;
         }
         //ggml_backend_qnn_set_n_threads(backend, 1);
@@ -7039,10 +7039,10 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
         default:
             LOGGD("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
                   ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-                  ggml_backend_qnn_get_devname(n_backend_type));
+                  ggml_backend_hexagon_get_devname(n_backend_type));
             GGML_JNI_NOTIFY("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
                             ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-                            ggml_backend_qnn_get_devname(n_backend_type));
+                            ggml_backend_hexagon_get_devname(n_backend_type));
             LOGGD("leave qnn_ggml_op UT(unit test)\n");
             ggml_free(ctx);
             ggml_backend_free(backend);
@@ -7051,7 +7051,7 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     }
     ggml_set_output(dst);
 #ifdef GGML_USE_QNN
-    if (n_backend_type != QNN_BACKEND_GGML) {
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
         buffer = ggml_backend_alloc_ctx_tensors(ctx, backend);
         if (!buffer) {
             LOGGD("%s: failed to allocate backend buffer\n", __func__);
@@ -7076,7 +7076,7 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
         initialize_tensors(ctx);
     }
 #else
-    if (n_backend_type != QNN_BACKEND_GGML) {
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
         initialize_tensors(ctx);
     }
 #endif
@@ -7128,10 +7128,10 @@ int qnn_ggml_op(const char *model_path, int num_threads, int n_backend_type, int
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n",
           n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-          ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY("duration of qnn_ggml_op %d(%s) with backend %d(%s) is: %lld milliseconds\n",
                     n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-                    ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+                    ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     LOGGD("leave qnn_ggml_op UT(unit test)\n");
 
     return 0;
@@ -7156,7 +7156,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     LOGGD("enter qnn_ggml_op_automation_ut\n");
     LOGGI("mode path:%s", model_path);
     LOGGI("num_threads:%d", num_threads);
-    LOGGI("backend_type:%d(%s)", n_backend_type, ggml_backend_qnn_get_devname(n_backend_type));
+    LOGGI("backend_type:%d(%s)", n_backend_type, ggml_backend_hexagon_get_devname(n_backend_type));
     LOGGI("ggml op:%d(%s)", n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type));
     GGML_JNI_NOTIFY("starting qnn_ggml_op_automation_ut(automation unit test)\n");
 
@@ -7169,10 +7169,10 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     if (!support_ops) {
         LOGGD("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
               ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-              ggml_backend_qnn_get_devname(n_backend_type));
+              ggml_backend_hexagon_get_devname(n_backend_type));
         GGML_JNI_NOTIFY("ggml op %d(%s) not supported  with backend %d(%s)", n_ggml_op_type,
                         ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-                        ggml_backend_qnn_get_devname(n_backend_type));
+                        ggml_backend_hexagon_get_devname(n_backend_type));
         LOGGD("leave qnn_ggml_op UT(unit test)\n");
 
         return 1;
@@ -7265,13 +7265,13 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
 #ifdef GGML_USE_QNN
             if (n_backend_type !=
                 3) {//3 is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
-                backend = ggml_backend_qnn_init(n_backend_type,
+                backend = ggml_backend_hexagon_init(n_backend_type,
                                                 "/data/data/com.cdeos.kantv/qnnlib/"); // the second param can be got by JNI from Java layer
                 if (nullptr == backend) {
                     LOGGD("create qnn backend %d(%s) failed", n_backend_type,
-                          ggml_backend_qnn_get_devname(n_backend_type));
+                          ggml_backend_hexagon_get_devname(n_backend_type));
                     GGML_JNI_NOTIFY("create qnn backend %d(%s) failed", n_backend_type,
-                                    ggml_backend_qnn_get_devname(n_backend_type));
+                                    ggml_backend_hexagon_get_devname(n_backend_type));
                     return 1;
                 }
             }
@@ -7283,7 +7283,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
                     /*.no_alloc   =*/ false,
             };
 #ifdef GGML_USE_QNN
-            if (n_backend_type != QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+            if (n_backend_type != HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 //gparams.use_hwaccel = true;
                 gparams.no_alloc = true;
             }
@@ -7312,7 +7312,7 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
             ggml_set_output(c);
 #ifdef GGML_USE_QNN
             if (n_backend_type !=
-                QNN_BACKEND_GGML) {//QNN_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
+                HEXAGON_BACKEND_GGML) {//HEXAGON_BACKEND_GGML is fake QNN backend "ggml", just used to compare performance between QNN backend and original GGML
                 LOGGD("creating backend buffer\n");
                 buffer = ggml_backend_alloc_ctx_tensors(ctx0, backend);
                 if (!buffer) {
@@ -7398,11 +7398,11 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     n_durtion = (n_end_time - n_begin_time) / 1000;
     LOGGD("duration of qnn_ggml_op_automation_ut %d(%s) with backend %d(%s) is: %lld milliseconds\n",
           n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-          ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+          ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     GGML_JNI_NOTIFY(
             "duration of qnn_ggml_op_automation_ut %d(%s) with backend %d(%s) is: %lld milliseconds\n",
             n_ggml_op_type, ggml_op_name((enum ggml_op) n_ggml_op_type), n_backend_type,
-            ggml_backend_qnn_get_devname(n_backend_type), n_durtion);
+            ggml_backend_hexagon_get_devname(n_backend_type), n_durtion);
     LOGGD("leave qnn_ggml_op_automation_ut(automation unit test)\n");
 
     return 0;
@@ -7431,7 +7431,7 @@ int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int 
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
-    ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type + 2);
 
     return ret;
 }

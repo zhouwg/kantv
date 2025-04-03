@@ -1,1 +1,0 @@
-/home/zhouwg/kantvai/llama.cpp/tests/ggml-qnn-ut.cpp

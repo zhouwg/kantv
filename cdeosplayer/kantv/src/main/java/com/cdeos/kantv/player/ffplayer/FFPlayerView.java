@@ -1577,9 +1577,9 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         if (CDEUtils.getASRSubsystemInit()) {
             if ((CDEUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (CDEUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                ggmljava.asr_reset(CDEUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL, CDEUtils.QNN_BACKEND_GGML);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_NORMAL, CDEUtils.HEXAGON_BACKEND_GGML);
             } else {
-                ggmljava.asr_reset(CDEUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST, CDEUtils.QNN_BACKEND_GGML);
+                ggmljava.asr_reset(CDEUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), CDEUtils.ASR_MODE_PRESURETEST, CDEUtils.HEXAGON_BACKEND_GGML);
             }
             ggmljava.asr_start();
         } else {

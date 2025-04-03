@@ -42,8 +42,6 @@ extern "C" {
 enum ggml_jni_bench_type {
     GGML_BENCHMARK_MEMCPY = 0,                //memcpy  benchmark
     GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
-    GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
-    GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
     GGML_BENCHMARK_ASR,                       //ASR(using whisper.cpp based on GGML) benchmark
     GGML_BENCHMARK_LLM,                       //LLM benchmark using llama.cpp based on GGML
     GGML_BENCHMARK_MAX
@@ -67,9 +65,9 @@ enum ggml_jni_bench_type {
     *
     * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
     * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / MNIST: image path
-    * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp)
+    * @param n_bench_type    0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp)
     * @param n_threads       1 - 8
-    * @param n_backend_type  0: QNN-CPU  1: QNN-GPU  2: QNN-NPU 3: ggml("fake" QNN backend, just for compare performance)
+    * @param n_backend_type  0: Hexagon NPU 1: ggml
     * @param n_op_type       type of GGML OP
     * @return
     */
@@ -98,7 +96,7 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
+    * @param n_backend            0: Hexagon NPU 1: ggml
     */
     int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode, int n_backend);
     void         whisper_asr_finalize(void);
@@ -109,7 +107,7 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
+    * @param n_backend            0: Hexagon NPU 1: ggml
     */
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
@@ -123,10 +121,9 @@ enum ggml_jni_bench_type {
     * @param prompt
     * @param bench_type            not used currently
     * @param n_threads             1 - 8
-    * @param n_backend            0: QNN CPU 1: QNN GPU 2: QNN HTP(DSP) 3:ggml
+    * @param n_backend             0: Hexagon NPU 1: ggml
     * @return
     */
-    int          llama_inference(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
     int          llama_inference_ng(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
 
 

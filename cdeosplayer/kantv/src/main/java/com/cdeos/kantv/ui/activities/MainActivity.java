@@ -211,7 +211,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                     return true;
 
                 case R.id.navigation_asr:
-                    setTitle("ggml-qnn on Android");
+                    setTitle("ggml-hexagon on Android");
                     switchFragment(AIResearchFragment.class);
                     //menuNetItem.setVisible(false);
                     hideOptionMenu();

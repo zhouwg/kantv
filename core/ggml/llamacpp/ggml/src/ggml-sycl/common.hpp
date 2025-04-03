@@ -170,7 +170,6 @@ static size_t g_scratch_offset = 0;
 int get_current_device_id();
 
 inline dpct::err0 ggml_sycl_set_device(const int device) try {
-
   int current_device_id;
   SYCL_CHECK(CHECK_TRY_ERROR(current_device_id = get_current_device_id()));
 
@@ -242,6 +241,14 @@ struct ggml_sycl_pool_alloc {
         }
     }
 
+    T * realloc(size_t size) {
+        GGML_ASSERT(pool != nullptr);
+        if (ptr)
+            pool->free(ptr, actual_size);
+        ptr = (T *) pool->alloc(size * sizeof(T), &this->actual_size);
+        return ptr;
+    }
+
     // size is in number of elements
     T * alloc(size_t size) {
         GGML_ASSERT(pool != nullptr);
@@ -301,6 +308,7 @@ inline optimize_feature check_gpu_optimize_feature(syclex::architecture &arch) {
     return opt;
 }
 
+namespace sycl_ex = sycl::ext::oneapi::experimental;
 struct ggml_backend_sycl_context {
     int device;
     std::string name;
@@ -370,10 +378,29 @@ struct ggml_backend_sycl_context {
     dnnl::stream stream_dnnl() {
         return stream_dnnl(device, 0);
     }
+    dnnl::memory get_scratchpad_mem(const dnnl::memory::desc & scratchpad_md,
+                                    const dnnl::engine & eng, const queue_ptr q) {
+        ggml_sycl_pool_alloc<uint8_t> * pool;
+        auto it = scratchpad_map.find(q);
+        if (it == scratchpad_map.end()) {
+            scratchpad_map[q] = std::make_unique<ggml_sycl_pool_alloc<uint8_t>>(this->pool());
+            pool = scratchpad_map[q].get();
+        } else {
+            pool = it->second.get();
+        }
+
+        size_t scratchpad_size = scratchpad_md.get_size();
+        if (scratchpad_size > pool->actual_size) {
+            pool->realloc(scratchpad_size);
+        }
+        void * mem_ptr = pool->get();
+        return dnnl::memory(scratchpad_md, eng, mem_ptr);
+    }
 #endif
 
     // pool
     std::unique_ptr<ggml_sycl_pool> pools[GGML_SYCL_MAX_DEVICES];
+    std::unordered_map<sycl::queue *, std::unique_ptr<ggml_sycl_pool_alloc<uint8_t>>> scratchpad_map;
 
     std::unique_ptr<ggml_sycl_pool> host_pools[GGML_SYCL_MAX_DEVICES];
 
@@ -391,6 +418,10 @@ struct ggml_backend_sycl_context {
     ggml_sycl_pool & pool() {
         return pool(device);
     }
+
+#ifdef GGML_SYCL_GRAPH
+    std::unique_ptr<sycl_ex::command_graph<sycl_ex::graph_state::executable>> exec_graph = nullptr;
+#endif
 
     ggml_sycl_pool & host_pool(int device) {
         if (host_pools[device] == nullptr) {
@@ -462,12 +493,6 @@ static __dpct_inline__ Tp* get_pointer(sycl::local_accessor<Tp, dim> acc) {
 }
 
 int64_t downsample_sycl_global_range(int64_t accumulate_block_num, int64_t block_size);
-
-typedef void (*ggml_sycl_op_flatten_t)(ggml_backend_sycl_context & ctx, const ggml_tensor *src0,
-                                       const ggml_tensor *src1,
-                                       ggml_tensor *dst, const float *src0_dd,
-                                       const float *src1_dd, float *dst_dd,
-                                       const queue_ptr &main_stream);
 
 template<float (*bin_op)(const float, const float), typename src0_t, typename src1_t, typename dst_t>
 static void k_bin_bcast(const src0_t * src0, const src1_t * src1, dst_t * dst,
@@ -726,24 +751,22 @@ struct bin_bcast_sycl {
 
 template <class op>
 inline void ggml_sycl_op_bin_bcast(ggml_backend_sycl_context & ctx, const ggml_tensor *src0,
-                                   const ggml_tensor *src1, ggml_tensor *dst,
-                                   const float *src0_dd, const float *src1_dd,
-                                   float *dst_dd,
-                                   const queue_ptr &main_stream) {
+                                   const ggml_tensor *src1, ggml_tensor *dst) {
+    dpct::queue_ptr main_stream = ctx.stream();
 
     if (src0->type == GGML_TYPE_F32 && dst->type == GGML_TYPE_F32) {
-        op()(ctx, src0, src1, dst, src0_dd, src1_dd, dst_dd, main_stream);
+        op()(ctx, src0, src1, dst, (const float *)src0->data, (const float *)src1->data, (float *)dst->data, main_stream);
     } else if (src0->type == GGML_TYPE_F16 && dst->type == GGML_TYPE_F16) {
-        op()(ctx, src0, src1, dst, (const sycl::half *)src0_dd, src1_dd,
-             (sycl::half *)dst_dd, main_stream);
+        op()(ctx, src0, src1, dst, (const sycl::half *)src0->data, (const float *)src1->data,
+             (sycl::half *)dst->data, main_stream);
     } else if (src0->type == GGML_TYPE_F16 && dst->type == GGML_TYPE_F32) {
-        op()(ctx, src0, src1, dst, (const sycl::half *)src0_dd, src1_dd, dst_dd,
+        op()(ctx, src0, src1, dst, (const sycl::half *)src0->data, (const float *)src1->data, (float *)dst->data,
              main_stream);
     } else if (src0->type == GGML_TYPE_I32 && dst->type == GGML_TYPE_I32) {
-        op()(ctx, src0, src1, dst, (const int32_t *)src0_dd, (const int32_t *)src1_dd, (int32_t *)dst_dd,
+        op()(ctx, src0, src1, dst, (const int32_t *)src0->data, (const int32_t *)src1->data, (int32_t *)dst->data,
              main_stream);
     } else if (src0->type == GGML_TYPE_I16 && dst->type == GGML_TYPE_I16) {
-        op()(ctx, src0, src1, dst, (const int16_t *)src0_dd, (const int16_t *)src1_dd, (int16_t *)dst_dd,
+        op()(ctx, src0, src1, dst, (const int16_t *)src0->data, (const int16_t *)src1->data, (int16_t *)dst->data,
              main_stream);
     } else {
         fprintf(stderr, "%s: unsupported types: dst: %s, src0: %s, src1: %s\n", __func__,
@@ -753,8 +776,4 @@ inline void ggml_sycl_op_bin_bcast(ggml_backend_sycl_context & ctx, const ggml_t
 }
 
 bool gpu_has_xmx(sycl::device &dev);
-
-void ggml_sycl_op_flatten(ggml_backend_sycl_context & ctx, const ggml_tensor *src0,
-                                 const ggml_tensor *src1, ggml_tensor *dst,
-                                 const ggml_sycl_op_flatten_t op);
 #endif // GGML_SYCL_COMMON_HPP

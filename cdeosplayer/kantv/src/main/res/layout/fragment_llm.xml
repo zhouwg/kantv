@@ -30,7 +30,7 @@
             <TextView
                 android:id="@+id/ggmlStatusLLM"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="5dp"
                 android:text=" " />
 

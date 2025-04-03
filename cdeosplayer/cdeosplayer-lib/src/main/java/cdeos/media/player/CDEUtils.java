@@ -905,6 +905,11 @@
          return dataDirectoryPath;
      }
 
+     public static String getSDCardDataPath() {
+         File sdcardPath = Environment.getExternalStorageDirectory();
+         CDELog.d(TAG, "sdcardPath name:" + sdcardPath.getName() + ",sdcardPath:" + sdcardPath.getPath());
+         return sdcardPath.getPath() + File.separator;
+     }
 
      public static String getEPGLocalDataPath() {
          String dataPath = getDataPath();
@@ -3951,13 +3956,9 @@
      public static String getGGMLBackendDesc(int n_backend_type) {
          switch (n_backend_type) {
              case 0:
-                 return "QNN-CPU";
+                 return "Hexagon-NPU";
              case 1:
-                 return "QNN-GPU";
-             case 2:
-                 return "QNN-NPU";
-             case 3:
-                 return "ggml";      //fake QNN backend, just used to compare performance between QNN and original GGML
+                 return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
 
              default:
                  return "unknown";
@@ -4053,8 +4054,6 @@
      public enum bench_type {
          GGML_BENCHMARK_MEMCPY,                    //memcpy  benchmark
          GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
-         GGML_BENCHMARK_QNN_GGML_OP,               //UT for PoC-S49: implementation of GGML OPs using QNN API
-         GGML_BENCHMARK_QNN_AUTO_UT,               //automation UT for PoC-S49: implementation of GGML OPs using QNN API
          GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM_V,                     //A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML
@@ -4073,11 +4072,9 @@
          NCNN_BENCHMARK_MAX,
      };
 
-     //keep sync with ggml-qnn.h
-     public static final int QNN_BACKEND_CPU           = 0;
-     public static final int QNN_BACKEND_GPU           = 1;
-     public static final int QNN_BACKEND_NPU           = 2;
-     public static final int QNN_BACKEND_GGML          = 3; //"fake" QNN backend, just for compare performance between QNN and original GGML
+
+     public static final int HEXAGON_BACKEND_NPU           = 0;
+     public static final int HEXAGON_BACKEND_GGML          = 1; //"fake" backend, just for compare performance between Hexagon and original GGML
 
 
      //keep sync with ncnn-jni.h, realtime inference with live camera / online TV using NCNN

@@ -264,3 +264,12 @@
                         <li>upgrade llama.cpp to upstream</li>
                         <li>sync ggml-qnn implementation from https://github.com/kantv-ai/ggml-qnn</li>
                     </ul>
+
+- v1.6.3-pre, 2025-04-03,
+                    <ul>
+                        <li>import ggml-hexagon implementation from https://github.com/zhouwg/ggml-hexagon</li>
+                        <li>remove QNN-CPU/QNN-GPU/QNN-NPU accordingly</li>
+                        <li>remove dependency of QNN runtime libs</li>
+                        <li>upgrade llama.cpp to upstream</li>
+                        <li>Hexagon NPU couldn't work as expected in APP because of a known issue</li>
+                    </ul>

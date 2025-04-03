@@ -11,8 +11,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(TARGET_XIAOMI14    ON)    # set it to ON to get much better performance on Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-set(GGML_ENABLE_QNN    ON)    # set it to ON to enable QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK on Qualcomm SoC based Android phone
+set(TARGET_XIAOMI14    ON)    # set it to ON to get much better performance on Xiaomi 14(Snapdragon 8Gen3) or Xiaomi 15(Snapdragon 8Elite(aka 8Gen4) equipped Android phone
+set(GGML_ENABLE_HEXAGON    ON) # set it to ON to enable ggml-hexagon backend on Qualcomm SoC equipped Android phone
 
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
@@ -43,27 +43,27 @@ include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
 include_directories(${LLAMACPP_SRC_DIR}/include)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
 
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1//libs/qprintf/inc)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs/stddef)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/incs)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rpcmem/inc)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_Debug_aarch64)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs/qnx)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/common/qnx/ship/android_Debug_aarch64)
+include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/rtos/qurt/computev75/include/qurt)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/utils/examples)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rtld/ship/android_aarch64)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/inc)
 include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/android_Debug_aarch64/ship)
 
-if (GGML_ENABLE_QNN)
-    #set(QNN_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-qnn.cpp)
-    file(GLOB QNN_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels/ggmlop_ap_skel.c")
+if (GGML_ENABLE_HEXAGON)
+    #set(HEXAGON_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-hexagon.cpp)
+    file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggmlop_ap_skel.c")
 endif()
 
 set(SOURCE_FILES
@@ -77,12 +77,14 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/gguf.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/cpu-feats-x86.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.c
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/binary-ops.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/unary-ops.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-aarch64.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-hbm.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-quants.c
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-traits.cpp
-        ${QNN_BACKEND_SRCS}
+        ${HEXAGON_BACKEND_SRCS}
 
         ${LLAMACPP_SRC_DIR}/src/llama.cpp
         ${LLAMACPP_SRC_DIR}/src/llama-adapter.cpp
@@ -146,8 +148,8 @@ add_definitions(-D__aarch64__)
 add_definitions(-D__linux__)
 add_definitions(-DGGML_USE_CPU)
 
-if (GGML_ENABLE_QNN)
-add_definitions(-DGGML_USE_QNN)
+if (GGML_ENABLE_HEXAGON)
+add_definitions(-DGGML_USE_HEXAGON)
 endif()
 
 add_definitions(-O3) #otherwise app's performance will be very bad on Xiaomi14 with debug build

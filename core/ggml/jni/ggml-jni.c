@@ -24,7 +24,7 @@
 #include "kantv-asr.h"
 #include "ggml-jni.h"
 
-#include "llamacpp/ggml/include/ggml-qnn.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
 
 #define UNUSED(x)       (void)(x)
 
@@ -86,13 +86,13 @@ Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path
         goto failure;
     }
 
-    if (backend_type > QNN_BACKEND_GGML) {
+    if (backend_type > HEXAGON_BACKEND_GGML) {
         LOGGW("pls check backend type\n");
         goto failure;
     }
 
-#ifdef GGML_DISABLE_QNN
-    if (QNN_BACKEND_GGML != backend_type) {
+#ifdef GGML_DISABLE_HEXAGON
+    if (HEXAGON_BACKEND_GGML != backend_type) {
         LOGGW("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(backend_type));
         GGML_JNI_NOTIFY("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(backend_type));
         goto failure;
@@ -266,8 +266,8 @@ Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_p
         goto failure;
     }
 
-#ifdef GGML_DISABLE_QNN
-    if (n_backend != QNN_BACKEND_GGML) {
+#ifdef GGML_DISABLE_HEXAGON
+    if (n_backend != HEXAGON_BACKEND_GGML) {
         LOGGW("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(n_backend));
         GGML_JNI_NOTIFY("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(n_backend));
         goto failure;
@@ -336,13 +336,13 @@ Java_org_ggml_ggmljava_ggml_1bench_1m(JNIEnv *env, jclass clazz, jstring model_p
         goto failure;
     }
 
-    if (n_backend_type > QNN_BACKEND_GGML) {
+    if (n_backend_type > HEXAGON_BACKEND_GGML) {
         GGML_JNI_NOTIFY("[%s,%s,%d]pls check backend type", __FILE__, __FUNCTION__, __LINE__);
         goto failure;
     }
 
-#ifdef GGML_DISABLE_QNN
-    if (n_backend_type != QNN_BACKEND_GGML) {
+#ifdef GGML_DISABLE_HEXAGON
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
         LOGGW("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(n_backend_type));
         GGML_JNI_NOTIFY("QNN backend %s is disabled and only ggml backend is supported\n", ggml_backend_qnn_get_devname(n_backend_type));
         goto failure;
