@@ -194,7 +194,7 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite(aka 8Gen4) SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite SoC based Android phone
 
  - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable ggml-hexagon backend for AI inference on Qualcomm SoC based Android phone
 
@@ -267,8 +267,7 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
 
-
-![Image](https://github.com/user-attachments/assets/7a3015cc-2fe5-409b-8683-cdb323795c75)
+![Image](https://github.com/user-attachments/assets/3403d6fc-a063-40d4-8d38-9001ce297092)
 
 ----
 
