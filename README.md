@@ -6,7 +6,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
 
-- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>), pls attention Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for AI subtitle feature otherwise unexpected behavior would happen
+- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>), pls attention Xiaomi 14 / Xiaomi 15 or other powerful Android mobile phone is HIGHLY required/recommended for AI subtitle feature otherwise unexpected behavior would happen
 
 - 2D graphic performance
 
@@ -25,7 +25,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 ### Highlight
 
-As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18">open-source implmentation of ggml-qnn/ggml-hexagon</a>
+As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> open-source ggml-hexagon backend for llama.cpp on Qualcomm's Hexagon NPU equipped phone</a>
 
 ### Supported Chipset
 
@@ -33,12 +33,12 @@ As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-
     Snapdragon 8 Gen 1+
     Snapdragon 8 Gen 2
     Snapdragon 8 Gen 3
-    Snapdragon 8 Elite(aka 8 Gen4)
+    Snapdragon 8 Elite
 
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/0ee33100-92da-43f7-baa6-7c4129525aba)
+![Image](https://github.com/user-attachments/assets/7dad3d8d-f938-4294-a8e3-3f4103e68bfa)
 
 
 ### How to build project manually
