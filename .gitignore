@@ -78,3 +78,4 @@ prebuilts/toolchain/*.gz
 crash.log
 kantv.jks
 core/ggml/llamacpp/tests/ggml-qnn-ut-4d.cpp
+CMakeLists.txt

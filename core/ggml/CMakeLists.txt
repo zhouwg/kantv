@@ -63,7 +63,7 @@ include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/android_Debug_aarc
 
 if (GGML_ENABLE_HEXAGON)
     #set(HEXAGON_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-hexagon.cpp)
-    file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggmlop_ap_skel.c")
+    file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/stub.c")
 endif()
 
 set(SOURCE_FILES
@@ -79,6 +79,8 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.c
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/binary-ops.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/unary-ops.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/vec.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ops.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-aarch64.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/ggml-cpu-hbm.cpp
