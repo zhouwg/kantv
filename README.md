@@ -249,7 +249,7 @@ You will need an Android smartphone with adb-connected running on one of below Q
     Snapdragon 8 Gen 1+
     Snapdragon 8 Gen 2
     Snapdragon 8 Gen 3
-    Snapdragon 8 Elite(aka 8 Gen4)
+    Snapdragon 8 Elite
 
 
 This project is a <b>pure AI learning&study</b> project, so the Android APK is a green Android APP and will not collect/upload user data in Android device. The Android APK should be works well on any Qualcomm mobile SoC equipped <b>mainstream</b> Android phone and the following permissions are required:
