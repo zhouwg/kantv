@@ -9,7 +9,7 @@ on:
     branches:
       - master
      # 添加忽略路径，避免文档更新等触发构建
-    paths-ignore:     
+    paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
@@ -28,12 +28,12 @@ jobs:
         with:
           submodules: 'recursive'
           fetch-depth: '0'
-        
+
       - name: build android release
         run: |
-          source build/envsetup.sh  
-          ./build/prebuild-download.sh  
-          lunch 1  
+          source build/envsetup.sh
+          ./build/prebuild-download.sh
+          lunch 1
           ./build-all.sh android
 
       - name: upload arm64-v8a release
@@ -41,16 +41,16 @@ jobs:
         if: ${{  success() }}
         with:
           name: arm64-v8a release apk
-          compression-level: 0 
+          compression-level: 0
           retention-days: 3
-          path: ${{ github.workspace }}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-release-*-signed.apk
-          
+          path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-*-signed.apk
+
       - name: upload arm64-v8a release to release
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-release-*-signed.apk
+          file: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-*-signed.apk
           tag: ${{ github.ref }}
           file_glob: true
 
