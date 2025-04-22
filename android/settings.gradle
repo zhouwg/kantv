@@ -1,0 +1,36 @@
+apply from: 'config.gradle'
+
+println '@settings enter-----------------'
+
+include ':kantvplayer-lib'
+include ':kantvplayer'
+
+
+gradle.ext.exoplayerRoot = settingsDir
+def rootDir = gradle.ext.exoplayerRoot
+println 'rootDir：' + rootDir
+println 'modulePrefix：' +  modulePrefix
+
+
+gradle.addBuildListener(new BuildListener() {
+    void buildStarted(Gradle var1) {
+        println 'begin build'
+    }
+    void settingsEvaluated(Settings var1) {
+        println 'settings evaluate'
+    }
+    void projectsLoaded(Gradle var1) {
+        println 'gradle.rootProject：' + gradle.rootProject
+        println 'rootDir：' + rootDir
+        println 'modulePrefix：' +  modulePrefix
+
+    }
+    void projectsEvaluated(Gradle var1) {
+        println 'evaluated'
+    }
+    void buildFinished(BuildResult var1) {
+        println 'end build'
+    }
+})
+
+println '@settings leave-----------------'

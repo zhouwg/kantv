@@ -29,7 +29,7 @@ if [ "${BUILD_TARGET}" == "android" ]; then
     export BUILD_ARCHS="arm64-v8a"
     export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
     export PROJECT_BUILD_COMMAND="./build-all.sh android"
-    export ANDROID_APK_VERSION=$(awk -F"'" '/releaseVersion[ ]*=/ {print $2}' "${PROJECT_ROOT_PATH}/cdeosplayer/constants.gradle")
+    export ANDROID_APK_VERSION=$(awk -F"'" '/releaseVersion[ ]*=/ {print $2}' "${PROJECT_ROOT_PATH}/android/constants.gradle")
 fi
 
 if [ "${BUILD_TARGET}" == "linux" ]; then

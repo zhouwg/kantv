@@ -29,7 +29,7 @@
 #define UNUSED(x)       (void)(x)
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
@@ -42,7 +42,7 @@ Java_org_ggml_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
+Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
                                                     jint b_exit_benchmark) {
     UNUSED(env);
     UNUSED(clazz);
@@ -52,7 +52,7 @@ Java_org_ggml_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path,
+Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path,
                                        jstring user_data, jint bench_type, jint num_threads, jint backend_type, jint op_type) {
     UNUSED(clazz);
 
@@ -124,7 +124,7 @@ failure:
 
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -133,7 +133,7 @@ Java_org_ggml_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
+Java_kantvai_ai_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -163,7 +163,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -171,7 +171,7 @@ Java_org_ggml_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT jint JNICALL
-Java_org_ggml_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
+Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
                                                jint n_thread_counts, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
@@ -202,7 +202,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_org_ggml_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -210,7 +210,7 @@ Java_org_ggml_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT void JNICALL
-Java_org_ggml_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -219,7 +219,7 @@ Java_org_ggml_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jstring JNICALL
-Java_org_ggml_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
@@ -232,7 +232,7 @@ Java_org_ggml_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jstring  JNICALL
-Java_org_ggml_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
+Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
                                                jint n_bench_type, jint n_thread_counts, jint n_backend) {
     UNUSED(clazz);
 
@@ -298,7 +298,7 @@ failure:
 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
 //"m" for "multimodal"
 JNIEXPORT jstring JNICALL
-Java_org_ggml_ggmljava_ggml_1bench_1m(JNIEnv *env, jclass clazz, jstring model_path,
+Java_kantvai_ai_ggmljava_ggml_1bench_1m(JNIEnv *env, jclass clazz, jstring model_path,
                                       jstring img_path, jstring user_data, jint n_bench_type,
                                       jint n_thread_counts, jint n_backend_type) {
     UNUSED(clazz);

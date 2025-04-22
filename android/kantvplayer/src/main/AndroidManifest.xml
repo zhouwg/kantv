@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.kantvai.kantvplayer">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+
+    <uses-permission android:name="com.qualcomm.permission.qti.FASTRPCPRIVILEGE"/>
+    <permission android:name="com.qualcomm.permission.qti.FASTRPCPRIVILEGE"
+        android:protectionLevel="normal" />
+
+    <application
+        android:name="com.kantvai.kantvplayer.app.IApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
+        android:allowBackup="true"
+        android:largeHeap="true"
+        android:theme="@style/AppBaseTheme">
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.SplashActivity"
+            android:theme="@style/WelcomeTheme"
+            android:screenOrientation="portrait"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.MainActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:launchMode="singleTask">
+
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.play.FolderActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.WebViewActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.play.PlayerActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.personal.KanTVBenchmarkActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden">
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.personal.LocalPlayHistoryActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.personal.BenchmarkActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.personal.CustomEPGListActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.personal.CrashActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.ShellActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize" >
+        </activity>
+
+        <activity
+            android:name="com.tencent.bugly.beta.ui.BetaActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|locale"
+            android:theme="@android:style/Theme.Translucent" >
+        </activity>
+
+        <activity
+            android:name="com.kantvai.kantvplayer.ui.activities.play.PlayerManagerActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:screenOrientation="landscape">
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.kantvai.player.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths_public" />
+        </provider>
+
+        <service
+            android:name="kantvai.media.player.MediaPlayerService"
+            android:enabled="false"
+            android:exported="false"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name" />
+    </application>
+
+</manifest>

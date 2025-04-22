@@ -1,6 +1,6 @@
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build libggml-jni.so for Project KanTV
+# Description: build libggml-jni.so for Android APP
 
 cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 project(ggml-jni)
@@ -19,7 +19,7 @@ set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
 set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
 
-set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../cdeosplayer/kantv/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)

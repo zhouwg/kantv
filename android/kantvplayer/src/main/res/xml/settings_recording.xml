@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+        <EditTextPreference
+            android:defaultValue="500"
+            android:enabled="true"
+            android:key="@string/pref_key_record_thresholddisksize"
+            android:persistent="true"
+            android:summary="@string/pref_summary_record_thresholddisksize"
+            android:title="@string/pref_title_record_thresholddisksize"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_recordformat"
+            android:entryValues="@array/pref_entry_values_recordformat"
+            android:key="@string/pref_key_recordformat"
+            android:persistent="true"
+            android:title="@string/pref_title_recordformat"
+            android:widgetLayout="@layout/my_checkbox" />
+            app:entrySummaries="@array/pref_entry_summaries_recordformat" />
+
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_recordcodec"
+            android:entryValues="@array/pref_entry_values_recordcodec"
+            android:key="@string/pref_key_recordcodec"
+            android:persistent="true"
+            android:title="@string/pref_title_recordcodec"
+            android:widgetLayout="@layout/my_checkbox" />
+            app:entrySummaries="@array/pref_entry_summaries_recordcodec" />
+
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_recordmode"
+            android:entryValues="@array/pref_entry_values_recordmode"
+            android:key="@string/pref_key_recordmode"
+            android:persistent="true"
+            android:title="@string/pref_title_recordmode"
+            android:widgetLayout="@layout/my_checkbox" />
+        app:entrySummaries="@array/pref_entry_summaries_recordcodec" />
+
+
+        <EditTextPreference
+            android:defaultValue="3"
+            android:enabled="true"
+            android:key="@string/pref_key_record_duration"
+            android:persistent="true"
+            android:summary="@string/pref_summary_record_duration"
+            android:title="@string/pref_title_record_duration"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <EditTextPreference
+            android:defaultValue="20"
+            android:enabled="true"
+            android:key="@string/pref_key_record_size"
+            android:persistent="true"
+            android:summary="@string/pref_summary_record_size"
+            android:title="@string/pref_title_record_size"
+            android:widgetLayout="@layout/my_checkbox" />
+
+
+</PreferenceScreen>

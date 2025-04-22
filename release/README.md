@@ -271,5 +271,12 @@
                         <li>remove QNN-CPU/QNN-GPU/QNN-NPU accordingly</li>
                         <li>remove dependency of QNN runtime libs</li>
                         <li>upgrade llama.cpp to upstream</li>
-                        <li>Hexagon NPU couldn't work as expected in APP because of a known issue</li>
+                        <li>Hexagon NPU couldn't work as expected in APP because of an unknown issue:https://github.com/zhouwg/kantv/issues/269</li>
+                    </ul>
+
+- v1.6.3, 2025-04-22,
+                    <ul>
+                        <li>refine the entire project</li>
+                        <li>sync llama.cpp with upstream</li>
+                        <li>Hexagon NPU couldn't work as expected in APP because of an unknown issue:https://github.com/zhouwg/kantv/issues/269</li>
                     </ul>

@@ -114,10 +114,10 @@ function build_nativelibs
 }
 
 
-function build_kantv_apk()
+function build_kantv_androidapk()
 {
     echo ""
-    cd ${PROJECT_ROOT_PATH}/cdeosplayer
+    cd ${PROJECT_ROOT_PATH}/android
 
     #./gradlew assembleDebug
 
@@ -127,12 +127,9 @@ function build_kantv_apk()
         echo ""
         echo ""
 
-        #printf "succeed to build apk ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk by cmdline-tools\n"
-        #ls -lah ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/debug/kantv-all64-debug.apk
-
-        printf "succeed to build apk in dir:${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release by cmdline-tools\n"
-        ls -lah ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/*.apk
-        sign_kantv_apk
+        printf "succeed to build apk in dir:${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release by cmdline-tools\n"
+        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/*.apk
+        sign_kantv_androidapk
         cd ${PROJECT_ROOT_PATH}
         echo ""
         echo ""
@@ -153,7 +150,7 @@ function build_kantv_apk()
 }
 
 
-function sign_kantv_apk()
+function sign_kantv_androidapk()
 {
     declare -r KANTV_KEY_PASSWORD="123456"
     declare -r KANTV_KEYSTORE_PASSWORD="123456"
@@ -172,7 +169,7 @@ function sign_kantv_apk()
             -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
             -storepass "$KANTV_KEYSTORE_PASSWORD" \
             -keypass "$KANTV_KEY_PASSWORD" \
-            -dname "CN=kantv authors, OU=kantv, O=kantv, L=China, ST=China, C=China"
+            -dname "CN=kantv authors, OU=kantv-ai, O=kantv-ai, L=China, ST=China, C=China"
     #check whether jks file is generated
     if [ -f "${PROJECT_ROOT_PATH}/kantv.jks" ]; then
         echo "succeed to generate keystore ${PROJECT_ROOT_PATH}/kantv.jks"
@@ -183,16 +180,16 @@ function sign_kantv_apk()
     #sign apk
     jarsigner -verbose -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
               -storepass "$KANTV_KEYSTORE_PASSWORD" \
-              -keypass "$KANTV_KEY_PASSWORD" "${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-unsigned.apk" "$KANTV_KEY_ALIAS" \
-              -signedjar "${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk"
+              -keypass "$KANTV_KEY_PASSWORD" "${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-unsigned.apk" "$KANTV_KEY_ALIAS" \
+              -signedjar "${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk"
 
     if [ $? -ne 0 ]; then
-        echo -e "${TEXT_RED}failed to sign apk,you may need to sign it mannually${TEXT_RESET}" 
-        echo "unsigned apk located in:${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release" 
+        echo -e "${TEXT_RED}failed to sign apk,you may need to sign it mannually${TEXT_RESET}"
+        echo "unsigned apk located in:${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release"
         exit 1
     else
-        echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"  
-    fi                
+        echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"
+    fi
 }
 
 
@@ -200,13 +197,13 @@ function build_check()
 {
 
 if [ "${BUILD_TARGET}" == "android" ]; then
-    cd ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/
+    cd ${PROJECT_ROOT_PATH}/android/kantvplayer/src/main/jniLibs/arm64-v8a/
     show_pwd
 
     echo -e "begin check...\n"
 
-    ls -l   ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/
-    ls -lah ${PROJECT_ROOT_PATH}/cdeosplayer/kantv/src/main/jniLibs/arm64-v8a/
+    ls -l   ${PROJECT_ROOT_PATH}/android/kantvplayer/src/main/jniLibs/arm64-v8a/
+    ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/src/main/jniLibs/arm64-v8a/
 
     echo -e "\nend check...\n"
 
@@ -225,7 +222,7 @@ function do_buildandroid()
 
     build_check
 
-    build_kantv_apk
+    build_kantv_androidapk
 }
 
 

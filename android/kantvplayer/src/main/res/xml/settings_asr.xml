@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/pref_title_general">
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_asrmode"
+            android:entryValues="@array/pref_entry_values_asrmode"
+            android:key="@string/pref_key_asrmode"
+            android:persistent="true"
+            android:title="@string/pref_title_asrmode"
+            app:entrySummaries="@array/pref_entry_summaries_asrmode" />
+
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="3"
+            android:entries="@@array/pref_entries_asrthreadcounts"
+            android:entryValues="@array/pref_entry_values_asrthreadcounts"
+            android:key="@string/pref_key_asrthreadcounts"
+            android:persistent="true"
+            android:title="@string/pref_title_asrthreadcounts"
+             />
+
+        <!-- not implemented currently
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_voiceapi"
+            android:entryValues="@array/pref_entry_values_voiceapi"
+            android:key="@string/pref_key_voiceapi"
+            android:persistent="true"
+            android:title="@string/pref_title_voiceapi"
+            app:entrySummaries="@array/pref_entry_summaries_voiceapi" />
+        -->
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="GGML Model">
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_ggmlmodel"
+            android:entryValues="@array/pref_entry_values_ggmlmodel"
+            android:key="@string/pref_key_ggmlmodel"
+            android:persistent="true"
+            android:title="@string/pref_title_ggmlmodel"
+            app:entrySummaries="@array/pref_entry_summaries_ggmlmodel" />
+
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_downloadGGMLmodel"
+            android:persistent="true"
+            android:summary="Download GGML model"
+            android:title="Download GGML model"
+            android:widgetLayout="@layout/my_checkbox" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
