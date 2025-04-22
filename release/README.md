@@ -276,7 +276,8 @@
 
 - v1.6.3, 2025-04-22,
                     <ul>
-                        <li>refine the entire project</li>
                         <li>sync llama.cpp with upstream</li>
+                        <li>fix a LLM inference issue on Androd phone</li>
+                        <li>refine the entire project</li>
                         <li>Hexagon NPU couldn't work as expected in APP because of an unknown issue:https://github.com/zhouwg/kantv/issues/269</li>
                     </ul>
