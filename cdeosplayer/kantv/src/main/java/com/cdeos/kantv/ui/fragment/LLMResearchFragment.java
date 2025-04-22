@@ -1,7 +1,7 @@
  /*
   * Copyright (c) 2024- KanTV Author
   *
-  * 03-26-2024, weiguo, this is a skeleton/initial UI for study llama.cpp on Android phone
+  * 03-26-2024, zhouwg, this is a skeleton/initial UI for study llama.cpp on Android phone
   *
   * Licensed under the Apache License, Version 2.0 (the "License");
   * you may not use this file except in compliance with the License.
@@ -52,15 +52,9 @@
  import com.cdeos.kantv.mvp.view.LLMResearchView;
  import com.cdeos.kantv.utils.Settings;
 
-
  import org.ggml.ggmljava;
 
  import java.io.File;
- import java.io.FileNotFoundException;
- import java.io.IOException;
- import java.io.RandomAccessFile;
- import java.nio.ByteBuffer;
- import java.nio.ByteOrder;
  import java.text.SimpleDateFormat;
  import java.util.Date;
  import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,20 +92,14 @@
      private long endTime = 0;
      private long duration = 0;
      private String strBenchmarkInfo;
-     //private String strUserInput = "how many days in March 2024?";
+
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words.";
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
-     private ProgressDialog mProgressDialog;
-
-     //https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf // 2.67 GB
-     //private String ggmlModelFileName = "gemma-2b.Q8_0.gguf";    // 2.67 GB
 
      // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
      private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
      private String selectModelFileName;
-
-     //https://huggingface.co/ggml-org/DeepSeek-R1-Distill-Qwen-1.5B-Q4_0-GGUF/blob/main/deepseek-r1-distill-qwen-1.5b-q4_0.gguf //1.07 GB
 
      private Context mContext;
      private Activity mActivity;
@@ -187,7 +175,6 @@
                  + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(phoneInfo + "\n");
-         _txtGGMLInfo.append("Model:" + ggmlModelFileName + "\n");
          _txtGGMLInfo.append("Powered by https://github.com/ggml-org/llama.cpp");
 
 

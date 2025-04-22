@@ -117,14 +117,14 @@
  public class CDEUtils {
      private final static String TAG = CDEUtils.class.getName();
 
-     private static String mKANTVMasterServer = "www.cdeos.com";
-     private static String mKANTVUpdateAPKUrl = "http://www.cdeos.com/kantv/apk/kantv-latest.apk";
-     private static String mKANTVUpdateAPKVersionUrl = "http://www.cdeos.com/kantv/apk/kantv-version.txt";
-     private static String mKANTVUpdateMainEPGUrl = "http://www.cdeos.com/kantv/kantv.bin";
-     private static String mKANTVServer = "www.cdeos.com";
-     private static String mKANTVUMUrl = "http://www.cdeos.com:81/epg/uploadUM";
-     private static String mNginxServerUrl = "http://www.cdeos.com:81";
-     private static String mApiGatewayServerUrl = "http://www.cdeos.com:8888/wiseplay/getlicense";
+     private static String mKANTVMasterServer = "www.kantvai.com";
+     private static String mKANTVUpdateAPKUrl = "http://www.kantvai.com/kantv/apk/kantv-latest.apk";
+     private static String mKANTVUpdateAPKVersionUrl = "http://www.kantvai.com/kantv/apk/kantv-version.txt";
+     private static String mKANTVUpdateMainEPGUrl = "http://www.kantvai.com/kantv/kantv.bin";
+     private static String mKANTVServer = "www.kantvai.com";
+     private static String mKANTVUMUrl = "http://www.kantvai.com:81/epg/uploadUM";
+     private static String mNginxServerUrl = "http://www.kantvai.com:81";
+     private static String mApiGatewayServerUrl = "http://www.kantvai.com:8888/wiseplay/getlicense";
      private static String mLocalEMS = "http://192.168.0.200:81/ems";
 
      private static String mKANTVAPKVersion = "1.6.1";

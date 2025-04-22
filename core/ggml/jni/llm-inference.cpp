@@ -910,12 +910,6 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
 
         // end of generation
-        if (max_tokens > 300) { //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
-#if (defined __ANDROID__) || (defined ANDROID)
-            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
-#endif
-            break;
-        }
         if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back()) && !(params.interactive)) {
             LOG(" [end of text]\n");
 #if (defined __ANDROID__) || (defined ANDROID)

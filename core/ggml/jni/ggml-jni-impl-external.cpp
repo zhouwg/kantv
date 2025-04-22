@@ -7425,8 +7425,9 @@ int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int 
     }
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
-    int argc = 7;
+    int argc = 8;
     const char *argv[] = {"llama-inference-main",
+                          "-no-cnv",
                           "-m", sz_model_path,
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
