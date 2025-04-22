@@ -27,8 +27,8 @@ OBJS = $(patsubst %.c, %.o, $(SRCS))
 ALL:$(OBJS)
 		${HEXAGON_CC} ${LDFLAGS} -o ${TARGET} -Wl,--start-group ${OBJS} -Wl,--end-group
 		@ls -l ${TARGET}
-		/bin/cp -fv ${TARGET} ../../../../out/android/bin/
-		/bin/cp -fv ${TARGET} ../../../../out/android/bin/libggmlop-skel${HTP_ARCH_VERSION}.so
+		/bin/cp -fv ${TARGET} ../../../../../../../android/kantvplayer/src/main/assets/
+		/bin/cp -fv ${TARGET} ../../../../../../../android/kantvplayer/src/main/assets/libggmlop-skel${HTP_ARCH_VERSION}.so
 		/bin/rm -f *.so
 
 %.o:%.c

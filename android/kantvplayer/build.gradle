@@ -30,7 +30,7 @@ android {
 
         //fix conflict between open source native libs and prebuilt proprietary native libs(IDE would complain more than one file was found)
         packagingOptions {
-            //native libs packing,leagcy mode is used for better compatibility
+            //native libs packing,legacy mode is used for better compatibility
             jniLibs {
                 useLegacyPackaging = true
             }
@@ -38,7 +38,7 @@ android {
             pickFirst 'lib/arm64-v8a/libkantv-media.so'
             pickFirst 'lib/arm64-v8a/libggml-jni.so'
             //pickFirst 'lib/arm64-v8a/libQnn*.so'
-            pickFirst 'lib/arm64-v8a/libncnn-jni.so'
+            exclude   'lib/arm64-v8a/libcdsprpc.so'
         }
 
         versionName project.ext.releaseVersion

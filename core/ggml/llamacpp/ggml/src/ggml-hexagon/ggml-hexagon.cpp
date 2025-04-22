@@ -387,7 +387,7 @@ static struct hexagon_appcfg_t g_hexagon_appcfg = {
 //Android command line program
         .runtime_libpath        = "/data/local/tmp/",
 //Android KanTV standard APP
-        //.runtime_libpath        = "/data/data/com.cdeos.kantv/",
+        .runtime_libpath        = "/data/data/com.kantvai.kantvplayer/",
 #elif defined(__linux__)
         .qnn_runtimelib_path    = "/tmp/",
 #elif defined(_WIN32)
@@ -1799,14 +1799,14 @@ static void ggmlhexagon_set_runtime_path(size_t device, const std::string & path
     if ((HEXAGON_BACKEND_QNNNPU == device) || (HWACCEL_CDSP == g_hexagon_appcfg.hwaccel_approach)) {
         std::string lib_runtime_path = path + ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images";
         if (0 == setenv("LD_LIBRARY_PATH", lib_runtime_path.c_str(), 1)) {
-            GGMLHEXAGON_LOG_DEBUG("setenv LD_LIBRARY_PATH %s successfully", lib_runtime_path.c_str());
+            GGMLHEXAGON_LOG_INFO("setenv LD_LIBRARY_PATH %s successfully", lib_runtime_path.c_str());
         } else {
             GGMLHEXAGON_LOG_ERROR("setenv LD_LIBRARY_PATH %s failure", lib_runtime_path.c_str());
         }
 
         std::string adsp_runtime_path = path + ";/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp";
         if (0 == setenv("ADSP_LIBRARY_PATH", adsp_runtime_path.c_str(), 1)) {
-            GGMLHEXAGON_LOG_DEBUG("setenv ADSP_LIBRARY_PATH %s successfully", adsp_runtime_path.c_str());
+            GGMLHEXAGON_LOG_INFO("setenv ADSP_LIBRARY_PATH %s successfully", adsp_runtime_path.c_str());
         } else {
             GGMLHEXAGON_LOG_ERROR("setenv ADSP_LIBRARY_PATH %s failure", adsp_runtime_path.c_str());
         }
@@ -1829,13 +1829,13 @@ static void ggmlhexagon_load_cfg() {
     //this function can be called in various scenarios
     static bool initialized = false;
     if (initialized) {
-        GGMLHEXAGON_LOG_DEBUG("hexagon appcfg file already loaded\n");
+        GGMLHEXAGON_LOG_INFO("hexagon appcfg file already loaded\n");
         return;
     }
     char time_string[GGMLHEXAGON_TMPBUF_LEN];
     memset(time_string, 0, GGMLHEXAGON_TMPBUF_LEN);
     ggmlhexagon_get_timestring(time_string);
-    GGMLHEXAGON_LOG_DEBUG("program running start time:%s", time_string);
+    GGMLHEXAGON_LOG_INFO("program running start time:%s", time_string);
     std::string cfg_filename = std::string(g_hexagon_appcfg.runtime_libpath) + std::string(g_hexagon_appcfg.cfgfilename);
     GGMLHEXAGON_LOG_INFO("load hexagon appcfg from %s", cfg_filename.c_str());
     hexagon_appcfg hexagoncfg_instance;
@@ -1843,7 +1843,7 @@ static void ggmlhexagon_load_cfg() {
     hexagoncfg_instance.dump([](const std::string & section, const std::string & key, const std::string value) {
         std::ostringstream  tmposs;
         tmposs << "section[" << std::setw(10) << std::left << section << "],[" << std::setw(25) << std::left << key << "] = [" << value << "]";
-        GGMLHEXAGON_LOG_INFO("%s", tmposs.str().c_str());
+        GGMLHEXAGON_LOG_INFO("%s\n", tmposs.str().c_str());
     });
     std::string precision_mode;
     std::string version; //version of ggml-hexagon.cpp
@@ -5418,7 +5418,7 @@ static int ggmlhexagon_init_dsp(ggml_backend_hexagon_context * ctx) {
 
     //make sure test-backend-ops get the correct backend name when hwaccel approach is 2(HWACCEL_CDSP)
     memcpy(g_hexagon_mgr[ctx->device].name, "Hexagon-cDSP", strlen("Hexagon-cDSP"));
-
+    GGMLHEXAGON_LOG_INFO("init cDSP successfully");
     return 0;
 
 bail:
@@ -6452,7 +6452,7 @@ static const ggml_backend_reg_i ggml_backend_hexagon_reg_interface = {
 ggml_backend_reg_t ggml_backend_hexagon_reg() {
     static ggml_backend_reg reg;
     static bool initialized = false;
-    GGMLHEXAGON_LOG_DEBUG("enter ggml_backend_hexagon_reg");
+    GGMLHEXAGON_LOG_INFO("enter ggml_backend_hexagon_reg");
 
     //case-2: normal scenario, such as llama-cli or UI applicaton
     ggmlhexagon_load_cfg();
@@ -6516,7 +6516,7 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
 
         initialized = true;
     }
-    GGMLHEXAGON_LOG_DEBUG("leave ggml_backend_hexagon_reg");
+    GGMLHEXAGON_LOG_INFO("leave ggml_backend_hexagon_reg");
 
     return &reg;
 }

@@ -52,11 +52,12 @@
 
              if (destFile.exists()) {
                  if (destFilePath.contains("ggml-hexagon.cfg")) {
+                     //ensure using updated ggml-hexagon.cfg
                      destFile.delete();
                  }
              }
 
-             if (destFile.exists()) {
+             if (destFile.exists() && destFile.isFile()) {
                  // 03-30-2024 17:09:35.152 24446 24797 D KANTV   : [LogUtils.cpp, logStdoutCallback, 48]:
                  // 0.3ms [ ERROR ] Unable to load backend. pal::dynamicloading::dlError():
                  // dlopen failed: file offset for the library "/data/data/com.kantvai.kantv/libQnnCpu.so" >= file size: 0 >= 0
@@ -69,18 +70,13 @@
                  // is not accessible for the namespace "clns-4"
 
                  KANTVLog.j(TAG, "dst file already exist");
-                 if (destFile.getAbsolutePath().contains("libQnnCpu")) {
-                     KANTVLog.j(TAG, "remove libQnnCpu.so");
-                     //destFile.delete();
+                 if (0 == destFile.length()) {
+                     destFile.delete();
+                     destFile.createNewFile();
+                 } else {
+                     return;
                  }
-                 if (destFile.getAbsolutePath().contains("libInception_v3")) {
-                     KANTVLog.j(TAG, "remove libInception_v3.so");
-                     //destFile.delete();
-                 }
-                 return;
-             }
-
-             if (!destFile.exists()) {
+             } else {
                  destFile.createNewFile();
              }
 
@@ -111,6 +107,7 @@
                  return;
              } else {
                  KANTVLog.j(TAG, "dir: " + destDirPath + " not exist");
+                 destFile.mkdirs();
              }
 
              String fileNames[] = context.getAssets().list(srcDirPath);

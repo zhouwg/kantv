@@ -232,7 +232,7 @@ public class IApplication extends Application {
         mKANTVDRM.ANDROID_JNI_SetLocalEMS(KANTVUtils.getLocalEMS());
         KANTVAssetLoader.copyAssetFile(mContext, "config.json", KANTVAssetLoader.getDataPath(mContext) + "config.json");
         KANTVAssetLoader.copyAssetFile(mContext, "ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
-        KANTVAssetLoader.copyAssetFile(mContext, "libggmlop_skel.so", KANTVAssetLoader.getDataPath(mContext) + "libggmlop_skel.so");
+        KANTVAssetLoader.copyAssetFile(mContext, "libggmlop-skel.so", KANTVAssetLoader.getDataPath(mContext) + "libggmlop-skel.so");
 
         KANTVUtils.copyAssetFile(mContext, "res/apple.png", KANTVUtils.getDataPath(mContext) + "apple.png");
         KANTVUtils.copyAssetFile(mContext, "res/colorkey.png", KANTVUtils.getDataPath(mContext) + "colorkey.png");
@@ -265,10 +265,8 @@ public class IApplication extends Application {
         KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", "/data/local/tmp/");
         KANTVLog.j(TAG, "qnn lib path:" + KANTVUtils.getDataPath(mContext) + "qnnlib");
 
-        //note: move assets/models to /sdcard/kantv/models manually
-        //     for purpose of reduce size of APK, the APK size would be smaller significantly
-        KANTVAssetLoader.copyAssetDir(mContext, "models", KANTVUtils.getDataPath() + "/models");
-        KANTVAssetLoader.copyAssetFile(mContext, "/models/ggml-tiny.en-q8_0.bin", KANTVUtils.getSDCardDataPath() + "ggml-tiny.en-q8_0.bin");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVAssetLoader.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVUtils.getDataPath() + "ggml-tiny.en-q8_0.bin");
 
         //step-4:
         String configString = KANTVAssetLoader.readTextFromFile(KANTVAssetLoader.getDataPath(mContext) + "config.json");
@@ -322,6 +320,7 @@ public class IApplication extends Application {
             KANTVUtils.setReleaseMode(true);
         }
         KANTVLog.j(TAG, "qnn lib path        : " + KANTVUtils.getDataPath(mContext) + "qnnlib");
+        KANTVLog.j(TAG, "runtime lib path    : " + KANTVUtils.getDataPath(mContext));
         KANTVLog.j(TAG, "dev  mode           : " + mSettings.getDevMode());
         KANTVUtils.setExpertMode(mSettings.getDevMode());
 
@@ -389,7 +388,7 @@ public class IApplication extends Application {
         int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
         KANTVLog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
         KANTVLog.j(TAG, "GGML mode name: " + KANTVUtils.getGGMLModeString(mSettings.getGGMLMode()));
-        String modelPath = KANTVUtils.getDataPath() + "/models/" + "ggml-" + KANTVUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
+        String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
         KANTVLog.j(TAG, "modelPath:" + modelPath);
 
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance

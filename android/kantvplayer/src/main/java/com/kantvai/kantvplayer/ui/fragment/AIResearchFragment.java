@@ -584,9 +584,9 @@
                      }
                  }
 
-                 if (!isLLMModel)
-                     selectModelFilePath = KANTVUtils.getDataPath() + "/models/" + selectModeFileName;
-                 else {
+                 if (!isLLMModel) //ASR inference
+                     selectModelFilePath = KANTVUtils.getDataPath() + selectModeFileName;
+                 else { //LLM inference
                      selectModelFilePath = KANTVUtils.getSDCardDataPath() + selectModeFileName;
                  }
 

@@ -49,17 +49,58 @@ include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
 include_directories(${QNN_INC_PATH}/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1//libs/qprintf/inc)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/incs/stddef)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/incs)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rpcmem/inc)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_Debug_aarch64)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/rtos/qurt/computev75/include/qurt)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/utils/examples)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/rtld/ship/android_aarch64)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/inc)
-include_directories(/opt/qcom/Hexagon_SDK/6.2.0.1/libs/atomic/android_Debug_aarch64/ship)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(DEBUG_FLAG "-Wall")
+    message("Debug mode:${DEBUG_FLAG}")
+else()
+    set(DEBUG_FLAG "-DNDEBUG -Wall")
+    #manually disable all foreground logs in ggml-hexagon/CMakeLists.txt to
+    #make compare NPU performance through llama-bench more clear
+    #set(DEBUG_FLAG "-DNDEBUG -Wall -DDISABLE_ALL_LOG")
+    message("Release mode:${DEBUG_FLAG}")
+endif()
+
+if(NOT DEFINED HEXAGON_SDK_PATH)
+    message(WARNING "HEXAGON_SDK_PATH not defined")
+    set(HEXAGON_SDK_PATH "/opt/qcom/Hexagon_SDK/6.2.0.1")
+endif()
+
+if(NOT DEFINED HTP_ARCH_VERSION)
+    message(WARNING "HTP_ARCH_VERSION not defined, valid htp arch: v68,v69,v73,v75,v79")
+    #manually set to v79
+    set(HTP_ARCH_VERSION v79)
+endif()
+#check whether user's specified htp arch is valid
+set(CHECK_HTP_ARCH "WRONG")
+foreach (feat v68 v69 v73 v75 v79)
+    if (${feat} STREQUAL ${HTP_ARCH_VERSION})
+        set(CHECK_HTP_ARCH "GOOD")
+    endif()
+endforeach()
+if (${CHECK_HTP_ARCH} STREQUAL "WRONG")
+    message(FATAL_ERROR "ggml-hexagon backend only support htp arch v68,v69,v73,v75,v79")
+endif()
+
+#check optimization flags
+set(OPT_FLAG " ")
+if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
+    #works fine on Snapdragon 8Gen3&8Elite with 1.5x - 3x performance gains with the default ggml backend
+    set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
+endif()
+message("OPT_FLAG:${OPT_FLAG}")
+
+include_directories(${HEXAGON_SDK_PATH}/incs)
+include_directories(${HEXAGON_SDK_PATH}/incs/stddef)
+include_directories(${HEXAGON_SDK_PATH}/libs/qprintf/inc)
+include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/incs)
+include_directories(${HEXAGON_SDK_PATH}/utils/examples)
+include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/rpcmem/inc)
+include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/remote/ship/android_Debug_aarch64)
+include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/rtld/ship/android_aarch64)
+include_directories(${HEXAGON_SDK_PATH}/libs/atomic/inc)
+include_directories(${HEXAGON_SDK_PATH}/libs/atomic/android_Debug_aarch64/ship)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/)
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/)
 
 if (GGML_ENABLE_HEXAGON)
     #set(HEXAGON_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-hexagon.cpp)
@@ -200,12 +241,10 @@ add_definitions(-D_LIBCPP_EXCEPTIONS)
 add_definitions(-D_LIBCXXABI_EXCEPTIONS)
 add_link_options( "-lc++_shared" )
 
-if (GGML_ENABLE_QNN)
-    file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
-
-    #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
-
-endif()
+set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
 
 find_library(LOG_LIB log)
 
@@ -235,13 +274,6 @@ set_target_properties(cdsprpc
         IMPORTED_LOCATION
         /opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_aarch64/libcdsprpc.so)
 
-add_library(ggmlop_skel
-        SHARED
-        IMPORTED)
-set_target_properties(ggmlop_skel
-        PROPERTIES
-        IMPORTED_LOCATION
-        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/kernels/libggmlop.so)
 
 function(build_library target_name)
     add_library(
@@ -250,10 +282,11 @@ function(build_library target_name)
             ${SOURCE_FILES}
     )
 
-    if (GGML_ENABLE_QNN)
-        file(GLOB allQNNLibs "${PREBUILT_LIB_PATH}/libQnn*.so")
-        #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allQNNLibs})
-        #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc ggmlop_skel)
+    if (GGML_ENABLE_HEXAGON)
+        #file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
+        #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
+        #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia kantvffmpeg android ${allPrebuiltQNNLibs})
+
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
     else()
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
@@ -262,3 +295,19 @@ function(build_library target_name)
 endfunction()
 
 build_library("ggml-jni")
+
+#cross compiling source codes of hexagon kernels which running on cDSP side
+function(ggml_hexagon_build_kernel KNAME)
+    message(STATUS "ggml_hexagon: build hexagon-kernel ${KNAME}")
+
+    add_custom_command(
+            TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND make -C ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ clean
+            COMMAND make -C ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH} HTP_ARCH_VERSION=${HTP_ARCH_VERSION} DEBUG_FLAG=${DEBUG_FLAG}
+            COMMAND echo "current working path:`pwd`\n"
+            COMMENT "build hexagon-kernel"
+    )
+endfunction()
+
+ggml_hexagon_build_kernel("cdsp")
