@@ -112,10 +112,19 @@
      private int benchmarkIndex = KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal();
      private int previousBenchmakrIndex = 0;
      private String strModeName = "tiny.en-q8_0";
-     private String strBackend = "npu";
-     private int backendIndex = 0; //NPU
-     private String strOPType = "add";
-     private int optypeIndex = 0; //matrix addition operation
+     private String strBackend = "ggml";
+     private String strAccel = "cdsp";
+
+     private String strLLMInferenceInfo;
+
+     private int offset = 3;
+     //TODO: the existing codes can't cover following special case:
+     //      toggle backend and forth between QNN-NPU and cDSP and ggml in a standard Android APP or in
+     //      a same running process, so here backendIndex = ggmljava.HEXAGON_BACKEND_GGML - offset
+     //      supportive of such special case is easy but it will significantly increase the size of APK
+     private int backendIndex = ggmljava.HEXAGON_BACKEND_GGML - offset;
+     private int accelIndex = ggmljava.HEXAGON_BACKEND_CDSP;
+
      private String selectModeFileName = "";
 
      private Bitmap bitmapSelectedImage = null;
@@ -128,9 +137,10 @@
      ArrayAdapter<String> adapterGraphType = null;
 
      ArrayAdapter<String> adapterGGMLBackendType = null;
-     ArrayAdapter<String> adapterNCNNBackendType = null;
+     ArrayAdapter<String> adapterGGMLAccelType = null;
 
-     Spinner spinnerBackend = null;
+     Spinner spinnerBackendType = null;
+     Spinner spinnerAccelType = null;
      Spinner spinnerModelName = null;
 
 
@@ -160,7 +170,7 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
-     private String strUserInput = "introduce the movie Once Upon a Time in America briefly.\n";
+     private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
 
      private Context mContext;
      private Activity mActivity;
@@ -204,7 +214,6 @@
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
          _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
-         //_ivInfo = mActivity.findViewById(R.id.imgInfo);
          _llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
@@ -225,56 +234,9 @@
              return;
          }
 
-         ActivityManager am = (ActivityManager) mActivity.getSystemService(Context.ACTIVITY_SERVICE);
-         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
-         am.getMemoryInfo(memoryInfo);
-         long totalMem = memoryInfo.totalMem;
-         long availMem = memoryInfo.availMem;
-         boolean isLowMemory = memoryInfo.lowMemory;
-         long threshold = memoryInfo.threshold;
-         Debug.MemoryInfo debugInfo = new Debug.MemoryInfo();
-         Debug.getMemoryInfo(debugInfo);
-         int totalPrivateClean = debugInfo.getTotalPrivateClean();
-         int totalPrivateDirty = debugInfo.getTotalPrivateDirty();
-         int totalPss = debugInfo.getTotalPss();
-         int totalSharedClean = debugInfo.getTotalSharedClean();
-         int totalSharedDirty = debugInfo.getTotalSharedDirty();
-         int totalSwappablePss = debugInfo.getTotalSwappablePss();
-         int totalUsageMemory = totalPrivateClean + totalPrivateDirty + totalPss + totalSharedClean + totalSharedDirty + totalSwappablePss;
-         int Bytes2MBytes = (1 << 20);
-         //VSS - Virtual Set Size
-         //RSS - Resident Set Size
-         //PSS - Proportional Set Size
-         //USS - Unique Set Size
-         String memoryInfoString =
-                    "total mem              ：" + (totalMem >> 20) + "MB" + "  "
-                     + "isLowMeory:" + isLowMemory + " "
-                     + "threshold of low mem：" + threshold / Bytes2MBytes + "MB" + "  "
-                     + "available mem：" + availMem / Bytes2MBytes + "MB" + " "
-                     + "NativeHeapSize：" + (Debug.getNativeHeapSize() >> 20) + "MB" + "  "
-                     + "NativeHeapAllocatedSize：" + (Debug.getNativeHeapAllocatedSize() >> 20) + "MB" + " "
-                     + "NativeHeapFreeSize：" + (Debug.getNativeHeapFreeSize() >> 20) + "MB " + " "
-                     + "total private dirty memory：" + totalPrivateDirty / 1024 + "MB" + " "
-                     + "total shared  dirty memory：" + totalSharedDirty / 1024 + "MB" + " "
-                     + "total PSS memory               ：" + totalPss / 1024 + "MB" + " "
-                     + "total swappable memory  ：" + totalSwappablePss / 1024 + "MB" + " "
-                     + "total usage memory           ：" + totalUsageMemory / 1024 + "MB" + " ";
-         KANTVLog.j(TAG, "memory info: " + memoryInfoString);
-
-         KANTVLog.j(TAG, "load ggml's whispercpp info");
-         String systemInfo = ggmljava.asr_get_systeminfo();
-         String phoneInfo = "Device info:" + " "
-                 + Build.BRAND + " "
-                 + Build.HARDWARE + " "
-                 + "Android " + android.os.Build.VERSION.RELEASE + " "
-                 + "Arch:" + Build.CPU_ABI + " "
-                 + "(" + systemInfo + ")" + " "
-                 + "Mem:total " + (totalMem >> 20) + "MB"  + " "
-                 + "available " + (availMem >> 20) + "MB"   + " "
-                 + "usage " + (totalUsageMemory >> 10) + "MB";
-
+         KANTVLog.j(TAG, "load ggml's whisper.cpp info");
          _txtGGMLInfo.setText("");
-         _txtGGMLInfo.append(phoneInfo + "\n");
+         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -302,7 +264,7 @@
                  //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
                      isLLMVModel = true;
-                     strModeName="minicpm-v";
+                     strModeName = "minicpm-v";
                      spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
                      displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
                  }
@@ -317,11 +279,9 @@
                      return;
                  }
 
-                 if (benchmarkIndex >= KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) {
-                     spinnerBackend.setAdapter(adapterNCNNBackendType);
-                     adapterNCNNBackendType.notifyDataSetChanged();
-                 } else {
-                     spinnerBackend.setAdapter(adapterGGMLBackendType);
+
+                 {
+                     spinnerBackendType.setAdapter(adapterGGMLBackendType);
                      adapterGGMLBackendType.notifyDataSetChanged();
                  }
 
@@ -351,7 +311,49 @@
 
              }
          });
-         spinnerThreadsCounts.setSelection(4);
+         spinnerThreadsCounts.setSelection(4); // 4 threads
+
+         spinnerBackendType = mActivity.findViewById(R.id.spinnerBackend);
+         String[] arrayBackend = getResources().getStringArray(R.array.backendtype);
+         adapterGGMLBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
+         spinnerBackendType.setAdapter(adapterGGMLBackendType);
+         spinnerBackendType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 KANTVLog.j(TAG, "backend:" + arrayBackend[position]);
+                 strBackend = arrayBackend[position];
+                 backendIndex = Integer.valueOf(position) + offset;
+                 KANTVLog.j(TAG, "strBackend:" + strBackend);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+         spinnerBackendType.setSelection(ggmljava.HEXAGON_BACKEND_GGML - offset);
+
+         /* not used currently
+         spinnerAccelType = mActivity.findViewById(R.id.spinnerAccel);
+         String[] arrayAccel = getResources().getStringArray(R.array.hwacceltype);
+         adapterGGMLAccelType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayAccel);
+         spinnerAccelType.setAdapter(adapterGGMLAccelType);
+         spinnerAccelType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+             @Override
+             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                 KANTVLog.j(TAG, "hwaccel type:" + arrayAccel[position]);
+                 strAccel = arrayAccel[position];
+                 accelIndex = Integer.valueOf(position);
+                 KANTVLog.j(TAG, "strAccel:" + strAccel);
+             }
+
+             @Override
+             public void onNothingSelected(AdapterView<?> parent) {
+
+             }
+         });
+         spinnerAccelType.setSelection(ggmljava.HWACCEL_CDSP);
+         */
 
          spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
          String[] arrayModelName = getResources().getStringArray(R.array.modelName);
@@ -373,29 +375,6 @@
          });
          spinnerModelName.setSelection(3); // ggml-tiny.en-q8_0.bin, 42M
 
-
-         spinnerBackend = mActivity.findViewById(R.id.spinnerBackend);
-         String[] arrayBackend = getResources().getStringArray(R.array.backend);
-         adapterGGMLBackendType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBackend);
-
-         spinnerBackend.setAdapter(adapterGGMLBackendType);
-         spinnerBackend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-             @Override
-             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 KANTVLog.j(TAG, "backend:" + arrayBackend[position]);
-                 strBackend = arrayBackend[position];
-                 backendIndex = Integer.valueOf(position);
-                 KANTVLog.j(TAG, "strBackend:" + strBackend);
-             }
-
-             @Override
-             public void onNothingSelected(AdapterView<?> parent) {
-
-             }
-         });
-         spinnerBackend.setSelection(KANTVUtils.HEXAGON_BACKEND_GGML);
-
-
          _btnSelectImage.setOnClickListener(arg0 -> {
              Intent intent = new Intent(Intent.ACTION_PICK);
              intent.setType("image/*");
@@ -413,52 +392,7 @@
 
              //TODO: better method
              //sanity check begin
-             if (isNCNNInference()) {
-                 //inference using NCNN framework
-
-                 if (backendIndex == KANTVUtils.HEXAGON_BACKEND_NPU) {
-                     KANTVUtils.showMsgBox(mActivity, "NCNN inference with NPU backend not supported currently");
-                     return;
-                 }
-                 if (backendIndex == KANTVUtils.HEXAGON_BACKEND_GGML) {
-                     KANTVUtils.showMsgBox(mActivity, "NCNN inference only support CPU/GPU backend");
-                     return;
-                 }
-
-                 // - 1 used to skip bench_type.GGML_BENCHMARK_MAX
-                 if (
-                         (benchmarkIndex == (KANTVUtils.bench_type.NCNN_BENCHMARK_ASR.ordinal() - 1))
-                      || (benchmarkIndex == (KANTVUtils.bench_type.NCNN_BENCHMARK_TTS.ordinal() - 1))
-                 ) {
-                     KANTVUtils.showMsgBox(mActivity, "ncnn inference benchmark " + benchmarkIndex + "(" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + ") not supported currently");
-                     return;
-                 }
-
-                 // - 1 used to skip bench_type.GGML_BENCHMARK_MAX
-                 if ((benchmarkIndex == KANTVUtils.bench_type.NCNN_BENCHMARK_MNIST.ordinal() - 1) && (bitmapSelectedImage == null)) {
-                     if (_ivInfo != null) {
-                         _ivInfo.setVisibility(View.INVISIBLE);
-                         _llInfoLayout.removeView(_ivInfo);
-                         _ivInfo = null;
-                     }
-                     //hardcode to mnist-5.png
-                     String imgPath = KANTVUtils.getDataPath() + "mnist-5.png";
-                     Uri uri = Uri.fromFile(new File(imgPath));
-                     try {
-                         bitmapSelectedImage = decodeUri(uri, false);
-                     } catch (FileNotFoundException e) {
-                         KANTVLog.j(TAG, "FileNotFoundException: " + e.toString());
-                         KANTVUtils.showMsgBox(mActivity, "FileNotFoundException: " + e.toString());
-                         return;
-                     }
-                 }
-
-                 if (bitmapSelectedImage == null) {
-                     KANTVLog.j(TAG, "image is empty");
-                     KANTVUtils.showMsgBox(mActivity, "please select a image for inference using NCNN");
-                     return;
-                 }
-             } else {
+             {
                  //inference using GGML framework
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM_O.ordinal()) {
                      KANTVUtils.showMsgBox(mActivity, "GGML_BENCHMARK_LLM_O(GPT-4o style) inference not support currently");
@@ -521,7 +455,7 @@
                  }
                  KANTVLog.j(TAG, "selectModeFileName:" + selectModeFileName);
 
-                {
+                 {
                      if (isLLMModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal())) {
                          KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
                          KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
@@ -576,7 +510,7 @@
                      }
 
                      if (isLLMVModel || isLLMOModel) {
-                         if ((bitmapSelectedImage == null) ||  (pathSelectedImage.isEmpty())) {
+                         if ((bitmapSelectedImage == null) || (pathSelectedImage.isEmpty())) {
                              KANTVLog.j(TAG, "image is empty");
                              KANTVUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
                              return;
@@ -623,25 +557,13 @@
              }
 
              nLogCounts = 0;
-             isBenchmarking.set(true);
 
              startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + ")");
 
-             Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
-
-             //update UI status
-             _txtASRInfo.setText("");
-             _btnBenchmark.setEnabled(false);
-
-             WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
-             attributes.screenBrightness = 1.0f;
-             mActivity.getWindow().setAttributes(attributes);
-             mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+             initUIAndStatus();
 
              launchGGMLBenchmarkThread();
-
          });
-
 
          endTime = System.currentTimeMillis();
          KANTVLog.j(TAG, "initView cost: " + (endTime - beginTime) + " milliseconds");
@@ -672,8 +594,7 @@
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
 
-                     if (isGGMLInfernce()) {
-                         //GGML inference
+                     if (isGGMLInfernce()) {  //GGML inference
                          ggmljava.ggml_set_benchmark_status(0);
 
                          if (!isQNNModel) {
@@ -682,55 +603,51 @@
                                          ggmlModelFileName,
                                          strUserInput,
                                          benchmarkIndex,
-                                         nThreadCounts, backendIndex);
+                                         nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
                              } else if (isMNISTModel) {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
-                                          ggmlModelFileName,
+                                         ggmlModelFileName,
                                          KANTVUtils.getDataPath() + ggmlMNISTImageFile,
                                          benchmarkIndex,
-                                         nThreadCounts, backendIndex, optypeIndex);
+                                         nThreadCounts, backendIndex, accelIndex);
                              } else if (isSDModel) {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
-                                          ggmlModelFileName,
+                                         ggmlModelFileName,
                                          "a lovely cat"/*strUserInput*/,
                                          benchmarkIndex,
-                                         nThreadCounts, backendIndex, optypeIndex);
+                                         nThreadCounts, backendIndex, accelIndex);
                              } else if (isTTSModel) {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
-                                          ggmlModelFileName,
+                                         ggmlModelFileName,
                                          "this is an audio generated by bark.cpp"/*strUserInput*/,
                                          benchmarkIndex,
-                                         nThreadCounts, backendIndex, optypeIndex);
+                                         nThreadCounts, backendIndex, accelIndex);
                              } else if (isLLMVModel) {
                                  //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V)
                                  //"m" for "multimodal": GPT-4V style or GPT-4o style
                                  KANTVLog.j(TAG, "image path:" + pathSelectedImage);
+                                 /*
                                  strBenchmarkInfo = ggmljava.ggml_bench_m(
                                           ggmlModelFileName,
                                          pathSelectedImage,
-                                         "What is in the image?"/*strUserInput*/,
+                                         "What is in the image?",
                                          benchmarkIndex,
                                          nThreadCounts, backendIndex);
+                                 */
                              } else {
                                  strBenchmarkInfo = ggmljava.ggml_bench(
-                                          ggmlModelFileName,
+                                         ggmlModelFileName,
                                          KANTVUtils.getDataPath() + ggmlSampleFileName,
                                          benchmarkIndex,
-                                         nThreadCounts, backendIndex, optypeIndex);
+                                         nThreadCounts, backendIndex, accelIndex);
                              }
                          } else {
-                             // avoid following issue
-                             // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
-                             // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.kantvai.kantvplayer-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
-                             // is not accessible for the namespace "clns-4"
                              strBenchmarkInfo = ggmljava.ggml_bench(
                                      ggmlModelFileName,
                                      KANTVUtils.getDataPath() + ggmlSampleFileName,
                                      benchmarkIndex,
-                                     nThreadCounts, backendIndex, optypeIndex);
+                                     nThreadCounts, backendIndex, accelIndex);
                          }
-
-                     } else {
 
                      }
 
@@ -741,40 +658,9 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
-                             if (isNCNNInference()) {
-                                 backendDesc = KANTVUtils.getNCNNBackendDesc(backendIndex);
-                             }
-                             String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " +  selectModeFileName
-                                     + " ,threads: " + nThreadCounts
-                                     + " ,backend: " + backendDesc
-                                     + " ) cost " + duration + " milliseconds";
-                             //04-07-2024(April,7,2024), add timestamp
-                             String timestamp = "";
-                             SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
-                             Date date = new Date(System.currentTimeMillis());
-                             timestamp = fullDateFormat.format(date);
-                             benchmarkTip += ", on " + timestamp;
-
-                             benchmarkTip += "\n";
-
-                             //becareful here
-                             if (!strBenchmarkInfo.startsWith("unknown")) {
-                                 if (!strBenchmarkInfo.startsWith("asr_result")) {
-                                     benchmarkTip += strBenchmarkInfo;
-                                 }
-                             }
-
-                             if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
-                                 playAudioFile();
-                             }
-
-                             KANTVLog.j(TAG, benchmarkTip);
-                             //_txtGGMLStatus.setText("");
-                             _txtGGMLStatus.append(benchmarkTip);
-
+                             displayInferenceResult(strLLMInferenceInfo);
                              //update UI status
-                             _btnBenchmark.setEnabled(true);
+                             restoreUIAndStatus();
 
                              if (isGGMLInfernce()) {
                                  if (isMNISTModel) {
@@ -784,7 +670,7 @@
 
                                  if (isLLMVModel) {
                                      if (!pathSelectedImage.isEmpty())
-                                        displayImage(pathSelectedImage);
+                                         displayImage(pathSelectedImage);
                                  }
 
                                  _txtASRInfo.scrollTo(0, 0);
@@ -798,12 +684,9 @@
                  }
 
                  stopUIBuffering();
-                 //release();
-
              }
          });
          workThread.start();
-
      }
 
      private void startUIBuffering(String status) {
@@ -845,7 +728,6 @@
          });
      }
 
-
      private void stopUIBuffering() {
          mActivity.runOnUiThread(new Runnable() {
              @Override
@@ -853,15 +735,13 @@
                  if (mProgressDialog != null) {
                      mProgressDialog.dismiss();
                      mProgressDialog = null;
-                     Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_stop), Toast.LENGTH_SHORT).show();
+                     //Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_stop), Toast.LENGTH_SHORT).show();
                  }
                  String benchmarkTip = "GGML benchmark finished ";
                  KANTVLog.j(TAG, benchmarkTip);
-                 //release();
              }
          });
      }
-
 
      @Override
      public void initListener() {
@@ -908,7 +788,7 @@
                          KANTVLog.j(TAG, "image path:" + imgPath);
                          //xiaomi14: image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
                          if (imgPath.startsWith("/raw/"))
-                            imgPath = imgPath.substring(6);
+                             imgPath = imgPath.substring(6);
                          pathSelectedImage = imgPath;
                          KANTVLog.j(TAG, "image path:" + imgPath);
                          displayImage(imgPath);
@@ -939,9 +819,7 @@
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
-                 if ((arg1 == KANTV_INFO_ASR_STOP)
-                         || (arg1 == KANTV_INFO_ASR_FINALIZE)
-                 ) {
+                 if ((arg1 == KANTV_INFO_ASR_STOP) || (arg1 == KANTV_INFO_ASR_FINALIZE)) {
                      return;
                  }
 
@@ -955,9 +833,7 @@
                  } else {
                      if (content.startsWith("llama-timings")) {
                          KANTVLog.j(TAG, "LLM timings");
-                         _txtGGMLStatus.setText("");
-                         //_txtGGMLStatus.setText("\n");
-                         _txtGGMLStatus.append(content);
+                         strLLMInferenceInfo = content;
                      } else {
                          nLogCounts++;
                          if (nLogCounts > 100) {
@@ -1139,6 +1015,73 @@
          } catch (Exception ex) {
              KANTVLog.j(TAG, "failed to play audio file:" + ex.toString());
          }
+     }
+
+     private void initUIAndStatus() {
+         isBenchmarking.set(true);
+         //Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
+
+         _txtASRInfo.setText("");
+         _btnBenchmark.setEnabled(false);
+         _btnBenchmark.setBackgroundColor(0xffa9a9a9);
+
+         WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
+         attributes.screenBrightness = 1.0f;
+         mActivity.getWindow().setAttributes(attributes);
+         mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+     }
+
+     private void restoreUIAndStatus() {
+         isBenchmarking.set(false);
+         _btnBenchmark.setEnabled(true);
+         _btnBenchmark.setBackgroundColor(0xC3009688);
+     }
+
+     private void displayInferenceResult(String content) {
+         String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
+         if (isNCNNInference()) {
+             backendDesc = KANTVUtils.getNCNNBackendDesc(backendIndex);
+         }
+         String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
+                 + " ,threads: " + nThreadCounts
+                 + " ,backend: " + backendDesc
+                 + " ) cost " + duration + " milliseconds";
+         //04-07-2024(April,7,2024), add timestamp
+         String timestamp = "";
+         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+         Date date = new Date(System.currentTimeMillis());
+         timestamp = fullDateFormat.format(date);
+         benchmarkTip += ", on " + timestamp;
+
+         benchmarkTip += "\n";
+
+         if (!strBenchmarkInfo.startsWith("unknown")) {
+             if (!strBenchmarkInfo.startsWith("asr_result")) {
+                 benchmarkTip += strBenchmarkInfo;
+             }
+         }
+
+         if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
+             playAudioFile();
+         }
+
+         KANTVLog.j(TAG, benchmarkTip);
+
+         String dispInfo;
+         if (benchmarkIndex ==  KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
+            dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
+         else
+             dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
+         dispInfo += "\n\n";
+
+         benchmarkTip += "\n";
+         dispInfo += benchmarkTip;
+         dispInfo += "\n";
+
+         if (content != null) {
+             dispInfo += content;
+         }
+         KANTVUtils.showMsgBox(mActivity, dispInfo);
      }
 
      public static native int kantv_anti_remove_rename_this_file();

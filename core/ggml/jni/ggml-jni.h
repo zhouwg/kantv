@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 //=============================================================================================
-//add new AI benchmark type / new backend using GGML inference framework here, keep sync with CDEUtils.java
+//add new AI benchmark type / new backend using GGML inference framework here, keep sync with KANTVUtils.java
 
 // available bench type for ggml-jni
 enum ggml_jni_bench_type {
@@ -61,20 +61,18 @@ enum ggml_jni_bench_type {
     bool         ggml_jni_abort_callback(void * data);
     void         ggml_jni_set_abortbenchmark_flag(int b_exit_benchmark);
     int          ggml_jni_get_abortbenchmark_flag(void);
-    /**
-    *
-    * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
-    * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / MNIST: image path
-    * @param n_bench_type    0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp)
-    * @param n_threads       1 - 8
-    * @param n_backend_type  0: Hexagon NPU 1: ggml
-    * @param n_op_type       type of GGML OP
-    * @return
-    */
-    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type, int n_op_type);
 
-    //"m" for "multimodal", GPT4-V or GPT4-o
-    void         ggml_jni_bench_m(const char * sz_model_path, const char * sz_img_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type);
+    /**
+     *
+     * @param sz_model_path     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
+     * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
+     * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp)
+     * @param n_threads         1 - 8
+     * @param n_backend_type    0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU/HEXAGON_BACKEND_CDSP 3: ggml
+     * @param n_accel_type      0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+     * @return
+    */
+    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int num_threads, int n_backend_type, int n_accel_type);
 
     const char * ggml_jni_bench_memcpy(int n_threads);
 
@@ -83,9 +81,6 @@ enum ggml_jni_bench_type {
     const char * ggml_jni_get_ggmltype_str(enum ggml_type wtype);
 
     bool         ggml_jni_is_valid_utf8(const char * string);
-
-    //similar with original llama_print_timings and dedicated for project kantv, for merge/update latest source code of llama.cpp more easily and quickly
-    void         ggml_jni_llama_print_timings(struct llama_context * ctx);
 
 
 // =================================================================================================
@@ -96,9 +91,9 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: Hexagon NPU 1: ggml
+    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
     */
-    int          whisper_asr_init(const char *sz_model_path, int n_threads, int n_asrmode, int n_backend);
+    int          whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
@@ -107,7 +102,7 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: Hexagon NPU 1: ggml
+    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
     */
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
@@ -119,41 +114,13 @@ enum ggml_jni_bench_type {
     *
     * @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
     * @param prompt
-    * @param bench_type            not used currently
+    * @param llm_type              not used currently
     * @param n_threads             1 - 8
-    * @param n_backend             0: Hexagon NPU 1: ggml
+    * @param n_backend             0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_accel_type          0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
     */
-    int          llama_inference_ng(const char * model_path, const char * prompt, int bench_type, int num_threads, int n_backend);
-
-
-// =================================================================================================
-// PoC#121:Add/implement Qualcomm mobile SoC native backend for GGML inference framework from 03-29-2024 to 04-26-2024
-// https://github.com/zhouwg/kantv/issues/121
-// PR to upstream llama.cpp
-// https://github.com/ggerganov/llama.cpp/pull/6869
-// =================================================================================================
-    /**
-     * this special function is for PoC-S49: implementation of other GGML OP(non-mulmat) using QNN API
-     *
-     * this function will calling GGML QNN backend directly
-     *
-     * this function used to validate PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
-     * or this function is UT for PoC-S49:implementation of other GGML OP(non-mulmat) using QNN API
-     *
-     * @param model_path whisper.cpp model at the first step, llama.cpp model at the second step
-     * @param num_threads 1 - 8
-     * @param n_backend_type 0: QNN CPU, 1: QNN GPU, 2: QNN DSP(HTA), 3: ggml(fake QNN backend, just used to compare performance between QNN and original GGML)
-     * @param n_op_type GGML OP type
-     * @return
-     */
-    int qnn_ggml_op(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
-
-    /**
-     * similar to qnn_ggml_op, but an automation UT for a specify GGML OP with a specify backend
-     */
-    int qnn_ggml_op_automation_ut(const char * model_path, int num_threads, int n_backend_type, int n_ggml_op_type);
-
+    int          llama_inference_ng(const char * model_path, const char * prompt, int llm_type, int num_threads, int n_backend, int n_hwaccel_type);
 
 #ifdef __cplusplus
 }

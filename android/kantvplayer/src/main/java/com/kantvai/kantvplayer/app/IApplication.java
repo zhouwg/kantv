@@ -315,7 +315,7 @@ public class IApplication extends Application {
         if (releaseModeString != null) {
             int releaseMode = Integer.valueOf(releaseModeString);
             KANTVLog.j(TAG, "releaseMode: " + releaseMode);
-            KANTVUtils.setReleaseMode((1 == releaseMode) ? true : false);
+            KANTVUtils.setReleaseMode(1 == releaseMode);
         } else {
             KANTVUtils.setReleaseMode(true);
         }
@@ -398,9 +398,9 @@ public class IApplication extends Application {
             KANTVLog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             KANTVLog.j(TAG, "asr mode: " + mSettings.getASRMode());
             if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, KANTVUtils.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, KANTVUtils.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
             }
             KANTVUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             KANTVUtils.setTVASR(false);

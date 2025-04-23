@@ -255,6 +255,9 @@
      public static final int  ASR_MODE_TRANSCRIPTION_RECORD = 3; // transcription + audio record
      private static int       mASRMode = ASR_MODE_NORMAL;
 
+     public static final int INFERENCE_ASR          = 0;
+     public static final int INFERENCE_LLM          = 1;
+
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
 
      private static AtomicBoolean mASRSubsystemInit = new AtomicBoolean(false);
@@ -3925,7 +3928,7 @@
      }
 
      public static void showMsgBox(Context context, String message) {
-         AlertDialog dialog = new AlertDialog.Builder(context).create();
+         android.app.AlertDialog dialog = new AlertDialog.Builder(context).create();
          dialog.setMessage(message);
          dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener() {
              public void onClick(DialogInterface dialog, int which) {
@@ -3935,6 +3938,115 @@
          dialog.show();
      }
 
+     public static String getDeviceInfo() {
+         String systemInfo = ggmljava.llm_get_systeminfo();
+         String deviceInfo = "Device info:" + " "
+                 + "Brand:" + Build.BRAND + " "
+                 + "Hardware:" + Build.HARDWARE + " "
+                 + "OS:" + "Android " + android.os.Build.VERSION.RELEASE + " "
+                 + "Arch:" + Build.CPU_ABI + "(" + systemInfo + ")";
+         deviceInfo += "\n";
+         deviceInfo += "Powered by https://github.com/ggml-org/llama.cpp";
+         KANTVLog.j(TAG, "deviceInfo:" + deviceInfo);
+         return deviceInfo;
+     }
+
+     public static String getDeviceMemoryInfo(Activity activity) {
+         ActivityManager am = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+         am.getMemoryInfo(memoryInfo);
+         long totalMem = memoryInfo.totalMem;
+         long availMem = memoryInfo.availMem;
+         boolean isLowMemory = memoryInfo.lowMemory;
+         long threshold = memoryInfo.threshold;
+         Debug.MemoryInfo debugInfo = new Debug.MemoryInfo();
+         Debug.getMemoryInfo(debugInfo);
+         int totalPrivateClean = debugInfo.getTotalPrivateClean();
+         int totalPrivateDirty = debugInfo.getTotalPrivateDirty();
+         int totalPss = debugInfo.getTotalPss();
+         int totalSharedClean = debugInfo.getTotalSharedClean();
+         int totalSharedDirty = debugInfo.getTotalSharedDirty();
+         int totalSwappablePss = debugInfo.getTotalSwappablePss();
+         int totalUsageMemory = totalPrivateClean + totalPrivateDirty + totalPss + totalSharedClean + totalSharedDirty + totalSwappablePss;
+         int Bytes2MBytes = (1 << 20);
+         //VSS - Virtual Set Size
+         //RSS - Resident Set Size
+         //PSS - Proportional Set Size
+         //USS - Unique Set Size
+         String memoryInfoString =
+                 "total mem              ：" + (totalMem >> 20) + "MB" + "  "
+                         + "isLowMeory:" + isLowMemory + " "
+                         + "threshold of low mem：" + threshold / Bytes2MBytes + "MB" + "  "
+                         + "available mem：" + availMem / Bytes2MBytes + "MB" + " "
+                         + "NativeHeapSize：" + (Debug.getNativeHeapSize() >> 20) + "MB" + "  "
+                         + "NativeHeapAllocatedSize：" + (Debug.getNativeHeapAllocatedSize() >> 20) + "MB" + " "
+                         + "NativeHeapFreeSize：" + (Debug.getNativeHeapFreeSize() >> 20) + "MB " + " "
+                         + "total private dirty memory：" + totalPrivateDirty / 1024 + "MB" + " "
+                         + "total shared  dirty memory：" + totalSharedDirty / 1024 + "MB" + " "
+                         + "total PSS memory               ：" + totalPss / 1024 + "MB" + " "
+                         + "total swappable memory  ：" + totalSwappablePss / 1024 + "MB" + " "
+                         + "total usage memory           ：" + totalUsageMemory / 1024 + "MB" + " ";
+         KANTVLog.j(TAG, "memory info: " + memoryInfoString);
+         return memoryInfoString;
+     }
+
+     public static String getDeviceInfo(Activity activity, int inference_type) {
+         ActivityManager am = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
+         ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+         am.getMemoryInfo(memoryInfo);
+         long totalMem = memoryInfo.totalMem;
+         long availMem = memoryInfo.availMem;
+         boolean isLowMemory = memoryInfo.lowMemory;
+         long threshold = memoryInfo.threshold;
+         Debug.MemoryInfo debugInfo = new Debug.MemoryInfo();
+         Debug.getMemoryInfo(debugInfo);
+         int totalPrivateClean = debugInfo.getTotalPrivateClean();
+         int totalPrivateDirty = debugInfo.getTotalPrivateDirty();
+         int totalPss = debugInfo.getTotalPss();
+         int totalSharedClean = debugInfo.getTotalSharedClean();
+         int totalSharedDirty = debugInfo.getTotalSharedDirty();
+         int totalSwappablePss = debugInfo.getTotalSwappablePss();
+         int totalUsageMemory = totalPrivateClean + totalPrivateDirty + totalPss + totalSharedClean + totalSharedDirty + totalSwappablePss;
+         int Bytes2MBytes = (1 << 20);
+         //VSS - Virtual Set Size
+         //RSS - Resident Set Size
+         //PSS - Proportional Set Size
+         //USS - Unique Set Size
+         String memoryInfoString =
+                 "total mem              ：" + (totalMem >> 20) + "MB" + "  "
+                         + "isLowMeory:" + isLowMemory + " "
+                         + "threshold of low mem：" + threshold / Bytes2MBytes + "MB" + "  "
+                         + "available mem：" + availMem / Bytes2MBytes + "MB" + " "
+                         + "NativeHeapSize：" + (Debug.getNativeHeapSize() >> 20) + "MB" + "  "
+                         + "NativeHeapAllocatedSize：" + (Debug.getNativeHeapAllocatedSize() >> 20) + "MB" + " "
+                         + "NativeHeapFreeSize：" + (Debug.getNativeHeapFreeSize() >> 20) + "MB " + " "
+                         + "total private dirty memory：" + totalPrivateDirty / 1024 + "MB" + " "
+                         + "total shared  dirty memory：" + totalSharedDirty / 1024 + "MB" + " "
+                         + "total PSS memory               ：" + totalPss / 1024 + "MB" + " "
+                         + "total swappable memory  ：" + totalSwappablePss / 1024 + "MB" + " "
+                         + "total usage memory           ：" + totalUsageMemory / 1024 + "MB" + " ";
+         KANTVLog.j(TAG, "memory info: " + memoryInfoString);
+
+         String systemInfo;
+         if (inference_type == INFERENCE_ASR)
+             systemInfo = ggmljava.asr_get_systeminfo();
+         else if (inference_type == INFERENCE_LLM)
+             systemInfo = ggmljava.llm_get_systeminfo();
+         else
+             systemInfo = "unknown system info of unsupported inference type:" + Integer.toString(inference_type) + " ";
+
+         String deviceInfo = "Device info:" + " "
+                 + Build.BRAND + " "
+                 + Build.HARDWARE + " "
+                 + "Android " + android.os.Build.VERSION.RELEASE + " "
+                 + "Arch:" + Build.CPU_ABI + " "
+                 + "(" + systemInfo + ")" + " "
+                 + "Mem:total " + (totalMem >> 20) + "MB"  + " "
+                 + "available " + (availMem >> 20) + "MB"   + " "
+                 + "usage " + (totalUsageMemory >> 10) + "MB";
+
+         return deviceInfo;
+     }
 
      public static String getBenchmarkDesc(int benchmarkIndex) {
          bench_type[] benchTypes = bench_type.values();
@@ -3956,11 +4068,16 @@
 
      public static String getGGMLBackendDesc(int n_backend_type) {
          switch (n_backend_type) {
-             case 0:
-                 return "Hexagon-NPU";
-             case 1:
+             case ggmljava.HEXAGON_BACKEND_QNNCPU:
+                 return "QNN-CPU";
+             case ggmljava.HEXAGON_BACKEND_QNNGPU:
+                 return "QNN-GPU";
+             case ggmljava.HEXAGON_BACKEND_QNNNPU:
+                 return "QNN-NPU";
+             case ggmljava.HEXAGON_BACKEND_CDSP:
+                 return "Hexagon-CDSP";
+             case ggmljava.HEXAGON_BACKEND_GGML:
                  return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
-
              default:
                  return "unknown";
          }
@@ -4072,11 +4189,6 @@
          NCNN_BENCHARK_YOLOV10,
          NCNN_BENCHMARK_MAX,
      };
-
-
-     public static final int HEXAGON_BACKEND_NPU           = 0;
-     public static final int HEXAGON_BACKEND_GGML          = 1; //"fake" backend, just for compare performance between Hexagon and original GGML
-
 
      //keep sync with ncnn-jni.h, realtime inference with live camera / online TV using NCNN
      public enum ncnn_realtimeinference_type {

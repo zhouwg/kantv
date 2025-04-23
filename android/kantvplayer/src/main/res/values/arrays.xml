@@ -105,9 +105,26 @@
         <item>tts-small</item>
     </string-array>
 
-    <string-array name="backend">
-        <item>npu</item>
+    <string-array name="backendtype">
+        <!--
+        TODO: the existing implementation of ggml-hexagon.cpp can't cover following special case:
+              toggle backend and forth between QNN-NPU and cDSP and ggml in a standard Android APP or in
+              a same running process
+              supportive of such special case is easy but it will significantly increase the size of APK
+        -->
+        <!--
+        <item>QNN-CPU</item>
+        <item>QNN-GPU</item>
+        <item>QNN-NPU</item>
+        -->
+        <item>cDSP</item>
         <item>ggml</item>
+    </string-array>
+
+    <string-array name="hwacceltype">
+        <item>QNN</item>
+        <item>QNN-SINGLEGRAPH</item>
+        <item>cDSP</item>
     </string-array>
 
     <string-array name="optype">

@@ -122,7 +122,15 @@ llama_context::llama_context(
     if (!hparams.vocab_only) {
         // GPU backends
         for (auto * dev : model.devices) {
+#ifdef GGML_USE_HEXAGON
+            if (model.params.main_gpu == 4)
+                break;
+#endif
+#ifndef GGML_USE_HEXAGON
             ggml_backend_t backend = ggml_backend_dev_init(dev, nullptr);
+#else
+            ggml_backend_t backend = ggml_backend_dev_init(dev,reinterpret_cast<const char *>(model.params.main_gpu));
+#endif
             if (backend == nullptr) {
                 throw std::runtime_error(format("failed to initialize %s backend", ggml_backend_dev_name(dev)));
             }
@@ -131,13 +139,13 @@ llama_context::llama_context(
 
         // add ACCEL backends (such as BLAS)
         for (size_t i = 0; i < ggml_backend_dev_count(); ++i) {
-#ifdef GGML_USE_QNN
-            if (model.params.main_gpu == 3)
+#ifdef GGML_USE_HEXAGON
+            if (model.params.main_gpu == 4)
                 break;
 #endif
             ggml_backend_dev_t dev = ggml_backend_dev_get(i);
             if (ggml_backend_dev_type(dev) == GGML_BACKEND_DEVICE_TYPE_ACCEL) {
-#ifndef GGML_USE_QNN
+#ifndef GGML_USE_HEXAGON
                 ggml_backend_t backend = ggml_backend_dev_init(dev, nullptr);
 #else
                 ggml_backend_t backend = ggml_backend_dev_init(dev,reinterpret_cast<const char *>(model.params.main_gpu));
@@ -2798,7 +2806,7 @@ void llama_perf_context_print(const llama_context * ctx) {
 #if defined(__ANDROID__)
     const auto timings = llama_perf_context(ctx);
     std::ostringstream timing;
-    timing << "llama-timings:\t";
+    timing << "llama-timings:\n";
 
     timing << "   load time  = " << std::setw(10) << std::fixed << std::setprecision(2)
            << (timings.t_load_ms) << " ms";
@@ -2823,7 +2831,7 @@ void llama_perf_context_print(const llama_context * ctx) {
     timing << "   total time = " << std::setw(10) << std::fixed << std::setprecision(2)
            << ((t_end_ms - timings.t_start_ms)) << " ms / "
            << (timings.n_p_eval + timings.n_eval)
-           << "  tokens\n\n";
+           << "  tokens";
 
     std::string result = timing.str();
     kantv_asr_notify_benchmark(result);

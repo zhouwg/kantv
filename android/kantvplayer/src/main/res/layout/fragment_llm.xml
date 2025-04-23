@@ -27,13 +27,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp" />
 
-            <TextView
-                android:id="@+id/ggmlStatusLLM"
-                android:layout_width="match_parent"
-                android:layout_height="190dp"
-                android:layout_marginTop="5dp"
-                android:text=" " />
-
             <EditText
                 android:id="@+id/txtUserInput"
                 android:layout_width="match_parent"
@@ -41,7 +34,7 @@
                 android:layout_marginTop="5dp"
                 android:background="@drawable/textview_border"
                 android:gravity="top"
-                android:hint="introduce the movie Once Upon a Time in America briefly." />
+                android:hint="introduce the movie Once Upon a Time in America briefly, less then 100 words" />
         </LinearLayout>
 
         <LinearLayout
@@ -73,16 +66,22 @@
                 android:dropDownSelector="#63D81B60"
                 android:spinnerMode="dropdown" />
 
-            <Button
-                android:id="@+id/btnInference"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/button_drawable"
-                android:text="Inference"
-                android:textAllCaps="false"
-                android:textColor="#ffffff" />
         </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/btnInference"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_drawable"
+            android:text="Inference"
+            android:textAllCaps="false"
+            android:textColor="#ffffff" />
+    </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
