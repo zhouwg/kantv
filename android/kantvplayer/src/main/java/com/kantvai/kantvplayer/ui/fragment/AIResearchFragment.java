@@ -98,7 +98,7 @@
      private static final String TAG = AIResearchFragment.class.getName();
      TextView _txtASRInfo;
      TextView _txtGGMLInfo;
-     TextView _txtGGMLStatus;
+
      EditText _txtUserInput;
      ImageView _ivInfo;
      LinearLayout _llInfoLayout;
@@ -210,14 +210,15 @@
 
          _txtASRInfo = mActivity.findViewById(R.id.asrInfo);
          _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
-         _txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
+         //_txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
          _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
          _llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
 
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-         displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + ggmlModelFileName);
+         //will be removed in the future
+         //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + ggmlModelFileName);
 
          try {
              KANTVLibraryLoader.load("ggml-jni");
@@ -266,7 +267,7 @@
                      isLLMVModel = true;
                      strModeName = "minicpm-v";
                      spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
-                     displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
+                     //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
                  }
 
                  if ((previousBenchmakrIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -526,14 +527,18 @@
 
                  KANTVLog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
                  selectModeFile = new File(selectModelFilePath);
-                 displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
-
+                 //will be removed in the future
+                 //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
+                 File sampleFile = new File(KANTVUtils.getDataPath() + ggmlSampleFileName);
                  if (!selectModeFile.exists()) {
                      KANTVLog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
                  }
-                 File sampleFile = new File(KANTVUtils.getDataPath() + ggmlSampleFileName);
+                 if (!sampleFile.exists()) {
+                     KANTVLog.j(TAG, "sample file not exist:" + sampleFile.getAbsolutePath());
+                 }
                  if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                     KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" + selectModeFile.getAbsolutePath() + " exist");
+                     KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" +
+                             selectModeFile.getAbsolutePath() + " and sample file:" + sampleFile.getAbsolutePath() + " exist");
                      return;
                  }
 
@@ -558,7 +563,8 @@
 
              nLogCounts = 0;
 
-             startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + ")");
+             //will be removed in the future
+             //startUIBuffering(mContext.getString(R.string.ggml_benchmark_updating) + "(" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + ")");
 
              initUIAndStatus();
 
@@ -683,7 +689,8 @@
                      });
                  }
 
-                 stopUIBuffering();
+                 //will be removed in the future
+                 //stopUIBuffering();
              }
          });
          workThread.start();
@@ -900,6 +907,7 @@
      }
 
 
+     /* will be removed in the future
      private void displayFileStatus(String sampleFilePath, String modelFilePath) {
          _txtGGMLStatus.setText("");
 
@@ -921,6 +929,7 @@
              _txtGGMLStatus.append("model   file not exist: " + modelFile.getAbsolutePath());
          }
      }
+     */
 
      private boolean isGGMLInfernce() {
          if (benchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
@@ -1038,6 +1047,9 @@
      }
 
      private void displayInferenceResult(String content) {
+         if (strBenchmarkInfo.startsWith("unknown")) {
+             return;
+         }
          String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
          if (isNCNNInference()) {
              backendDesc = KANTVUtils.getNCNNBackendDesc(backendIndex);

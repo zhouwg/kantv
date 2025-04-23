@@ -826,13 +826,6 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("accel type:%d\n", n_accel_type);
 
-    if (GGML_BENCHMARK_ASR == n_backend_type) {
-        if (HEXAGON_BACKEND_CDSP == n_backend_type) {
-            GGML_JNI_NOTIFY("whisper.cpp through cDSP not supported currently");
-            return;
-        }
-    }
-
 #ifdef GGML_USE_HEXAGON
     if (HEXAGON_BACKEND_GGML == n_backend_type) {
         p_asr_ctx->b_use_gpu = false;
