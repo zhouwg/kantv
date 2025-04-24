@@ -2,9 +2,9 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021) , with much enhancements and new features:
 
-- Watch online TV and local media by my customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
-- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
+- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>), pls attention Android phone equipped with Qualcomm Snapdragon 8Gen3/8Elite are HIGHLY required/recommended for AI subtitle feature otherwise unexpected behavior would happen
 
@@ -12,9 +12,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
-- UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
-
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers/programmers who was interested in practise state-of-the-art AI tech(such as [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in <b>real scenario on Android phone
+- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers/programmers who was interested in practise state-of-the-art AI tech(such as [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in <b>real scenario on Android phone</b>
 
 - Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model on Android phone
 
@@ -33,7 +31,7 @@ As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-
 ### Building the project
 
 - Clone this repository and build locally, see [how to build](./docs/build.md)
-- Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases(TBD)
+- Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
 
 ### Run Android APK on Android phone
 
@@ -83,17 +81,14 @@ here is a screenshot to demostrate ASR inference by running the excellent <a hre
 
 ### Hot topics
 
+- roadmap: https://github.com/zhouwg/kantv/discussions/262
 - improve the [ggml-hexagon for Qualcomm Hexagon NPU](https://github.com/zhouwg/ggml-hexagon) in real scenario on Android phone
-
-- bugfix in UI layer(Java)
-
-- bugfix in native layer(C/C++)
 
 ### Contribution
 
 Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
 
-Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
+Report issue in various Android-based phone and <b>submit PR to this project is greatly welcomed</b>.
 
 <!--
  **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
