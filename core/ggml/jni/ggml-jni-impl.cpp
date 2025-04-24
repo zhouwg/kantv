@@ -1621,6 +1621,7 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
     LOGGD("backend type:%d\n", n_backend);
     if (NULL == p_asr_ctx) {
         LOGGW("asr instance not initialized, pls check why\n");
+        GGML_JNI_NOTIFY("asr instance not initialized, pls check why\n");
         return 1;
     }
 

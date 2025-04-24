@@ -185,6 +185,9 @@ add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
 add_definitions(-DGGML_USE_LLAMAFILE)
 
+add_definitions(-DSTANDARD_ANDROID_APP)
+add_definitions(-DPROJECT_NAME=\"KANTV\")
+
 #2025-01:make the new sw arch of latest upstream llama.cpp happy on Android port
 #add_definitions(-D__ARM_ARCH) #FIXME:why NDK complains NEON issue in ggml-quants.c
 add_definitions(-D__aarch64__)

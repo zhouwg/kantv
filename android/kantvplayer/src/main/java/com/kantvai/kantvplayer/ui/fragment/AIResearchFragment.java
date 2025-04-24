@@ -116,6 +116,7 @@
      private String strAccel = "cdsp";
 
      private String strLLMInferenceInfo;
+     private Boolean bASROK = true;
 
      private int offset = 3;
      //TODO: the existing codes can't cover following special case:
@@ -835,6 +836,12 @@
                      return;
                  }
 
+                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+                     if (content.contains("not initialized")) {
+                         bASROK = false;
+                     }
+                 }
+
                  if (content.startsWith("unknown")) {
 
                  } else {
@@ -1073,8 +1080,13 @@
              }
          }
 
-         if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
-             playAudioFile();
+         if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+             if (!bASROK) {
+                 return;
+             }
+             if (strBenchmarkInfo.startsWith("asr_result")) { //when got asr result, playback the audio file
+                 playAudioFile();
+             }
          }
 
          KANTVLog.j(TAG, benchmarkTip);

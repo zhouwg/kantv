@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 The KanTV authors
+ * Copyright (c) 2024-2025 The ggml authors
  *
  * Qualcomm QNN SDK and reference tech guides could be found at:
  * https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
@@ -136,6 +136,10 @@ struct ggml_backend_hexagon_context;
 #define GGMLHEXAGON_DEBUG                               1
 #endif
 
+#ifndef PROJECT_NAME
+#define PROJECT_NAME                                    "ggml-hexagon"
+#endif
+
 #define GGMLHEXAGON_LOGBUF_LEN                          4096
 #define GGMLHEXAGON_TMPBUF_LEN                          256
 
@@ -146,7 +150,7 @@ struct ggml_backend_hexagon_context;
 #define GGMLHEXAGON_LOG_INFO(...)                       ggmlhexagon_log_internal(GGML_LOG_LEVEL_INFO , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #define GGMLHEXAGON_LOG_VERBOSE(...)                    ggmlhexagon_log_internal(GGML_LOG_LEVEL_CONT , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 #else
-//manually disable all foreground logs in ggml-hexagon/CMakeLists.txt to
+//manually disable all verbose logs in ggml-hexagon/CMakeLists.txt to
 //make compare NPU performance through llama-bench more clear
 #define GGMLHEXAGON_LOG_INFO(...)
 #define GGMLHEXAGON_LOG_VERBOSE(...)
@@ -384,10 +388,11 @@ static struct hexagon_appcfg_t g_hexagon_appcfg = {
         .thread_counts          = 4,
         .cfgfilename            = "ggml-hexagon.cfg",
 #if defined(__ANDROID__)
-//Android command line program
-        .runtime_libpath        = "/data/local/tmp/",
-//Android KanTV standard APP
+    #if defined(STANDARD_ANDROID_APP)
         .runtime_libpath        = "/data/data/com.kantvai.kantvplayer/",
+    #else
+        .runtime_libpath        = "/data/local/tmp/",
+    #endif
 #elif defined(__linux__)
         .qnn_runtimelib_path    = "/tmp/",
 #elif defined(_WIN32)
@@ -861,7 +866,7 @@ static void ggmlhexagon_log_internal(ggml_log_level level, const char * file, co
         int len = vsnprintf(s_ggmlhexagon_log_internal_buf + len_prefix, GGMLHEXAGON_LOGBUF_LEN - len_prefix, format, args);
         if (len < (GGMLHEXAGON_LOGBUF_LEN - len_prefix)) {
 #if (defined __ANDROID__) || (defined ANDROID)
-            __android_log_print(ANDROID_LOG_INFO, "KANTV", "%s\n", s_ggmlhexagon_log_internal_buf);
+            __android_log_print(ANDROID_LOG_INFO, PROJECT_NAME, "%s\n", s_ggmlhexagon_log_internal_buf);
             if (GGML_LOG_LEVEL_INFO == level) {
                 printf("%s\n", s_ggmlhexagon_log_internal_buf);
             }
@@ -1822,14 +1827,14 @@ static void ggmlhexagon_set_runtime_path(size_t device, const std::string & path
     if ((HEXAGON_BACKEND_QNNNPU == device) || (HWACCEL_CDSP == g_hexagon_appcfg.hwaccel_approach)) {
         std::string lib_runtime_path = path + ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images";
         if (0 == setenv("LD_LIBRARY_PATH", lib_runtime_path.c_str(), 1)) {
-            GGMLHEXAGON_LOG_INFO("setenv LD_LIBRARY_PATH %s successfully", lib_runtime_path.c_str());
+            GGMLHEXAGON_LOG_DEBUG("setenv LD_LIBRARY_PATH %s successfully", lib_runtime_path.c_str());
         } else {
             GGMLHEXAGON_LOG_ERROR("setenv LD_LIBRARY_PATH %s failure", lib_runtime_path.c_str());
         }
 
         std::string adsp_runtime_path = path + ";/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp";
         if (0 == setenv("ADSP_LIBRARY_PATH", adsp_runtime_path.c_str(), 1)) {
-            GGMLHEXAGON_LOG_INFO("setenv ADSP_LIBRARY_PATH %s successfully", adsp_runtime_path.c_str());
+            GGMLHEXAGON_LOG_DEBUG("setenv ADSP_LIBRARY_PATH %s successfully", adsp_runtime_path.c_str());
         } else {
             GGMLHEXAGON_LOG_ERROR("setenv ADSP_LIBRARY_PATH %s failure", adsp_runtime_path.c_str());
         }
@@ -1852,13 +1857,13 @@ static void ggmlhexagon_load_cfg() {
     //this function can be called in various scenarios
     static bool initialized = false;
     if (initialized) {
-        GGMLHEXAGON_LOG_INFO("hexagon appcfg file already loaded\n");
+        GGMLHEXAGON_LOG_DEBUG("hexagon appcfg file already loaded\n");
         return;
     }
     char time_string[GGMLHEXAGON_TMPBUF_LEN];
     memset(time_string, 0, GGMLHEXAGON_TMPBUF_LEN);
     ggmlhexagon_get_timestring(time_string);
-    GGMLHEXAGON_LOG_INFO("program running start time:%s", time_string);
+    GGMLHEXAGON_LOG_DEBUG("program running start time:%s", time_string);
     std::string cfg_filename = std::string(g_hexagon_appcfg.runtime_libpath) + std::string(g_hexagon_appcfg.cfgfilename);
     GGMLHEXAGON_LOG_INFO("load hexagon appcfg from %s", cfg_filename.c_str());
     hexagon_appcfg hexagoncfg_instance;
@@ -1866,7 +1871,7 @@ static void ggmlhexagon_load_cfg() {
     hexagoncfg_instance.dump([](const std::string & section, const std::string & key, const std::string value) {
         std::ostringstream  tmposs;
         tmposs << "section[" << std::setw(10) << std::left << section << "],[" << std::setw(25) << std::left << key << "] = [" << value << "]";
-        GGMLHEXAGON_LOG_INFO("%s\n", tmposs.str().c_str());
+        GGMLHEXAGON_LOG_INFO("%s", tmposs.str().c_str());
     });
     std::string precision_mode;
     std::string version; //version of ggml-hexagon.cpp
@@ -5296,7 +5301,6 @@ static void ggmlhexagon_deinit_cdsp(ggml_backend_hexagon_context * ctx) {
 }
 
 static int ggmlhexagon_init_dsp(ggml_backend_hexagon_context * ctx) {
-    GGMLHEXAGON_LOG_INFO("enter %s", __func__);
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -5320,7 +5324,7 @@ static int ggmlhexagon_init_dsp(ggml_backend_hexagon_context * ctx) {
 
     if (nullptr == ctx)
         return 1;
-    GGMLHEXAGON_LOG_INFO("init Hexagon cDSP with backend %d(%s)", ctx->device, ggml_backend_hexagon_get_devname(ctx->device));
+    GGMLHEXAGON_LOG_DEBUG("init Hexagon cDSP with backend %d(%s)", ctx->device, ggml_backend_hexagon_get_devname(ctx->device));
     if (0 != ctx->ggmlop_handle) {
         GGMLHEXAGON_LOG_DEBUG("already init Hexagon cDSP with backend %d(%s)", ctx->device, ggml_backend_hexagon_get_devname(ctx->device));
         return 0;
@@ -5445,7 +5449,7 @@ static int ggmlhexagon_init_dsp(ggml_backend_hexagon_context * ctx) {
 
     //make sure test-backend-ops get the correct backend name when hwaccel approach is 2(HWACCEL_CDSP)
     memcpy(g_hexagon_mgr[ctx->device].name, "Hexagon-cDSP", strlen("Hexagon-cDSP"));
-    GGMLHEXAGON_LOG_INFO("init cDSP successfully");
+
     return 0;
 
 bail:
@@ -5542,7 +5546,7 @@ static void ggmlhexagon_compute(ggml_backend_hexagon_context * ctx, struct ggml_
     memcpy(dsptensor_2.op_params, dst->op_params, GGML_MAX_OP_PARAMS / sizeof(int32_t));
     std::chrono::high_resolution_clock::time_point end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<size_t, std::nano> duration = end_time - start_time;
-    GGMLHEXAGON_LOG_VERBOSE("pack duration %llu ns", duration.count());
+    GGMLHEXAGON_LOG_DEBUG("pack duration %llu ns", duration.count());
 
     hexagon_error = op_func(ctx->ggmlop_handle, &dsptensor_0, &dsptensor_1, &dsptensor_2);
     if (AEE_SUCCESS != hexagon_error) {
@@ -6209,17 +6213,13 @@ static ggml_backend_buffer_type_t ggml_backend_hexagon_buffer_type(size_t device
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
     GGMLHEXAGON_LOG_DEBUG("enter %s", __func__ );
-    GGMLHEXAGON_LOG_DEBUG("device_index %d\n", device_index);
-    GGMLHEXAGON_LOG_DEBUG("backend %d\n", g_hexagon_appcfg.hexagon_backend);
-    GGMLHEXAGON_LOG_DEBUG("hwaccel_approach %d\n", g_hexagon_appcfg.hwaccel_approach);
-    GGMLHEXAGON_LOG_DEBUG("backend counts %d\n", ggml_backend_hexagon_get_device_count());
     if (device_index >= GGML_HEXAGON_MAX_DEVICES) {
         GGMLHEXAGON_LOG_DEBUG("ggml_backend_hexagon_buffer_type error: device_index:%d is out of range [0, %d]\n",
                       device_index, GGML_HEXAGON_MAX_DEVICES - 1);
         return nullptr;
     }
 
-    if (device_index != g_hexagon_appcfg.hexagon_backend) {
+    if (device_index != (size_t)(g_hexagon_appcfg.hexagon_backend)) {
         //cover following special case:
         //      toggle backend and forth between cDSP and ggml in a standard Android APP or in
         //      a same running process
@@ -6250,8 +6250,8 @@ static ggml_backend_buffer_type_t ggml_backend_hexagon_buffer_type(size_t device
     if (HWACCEL_CDSP == g_hexagon_appcfg.hwaccel_approach) {
         GGML_ASSERT(HEXAGON_BACKEND_CDSP == g_hexagon_appcfg.hexagon_backend);
         //FIXME:this is workaround for cover following special case:
-        //      toggle backend and forth between cDSP and ggml in a standard Android APP or in a same running process
-        //      there is unknown issue with this workaround when toggle backend and forth frequently
+        //      toggle back and forth between cDSP and ggml in a standard Android APP or in a same running process
+        //      there is unknown issue with this workaround when toggle back and forth frequently in a standard Android APP
         int result = ggmlhexagon_init_dsp(&g_hexagon_mgr[HEXAGON_BACKEND_CDSP]);
         if (0 != result) {
             GGMLHEXAGON_LOG_INFO("init hexagon dsp failure");
@@ -6475,7 +6475,7 @@ static ggml_backend_dev_t ggml_backend_hexagon_reg_get_device(ggml_backend_reg_t
         //so return ctx->devices[0]
         return ctx->devices[0];
     } else {
-        GGML_ASSERT(index < ctx->devices.size());
+        GGML_ASSERT(index <= ctx->devices.size());
         return ctx->devices[index];
     }
 }
@@ -6502,13 +6502,13 @@ static const ggml_backend_reg_i ggml_backend_hexagon_reg_interface = {
 };
 
 ggml_backend_reg_t ggml_backend_hexagon_reg() {
-    GGMLHEXAGON_LOG_INFO("enter %s", __func__);
     static ggml_backend_reg reg;
     //TODO: the existing codes can't cover following special case:
-    //      toggle backend and forth between QNN-NPU and cDSP and ggml in a standard Android APP or in
+    //      toggle back and forth between QNN-NPU and cDSP and ggml in a standard Android APP or in
     //      a same running process
     //      supportive of such special case is easy but it will significantly increase the size of APK
     static bool initialized = false;
+    GGMLHEXAGON_LOG_DEBUG("enter %s", __func__);
 
     //case-2: normal scenario, such as llama-cli or UI applicaton
     ggmlhexagon_load_cfg();
@@ -6573,7 +6573,7 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
 
         initialized = true;
     }
-    GGMLHEXAGON_LOG_INFO("leave ggml_backend_hexagon_reg");
+    GGMLHEXAGON_LOG_DEBUG("leave ggml_backend_hexagon_reg");
 
     return &reg;
 }
@@ -6596,7 +6596,6 @@ const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
 }
 
 static qnn_instance * ggmlqnn_init_qnn_instance(size_t device, const char * qnn_lib_path) {
-    GGMLHEXAGON_LOG_DEBUG("enter %s", __func__);
     int result = 0;
     GGMLHEXAGON_LOG_INFO("hwaccel approach=%d(%s)", g_hexagon_appcfg.hwaccel_approach,
                      ggmlhexagon_get_hwaccel_approach_name(g_hexagon_appcfg.hwaccel_approach));
