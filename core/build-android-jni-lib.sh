@@ -21,7 +21,7 @@ HEXAGON_SDK_PATH=/opt/qcom/Hexagon_SDK/6.2.0.1
 #v73 --- Snapdragon 8 Gen2
 #v75 --- Snapdragon 8 Gen3
 #v79 --- Snapdragon 8 Elite
-HTP_ARCH_VERSION=v79
+HTP_ARCH_VERSION=v75
 
 if [ "x${PROJECT_ROOT_PATH}" == "x" ]; then
     echo "pwd is `pwd`"

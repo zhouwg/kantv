@@ -107,7 +107,7 @@ public class CommonEditTextDialog extends Dialog{
             case NETWORK_LINK:
                 if (StringUtils.isEmpty(inputData)) {
                     inputLayout.setErrorEnabled(true);
-                    inputLayout.setError("链接不能为空");
+                    inputLayout.setError("URL can not be empty");
                 } else {
                     KeyboardUtils.hideSoftInput(editText);
                     int lastEx = inputData.lastIndexOf("/") + 1;
@@ -122,7 +122,7 @@ public class CommonEditTextDialog extends Dialog{
             case SEARCH_SUBTITLE:
                 if (StringUtils.isEmpty(inputData)) {
                     inputLayout.setErrorEnabled(true);
-                    inputLayout.setError("video name can not empty");
+                    inputLayout.setError("video name can not be empty");
                 } else if (listener != null) {
                     listener.onConfirm(inputData);
                     CommonEditTextDialog.this.dismiss();

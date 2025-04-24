@@ -67,8 +67,8 @@ endif()
 
 if(NOT DEFINED HTP_ARCH_VERSION)
     message(WARNING "HTP_ARCH_VERSION not defined, valid htp arch: v68,v69,v73,v75,v79")
-    #manually set to v79
-    set(HTP_ARCH_VERSION v79)
+    #manually set to v75
+    set(HTP_ARCH_VERSION v75)
 endif()
 #check whether user's specified htp arch is valid
 set(CHECK_HTP_ARCH "WRONG")

@@ -281,3 +281,10 @@
                         <li>refine the entire project</li>
                         <li>Hexagon NPU couldn't work as expected in APP because of an unknown issue:https://github.com/zhouwg/kantv/issues/269</li>
                     </ul>
+- v1.6.4, 2025-04-24,
+                    <ul>
+                        <li>fix issue #269: cDSP cannot works in a standard Android APP</li>
+                        <li>sync source code of ggml-hexagon.cpp between project kantv and project ggml-hexagon</li>
+                        <li>maintain only one version of ggml-hexagon.cpp and make work flow more clear and easy</li>
+                        <li>release v1.6.4</li>
+                    </ul>
