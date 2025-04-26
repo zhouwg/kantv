@@ -1574,12 +1574,21 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         }
 
         if (KANTVUtils.getASRSubsystemInit()) {
+            int result = 0;
             if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                ggmljava.asr_reset(KANTVUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {
-                ggmljava.asr_reset(KANTVUtils.getDataPath() + "/models/" + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
             }
-            ggmljava.asr_start();
+            if (0 == result) {
+                ggmljava.asr_start();
+            } else {
+                KANTVLog.j(TAG, "failed to initialized ASR");
+                topBarView.updateTVASRVisibility(false);
+                KANTVUtils.setTVASR(false);
+                KANTVUtils.showMsgBox(mAttachActivity, "ASR subsystem not initialized, pls check why");
+                return;
+            }
         } else {
             topBarView.updateTVASRVisibility(false);
             KANTVUtils.setTVASR(false);

@@ -635,7 +635,7 @@ static const char * ggml_jni_transcribe_from_file(const char * sz_model_path, co
         wcp.gpu_device  = n_backend_type;
         wcp.use_gpu     = false;
 #ifdef GGML_USE_HEXAGON
-        if (n_backend_type != 1) {
+        if (n_backend_type != HEXAGON_BACKEND_GGML) {
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
@@ -1457,7 +1457,7 @@ int whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, i
      c_params.gpu_device  = n_backend;
      c_params.use_gpu     = false;
 #ifdef GGML_USE_HEXAGON
-     if (n_backend != 1) {
+     if (n_backend != HEXAGON_BACKEND_GGML) {
          c_params.use_gpu = true;
      } else {
          c_params.use_gpu = false;
@@ -1643,7 +1643,7 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
         wcp.gpu_device  = n_backend;
         wcp.use_gpu     = false;
 #ifdef GGML_USE_HEXAGON
-        if (n_backend != 1) {
+        if (n_backend != HEXAGON_BACKEND_GGML) {
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
@@ -1661,7 +1661,21 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
         wcp.gpu_device  = n_backend;
         wcp.use_gpu     = false;
 #ifdef GGML_USE_HEXAGON
-        if (n_backend != 1) {
+        if (n_backend != HEXAGON_BACKEND_GGML) {
+            wcp.use_gpu = true;
+        } else {
+            wcp.use_gpu = false;
+        }
+#endif
+        p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, wcp);
+        p_asr_ctx->n_backend = n_backend;
+    } else if (nullptr == p_asr_ctx->p_context) {
+        LOGGD("re-init whispercpp instance");
+        struct whisper_context_params wcp = whisper_context_default_params();
+        wcp.gpu_device  = n_backend;
+        wcp.use_gpu     = false;
+#ifdef GGML_USE_HEXAGON
+        if (n_backend != HEXAGON_BACKEND_GGML) {
             wcp.use_gpu = true;
         } else {
             wcp.use_gpu = false;
@@ -1674,6 +1688,7 @@ int whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, 
     }
 
     if (nullptr == p_asr_ctx->p_context) {
+        LOGGW("it should not happen and ASR feature would be not available, pls check why?\n");
         result = 3;
     } else {
         p_asr_ctx->n_threads            = n_threads;

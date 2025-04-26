@@ -559,7 +559,12 @@
              ggmlModelFileName = selectModelFilePath;
              KANTVLog.j(TAG, "model file:" + selectModelFilePath);
              if (isASRModel) { //avoid crash
-                 ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVUtils.ASR_MODE_BECHMARK, backendIndex);
+                 int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVUtils.ASR_MODE_BECHMARK, backendIndex);
+                 if (0 != result) {
+                     KANTVLog.j(TAG, "failed to initialize ASR");
+                     KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR");
+                     return;
+                 }
              }
 
              nLogCounts = 0;
