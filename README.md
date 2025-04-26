@@ -1,14 +1,14 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021) , with much enhancements and new features:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on <b>ANY mainstream</b> **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021) , with much enhancements and new features:
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
 
 - Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
 
-- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>), pls attention Android phone equipped with Qualcomm Snapdragon 8Gen3/8Elite are HIGHLY required/recommended for AI subtitle feature otherwise unexpected behavior would happen
+- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>)
 
-- 2D graphic performance
+- 2D graphic performance benchmark
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
@@ -20,7 +20,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 ### Highlight
 
-As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> open-source ggml-hexagon backend for llama.cpp on Qualcomm's Hexagon NPU equipped phone</a>
+As far as I know, probably be <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> the first open-source implementation of ggml-hexagon backend in llama.cpp community </a> for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite).
 
 
 ### Software architecture of KanTV Android
@@ -35,19 +35,23 @@ As far as I know, probably be the first <a href="https://github.com/zhouwg/ggml-
 
 ### Run Android APK on Android phone
 
-You will need an Android smartphone with adb-connected running on one of below Qualcomm SoCs(Qualcomm Snapdragon 8 Gen3 and Snapdragon 8 Elite are highly recommended for better performance):
+- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm Snapdragon 8Gen3 and Snapdragon 8Elite are highly recommended) is <b>required</b> for verify/running ggml-hexagon backend on Android phone:
 
     Snapdragon 8 Gen 1
+
     Snapdragon 8 Gen 1+
+
     Snapdragon 8 Gen 2
+
     Snapdragon 8 Gen 3
+
     Snapdragon 8 Elite
 
+- Android smartphone equipped with <b>ANY</b> mainstream high-end mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen
 
-This project is a <b>pure AI learning&study</b> project, so the Android APK is a green Android APP and will not collect/upload user data in Android device. The Android APK should be works well on any Qualcomm mobile SoC equipped <b>mainstream</b> Android phone and the following permissions are required:
-
-- Access to storage is required for ASR inference and LLM inference(read/load models from storage)
-- Access to device information is required to obtain phone's network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
+- This project is a <b>pure AI learning&study</b> project, so the Android APK is a <b>green</b> Android APP and will <b>NOT</b> collect/upload user data in Android device, following minimum permissions are required:
+  - Access to storage is required for TV recording(write recording data to storage) and ASR/LLM inference(read/load models from storage)
+  - Access to device information is required to obtain phone's network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
 
 ### Screenshots
 <hr>

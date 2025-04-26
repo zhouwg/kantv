@@ -39,6 +39,7 @@ import java.text.SimpleDateFormat;
 
 import kantvai.media.player.AndroidMediaPlayer;
 import kantvai.media.player.IMediaPlayer;
+import kantvai.media.player.KANTVDRM;
 import kantvai.media.player.KANTVLog;
 import kantvai.media.player.FFmpegMediaPlayer;
 import kantvai.media.player.MediaPlayerProxy;
@@ -208,7 +209,10 @@ public class InfoHudViewHolder {
                                 break;
                         }
                         //setRowValue(R.string.playengine, "FFmpeg");
-                        tmpString = mMediaPlayer.getVideoDecoderName() + "  " +  mActivity.getBaseContext().getString(R.string.playengine) + ": " + "FFmpeg-" + ((FFmpegMediaPlayer) mMediaPlayer).getFFmpegVersion();
+                        tmpString = "SDK:" + KANTVDRM.getInstance().ANDROID_JNI_GetSDKVersion() +
+                                " "  + mMediaPlayer.getVideoDecoderName() +
+                                " "  + mActivity.getBaseContext().getString(R.string.playengine) +
+                                ": " + "FFmpeg-" + ((FFmpegMediaPlayer) mMediaPlayer).getFFmpegVersion();
                         tmpString = KANTVUtils.convertLongString(tmpString, 30);
                         setRowValue(R.string.vdec, tmpString);
 
@@ -229,7 +233,7 @@ public class InfoHudViewHolder {
                             long bitRate = mp.getBitRate();
                             float playbackRate = mp.getPlaybackSpeed();
                             KANTVLog.d(TAG, "bitrate: " + bitRate);
-                            KANTVLog.d(TAG, "playbackrate: " + playbackRate);
+                            KANTVLog.d(TAG, "playback rate: " + playbackRate);
                             long seekLoadDuration = mp.getSeekLoadDuration();
                             setRowValue(R.string.v_cache, String.format(Locale.US, "%s, %s", KANTVUtils.formatedDurationMilli(videoCachedDuration), formatedSize(videoCachedBytes)));
                             setRowValue(R.string.a_cache, String.format(Locale.US, "%s, %s", KANTVUtils.formatedDurationMilli(audioCachedDuration), formatedSize(audioCachedBytes)));

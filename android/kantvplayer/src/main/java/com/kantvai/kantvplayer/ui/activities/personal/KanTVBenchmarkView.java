@@ -17,62 +17,50 @@
   */
 package com.kantvai.kantvplayer.ui.activities.personal;
 
-import static kantvai.media.player.KANTVBenchmarkType.AV_PIX_FMT_YUV420P;
-import static kantvai.media.player.KANTVEvent.KANTV_INFO_PREVIEW;
+ import static kantvai.media.player.KANTVBenchmarkType.AV_PIX_FMT_YUV420P;
 
-import android.animation.ValueAnimator;
-import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.graphics.Color;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.net.Uri;
-import android.os.Build;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.MediaController;
+ import android.annotation.TargetApi;
+ import android.app.AlertDialog;
+ import android.content.Context;
+ import android.content.DialogInterface;
+ import android.content.SharedPreferences;
+ import android.graphics.Color;
+ import android.graphics.Matrix;
+ import android.os.Build;
+ import android.preference.PreferenceManager;
+ import android.util.AttributeSet;
+ import android.util.Log;
+ import android.view.Gravity;
+ import android.view.KeyEvent;
+ import android.view.MotionEvent;
+ import android.view.Surface;
+ import android.view.View;
+ import android.widget.FrameLayout;
+ import android.widget.MediaController;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+ import androidx.annotation.NonNull;
+ import androidx.appcompat.app.AppCompatActivity;
 
-import com.kantvai.kantvplayer.R;
-import com.kantvai.kantvplayer.player.ffplayer.media.IMediaController;
-import com.kantvai.kantvplayer.player.ffplayer.media.IRenderView;
-import com.kantvai.kantvplayer.player.ffplayer.media.SurfaceRenderView;
-import com.kantvai.kantvplayer.player.ffplayer.media.TableLayoutBinder;
-import com.kantvai.kantvplayer.player.ffplayer.media.TextureRenderView;
-import com.kantvai.kantvplayer.utils.Settings;
+ import com.kantvai.kantvplayer.R;
+ import com.kantvai.kantvplayer.player.ffplayer.media.IMediaController;
+ import com.kantvai.kantvplayer.player.ffplayer.media.IRenderView;
+ import com.kantvai.kantvplayer.player.ffplayer.media.SurfaceRenderView;
+ import com.kantvai.kantvplayer.player.ffplayer.media.TableLayoutBinder;
+ import com.kantvai.kantvplayer.player.ffplayer.media.TextureRenderView;
+ import com.kantvai.kantvplayer.utils.Settings;
 
-import java.util.Locale;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.Locale;
+ import java.util.concurrent.atomic.AtomicBoolean;
 
-
-import kantvai.media.player.KANTVLog;
-import kantvai.media.player.KANTVUtils;
-import kantvai.media.player.KANTVEvent;
-import kantvai.media.player.KANTVEventListener;
-import kantvai.media.player.KANTVEventType;
-import kantvai.media.player.KANTVException;
-import kantvai.media.player.KANTVMgr;
-
-import android.content.DialogInterface;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+ import kantvai.media.player.KANTVEvent;
+ import kantvai.media.player.KANTVEventListener;
+ import kantvai.media.player.KANTVEventType;
+ import kantvai.media.player.KANTVException;
+ import kantvai.media.player.KANTVLog;
+ import kantvai.media.player.KANTVMgr;
+ import kantvai.media.player.KANTVUtils;
 
 
 public class KanTVBenchmarkView extends FrameLayout implements MediaController.MediaPlayerControl {
@@ -91,11 +79,7 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
     private int mVideoWidth;
     private int mVideoHeight;
 
-    private int mVideoRotationDegree;
-
-    private int mVideoTargetRotationDegree;
-
-    private Matrix mOriginalMatrix;
+    private int mVideoRotationDegree = 90;
 
     private IMediaController mMediaController;
 
@@ -106,22 +90,10 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
     private SharedPreferences mSharedPreferences;
     private int mVideoSarNum = 0;
     private int mVideoSarDen = 0;
-    private boolean mBenchmarkDone = false;
 
-    private float mVideoScale = 1.0f;
-
-    private boolean mIsNormalScreen = true;
-
-    private int mScreenOrWidth;
-    private int mScreenOrHeight;
-    private Matrix mSaveMatrix;
-
-
-    private boolean mEnableLandscape = true;
-    private boolean mEnableFullscreen = false;
     private boolean isActionBarShowing = false;
 
-    private int mKeyFSM[] = new int[4];
+    private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
     public KanTVBenchmarkView(Context context) {
         super(context);
@@ -197,6 +169,7 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
                 setRenderView(null);
                 break;
             case RENDER_TEXTURE_VIEW: {
+                KANTVLog.j(TAG, "using TEXTURE_VIEW");
                 TextureRenderView renderView = new TextureRenderView(getContext());
                 {
                     renderView.setVideoSize(SURFACE_WIDTH, SURFACE_WIDTH);
@@ -207,7 +180,13 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
                 break;
             }
             case RENDER_SURFACE_VIEW: {
+                KANTVLog.j(TAG, "using SURFACE_VIEW");
                 SurfaceRenderView renderView = new SurfaceRenderView(getContext());
+                {
+                    renderView.setVideoSize(SURFACE_WIDTH, SURFACE_WIDTH);
+                    renderView.setVideoSampleAspectRatio(4, 3);
+                    renderView.setAspectRatio(mCurrentAspectRatio);
+                }
                 setRenderView(renderView);
                 break;
             }
@@ -431,7 +410,8 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
                 KANTVLog.j(TAG, "onSurfaceDestroyed: unmatched render callback\n");
                 return;
             }
-            if (mBenchmarkDone)
+
+            if (!isBenchmarking.get())
                 return;
 
             if (!KANTVUtils.getCouldExitApp()) {
@@ -453,7 +433,7 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
             KANTVLog.j(TAG, "Mgr version:" + mGraphicBenchMgr.getMgrVersion());
         } catch (KANTVException ex) {
             String errorMsg = "An Exception was thrown because:\n" + " " + ex.getMessage();
-            KANTVLog.j(TAG, "error occured: " + errorMsg);
+            KANTVLog.j(TAG, "error occurred: " + errorMsg);
             showMsgBox(mActivity, errorMsg);
             ex.printStackTrace();
         }
@@ -475,6 +455,7 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
             mGraphicBenchMgr.enablePreview(0, objSurface);
             mGraphicBenchMgr.startGraphicBenchmarkPreview();
             KANTVUtils.setCouldExitApp(false);
+            isBenchmarking.set(true);
         }
     }
 
@@ -516,8 +497,8 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
 
                 if (arg1 == KANTVEvent.KANTV_INFO_GRAPHIC_BENCHMARK_STOP) {
                     KANTVLog.j(TAG, "benchmark stop from native layer");
-                    mBenchmarkDone = true;
                     KANTVUtils.setCouldExitApp(true);
+                    isBenchmarking.set(false);
                 }
             }
 
@@ -550,6 +531,7 @@ public class KanTVBenchmarkView extends FrameLayout implements MediaController.M
         builder.appendRow2(R.string.cpu_abi, Build.CPU_ABI);
         builder.appendRow2(R.string.hardware_info, Build.HARDWARE);
         builder.appendRow2(R.string.os_info, "Android " + android.os.Build.VERSION.RELEASE);
+        //TODO: display some necessary info of Qualcomm's mobile SoC(GPU and NPU）
         //builder.appendRow2(R.string.fingerprint_info, Build.FINGERPRINT);
         androidx.appcompat.app.AlertDialog.Builder adBuilder = builder.buildAlertDialogBuilder();
         adBuilder.setTitle(R.string.device_info);
