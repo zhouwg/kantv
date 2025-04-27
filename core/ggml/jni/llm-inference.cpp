@@ -4,7 +4,7 @@
 #include "log.h"
 #include "sampling.h"
 #include "llama.h"
-#include "minja/chat-template.hpp"
+#include "chat.h"
 
 #include <cstdio>
 #include <cstring>
@@ -15,19 +15,9 @@
 #include <string>
 #include <vector>
 
-extern "C" {
-#include "libavutil/cde_log.h"
-#include "libavutil/cde_assert.h"
-}
-#include "llamacpp/ggml/include/ggml-hexagon.h"
-#include "ggml-jni.h"
-
-
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <signal.h>
 #include <unistd.h>
-#include <chat.h>
-
 #elif defined (_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -41,7 +31,14 @@ extern "C" {
 #pragma warning(disable: 4244 4267) // possible loss of data
 #endif
 
-static const char * DEFAULT_SYSTEM_MESSAGE = "You are a helpful assistant";
+#if (defined __ANDROID__) || (defined ANDROID)
+extern "C" {
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
+}
+#include "llamacpp/ggml/include/ggml-hexagon.h"
+#include "ggml-jni.h"
+#endif
 
 static llama_context           ** g_ctx;
 static llama_model             ** g_model;
@@ -57,8 +54,8 @@ static void print_usage(int argc, char ** argv) {
     (void) argc;
 
     LOG("\nexample usage:\n");
-    LOG("\n  text generation:     %s -m your_model.gguf -p \"I believe the meaning of life is\" -n 128\n", argv[0]);
-    LOG("\n  chat (conversation): %s -m your_model.gguf -p \"You are a helpful assistant\" -cnv\n", argv[0]);
+    LOG("\n  text generation:     %s -m your_model.gguf -p \"I believe the meaning of life is\" -n 128 -no-cnv\n", argv[0]);
+    LOG("\n  chat (conversation): %s -m your_model.gguf -sys \"You are a helpful assistant\"\n", argv[0]);
     LOG("\n");
 }
 
@@ -106,10 +103,10 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
     if (backend_type != HEXAGON_BACKEND_GGML) {
-#ifdef GGML_USE_HEXAGON
+#ifdef GGML_USE_HEXAGON \
         LOGGD("using hexagon backend %d", backend_type);
         params.main_gpu = backend_type;
-        params.n_gpu_layers = 4096;
+        params.n_gpu_layers = 99;
 #else
         LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
         GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
@@ -118,7 +115,6 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     } else {
         params.main_gpu = backend_type;
     }
-
     common_init();
 
     auto & sparams = params.sampling;
@@ -153,6 +149,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG_INF("%s: llama backend init\n", __func__);
+    LOGGD("%s: llama backend init\n", __func__);
 
     llama_backend_init();
     llama_numa_init(params.numa);
@@ -170,6 +167,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     // load the model and apply lora adapter, if any
     LOG_INF("%s: load the model and apply lora adapter, if any\n", __func__);
     common_init_result llama_init = common_init_from_params(params);
+
     model = llama_init.model.get();
     ctx = llama_init.context.get();
 
@@ -221,7 +219,6 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         LOG_WRN("%s: model was trained on only %d context tokens (%d specified)\n", __func__, n_ctx_train, n_ctx);
     }
 
-    // auto enable conversation mode if chat template is available
     // auto enable conversation mode if chat template is available
     const bool has_chat_template = common_chat_templates_was_explicit(chat_templates.get());
     if (params.conversation_mode == COMMON_CONVERSATION_MODE_AUTO) {
@@ -280,7 +277,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
     }
 
-    const bool add_bos = llama_vocab_get_add_bos(vocab);
+    const bool add_bos = llama_vocab_get_add_bos(vocab) && !params.use_jinja;
     if (!llama_model_has_encoder(model)) {
         GGML_ASSERT(!llama_vocab_get_add_eos(vocab));
     }
@@ -289,6 +286,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     std::vector<llama_token> embd_inp;
 
+    bool waiting_for_first_input = false;
     auto chat_add_and_format = [&chat_msgs, &chat_templates](const std::string & role, const std::string & content) {
         common_chat_msg new_msg;
         new_msg.role = role;
@@ -299,13 +297,34 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         return formatted;
     };
 
+    std::string prompt;
     {
-        auto prompt = (params.conversation_mode && params.enable_chat_template)
-            // format the system prompt in conversation mode (fallback to default if empty)
-            ? chat_add_and_format("", params.prompt.empty() ? DEFAULT_SYSTEM_MESSAGE : params.prompt)
+        if (params.conversation_mode && params.enable_chat_template) {
+            if (!params.system_prompt.empty()) {
+                // format the system prompt (will use template default if empty)
+                chat_add_and_format("system", params.system_prompt);
+            }
+
+            if (!params.prompt.empty()) {
+                // format and append the user prompt
+                chat_add_and_format("user", params.prompt);
+            } else {
+                waiting_for_first_input = true;
+            }
+
+            if (!params.system_prompt.empty() || !params.prompt.empty()) {
+                common_chat_templates_inputs inputs;
+                inputs.messages = chat_msgs;
+                inputs.add_generation_prompt = !params.prompt.empty();
+
+                prompt = common_chat_templates_apply(chat_templates.get(), inputs).prompt;
+            }
+        } else {
             // otherwise use the prompt as is
-            : params.prompt;
-        if (params.interactive_first || !params.prompt.empty() || session_tokens.empty()) {
+            prompt = params.prompt;
+        }
+
+        if (params.interactive_first || !prompt.empty() || session_tokens.empty()) {
             LOG_DBG("tokenize the prompt\n");
             embd_inp = common_tokenize(ctx, prompt, true, true);
         } else {
@@ -318,7 +337,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     // Should not run without any tokens
-    if (embd_inp.empty()) {
+    if (!waiting_for_first_input && embd_inp.empty()) {
         if (add_bos) {
             embd_inp.push_back(llama_vocab_bos(vocab));
             LOG_WRN("embd_inp was considered empty and bos was added: %s\n", string_from(ctx, embd_inp).c_str());
@@ -356,7 +375,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
 
         // remove any "future" tokens that we might have inherited from the previous session
-        llama_kv_cache_seq_rm(ctx, -1, n_matching_session_tokens, -1);
+        llama_kv_self_seq_rm(ctx, -1, n_matching_session_tokens, -1);
     }
 
     LOG_DBG("recalculate the cached logits (check): embd_inp.size() %zu, n_matching_session_tokens %zu, embd_inp.size() %zu, session_tokens.size() %zu\n",
@@ -378,7 +397,12 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     if (params.conversation_mode) {
-        params.interactive_first = true;
+        if (params.single_turn && !params.prompt.empty()) {
+            params.interactive = false;
+            params.interactive_first = false;
+        } else {
+            params.interactive_first = true;
+        }
     }
 
     // enable interactive mode if interactive start is specified
@@ -486,8 +510,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         LOG_INF(       " - Press Ctrl+C to interject at any time.\n");
 #endif
         LOG_INF(       "%s", control_message);
-        if (params.conversation_mode && params.enable_chat_template && params.prompt.empty()) {
-            LOG_INF(   " - Using default system message. To change it, set a different value via -p PROMPT or -f FILE argument.\n");
+        if (params.conversation_mode && params.enable_chat_template && params.system_prompt.empty()) {
+            LOG_INF(   " - Not using system message. To change it, set a different value via -sys PROMPT\n");
         }
         LOG_INF("\n");
 
@@ -515,12 +539,14 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     std::vector<llama_token> embd;
 
-    // tokenized antiprompts
-    std::vector<std::vector<llama_token>> antiprompt_ids;
+    // single-token antiprompts
+    std::vector<llama_token> antiprompt_token;
 
-    antiprompt_ids.reserve(params.antiprompt.size());
     for (const std::string & antiprompt : params.antiprompt) {
-        antiprompt_ids.emplace_back(::common_tokenize(ctx, antiprompt, false, true));
+        auto ids = ::common_tokenize(ctx, antiprompt, false, true);
+        if (ids.size() == 1) {
+            antiprompt_token.push_back(ids[0]);
+        }
     }
 
     if (llama_model_has_encoder(model)) {
@@ -554,8 +580,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 embd.resize(max_embd_size);
 
                 console::set_display(console::error);
-                LOG_WRN("<<input too long: skipped %d token%s>>", skipped_tokens,
-                        skipped_tokens != 1 ? "s" : "");
+                LOG_WRN("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
                 console::set_display(console::reset);
             }
 
@@ -566,26 +591,24 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 // - take half of the last (n_ctx - n_keep) tokens and recompute the logits in batches
 
                 if (n_past + (int) embd.size() >= n_ctx) {
-                    if (!params.ctx_shift) {
-                        LOG_DBG("\n\n%s: context full and context shift is disabled => stopping\n",
-                                __func__);
+                    if (!params.ctx_shift){
+                        LOG_DBG("\n\n%s: context full and context shift is disabled => stopping\n", __func__);
                         break;
                     }
 
                     if (params.n_predict == -2) {
-                        LOG_DBG("\n\n%s: context full and n_predict == -%d => stopping\n", __func__,
-                                params.n_predict);
+                        LOG_DBG("\n\n%s: context full and n_predict == -%d => stopping\n", __func__, params.n_predict);
                         break;
                     }
 
-                    const int n_left = n_past - params.n_keep;
-                    const int n_discard = n_left / 2;
+                    const int n_left    = n_past - params.n_keep;
+                    const int n_discard = n_left/2;
 
                     LOG_DBG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
                             n_past, n_left, n_ctx, params.n_keep, n_discard);
 
-                    llama_kv_cache_seq_rm(ctx, 0, params.n_keep, params.n_keep + n_discard);
-                    llama_kv_cache_seq_add(ctx, 0, params.n_keep + n_discard, n_past, -n_discard);
+                    llama_kv_self_seq_rm (ctx, 0, params.n_keep            , params.n_keep + n_discard);
+                    llama_kv_self_seq_add(ctx, 0, params.n_keep + n_discard, n_past, -n_discard);
 
                     n_past -= n_discard;
 
@@ -599,37 +622,31 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             } else {
                 // context extension via Self-Extend
                 while (n_past >= ga_i + ga_w) {
-                    const int ib = (ga_n * ga_i) / ga_w;
-                    const int bd = (ga_w / ga_n) * (ga_n - 1);
-                    const int dd = (ga_w / ga_n) - ib * bd - ga_w;
+                    const int ib = (ga_n*ga_i)/ga_w;
+                    const int bd = (ga_w/ga_n)*(ga_n - 1);
+                    const int dd = (ga_w/ga_n) - ib*bd - ga_w;
 
                     LOG_DBG("\n");
-                    LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib * bd,
-                            ga_i + ib * bd, n_past + ib * bd);
-                    LOG_DBG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib * bd,
-                            ga_i + ib * bd + ga_w, ga_n, (ga_i + ib * bd) / ga_n,
-                            (ga_i + ib * bd + ga_w) / ga_n);
-                    LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib * bd + ga_w,
-                            n_past + ib * bd, dd, ga_i + ib * bd + ga_w + dd,
-                            n_past + ib * bd + dd);
+                    LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i, n_past, ib*bd, ga_i + ib*bd, n_past + ib*bd);
+                    LOG_DBG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib*bd, ga_i + ib*bd + ga_w, ga_n, (ga_i + ib*bd)/ga_n, (ga_i + ib*bd + ga_w)/ga_n);
+                    LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib*bd + ga_w, n_past + ib*bd, dd, ga_i + ib*bd + ga_w + dd, n_past + ib*bd + dd);
 
-                    llama_kv_cache_seq_add(ctx, 0, ga_i, n_past, ib * bd);
-                    llama_kv_cache_seq_div(ctx, 0, ga_i + ib * bd, ga_i + ib * bd + ga_w, ga_n);
-                    llama_kv_cache_seq_add(ctx, 0, ga_i + ib * bd + ga_w, n_past + ib * bd, dd);
+                    llama_kv_self_seq_add(ctx, 0, ga_i,                n_past,              ib*bd);
+                    llama_kv_self_seq_div(ctx, 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
+                    llama_kv_self_seq_add(ctx, 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
 
                     n_past -= bd;
 
-                    ga_i += ga_w / ga_n;
+                    ga_i += ga_w/ga_n;
 
-                    LOG_DBG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past,
-                            ga_i);
+                    LOG_DBG("\nn_past_old = %d, n_past = %d, ga_i = %d\n\n", n_past + bd, n_past, ga_i);
                 }
             }
 
             // try to reuse a matching prefix from the loaded session instead of re-eval (via n_past)
             if (n_session_consumed < (int) session_tokens.size()) {
                 size_t i = 0;
-                for (; i < embd.size(); i++) {
+                for ( ; i < embd.size(); i++) {
                     if (embd[i] != session_tokens[n_session_consumed]) {
                         session_tokens.resize(n_session_consumed);
                         break;
@@ -682,8 +699,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             // optionally save the session on first sample (for faster prompt loading next time)
             if (!path_session.empty() && need_to_save_session && !params.prompt_cache_ro) {
                 need_to_save_session = false;
-                llama_state_save_file(ctx, path_session.c_str(), session_tokens.data(),
-                                      session_tokens.size());
+                llama_state_save_file(ctx, path_session.c_str(), session_tokens.data(), session_tokens.size());
 
                 LOG_DBG("saved session to %s\n", path_session.c_str());
             }
@@ -722,7 +738,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
         // display text
         if (input_echo && display) {
-            for (auto id: embd) {
+            for (auto id : embd) {
                 const std::string token_str = common_token_to_piece(ctx, id, params.special);
 
                 // Console/Stream Output
@@ -733,7 +749,6 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     kantv_asr_notify_benchmark_c(token_str.c_str());
                 }
 #endif
-
                 // Record Displayed Tokens To Log
                 // Note: Generated tokens are created one by one hence this check
                 if (embd.size() > 1) {
@@ -764,15 +779,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 // Check if each of the reverse prompts appears at the end of the output.
                 // If we're not running interactively, the reverse prompt might be tokenized with some following characters
                 // so we'll compensate for that by widening the search window a bit.
-                for (std::string &antiprompt: params.antiprompt) {
+                for (std::string & antiprompt : params.antiprompt) {
                     size_t extra_padding = params.interactive ? 0 : 2;
-                    size_t search_start_pos = last_output.length() >
-                                              static_cast<size_t>(antiprompt.length() +
-                                                                  extra_padding)
-                                              ? last_output.length() -
-                                                static_cast<size_t>(antiprompt.length() +
-                                                                    extra_padding)
-                                              : 0;
+                    size_t search_start_pos = last_output.length() > static_cast<size_t>(antiprompt.length() + extra_padding)
+                        ? last_output.length() - static_cast<size_t>(antiprompt.length() + extra_padding)
+                        : 0;
 
                     if (last_output.find(antiprompt, search_start_pos) != std::string::npos) {
                         if (params.interactive) {
@@ -785,8 +796,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
                 // check for reverse prompt using special tokens
                 llama_token last_token = common_sampler_last(smpl);
-                for (std::vector<llama_token> ids: antiprompt_ids) {
-                    if (ids.size() == 1 && last_token == ids[0]) {
+                for (auto token : antiprompt_token) {
+                    if (token == last_token) {
                         if (params.interactive) {
                             is_interacting = true;
                         }
@@ -801,17 +812,14 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             }
 
             // deal with end of generation tokens in interactive mode
-            if (llama_vocab_is_eog(vocab, common_sampler_last(smpl))) {
+            if (!waiting_for_first_input && llama_vocab_is_eog(vocab, common_sampler_last(smpl))) {
                 LOG_DBG("found an EOG token\n");
 
                 if (params.interactive) {
                     if (!params.antiprompt.empty()) {
                         // tokenize and inject first reverse prompt
-                        const auto first_antiprompt = common_tokenize(ctx,
-                                                                      params.antiprompt.front(),
-                                                                      false, true);
-                        embd_inp.insert(embd_inp.end(), first_antiprompt.begin(),
-                                        first_antiprompt.end());
+                        const auto first_antiprompt = common_tokenize(ctx, params.antiprompt.front(), false, true);
+                        embd_inp.insert(embd_inp.end(), first_antiprompt.begin(), first_antiprompt.end());
                         is_antiprompt = true;
                     }
 
@@ -824,12 +832,17 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             }
 
             // if current token is not EOG, we add it to current assistant message
-            if (params.conversation_mode) {
+            if (params.conversation_mode && !waiting_for_first_input) {
                 const auto id = common_sampler_last(smpl);
                 assistant_ss << common_token_to_piece(ctx, id, false);
+
+                if (!prompt.empty()) {
+                    prompt.clear();
+                    is_interacting = false;
+                }
             }
 
-            if (n_past > 0 && is_interacting) {
+            if ((n_past > 0 || waiting_for_first_input) && is_interacting) {
                 LOG_DBG("waiting for user input\n");
 
                 if (params.conversation_mode) {
@@ -862,9 +875,22 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 console::set_display(console::reset);
                 display = true;
 
-                // Add tokens to embd only if the input buffer is non-empty
-                // Entering a empty line lets the user pass control back
-                if (buffer.length() > 1) {
+                if (buffer.empty()) { // Ctrl+D on empty line exits
+                    LOG("EOF by user\n");
+                    break;
+                }
+
+                if (buffer.back() == '\n') {
+                    // Implement #587:
+                    // If the user wants the text to end in a newline,
+                    // this should be accomplished by explicitly adding a newline by using \ followed by return,
+                    // then returning control by pressing return again.
+                    buffer.pop_back();
+                }
+
+                if (buffer.empty()) { // Enter key on empty line lets the user pass control back
+                    LOG_DBG("empty line, passing control back\n");
+                } else { // Add tokens to embd only if the input buffer is non-empty
                     // append input suffix if any
                     if (!params.input_suffix.empty() && !params.conversation_mode) {
                         LOG_DBG("appending input suffix: '%s'\n", params.input_suffix.c_str());
@@ -881,11 +907,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
                     bool format_chat = params.conversation_mode && params.enable_chat_template;
                     std::string user_inp = format_chat
-                                           ? chat_add_and_format("user", std::move(buffer))
-                                           : std::move(buffer);
+                        ? chat_add_and_format("user", std::move(buffer))
+                        : std::move(buffer);
                     // TODO: one inconvenient of current chat template implementation is that we can't distinguish between user input and special tokens (prefix/postfix)
                     const auto line_pfx = common_tokenize(ctx, params.input_prefix, false, true);
-                    const auto line_inp = common_tokenize(ctx, user_inp, false, format_chat);
+                    const auto line_inp = common_tokenize(ctx, user_inp,            false, format_chat);
                     const auto line_sfx = common_tokenize(ctx, params.input_suffix, false, true);
 
                     LOG_DBG("input tokens: %s\n", string_from(ctx, line_inp).c_str());
@@ -912,37 +938,40 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
                     n_remain -= line_inp.size();
                     LOG_DBG("n_remain: %d\n", n_remain);
-                } else {
-                    LOG_DBG("empty line, passing control back\n");
                 }
 
                 input_echo = false; // do not echo this again
             }
 
-            if (n_past > 0) {
+            if (n_past > 0 || waiting_for_first_input) {
                 if (is_interacting) {
                     common_sampler_reset(smpl);
                 }
                 is_interacting = false;
-            }
-        }
 
-        // end of generation
-        {
-            //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+                if (waiting_for_first_input && params.single_turn) {
+                    params.interactive = false;
+                    params.interactive_first = false;
+                }
+                waiting_for_first_input = false;
+            }
+
+#if 0  //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
             if (max_tokens > 300) {
 #if (defined __ANDROID__) || (defined ANDROID)
                 kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
-#endif
-
                 break;
+#endif
             }
             int64_t end_duration = ggml_time_ms();
             if (end_duration - start_duration > 60000) {
+                kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
                 break;
             }
+#endif
         }
 
+        // end of generation
         if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back()) && !(params.interactive)) {
             LOG(" [end of text]\n");
 #if (defined __ANDROID__) || (defined ANDROID)

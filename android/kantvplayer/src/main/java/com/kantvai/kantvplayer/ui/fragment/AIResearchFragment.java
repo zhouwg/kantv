@@ -171,6 +171,10 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
+     //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
+     private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
+     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
 
      private Context mContext;
@@ -409,6 +413,7 @@
                      isLLMModel = true;
                      // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
                      selectModeFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
+                     selectModeFileName = LLMModelFileName;
                  } else if (strModeName.contains("baichuan")) {
                      isLLMModel = true;
                      // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf //4.61 GB

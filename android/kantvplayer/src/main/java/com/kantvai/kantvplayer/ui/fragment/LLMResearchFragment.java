@@ -22,10 +22,7 @@
 
  import android.annotation.SuppressLint;
  import android.app.Activity;
- import android.app.AlertDialog;
- import android.app.ProgressDialog;
  import android.content.Context;
- import android.content.DialogInterface;
  import android.content.res.Resources;
  import android.os.Build;
  import android.text.method.ScrollingMovementMethod;
@@ -38,7 +35,6 @@
  import android.widget.LinearLayout;
  import android.widget.Spinner;
  import android.widget.TextView;
- import android.widget.Toast;
 
  import androidx.annotation.NonNull;
  import androidx.annotation.RequiresApi;
@@ -58,15 +54,14 @@
 
  import butterknife.BindView;
  import kantvai.ai.ggmljava;
-
- import kantvai.media.player.KANTVLibraryLoader;
- import kantvai.media.player.KANTVLog;
- import kantvai.media.player.KANTVUtils;
  import kantvai.media.player.KANTVEvent;
  import kantvai.media.player.KANTVEventListener;
  import kantvai.media.player.KANTVEventType;
  import kantvai.media.player.KANTVException;
+ import kantvai.media.player.KANTVLibraryLoader;
+ import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVMgr;
+ import kantvai.media.player.KANTVUtils;
 
 
  public class LLMResearchFragment extends BaseMvpFragment<LLMResearchPresenter> implements LLMResearchView {
@@ -101,8 +96,12 @@
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
-     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
-     private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
+     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf
+     //private String ggmlModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; //1.1 GiB
+
+     //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
+     private String ggmlModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
+     private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
      private String selectModelFileName;
 
      private Context mContext;
@@ -226,16 +225,16 @@
              strUserInput = strPrompt;
              KANTVLog.j(TAG, "User input: \n " + strUserInput);
 
-             KANTVLog.j(TAG, "strModeName:" + ggmlModelFileName);
+             KANTVLog.j(TAG, "ggml model file name:" + ggmlModelFileName);
+             KANTVLog.j(TAG, "select model file name:" + selectModelFileName);
 
              File selectModeFile = new File(selectModelFileName);
              if (!selectModeFile.exists()) {
                  KANTVLog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
              }
-             displayFileStatus(selectModelFileName);
-
              if (!selectModeFile.exists()) {
-                 KANTVUtils.showMsgBox(mActivity, "pls check whether GGML's model file exist in /sdcard/");
+                 KANTVUtils.showMsgBox(mActivity, "model file " + selectModelFileName
+                         + " not exist in /sdcard/, pls download it from " + ggmlModelURL);
                  return;
              }
              //sanity check end
@@ -274,7 +273,10 @@
                          @Override
                          public void run() {
                              restoreUIAndStatus();
+                             if (null == strLLMInferenceInfo)
+                                 return;
                              displayInferenceResult(strLLMInferenceInfo);
+                             strLLMInferenceInfo = null;
                          }
                      });
                  }

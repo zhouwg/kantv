@@ -6,8 +6,7 @@ cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
 project(ggml-jni)
 
 set(CMAKE_VERBOSE_MAKEFILE on)
-#set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -62,6 +61,7 @@ endif()
 
 if(NOT DEFINED HEXAGON_SDK_PATH)
     message(WARNING "HEXAGON_SDK_PATH not defined")
+    #Hexagon SDK must be obtained with a Qualcomm Developer Account and cannot be downloaded automatically in this script
     set(HEXAGON_SDK_PATH "/opt/qcom/Hexagon_SDK/6.2.0.1")
 endif()
 
@@ -188,8 +188,6 @@ add_definitions(-DGGML_USE_LLAMAFILE)
 add_definitions(-DSTANDARD_ANDROID_APP)
 add_definitions(-DPROJECT_NAME=\"KANTV\")
 
-#2025-01:make the new sw arch of latest upstream llama.cpp happy on Android port
-#add_definitions(-D__ARM_ARCH) #FIXME:why NDK complains NEON issue in ggml-quants.c
 add_definitions(-D__aarch64__)
 add_definitions(-D__linux__)
 add_definitions(-DGGML_USE_CPU)
@@ -198,8 +196,7 @@ if (GGML_ENABLE_HEXAGON)
 add_definitions(-DGGML_USE_HEXAGON)
 endif()
 
-add_definitions(-O3) #otherwise app's performance will be very bad on Xiaomi14 with debug build
-
+add_definitions(-O3)
 
 if (TARGET_XIAOMI14)
 

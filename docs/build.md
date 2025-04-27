@@ -149,9 +149,9 @@ cd kantv
     ```
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L13">ggml/CMakeLists.txt</a> accordingly if target Android device is Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite SoC based Android phone
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable ggml-hexagon backend for AI inference on Qualcomm SoC based Android phone
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable ggml-hexagon backend for AI inference on Qualcomm SoC based Android phone
 
  - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
 
@@ -188,3 +188,6 @@ cd kantv
         lunch 1
         ./build-all.sh android
 
+#### How to enable debug build
+
+Modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/build.gradle#L17">kantvplayer/build.gradle</a> accordingly

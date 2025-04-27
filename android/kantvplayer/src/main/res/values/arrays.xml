@@ -95,7 +95,7 @@
         <item>medium.en-q5_0</item>
         <item>large</item>
         <item>llama2-7b</item>
-        <item>qwen_8b</item>
+        <item>qwen_3b</item>
         <item>baichuan2-7b</item>
         <item>gemma-2b.Q8_0</item>
         <item>yi-chat-6b</item>

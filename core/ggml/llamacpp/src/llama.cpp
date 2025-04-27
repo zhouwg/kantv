@@ -9,6 +9,15 @@
 #include "ggml.h"
 #include "ggml-backend.h"
 
+#ifdef GGML_USE_HEXAGON
+extern "C" {
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
+}
+#include "llamacpp/ggml/include/ggml-hexagon.h"
+#include "ggml-jni.h"
+#endif
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
@@ -91,8 +100,9 @@ static int llama_model_load(const std::string & fname, std::vector<std::string> 
 
     model.t_start_us = tm.t_start_us;
 
+    LOGGD("enter %s", __func__ );
     try {
-        llama_model_loader ml(fname, splits, params.use_mmap, params.check_tensors, params.kv_overrides);
+        llama_model_loader ml(fname, splits, params.use_mmap, params.check_tensors, params.kv_overrides, params.tensor_buft_overrides);
 
         ml.print_info();
 
@@ -101,16 +111,19 @@ static int llama_model_load(const std::string & fname, std::vector<std::string> 
         try {
             model.load_arch(ml);
         } catch(const std::exception & e) {
+            LOGGD("error loading model architecture: %s", std::string(e.what()).c_str());
             throw std::runtime_error("error loading model architecture: " + std::string(e.what()));
         }
         try {
             model.load_hparams(ml);
         } catch(const std::exception & e) {
+            LOGGD("error loading model hyperparameters: %s", std::string(e.what()).c_str());
             throw std::runtime_error("error loading model hyperparameters: " + std::string(e.what()));
         }
         try {
             model.load_vocab(ml);
         } catch(const std::exception & e) {
+            LOGGD("error loading model vocabulary: %s", std::string(e.what()).c_str());
             throw std::runtime_error("error loading model vocabulary: " + std::string(e.what()));
         }
 
@@ -118,7 +131,7 @@ static int llama_model_load(const std::string & fname, std::vector<std::string> 
         model.print_info();
 
         if (params.vocab_only) {
-            LLAMA_LOG_INFO("%s: vocab only - skipping tensors\n", __func__);
+            LOGGD("%s: vocab only - skipping tensors\n", __func__);
             return 0;
         }
 
@@ -126,7 +139,9 @@ static int llama_model_load(const std::string & fname, std::vector<std::string> 
             return -2;
         }
     } catch (const std::exception & err) {
-        LLAMA_LOG_ERROR("%s: error loading model: %s\n", __func__, err.what());
+        LOGGD("%s: error loading model: %s\n", __func__, err.what());
+        std::string info = std::string("error loading model: ") + err.what() + " at [" + __FILE__ + ", " +  __FUNCTION__ + " ]\n";
+        kantv_asr_notify_benchmark_c(info.c_str());
         return -1;
     }
 
@@ -156,6 +171,7 @@ static struct llama_model * llama_model_load_from_file_impl(
         };
     }
 
+    LOGGD("enter %s", __func__ );
     llama_model * model = new llama_model(params);
 
     // create list of devices to use with this model
