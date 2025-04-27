@@ -62,4 +62,8 @@ public class ggmljava {
      * @return
      */
     public static native String llm_inference(String modelPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
+
+    public static native void    llm_stop_inference();
+
+    public static native boolean llm_is_running();
 }

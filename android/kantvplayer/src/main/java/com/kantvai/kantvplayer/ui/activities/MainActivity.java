@@ -369,6 +369,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             if (fragmentName.contains("AIResearchFragment")) {
                 KANTVLog.d(TAG, "release ASR resource");
                 airesearchFragment.release();
+                airesearchFragment.stopLLMInference();
             }
 
             if (fragmentName.contains("LLMResearchFragment")) {

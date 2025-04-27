@@ -104,6 +104,7 @@
      LinearLayout _llInfoLayout;
 
      Button _btnBenchmark;
+     Button _btnStop;
 
      Button _btnSelectImage;
      private static final int SELECT_IMAGE = 1;
@@ -217,6 +218,7 @@
          _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
          //_txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
+         _btnStop      = mActivity.findViewById(R.id.btnStop);
          _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
          _llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
@@ -385,6 +387,13 @@
              Intent intent = new Intent(Intent.ACTION_PICK);
              intent.setType("image/*");
              startActivityForResult(intent, SELECT_IMAGE);
+         });
+
+         _btnStop.setOnClickListener(v -> {
+             if (ggmljava.llm_is_running()) {
+                 ggmljava.llm_stop_inference();
+             }
+             restoreUIAndStatus();
          });
 
          _btnBenchmark.setOnClickListener(v -> {
@@ -907,6 +916,9 @@
          if (mKANTVMgr == null) {
              return;
          }
+         if (ggmljava.llm_is_running()) {
+             ggmljava.llm_stop_inference();
+         }
 
          try {
              KANTVLog.j(TAG, "release");
@@ -923,6 +935,14 @@
          }
      }
 
+     public void stopLLMInference() {
+         if (ggmljava.llm_is_running()) {
+             ggmljava.llm_stop_inference();
+         }
+
+         restoreUIAndStatus();
+         _txtASRInfo.setText("");
+     }
 
      /* will be removed in the future
      private void displayFileStatus(String sampleFilePath, String modelFilePath) {

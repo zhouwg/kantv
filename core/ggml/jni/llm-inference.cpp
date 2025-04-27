@@ -93,6 +93,7 @@ static void sigint_handler(int signo) {
 #endif
 
 int llama_inference_main(int argc, char ** argv, int backend_type) {
+    int llm_inference_interrupted = 0;
     common_params params;
     g_params = &params;
     int max_tokens = 0;
@@ -746,7 +747,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 max_tokens++;
 #if (defined __ANDROID__) || (defined ANDROID)
                 if (ggml_jni_is_valid_utf8(token_str.c_str())) {
-                    kantv_asr_notify_benchmark_c(token_str.c_str());
+                    if (0 == llama_is_running_state()) {
+                        llm_inference_interrupted = 1;
+                    } else {
+                        kantv_asr_notify_benchmark_c(token_str.c_str());
+                    }
                 }
 #endif
                 // Record Displayed Tokens To Log
@@ -955,22 +960,26 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 }
                 waiting_for_first_input = false;
             }
-
-#if 0  //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
-            if (max_tokens > 300) {
-#if (defined __ANDROID__) || (defined ANDROID)
-                kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
-                break;
-#endif
-            }
-            int64_t end_duration = ggml_time_ms();
-            if (end_duration - start_duration > 60000) {
-                kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
-                break;
-            }
-#endif
         }
 
+#if 0  //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+        if (max_tokens > 300) {
+#if (defined __ANDROID__) || (defined ANDROID)
+            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+            break;
+#endif
+        }
+        int64_t end_duration = ggml_time_ms();
+        if (end_duration - start_duration > 60000) {
+            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+            break;
+        }
+#endif
+
+        if (0 == llama_is_running_state()) {
+            llm_inference_interrupted = 1;
+            break;
+        }
         // end of generation
         if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back()) && !(params.interactive)) {
             LOG(" [end of text]\n");
@@ -994,7 +1003,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG("\n\n");
-    common_perf_print(ctx, smpl);
+    LOGGD("llm_inference_interrupted = %d", llm_inference_interrupted);
+    if (0 == llama_is_running_state()) {
+        llm_inference_interrupted = 1;
+        common_perf_print(ctx, smpl);
+    }
 
     common_sampler_free(smpl);
 
@@ -1002,6 +1015,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     ggml_threadpool_free_fn(threadpool);
     ggml_threadpool_free_fn(threadpool_batch);
+
+    if (1 == llm_inference_interrupted)
+        return LLM_INFERENCE_INTERRUPTED;
 
     return 0;
 }

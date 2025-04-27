@@ -35,6 +35,7 @@
 extern "C" {
 #endif
 
+#define LLM_INFERENCE_INTERRUPTED             8
 //=============================================================================================
 //add new AI benchmark type / new backend using GGML inference framework here, keep sync with KANTVUtils.java
 
@@ -121,6 +122,12 @@ enum ggml_jni_bench_type {
     * @return
     */
     int          llama_inference_ng(const char * model_path, const char * prompt, int llm_type, int num_threads, int n_backend, int n_hwaccel_type);
+
+    int          llama_inference_main(int argc, char *argv[], int backend);
+
+    void         llama_init_running_state(void);
+    void         llama_reset_running_state(void);
+    int          llama_is_running_state(void);
 
 #ifdef __cplusplus
 }

@@ -7400,8 +7400,19 @@ int qnn_ggml_op_automation_ut(const char *model_path, int num_threads, int n_bac
     return 0;
 }
 
+static static std::atomic<uint32_t> g_ggmljni_llm_is_running(0);
 
-extern int llama_inference_main(int argc, char *argv[], int backend);
+void llama_init_running_state() {
+    g_ggmljni_llm_is_running.store(1);
+}
+
+void llama_reset_running_state() {
+    g_ggmljni_llm_is_running.store(0);
+}
+
+int llama_is_running_state() {
+    return g_ggmljni_llm_is_running.load();
+}
 
 int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int llm_type,
                        int n_threads, int n_backend_type, int n_hwaccel_type) {
@@ -7426,7 +7437,10 @@ int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int 
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
+    llama_init_running_state();
     ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    llama_reset_running_state();
+    LOGGD("ret = %d", ret);
 
     return ret;
 }

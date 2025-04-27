@@ -138,11 +138,21 @@
 
             <Button
                 android:id="@+id/btnBenchmark"
-                android:layout_width="80dp"
+                android:layout_width="100dp"
                 android:layout_height="30dp"
                 android:layout_marginRight="5dp"
                 android:background="@drawable/button_drawable"
                 android:text="Benchmark"
+                android:textAllCaps="false"
+                android:textColor="#ffffff" />
+
+            <Button
+                android:id="@+id/btnStop"
+                android:layout_width="150dp"
+                android:layout_height="30dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/button_drawable"
+                android:text="StopLLMInference"
                 android:textAllCaps="false"
                 android:textColor="#ffffff" />
 

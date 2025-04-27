@@ -288,7 +288,9 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model
     result = llama_inference_ng(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
-        GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend);
+        if (result != LLM_INFERENCE_INTERRUPTED) {
+            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend);
+        }
     }
 
 failure:
@@ -318,8 +320,21 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 
     len_content = vsnprintf(s_ggml_jni_buf, JNI_BUF_LEN, format, va);
     snprintf(s_ggml_jni_buf + len_content, JNI_BUF_LEN - len_content, "\n");
+    va_end(va);
 
     kantv_asr_notify_benchmark_c(s_ggml_jni_buf);
+}
 
-    va_end(va);
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_llm_1stop_1inference(JNIEnv *env, jclass clazz) {
+    llama_reset_running_state();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv *env, jclass clazz) {
+    if (1 == llama_is_running_state()) {
+        return JNI_TRUE;
+    } else {
+        return JNI_FALSE;
+    }
 }
