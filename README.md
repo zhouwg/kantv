@@ -2,19 +2,17 @@
 
 KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on <b>ANY mainstream</b> **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021) , with much enhancements and new features:
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>.
 
-- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider)
+- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider).
 
-- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>)
+- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- 2D graphic performance benchmark
+- 2D graphic performance benchmark.
 
-- Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
+- Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity.
 
-- Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model on Android phone
-
-- Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on on-device AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone very easily
+- Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on on-device AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone easily. many features and techs here can be used in a real commercial software.
 
 - Built-in [qwen2.5-3b](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main) model and runs entirely offline(no internet required)
 
@@ -121,7 +119,7 @@ Report issue in various Android-based phone and <b>submit PR to this project is 
 
    <ul>
   <li>
-   <a href="https://github.com/ggerganov/ggml">GGML</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   <a href="https://github.com/ggml-org/ggml">GGML</a>
    </li>
 
 
@@ -133,11 +131,11 @@ Report issue in various Android-based phone and <b>submit PR to this project is 
 
   <ul>
   <li>
-   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   ASR engine <a href="https://github.com/ggml-org/whisper.cpp">whisper.cpp</a>
   </li>
 
    <li>
-  LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>
   </li>
 
   </ul>
@@ -148,9 +146,4 @@ Report issue in various Android-based phone and <b>submit PR to this project is 
 
 ### License
 
-```
-
-Copyright (c) 2021 -  Authors of Project KanTV
-
-Licensed under Apachev2.0 or later
-```
+This code repository is licensed under [the MIT License](./LICENSE).
