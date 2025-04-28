@@ -264,3 +264,12 @@
                        <li>fix a stability issue of "AI-subtitle can't works" which introduced in https://github.com/kantv-ai/kantv/pull/281
                        <li>release v1.6.5</li>
                     </ul>
+- v1.6.6, 2025-04-28,
+                    <ul>
+                       <li>fix a very long-term stability issue of <a href="https://github.com/kantv-ai/kantv/pull/288">APP would crash during toggle back and forth in different UI frequently when LLM inference is running</a>
+                       <li>change main license from Apache2.0 to MIT</li>
+                       <li>refine <a href="https://github.com/kantv-ai/kantv/blob/master/docs/how-to-customize.md">how to integrate proprietary / open-source codes to project KanTV for personal/proprietary/commercial R&D activity</a></li>
+                       <li>refine toplevel README.md</li>
+                       <li>write <a href="https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html">Convert safetensors to GGUF</a></li>
+                       <li>release v1.6.6</li>
+                    </ul>

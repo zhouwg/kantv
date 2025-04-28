@@ -1550,11 +1550,10 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         KANTVLog.j(TAG, "ggml model name of user's choose:" + userChooseModelFileName);
 
         if (!ggmlModelFileName.equals(userChooseModelFileName)) {
-            KANTVLog.j(TAG, "pls choose GGML model :" + ggmlModelFileName);
-            Toast.makeText(getContext(), "pls choose GGML model: " + ggmlModelFileName, Toast.LENGTH_SHORT).show();
+            KANTVLog.j(TAG, "pls choose GGML model :" + ggmlModelFileName + " in Person Center /ASR Setting");
             topBarView.updateTVASRVisibility(false);
             KANTVUtils.setTVASR(false);
-            KANTVUtils.showMsgBox(mAttachActivity, "pls choose GGML model: " + ggmlModelFileName);
+            KANTVUtils.showMsgBox(mAttachActivity, "pls choose GGML model: " + ggmlModelFileName + " in Person Center /ASR Setting");
             return;
         }
 
