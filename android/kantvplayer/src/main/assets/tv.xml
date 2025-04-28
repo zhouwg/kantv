@@ -2,15 +2,15 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>online TV</title>
     <link href="http://192.168.0.200:81/mediaroot/epg?tv" />
-    <updated>2021-06-23,19:25</updated>
+    <updated>2025-04-28,15:35</updated>
     <author>
-        <name>zhouwg</name>
+        <name>Project KanTV</name>
     </author>
     <id>urn:uuid:12345678-1234-3456-AABB-123412345678</id>
-    
+
     <entry>
         <title>
-            CNA(Channel News Asia-新加坡亚洲新闻英语频道)
+            CNA(Channel News Asia)
         </title>
         <link href="https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8" poster="cna.png" protected="no" urltype="hls" />
         <id>12345678-1234-12AB-ABC1-1a2b3C4D5E6F</id>

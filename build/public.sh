@@ -28,7 +28,7 @@ if [ "${BUILD_TARGET}" == "android" ]; then
     #export BUILD_ARCHS="arm64-v8a armeabi-v7a"
     export BUILD_ARCHS="arm64-v8a"
     export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
-    export PROJECT_BUILD_COMMAND="./build-all.sh android"
+    export PROJECT_BUILD_COMMAND="./build/build-all.sh android"
     export ANDROID_APK_VERSION=$(awk -F"'" '/releaseVersion[ ]*=/ {print $2}' "${PROJECT_ROOT_PATH}/android/constants.gradle")
 fi
 
@@ -36,14 +36,14 @@ if [ "${BUILD_TARGET}" == "linux" ]; then
     export PROJECT_NAME=KanTV-linux
     export BUILD_ARCHS="x86"
     export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
-    export PROJECT_BUILD_COMMAND="./build-all.sh linux"
+    export PROJECT_BUILD_COMMAND="./build/build-all.sh linux"
 fi
 
 if [ "${BUILD_TARGET}" == "wasm" ]; then
     export PROJECT_NAME=KanTV-wasm
     export BUILD_ARCHS="wasm"
     export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
-    export PROJECT_BUILD_COMMAND="./build-all.sh wasm"
+    export PROJECT_BUILD_COMMAND="./build/build-all.sh wasm"
 
     export EMSDK=${KANTV_TOOLCHAIN_PATH}/emsdk
     export NODEJS_ROOT_PATH=${KANTV_TOOLCHAIN_PATH}/nodejs
@@ -60,7 +60,7 @@ fi
 if [ "${BUILD_TARGET}" == "ios" ]; then
     export PROJECT_NAME=KanTV-ios
     export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
-    export PROJECT_BUILD_COMMAND="./build-all.sh ios"
+    export PROJECT_BUILD_COMMAND="./build/build-all.sh ios"
 
     export XCODE_SELECT=/usr/bin/xcode-select
     #export BUILD_ARCHS="armv7 arm64 i386 x86_64"

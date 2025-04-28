@@ -961,19 +961,19 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 waiting_for_first_input = false;
             }
         }
-
+#if (defined __ANDROID__) || (defined ANDROID)
 #if 0  //dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116, it seems not required from now on
         if (max_tokens > 300) {
-#if (defined __ANDROID__) || (defined ANDROID)
+
             kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
             break;
-#endif
         }
         int64_t end_duration = ggml_time_ms();
         if (end_duration - start_duration > 60000) {
             kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
             break;
         }
+#endif
 #endif
 
         if (0 == llama_is_running_state()) {

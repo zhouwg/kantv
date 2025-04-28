@@ -142,7 +142,7 @@ echo "--------------------------------------------------------------------------
 echo -e "[*] to continue to build project, pls run\n"
 echo -e "lunch\n"
 echo -e "[*] or\n"
-echo -e "./build-all.sh\n"
+echo -e "./build/build-all.sh\n"
 echo -e "[*] for default target android\n"
 echo "------------------------------------------------------------------------------------------"
 echo -e "\n"

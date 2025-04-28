@@ -88,7 +88,6 @@
  import kantvai.media.player.KANTVException;
  import kantvai.media.player.KANTVMgr;
 
-
  public class AIResearchFragment extends BaseMvpFragment<AIResearchPresenter> implements AIResearchView {
      @BindView(R.id.airesearchLayout)
      LinearLayout layout;

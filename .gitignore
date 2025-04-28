@@ -73,5 +73,4 @@ crash.log
 kantv.jks
 CMakeLists.txt
 libggmlop-skel*.so
-build-info.cpp.in
 cmake/
