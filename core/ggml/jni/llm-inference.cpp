@@ -962,7 +962,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             }
         }
 
-#if 0  //TODO: dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116
+#if 0  //dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116, it seems not required from now on
         if (max_tokens > 300) {
 #if (defined __ANDROID__) || (defined ANDROID)
             kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
@@ -1003,10 +1003,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG("\n\n");
-    LOGGD("llm_inference_interrupted = %d", llm_inference_interrupted);
-    if (0 == llama_is_running_state()) {
-        llm_inference_interrupted = 1;
+    if (1 == llama_is_running_state()) {
+        llm_inference_interrupted = 0;
         common_perf_print(ctx, smpl);
+    } else {
+        llm_inference_interrupted = 1;
     }
 
     common_sampler_free(smpl);

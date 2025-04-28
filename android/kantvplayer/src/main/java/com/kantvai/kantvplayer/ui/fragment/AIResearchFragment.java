@@ -1,6 +1,4 @@
  /*
-  * Copyright (c) Project KanTV. 2021-2023. All rights reserved.
-  *
   * Copyright (c) 2024- KanTV Authors. All Rights Reserved.
   *
   * @author: zhou.weiguo
@@ -172,9 +170,15 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
+     //focus on qwen2.5-3b-instruct-q4_0.gguf in this page
      //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
      private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
      private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+
+     //https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main
+     //refer to: https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+     //private String LLMModelFileName = "DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf";
+     //private String LLMModelURL = "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main";
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
 
@@ -235,16 +239,16 @@
              return;
          }
 
-         try {
-             initKANTVMgr();
-         } catch (Exception e) {
-             KANTVLog.j(TAG, "failed to initialize asr subsystem");
-             return;
-         }
-
          KANTVLog.j(TAG, "load ggml's whisper.cpp info");
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
+         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
+         String timestamp = "";
+         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+         Date date = new Date(System.currentTimeMillis());
+         timestamp = fullDateFormat.format(date);
+         _txtGGMLInfo.append("\n");
+         _txtGGMLInfo.append("running timestamp:" + timestamp);
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -390,7 +394,9 @@
          });
 
          _btnStop.setOnClickListener(v -> {
+             KANTVLog.g(TAG, "here");
              if (ggmljava.llm_is_running()) {
+                 KANTVLog.g(TAG, "here");
                  ggmljava.llm_stop_inference();
              }
              restoreUIAndStatus();
@@ -873,12 +879,17 @@
                              //_txtASRInfo.setText(""); //make QNN SDK happy on Xiaomi14
                              nLogCounts = 0;
                          }
+                         if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                             if (!ggmljava.llm_is_running()) {
+                                 return;
+                             }
+                         }
                          _txtASRInfo.append(content);
                          int offset = _txtASRInfo.getLineCount() * _txtASRInfo.getLineHeight();
                          int screenHeight = KANTVUtils.getScreenHeight();
-                         int maxHeight = 500;//TODO: works fine on Xiaomi 14, adapt to other Android phone
-                         //KANTVLog.j(TAG, "offset:" + offset);
-                         //KANTVLog.j(TAG, "screenHeight:" + screenHeight);
+                         int maxHeight = 500;
+                         KANTVLog.j(TAG, "offset:" + offset);
+                         KANTVLog.j(TAG, "screenHeight:" + screenHeight);
                          if (offset > maxHeight)
                              _txtASRInfo.scrollTo(0, offset - maxHeight);
                      }
@@ -1088,9 +1099,6 @@
              return;
          }
          String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
-         if (isNCNNInference()) {
-             backendDesc = KANTVUtils.getNCNNBackendDesc(backendIndex);
-         }
          String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
                  + " ,threads: " + nThreadCounts
                  + " ,backend: " + backendDesc

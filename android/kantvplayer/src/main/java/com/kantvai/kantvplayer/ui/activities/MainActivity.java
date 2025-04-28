@@ -375,6 +375,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
             if (fragmentName.contains("LLMResearchFragment")) {
                 KANTVLog.d(TAG, "release LLM resource");
                 llmFragment.release();
+                llmFragment.stopLLMInference();
             }
 
             if (fragmentName.contains("AgentFragment")) {

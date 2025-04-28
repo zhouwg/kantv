@@ -7440,7 +7440,6 @@ int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int 
     llama_init_running_state();
     ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
     llama_reset_running_state();
-    LOGGD("ret = %d", ret);
 
     return ret;
 }

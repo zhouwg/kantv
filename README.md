@@ -12,11 +12,9 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
 
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers/programmers who was interested in practise state-of-the-art AI tech(such as [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in <b>real scenario on Android phone</b>
-
 - Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model on Android phone
 
-- Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
+- Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on on-device AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone very easily
 
 - Built-in [qwen2.5-3b](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main) model and runs entirely offline(no internet required)
 

@@ -2837,7 +2837,7 @@ void llama_perf_context_print(const llama_context * ctx) {
     const auto data = llama_perf_context(ctx);
 
     const double t_end_ms = 1e-3 * ggml_time_us();
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) || defined(ANDROID)
     const auto timings = llama_perf_context(ctx);
     std::ostringstream timing;
     timing << "llama-timings:\n";

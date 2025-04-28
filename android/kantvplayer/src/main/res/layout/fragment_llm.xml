@@ -10,28 +10,28 @@
         android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/ggmlLayoutLLM"
+            android:id="@+id/llmresearchLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <ImageView
                 android:id="@+id/ggmlLogoLLM"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
                 android:layout_gravity="center_horizontal"
                 android:src="@drawable/llamacpp_logo" />
 
             <TextView
                 android:id="@+id/ggmlInfoLLM"
                 android:layout_width="match_parent"
-                android:layout_height="80dp" />
+                android:layout_height="120dp" />
 
             <EditText
                 android:id="@+id/txtUserInput"
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginTop="5dp"
+                android:layout_height="90dp"
                 android:background="@drawable/textview_border"
                 android:gravity="top"
                 android:hint="introduce the movie Once Upon a Time in America briefly, less then 100 words" />
@@ -76,14 +76,30 @@
             android:id="@+id/btnInference"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:layout_marginTop="5dp"
             android:background="@drawable/button_drawable"
             android:text="Inference"
+            android:textAllCaps="false"
+            android:textColor="#ffffff" />
+
+        <Button
+            android:id="@+id/btnStop"
+            android:layout_width="150dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="10dp"
+            android:background="@drawable/button_drawable"
+            android:text="StopLLMInference"
             android:textAllCaps="false"
             android:textColor="#ffffff" />
     </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llLLMInfoLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"></LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -91,10 +107,7 @@
             <TextView
                 android:id="@+id/llmInfo"
                 android:layout_width="match_parent"
-                android:layout_height="3000dp"
-
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="5dp"
+                android:layout_height="1000dp"
                 android:fadeScrollbars="false"
                 android:scrollIndicators="right"
                 android:scrollbarFadeDuration="0"
