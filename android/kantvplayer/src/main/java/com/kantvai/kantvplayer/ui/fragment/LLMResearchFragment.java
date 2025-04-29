@@ -110,14 +110,22 @@
 
 
      //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
-     private String ggmlModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
-     private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+     //private String ggmlModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
+     //
+     // private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+
+     //https://huggingface.co/Qwen/Qwen3-4B/tree/main
+     //Qwen3 was released on 04/28/2025
+     //try Qwen3-4B with KanTV Android APP on Android phone equipped with Qualcomm Snapdragon 8Elite
+     //ref to:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+     private String ggmlModelFileName = "Qwen3-4.0B-F16.gguf";
+     private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen3-4B/tree/main";
 
      //https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main
+     //how to convert safetensors to GGUF
      //refer to: https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-     //TODO: DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf can't works on Android phone https://github.com/kantv-ai/kantv/issues/287
-     //private String ggmlModelFileName = "DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf";
-     //private String ggmlModelURL = "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main";
+     //can works fine on Android phone equipped with Snapdragon 8Elite mobile SoC
+
      String selectModelFilePath = "";
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
@@ -438,6 +446,8 @@
 
          restoreUIAndStatus();
          _txtLLMInfo.setText("");
+         _txtUserInput.setText("");
+         _txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
      }
 
      private void initUIAndStatus() {
