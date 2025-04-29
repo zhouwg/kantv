@@ -42,7 +42,7 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
 ### Building the project
 
 - Clone this repository and build locally, see [how to build](./docs/build.md)
-- How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC:modify [ggml/CMakeLists.txt](./core/ggml/CMakeLists.txt#L12) accordingly.
+- How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC:modify [ggml/CMakeLists.txt#L12](./core/ggml/CMakeLists.txt#L12) accordingly.
 - Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
 
 ### Run Android APK on Android phone
