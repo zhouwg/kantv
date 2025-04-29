@@ -4207,5 +4207,32 @@
      public static final int NCNN_BACKEND_GPU           = 1;
      //=============================================================================================
 
+     public static boolean isASRModel(String name) {
+         String[] asrModels = {
+                 "tiny",
+                 "tiny.en",
+                 "tiny.en-q5_1",
+                 "tiny.en-q8_0",
+                 "tiny-q5_1",
+                 "base",
+                 "base.en",
+                 "base-q5_1",
+                 "small",
+                 "small.en",
+                 "small.en-q5_1",
+                 "small-q5_1",
+                 "medium",
+                 "medium.en",
+                 "medium.en-q5_0",
+                 "large"
+         };
+         for (int i = 0; i < asrModels.length; i++) {
+             if (name.contains(asrModels[i])) {
+                 return true;
+             }
+         }
+         return false;
+     }
+
      public static native int kantv_anti_remove_rename_this_file();
  }

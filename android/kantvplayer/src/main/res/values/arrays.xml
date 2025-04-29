@@ -77,6 +77,8 @@
         <item>1</item>
     </string-array>
 
+
+    <!-- all ASR models and LLM models -->
     <string-array name="modelName">
         <item>tiny</item>
         <item>tiny.en</item>
@@ -94,15 +96,17 @@
         <item>medium.en</item>
         <item>medium.en-q5_0</item>
         <item>large</item>
-        <item>llama2-7b</item>
-        <item>qwen_3b</item>
-        <item>baichuan2-7b</item>
-        <item>gemma-2b.Q8_0</item>
-        <item>yi-chat-6b</item>
-        <item>minicpm-v</item>
-        <item>text2image</item>
-        <item>mnist</item>
-        <item>tts-small</item>
+        <item>Qwen2.5-3B</item>
+        <item>Qwen3-4B</item>
+        <item>DS-R1-Distill-Qwen-1.5B</item>
+    </string-array>
+
+    <string-array name="newModelName">
+        <item>tiny.en-q8_0</item>
+        <item>Qwen1.5-1.8B</item>
+        <item>Qwen2.5-3B</item>
+        <item>Qwen3-4B</item>
+        <item>DS-R1-Distill-Qwen-1.5B</item>
     </string-array>
 
     <string-array name="backendtype">

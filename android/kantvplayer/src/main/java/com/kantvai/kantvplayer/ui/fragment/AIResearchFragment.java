@@ -80,6 +80,7 @@
  import butterknife.BindView;
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVAssetLoader;
+ import kantvai.media.player.KANTVLLMModel;
  import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
@@ -170,15 +171,14 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
-     //focus on qwen2.5-3b-instruct-q4_0.gguf in this page
      //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
+     //default LLM model
      private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
      private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
 
-     //https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main
-     //refer to: https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-     //private String LLMModelFileName = "DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf";
-     //private String LLMModelURL = "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main";
+     private final int LLM_MODEL_MAXCOUNTS = 4;
+     private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
+     private int selectModelIndex = 0;
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
 
@@ -222,14 +222,15 @@
          _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
          //_txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
-         _btnStop      = mActivity.findViewById(R.id.btnStop);
+         _btnStop = mActivity.findViewById(R.id.btnStop);
          _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          _txtUserInput = mActivity.findViewById(R.id.txtPrompt);
          _llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
-
          _txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
          //will be removed in the future
          //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + ggmlModelFileName);
+
+         initLLMModels();
 
          try {
              KANTVLibraryLoader.load("ggml-jni");
@@ -239,16 +240,8 @@
              return;
          }
 
-         KANTVLog.j(TAG, "load ggml's whisper.cpp info");
-         _txtGGMLInfo.setText("");
-         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
-         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
-         String timestamp = "";
-         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
-         Date date = new Date(System.currentTimeMillis());
-         timestamp = fullDateFormat.format(date);
-         _txtGGMLInfo.append("\n");
-         _txtGGMLInfo.append("running timestamp:" + timestamp);
+         KANTVLog.j(TAG, "set ggml's whisper.cpp info");
+         setTextGGMLInfo(LLMModelFileName);
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -262,23 +255,10 @@
                  KANTVLog.j(TAG, "benchmark index:" + benchmarkIndex);
 
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
-                     spinnerModelName.setSelection(3); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
+                     spinnerModelName.setSelection(0); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
                  }
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                     spinnerModelName.setSelection(17); //hardcode to qwen1_5-1_8b-chat-q4_0.gguf for purpose of validate various models more easily on Android phone
-                 }
-                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
-                     spinnerModelName.setSelection(22); //hardcdoe to v2-1_768-nonema-pruned.q8_0.gguf for purpose of validate various models more easily on Android phone
-                 }
-                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TTS.ordinal()) {
-                     spinnerModelName.setSelection(24); //hardcode to ggml-bark-small.bin for purpose of validate various models more easily on Android phone
-                 }
-                 //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal()) {
-                     isLLMVModel = true;
-                     strModeName = "minicpm-v";
-                     spinnerModelName.setSelection(21); //TODO: hardcode to MiniCPM-V model for purpose of validate MiniCP-V more easily on Android phone
-                     //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, KANTVUtils.getDataPath() + "/models/" + ggmlMiniCPMVModelFile);
+                     spinnerModelName.setSelection(1); //hardcode to qwen2.5-3b-instruct-q4_0.gguf for purpose of validate various models more easily on Android phone
                  }
 
                  if ((previousBenchmakrIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -345,7 +325,7 @@
          });
          spinnerBackendType.setSelection(ggmljava.HEXAGON_BACKEND_GGML - offset);
 
-         /* not used currently
+         /* not used currently, keep them for further usage
          spinnerAccelType = mActivity.findViewById(R.id.spinnerAccel);
          String[] arrayAccel = getResources().getStringArray(R.array.hwacceltype);
          adapterGGMLAccelType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayAccel);
@@ -368,7 +348,7 @@
          */
 
          spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
-         String[] arrayModelName = getResources().getStringArray(R.array.modelName);
+         String[] arrayModelName = getResources().getStringArray(R.array.newModelName);
          ArrayAdapter<String> adapterModel = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayModelName);
          spinnerModelName.setAdapter(adapterModel);
          spinnerModelName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -376,6 +356,7 @@
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                  KANTVLog.j(TAG, "position: " + position + ", model:" + arrayModelName[position]);
                  strModeName = arrayModelName[position];
+                 selectModelIndex = position;
 
                  KANTVLog.j(TAG, "strModeName:" + strModeName);
              }
@@ -385,7 +366,7 @@
 
              }
          });
-         spinnerModelName.setSelection(3); // ggml-tiny.en-q8_0.bin, 42M
+         spinnerModelName.setSelection(0); // ggml-tiny.en-q8_0.bin, 42M
 
          _btnSelectImage.setOnClickListener(arg0 -> {
              Intent intent = new Intent(Intent.ACTION_PICK);
@@ -404,163 +385,89 @@
 
          _btnBenchmark.setOnClickListener(v -> {
              KANTVLog.j(TAG, "strModeName:" + strModeName);
+             KANTVLog.g(TAG, "selectModeIndex:" + selectModelIndex);
              KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex)
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
              String selectModelFilePath = "";
-             File selectModeFile = null;
 
              resetInternalVars();
 
-             //TODO: better method
              //sanity check begin
              {
-                 //inference using GGML framework
-                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM_O.ordinal()) {
-                     KANTVUtils.showMsgBox(mActivity, "GGML_BENCHMARK_LLM_O(GPT-4o style) inference not support currently");
+                 isASRModel = KANTVUtils.isASRModel(strModeName);
+                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                     //all candidate models are: ggml-tiny.en-q8_0.bin + other LLM models, so real index in LLMModels is selectModelIndex - 1
+                     selectModeFileName = LLMModels[selectModelIndex - 1].getName();
+                     isLLMModel = true;
+                     setTextGGMLInfo(selectModeFileName);
+                 } else {
+                     //https://huggingface.co/ggerganov/whisper.cpp
+                     selectModeFileName = "ggml-" + strModeName + ".bin";
+
+                 }
+                 KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
+
+                 if (isASRModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                     KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     return;
+                 }
+                 if ((!isASRModel) && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                     KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
                      return;
                  }
 
-                 if (strModeName.contains("llama")) {
-                     isLLMModel = true;
-                     //https://huggingface.co/bevangelista/Llama-2-7b-chat-hf-GGUF-Q4_K_M/tree/main, //4.08 GB
-                     selectModeFileName = "llama-2-7b-chat.Q4_K_M.gguf";
-                 } else if (strModeName.contains("qwen")) {
-                     isLLMModel = true;
-                     // https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf   //1.1 GB
-                     selectModeFileName = "qwen1_5-1_8b-chat-q4_0.gguf";
-                     selectModeFileName = LLMModelFileName;
-                 } else if (strModeName.contains("baichuan")) {
-                     isLLMModel = true;
-                     // https://huggingface.co/TheBloke/blossom-v3-baichuan2-7B-GGUF/blob/main/blossom-v3-baichuan2-7b.Q4_K_M.gguf //4.61 GB
-                     selectModeFileName = "baichuan2-7b.Q4_K_M.gguf";
-                 } else if (strModeName.contains("gemma")) {
-                     isLLMModel = true;
-                     selectModeFileName = "gemma-2b.Q4_K_M.gguf";
-                     // https://huggingface.co/ggerganov/gemma-2b-Q8_0-GGUF/resolve/main/gemma-2b.Q8_0.gguf    //2.67 GB
-                     selectModeFileName = "gemma-2b.Q8_0.gguf";
-                 } else if (strModeName.contains("yi-chat")) {
-                     isLLMModel = true;
-                     selectModeFileName = "yi-chat-6b.Q2_K.gguf";
-                     // https://huggingface.co/XeIaso/yi-chat-6B-GGUF/blob/main/yi-chat-6b.Q4_0.gguf //3.48 GB
-                     selectModeFileName = "yi-chat-6b.Q4_0.gguf";
-                 } else if (strModeName.startsWith("qnn")) {
-                     //not used since v1.3.8, but keep it for future usage because Qualcomm provide some prebuilt dedicated QNN models
-                     isQNNModel = true;
-                 } else if (strModeName.contains("minicpm-v")) {
-                     //MiniCPM-V:A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V/
-                     //for users in China,         https://modelscope.cn/models/OpenBMB/MiniCPM-Llama3-V-2_5-gguf/files
-                     //for users outside of China, https://huggingface.co/openbmb/MiniCPM-Llama3-V-2_5-gguf/tree/main
-                     selectModeFileName = ggmlMiniCPMVModelFile;
-                     isLLMVModel = true;
-                 } else if ((strModeName.startsWith("mnist")) || (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_CV_MNIST.ordinal())) {
-                     isMNISTModel = true;
-                     //https://huggingface.co/zhouwg/kantv/blob/main/mnist-ggml-model-f32.gguf, //204 KB
-                     selectModeFileName = "mnist-ggml-model-f32.gguf";
-                     selectModeFileName = ggmlMNISTModelFile;
-                 } else if ((strModeName.startsWith("sdmodel")) || (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal())) {
-                     isSDModel = true;
-                     //https://github.com/leejet/stable-diffusion.cpp
-                     //curl -L -O https://huggingface.co/stabilityai/stable-diffusion-2-1/resolve/main/v2-1_768-nonema-pruned.safetensors
-                     //sd -M convert -m v2-1_768-nonema-pruned.safetensors -o  v2-1_768-nonema-pruned.q8_0.gguf -v --type q8_0
-                     //https://huggingface.co/zhouwg/kantv, //2.0 GB
-                     selectModeFileName = "v2-1_768-nonema-pruned.q8_0.gguf";
-                     //https://huggingface.co/runwayml/stable-diffusion-v1-5/tree/main
-                     //selectModeFileName = "v1-5-pruned-emaonly.safetensors";
-                 } else if ((strModeName.contains("bark")) || (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TTS.ordinal())) {
-                     isTTSModel = true;
-                     //https://huggingface.co/zhouwg/kantv/blob/main/ggml-bark-small.bin, //843 MB
-                     selectModeFileName = "ggml-bark-small.bin";
-                 } else {
-                     isASRModel = true;
-                     //https://huggingface.co/ggerganov/whisper.cpp
-                     selectModeFileName = "ggml-" + strModeName + ".bin";
-                 }
-                 KANTVLog.j(TAG, "selectModeFileName:" + selectModeFileName);
-
-                 {
-                     if (isLLMModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-                     if ((!isLLMModel) && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-
-                     if (isSDModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-                     if ((!isSDModel) && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-
-                     if (isTTSModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_TTS.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-                     if (!isTTSModel && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TTS.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-
-                     //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-                     if (isLLMVModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-                     if (!isLLMVModel && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM_V.ordinal())) {
-                         KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                         return;
-                     }
-
-                     if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
-                         if (_ivInfo != null) {
-                             _ivInfo.setVisibility(View.INVISIBLE);
-                             _llInfoLayout.removeView(_ivInfo);
-                             _ivInfo = null;
-                         }
-                     }
-
-                     if (isLLMVModel || isLLMOModel) {
-                         if ((bitmapSelectedImage == null) || (pathSelectedImage.isEmpty())) {
-                             KANTVLog.j(TAG, "image is empty");
-                             KANTVUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
-                             return;
-                         }
+                 //not used currently, keep them for further usage
+                 if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
+                     if (_ivInfo != null) {
+                         _ivInfo.setVisibility(View.INVISIBLE);
+                         _llInfoLayout.removeView(_ivInfo);
+                         _ivInfo = null;
                      }
                  }
 
-                 if (!isLLMModel) //ASR inference
+                 //not used currently, keep them for further usage
+                 if (isLLMVModel || isLLMOModel) {
+                     if ((bitmapSelectedImage == null) || (pathSelectedImage.isEmpty())) {
+                         KANTVLog.j(TAG, "image is empty");
+                         KANTVUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
+                         return;
+                     }
+                 }
+
+                 if (isASRModel) //ASR inference
+                     //built-in path /sdcard/kantv/
                      selectModelFilePath = KANTVUtils.getDataPath() + selectModeFileName;
                  else { //LLM inference
+                     //sdcard
                      selectModelFilePath = KANTVUtils.getSDCardDataPath() + selectModeFileName;
                  }
 
-                 KANTVLog.j(TAG, "selectModelFilePath:" + selectModelFilePath);
-                 selectModeFile = new File(selectModelFilePath);
-                 //will be removed in the future
-                 //displayFileStatus(KANTVUtils.getDataPath() + ggmlSampleFileName, selectModelFilePath);
-                 File sampleFile = new File(KANTVUtils.getDataPath() + ggmlSampleFileName);
+                 KANTVLog.g(TAG, "selectModelFilePath:" + selectModelFilePath);
+
+                 File selectModeFile = new File(selectModelFilePath);
                  if (!selectModeFile.exists()) {
                      KANTVLog.j(TAG, "model file not exist:" + selectModeFile.getAbsolutePath());
                  }
+                 File sampleFile = new File(KANTVUtils.getDataPath() + ggmlSampleFileName);
                  if (!sampleFile.exists()) {
                      KANTVLog.j(TAG, "sample file not exist:" + sampleFile.getAbsolutePath());
                  }
-                 if (!selectModeFile.exists() || (!sampleFile.exists())) {
-                     KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" +
-                             selectModeFile.getAbsolutePath() + " and sample file:" + sampleFile.getAbsolutePath() + " exist");
-                     return;
+
+                 if (isASRModel) {
+                     if (!selectModeFile.exists() || (!sampleFile.exists())) {
+                         KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" +
+                                 selectModeFile.getAbsolutePath() + " and sample file:" + sampleFile.getAbsolutePath() + " exist");
+                         return;
+                     }
+                 } else {
+                     if (!selectModeFile.exists()) {
+                         //all candidate models are: ggml-tiny.en-q8_0.bin + other LLM models, so real index in LLMModels is selectModelIndex - 1
+                         KANTVUtils.showMsgBox(mActivity, "LLM model file:" +
+                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: " + LLMModels[selectModelIndex - 1].getUrl());
+                         return;
+                     }
                  }
 
                  String strPrompt = _txtUserInput.getText().toString();
@@ -571,13 +478,13 @@
                  }
                  strPrompt = strPrompt.trim();
                  strUserInput = strPrompt;
-                 KANTVLog.j(TAG, "User input: \n " + strUserInput);
+                 KANTVLog.j(TAG, "user input: \n " + strUserInput);
              }
              //sanity check end
 
              //reset default ggml model file name after sanity check
              ggmlModelFileName = selectModelFilePath;
-             KANTVLog.j(TAG, "model file:" + selectModelFilePath);
+             KANTVLog.j(TAG, "model file:" + ggmlModelFileName);
              if (isASRModel) { //avoid crash
                  int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVUtils.ASR_MODE_BECHMARK, backendIndex);
                  if (0 != result) {
@@ -1136,8 +1043,8 @@
          KANTVLog.j(TAG, benchmarkTip);
 
          String dispInfo;
-         if (benchmarkIndex ==  KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
-            dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
+         if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
+             dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
          else
              dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
          dispInfo += "\n\n";
@@ -1151,6 +1058,30 @@
          }
          KANTVUtils.showMsgBox(mActivity, dispInfo);
      }
+
+     private void setTextGGMLInfo(String LLMModelFileName) {
+         _txtGGMLInfo.setText("");
+         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
+         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
+         String timestamp = "";
+         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+         Date date = new Date(System.currentTimeMillis());
+         timestamp = fullDateFormat.format(date);
+         _txtGGMLInfo.append("\n");
+         _txtGGMLInfo.append("running timestamp:" + timestamp);
+     }
+
+     private void initLLMModels() {
+         //how to convert safetensors to GGUF:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+         //TODO: DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf can't works on Android phone https://github.com/kantv-ai/kantv/issues/287
+         LLMModels[0] = new KANTVLLMModel(0,"qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
+         LLMModels[1] = new KANTVLLMModel(1,"qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
+         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4.0B-F16.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3,"DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModelFileName = LLMModels[selectModelIndex].getName();
+         LLMModelURL      = LLMModels[selectModelIndex].getUrl();
+     }
+
 
      public static native int kantv_anti_remove_rename_this_file();
  }

@@ -55,6 +55,8 @@
  import java.io.File;
  import java.text.SimpleDateFormat;
  import java.util.Date;
+ import java.util.HashMap;
+ import java.util.Map;
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
@@ -63,6 +65,7 @@
  import kantvai.media.player.KANTVEventListener;
  import kantvai.media.player.KANTVEventType;
  import kantvai.media.player.KANTVException;
+ import kantvai.media.player.KANTVLLMModel;
  import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVMgr;
@@ -109,23 +112,15 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
 
+
      //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
-     //private String ggmlModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
-     //
-     // private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+     //default LLM model
+     private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
+     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
 
-     //https://huggingface.co/Qwen/Qwen3-4B/tree/main
-     //Qwen3 was released on 04/28/2025
-     //try Qwen3-4B with KanTV Android APP on Android phone equipped with Qualcomm Snapdragon 8Elite
-     //ref to:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-     private String ggmlModelFileName = "Qwen3-4.0B-F16.gguf";
-     private String ggmlModelURL = "https://huggingface.co/Qwen/Qwen3-4B/tree/main";
-
-     //https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main
-     //how to convert safetensors to GGUF
-     //refer to: https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-     //can works fine on Android phone equipped with Snapdragon 8Elite mobile SoC
-
+     private final int LLM_MODEL_MAXCOUNTS = 4;
+     private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
+     private int selectModelIndex = 0;
      String selectModelFilePath = "";
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
@@ -172,9 +167,9 @@
          _btnStopInference      = mActivity.findViewById(R.id.btnStop);
          _txtUserInput = mActivity.findViewById(R.id.txtUserInput);
          _llInfoLayout = mActivity.findViewById(R.id.llLLMInfoLayout);
-
          _txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 
+         initLLMModels();
 
          try {
              KANTVLibraryLoader.load("ggml-jni");
@@ -184,16 +179,8 @@
              return;
          }
 
-         KANTVLog.j(TAG, "load ggml's llama.cpp info");
-         _txtGGMLInfo.setText("");
-         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM));
-         _txtGGMLInfo.append("\n" + "LLM model:" + ggmlModelFileName);
-         String timestamp = "";
-         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
-         Date date = new Date(System.currentTimeMillis());
-         timestamp = fullDateFormat.format(date);
-         _txtGGMLInfo.append("\n");
-         _txtGGMLInfo.append("running timestamp:" + timestamp);
+         KANTVLog.j(TAG, "set ggml's llama.cpp info");
+         setTextGGMLInfo(LLMModelFileName);
 
          Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerLLMThreadCounts);
          String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
@@ -243,8 +230,8 @@
          });
 
          _btnInference.setOnClickListener(v -> {
-             KANTVLog.j(TAG, "strModeName:" + ggmlModelFileName);
-             KANTVLog.j(TAG, "threads:" + nThreadCounts + ", model:" + ggmlModelFileName + ", backend:" + strBackend);
+             KANTVLog.j(TAG, "strModeName:" + LLMModelFileName);
+             KANTVLog.j(TAG, "threads:" + nThreadCounts + ", model:" + LLMModelFileName + ", backend:" + strBackend);
 
              //sanity check begin
              {
@@ -393,7 +380,6 @@
          }
      }
 
-
      private void initKANTVMgr() {
          if (mKANTVMgr != null) {
              release();
@@ -446,7 +432,6 @@
 
          restoreUIAndStatus();
          _txtLLMInfo.setText("");
-         _txtUserInput.setText("");
          _txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
      }
 
@@ -481,7 +466,7 @@
          }
          String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
 
-         String benchmarkTip =  " (model: " + ggmlModelFileName
+         String benchmarkTip =  " (model: " + LLMModelFileName
                  + " ,threads: " + nThreadCounts
                  + " ,backend: " + backendDesc
                  + " ) cost " + duration + " milliseconds";
@@ -515,16 +500,38 @@
 
      private boolean checkLLMModelExist() {
          File selectModeFile = null;
-         KANTVLog.g(TAG, "selectModeFileName:" + ggmlModelFileName);
-         selectModelFilePath = KANTVUtils.getSDCardDataPath() + ggmlModelFileName;
+         KANTVLog.g(TAG, "selectModeFileName:" + LLMModelFileName);
+         selectModelFilePath = KANTVUtils.getSDCardDataPath() + LLMModelFileName;
          KANTVLog.g(TAG, "selectModelFilePath:" + selectModelFilePath);
          selectModeFile = new File(selectModelFilePath);
          if (!selectModeFile.exists()) {
              KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" +
-                     selectModeFile.getAbsolutePath() + " exist and down from " + ggmlModelURL);
+                     selectModeFile.getAbsolutePath() + " exist and down from " + LLMModelURL);
              return false;
          }
          return true;
+     }
+     private void setTextGGMLInfo(String LLMModelFileName) {
+         _txtGGMLInfo.setText("");
+         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM));
+         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
+         String timestamp = "";
+         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+         Date date = new Date(System.currentTimeMillis());
+         timestamp = fullDateFormat.format(date);
+         _txtGGMLInfo.append("\n");
+         _txtGGMLInfo.append("running timestamp:" + timestamp);
+     }
+
+     private void initLLMModels() {
+         //how to convert safetensors to GGUF:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+         //TODO: DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf can't works on Android phone https://github.com/kantv-ai/kantv/issues/287
+         LLMModels[0] = new KANTVLLMModel(0,"qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
+         LLMModels[1] = new KANTVLLMModel(1,"qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
+         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4.0B-F16.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3,"DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModelFileName = LLMModels[selectModelIndex].getName();
+         LLMModelURL      = LLMModels[selectModelIndex].getUrl();
      }
 
      public static native int kantv_anti_remove_rename_this_file();
