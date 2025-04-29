@@ -189,6 +189,7 @@ function sign_kantv_androidapk()
         exit 1
     else
         echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"
+        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk
     fi
 }
 
