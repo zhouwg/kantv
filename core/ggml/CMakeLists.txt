@@ -34,6 +34,12 @@ if(NOT DEFINED HEXAGON_SDK_PATH)
     set(HEXAGON_SDK_PATH "/opt/qcom/Hexagon_SDK/6.2.0.1/")
 endif()
 
+#available htp arch version:
+#v68 --- Snapdragon 888
+#v69 --- Snapdragon 8 Gen1
+#v73 --- Snapdragon 8 Gen2
+#v75 --- Snapdragon 8 Gen3
+#v79 --- Snapdragon 8 Elite(aka Gen4)
 if(NOT DEFINED HTP_ARCH_VERSION)
     message(WARNING "HTP_ARCH_VERSION not defined, valid htp arch: v68,v69,v73,v75,v79")
     #manually set to v75
