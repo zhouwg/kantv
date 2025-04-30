@@ -88,8 +88,7 @@ enum ggml_jni_bench_type {
 
 
 // =================================================================================================
-// PoC#64:Add/implement realtime AI subtitle for online English TV using whisper.cpp from 03-05-2024 to 03-16-2024
-// https://github.com/zhouwg/kantv/issues/64
+// implement realtime AI subtitle for online English TV using whisper.cpp from 03-05-2024 to 03-16-2024
 // =================================================================================================
     /**
     * @param sz_model_path
@@ -116,7 +115,7 @@ enum ggml_jni_bench_type {
 // =================================================================================================
     /**
     *
-    * @param sz_model_path         /sdcard/kantv/models/xxxxxx.gguf
+    * @param model_path         /sdcard/xxxxxx.gguf
     * @param prompt
     * @param llm_type              not used currently
     * @param n_threads             1 - 8
@@ -132,6 +131,20 @@ enum ggml_jni_bench_type {
     void         llama_reset_running_state(void);
     int          llama_is_running_state(void);
 
+    /**
+    *
+    * @param model_path         /sdcard/xxxxxx.gguf
+    * @param mmproj_model_path  /sdcard/mmproj_xxxxxx.gguf
+    * @param img_path
+    * @param prompt
+    * @param llm_type              not used currently
+    * @param n_threads             1 - 8
+    * @param n_backend             0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_accel_type          0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+    * @return
+    */
+    int          llava_inference(const char * model_path, const char * mmproj_model_path, const char * img_path, const char * prompt, int llm_type, int num_threads, int n_backend, int n_hwaccel_type);
+    int          llava_inference_main(int argc, char *argv[], int backend);
 #ifdef __cplusplus
 }
 #endif

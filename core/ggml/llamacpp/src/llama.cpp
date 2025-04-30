@@ -191,6 +191,11 @@ static struct llama_model * llama_model_load_from_file_impl(
                     break;
 
                 case GGML_BACKEND_DEVICE_TYPE_GPU:
+#if GGML_USE_HEXAGON
+                    if (params.main_gpu == HEXAGON_BACKEND_GGML) {
+                        break;
+                    }
+#endif
                     ggml_backend_reg_t reg = ggml_backend_dev_backend_reg(dev);
                     if (ggml_backend_reg_name(reg) == std::string("RPC")) {
                         rpc_servers.push_back(dev);
@@ -217,13 +222,11 @@ static struct llama_model * llama_model_load_from_file_impl(
         model->devices.clear();
         model->devices.push_back(main_gpu);
     }
-
     for (auto * dev : model->devices) {
         size_t free, total; // NOLINT
         ggml_backend_dev_memory(dev, &free, &total);
-        LLAMA_LOG_INFO("%s: using device %s (%s) - %zu MiB free\n", __func__, ggml_backend_dev_name(dev), ggml_backend_dev_description(dev), free/1024/1024);
+        LOGGD("%s: using device %s (%s) - %zu MiB free\n", __func__, ggml_backend_dev_name(dev), ggml_backend_dev_description(dev), free/1024/1024);
     }
-
     const int status = llama_model_load(path_model, splits, *model, params);
     GGML_ASSERT(status <= 0);
     if (status < 0) {

@@ -53,7 +53,7 @@ public class ggmljava {
 
 
     /**
-     * @param modelPath     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
+     * @param modelPath     /sdcard/xxxxxx.gguf
      * @param prompt        user input from UI
      * @param nLLMType      not used currently
      * @param nThreadCounts 1 - 8
@@ -66,4 +66,17 @@ public class ggmljava {
     public static native void    llm_stop_inference();
 
     public static native boolean llm_is_running();
+
+    /**
+     * @param modelPath     /sdcard/xxxxxx.gguf
+     * @param mmprojModelPath
+     * @param imgPath
+     * @param prompt        user input from UI
+     * @param nLLMType      not used currently
+     * @param nThreadCounts 1 - 8
+     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+     * @return
+     */
+    public static native String llava_inference(String modelPath, String mmprojModelPath, String imgPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 }

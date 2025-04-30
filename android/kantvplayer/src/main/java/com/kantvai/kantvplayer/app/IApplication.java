@@ -248,7 +248,8 @@ public class IApplication extends Application {
 
         KANTVAssetLoader.copyAssetFile(mContext, "mnist-5.png", KANTVUtils.getDataPath() + "mnist-5.png");
         KANTVAssetLoader.copyAssetFile(mContext, "mnist-7.png", KANTVUtils.getDataPath() + "mnist-7.png");
-
+        KANTVAssetLoader.copyAssetFile(mContext, "res/vision-test.jpg", KANTVUtils.getDataPath() + "vision-test.jpg");
+        KANTVAssetLoader.copyAssetFile(mContext, "res/vision-test.jpg", KANTVUtils.getSDCardDataPath() + "vision-test.jpg");
 
         //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
         //TODO: fix following issue and then modify from

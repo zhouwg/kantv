@@ -194,6 +194,10 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/speculative.cpp
 
+        ${LLAMACPP_SRC_DIR}/examples/llava/mtmd.cpp
+        ${LLAMACPP_SRC_DIR}/examples/llava/clip.cpp
+        ${LLAMACPP_SRC_DIR}/examples/llava/mtmd-cli.cpp
+
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c

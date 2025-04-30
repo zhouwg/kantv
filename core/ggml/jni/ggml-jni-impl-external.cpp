@@ -7462,3 +7462,42 @@ int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int 
 
     return ret;
 }
+
+
+int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path, const char * img_path, const char *sz_user_data, int llm_type,
+                       int n_threads, int n_backend_type, int n_hwaccel_type) {
+    int ret = 0;
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("mmproj path:%s\n", sz_mmproj_model_path);
+    LOGGD("image path:%s\n", img_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("llm_type: %d\n", llm_type);
+    LOGGD("num_threads:%d\n", n_threads);
+    LOGGD("backend type:%d\n", n_backend_type);
+    LOGGD("hwaccel type:%d\n", n_hwaccel_type);
+
+    if (nullptr == sz_model_path || nullptr == sz_user_data) {
+        LOGGD("pls check params\n");
+        return 1;
+    }
+    if (nullptr == sz_mmproj_model_path || nullptr == img_path) {
+        LOGGD("pls check params\n");
+        return 1;
+    }
+    //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
+    //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
+    int argc = 11;
+    const char *argv[] = {"llava-inference-main",
+                          "-m", sz_model_path,
+                          "--mmproj", sz_mmproj_model_path,
+                          "--image", img_path,
+                          "-p", sz_user_data,
+                          "-t", std::to_string(n_threads).c_str()
+    };
+    llama_init_running_state();
+    ret = llava_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    llama_reset_running_state();
+
+    LOGGD("ret %d", ret);
+    return ret;
+}

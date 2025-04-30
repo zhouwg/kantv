@@ -244,7 +244,7 @@ Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 JNIEXPORT jstring  JNICALL
 Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
-                                               jint n_bench_type, jint n_thread_counts, jint n_backend, jint n_hwaccel_type) {
+                                               jint n_llm_type, jint n_thread_counts, jint n_backend, jint n_hwaccel_type) {
     UNUSED(clazz);
 
     const char *sz_model_path = NULL;
@@ -267,16 +267,10 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model
 
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("prompt:%s\n", sz_prompt);
-    LOGGV("bench type: %d\n", n_bench_type);
+    LOGGV("llm type: %d\n", n_llm_type);
     LOGGV("thread counts:%d\n", n_thread_counts);
     LOGGV("backend type:%d\n", n_backend);
     LOGGV("accel type:%d\n", n_hwaccel_type);
-
-    if (n_bench_type >= GGML_BENCHMARK_MAX) {
-        LOGGW("pls check bench type\n");
-        GGML_JNI_NOTIFY("ggml benchmark type %d not supported currently", n_bench_type);
-        goto failure;
-    }
 
 #if !defined GGML_USE_HEXAGON
     if (n_backend != HEXAGON_BACKEND_GGML) {
@@ -289,7 +283,7 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llama_inference_ng(sz_model_path, sz_prompt, n_bench_type, n_thread_counts, n_backend, n_hwaccel_type);
+    result = llama_inference_ng(sz_model_path, sz_prompt, n_llm_type, n_thread_counts, n_backend, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != LLM_INFERENCE_INTERRUPTED) {
@@ -341,4 +335,92 @@ Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv *env, jclass clazz) {
     } else {
         return JNI_FALSE;
     }
+}
+
+JNIEXPORT jstring JNICALL
+Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv *env, jclass clazz, jstring model_path,
+                                          jstring mmproj_model_path, jstring img_path,
+                                          jstring prompt, jint n_llmtype, jint n_thread_counts,
+                                          jint n_backend_type, jint n_hwaccel_type) {
+    const char *sz_model_path = NULL;
+    const char *sz_mmproj_path = NULL;
+    const char *sz_img_path = NULL;
+    const char *sz_prompt = NULL;
+    const char *sz_bench_result = "unknown";
+    const char *bench_result = NULL;
+    int result = 0;
+
+    sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
+    if (NULL == sz_model_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    sz_mmproj_path = (*env)->GetStringUTFChars(env, mmproj_model_path, NULL);
+    if (NULL == sz_mmproj_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    sz_img_path = (*env)->GetStringUTFChars(env, img_path, NULL);
+    if (NULL == sz_img_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    sz_prompt = (*env)->GetStringUTFChars(env, prompt, NULL);
+    if (NULL == sz_prompt) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    LOGGV("model path:%s\n", sz_model_path);
+    LOGGV("mmproj model path:%s\n", sz_mmproj_path);
+    LOGGV("img path:%s\n", sz_img_path);
+    LOGGV("prompt:%s\n", sz_prompt);
+    LOGGV("llm type: %d\n", n_llmtype);
+    LOGGV("thread counts:%d\n", n_thread_counts);
+    LOGGV("backend type:%d\n", n_backend_type);
+    LOGGV("accel type:%d\n", n_hwaccel_type);
+
+
+#if !defined GGML_USE_HEXAGON
+    if (n_backend != HEXAGON_BACKEND_GGML) {
+        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+        goto failure;
+    }
+#endif
+
+    if (0 == n_thread_counts)
+        n_thread_counts = 1;
+
+    result = llava_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
+    LOGGD("result %d", result);
+    if (0 != result) {
+        if (result != LLM_INFERENCE_INTERRUPTED) {
+            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
+        }
+    }
+
+    failure:
+    if (NULL != sz_prompt) {
+        (*env)->ReleaseStringUTFChars(env, prompt, sz_prompt);
+    }
+
+    if (NULL != sz_img_path) {
+        (*env)->ReleaseStringUTFChars(env, img_path, sz_img_path);
+    }
+
+    if (NULL != sz_mmproj_path) {
+        (*env)->ReleaseStringUTFChars(env, mmproj_model_path, sz_mmproj_path);
+    }
+
+    if (NULL != sz_model_path) {
+        (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
+    }
+
+    jstring string = (*env)->NewStringUTF(env, sz_bench_result);
+
+    return string;
 }
