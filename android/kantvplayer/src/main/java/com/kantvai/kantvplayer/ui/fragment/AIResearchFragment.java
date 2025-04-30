@@ -171,14 +171,13 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
-     //https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf
+     //https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main
      //default LLM model
-     private String LLMModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; //1.12 GiB
-     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf";
+     private String LLMModelFileName = "gemma-3-4b-it-Q8_0.gguf"; //4.1 GiB
 
      private final int LLM_MODEL_MAXCOUNTS = 7;
      private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private int selectModelIndex = 0; //index of selected LLM model
+     private int selectModelIndex = 4; //index of selected LLM model, default is gemma-3-4b
      private int selectedUIIndex  = 0; //index of user's selected in all models(ASR model  and LLM model)
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
@@ -1090,7 +1089,6 @@
          LLMModels[5] = new KANTVLLMModel(5,"DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
          LLMModels[6] = new KANTVLLMModel(6,"DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
          LLMModelFileName = LLMModels[selectModelIndex].getName();
-         LLMModelURL      = LLMModels[selectModelIndex].getUrl();
          int tmp = LLM_MODEL_MAXCOUNTS; // make IDE happy and modify value of LLM_MODEL_MAXCOUNTS more convenient
          LLMModels[0].setQuality("not bad and fast");
          LLMModels[1].setQuality("good");

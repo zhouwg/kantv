@@ -112,14 +112,14 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
 
-     //https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf
+     //https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main
      //default LLM model
-     private String LLMModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; //1.12 GiB
-     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf";
+     private String LLMModelFileName = "gemma-3-4b-it-Q8_0.gguf"; //4.1 GiB
+     private String LLMModelURL = "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main";
 
      private final int LLM_MODEL_MAXCOUNTS = 7;
      private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private int selectModelIndex = 0;
+     private int selectModelIndex = 4; //gemma-3-4b
      String selectModelFilePath = "";
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";

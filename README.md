@@ -14,7 +14,7 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on on-device AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone easily. many features and techs here can be used in a real commercial software.
 
-- Built-in [qwen2.5-3b](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main) model and runs entirely offline(no Internet required)
+- Built-in [gemma-3-4b](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) supportive and runs entirely offline(no Internet required)
 
 generally speaking, this is project for developers and AI experts.
 
@@ -49,9 +49,9 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
 
 - Prepare LLM model
 ```
-    wget https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf
+    wget https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf
 
-    adb push qwen2.5-3b-instruct-q4_0.gguf /sdcard/
+    adb push gemma-3-4b-it-Q8_0.gguf /sdcard/
 ```
 
 - Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm Snapdragon 8Gen3 and Snapdragon 8Elite are highly recommended) is <b>required</b> for verify/running ggml-hexagon backend on Android phone:
