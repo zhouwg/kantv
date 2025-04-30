@@ -1,9 +1,9 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art device-AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcriptionand online-TV video&audio recording at the same time) on <b>ANY mainstream</b> **Android phone/device**:
+KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art device-AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcriptionand online-TV video&audio recording at the same time) on <b>ANY mainstream</b> Android phone/device:
 
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. developers or domain tech experts can set up [a customized playlist](./android/kantvplayer/src/main/assets/tv.xml) and then use this software to watch the content of the customized playlist for R&D activity.
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. Developers or domain tech experts can set up [a customized playlist](./android/kantvplayer/src/main/assets/tv.xml) and then use this software to watch the content of the customized playlist for R&D activity.
 
 - Record online TV to automatically generate videos(useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider).
 
@@ -14,11 +14,12 @@ KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/l
 
 - Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on on-device AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone easily. many features and techs here can be used in a real commercial software.
 
-- Built-in [gemma-3-4b](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) supportive and runs entirely offline(no Internet required)
+- Built-in [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) text-to-text and image-to-text(multimodal) supportive and runs entirely offline(no Internet required)
 
-generally speaking, this is project for developers and AI experts.
+
 
 <!--
+generally speaking, this is project for developers and AI experts.
 In the all, generally speaking,
 - this is <b>project for Linux/Android developers</b>. If you thoroughly understand all the code in this project (native C/C++ and Java)
   - you will find a good job in the CN(age should be smaller then 35 because of well-known facts) with a monthly salary of more than RMB30,000
@@ -80,19 +81,22 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
+here is a screenshot to demostrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
+
+
+![1429485556](https://github.com/user-attachments/assets/84d9fed1-e250-4212-8eff-104f08110875)
+
+----
 here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
 
-![Image](https://github.com/user-attachments/assets/2cdf0e95-f800-44dc-af39-70d0c9c95501)
-![Image](https://github.com/user-attachments/assets/ca6016ec-1999-4606-a1b0-64fcbe0e3822)
+![1351701335](https://github.com/user-attachments/assets/fc30d262-def2-4b77-973c-b71b33080535)
+
 
 ----
 
 here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
 
-
-![Image](https://github.com/user-attachments/assets/eaeb4eb6-6922-4540-ae6b-d533f48cb965)
-![Image](https://github.com/user-attachments/assets/48b63fd6-9741-4bc3-88b8-3a496fda750c)
-
+![705759462](https://github.com/user-attachments/assets/df1ed1ed-294e-4691-bbd1-b8a6f7ff6f8c)
 <details>
   <summary>some other screenshots</summary>
   <ol>
@@ -128,9 +132,6 @@ Report issue in various Android-based phone and <b>submit PR to this project is 
 
 
 ### Special Acknowledgement
-
-This project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021), with much enhancements and new features. <b>NOW</b> this project is actively focus on <b>device-AI tech on Android</b> phone/device equipped with <b>mainstream high-end</b> mobile SoC.
-
 
  <ul>AI inference framework
 
