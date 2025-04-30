@@ -171,14 +171,15 @@
 
      private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
 
-     //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
+     //https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf
      //default LLM model
-     private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
-     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+     private String LLMModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; //1.12 GiB
+     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf";
 
-     private final int LLM_MODEL_MAXCOUNTS = 4;
+     private final int LLM_MODEL_MAXCOUNTS = 7;
      private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private int selectModelIndex = 0;
+     private int selectModelIndex = 0; //index of selected LLM model
+     private int selectedUIIndex  = 0; //index of user's selected in all models(ASR model  and LLM model)
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
 
@@ -258,7 +259,8 @@
                      spinnerModelName.setSelection(0); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
                  }
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                     spinnerModelName.setSelection(1); //hardcode to qwen2.5-3b-instruct-q4_0.gguf for purpose of validate various models more easily on Android phone
+                     //2025/04/30, comment following line because don't interrupt/change user's behaviour
+                     //spinnerModelName.setSelection(1); //hardcode to qwen1_5-1_8b-chat-q4_0.gguf for purpose of validate various models more easily on Android phone
                  }
 
                  if ((previousBenchmakrIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -356,7 +358,9 @@
              public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                  KANTVLog.j(TAG, "position: " + position + ", model:" + arrayModelName[position]);
                  strModeName = arrayModelName[position];
-                 selectModelIndex = position;
+                 selectedUIIndex  = position;
+                 //attention here
+                 selectModelIndex = selectedUIIndex - 1;
 
                  KANTVLog.j(TAG, "strModeName:" + strModeName);
              }
@@ -396,8 +400,14 @@
              {
                  isASRModel = KANTVUtils.isASRModel(strModeName);
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                     //all candidate models are: ggml-tiny.en-q8_0.bin + other LLM models, so real index in LLMModels is selectModelIndex - 1
-                     selectModeFileName = LLMModels[selectModelIndex - 1].getName();
+                     //attention here
+                     if (selectModelIndex < 0) {
+                         selectModelIndex = 0;
+                         selectModeFileName = "ggml-" + strModeName + ".bin";
+                     } else {
+                         selectModeFileName = LLMModels[selectModelIndex].getName();
+                     }
+
                      isLLMModel = true;
                      setTextGGMLInfo(selectModeFileName);
                  } else {
@@ -408,13 +418,13 @@
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
                  if (isASRModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                     KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                     KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVLog.j(TAG, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
                      return;
                  }
                  if ((!isASRModel) && (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                     KANTVLog.j(TAG, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
-                     KANTVUtils.showMsgBox(mActivity, "mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVLog.j(TAG, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex));
                      return;
                  }
 
@@ -463,9 +473,8 @@
                      }
                  } else {
                      if (!selectModeFile.exists()) {
-                         //all candidate models are: ggml-tiny.en-q8_0.bin + other LLM models, so real index in LLMModels is selectModelIndex - 1
                          KANTVUtils.showMsgBox(mActivity, "LLM model file:" +
-                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: " + LLMModels[selectModelIndex - 1].getUrl());
+                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: " + LLMModels[selectModelIndex].getUrl());
                          return;
                      }
                  }
@@ -1072,16 +1081,25 @@
      }
 
      private void initLLMModels() {
-         //how to convert safetensors to GGUF:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         //TODO: DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf can't works on Android phone https://github.com/kantv-ai/kantv/issues/287
+         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
          LLMModels[0] = new KANTVLLMModel(0,"qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
          LLMModels[1] = new KANTVLLMModel(1,"qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
-         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4.0B-F16.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
-         LLMModels[3] = new KANTVLLMModel(3,"DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3,"Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
+         LLMModels[4] = new KANTVLLMModel(4,"gemma-3-4b-it-Q8_0.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main");
+         LLMModels[5] = new KANTVLLMModel(5,"DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[6] = new KANTVLLMModel(6,"DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
          LLMModelFileName = LLMModels[selectModelIndex].getName();
          LLMModelURL      = LLMModels[selectModelIndex].getUrl();
+         int tmp = LLM_MODEL_MAXCOUNTS; // make IDE happy and modify value of LLM_MODEL_MAXCOUNTS more convenient
+         LLMModels[0].setQuality("not bad and fast");
+         LLMModels[1].setQuality("good");
+         LLMModels[2].setQuality("not bad");
+         LLMModels[3].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
+         LLMModels[4].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I want
+         LLMModels[5].setQuality("bad"); //inference speed is fast but the answer is wrong
+         LLMModels[6].setQuality("not bad"); //the answer is not concise
      }
-
 
      public static native int kantv_anti_remove_rename_this_file();
  }

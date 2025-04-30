@@ -112,13 +112,12 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
 
-
-     //https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main
+     //https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf
      //default LLM model
-     private String LLMModelFileName = "qwen2.5-3b-instruct-q4_0.gguf"; //2 GiB
-     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main";
+     private String LLMModelFileName = "qwen1_5-1_8b-chat-q4_0.gguf"; //1.12 GiB
+     private String LLMModelURL = "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf";
 
-     private final int LLM_MODEL_MAXCOUNTS = 4;
+     private final int LLM_MODEL_MAXCOUNTS = 7;
      private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
      private int selectModelIndex = 0;
      String selectModelFilePath = "";
@@ -523,15 +522,19 @@
          _txtGGMLInfo.append("running timestamp:" + timestamp);
      }
 
+     //not practically used currently, keep this function for further usage
      private void initLLMModels() {
-         //how to convert safetensors to GGUF:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         //TODO: DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf can't works on Android phone https://github.com/kantv-ai/kantv/issues/287
+         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
          LLMModels[0] = new KANTVLLMModel(0,"qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
          LLMModels[1] = new KANTVLLMModel(1,"qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
-         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4.0B-F16.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
-         LLMModels[3] = new KANTVLLMModel(3,"DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[2] = new KANTVLLMModel(2,"Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3,"Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
+         LLMModels[4] = new KANTVLLMModel(4,"gemma-3-4b-it-Q8_0.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main");
+         LLMModels[5] = new KANTVLLMModel(5,"DeepSeek-R1-Distill-Qwen-1.5B-F16.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[6] = new KANTVLLMModel(6,"DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
          LLMModelFileName = LLMModels[selectModelIndex].getName();
          LLMModelURL      = LLMModels[selectModelIndex].getUrl();
+         int tmp = LLM_MODEL_MAXCOUNTS; // make IDE happy and modify value of LLM_MODEL_MAXCOUNTS more convenient
      }
 
      public static native int kantv_anti_remove_rename_this_file();

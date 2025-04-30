@@ -106,7 +106,10 @@
         <item>Qwen1.5-1.8B</item>
         <item>Qwen2.5-3B</item>
         <item>Qwen3-4B</item>
+        <item>Qwen3-8B</item>
+        <item>gemma-3-4b</item>
         <item>DS-R1-Distill-Qwen-1.5B</item>
+        <item>DS-R1-Distill-Qwen-7B</item>
     </string-array>
 
     <string-array name="backendtype">

@@ -23,13 +23,22 @@ package kantvai.media.player;
 
 public class KANTVLLMModel {
     private int index;
-    private String name;
-    private String url;
+    private String name;    //full name
+    private String url;     //original source
+
+    private String quality; //quality on Android phone
 
     public KANTVLLMModel(int index, String name, String url) {
         this.index = index;
         this.name  = name;
         this.url   = url;
+    }
+
+    public KANTVLLMModel(int index, String name, String url, String quality) {
+        this.index = index;
+        this.name  = name;
+        this.url   = url;
+        this.quality = quality;
     }
 
     public String getName() {
@@ -42,5 +51,11 @@ public class KANTVLLMModel {
 
     public int getIndex() {
         return index;
+    }
+
+    public String getQuality() { return quality; }
+
+    public void setQuality(String quality) {
+        this.quality = quality;
     }
 }
