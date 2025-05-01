@@ -171,7 +171,7 @@
      private Settings mSettings;
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
-     private int selectModelIndex = 4; //index of selected LLM model, default is gemma-3-4b
+     private int selectModelIndex = 4; //index of selected LLM model, default index is 4 (gemma-3-4b)
      private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model  and LLM model)
 
 
@@ -191,7 +191,7 @@
          LLMModels[6] = new KANTVLLMModel(6, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
          LLMModels[7] = new KANTVLLMModel(7, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
 
-         LLMModelFileName = LLMModels[selectModelIndex].getName();
+
          arrayModelName[0] = "ggml-tiny.en-q8_0.bin"; //the built-in and default ASR model, size is 42 MiB
          for (int i = 1; i <= LLM_MODEL_MAXCOUNTS; i++) {
              arrayModelName[i] = LLMModels[i - 1].getNickname();
@@ -201,7 +201,7 @@
          LLMModels[2].setQuality("not bad");
          LLMModels[3].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
          LLMModels[4].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I
-         LLMModels[5].setQuality("good");
+         LLMModels[5].setQuality("slow and good");
          LLMModels[6].setQuality("bad"); //inference speed is fast but the answer is wrong
          LLMModels[7].setQuality("not bad"); //the answer is not concise
      }
@@ -260,7 +260,7 @@
          }
 
          KANTVLog.j(TAG, "set ggml's whisper.cpp info");
-         setTextGGMLInfo(LLMModelFileName);
+         setTextGGMLInfo(LLMModels[selectModelIndex].getName());
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);

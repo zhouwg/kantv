@@ -72,6 +72,8 @@
  import kantvai.media.player.KANTVUtils;
 
 
+ //the feature in this UI page is exactly similar to AIResearchFragment.java
+ //keep it for further usage
  public class LLMResearchFragment extends BaseMvpFragment<LLMResearchPresenter> implements LLMResearchView {
      @BindView(R.id.llmresearchLayout)
      LinearLayout layout;
@@ -116,20 +118,31 @@
      //default LLM model
      private String LLMModelFileName = "gemma-3-4b-it-Q8_0.gguf"; //4.1 GiB
      private String LLMModelURL = "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main";
-
-     private final int LLM_MODEL_MAXCOUNTS = 8;
-     private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private int selectModelIndex = 4; //gemma-3-4b
      String selectModelFilePath = "";
-
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
-
      private Context mContext;
      private Activity mActivity;
      private Settings mSettings;
-
      private KANTVMgr mKANTVMgr = null;
      private LLMResearchFragment.MyEventListener mEventListener = new LLMResearchFragment.MyEventListener();
+
+     private final int LLM_MODEL_MAXCOUNTS  = 8;
+     private KANTVLLMModel[] LLMModels      = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
+     private int selectModelIndex           = 4; //gemma-3-4b
+     //not practically used currently, keep this function for further usage
+     private void initLLMModels() {
+         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+         LLMModels[0] = new KANTVLLMModel(0, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
+         LLMModels[1] = new KANTVLLMModel(1, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
+         LLMModels[2] = new KANTVLLMModel(2, "Qwen3-4B","Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
+         LLMModels[4] = new KANTVLLMModel(4, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf","mmproj-gemma3-4b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main", "good");
+         LLMModels[5] = new KANTVLLMModel(5, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/tree/main", "good");
+         LLMModels[6] = new KANTVLLMModel(6, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[7] = new KANTVLLMModel(7, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
+         LLMModelFileName = LLMModels[selectModelIndex].getName();
+         LLMModelURL      = LLMModels[selectModelIndex].getUrl();
+     }
 
      public static LLMResearchFragment newInstance() {
          return new LLMResearchFragment();
@@ -520,22 +533,6 @@
          timestamp = fullDateFormat.format(date);
          _txtGGMLInfo.append("\n");
          _txtGGMLInfo.append("running timestamp:" + timestamp);
-     }
-
-     //not practically used currently, keep this function for further usage
-     private void initLLMModels() {
-         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         LLMModels[0] = new KANTVLLMModel(0, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
-         LLMModels[1] = new KANTVLLMModel(1, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
-         LLMModels[2] = new KANTVLLMModel(2, "Qwen3-4B","Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
-         LLMModels[3] = new KANTVLLMModel(3, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
-         LLMModels[4] = new KANTVLLMModel(4, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf","mmproj-gemma3-4b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main", "good");
-         LLMModels[5] = new KANTVLLMModel(5, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/tree/main", "good");
-         LLMModels[6] = new KANTVLLMModel(6, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
-         LLMModels[7] = new KANTVLLMModel(7, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
-         LLMModelFileName = LLMModels[selectModelIndex].getName();
-         LLMModelURL      = LLMModels[selectModelIndex].getUrl();
-         int tmp = LLM_MODEL_MAXCOUNTS; // make IDE happy and modify value of LLM_MODEL_MAXCOUNTS more convenient
      }
 
      public static native int kantv_anti_remove_rename_this_file();
