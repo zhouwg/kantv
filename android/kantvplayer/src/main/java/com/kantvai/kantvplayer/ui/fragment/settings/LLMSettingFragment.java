@@ -1,5 +1,4 @@
  /*
-  * Copyright (c) Project KanTV. 2021-2023
   * Copyright (c) 2024- KanTV Authors
   *
   * Permission is hereby granted, free of charge, to any person obtaining a copy
