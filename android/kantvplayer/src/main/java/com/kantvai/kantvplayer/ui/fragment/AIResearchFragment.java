@@ -398,18 +398,17 @@
                  KANTVLog.g(TAG, "here");
                  ggmljava.llm_stop_inference();
              }
-             resetUIAndStatus(true);
-             resetInternalVars();
+             resetUIAndStatus(true, false);
          });
 
          _btnBenchmark.setOnClickListener(v -> {
-             KANTVLog.j(TAG, "strModeName:" + arrayModelName[selectedUIIndex]);
              KANTVLog.g(TAG, "selectModeIndex:" + selectModelIndex);
+             KANTVLog.j(TAG, "strModeName:" + arrayModelName[selectedUIIndex]);
              KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex)
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
              String selectModelFilePath = "";
 
-             resetInternalVars();
+             resetUIAndStatus(true, true);
 
              //sanity check begin
              {
@@ -431,7 +430,6 @@
                      //selectModeFileName = "ggml-" + strModeName + ".bin";
                      selectModeFileName = strModeName;
                  }
-                 KANTVLog.g(TAG, "selectModelIndex " + selectModelIndex);
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
                  if (isASRModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
@@ -615,27 +613,9 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             //update UI status
-                             resetUIAndStatus(false);
-                             _txtASRInfo.scrollTo(0, 0);
                              displayInferenceResult(null);
-
-                             if (isMNISTModel) {
-                                 String imgPath = KANTVUtils.getDataPath() + ggmlMNISTImageFile;
-                                 displayImage(imgPath);
-                                 bitmapSelectedImage = null;
-                                 pathSelectedImage = null;
-                             }
-
-                             if (isLLMVModel) {
-                                 if (pathSelectedImage != null && !pathSelectedImage.isEmpty()) {
-                                     displayImage(pathSelectedImage);
-                                 }
-                                 bitmapSelectedImage = null;
-                                 pathSelectedImage = null;
-                             }
-
-                             resetInternalVars();
+                             //update UI status
+                             resetUIAndStatus(false, true);
                          }
                      });
                  }
@@ -884,7 +864,7 @@
              ggmljava.llm_stop_inference();
          }
 
-         resetUIAndStatus(true);
+         resetUIAndStatus(true, false);
      }
 
      /* will be removed in the future
@@ -1020,8 +1000,38 @@
          mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
      }
 
-     //TODO:merge following two functions
-     private void resetInternalVars() {
+     private void resetUIAndStatus( boolean removeInferenceResult, boolean dispImage) {
+         isBenchmarking.set(false);
+         _btnBenchmark.setEnabled(true);
+         _btnBenchmark.setBackgroundColor(0xC3009688);
+
+         //for LLM multimodal
+         if (!dispImage) {
+             if (_ivInfo != null) {
+                 _ivInfo.setVisibility(View.INVISIBLE);
+                 _llInfoLayout.removeView(_ivInfo);
+                 _ivInfo = null;
+             }
+         } else {
+             if (isMNISTModel) {
+                 String imgPath = KANTVUtils.getDataPath() + ggmlMNISTImageFile;
+                 displayImage(imgPath);
+                 bitmapSelectedImage = null;
+                 pathSelectedImage = null;
+             }
+
+             if (isLLMVModel) {
+                 if (pathSelectedImage != null && !pathSelectedImage.isEmpty()) {
+                     displayImage(pathSelectedImage);
+                 }
+                 bitmapSelectedImage = null;
+                 pathSelectedImage = null;
+             }
+         }
+
+         if (removeInferenceResult)
+             _txtASRInfo.setText("");
+
          isLLMModel = false;
          isSDModel = false;
          isMNISTModel = false;
@@ -1033,25 +1043,8 @@
          selectModeFileName = "";
      }
 
-     private void resetUIAndStatus( boolean removeInferenceResult) {
-         isBenchmarking.set(false);
-         _btnBenchmark.setEnabled(true);
-         _btnBenchmark.setBackgroundColor(0xC3009688);
-
-         //for LLM multimodal
-         {
-             if (_ivInfo != null) {
-                 _ivInfo.setVisibility(View.INVISIBLE);
-                 _llInfoLayout.removeView(_ivInfo);
-                 _ivInfo = null;
-             }
-         }
-
-         if (removeInferenceResult)
-             _txtASRInfo.setText("");
-     }
-
      private void displayInferenceResult(String content) {
+         _txtASRInfo.scrollTo(0, 0);
          if (strBenchmarkInfo.startsWith("unknown")) {
              return;
          }
