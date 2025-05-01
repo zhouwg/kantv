@@ -1,5 +1,4 @@
  /*
-  * Copyright (c) Project KanTV. 2021-2023
   * Copyright (c) 2024- KanTV Authors
   *
   * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -52,7 +51,7 @@
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
- //TODO: merge download code between SoftwareUpgrade and DownloadModel
+ //TODO: merge codes between SoftwareUpgrade and DownloadModel
  public class DownloadModel {
      private Context mContext;
      private boolean intercept = false;
@@ -76,8 +75,8 @@
      private String savePath = null;
      private String modelFileNameA;
      private String modelFileNameB;
-     private String localModleFileA;
-     private String localModleFileB;
+     private String localModleFileA = null;
+     private String localModleFileB = null;
      private String remoteModleFileA;
      private String remoteModleFileB;
 
@@ -94,11 +93,11 @@
          title = titleName;
      }
 
-     public void setModeName(String name) {
+     public void setModelName(String name) {
          modelName = name;
      }
 
-     public void setModeName(String engineName, String modelA, String modelB) {
+     public void setModelName(String engineName, String modelA, String modelB) {
          modelFileNameA = modelA;
          modelFileNameB = modelB;
 
@@ -119,6 +118,23 @@
          KANTVLog.j(TAG, "remote model url:" + remoteModleFileB);
      }
 
+     public void setLLMModelName(String engineName, String modelName, String mmprojModelName, String modelURL, String mmprojModelURL) {
+         modelFileNameA = modelName;
+         modelFileNameB = mmprojModelName;
+
+         KANTVLog.j(TAG, "engineName: " + engineName + " modelName:" + modelName);
+         KANTVLog.j(TAG, "modelName: " + engineName + "  mmprojModelName:" + mmprojModelName);
+
+         //  /sdcardk/xxx.gguf
+         //  /sdcard/mmproj-xxx.gguf.bin
+         localModleFileA = KANTVUtils.getSDCardDataPath() + modelFileNameA;
+         localModleFileB = KANTVUtils.getSDCardDataPath() + modelFileNameB;
+
+         remoteModleFileA = modelURL;
+         remoteModleFileB = mmprojModelURL;
+
+         KANTVLog.j(TAG, "remote model url:" + remoteModleFileA);
+     }
 
      public void showUpdateDialog() {
          if ((modelFileNameB == null) || (modelFileNameB == null)) {
@@ -167,10 +183,12 @@
                      //apkFile.delete(); //jfk.wav is small, so it should be downloaded ok, don't remove it
                  }
 
-                 apkFile = new File(localModleFileB);
-                 if (apkFile.exists()) {
-                     KANTVLog.j(TAG, "download partial,remove it");
-                     apkFile.delete();
+                 if (localModleFileB != null) {
+                     apkFile = new File(localModleFileB);
+                     if (apkFile.exists()) {
+                         KANTVLog.j(TAG, "download partial,remove it");
+                         apkFile.delete();
+                     }
                  }
              }
          });
@@ -256,7 +274,8 @@
          public void run() {
              int result = 0;
              result = doDownloadFile(remoteModleFileA, localModleFileA, true);
-             result = doDownloadFile(remoteModleFileB, localModleFileB, true);
+             if (localModleFileB != null)
+                result = doDownloadFile(remoteModleFileB, localModleFileB, true);
              downloadDialog.dismiss();
              KANTVLog.j(TAG, "result= " + result);
              if (0 == result) {
@@ -272,21 +291,33 @@
 
      private void onFinishDownload() {
          try {
-             File fileA = new File(localModleFileA);
-             File fileB = new File(localModleFileB);
-             if (
-                     (fileA == null) || (!fileA.exists())
-                             || (fileB == null) || (!fileB.exists())
-             ) {
-                 Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
+             if (localModleFileA != null && localModleFileB != null) {
+                 File fileA = new File(localModleFileA);
+                 File fileB = new File(localModleFileB);
+                 if (
+                         (fileA == null) || (!fileA.exists())
+                                 || (fileB == null) || (!fileB.exists())
+                 ) {
+                     Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
+                 } else {
+                     Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
+                 }
              } else {
-                 Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
-             }
+                 if (localModleFileA != null) {
+                     File fileA = new File(localModleFileA);
 
+                     if ((fileA == null) || (!fileA.exists())
+                     ) {
+                         Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
+                     } else {
+                         Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
+                     }
+                 }
+             }
 
          } catch (Exception e) {
              e.printStackTrace();
-             KANTVLog.j(TAG, "download failed");
+             KANTVLog.g(TAG, "download failed");
          }
      }
 

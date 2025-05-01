@@ -387,9 +387,9 @@ public class IApplication extends Application {
 
         int asrMode = mSettings.getASRMode();  //default is normal transcription
         int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
-        KANTVLog.j(TAG, "GGML mode: " + mSettings.getGGMLMode());
-        KANTVLog.j(TAG, "GGML mode name: " + KANTVUtils.getGGMLModeString(mSettings.getGGMLMode()));
-        String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getGGMLModeString(mSettings.getGGMLMode()) + ".bin";
+        KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
+        KANTVLog.j(TAG, "ASR model name: " + KANTVUtils.getASRModelString(mSettings.getASRModel()));
+        String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
         KANTVLog.j(TAG, "modelPath:" + modelPath);
 
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
@@ -398,6 +398,7 @@ public class IApplication extends Application {
             KANTVLibraryLoader.load("ggml-jni");
             KANTVLog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             KANTVLog.j(TAG, "asr mode: " + mSettings.getASRMode());
+            KANTVLog.g(TAG, "asr mode string: " + KANTVUtils.getASRModeString(mSettings.getASRMode()));
             if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
                 result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {

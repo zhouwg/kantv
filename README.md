@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art device-AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcriptionand online-TV video&audio recording at the same time) on <b>ANY mainstream</b> Android phone/device:
+KanTV("Kan", aka English "watch") , an open source project focus on study and practise state-of-the-art device-AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcriptionand online-TV video&audio recording at the same time) on <b>ANY mainstream</b> Android phone/device:
 
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. Developers or domain tech experts can set up [a customized playlist](./android/kantvplayer/src/main/assets/tv.xml) and then use this software to watch the content of the customized playlist for R&D activity.

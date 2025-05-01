@@ -39,6 +39,7 @@
 
  import com.blankj.utilcode.util.ConvertUtils;
  import com.kantvai.kantvplayer.ui.activities.personal.CustomEPGListActivity;
+ import com.kantvai.kantvplayer.ui.fragment.settings.LLMSettingFragment;
  import com.kantvai.kantvplayer.ui.fragment.settings.SystemSettingFragment;
  import com.kantvai.kantvplayer.R;
  import com.kantvai.kantvplayer.base.BaseMvpFragment;
@@ -160,8 +161,8 @@
 
      @OnClick({
              R.id.system_setting_ll, R.id.play_setting_ll, R.id.record_setting_ll,
-             R.id.local_history_ll, R.id.peformance_benchmark_ll, R.id.asr_setting_ll,
-             R.id.custom_playlist_ll, R.id.exit_app_ll
+             R.id.local_history_ll, R.id.llm_setting_ll, R.id.asr_setting_ll,
+             R.id.peformance_benchmark_ll, R.id.custom_playlist_ll, R.id.exit_app_ll
      })
      public void onViewClicked(View view) {
          switch (view.getId()) {
@@ -177,24 +178,30 @@
                  launchActivity(ShellActivity.class, player);
                  break;
 
+             case R.id.local_history_ll:
+                 launchActivity(LocalPlayHistoryActivity.class);
+                 break;
+
              case R.id.record_setting_ll:
                  Bundle download = new Bundle();
                  download.putString("fragment", RecordSettingFragment.class.getName());
                  launchActivity(ShellActivity.class, download);
                  break;
 
+             case R.id.llm_setting_ll:
+                 Bundle llm = new Bundle();
+                 llm.putString("fragment", LLMSettingFragment.class.getName());
+                 launchActivity(ShellActivity.class, llm);
+                 break;
+
              case R.id.asr_setting_ll:
-                 Bundle voice = new Bundle();
-                 voice.putString("fragment", ASRSettingFragment.class.getName());
-                 launchActivity(ShellActivity.class, voice);
+                 Bundle asr = new Bundle();
+                 asr.putString("fragment", ASRSettingFragment.class.getName());
+                 launchActivity(ShellActivity.class, asr);
                  break;
 
              case R.id.peformance_benchmark_ll:
                  launchActivity(BenchmarkActivity.class);
-                 break;
-
-             case R.id.local_history_ll:
-                 launchActivity(LocalPlayHistoryActivity.class);
                  break;
 
              case R.id.custom_playlist_ll:

@@ -22,13 +22,16 @@
 package kantvai.media.player;
 
 public class KANTVLLMModel {
+    private static final String TAG = KANTVLLMModel.class.getSimpleName();
     private int index;
-    private String nickname;    //short name
-    private String name;        //full name
+    private String nickname;    //model's short name
+    private String name;        //model's full name
     private String mmproj_name; //mmproj model name
-    private String url;     //original source
+    private String url;         //original url of model
 
-    private String quality; //quality on Android phone
+    private String mmproj_url;  //original url of mmproj model
+
+    private String quality;     //quality of model on Android phone
 
     public KANTVLLMModel(int index, String nick, String name, String url) {
         this.index = index;
@@ -45,6 +48,7 @@ public class KANTVLLMModel {
     public KANTVLLMModel(int index, String nick, String name, String mmprojName, String url, String quality) {
         this(index, nick, name, url, quality);
         this.mmproj_name = mmprojName;
+        KANTVLog.j(TAG, "init");
     }
 
     public String getNickname() { return nickname; }
@@ -53,10 +57,13 @@ public class KANTVLLMModel {
     }
 
     public String getMMProjName() { return mmproj_name; }
+    public String getMMProjUrl() { return mmproj_url; }
+    public void setMmprojUrl(String mmprojUrl) { this.mmproj_url = mmprojUrl; }
 
     public String getUrl() {
         return url;
     }
+    public void setUrl(String modelUrl) { this.url = modelUrl;}
 
     public int getIndex() {
         return index;
@@ -67,4 +74,6 @@ public class KANTVLLMModel {
     public void setQuality(String quality) {
         this.quality = quality;
     }
+
+
 }

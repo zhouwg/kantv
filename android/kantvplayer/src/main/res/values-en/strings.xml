@@ -194,6 +194,8 @@
     <string name="play_history">Play History</string>
     <string name="performance_bechmark">Benchmark</string>
     <string name="asr_settings">ASR Setting</string>
+    <string name="llm_settings">LLM Setting</string>
+    <string name="hexagon_settings">Hexagon Setting</string>
     <string name="video_scan">Video Scan</string>
     <string name="general_question">Help</string>
     <string name="skin_nighttime">Night Mode</string>

@@ -4,21 +4,21 @@
 
     <PreferenceCategory android:title="@string/pref_title_general">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
-            android:entries="@@array/pref_entries_asrmode"
-            android:entryValues="@array/pref_entry_values_asrmode"
-            android:key="@string/pref_key_asrmode"
+            android:defaultValue="1"
+            android:entries="@@array/pref_entries_backend"
+            android:entryValues="@array/pref_entry_values_backend"
+            android:key="@string/pref_key_backend"
             android:persistent="true"
-            android:title="@string/pref_title_asrmode"
-            app:entrySummaries="@array/pref_entry_summaries_asrmode" />
+            android:title="@string/pref_title_backend"
+            app:entrySummaries="@array/pref_entry_summaries_backend" />
 
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
             android:defaultValue="3"
-            android:entries="@@array/pref_entries_asrthreadcounts"
-            android:entryValues="@array/pref_entry_values_asrthreadcounts"
-            android:key="@string/pref_key_asrthreadcounts"
+            android:entries="@@array/pref_entries_llmthreadcounts"
+            android:entryValues="@array/pref_entry_values_llmthreadcounts"
+            android:key="@string/pref_key_llmthreadcounts"
             android:persistent="true"
-            android:title="@string/pref_title_asrthreadcounts"
+            android:title="@string/pref_title_llmthreadcounts"
              />
 
         <!-- not implemented currently
@@ -33,24 +33,24 @@
         -->
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_title_asr">
+    <PreferenceCategory android:title="LLM Model">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
             android:defaultValue="0"
-            android:entries="@@array/pref_entries_asrmodel"
-            android:entryValues="@array/pref_entry_values_asrmodel"
-            android:key="@string/pref_key_asrmodel"
+            android:entries="@@array/pref_entries_llmmodel"
+            android:entryValues="@array/pref_entry_values_llmmodel"
+            android:key="@string/pref_key_llmmodel"
             android:persistent="true"
-            android:title="@string/pref_title_asrmodel"
-            app:entrySummaries="@array/pref_entry_summaries_asrmodel" />
+            android:title="@string/pref_title_llmmodel"
+            app:entrySummaries="@array/pref_entry_summaries_llmmodel" />
 
 
         <CheckBoxPreference
             android:defaultValue="true"
             android:enabled="true"
-            android:key="@string/pref_key_downloadASRmodel"
+            android:key="@string/pref_key_downloadLLMmodel"
             android:persistent="true"
-            android:summary="Download GGML model"
-            android:title="Download GGML model"
+            android:summary="@string/pref_summary_downloadLLMmodel"
+            android:title="@string/pref_title_downloadLLMmodel"
             android:widgetLayout="@layout/my_checkbox" />
     </PreferenceCategory>
 

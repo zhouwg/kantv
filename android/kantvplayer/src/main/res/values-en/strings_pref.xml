@@ -127,9 +127,10 @@
         <item>7</item>
     </string-array>
 
-    <string name="pref_key_ggmlmodel">pref.ggmlmodel</string>
-    <string name="pref_title_ggmlmodel">Choose GGML model</string>
-    <string-array name="pref_entries_ggmlmodel">
+    <string name="pref_title_asr">ASR</string>
+    <string name="pref_key_asrmodel">pref.asrmodel</string>
+    <string name="pref_title_asrmodel">Choose ASR model</string>
+    <string-array name="pref_entries_asrmodel">
         <item>tiny</item>
         <item>tiny.en</item>
         <item>tiny.en-q5_1</item>
@@ -147,7 +148,7 @@
         <item>medium.en-q5_0</item>
         <item>large</item>
     </string-array>
-    <string-array name="pref_entry_values_ggmlmodel">
+    <string-array name="pref_entry_values_asrmodel">
         <item>0</item>
         <item>1</item>
         <item>2</item>
@@ -165,7 +166,7 @@
         <item>14</item>
         <item>15</item>
     </string-array>
-    <string-array name="pref_entry_summaries_ggmlmodel">
+    <string-array name="pref_entry_summaries_asrmodel">
             <item>tiny</item>
             <item>tiny.en</item>
             <item>tiny.en-q5_1</item>
@@ -415,15 +416,9 @@
     <string name="pref_title_exitapp">Exit app </string>
     <string name="pref_summary_exitapp">click to exit app</string>
 
-    <string name="pref_title_ASRmodel"></string>
     <string name="pref_key_downloadASRmodel">pref.downloadASRmodel</string>
     <string name="pref_title_downloadASRmodel">Download ASR model</string>
     <string name="pref_summary_downloadASRmodel">Download ASR model</string>
-
-    <string name="pref_title_GGMLmodel"></string>
-    <string name="pref_key_downloadGGMLmodel">pref.downloadGGMLmodel</string>
-    <string name="pref_title_downloadGGMLmodel">Download GGML model</string>
-    <string name="pref_summary_downloadGGMLmodel">Download GGML model</string>
 
     <string name="pref_title_TTSmodel"></string>
     <string name="pref_key_downloadTTSmodel">pref.downloadTTSmodel</string>
@@ -515,6 +510,77 @@
     <string name="pref_title_record_thresholddisksize">threshold disk size</string>
     <string name="pref_summary_record_thresholddisksize" translatable="false">click to setting threshold disk size(Mbytes)</string>
 
+    <string name="pref_key_backend">pref.backend</string>
+    <string name="pref_title_backend">Choose Backend</string>
+    <string-array name="pref_entries_backend">
+        <item>Hexagon cDSP</item>
+        <item>Default ggml</item>
+    </string-array>
+    <string-array name="pref_entry_values_backend">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_backend">
+        <item>offload GGML OP to cDSP directly</item>
+        <item>default ggml backend</item>
+    </string-array>
+
+    <string name="pref_key_llmthreadcounts">pref.llmthreadcounts</string>
+    <string name="pref_title_llmthreadcounts">Choose LLM thread counts</string>
+    <string-array name="pref_entries_llmthreadcounts">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+    </string-array>
+    <string-array name="pref_entry_values_llmthreadcounts">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
+
+    <string name="pref_title_llm">LLM</string>
+    <string name="pref_key_llmmodel">pref.llmmodel</string>
+    <string name="pref_title_llmmodel">Choose LLM model</string>
+    <string-array name="pref_entries_llmmodel">
+        <item>Qwen1.5-1.8B</item>
+        <item>Qwen2.5-3B</item>
+        <item>Qwen3-4B</item>
+        <item>Qwen3-8B</item>
+        <item>Gemma3-4B</item>
+        <item>Gemma3-12B</item>
+    </string-array>
+    <string-array name="pref_entry_values_llmmodel">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_llmmodel">
+        <item>Qwen1.5-1.8B</item>
+        <item>Qwen2.5-3B</item>
+        <item>Qwen3-4B</item>
+        <item>Qwen3-8B</item>
+        <item>Gemma3-4B</item>
+        <item>Gemma3-12B</item>
+    </string-array>
+
+    <string name="pref_title_LLMmodel"></string>
+    <string name="pref_key_downloadLLMmodel">pref.downloadLLMmodel</string>
+    <string name="pref_title_downloadLLMmodel">Download LLM model</string>
+    <string name="pref_summary_downloadLLMmodel">Download LLM model</string>
 
     <string name="pref_key_last_directory"></string>
 

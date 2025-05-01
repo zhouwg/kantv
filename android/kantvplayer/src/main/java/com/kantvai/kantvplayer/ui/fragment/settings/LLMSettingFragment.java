@@ -44,12 +44,13 @@
 
  import java.io.File;
 
+ import kantvai.media.player.KANTVLLMModelMgr;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
 
- public class ASRSettingFragment extends BaseSettingsFragment {
-     private static final String TAG = ASRSettingFragment.class.getName();
+ public class LLMSettingFragment extends BaseSettingsFragment {
+     private static final String TAG = LLMSettingFragment.class.getName();
      private static ShellActivity mActivity;
      private Context mContext;
      private Context mAppContext;
@@ -59,7 +60,7 @@
 
      @Override
      public String getTitle() {
-         return mActivity.getBaseContext().getString(R.string.asr_settings);
+         return mActivity.getBaseContext().getString(R.string.llm_settings);
      }
 
      @Override
@@ -76,30 +77,20 @@
          mContext = mActivity.getBaseContext();
          mSettings.updateUILang(mActivity);
 
-         addPreferencesFromResource(R.xml.settings_asr);
+         addPreferencesFromResource(R.xml.settings_llm);
          mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
 
-         KANTVLog.j(TAG, "dev mode:" + mSettings.getDevMode());
-         //NPU or dedicated hardware AI engine in Android device not supported currently
-         if (!mSettings.getDevMode()) {
-             if (findPreference("pref.voiceapi") != null) {
-                 findPreference("pref.voiceapi").setEnabled(true);
+         KANTVLog.g(TAG, "getHexagonEnabled:" + mSettings.getHexagonEnabled());
+         if (!mSettings.getHexagonEnabled()) {
+             if (findPreference("pref.backend") != null) {
+                 findPreference("pref.backend").setEnabled(false);
              }
          }
-
-
      }
 
      @Override
      public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
          super.onViewCreated(view, savedInstanceState);
-
-         if (findPreference("pref.voiceapi") != null) {
-             findPreference("pref.voiceapi").setOnPreferenceClickListener(preference -> {
-                 KANTVUtils.showMsgBox(mActivity, "This feature not implemented currently");
-                 return false;
-             });
-         }
      }
 
 
@@ -124,19 +115,19 @@
      private SharedPreferences.OnSharedPreferenceChangeListener mSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
          @Override
          public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-             KANTVLog.j(TAG, "key : " + key);
+             KANTVLog.g(TAG, "key : " + key);
              if (
-                 (key.contains("pref.asrmode"))
-                 || (key.contains("pref.asrthreadcounts"))
-                 || (key.contains("pref.asrmodel"))
+                 (key.contains("pref.backend"))
+                 || (key.contains("pref.llmthreadcounts"))
+                 || (key.contains("pref.llmmodel"))
              ) {
-                 KANTVLog.j(TAG, "asrmode: " + mSettings.getASRMode());
-                 KANTVLog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts());
-                 KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
-                 KANTVLog.j(TAG, "ASR model name: " + KANTVUtils.getASRModelString(mSettings.getASRModel()));
-                 String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
-                 KANTVLog.j(TAG, "modelPath:" + modelPath);
-                 KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
+                 KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
+                 KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
+                 KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
+                 KANTVLog.g(TAG, "LLM model name: " + KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel()));
+                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel());
+                 KANTVLog.g(TAG, "modelPath:" + modelPath);
+                 //KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
              }
          }
      };
@@ -145,42 +136,47 @@
      @Override
      public boolean onPreferenceTreeClick(Preference preference) {
          String key = preference.getKey();
-         KANTVLog.j(TAG, "key : " + key);
+         KANTVLog.g(TAG, "key : " + key);
          if (preference instanceof CheckBoxPreference) {
              KANTVLog.d(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getBoolean(key, false));
          }
 
-
-         //focus on GGML's model
-         if (key.contains("pref.downloadASRmodel")) {
-             KANTVLog.j(TAG, "download ASR model");
+         if (key.contains("pref.downloadLLMmodel")) {
+             KANTVLog.j(TAG, "download LLM model");
              WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
              attributes.screenBrightness = 1.0f;
              mActivity.getWindow().setAttributes(attributes);
              mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-             String asrAudioFileName = KANTVUtils.getDataPath() + "jfk.wav";
-             //String asrModelFileName = KANTVUtils.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin";
-             String userChooseModelName = KANTVUtils.getASRModelString(mSettings.getASRModel());
-             KANTVLog.g(TAG, "ASR model name of user choose:" + userChooseModelName);
-             String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
-             File asrAudioFile = new File(asrAudioFileName);
-             File asrModelFile = new File(KANTVUtils.getDataPath() + userChooseModelFileName);
-             KANTVLog.g(TAG, "asrAudioFile:" + asrAudioFile.getAbsolutePath());
-             KANTVLog.g(TAG, "asrModeFile:" + asrModelFile.getAbsolutePath());
-             if (
-                     (asrAudioFile == null) || (!asrAudioFile.exists())
-                             || (asrModelFile == null) || (!asrModelFile.exists())
-             ) {
+             String userChooseModelName = KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel());
+             KANTVLog.g(TAG, "LLM model name of user choose:" + userChooseModelName);
+             File llmModelFile = new File(KANTVUtils.getSDCardDataPath() + userChooseModelName);
+             KANTVLog.g(TAG, "llmModeFile:" + llmModelFile.getAbsolutePath());
+
+             //TODO:add support download other LLM models
+             if (mSettings.getLLMModel() != KANTVLLMModelMgr.getInstance().getDefaultModelIndex()) {
+                 KANTVUtils.showMsgBox(mActivity, "currently only support download Gemma3-4B:model size 4.13 GiB, mmproj size 851 MiB");
+                 return true;
+             }
+             KANTVLog.g(TAG, "model url:" +  KANTVLLMModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
+             KANTVLog.g(TAG, "mmproj url:"+  KANTVLLMModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
+
+             if (llmModelFile.exists()) {
+                 KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelName);
+                 //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
+                 KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelName);
+                 return true;
+             }
+
+             if ((llmModelFile == null) || (!llmModelFile.exists())) {
                  DownloadModel manager = new DownloadModel(mActivity);
-                 manager.setTitle("begin download ASR model and sample");
-                 manager.setModelName("ASR");
-                 manager.setModelName("GGML", "jfk.wav", userChooseModelFileName);
+                 manager.setTitle("begin download LLM model");
+                 manager.setModelName("LLM");
+                 manager.setLLMModelName("GGML",  userChooseModelName,
+                         KANTVLLMModelMgr.getInstance().getMMProjName(mSettings.getLLMModel()),
+                         KANTVLLMModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
+                         KANTVLLMModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
                  manager.showUpdateDialog();
-             } else {
-                 KANTVLog.j(TAG, "ASR model file already exist: " + KANTVUtils.getDataPath() + userChooseModelFileName);
-                 //Toast.makeText(mContext, "ASR model file already exist: " + KANTVUtils.getDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
-                 KANTVUtils.showMsgBox(mActivity, "ASR model file already exist: " + KANTVUtils.getDataPath() + userChooseModelFileName);
              }
          }
 

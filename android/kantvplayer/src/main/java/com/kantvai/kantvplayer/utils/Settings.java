@@ -88,8 +88,8 @@ public class Settings {
     }
 
 
-    public int getGGMLMode() {
-        String key = mAppContext.getString(R.string.pref_key_ggmlmodel);
+    public int getASRModel() {
+        String key = mAppContext.getString(R.string.pref_key_asrmodel);
         String value = mSharedPreferences.getString(key, "3"); //tiny.en-q8_0
         try {
             return Integer.valueOf(value).intValue();
@@ -448,4 +448,42 @@ public class Settings {
         String key = "auto_load_local_subtitle";
         return mSharedPreferences.getBoolean(key, true);
     }
+
+    public int getLLMbackend() {
+        String key = mAppContext.getString(R.string.pref_key_backend);
+        String value = mSharedPreferences.getString(key, "1"); //actual backend is 1 + 3 = 4
+        try {
+            return Integer.valueOf(value).intValue() + 3; //skip QNN-CPU,QNN-GPU,QNN-NPU
+        } catch (NumberFormatException e) {
+            KANTVLog.j(TAG, "exception occurred");
+            return 4;
+        }
+    }
+
+    public int getLLMThreadCounts() {
+        String key = mAppContext.getString(R.string.pref_key_llmthreadcounts);
+        String value = mSharedPreferences.getString(key, "3"); // actual thread counts is 3 + 1 = 4
+        try {
+            return Integer.valueOf(value).intValue() + 1;
+        } catch (NumberFormatException e) {
+            KANTVLog.j(TAG, "exception occurred");
+            return 4;
+        }
+    }
+
+    public int getLLMModel() {
+        String key = mAppContext.getString(R.string.pref_key_llmmodel);
+        String value = mSharedPreferences.getString(key, "4"); //Gemma3-4B
+        try {
+            return Integer.valueOf(value).intValue();
+        } catch (NumberFormatException e) {
+            KANTVLog.j(TAG, "exception occurred");
+            return 4;
+        }
+    }
+
+    public boolean getHexagonEnabled() {
+        return true;
+    }
+
 }

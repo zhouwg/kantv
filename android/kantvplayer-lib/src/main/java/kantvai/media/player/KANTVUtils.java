@@ -4101,8 +4101,8 @@
      }
 
 
-     public static String getGGMLModeString(int ggmlModeType) {
-         switch (ggmlModeType) {
+     public static String getASRModelString(int asrModelType) {
+         switch (asrModelType) {
              case 0:
                  return "tiny";
              case 1:
@@ -4142,12 +4142,12 @@
      }
 
 
-     public int getASRMode() {
+     public static int getASRMode() {
          return mASRMode;
      }
 
 
-     public String getASRModeString( int asrMode) {
+     public static String getASRModeString( int asrMode) {
          switch (asrMode) {
              case ASR_MODE_NORMAL:
                  return "ASR_MODE_NORMAL";

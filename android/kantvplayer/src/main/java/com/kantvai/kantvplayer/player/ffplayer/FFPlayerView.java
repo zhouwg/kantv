@@ -1551,7 +1551,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         //String ggmlModelFileName = "ggml-tiny-q5_1.bin";      // 31M
         //String ggmlModelFileName = "ggml-tiny.en-q5_1.bin";   // 31M
         String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     // 42M, very good, about 500-700 ms
-        String userChooseModelName = KANTVUtils.getGGMLModeString(mSettings.getGGMLMode());
+        String userChooseModelName = KANTVUtils.getASRModelString(mSettings.getASRModel());
         String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
         KANTVLog.j(TAG, "ggml model name of user's choose:" + userChooseModelFileName);
 
@@ -1580,6 +1580,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
 
         if (KANTVUtils.getASRSubsystemInit()) {
             int result = 0;
+            KANTVLog.j(TAG, "asr mode string: " + KANTVUtils.getASRModeString(mSettings.getASRMode()));
             if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
                 result = ggmljava.asr_reset(KANTVUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {

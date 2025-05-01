@@ -84,6 +84,7 @@
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVAssetLoader;
  import kantvai.media.player.KANTVLLMModel;
+ import kantvai.media.player.KANTVLLMModelMgr;
  import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
@@ -161,10 +162,6 @@
      private String ggmlMNISTImageFile = "mnist-5.png";
      private String ggmlMNISTModelFile = "mnist-ggml-model-f32.gguf";
 
-     //https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main
-     //default LLM model
-     private String LLMModelFileName = "gemma-3-4b-it-Q8_0.gguf"; //4.1 GiB
-
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
      private Context mContext;
      private Activity mActivity;
@@ -174,36 +171,12 @@
      private int selectModelIndex = 4; //index of selected LLM model, default index is 4 (gemma-3-4b)
      private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model  and LLM model)
 
+     private KANTVLLMModelMgr LLMModelMgr = KANTVLLMModelMgr.getInstance();
 
      //=============================================================================================
-     //AI experts can add other LLM models at here accordingly
-     private final int LLM_MODEL_MAXCOUNTS    = 8;
-     private KANTVLLMModel[] LLMModels        = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private String[]        arrayModelName   = new String[LLM_MODEL_MAXCOUNTS + 1];
+     private String[]        arrayModelName;
      private void initLLMModels() {
-         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         LLMModels[0] = new KANTVLLMModel(0, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
-         LLMModels[1] = new KANTVLLMModel(1, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
-         LLMModels[2] = new KANTVLLMModel(2, "Qwen3-4B","Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
-         LLMModels[3] = new KANTVLLMModel(3, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
-         LLMModels[4] = new KANTVLLMModel(4, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf","mmproj-gemma3-4b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main", "good");
-         LLMModels[5] = new KANTVLLMModel(5, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/tree/main", "good");
-         LLMModels[6] = new KANTVLLMModel(6, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
-         LLMModels[7] = new KANTVLLMModel(7, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
-
-
-         arrayModelName[0] = "ggml-tiny.en-q8_0.bin"; //the built-in and default ASR model, size is 42 MiB
-         for (int i = 1; i <= LLM_MODEL_MAXCOUNTS; i++) {
-             arrayModelName[i] = LLMModels[i - 1].getNickname();
-         }
-         LLMModels[0].setQuality("not bad and fast");
-         LLMModels[1].setQuality("good");
-         LLMModels[2].setQuality("not bad");
-         LLMModels[3].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
-         LLMModels[4].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I
-         LLMModels[5].setQuality("slow and good");
-         LLMModels[6].setQuality("bad"); //inference speed is fast but the answer is wrong
-         LLMModels[7].setQuality("not bad"); //the answer is not concise
+         arrayModelName = LLMModelMgr.getArrayModelName();
      }
      //=============================================================================================
 
@@ -260,7 +233,7 @@
          }
 
          KANTVLog.j(TAG, "set ggml's whisper.cpp info");
-         setTextGGMLInfo(LLMModels[selectModelIndex].getName());
+         setTextGGMLInfo(LLMModelMgr.getName(selectModelIndex));
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
          String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
@@ -420,7 +393,7 @@
                          //selectModeFileName = "ggml-" + strModeName + ".bin";
                          selectModeFileName = strModeName;
                      } else {
-                         selectModeFileName = LLMModels[selectModelIndex].getName();
+                         selectModeFileName = LLMModelMgr.getName(selectModelIndex);
                      }
 
                      isLLMModel = true;
@@ -447,11 +420,12 @@
                  if ((pathSelectedImage != null) && (!pathSelectedImage.isEmpty())) {
                      if (selectModeFileName.contains("gemma-3")) {
                          isLLMVModel = true;
-                         File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getMMProjName());
+                         File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + LLMModelMgr.getMMProjName(selectModelIndex));
                          if (!mmprModelFile.exists()) {
                              KANTVUtils.showMsgBox(mActivity, "LLM mmproj model file:" +
-                                     LLMModels[selectModelIndex].getMMProjName() +
-                                     " not exist, pls download from: " + LLMModels[selectModelIndex].getUrl());
+                                     LLMModelMgr.getMMProjName(selectModelIndex) +
+                                     " not exist, pls download from: "
+                                     + LLMModelMgr.getMMProjUrl(selectModelIndex) + " in LLM Setting");
                              return;
                          }
                      }
@@ -501,7 +475,8 @@
                  } else {
                      if (!selectModeFile.exists()) {
                          KANTVUtils.showMsgBox(mActivity, "LLM model file:" +
-                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: " + LLMModels[selectModelIndex].getUrl());
+                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: "
+                                 + LLMModelMgr.getModelUrl(selectModelIndex) + " in LLM Setting");
                          return;
                      }
                  }
@@ -524,8 +499,8 @@
              if (isASRModel) { //avoid crash
                  int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVUtils.ASR_MODE_BECHMARK, backendIndex);
                  if (0 != result) {
-                     KANTVLog.j(TAG, "failed to initialize ASR");
-                     KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR");
+                     KANTVLog.j(TAG, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
+                     KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
                      return;
                  }
              }
@@ -562,8 +537,8 @@
                              //LLM multimodal inference
                              KANTVLog.g(TAG, "LLMV model, image path:" + pathSelectedImage);
                              strBenchmarkInfo = ggmljava.llava_inference(
-                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getName(),
-                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getMMProjName(),
+                                     KANTVUtils.getSDCardDataPath() + LLMModelMgr.getName(selectModelIndex),
+                                     KANTVUtils.getSDCardDataPath() + LLMModelMgr.getMMProjName(selectModelIndex),
                                      pathSelectedImage,
                                      "What is in the image?",
                                      2,
@@ -571,7 +546,7 @@
                          } else {
                              //general LLM inference
                              strBenchmarkInfo = ggmljava.llm_inference(
-                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getName(),
+                                     KANTVUtils.getSDCardDataPath() + LLMModelMgr.getName(selectModelIndex),
                                      strUserInput,
                                      1,
                                      nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
