@@ -193,3 +193,7 @@ cd kantv
 #### How to enable debug build
 
 Modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/build.gradle#L17">kantvplayer/build.gradle</a> accordingly
+
+#### How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC
+
+modify [ggml/CMakeLists.txt#L12](https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L12) accordingly.
