@@ -856,7 +856,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_LLM:
-            llama_inference_ng(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type, n_accel_type);
+            llama_inference(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type, n_accel_type);
             break;
 
         default:

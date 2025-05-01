@@ -99,15 +99,15 @@
             android:orientation="vertical"></LinearLayout>
 
         <LinearLayout
-            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/llmInfo"
+                android:layout_marginLeft="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="1000dp"
+                android:layout_height="3000dp"
                 android:fadeScrollbars="false"
                 android:scrollIndicators="right"
                 android:scrollbarFadeDuration="0"

@@ -30,14 +30,13 @@
 
 #include "llamacpp/ggml/include/ggml-hexagon.h"
 
-#define UNUSED(x)       (void)(x)
 
 JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1get_1systeminfo(JNIEnv * env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
-    const char *sysinfo = whisper_print_system_info();
+    const char * sysinfo = whisper_print_system_info();
     jstring string = (*env)->NewStringUTF(env, sysinfo);
     LOGGD("leave getSystemInfo");
 
@@ -46,8 +45,7 @@ Java_kantvai_ai_ggmljava_asr_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
-                                                    jint b_exit_benchmark) {
+Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv * env, jclass clazz, jint b_exit_benchmark) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -56,14 +54,14 @@ Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv *env, jclass clazz,
 
 
 JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_path,
+Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_path,
                                        jstring user_data, jint bench_type, jint num_threads, jint backend_type, jint accel_type) {
     UNUSED(clazz);
 
-    const char *sz_model_path = NULL;
-    const char *sz_user_data = NULL;
-    const char *sz_bench_result = "unknown";
-    const char *bench_result = NULL;
+    const char * sz_model_path = NULL;
+    const char * sz_user_data = NULL;
+    const char * sz_bench_result = "unknown";
+    const char * bench_result = NULL;
 
     sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
     if (NULL == sz_model_path) {
@@ -93,13 +91,6 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv *env, jclass clazz, jstring model_pa
     if (backend_type > HEXAGON_BACKEND_GGML) {
         LOGGW("pls check backend type\n");
         goto failure;
-    }
-
-    //FIXME: cDSP doesn't works with whisper.cpp at the moment
-    if ((GGML_BENCHMARK_ASR == bench_type) && (HEXAGON_BACKEND_CDSP == backend_type)) {
-        LOGGW("whisper.cpp through cDSP not supported currently");
-        //GGML_JNI_NOTIFY("whisper.cpp through cDSP not supported currently");
-        //goto failure;
     }
 
 #if !defined GGML_USE_HEXAGON
@@ -135,7 +126,7 @@ failure:
 
 
 JNIEXPORT jint JNICALL
-Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv * env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -144,11 +135,11 @@ Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jint JNICALL
-Java_kantvai_ai_ggmljava_asr_1init(JNIEnv *env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
+Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
     int result  = 0;
-    const char *sz_model_path = NULL;
+    const char * sz_model_path = NULL;
 
     sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
     if (NULL == sz_model_path) {
@@ -174,7 +165,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv * env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -182,12 +173,12 @@ Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT jint JNICALL
-Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv *env, jclass clazz, jstring str_model_path,
+Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv * env, jclass clazz, jstring str_model_path,
                                                jint n_thread_counts, jint n_asrmode, jint n_backend) {
     UNUSED(clazz);
 
     int result  = 0;
-    const char *sz_model_path = NULL;
+    const char * sz_model_path = NULL;
 
     sz_model_path = (*env)->GetStringUTFChars(env, str_model_path, NULL);
     if (NULL == sz_model_path) {
@@ -213,7 +204,7 @@ failure:
 
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1start(JNIEnv * env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -221,7 +212,7 @@ Java_kantvai_ai_ggmljava_asr_1start(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_asr_1stop(JNIEnv * env, jclass clazz) {
     UNUSED(env);
     UNUSED(clazz);
 
@@ -230,11 +221,11 @@ Java_kantvai_ai_ggmljava_asr_1stop(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv * env, jclass clazz) {
     UNUSED(env);
 
     LOGGD("enter getSystemInfo");
-    const char *sysinfo = llama_print_system_info();
+    const char * sysinfo = llama_print_system_info();
     jstring string = (*env)->NewStringUTF(env, sysinfo);
     LOGGD("leave getSystemInfo");
 
@@ -243,15 +234,14 @@ Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT jstring  JNICALL
-Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model_path, jstring prompt,
+Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring model_path, jstring prompt,
                                                jint n_llm_type, jint n_thread_counts, jint n_backend, jint n_hwaccel_type) {
     UNUSED(clazz);
 
-    const char *sz_model_path = NULL;
-    const char *sz_prompt = NULL;
-    const char *sz_bench_result = "unknown";
-    const char *bench_result = NULL;
-    int result = 0;
+    const char * sz_model_path   = NULL;
+    const char * sz_prompt       = NULL;
+    const char * sz_bench_result = "unknown";
+    int result                   = 0;
 
     sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
     if (NULL == sz_model_path) {
@@ -283,7 +273,7 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv *env, jclass clazz, jstring model
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llama_inference_ng(sz_model_path, sz_prompt, n_llm_type, n_thread_counts, n_backend, n_hwaccel_type);
+    result = llama_inference(sz_model_path, sz_prompt, n_llm_type, n_thread_counts, n_backend, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != LLM_INFERENCE_INTERRUPTED) {
@@ -308,14 +298,10 @@ failure:
 
 void  ggml_jni_notify_c_impl(const char * format,  ...) {
     static unsigned char s_ggml_jni_buf[JNI_BUF_LEN];
-
-    va_list va;
     int len_content = 0;
-
+    va_list va;
     memset(s_ggml_jni_buf, 0, JNI_BUF_LEN);
-
     va_start(va, format);
-
     len_content = vsnprintf(s_ggml_jni_buf, JNI_BUF_LEN, format, va);
     snprintf(s_ggml_jni_buf + len_content, JNI_BUF_LEN - len_content, "\n");
     va_end(va);
@@ -324,12 +310,12 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 }
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_llm_1stop_1inference(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_llm_1stop_1inference(JNIEnv * env, jclass clazz) {
     llama_reset_running_state();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv * env, jclass clazz) {
     if (1 == llama_is_running_state()) {
         return JNI_TRUE;
     } else {
@@ -338,16 +324,15 @@ Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv *env, jclass clazz) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv *env, jclass clazz, jstring model_path,
+Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring model_path,
                                           jstring mmproj_model_path, jstring img_path,
                                           jstring prompt, jint n_llmtype, jint n_thread_counts,
                                           jint n_backend_type, jint n_hwaccel_type) {
-    const char *sz_model_path = NULL;
-    const char *sz_mmproj_path = NULL;
-    const char *sz_img_path = NULL;
-    const char *sz_prompt = NULL;
-    const char *sz_bench_result = "unknown";
-    const char *bench_result = NULL;
+    const char * sz_model_path   = NULL;
+    const char * sz_mmproj_path  = NULL;
+    const char * sz_img_path     = NULL;
+    const char * sz_prompt       = NULL;
+    const char * sz_bench_result = "unknown";
     int result = 0;
 
     sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
@@ -403,7 +388,7 @@ Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv *env, jclass clazz, jstring mod
         }
     }
 
-    failure:
+failure:
     if (NULL != sz_prompt) {
         (*env)->ReleaseStringUTFChars(env, prompt, sz_prompt);
     }

@@ -7433,7 +7433,7 @@ int llama_is_running_state() {
     return g_ggmljni_llm_is_running.load();
 }
 
-int llama_inference_ng(const char *sz_model_path, const char *sz_user_data, int llm_type,
+int llama_inference(const char * sz_model_path, const char * sz_user_data, int llm_type,
                        int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);

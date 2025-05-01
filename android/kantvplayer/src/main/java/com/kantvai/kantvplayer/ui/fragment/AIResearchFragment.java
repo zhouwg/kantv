@@ -101,15 +101,20 @@
      private static final String TAG = AIResearchFragment.class.getName();
      TextView _txtASRInfo;
      TextView _txtGGMLInfo;
-
      EditText _txtUserInput;
      ImageView _ivInfo;
      LinearLayout _llInfoLayout;
-
      Button _btnBenchmark;
      Button _btnStop;
-
      Button _btnSelectImage;
+
+     Spinner spinnerBackendType = null;
+     Spinner spinnerAccelType = null;
+     Spinner spinnerModelName = null;
+
+     ArrayAdapter<String> adapterGGMLBackendType = null;
+     ArrayAdapter<String> adapterGGMLAccelType = null;
+
      private static final int SELECT_IMAGE = 1;
 
      private int nThreadCounts = 1;
@@ -130,16 +135,8 @@
      private int accelIndex = ggmljava.HEXAGON_BACKEND_CDSP;
 
      private String selectModeFileName = "";
-
      private Bitmap bitmapSelectedImage = null;
      private String pathSelectedImage = "";
-
-     ArrayAdapter<String> adapterGGMLBackendType = null;
-     ArrayAdapter<String> adapterGGMLAccelType = null;
-
-     Spinner spinnerBackendType = null;
-     Spinner spinnerAccelType = null;
-     Spinner spinnerModelName = null;
 
      private long beginTime = 0;
      private long endTime = 0;
@@ -159,31 +156,57 @@
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
 
-     private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";//42M, ggml-tiny.en-q8_0.bin is preferred
+     private String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";
      private String ggmlSampleFileName = "jfk.wav";
      private String ggmlMNISTImageFile = "mnist-5.png";
      private String ggmlMNISTModelFile = "mnist-ggml-model-f32.gguf";
 
-     private String ggmlMiniCPMVModelFile = "ggml-model-Q4_K_M.gguf";
-
      //https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main
      //default LLM model
      private String LLMModelFileName = "gemma-3-4b-it-Q8_0.gguf"; //4.1 GiB
-     private String LLMMMprjModelFilePath = "/sdcard/mmproj-model-f16.gguf";
-
-     private final int LLM_MODEL_MAXCOUNTS = 7;
-     private KANTVLLMModel[] LLMModels = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
-     private int selectModelIndex = 4; //index of selected LLM model, default is gemma-3-4b
-     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model  and LLM model)
 
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
-
      private Context mContext;
      private Activity mActivity;
      private Settings mSettings;
-
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
+     private int selectModelIndex = 4; //index of selected LLM model, default is gemma-3-4b
+     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model  and LLM model)
+
+
+     //=============================================================================================
+     //AI experts can add other LLM models at here accordingly
+     private final int LLM_MODEL_MAXCOUNTS    = 8;
+     private KANTVLLMModel[] LLMModels        = new KANTVLLMModel[LLM_MODEL_MAXCOUNTS];
+     private String[]        arrayModelName   = new String[LLM_MODEL_MAXCOUNTS + 1];
+     private void initLLMModels() {
+         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
+         LLMModels[0] = new KANTVLLMModel(0, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
+         LLMModels[1] = new KANTVLLMModel(1, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
+         LLMModels[2] = new KANTVLLMModel(2, "Qwen3-4B","Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+         LLMModels[3] = new KANTVLLMModel(3, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
+         LLMModels[4] = new KANTVLLMModel(4, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf","mmproj-gemma3-4b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main", "good");
+         LLMModels[5] = new KANTVLLMModel(5, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf", "https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/tree/main", "good");
+         LLMModels[6] = new KANTVLLMModel(6, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
+         LLMModels[7] = new KANTVLLMModel(7, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
+
+         LLMModelFileName = LLMModels[selectModelIndex].getName();
+         arrayModelName[0] = "ggml-tiny.en-q8_0.bin"; //the built-in and default ASR model, size is 42 MiB
+         for (int i = 1; i <= LLM_MODEL_MAXCOUNTS; i++) {
+             arrayModelName[i] = LLMModels[i - 1].getNickname();
+         }
+         LLMModels[0].setQuality("not bad and fast");
+         LLMModels[1].setQuality("good");
+         LLMModels[2].setQuality("not bad");
+         LLMModels[3].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
+         LLMModels[4].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I
+         LLMModels[5].setQuality("good");
+         LLMModels[6].setQuality("bad"); //inference speed is fast but the answer is wrong
+         LLMModels[7].setQuality("not bad"); //the answer is not concise
+     }
+     //=============================================================================================
+
 
      public static AIResearchFragment newInstance() {
          return new AIResearchFragment();
@@ -341,7 +364,8 @@
          */
 
          spinnerModelName = mActivity.findViewById(R.id.spinnerModelName);
-         String[] arrayModelName = getResources().getStringArray(R.array.newModelName);
+         //replace with code-generated array
+         //String[] arrayModelName = getResources().getStringArray(R.array.newModelName);
          ArrayAdapter<String> adapterModel = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayModelName);
          spinnerModelName.setAdapter(adapterModel);
          spinnerModelName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -379,7 +403,7 @@
          });
 
          _btnBenchmark.setOnClickListener(v -> {
-             KANTVLog.j(TAG, "strModeName:" + strModeName);
+             KANTVLog.j(TAG, "strModeName:" + arrayModelName[selectedUIIndex]);
              KANTVLog.g(TAG, "selectModeIndex:" + selectModelIndex);
              KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVUtils.getBenchmarkDesc(benchmarkIndex)
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
@@ -394,7 +418,8 @@
                      //attention here
                      if (selectModelIndex < 0) {
                          selectModelIndex = 0;
-                         selectModeFileName = "ggml-" + strModeName + ".bin";
+                         //selectModeFileName = "ggml-" + strModeName + ".bin";
+                         selectModeFileName = strModeName;
                      } else {
                          selectModeFileName = LLMModels[selectModelIndex].getName();
                      }
@@ -403,9 +428,10 @@
                      setTextGGMLInfo(selectModeFileName);
                  } else {
                      //https://huggingface.co/ggerganov/whisper.cpp
-                     selectModeFileName = "ggml-" + strModeName + ".bin";
-
+                     //selectModeFileName = "ggml-" + strModeName + ".bin";
+                     selectModeFileName = strModeName;
                  }
+                 KANTVLog.g(TAG, "selectModelIndex " + selectModelIndex);
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
                  if (isASRModel && (benchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
@@ -423,10 +449,11 @@
                  if ((pathSelectedImage != null) && (!pathSelectedImage.isEmpty())) {
                      if (selectModeFileName.contains("gemma-3")) {
                          isLLMVModel = true;
-                         File mmprModelFile = new File(LLMMMprjModelFilePath);
+                         File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getMMProjName());
                          if (!mmprModelFile.exists()) {
                              KANTVUtils.showMsgBox(mActivity, "LLM mmproj model file:" +
-                                     LLMMMprjModelFilePath + " not exist, pls download from: " + LLMModels[selectModelIndex].getUrl());
+                                     LLMModels[selectModelIndex].getMMProjName() +
+                                     " not exist, pls download from: " + LLMModels[selectModelIndex].getUrl());
                              return;
                          }
                      }
@@ -449,10 +476,10 @@
                  }
 
                  if (isASRModel) //ASR inference
-                     //built-in path /sdcard/kantv/
+                     //ASR inference: built-in ASR model which located in path /sdcard/kantv/
                      selectModelFilePath = KANTVUtils.getDataPath() + selectModeFileName;
-                 else { //LLM inference
-                     //sdcard
+                 else {
+                     //LLM inference: LLM model is located on /sdcard/ and manually uploaded by user currently
                      selectModelFilePath = KANTVUtils.getSDCardDataPath() + selectModeFileName;
                  }
 
@@ -537,8 +564,8 @@
                              //LLM multimodal inference
                              KANTVLog.g(TAG, "LLMV model, image path:" + pathSelectedImage);
                              strBenchmarkInfo = ggmljava.llava_inference(
-                                     ggmlModelFileName,
-                                     LLMMMprjModelFilePath,
+                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getName(),
+                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getMMProjName(),
                                      pathSelectedImage,
                                      "What is in the image?",
                                      2,
@@ -546,7 +573,7 @@
                          } else {
                              //general LLM inference
                              strBenchmarkInfo = ggmljava.llm_inference(
-                                     ggmlModelFileName,
+                                     KANTVUtils.getSDCardDataPath() + LLMModels[selectModelIndex].getName(),
                                      strUserInput,
                                      1,
                                      nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
@@ -1086,26 +1113,6 @@
          timestamp = fullDateFormat.format(date);
          _txtGGMLInfo.append("\n");
          _txtGGMLInfo.append("running timestamp:" + timestamp);
-     }
-
-     private void initLLMModels() {
-         //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         LLMModels[0] = new KANTVLLMModel(0, "qwen1_5-1_8b-chat-q4_0.gguf", "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
-         LLMModels[1] = new KANTVLLMModel(1, "qwen2.5-3b-instruct-q4_0.gguf", "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
-         LLMModels[2] = new KANTVLLMModel(2, "Qwen3-4B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
-         LLMModels[3] = new KANTVLLMModel(3, "Qwen3-8B-Q8_0.gguf", "https://huggingface.co/Qwen/Qwen3-8B");
-         LLMModels[4] = new KANTVLLMModel(4, "gemma-3-4b-it-Q8_0.gguf", "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main");
-         LLMModels[5] = new KANTVLLMModel(5, "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B");
-         LLMModels[6] = new KANTVLLMModel(6, "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf", "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main");
-         LLMModelFileName = LLMModels[selectModelIndex].getName();
-         int tmp = LLM_MODEL_MAXCOUNTS; // make IDE happy and modify value of LLM_MODEL_MAXCOUNTS more convenient
-         LLMModels[0].setQuality("not bad and fast");
-         LLMModels[1].setQuality("good");
-         LLMModels[2].setQuality("not bad");
-         LLMModels[3].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
-         LLMModels[4].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I want
-         LLMModels[5].setQuality("bad"); //inference speed is fast but the answer is wrong
-         LLMModels[6].setQuality("not bad"); //the answer is not concise
      }
 
      public static native int kantv_anti_remove_rename_this_file();
