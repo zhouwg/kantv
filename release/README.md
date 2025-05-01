@@ -273,3 +273,11 @@
                        <li>write <a href="https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html">Convert safetensors to GGUF</a></li>
                        <li>release v1.6.6</li>
                     </ul>
+- v1.6.7, 2025-05-01,
+                    <ul>
+                       <li>change project's license from Apache2.0 to MIT</li>
+                       <li>try Qwen3-4B, Qwen3-8B, DeepSeek-R1-Distill-Qwen-7B, Gemma3-4B, Gemma3-12B on Android phone</li>
+                       <li>[make DeepSeek-R1-Distill-Qwen-1.5B can works fine](https://github.com/kantv-ai/kantv/issues/287) on Android phone</li>
+                       <li>[multi-modal inference supportive through Gemma3](https://github.com/kantv-ai/kantv/pull/295) on Android phone</li>
+                       <li>refine and simplify UI code</li>
+                    </ul>
