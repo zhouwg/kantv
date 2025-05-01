@@ -32,12 +32,12 @@ In the all, generally speaking,
 
 ### Highlight
 
-As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> the first open-source implementation of ggml-hexagon backend in llama.cpp community </a> for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite).
+As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> the first open-source implementation of ggml-hexagon backend in llama.cpp community </a> for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite), [PR can be found at upstream llama.cpp community](https://github.com/ggml-org/llama.cpp/pull/12326).
 
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/7dad3d8d-f938-4294-a8e3-3f4103e68bfa)
+![Image](https://github.com/user-attachments/assets/b82eda42-7211-4781-a7e5-7edb5bf60ed1)
 
 
 ### Building the project
@@ -115,6 +115,7 @@ Report issue in various Android-based phone and <b>submit PR to this project is 
 
 - [About ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [How to build](./docs/build.md)
+- [How to troubleshooting](./docs/FAQ.md)
 - <b>[How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](./docs/how-to-customize.md)</b>
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
