@@ -37,8 +37,7 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/b82eda42-7211-4781-a7e5-7edb5bf60ed1)
-
+![kantv-arch-320-240](https://github.com/user-attachments/assets/48e18ace-b667-45f9-8e0f-9faf1427e6bf)
 
 ### Building the project
 
