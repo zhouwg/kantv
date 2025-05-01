@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV("Kan", aka English "watch") , an open source project focus on study and practise state-of-the-art device-AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcriptionand online-TV video&audio recording at the same time) on <b>ANY mainstream</b> Android phone/device:
+KanTV("Kan", aka English "watch") , an open source project focus on study and practise device-AI technology in <b>real scenario</b>(such as online-TV playback and <b>realtime transcription</b> through the amazing <b>whisper.cpp</b> and online-TV recording at the same time) on Android phone:
 
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(because that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. Developers or domain tech experts can set up [a customized playlist](./android/kantvplayer/src/main/assets/tv.xml) and then use this software to watch the content of the customized playlist for R&D activity.
@@ -32,7 +32,7 @@ In the all, generally speaking,
 
 ### Highlight
 
-As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> the first open-source implementation of ggml-hexagon backend in llama.cpp community </a> for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite), [PR can be found at upstream llama.cpp community](https://github.com/ggml-org/llama.cpp/pull/12326).
+As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon/discussions/18"> the first open-source implementation </a> of ggml-hexagon backend in llama.cpp community for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite), [PR can be found at](https://github.com/ggml-org/llama.cpp/pull/12326) upstream llama.cpp community.
 
 
 ### Software architecture of KanTV Android
@@ -46,7 +46,7 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
 - Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
 
 ### Run Android APK on Android phone
-- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm Snapdragon 8Gen3 and Snapdragon 8Elite are highly recommended) is <b>required</b> for verify/running ggml-hexagon backend on Android phone:
+- Android smartphone equipped with one of below Qualcomm mobile SoCs(<b>Qualcomm high-end mobile SoC</b> Snapdragon 8Gen3 and Snapdragon 8Elite are highly recommended) is <b>required</b> for verify/running ggml-hexagon backend on Android phone:
 ```
     Snapdragon 8 Gen 1
     Snapdragon 8 Gen 1+
@@ -54,7 +54,7 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
     Snapdragon 8 Gen 3
     Snapdragon 8 Elite
 ```
-- Android smartphone equipped with <b>ANY</b> mainstream high-end mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen
+- Android smartphone equipped with <b>ANY</b> mainstream <b>high-end</b> mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen
 
 ### Screenshots
 <hr>
