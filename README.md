@@ -43,35 +43,18 @@ As far as I/We know, probably be <a href="https://github.com/zhouwg/ggml-hexagon
 ### Building the project
 
 - Clone this repository and build locally, see [how to build](./docs/build.md)
-- How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC:modify [ggml/CMakeLists.txt#L12](./core/ggml/CMakeLists.txt#L12) accordingly.
 - Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
 
 ### Run Android APK on Android phone
-
-- Prepare LLM model
-```
-    wget https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf
-
-    adb push gemma-3-4b-it-Q8_0.gguf /sdcard/
-```
-
 - Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm Snapdragon 8Gen3 and Snapdragon 8Elite are highly recommended) is <b>required</b> for verify/running ggml-hexagon backend on Android phone:
-
+```
     Snapdragon 8 Gen 1
-
     Snapdragon 8 Gen 1+
-
     Snapdragon 8 Gen 2
-
     Snapdragon 8 Gen 3
-
     Snapdragon 8 Elite
-
+```
 - Android smartphone equipped with <b>ANY</b> mainstream high-end mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen
-
-- This project is a <b>pure AI learning&study</b> project, so the Android APK is a <b>green</b> Android APP and will <b>NOT</b> collect/upload user data in Android device, following minimum permissions are required:
-  - Access to storage is required for TV recording(write recording data to storage) and ASR/LLM inference(read/load models from storage)
-  - Access to device information is required to obtain phone's network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
 
 ### Screenshots
 <hr>
@@ -81,28 +64,35 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-here is a screenshot to demostrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
+a screenshot to demostrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
 
 
 ![1429485556](https://github.com/user-attachments/assets/84d9fed1-e250-4212-8eff-104f08110875)
 
 ----
-here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
+a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen3 mobile SoC  - <b>fully offline, on-device</b>.
 
 ![1351701335](https://github.com/user-attachments/assets/fc30d262-def2-4b77-973c-b71b33080535)
 
 
 ----
 
-here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
+a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
 
 ![705759462](https://github.com/user-attachments/assets/df1ed1ed-294e-4691-bbd1-b8a6f7ff6f8c)
+
+----
+a screenshot to demostrate download LLM model in APK.
+
+![Image](https://github.com/user-attachments/assets/b07f8560-9221-4136-b773-4b0874de294a)
+
 <details>
   <summary>some other screenshots</summary>
   <ol>
 
 ![Image](https://github.com/user-attachments/assets/2d95bd5e-bd02-4810-aa70-a81cc0469fcc)
 
+![Image](https://github.com/user-attachments/assets/025a8ff0-7584-4df2-97a5-f4e655a52e0f)
   </ol>
 </details>
 
