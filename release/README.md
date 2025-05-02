@@ -281,3 +281,10 @@
                        <li>[multi-modal inference supportive through Gemma3](https://github.com/kantv-ai/kantv/pull/295) on Android phone</li>
                        <li>refine and simplify UI code</li>
                     </ul>
+- v1.6.8, 2025-05-02,
+                    <ul>
+                       <li>add LLM setting</li>
+                       <li>add download LLM models in APK</li>
+                       <li>make tv.xml can be edited by APK's user(whom doesn't have tech background)</li>
+                       <li>refine and simplify toplevel README.md</li>
+                    </ul>
