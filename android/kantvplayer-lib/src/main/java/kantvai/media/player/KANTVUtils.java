@@ -570,7 +570,7 @@
                  is.setCharacterStream(new StringReader(xmlContent));
                  doc = db.parse(is);
              } catch (Exception e) {
-                 KANTVLog.d(TAG, "getDomElement failed:" + e.getMessage());
+                 KANTVLog.g(TAG, "getDomElement failed:" + e.getMessage());
                  e.printStackTrace();
              }
              return doc;
@@ -616,7 +616,7 @@
                  EPGXmlParser parser = new EPGXmlParser();
                  Document doc = parser.getDomElement(xml);
                  if (doc == null) {
-                     KANTVLog.d(TAG, "xml parse failed");
+                     KANTVLog.g(TAG, "xml parse failed");
                      return null;
                  }
                  NodeList nl = doc.getElementsByTagName("entry");
@@ -4232,6 +4232,26 @@
              }
          }
          return false;
+     }
+
+     public static byte[] loadContentFromFile(File file) {
+         long beginTime = 0;
+         long endTime = 0;
+         beginTime = System.currentTimeMillis();
+         try {
+             int fileLength = (int)file.length();
+             KANTVLog.j(TAG, "file len:" + fileLength);
+             byte[] fileContent = new byte[fileLength];
+             FileInputStream in = new FileInputStream(file);
+             in.read(fileContent);
+             in.close();
+             endTime = System.currentTimeMillis();
+             KANTVLog.g(TAG, "load content from file " + file.getAbsolutePath() + " cost " + (endTime - beginTime) + " milliseconds");
+             return fileContent;
+         } catch (Exception ex) {
+             KANTVLog.g(TAG, "failed to load content from file:" + file.getAbsolutePath() + "reason: " +  ex.toString());
+             return null;
+         }
      }
 
      public static native int kantv_anti_remove_rename_this_file();

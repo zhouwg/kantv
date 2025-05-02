@@ -208,6 +208,7 @@ public class IApplication extends Application {
         }
 
         //step-2
+        /* reduce permission requirement with APK, don't need to read Application List on phone
         Intent intent = new Intent(Intent.ACTION_MAIN, null);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         List<ResolveInfo> packageInfos = getPackageManager().queryIntentActivities(intent, 0);
@@ -224,15 +225,21 @@ public class IApplication extends Application {
         }
         String launcherName = packageInfos.get(indexKanTV).activityInfo.name;
         KANTVLog.d(TAG, "packageName: " + packageInfos.get(indexKanTV).activityInfo.packageName + " ,launcherActivityName: " + launcherName);
-
+        */
 
         //step-3: asset files
         KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
         mKANTVDRM.ANDROID_JNI_Init(mContext, KANTVUtils.getDataPath(mContext));
         mKANTVDRM.ANDROID_JNI_SetLocalEMS(KANTVUtils.getLocalEMS());
         KANTVAssetLoader.copyAssetFile(mContext, "config.json", KANTVAssetLoader.getDataPath(mContext) + "config.json");
-        KANTVAssetLoader.copyAssetFile(mContext, "ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
-        KANTVAssetLoader.copyAssetFile(mContext, "libggmlop-skel.so", KANTVAssetLoader.getDataPath(mContext) + "libggmlop-skel.so");
+
+        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/libggmlop-skel.so", KANTVAssetLoader.getDataPath(mContext) + "libggmlop-skel.so");
+        //copy asset files to /sdcard/kantv/, this file is needed for ASR benchmark
+        KANTVAssetLoader.copyAssetFile(mContext, "models/jfk.wav", KANTVUtils.getDataPath() + "jfk.wav");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/jfk.wav", KANTVUtils.getDataPath(mContext) + "jfk.wav");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVAssetLoader.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin");
+        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVUtils.getDataPath() + "ggml-tiny.en-q8_0.bin");
 
         KANTVUtils.copyAssetFile(mContext, "res/apple.png", KANTVUtils.getDataPath(mContext) + "apple.png");
         KANTVUtils.copyAssetFile(mContext, "res/colorkey.png", KANTVUtils.getDataPath(mContext) + "colorkey.png");
@@ -241,33 +248,19 @@ public class IApplication extends Application {
         KANTVUtils.copyAssetFile(mContext, "res/png1.png", KANTVUtils.getDataPath(mContext) + "png1.png");
         KANTVUtils.copyAssetFile(mContext, "res/png2.png", KANTVUtils.getDataPath(mContext) + "png2.png");
         KANTVUtils.copyAssetFile(mContext, "res/simhei.ttf", KANTVUtils.getDataPath(mContext) + "simhei.ttf");
-
-        //copy asset files to /sdcard/kantv/, this file is needed for ASR benchmark
-        String ggmlSampleFileName = "jfk.wav";
-        KANTVAssetLoader.copyAssetFile(mContext, ggmlSampleFileName, KANTVUtils.getDataPath() + ggmlSampleFileName);
-
-        KANTVAssetLoader.copyAssetFile(mContext, "mnist-5.png", KANTVUtils.getDataPath() + "mnist-5.png");
-        KANTVAssetLoader.copyAssetFile(mContext, "mnist-7.png", KANTVUtils.getDataPath() + "mnist-7.png");
         KANTVAssetLoader.copyAssetFile(mContext, "res/vision-test.jpg", KANTVUtils.getDataPath() + "vision-test.jpg");
         KANTVAssetLoader.copyAssetFile(mContext, "res/vision-test.jpg", KANTVUtils.getSDCardDataPath() + "vision-test.jpg");
 
+        KANTVUtils.copyAssetFile(mContext, "tv.xml", KANTVUtils.getDataPath(mContext) + "tv.xml"); //backuped EPG / L2 EPG
+        KANTVAssetLoader.copyAssetFile(mContext, "tv.xml", KANTVUtils.getSDCardDataPath() + "tv.xml"); //preferred EPG / L1 EPG
+
         //for PoC:Add Qualcomm mobile SoC native backend for GGML, https://github.com/zhouwg/kantv/issues/121
-        //TODO: fix following issue and then modify from
-        //      KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", KANTVUtils.getDataPath(mContext) + "qnnlib");
-        //      to
-        //      KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", KANTVUtils.getDataPath() + "qnnlib");
-        //      or
-        //      move assets/qnnlib to /sdcard/kantv/qnnlib manually for purpose of reduce size of APK because size of prebuilt qnnlibs is about 49M
         //   QNN issue:
         //   can not open QNN library /sdcard/kantv/qnnlib/libQnnSystem.so,
         //   error: dlopen failed: library "/sdcard/kantv/qnnlib/libQnnSystem.so"
         //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.kantvai.kantvplayer-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
         KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", KANTVUtils.getDataPath(mContext) + "qnnlib");
-        KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", "/data/local/tmp/");
         KANTVLog.j(TAG, "qnn lib path:" + KANTVUtils.getDataPath(mContext) + "qnnlib");
-
-        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVAssetLoader.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin");
-        KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-tiny.en-q8_0.bin", KANTVUtils.getDataPath() + "ggml-tiny.en-q8_0.bin");
 
         //step-4:
         String configString = KANTVAssetLoader.readTextFromFile(KANTVAssetLoader.getDataPath(mContext) + "config.json");

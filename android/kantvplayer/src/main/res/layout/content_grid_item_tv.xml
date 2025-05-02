@@ -10,7 +10,7 @@
         android:layout_width="320dp"
         android:layout_height="320dp"
         android:layout_centerInParent="true"
-        android:src="@mipmap/cctv1" />
+        android:src="@mipmap/cna" />
 
     <TextView
         android:id="@+id/txt_icon_tv"

@@ -99,6 +99,8 @@
      private int gridItemImageID = 0;
      private int gridItemTextID = 0;
 
+     private int testResID = 0;
+
      public static TVGridFragment newInstance() {
          return new TVGridFragment();
      }
@@ -240,7 +242,6 @@
                      byte[] payload = new byte[fileLength - 2];
                      System.arraycopy(fileContent, 2, payload, 0, fileLength - 2);
 
-
                      KANTVLog.d(TAG, "encrypted file length:" + fileLength);
                      mKANTVDRM.ANDROID_JNI_Decrypt(payload, fileLength - 2, dataEntity, KANTVJNIDecryptBuffer.getDirectBuffer());
                      KANTVLog.d(TAG, "decrypted data length:" + dataEntity.getDataLength());
@@ -293,7 +294,6 @@
                      KANTVLog.d(TAG, "shouldn't happen, pls check encrypted epg data");
                      return;
                  }
-
 
                  byte[] fileContent = new byte[fileLength];
                  FileInputStream in = new FileInputStream(file);
@@ -350,100 +350,83 @@
          }
          */
 
-         //2025-01-29,customize TV program in non-encrypted tv.xml
-         {
-             KANTVUtils.copyAssetFile(mContext, "tv.xml", KANTVUtils.getDataPath(mContext) + "/tv.xml");
-             File file = new File(KANTVUtils.getDataPath(mContext), "tv.xml");
-             beginTime = System.currentTimeMillis();
-             int fileLength = (int) file.length();
-             KANTVLog.j(TAG, "clear file len:" + fileLength);
+         try {
              mData.clear();
              mContentList.clear();
 
-             try {
-                 byte[] fileContent = new byte[fileLength];
-                 FileInputStream in = new FileInputStream(file);
-                 in.read(fileContent);
-                 in.close();
-                 if (fileLength < 2) {
-                     KANTVLog.j(TAG, "shouldn't happen, pls check tv.xml");
-                     return;
-                 }
+             //load EPG from /sdcard/tv.xml because this file can be edited by user
+             File file = new File(KANTVUtils.getSDCardDataPath() + "tv.xml");// load EPG from /sdcard/tv.xml
+             byte[] fileContent = KANTVUtils.loadContentFromFile(file);
+             if (null != fileContent) {
                  mContentList = KANTVUtils.EPGXmlParser.getContentDescriptors(fileContent);
-             } catch (Exception ex) {
-                 KANTVLog.j(TAG, "load tv xml failed:" + ex.toString());
-                 KANTVLog.d(TAG, "shouldn't happen, pls check tv.xml");
-                 return;
              }
+             if ((mContentList == null) || (0 == mContentList.size())) {
+                 KANTVLog.g(TAG, "failed to load tv xml from:" + KANTVUtils.getSDCardDataPath());
+                 //load EPG from internal tv.xml if failed to load EPG from /sdcard/tv.xml
+                 File backupFile = new File(KANTVUtils.getDataPath(mContext) + "tv.xml");
+                 byte[] backupFileContent = KANTVUtils.loadContentFromFile(backupFile);
+                 mContentList = KANTVUtils.EPGXmlParser.getContentDescriptors(backupFileContent);
+             }
+         } catch (Exception ex) {
+             KANTVLog.g(TAG, "failed to load tv xml:" + ex.toString());
+             //load EPG from internal tv.xml if failed to load EPG from /sdcard/tv.xml
+             File backupFile = new File(KANTVUtils.getDataPath(mContext) + "tv.xml");
+             byte[] backupFileContent = KANTVUtils.loadContentFromFile(backupFile);
+             mContentList = KANTVUtils.EPGXmlParser.getContentDescriptors(backupFileContent);
          }
 
          if ((mContentList == null) || (0 == mContentList.size())) {
-             KANTVLog.j(TAG, "shouldn't happen, pls check tv.xml");
+             KANTVLog.g(TAG, "shouldn't happen, pls check tv.xml");
+             //failed to load EPG from /sdcard/tv.xml and internal tv.xml
+             KANTVUtils.showMsgBox(mActivity, "pls check tv.xml in " + KANTVUtils.getSDCardDataPath());
              return;
          }
          KANTVLog.d(TAG, "epg items: " + mContentList.size());
 
          if (KANTVMediaType.MEDIA_TV == mMediaType) {
-             {
-                 KANTVLog.d(TAG, "load tv logos from internal resources");
-                 Resources res = mActivity.getResources();
+             KANTVLog.d(TAG, "load tv logos from internal resources");
+             Resources res = mActivity.getResources();
 
-                 if (true) {
-                     Field field;
-                     String resName = "test";
-                     int resID = 0;
-                     for (int index = 0; index < mContentList.size(); index++) {
-                         resID = 0;
-                         KANTVContentDescriptor descriptor = mContentList.get(index);
-                         String posterName = descriptor.getPoster();
-                         if (posterName != null) {
-                             posterName = posterName.trim();
-                             resName = posterName.substring(0, posterName.indexOf('.'));
-                         } else {
-                             KANTVLog.d(TAG, "can't find poster name, pls check epg data");
-                         }
-                         String title = descriptor.getName();
-                         title = title.trim();
-                         String url = descriptor.getUrl();
-                         url = url.trim();
-                         //KANTVLog.d(TAG, "real resource name:" + resName);
-                         //KANTVLog.d(TAG, "url:" + url );
-                         //KANTVLog.d(TAG, "title:" + title);
-                         //KANTVLog.d(TAG, "poster:" + posterName);
-                         resID = res.getIdentifier(resName, "mipmap", mActivity.getPackageName());
-                         if (resID == 0) {
-                             KANTVLog.d(TAG, "can't find resource name:" + posterName);
-                             resID = res.getIdentifier("test", "mipmap", mActivity.getPackageName());
-                         }
-                         mData.add(new KANTVMediaGridItem(resID, title));
-                     }
-                 } else {
-                     mData.add(new KANTVMediaGridItem(R.mipmap.cgtn, "CGTN"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.cgtn_doc, "CGTN Doc"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.bloomberg_tv_emea, "Bloomberg TV"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.dw, "DW"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.abc_news_live, "ABC News Live"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.fox_news_now, "Fox News Live Now"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.cnn_us, "CNN"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.cbn_news, "CBN News"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.fox_5_dc, " FOX 5 Washington DC"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.fox_5_newyork, "FOX 5 New York"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.nbc_news_chicago, "NBC Chicago News"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.news_12_newyork, "New York News"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.nasa_media, "NASA TV Media"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.nasa_uhd, "NASA TV Public"));
-
-                     mData.add(new KANTVMediaGridItem(R.mipmap.bbc, "BBC sports"));
-                     mData.add(new KANTVMediaGridItem(R.mipmap.cri, "China Radio"));
-                 }
-                 KANTVLog.d(TAG, "load internal resource counts:" + mData.size());
+             Field field;
+             String resName = "test";
+             int resID = 0;
+             if (resName.equals("test")) {
+                 resID = res.getIdentifier("test", "mipmap", mActivity.getPackageName());
+                 testResID = resID;
+                 KANTVLog.g(TAG, "test res id: " + resID);
              }
+             for (int index = 0; index < mContentList.size(); index++) {
+                 resID = 0;
+                 KANTVContentDescriptor descriptor = mContentList.get(index);
+                 String posterName = descriptor.getPoster();
+                 if (posterName != null) {
+                     posterName = posterName.trim();
+                     resName = posterName.substring(0, posterName.indexOf('.'));
+                 } else {
+                     KANTVLog.g(TAG, "can't find poster name, pls check epg data in tv.xml");
+                     //can't find a valid poster for a specified TV program, use the default "test.jpg"
+                     resName = "test";
+                 }
+                 String title = descriptor.getName();
+                 title = title.trim();
+                 String url = descriptor.getUrl();
+                 url = url.trim();
+                 //KANTVLog.d(TAG, "real resource name:" + resName);
+                 //KANTVLog.d(TAG, "url:" + url );
+                 //KANTVLog.d(TAG, "title:" + title);
+                 //KANTVLog.d(TAG, "poster:" + posterName);
+                 resID = res.getIdentifier(resName, "mipmap", mActivity.getPackageName());
+                 if (resID == 0) {
+                     KANTVLog.d(TAG, "can't find resource name:" + posterName);
+                     resID = res.getIdentifier("test", "mipmap", mActivity.getPackageName());
+                 }
+                 mData.add(new KANTVMediaGridItem(resID, title));
+             }
+
+             KANTVLog.g(TAG, "load tv program counts:" + mData.size());
          }
+         endTime = System.currentTimeMillis();
+         KANTVLog.g(TAG, "load EPG cost " + (endTime - beginTime) + " milliseconds");
      }
 
 
@@ -469,11 +452,13 @@
              @Override
              public void bindView(KANTVMediaGridAdapter.ViewHolder holder, KANTVMediaGridItem obj) {
                  try {
-                     {
-                         KANTVLog.d(TAG, "load img from interl res");
-                         holder.setImageResource(gridItemImageID, obj.getItemId());
+                     KANTVLog.d(TAG, "load img from internal res");
+                     holder.setImageResource(gridItemImageID, obj.getItemId());
+                     if (obj.getItemId() == testResID) {
+                         //TODO: dynamically generate a poster from user's specified "text"
+                         //      text ---> poster image
+                         holder.setText(gridItemTextID, obj.getItemName());
                      }
-                     //holder.setText(gridItemTextID, obj.getItemName());
                  } catch (Exception ex) {
                      KANTVLog.d(TAG, "error: " + ex.toString());
                  }
