@@ -78,7 +78,13 @@ public class KANTVLLMModelMgr {
 
         //make LLM downloader happy
         LLMModels[4].setUrl("https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true"); //4.13 GiB
-        LLMModels[4].setMmprojUrl("https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true");//851 MiB
+        LLMModels[4].setMMprojUrl("https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true");//851 MiB
+        LLMModels[4].setSize(4130226336L); //size of the main model in bytes
+        LLMModels[4].setMMprojSize(851251104L);//size of the mmproj model in bytes
+
+        //local test
+        //LLMModels[4].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the main model
+        //LLMModels[4].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the mmproj model
     }
 
     public String[] getArrayModelName() {
@@ -120,4 +126,8 @@ public class KANTVLLMModelMgr {
     public int getDefaultModelIndex() {
         return defaultModelIndex;
     }
+
+    public long getModelSize(int index) { return LLMModels[index].getSize(); }
+
+    public long getMMProjSize(int index) { return LLMModels[index].getMMprojSize(); }
 }

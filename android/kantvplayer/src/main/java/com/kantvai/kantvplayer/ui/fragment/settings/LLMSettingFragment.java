@@ -175,6 +175,8 @@
                          KANTVLLMModelMgr.getInstance().getMMProjName(mSettings.getLLMModel()),
                          KANTVLLMModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
                          KANTVLLMModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
+                 manager.setLLMModelSize(KANTVLLMModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
+                         KANTVLLMModelMgr.getInstance().getMMProjSize(mSettings.getLLMModel()));
                  manager.showUpdateDialog();
              }
          }

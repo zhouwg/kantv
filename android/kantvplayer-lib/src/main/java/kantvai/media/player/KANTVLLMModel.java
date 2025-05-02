@@ -33,6 +33,9 @@ public class KANTVLLMModel {
 
     private String quality;     //quality of model on Android phone
 
+    private long size;          //size of model, in bytes
+    private long mmproj_size;   //size of mmproj model, in bytes
+
     public KANTVLLMModel(int index, String nick, String name, String url) {
         this.index = index;
         this.nickname  = nick;
@@ -58,7 +61,7 @@ public class KANTVLLMModel {
 
     public String getMMProjName() { return mmproj_name; }
     public String getMMProjUrl() { return mmproj_url; }
-    public void setMmprojUrl(String mmprojUrl) { this.mmproj_url = mmprojUrl; }
+    public void setMMprojUrl(String mmprojUrl) { this.mmproj_url = mmprojUrl; }
 
     public String getUrl() {
         return url;
@@ -75,5 +78,10 @@ public class KANTVLLMModel {
         this.quality = quality;
     }
 
+    public void setSize(long size) { this.size = size; }
+    public long getSize() { return size; }
+
+    public void setMMprojSize(long size) { this.mmproj_size = size; }
+    public long getMMprojSize() { return mmproj_size; }
 
 }

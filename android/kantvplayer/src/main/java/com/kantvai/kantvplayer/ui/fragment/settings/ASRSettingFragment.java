@@ -44,6 +44,7 @@
 
  import java.io.File;
 
+ import kantvai.media.player.KANTVLLMModelMgr;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -168,9 +169,15 @@
              File asrModelFile = new File(KANTVUtils.getDataPath() + userChooseModelFileName);
              KANTVLog.g(TAG, "asrAudioFile:" + asrAudioFile.getAbsolutePath());
              KANTVLog.g(TAG, "asrModeFile:" + asrModelFile.getAbsolutePath());
-             if (
-                     (asrAudioFile == null) || (!asrAudioFile.exists())
-                             || (asrModelFile == null) || (!asrModelFile.exists())
+
+             //TODO:add support download other ASR models
+             if (mSettings.getASRModel() != 3) {
+                 KANTVUtils.showMsgBox(mActivity, "currently only support built-in ASR model ggml-tiny.en-q8_0.bin");
+                 return true;
+             }
+
+             if ((asrAudioFile == null) || (!asrAudioFile.exists())
+              || (asrModelFile == null) || (!asrModelFile.exists())
              ) {
                  DownloadModel manager = new DownloadModel(mActivity);
                  manager.setTitle("begin download ASR model and sample");

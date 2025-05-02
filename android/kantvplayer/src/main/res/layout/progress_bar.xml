@@ -10,6 +10,14 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/txtDownloadInfo"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:gravity="center"
+        android:textStyle="italic"
+        android:textSize="18sp" />
+
+    <TextView
         android:id="@+id/txtSpeed"
         android:layout_width="match_parent"
         android:layout_height="25dp"

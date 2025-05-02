@@ -21,6 +21,8 @@
   */
  package com.kantvai.kantvplayer.ui.fragment.settings;
 
+ import static com.kantvai.kantvplayer.R.*;
+
  import java.io.BufferedReader;
  import java.io.File;
  import java.io.FileInputStream;
@@ -30,6 +32,7 @@
  import java.net.HttpURLConnection;
  import java.net.URL;
  import java.nio.charset.StandardCharsets;
+ import java.util.Locale;
 
  import android.app.AlertDialog;
  import android.content.Context;
@@ -65,21 +68,25 @@
      private AlertDialog updateDialog = null;
      private AlertDialog downloadDialog = null;
      private TextView mTextSpeed = null;
+     private TextView mTextInfo  = null;
+
+     private boolean mIsDownloadLLMModel = false;
      private static final int DOWN_UPDATE = 1;
      private static final int DOWN_OVER_FILE = 2;
      private static final int DOWN_OVER_VERSION = 3;
      private static final int DOWN_FILE_FAILED = 4;
 
      private String title = null;
-     private String modelName = null;
-     private String savePath = null;
-     private String modelFileNameA;
-     private String modelFileNameB;
+     private String savePath;
+     private String modelFileNameA;  //name of the main model for a specified LLM model
+     private String modelFileNameB;  //name of the mmproj model for a specified LLM model
      private String localModleFileA = null;
      private String localModleFileB = null;
      private String remoteModleFileA;
      private String remoteModleFileB;
 
+     private long sizeOfLocalModelFileA = 0; //expected size of the main model for a specified LLM model
+     private long sizeOfLocalModelFileB = 0; //expected size of the mmproj model for a specified LLM model
      private String errorString = "";
 
      public DownloadModel(Context context) {
@@ -94,7 +101,6 @@
      }
 
      public void setModelName(String name) {
-         modelName = name;
      }
 
      public void setModelName(String engineName, String modelA, String modelB) {
@@ -133,7 +139,14 @@
          remoteModleFileA = modelURL;
          remoteModleFileB = mmprojModelURL;
 
+         mIsDownloadLLMModel = true;
+
          KANTVLog.j(TAG, "remote model url:" + remoteModleFileA);
+     }
+
+     public void setLLMModelSize(long modelSize, long mmprojModelSize) {
+         sizeOfLocalModelFileA = modelSize;
+         sizeOfLocalModelFileB = mmprojModelSize;
      }
 
      public void showUpdateDialog() {
@@ -166,30 +179,21 @@
 
      private void showDownloadDialog() {
          AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-         //builder.setTitle("Download " + modelName + " model");
-         builder.setTitle("Downloading GGML model");
+         if (mIsDownloadLLMModel)
+             builder.setTitle("Downloading LLM model");
+         else
+            builder.setTitle("Downloading ASR model");
          LayoutInflater inflater = LayoutInflater.from(mContext);
          View v = inflater.inflate(R.layout.progress_bar, null);
-         mProgress = (ProgressBar) v.findViewById(R.id.progress);
-         mTextSpeed = (TextView) v.findViewById(R.id.txtSpeed);
+         mProgress = v.findViewById(R.id.progress);
+         mTextSpeed = v.findViewById(R.id.txtSpeed);
+         mTextInfo  = v.findViewById(R.id.txtDownloadInfo);
          builder.setView(v);
          builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
              @Override
              public void onClick(DialogInterface dialog, int which) {
                  intercept = true;
-                 File apkFile = new File(localModleFileA);
-                 if (apkFile.exists()) {
-                     KANTVLog.j(TAG, "file: " + localModleFileA + "exist, remove it");
-                     //apkFile.delete(); //jfk.wav is small, so it should be downloaded ok, don't remove it
-                 }
-
-                 if (localModleFileB != null) {
-                     apkFile = new File(localModleFileB);
-                     if (apkFile.exists()) {
-                         KANTVLog.j(TAG, "download partial,remove it");
-                         apkFile.delete();
-                     }
-                 }
+                 checkDownloadedModels();
              }
          });
          builder.setCancelable(true);
@@ -206,8 +210,9 @@
      }
 
 
-     private int doDownloadFile(String remoteFileUrl, String localFileUrl, boolean showUIProgress) {
+     private int doDownloadFile(String remoteFileUrl, String localFileUrl, long expectedSize, boolean showUIProgress) {
          URL url;
+         mTextInfo.setText("Downloading from " + remoteFileUrl + " to " + localFileUrl + ", expectedSize:" + expectedSize + " bytes");
          try {
              url = new URL(remoteFileUrl);
              HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -229,7 +234,6 @@
              beginTime = System.currentTimeMillis();
 
              while (!intercept) {
-                 numread = 0;
                  numread = ins.read(buf);
                  count += numread;
                  downloadBytes += numread;
@@ -239,13 +243,14 @@
                      mHandler.sendEmptyMessage(DOWN_UPDATE);
                      endTime = System.currentTimeMillis();
                      float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
-                     String speedString = mContext.getString(R.string.download_speed) + ":" + String.format("%.2f", speed) + " KBytes/s";
+                     //String speedString = mContext.getString(R.string.download_speed) + ":" + String.format("%-8.2f", speed) + " KBytes/s";
+                     String speedString  = mContext.getString(R.string.download_speed) + ":" +
+                             String.format(Locale.US, "%s", KANTVUtils.formatedBitRate(downloadBytes, (endTime - beginTime)));
                      mTextSpeed.setText(speedString);
                  }
 
                  if (numread <= 0) {
-                     KANTVLog.j(TAG, "download file succeed:remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
-                     //mHandler.sendEmptyMessage(DOWN_OVER);
+                     KANTVLog.g(TAG, "download file succeed:remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
                      break;
                  }
                  fos.write(buf, 0, numread);
@@ -253,17 +258,23 @@
              fos.close();
              ins.close();
              endTime = System.currentTimeMillis();
-             KANTVLog.j(TAG, "download file succeed: remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
-             KANTVLog.j(TAG, "download bytes:" + downloadBytes);
-             KANTVLog.j(TAG, "download cost: " + (endTime - beginTime) + " milliseconds");
+             KANTVLog.g(TAG, "download file succeed: remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
+             KANTVLog.g(TAG, "download bytes:" + downloadBytes);
+             KANTVLog.g(TAG, "download cost: " + (endTime - beginTime) + " milliseconds");
              float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
-             KANTVLog.j(TAG, "download speed:" + String.format("%.2f", speed) + "KBytes/s");
-             //mHandler.sendEmptyMessage(DOWN_OVER_FILE);
+             KANTVLog.g(TAG, "download speed:" + String.format("%-8.2f", speed) + "KBytes/s");
+             if ((downloadBytes + 1) != expectedSize) {
+                 KANTVLog.g(TAG, "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize);
+                 //errorString = "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize;
+                 checkDownloadedModels();
+                 return 2;
+             }
              return 0;
          } catch (Exception e) {
+             checkDownloadedModels();
              e.printStackTrace();
-             KANTVLog.j(TAG, "download file failed,reason:" + e.toString());
-             errorString = e.toString();
+             KANTVLog.g(TAG, "download file failed,reason:" + e.toString());
+             errorString ="download file failed,reason:" + e.toString();
              return 1;
          }
      }
@@ -273,16 +284,16 @@
          @Override
          public void run() {
              int result = 0;
-             result = doDownloadFile(remoteModleFileA, localModleFileA, true);
+             result = doDownloadFile(remoteModleFileA, localModleFileA, sizeOfLocalModelFileA, true);
              if (localModleFileB != null)
-                result = doDownloadFile(remoteModleFileB, localModleFileB, true);
+                result = doDownloadFile(remoteModleFileB, localModleFileB, sizeOfLocalModelFileB, true);
              downloadDialog.dismiss();
-             KANTVLog.j(TAG, "result= " + result);
+             KANTVLog.g(TAG, "result= " + result);
              if (0 == result) {
-                 KANTVLog.j(TAG, "download  file succeed:" + remoteModleFileA);
+                 KANTVLog.g(TAG, "download  file succeed:" + remoteModleFileA);
                  mHandler.sendEmptyMessage(DOWN_OVER_FILE);
              } else {
-                 KANTVLog.j(TAG, "download file failed:" + remoteModleFileA);
+                 KANTVLog.g(TAG, "download file failed:" + remoteModleFileA);
                  mHandler.sendEmptyMessage(DOWN_FILE_FAILED);
              }
          }
@@ -291,49 +302,14 @@
 
      private void onFinishDownload() {
          try {
-             if (localModleFileA != null && localModleFileB != null) {
-                 File fileA = new File(localModleFileA);
-                 File fileB = new File(localModleFileB);
-                 if (
-                         (fileA == null) || (!fileA.exists())
-                                 || (fileB == null) || (!fileB.exists())
-                 ) {
-                     Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
-                 } else {
-                     Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
-                 }
-             } else {
-                 if (localModleFileA != null) {
-                     File fileA = new File(localModleFileA);
-
-                     if ((fileA == null) || (!fileA.exists())
-                     ) {
-                         Toast.makeText(mContext, modelName + "failed to download model file", Toast.LENGTH_SHORT).show();
-                     } else {
-                         Toast.makeText(mContext, modelName + "ok to download model file", Toast.LENGTH_SHORT).show();
-                     }
-                 }
-             }
-
+             int result = checkDownloadedModels();
+             KANTVLog.g(TAG,"result " + result);
+             KANTVUtils.showMsgBox(mContext, errorString);
          } catch (Exception e) {
              e.printStackTrace();
              KANTVLog.g(TAG, "download failed");
+             KANTVUtils.showMsgBox(mContext, "download failed");
          }
-     }
-
-     private void showInstallResultDialog(String info) {
-         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-         builder.setTitle(mContext.getString(R.string.software_update));
-         builder.setMessage(info);
-         builder.setCancelable(true);
-         builder.setNegativeButton(R.string.OK,
-                 new DialogInterface.OnClickListener() {
-                     @Override
-                     public void onClick(DialogInterface dialog, int which) {
-                         dialog.dismiss();
-                     }
-                 });
-         builder.show();
      }
 
      private Handler mHandler = new Handler() {
@@ -349,7 +325,8 @@
                      break;
 
                  case DOWN_FILE_FAILED:
-                     Toast.makeText(mContext, errorString, Toast.LENGTH_SHORT).show();
+                     checkDownloadedModels();
+                     //Toast.makeText(mContext, errorString, Toast.LENGTH_SHORT).show();
                      KANTVUtils.showMsgBox(mContext, errorString);
                      break;
 
@@ -359,4 +336,50 @@
          }
      };
 
+     private int checkDownloadedModels() {
+         int result = 0;
+         try {
+             File modelFile = new File(localModleFileA);
+             if (modelFile.exists()) {
+                 if (mIsDownloadLLMModel) {
+                     if (sizeOfLocalModelFileA != modelFile.length()) {
+                         KANTVLog.g(TAG, "file: " + localModleFileA + " exist but not complete, remove it");
+                         errorString = "file: " + localModleFileA + " exist but file size " + modelFile.length()
+                                 + " is not equal to the expected size " + sizeOfLocalModelFileA + ", remove it";
+                         modelFile.delete();
+                         result = 1;
+                     }
+                 }
+             } else {
+                 KANTVLog.g(TAG, "file " + localModleFileA + " not exist");
+                 errorString = "file " + localModleFileA + " not exist";
+                 result = 1;
+             }
+
+             modelFile = new File(localModleFileB);
+             if (modelFile.exists()) {
+                 if (mIsDownloadLLMModel) {
+                     if (sizeOfLocalModelFileB != modelFile.length()) {
+                         KANTVLog.g(TAG, "file: " + localModleFileB + " exist but not complete, remove it");
+                         errorString += "file: " + localModleFileB + " exist but file size " + modelFile.length()
+                                 + " is not equal to the expected size " + sizeOfLocalModelFileB + ", remove it";
+                         modelFile.delete();
+                         result = 2;
+                     }
+                 }
+             } else {
+                 KANTVLog.g(TAG, "file " + localModleFileB + " not exist");
+                 errorString += "file " + localModleFileB + " not exist";
+                 result = 2;
+             }
+         } catch (Exception e) {
+             errorString += "error: " + e.toString();
+             result = 3;
+         }
+
+         if (0 == result) {
+             errorString = "succeed to download model file: " + modelFileNameA + " and " + modelFileNameB;
+         }
+         return result;
+     }
  }
