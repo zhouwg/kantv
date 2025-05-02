@@ -83,7 +83,8 @@ a screenshot to demostrate ASR inference by running the excellent <a href="https
 ----
 a screenshot to demostrate download LLM model in APK.
 
-![Image](https://github.com/user-attachments/assets/b07f8560-9221-4136-b773-4b0874de294a)
+![1213951738](https://github.com/user-attachments/assets/5a0a965e-1752-475e-a2c1-63e6f60a9009)
+![1242080159](https://github.com/user-attachments/assets/32586234-4b2c-4d43-b0ab-498c56de44b3)
 
 <details>
   <summary>some other screenshots</summary>
