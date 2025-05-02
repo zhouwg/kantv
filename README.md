@@ -58,7 +58,7 @@ a screenshot to demostrate multi-modal inference by running the magic <a href="h
 
 a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
 
-![705759462](https://github.com/user-attachments/assets/df1ed1ed-294e-4691-bbd1-b8a6f7ff6f8c)
+![226086526](https://github.com/user-attachments/assets/1e5d54f7-a2c2-4365-b46f-4c8486156bd4)
 
 ----
 a screenshot to demostrate download LLM model in APK.
