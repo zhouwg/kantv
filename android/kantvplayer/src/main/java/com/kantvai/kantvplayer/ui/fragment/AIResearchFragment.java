@@ -402,6 +402,7 @@
                      //https://huggingface.co/ggerganov/whisper.cpp
                      //selectModeFileName = "ggml-" + strModeName + ".bin";
                      selectModeFileName = strModeName;
+                     setTextGGMLInfo(selectModeFileName);
                  }
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
