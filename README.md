@@ -16,11 +16,6 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
 
-### Highlight
-
-As far as I/We know, [the implementation of ggml-hexagon in this project](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) probably be the first open-source implementation of ggml-hexagon backend in llama.cpp community for Android phone equipped with Qualcomm's high-end Hexagon NPU(such as Snapdragon 8Gen3/Snapdragon 8Elite), [PR can be found at](https://github.com/ggml-org/llama.cpp/pull/12326) upstream llama.cpp community, details could be found at https://github.com/zhouwg/ggml-hexagon/discussions/18.
-
-
 ### Software architecture of KanTV Android
 
 ![kantv-arch-320-240](https://github.com/user-attachments/assets/48e18ace-b667-45f9-8e0f-9faf1427e6bf)
@@ -92,7 +87,7 @@ English is preferred in this project, thanks for cooperation and understanding.
 -->
 
 ### Docs
-
+- [Highlight](./docs/highlight.md)
 - [How to build](./docs/build.md)
 - [How to customize tv.xml](./docs/how-to-customized-tv-xml.md)
 - [How to troubleshooting issues in APP](./docs/FAQ.md)
