@@ -10,7 +10,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on on-device AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done via this project + a powerful Android phone easily.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with regular Android software development) focus on highly-value on-device AI R&D activity, some on-device AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM on Android) could be done via this project easily.
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android device through llama.cpp and whisper.cpp.
 
