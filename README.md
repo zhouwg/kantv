@@ -10,11 +10,11 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> project for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on on-device AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done via this project + a powerful Android phone easily.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on on-device AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done via this project + a powerful Android phone easily.
+
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android device through llama.cpp and whisper.cpp.
 
 - Built-in [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) text-to-text and image-to-text(multimodal) supportive and runs entirely offline(no Internet required). the Gemma3-4B LLM models can be downloadded in the Android APK directly without manually preparation.
-
-- [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
 
 - Probably be the first [open-source implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) on Android phone.
 
@@ -53,11 +53,6 @@ a screenshot to demostrate multi-modal inference by running the magic <a href="h
 
 ![132746253](https://github.com/user-attachments/assets/ce0306c4-5e59-4504-8ebe-b17c178e688b)
 
-----
-
-a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
-
-![226086526](https://github.com/user-attachments/assets/1e5d54f7-a2c2-4365-b46f-4c8486156bd4)
 
 
 
@@ -68,6 +63,14 @@ a screenshot to demostrate ASR inference by running the excellent <a href="https
 ![Image](https://github.com/user-attachments/assets/2d95bd5e-bd02-4810-aa70-a81cc0469fcc)
 
 ![Image](https://github.com/user-attachments/assets/025a8ff0-7584-4df2-97a5-f4e655a52e0f)
+
+
+----
+
+a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8 Gen 3 mobile SoC - <b>fully offline, on-device</b>.
+
+![226086526](https://github.com/user-attachments/assets/1e5d54f7-a2c2-4365-b46f-4c8486156bd4)
+
 
 ----
 a screenshot to demostrate download LLM model in APK.
@@ -92,6 +95,7 @@ English is preferred in this project, thanks for cooperation and understanding.
 - [How to build](./docs/build.md)
 - [How to customize tv.xml](./docs/how-to-customized-tv-xml.md)
 - [How to troubleshooting issues in APP](./docs/FAQ.md)
+- [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
 - <b>[How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](./docs/how-to-customize.md)</b>
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
