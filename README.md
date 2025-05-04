@@ -179,10 +179,31 @@ This project is licensed under [the MIT License](./LICENSE).
 If you find this project useful in your R&D activity or learning activity, please consider giving a star :star: and citation :pencil: :)
 
 ```
-@project{KanTV,
-  title={KanTV},
-  author={KanTV authors},
-  url={https://github.com/kantv-ai/kantv},
-  year={2024-2025}
+@misc{KanTV authors,
+  author = {KanTV authors},
+  title = {Project KanTV},
+  year = {2024-2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/kantv-ai/kantv}},
+  commit = {https://github.com/kantv-ai/kantv/tree/master}
+}
+
+@article{ggml-hexagon,
+  title={ggml-hexagon:high-level data path of ggml-hexagon},
+  author={zhouwg},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/zhouwg/ggml-hexagon/discussions/33}},
+}
+
+@article{ggml-hexagon,
+  title={ggml-hexagon:why HWACCEL_CDSP approach is correct direction in llama.cpp community},
+  author={zhouwg},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/zhouwg/ggml-hexagon/discussions/28}},
 }
 ```
