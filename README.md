@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV("Kan", aka English "watch") , an open source project focus on study and practise device-AI tech in <b>real scenario</b>(such as perform <b>online-TV playback</b> and <b>realtime transcription</b> and <b>online-TV record</b> at the same time) on Android phone:
+KanTV("Kan", aka English "watch") , an open source project focus on study and practise on-device AI technology in <b>real scenario</b>(such as perform <b>online-TV playback</b> and <b>realtime transcription</b> and <b>online-TV record</b> at the same time) on Android phone:
 
 
 - Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>.
@@ -10,9 +10,11 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> project for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on on-device AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done by Android Studio IDE + a powerful Android phone easily.
+- Well-maintained <b>turn-key / self-contained</b> project for AI experts/researchers(whom mightbe not familiar with <b>regular Android software development</b>) focus on on-device AI R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM) could be done via this project + a powerful Android phone easily.
 
 - Built-in [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) text-to-text and image-to-text(multimodal) supportive and runs entirely offline(no Internet required)
+
+- [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
 
 ### Highlight
 
@@ -171,3 +173,16 @@ adb push /sdcard/tv.xml
 ### License
 
 This project is licensed under [the MIT License](./LICENSE).
+
+## Citation
+
+If you find this project useful in your R&D activity or learning activity, please consider giving a star :star: and citation :pencil: :)
+
+```
+@project{KanTV,
+  title={KanTV},
+  author={KanTV authors},
+  url={https://github.com/kantv-ai/kantv},
+  year={2024-2025}
+}
+```
