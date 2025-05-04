@@ -15,17 +15,12 @@ adb pull /sdcard/tv.xml
 
     <entry>
         <title> test1 </title>
-        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8" poster="test.png" urltype="hls" />
-    </entry>
-
-    <entry>
-        <title> test2 </title>
-        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8"  urltype="hls" />
-    </entry>
-
-    <entry>
-        <title> test3 </title>
         <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8" />
+    </entry>
+
+    <entry>
+        <title> test4test4test4test4 </title>
+        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8"  />
     </entry>
 
 </feed>
@@ -35,3 +30,7 @@ adb pull /sdcard/tv.xml
 ```
 adb push /sdcard/tv.xml
 ```
+
+- step 4: re-launch Android APP
+
+![Image](https://github.com/user-attachments/assets/71a6c0d2-2948-4595-aff1-686410cdb4a1)
