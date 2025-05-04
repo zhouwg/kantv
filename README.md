@@ -179,31 +179,41 @@ This project is licensed under [the MIT License](./LICENSE).
 If you find this project useful in your R&D activity or learning activity, please consider giving a star :star: and citation :pencil: :)
 
 ```
-@misc{KanTV authors,
+@software{KanTV authors,
   author = {KanTV authors},
   title = {Project KanTV},
   year = {2024-2025},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/kantv-ai/kantv}},
-  commit = {https://github.com/kantv-ai/kantv/tree/master}
+  url = { https://github.com/kantv-ai/kantv/tree/master },
+}
+
+@software{ggml-hexagon,
+  author = {zhouwg},
+  title = {ggml-hexagon: a specified llama.cpp backend for Android phone equipped with Qualcomm Hexagon NPU},
+  year = {2024-2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  url = { https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp },
 }
 
 @article{ggml-hexagon,
   title={ggml-hexagon:high-level data path of ggml-hexagon},
   author={zhouwg},
   year = {2025},
+  month = {04},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/zhouwg/ggml-hexagon/discussions/33}},
+  url = = { https://github.com/zhouwg/ggml-hexagon/discussions/33 },
 }
 
 @article{ggml-hexagon,
   title={ggml-hexagon:why HWACCEL_CDSP approach is correct direction in llama.cpp community},
   author={zhouwg},
   year = {2025},
+  month = {04},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/zhouwg/ggml-hexagon/discussions/28}},
+  url = = { https://github.com/zhouwg/ggml-hexagon/discussions/28 },
 }
 ```
