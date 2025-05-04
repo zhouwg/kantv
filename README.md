@@ -93,51 +93,14 @@ English is preferred in this project, thanks for cooperation and understanding.
 
 ### Docs
 
-- [About ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [How to build](./docs/build.md)
-- [How to troubleshooting](./docs/FAQ.md)
+- [How to customize tv.xml](./docs/how-to-customized-tv-xml.md)
+- [How to troubleshooting issues in APP](./docs/FAQ.md)
 - <b>[How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](./docs/how-to-customize.md)</b>
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 
-### How to customize tv.xml
-- step 1: download tv.xml from phone
-```
-adb pull /sdcard/tv.xml
-```
-- step 2: edit tv.xml
-
-```
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <entry>
-        <title> CNA(Channel News Asia) </title>
-        <link href="https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8" poster="cna.png" urltype="hls" />
-    </entry>
-
-    <entry>
-        <title> test1 </title>
-        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8" poster="test.png" urltype="hls" />
-    </entry>
-
-    <entry>
-        <title> test2 </title>
-        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8"  urltype="hls" />
-    </entry>
-
-    <entry>
-        <title> test3 </title>
-        <link href="  https://english-livebkws.cgtn.com/live/encgtn.m3u8" />
-    </entry>
-
-</feed>
-```
-
-- step 3: upload tv.xml to phone
-```
-adb push /sdcard/tv.xml
-```
 
 ### Special Acknowledgement
 

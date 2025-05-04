@@ -13,6 +13,6 @@ pls re-launch the APK accordingly.
 
 3. LLM download issue
 
-as well known, https://huggingface.co/ cann't be directly accessed from China.
+download LLM in the KanTV Android APP need to access https://huggingface.co/ directly otherwise this feature is not available.
 
-issue reports are greatly welcomed. Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+4. Issue reports are greatly welcomed. Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
