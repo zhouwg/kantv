@@ -190,7 +190,7 @@ If you find this project useful in your R&D activity or learning activity, pleas
 
 @software{ggml-hexagon,
   author = {zhouwg},
-  title = {ggml-hexagon: a specified llama.cpp backend for Android phone equipped with Qualcomm Hexagon NPU},
+  title = {ggml-hexagon: a specified llama.cpp backend for Qualcomm Hexagon NPU},
   year = {2024-2025},
   publisher = {GitHub},
   journal = {GitHub repository},
