@@ -81,10 +81,9 @@
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
+ import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVAssetLoader;
- import kantvai.media.player.KANTVLLMModel;
- import kantvai.media.player.KANTVLLMModelMgr;
  import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
@@ -168,10 +167,10 @@
      private Settings mSettings;
      private KANTVMgr mKANTVMgr = null;
      private AIResearchFragment.MyEventListener mEventListener = new AIResearchFragment.MyEventListener();
-     private int selectModelIndex = 4; //index of selected LLM model, default index is 4 (gemma-3-4b)
-     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model  and LLM model)
 
-     private KANTVLLMModelMgr LLMModelMgr = KANTVLLMModelMgr.getInstance();
+     private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
+     private int selectModelIndex = KANTVAIModelMgr.getInstance().getDefaultModelIndex(); //index of selected LLM model
+     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model, SD model and LLM model)
 
      //=============================================================================================
      private String[]        arrayModelName;
@@ -212,7 +211,6 @@
 
          _txtASRInfo = mActivity.findViewById(R.id.asrInfo);
          _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
-         //_txtGGMLStatus = mActivity.findViewById(R.id.ggmlStatus);
          _btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
          _btnStop = mActivity.findViewById(R.id.btnStop);
          _btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
@@ -250,7 +248,14 @@
                      spinnerModelName.setSelection(0); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
                  }
                  if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                     spinnerModelName.setSelection(5); //hardcode to gemma-3-4b-it-Q8_0.gguf for purpose of validate LLM multimodal more easily on Android phone
+                     //hardcode to gemma-3-4b-it-Q8_0.gguf for purpose of validate LLM multimodal more easily on Android phone
+                     spinnerModelName.setSelection(LLMModelMgr.getDefaultModelIndex() + LLMModelMgr.getNonLLMModelCounts());
+                     _txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
+                 }
+
+                 if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
+                     spinnerModelName.setSelection(1); //hardcode to SD model name for purpose of validate LLM multimodal more easily on Android phone
+                     _txtUserInput.setText("a lovely cat");
                  }
 
                  if ((previousBenchmakrIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (benchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
@@ -348,7 +353,7 @@
                  strModeName = arrayModelName[position];
                  selectedUIIndex = position;
                  //attention here
-                 selectModelIndex = selectedUIIndex - 1;
+                 selectModelIndex = selectedUIIndex - LLMModelMgr.getNonLLMModelCounts();
                  KANTVLog.j(TAG, "strModeName:" + strModeName);
              }
 
@@ -371,7 +376,7 @@
                  KANTVLog.g(TAG, "here");
                  ggmljava.llm_stop_inference();
              }
-             resetUIAndStatus(true, false);
+             resetUIAndStatus(null,true, false);
          });
 
          _btnBenchmark.setOnClickListener(v -> {
@@ -381,7 +386,7 @@
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
              String selectModelFilePath = "";
 
-             resetUIAndStatus(true, true);
+             resetUIAndStatus(null,true, true);
 
              //sanity check begin
              {
@@ -397,6 +402,10 @@
                      }
 
                      isLLMModel = true;
+                     setTextGGMLInfo(selectModeFileName);
+                 } else if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
+                     isSDModel = true;
+                     selectModeFileName = strModeName;
                      setTextGGMLInfo(selectModeFileName);
                  } else {
                      //https://huggingface.co/ggerganov/whisper.cpp
@@ -421,6 +430,7 @@
                  if ((pathSelectedImage != null) && (!pathSelectedImage.isEmpty())) {
                      if (selectModeFileName.contains("gemma-3")) {
                          isLLMVModel = true;
+                         _txtUserInput.setText("What is in the image?");
                          File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + LLMModelMgr.getMMProjName(selectModelIndex));
                          if (!mmprModelFile.exists()) {
                              KANTVUtils.showMsgBox(mActivity, "LLM mmproj model file:" +
@@ -471,6 +481,13 @@
                      if (!selectModeFile.exists() || (!sampleFile.exists())) {
                          KANTVUtils.showMsgBox(mActivity, "pls check whether model file:" +
                                  selectModeFile.getAbsolutePath() + " and sample file:" + sampleFile.getAbsolutePath() + " exist");
+                         return;
+                     }
+                 } else if (isSDModel) {
+                     if (!selectModeFile.exists()) {
+                         KANTVUtils.showMsgBox(mActivity, "StableDiffusion model file:" +
+                                 selectModeFile.getAbsolutePath() + " not exist, pls download from: "
+                                 + LLMModelMgr.getSDModelUrl());
                          return;
                      }
                  } else {
@@ -541,7 +558,7 @@
                                      KANTVUtils.getSDCardDataPath() + LLMModelMgr.getName(selectModelIndex),
                                      KANTVUtils.getSDCardDataPath() + LLMModelMgr.getMMProjName(selectModelIndex),
                                      pathSelectedImage,
-                                     "What is in the image?",
+                                     strUserInput,
                                      2,
                                      nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
                          } else {
@@ -563,7 +580,7 @@
                          //Text2Image inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
                                  ggmlModelFileName,
-                                 "a lovely cat"/*strUserInput*/,
+                                 strUserInput,
                                  benchmarkIndex,
                                  nThreadCounts, backendIndex, accelIndex);
                      } else if (isTTSModel) {
@@ -589,9 +606,9 @@
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
                          public void run() {
-                             displayInferenceResult(null);
+                             displayInferenceResult(null, true);
                              //update UI status
-                             resetUIAndStatus(false, true);
+                             resetUIAndStatus(strBenchmarkInfo,false, true);
                          }
                      });
                  }
@@ -763,7 +780,15 @@
                  } else {
                      if (content.startsWith("llama-timings")) {
                          KANTVLog.j(TAG, "LLM timings");
-                         displayInferenceResult(content);
+                         displayInferenceResult(content, true);
+                     } else if (content.startsWith("text2image-timings")) {
+                         KANTVLog.g(TAG, "text2image timings");
+                         try {
+                             displayImage("/sdcard/output.png");
+                         } catch (Exception ex) {
+                             KANTVLog.g(TAG, "error: " + ex.toString());
+                             KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());
+                         }
                      } else {
                          nLogCounts++;
                          if (nLogCounts > 100) {
@@ -840,7 +865,7 @@
              ggmljava.llm_stop_inference();
          }
 
-         resetUIAndStatus(true, false);
+         resetUIAndStatus(null,true, false);
      }
 
      /* will be removed in the future
@@ -976,7 +1001,7 @@
          mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
      }
 
-     private void resetUIAndStatus( boolean removeInferenceResult, boolean dispImage) {
+     private void resetUIAndStatus(String benchmarkResult, boolean removeInferenceResult, boolean dispImage) {
          isBenchmarking.set(false);
          _btnBenchmark.setEnabled(true);
          _btnBenchmark.setBackgroundColor(0xC3009688);
@@ -1003,6 +1028,11 @@
                  bitmapSelectedImage = null;
                  pathSelectedImage = null;
              }
+
+             if (isSDModel) {
+                 if ((strBenchmarkInfo != null) && (!strBenchmarkInfo.startsWith("unknown")))
+                    displayImage("/sdcard/output.png");
+             }
          }
 
          if (removeInferenceResult)
@@ -1019,11 +1049,7 @@
          selectModeFileName = "";
      }
 
-     private void displayInferenceResult(String content) {
-         _txtASRInfo.scrollTo(0, 0);
-         if (strBenchmarkInfo.startsWith("unknown")) {
-             return;
-         }
+     private String getBenchmarkTip() {
          String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
          String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
                  + " ,threads: " + nThreadCounts
@@ -1038,6 +1064,31 @@
 
          benchmarkTip += "\n";
 
+         return benchmarkTip;
+     }
+
+     private void displayInferenceResult(String content, boolean bOnlyDisplayBenchmarkTip) {
+         _txtASRInfo.scrollTo(0, 0);
+         if (strBenchmarkInfo.startsWith("unknown")) {
+             return;
+         }
+         String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
+         /*
+         String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(benchmarkIndex) + " (model: " + selectModeFileName
+                 + " ,threads: " + nThreadCounts
+                 + " ,backend: " + backendDesc
+                 + " ) cost " + duration + " milliseconds";
+         //04-07-2024(April,7,2024), add timestamp
+         String timestamp = "";
+         SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
+         Date date = new Date(System.currentTimeMillis());
+         timestamp = fullDateFormat.format(date);
+         benchmarkTip += ", on " + timestamp;
+
+         benchmarkTip += "\n";
+         */
+
+         String benchmarkTip = getBenchmarkTip();
          if (!strBenchmarkInfo.startsWith("unknown")) {
              if (!strBenchmarkInfo.startsWith("asr_result")) {
                  benchmarkTip += strBenchmarkInfo;
@@ -1054,28 +1105,34 @@
          }
 
          KANTVLog.j(TAG, benchmarkTip);
-
          String dispInfo;
-         if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
-             dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
-         else
-             dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
-         dispInfo += "\n\n";
+         if (!bOnlyDisplayBenchmarkTip) { //compatible with previous showMsgBox
+             if (benchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
+                 dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
+             else
+                 dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
+             dispInfo += "\n\n";
 
-         benchmarkTip += "\n";
-         dispInfo += benchmarkTip;
-         dispInfo += "\n";
+             dispInfo += benchmarkTip;
+             dispInfo += "\n";
+         } else { // compatible with new logic since 05/05/2025
+             dispInfo = benchmarkTip;
+             dispInfo += "\n";
+         }
 
          if (content != null) {
              dispInfo += content;
          }
-         KANTVUtils.showMsgBox(mActivity, dispInfo);
+         //don't call showMsgBox since 05/05/2025
+         //KANTVUtils.showMsgBox(mActivity, dispInfo);
+         _txtASRInfo.append("\n");
+         _txtASRInfo.append(dispInfo);
      }
 
      private void setTextGGMLInfo(String LLMModelFileName) {
          _txtGGMLInfo.setText("");
          _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
-         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
+         _txtGGMLInfo.append("\n" + "AI model:" + LLMModelFileName);
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
          Date date = new Date(System.currentTimeMillis());

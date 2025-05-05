@@ -99,8 +99,7 @@
 
 - v1.2.9 2024-03-04,
                  <ul>
-                    <li>set English as default UI language(it would be more useful for community)</li>
-                    <li> create <a href="https://github.com/cdeos">cde-os</a> org account in github and migrate project KanTV from personal github account to cde-os org account accordingly. so oneday I can assign one friend to continue maintaining it</li>
+                    <li>set English as default UI language</li>
                     <li> release source code v1.2.9 of KanTV APK before officially start integrating the excellent and amazing whisper.cpp to project KanTV. I have to say that I heard whisper.cpp too late but just try it since March 5,2024</li>
                 </ul>
 
@@ -113,7 +112,7 @@
 
 - v1.3.1 2024-03-11,
                  <ul>
-                     <li> ASR performance improved from 21 secs to 2 secs on Xiaomi 14 by build optimization, it's the second milestone for <a href="https://github.com/cdeos/kantv/issues/64">POC</a></li>
+                     <li> ASR performance improved from 21 secs to 2 secs on Xiaomi 14 by build optimization</li>
                      <li> add some technical docs to prepared empty directory doc </li>
                      <li> refine regular codes and prepare for coding work of implement real-time English subtitle for online English TV</li>
                  </ul>
@@ -132,8 +131,8 @@
 
 - v1.3.3 2024-03-18,
                  <ul>
-                    <li>switch to Project Whispercpp-Android successfully according to roadmap after finsihed <a href="https://github.com/cdeos/kantv/issues/64">POC</a></li>
-                    <li>this is the new baseline for new Project KanTV(aka Project Whispercpp-Android)</li>
+                    <li>switch to Project Whispercpp-Android successfully according to roadmap</li>
+                    <li>this is the new baseline for new Project KanTV</li>
                  </ul>
 
 - v1.3.4 2024-03-20,

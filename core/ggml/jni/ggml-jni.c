@@ -22,14 +22,11 @@
 #include <jni.h>
 
 #include "whispercpp/whisper.h"
-
 #include "llamacpp/include/llama.h"
 
 #include "kantv-asr.h"
 #include "ggml-jni.h"
-
 #include "llamacpp/ggml/include/ggml-hexagon.h"
-
 
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_asr_1get_1systeminfo(JNIEnv * env, jclass clazz) {
@@ -93,6 +90,14 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         goto failure;
     }
 
+    if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
+        if (HEXAGON_BACKEND_CDSP == backend_type) {
+            LOGGD("Text2Image via cDSP not supported currently");
+            GGML_JNI_NOTIFY("Text2Image via cDSP not supported currently");
+            goto failure;
+        }
+    }
+
 #if !defined GGML_USE_HEXAGON
     if (HEXAGON_BACKEND_GGML != backend_type) {
         LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
@@ -109,6 +114,10 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
     if (GGML_BENCHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
         sz_bench_result = "asr_result";
+    }
+
+    if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
+        sz_bench_result = "text2image_result";
     }
 
 failure:
@@ -408,4 +417,84 @@ failure:
     jstring string = (*env)->NewStringUTF(env, sz_bench_result);
 
     return string;
+}
+
+JNIEXPORT jstring JNICALL
+Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, jstring model_path,
+                                                    jstring aux_model_path, jstring prompt,
+                                                    jint n_llmtype, jint n_thread_counts,
+                                                    jint n_backend_type, jint n_hwaccel_type) {
+    const char * sz_model_path   = NULL;
+    const char * sz_auxmodel_path  = NULL;
+    const char * sz_prompt       = NULL;
+    const char * sz_bench_result = "unknown";
+    int result = 0;
+
+    sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
+    if (NULL == sz_model_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    sz_auxmodel_path = (*env)->GetStringUTFChars(env, aux_model_path, NULL);
+    if (NULL == sz_auxmodel_path) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    sz_prompt = (*env)->GetStringUTFChars(env, prompt, NULL);
+    if (NULL == sz_prompt) {
+        LOGGW("JNI failure, pls check why?");
+        goto failure;
+    }
+
+    LOGGV("model path:%s\n", sz_model_path);
+    LOGGV("aux model path:%s\n", sz_auxmodel_path);
+    LOGGV("prompt:%s\n", sz_prompt);
+    LOGGV("llm type: %d\n", n_llmtype);
+    LOGGV("thread counts:%d\n", n_thread_counts);
+    LOGGV("backend type:%d\n", n_backend_type);
+    LOGGV("accel type:%d\n", n_hwaccel_type);
+
+
+#if !defined GGML_USE_HEXAGON
+    if (n_backend != HEXAGON_BACKEND_GGML) {
+        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+        goto failure;
+    }
+#endif
+
+    if (0 == n_thread_counts)
+        n_thread_counts = 1;
+
+    result = sd_inference(sz_model_path, sz_auxmodel_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
+    LOGGD("result %d", result);
+    if (0 != result) {
+        if (result != LLM_INFERENCE_INTERRUPTED) {
+            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
+        }
+    }
+
+    failure:
+    if (NULL != sz_prompt) {
+        (*env)->ReleaseStringUTFChars(env, prompt, sz_prompt);
+    }
+
+    if (NULL != sz_auxmodel_path) {
+        (*env)->ReleaseStringUTFChars(env, aux_model_path, sz_auxmodel_path);
+    }
+
+    if (NULL != sz_model_path) {
+        (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
+    }
+
+    jstring string = (*env)->NewStringUTF(env, sz_bench_result);
+
+    return string;
+}
+
+JNIEXPORT jbyteArray JNICALL
+Java_kantvai_ai_ggmljava_jni_1text2image(JNIEnv *env, jclass clazz, jstring text) {
+    // TODO: implement jni_text2image() through StableDiffusion.cpp
 }

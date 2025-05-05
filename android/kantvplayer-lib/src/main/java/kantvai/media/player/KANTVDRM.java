@@ -119,6 +119,8 @@ final public class KANTVDRM {
 
     public native String ANDROID_JNI_GetSDKVersion();
 
+    public native byte[] ANDROID_JNI_Text2Image(String text);
+
 
     public native int ANDROID_DRM_Init(Context ctx, String dataPath, KANTVDRMClientEventListener drmClientEventListener);
 

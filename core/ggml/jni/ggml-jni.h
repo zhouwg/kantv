@@ -21,13 +21,13 @@
  */
 #ifndef KANTV_GGML_JNI_H
 #define KANTV_GGML_JNI_H
-
+#include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "libavutil/cde_log.h"
-
 #if (defined __ANDROID__) || (defined ANDROID)
 #include "kantv-asr.h"
 #include "kantv-media.h"
@@ -49,6 +49,7 @@ enum ggml_jni_bench_type {
     GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
     GGML_BENCHMARK_ASR,                       //ASR benchmark through whisper.cpp
     GGML_BENCHMARK_LLM,                       //LLM benchmark through llama.cpp
+    GGML_BENCHMARK_TEXT2IMAGE,                //Text2Image benchmark through stablediffusion.cpp
     GGML_BENCHMARK_MAX
 };
 //=============================================================================================
@@ -71,7 +72,7 @@ enum ggml_jni_bench_type {
      *
      * @param sz_model_path     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
      * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
-     * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp)
+     * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
      * @param n_threads         1 - 8
      * @param n_backend_type    0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU/HEXAGON_BACKEND_CDSP 3: ggml
      * @param n_accel_type      0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
@@ -149,6 +150,22 @@ enum ggml_jni_bench_type {
     int          llava_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
                                  const char * prompt, int llm_type, int num_threads, int backend_type, int hwaccel_type);
     int          llava_inference_main(int argc, char * argv[], int backend);
+
+    /**
+    * text-2-image inference
+    * @param model_path         /sdcard/xxxxxx.ckpt or /sdcard/safetensors or other name of SD model
+    * @param aux_model_path
+    * @param prompt
+    * @param llm_type           not used currently
+    * @param num_threads        1 - 8
+    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+    * @return
+    */
+    int          sd_inference(const char * model_path, const char * aux_model_path,
+                             const char * prompt, int llm_type, int num_threads, int backend_type, int hwaccel_type);
+    int          sd_inference_main(int argc, const char * argv[], int backend);
+
 #ifdef __cplusplus
 }
 #endif

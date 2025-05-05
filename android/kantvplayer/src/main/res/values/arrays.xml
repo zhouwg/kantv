@@ -64,6 +64,7 @@
         <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>ASR</item>                    <!-- ASR(whisper.cpp based on ggml)benchmark -->
         <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml)benchmark -->
+        <item>Text2Image</item>             <!-- Text2Image(stablediffusion.cpp based on ggml)benchmark -->
     </string-array>
 
     <string-array name="threadCounts">

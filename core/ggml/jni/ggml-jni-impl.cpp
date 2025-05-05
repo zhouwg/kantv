@@ -793,9 +793,9 @@ int ggml_jni_get_cpu_core_counts() {
 
 /**
   *
-  * @param sz_model_path   /sdcard/kantv/models/file_name_of_gguf_model or qualcomm's prebuilt dedicated model.so or ""
+  * @param sz_model_path   /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
   * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
-  * @param n_bench_type    0: memcpy 1: mulmat 2: QNN GGML OP(QNN UT) 3: QNN UT automation 4: ASR(whisper.cpp) 5: LLM(llama.cpp)
+  * @param n_bench_type    0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
   * @param n_threads       1 - 8
   * @param n_backend_type  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
   * @param n_accel_type    0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
@@ -803,11 +803,6 @@ int ggml_jni_get_cpu_core_counts() {
 */
 void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int n_threads, int n_backend_type, int n_accel_type) {
     int result = 0;
-
-    if (NULL == p_asr_ctx) {
-        LOGGW("pls check whether asr_ctx already initialized?\n");
-        return;
-    }
 
     if (NULL == sz_model_path) {
         LOGGW("pls check model path\n");
@@ -825,22 +820,29 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     LOGGD("backend type:%d\n", n_backend_type);
     LOGGD("accel type:%d\n", n_accel_type);
 
+    if (GGML_BENCHMARK_ASR == n_bench_type) {
+        if (NULL == p_asr_ctx) {
+            LOGGW("pls check whether asr_ctx already initialized?\n");
+            return;
+        }
+
 #ifdef GGML_USE_HEXAGON
-    if (HEXAGON_BACKEND_GGML == n_backend_type) {
-        p_asr_ctx->b_use_gpu = false;
-        p_asr_ctx->gpu_device = HEXAGON_BACKEND_GGML;
-    } else {
-        p_asr_ctx->b_use_gpu = true;
-        p_asr_ctx->gpu_device = n_backend_type;
-    }
+        if (HEXAGON_BACKEND_GGML == n_backend_type) {
+            p_asr_ctx->b_use_gpu = false;
+            p_asr_ctx->gpu_device = HEXAGON_BACKEND_GGML;
+        } else {
+            p_asr_ctx->b_use_gpu = true;
+            p_asr_ctx->gpu_device = n_backend_type;
+        }
 #endif
 
-    p_asr_ctx->n_threads                = n_threads;
-    p_asr_ctx->n_benchmark_type         = n_bench_type;
-    memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
-    strncpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
+        p_asr_ctx->n_threads = n_threads;
+        p_asr_ctx->n_benchmark_type = n_bench_type;
+        memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
+        strncpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
 
-    kantv_asr_notify_benchmark_c("reset");
+        kantv_asr_notify_benchmark_c("reset");
+    }
 
     switch (n_bench_type) {
         case GGML_BENCHMARK_MEMCPY:
@@ -857,6 +859,10 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
 
         case GGML_BENCHMARK_LLM:
             llama_inference(sz_model_path, sz_user_data, n_bench_type, n_threads, n_backend_type, n_accel_type);
+            break;
+
+        case GGML_BENCHMARK_TEXT2IMAGE:
+            sd_inference(sz_model_path, NULL, sz_user_data, n_bench_type, n_threads, n_backend_type, n_accel_type);
             break;
 
         default:

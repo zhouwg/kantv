@@ -79,4 +79,18 @@ public class ggmljava {
      * @return
      */
     public static native String llava_inference(String modelPath, String mmprojModelPath, String imgPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
+
+    /**
+     * @param modelPath     /sdcard/xxxxxx.ckpt or /sdcard/safetensors or other name of SD model
+     * @param auxModePath
+     * @param prompt        user input from UI
+     * @param nLLMType      not used currently
+     * @param nThreadCounts 1 - 8
+     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+     * @return
+     */
+    public static native String stablediffusion_inference(String modelPath, String auxModePath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
+
+    public static native byte[] jni_text2image(String text);
 }

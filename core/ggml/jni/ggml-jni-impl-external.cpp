@@ -7501,3 +7501,36 @@ int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path,
     LOGGD("ret %d", ret);
     return ret;
 }
+
+int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const char *sz_user_data, int llm_type,
+                    int n_threads, int n_backend_type, int n_hwaccel_type) {
+    int ret = 0;
+    LOGGD("model path:%s\n", sz_model_path);
+    LOGGD("aux path:%s\n", sz_aux_model_path);
+    LOGGD("user data: %s\n", sz_user_data);
+    LOGGD("llm_type: %d\n", llm_type);
+    LOGGD("num_threads:%d\n", n_threads);
+    LOGGD("backend type:%d\n", n_backend_type);
+    LOGGD("hwaccel type:%d\n", n_hwaccel_type);
+
+    if (nullptr == sz_model_path) {
+        LOGGD("pls check params\n");
+        return 1;
+    }
+    if (nullptr == sz_user_data) {
+        LOGGD("pls check params\n");
+        return 2;
+    }
+    //this is a lazy/dirty method to integrate stable-diffusion.cpp quickly
+    int argc = 11;
+    const char *argv[] = {"sd-inference-main",
+                          "-m", sz_model_path,
+                          "-p", sz_user_data,
+                          "--width", "64", /* hardcode to 64, it should be suitable for poster of a specified online-TV program */
+                          "--height", "64",
+                          "-t", std::to_string(n_threads).c_str()
+    };
+    ret = sd_inference_main(argc, argv, n_backend_type);
+    LOGGD("ret %d", ret);
+    return ret;
+}

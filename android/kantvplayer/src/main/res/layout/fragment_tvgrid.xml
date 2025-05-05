@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     android:padding="5dp">
 
-
-    <!--numColumns设置每行显示多少个-->
     <GridView
         android:id="@+id/tv_grid_layout"
         android:layout_width="match_parent"

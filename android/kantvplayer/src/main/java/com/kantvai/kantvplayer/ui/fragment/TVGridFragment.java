@@ -65,6 +65,7 @@
  import java.util.List;
 
  import butterknife.BindView;
+ import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVJNIDecryptBuffer;
  import kantvai.media.player.KANTVMediaGridAdapter;
  import kantvai.media.player.KANTVMediaGridItem;
@@ -152,9 +153,9 @@
      public void onResume() {
          super.onResume();
          if (mEPGDataLoadded) {
-             KANTVLog.d(TAG, "epg data already loadded");
+             KANTVLog.d(TAG, "epg data already loaded");
          } else {
-             KANTVLog.d(TAG, "epg data not loadded");
+             KANTVLog.d(TAG, "epg data not loaded");
              loadEPGData();
              mEPGDataLoadded = true;
              layoutUI(mActivity);
@@ -453,14 +454,18 @@
              public void bindView(KANTVMediaGridAdapter.ViewHolder holder, KANTVMediaGridItem obj) {
                  try {
                      KANTVLog.d(TAG, "load img from internal res");
-                     holder.setImageResource(gridItemImageID, obj.getItemId());
                      if (obj.getItemId() == testResID) {
-                         //TODO: dynamically generate a poster from user's specified "text"
-                         //      text ---> poster image
                          holder.setText(gridItemTextID, obj.getItemName());
+                         //dynamically generate a poster from user's specified "text"
+                         //text ---> poster image
+                         //FIXME: CJK not supported at the moment
+                         byte[] txt2image = mKANTVDRM.ANDROID_JNI_Text2Image(obj.getItemName());
+                         holder.setImageResource(gridItemImageID, txt2image, txt2image.length);
+                     } else {
+                         holder.setImageResource(gridItemImageID, obj.getItemId());
                      }
                  } catch (Exception ex) {
-                     KANTVLog.d(TAG, "error: " + ex.toString());
+                     KANTVLog.g(TAG, "error: " + ex.toString());
                  }
              }
          };

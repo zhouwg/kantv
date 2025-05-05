@@ -60,13 +60,12 @@
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
+ import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVEvent;
  import kantvai.media.player.KANTVEventListener;
  import kantvai.media.player.KANTVEventType;
  import kantvai.media.player.KANTVException;
- import kantvai.media.player.KANTVLLMModel;
- import kantvai.media.player.KANTVLLMModelMgr;
  import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVMgr;
@@ -123,7 +122,7 @@
      private Settings mSettings;
      private KANTVMgr mKANTVMgr = null;
      private LLMResearchFragment.MyEventListener mEventListener = new LLMResearchFragment.MyEventListener();
-     private KANTVLLMModelMgr LLMModelMgr = KANTVLLMModelMgr.getInstance();
+     private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
      private void initLLMModels() {
          LLMModelFileName = LLMModelMgr.getDefaultModelName();

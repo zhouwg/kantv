@@ -10,11 +10,13 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with regular Android software development) focus on highly-value on-device AI R&D activity, some on-device AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM on Android) could be done via this project easily.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with regular Android software development) focus on highly-value on-device AI R&D activity, some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/Text2Image/LLM on Android) could be done via this project easily.
 
-- Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android device through llama.cpp and whisper.cpp.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
 - Built-in [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) text-to-text and image-to-text(multimodal) supportive and runs entirely offline(no Internet required). the Gemma3-4B LLM models can be downloadded in the Android APK directly without manually preparation.
+
+- Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
 - Probably be the first [open-source implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) on Android phone.
 
@@ -100,6 +102,9 @@ English is preferred in this project, thanks for cooperation and understanding.
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
+- [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
+- [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
+- [ggml-hexagon:why HWACCEL_CDSP approach is correct direction in llama.cpp community](https://github.com/zhouwg/ggml-hexagon/discussions/28)
 - [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
 
 
@@ -128,6 +133,10 @@ English is preferred in this project, thanks for cooperation and understanding.
   LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>
   </li>
 
+  <li>
+   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stable-diffusion.cpp</a>
+  </li>
+
   </ul>
 
   </ul>
@@ -139,8 +148,6 @@ English is preferred in this project, thanks for cooperation and understanding.
 This project is licensed under [the MIT License](./LICENSE).
 
 ## Citation
-
-If you find this project useful in your R&D activity or learning activity, please consider giving a star :star: and citation :pencil: :)
 
 ```
 @software{KanTV authors,
@@ -161,23 +168,4 @@ If you find this project useful in your R&D activity or learning activity, pleas
   url = { https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp },
 }
 
-@article{ggml-hexagon,
-  title={ggml-hexagon:high-level data path of ggml-hexagon},
-  author={zhouwg},
-  year = {2025},
-  month = {04},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  url = = { https://github.com/zhouwg/ggml-hexagon/discussions/33 },
-}
-
-@article{ggml-hexagon,
-  title={ggml-hexagon:why HWACCEL_CDSP approach is correct direction in llama.cpp community},
-  author={zhouwg},
-  year = {2025},
-  month = {04},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  url = = { https://github.com/zhouwg/ggml-hexagon/discussions/28 },
-}
 ```

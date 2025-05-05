@@ -77,6 +77,7 @@ set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
 set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
+set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
@@ -90,6 +91,7 @@ message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
 message("GGML_SRC_DIR         : ${GGML_SRC_DIR}")
 message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
 message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
+message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
 message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
 message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
@@ -113,6 +115,7 @@ include_directories(${LLAMACPP_SRC_DIR}/)
 include_directories(${LLAMACPP_SRC_DIR}/common/)
 include_directories(${LLAMACPP_SRC_DIR}/common/minja/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
+include_directories(${SDCPP_SRC_DIR}/)
 
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
@@ -136,6 +139,8 @@ include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/)
 #set(HEXAGON_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-hexagon.cpp)
 file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/stub.c")
 endif()
+
+aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
 
 set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml.c
@@ -200,11 +205,14 @@ set(SOURCE_FILES
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
+        ${stablediffusioncpp}
+
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/llm-inference.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/sd-inference.cpp
 )
 
 add_definitions(-DTARGET_ANDROID)

@@ -43,7 +43,7 @@
 
  import java.io.File;
 
- import kantvai.media.player.KANTVLLMModelMgr;
+ import kantvai.ai.KANTVAIModelMgr;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -123,8 +123,8 @@
                  KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
                  KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
                  KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
-                 KANTVLog.g(TAG, "LLM model name: " + KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel()));
-                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel());
+                 KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel()));
+                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel());
                  KANTVLog.g(TAG, "modelPath:" + modelPath);
                  //KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
              }
@@ -147,18 +147,18 @@
              mActivity.getWindow().setAttributes(attributes);
              mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-             String userChooseModelName = KANTVLLMModelMgr.getInstance().getName(mSettings.getLLMModel());
+             String userChooseModelName = KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel());
              KANTVLog.g(TAG, "LLM model name of user choose:" + userChooseModelName);
              File llmModelFile = new File(KANTVUtils.getSDCardDataPath() + userChooseModelName);
              KANTVLog.g(TAG, "llmModeFile:" + llmModelFile.getAbsolutePath());
 
              //TODO:add support download other LLM models
-             if (mSettings.getLLMModel() != KANTVLLMModelMgr.getInstance().getDefaultModelIndex()) {
+             if (mSettings.getLLMModel() != KANTVAIModelMgr.getInstance().getDefaultModelIndex()) {
                  KANTVUtils.showMsgBox(mActivity, "currently only support download Gemma3-4B:model size 4.13 GiB, mmproj size 851 MiB");
                  return true;
              }
-             KANTVLog.g(TAG, "model url:" +  KANTVLLMModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
-             KANTVLog.g(TAG, "mmproj url:"+  KANTVLLMModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
+             KANTVLog.g(TAG, "model url:" +  KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
+             KANTVLog.g(TAG, "mmproj url:"+  KANTVAIModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
 
              if (llmModelFile.exists()) {
                  KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelName);
@@ -172,11 +172,11 @@
                  manager.setTitle("begin download LLM model");
                  manager.setModelName("LLM");
                  manager.setLLMModelName("GGML",  userChooseModelName,
-                         KANTVLLMModelMgr.getInstance().getMMProjName(mSettings.getLLMModel()),
-                         KANTVLLMModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
-                         KANTVLLMModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
-                 manager.setLLMModelSize(KANTVLLMModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
-                         KANTVLLMModelMgr.getInstance().getMMProjSize(mSettings.getLLMModel()));
+                         KANTVAIModelMgr.getInstance().getMMProjName(mSettings.getLLMModel()),
+                         KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
+                         KANTVAIModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
+                 manager.setLLMModelSize(KANTVAIModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
+                         KANTVAIModelMgr.getInstance().getMMProjSize(mSettings.getLLMModel()));
                  manager.showUpdateDialog();
              }
          }
