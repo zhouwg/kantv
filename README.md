@@ -32,7 +32,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 ### Run Android APK on Android phone
 - Android 5.1 --- Android 15 and higher version with <b>ANY</b> mainstream mobile SoC might/should/could be supported.
 - Android smartphone equipped with <b>ANY</b> mainstream <b>high-end</b> mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen.
-- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm high-end mobile SoC <b>Snapdragon 8Gen3 and Snapdragon 8Elite</b> are highly recommended) <b>is required</b> for verify/running ggml-hexagon backend on Android phone:
+- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm's state-of-the-art high-end mobile SoC <b>Snapdragon 8Gen3 series and Snapdragon 8Elite series</b> are highly recommended) <b>is required</b> for verify/running ggml-hexagon backend on Android phone:
 ```
     Snapdragon 8 Gen 1
     Snapdragon 8 Gen 1+
