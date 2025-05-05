@@ -108,7 +108,6 @@ English is preferred in this project, thanks for cooperation and understanding.
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
-- [ggml-hexagon:why HWACCEL_CDSP approach is correct direction in llama.cpp community](https://github.com/zhouwg/ggml-hexagon/discussions/28)
 - [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
 
 
