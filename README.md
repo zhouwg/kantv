@@ -101,6 +101,7 @@ English is preferred in this project, thanks for cooperation and understanding.
 - [How to build](./docs/build.md)
 - [How to customize tv.xml](./docs/how-to-customize-tv-xml.md)
 - [How to troubleshooting issues in APP](./docs/FAQ.md)
+- [How to utilize this project for validate/verify a specified LLM model on Android phone](./docs/how-to-use-this-project-for-ai-expert.md)
 - [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
 - <b>[How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](./docs/how-to-customize.md)</b>
 - [Authors](./AUTHORS)
