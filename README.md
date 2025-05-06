@@ -10,7 +10,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers(whom mightbe not familiar with regular Android software development) focus on highly-value on-device AI R&D activity, some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/Text2Image/LLM on Android) could be done via this project easily.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers whom focus on highly-value on-device AI R&D activity on Android rather than routine work. some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/Text2Image/LLM on Android) could be done via this project easily.
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
@@ -26,7 +26,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 ### Building the project
 
-- Clone this repository and build locally, see [how to build](./docs/build.md)
+- Clone this repository and build locally, see [how to build](./docs/how-to-build.md)
 - Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
 
 ### Run Android APK on Android phone
@@ -98,7 +98,7 @@ English is preferred in this project, thanks for cooperation and understanding.
 -->
 
 ### Docs
-- [How to build](./docs/build.md)
+- [How to build](./docs/how-to-build.md)
 - [How to customize tv.xml](./docs/how-to-customize-tv-xml.md)
 - [How to troubleshooting issues in APP](./docs/FAQ.md)
 - [How to utilize this project for validate/verify a specified LLM model on Android phone](./docs/how-to-use-this-project-for-ai-expert.md)
