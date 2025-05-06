@@ -24,8 +24,15 @@ package kantvai.ai;
  import kantvai.media.player.KANTVLog;
 
  public class KANTVAIModel {
+     public enum AIModelType {
+         TYPE_ASR,
+         TYPE_TEXT2IMAGE,
+         TYPE_LLM,
+     };
     private static final String TAG = KANTVAIModel.class.getSimpleName();
     private int index;
+
+    private AIModelType type;
     private String nickname;    //model's short name
     private String name;        //model's full name
     private String mmproj_name; //mmproj model name
@@ -38,23 +45,31 @@ package kantvai.ai;
     private long size;          //size of model, in bytes
     private long mmproj_size;   //size of mmproj model, in bytes
 
-    public KANTVAIModel(int index, String nick, String name, String url) {
+    private String sample_name;
+    private long sample_size;
+
+    public KANTVAIModel(int index, AIModelType type, String nick, String name, String url) {
         this.index = index;
+        this.type = type;
         this.nickname  = nick;
         this.name  = name;
         this.url   = url;
     }
 
-    public KANTVAIModel(int index, String nick, String name, String url, String quality) {
-        this(index, nick, name, url);
-        this.quality = quality;
-    }
+     public KANTVAIModel(int index, AIModelType type, String nick, String name, String url, long size) {
+         this(index, type, nick, name, url);
+         this.size = size;
+     }
 
-    public KANTVAIModel(int index, String nick, String name, String mmprojName, String url, String quality) {
-        this(index, nick, name, url, quality);
-        this.mmproj_name = mmprojName;
-        KANTVLog.j(TAG, "init");
-    }
+
+     public KANTVAIModel(int index, AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl, long modelSize, long mmprojModelSize) {
+         this(index, type, nick, name, url);
+         this.mmproj_name = mmprojName;
+         this.mmproj_url  = mmprojUrl;
+         this.size = modelSize;
+         this.mmproj_size = mmprojModelSize;
+         KANTVLog.j(TAG, "init");
+     }
 
     public String getNickname() { return nickname; }
     public String getName() {
@@ -85,5 +100,11 @@ package kantvai.ai;
 
     public void setMMprojSize(long size) { this.mmproj_size = size; }
     public long getMMprojSize() { return mmproj_size; }
+
+    public void setSample(String sampleName, long sampleSize, String url) {
+        this.sample_name = sampleName;
+        this.sample_size = sampleSize;
+        this.url = url;
+    }
 
 }

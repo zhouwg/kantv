@@ -79,14 +79,14 @@
      LinearLayout layout;
 
      private static final String TAG = LLMResearchFragment.class.getName();
-     TextView _txtLLMInfo;
-     TextView _txtGGMLInfo;
+     TextView txtLLMInfo;
+     TextView txtGGMLInfo;
 
-     EditText _txtUserInput;
-     LinearLayout _llInfoLayout;
+     EditText txtUserInput;
+     LinearLayout llInfoLayout;
 
-     Button _btnInference;
-     Button _btnStopInference;
+     Button btnInference;
+     Button btnStopInference;
 
      private int nThreadCounts = 4;
      private int nLLMType = 1;
@@ -113,7 +113,7 @@
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
 
-     private String LLMModelFileName;
+     private String LLMModelFullName;
      private String LLMModelURL;
      String selectModelFilePath = "";
      private String strUserInput = "introduce the movie Once Upon a Time in America briefly, less then 100 words\n";
@@ -125,8 +125,8 @@
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
      private void initLLMModels() {
-         LLMModelFileName = LLMModelMgr.getDefaultModelName();
-         LLMModelURL = LLMModelMgr.getDefaultModelUrl();
+         LLMModelFullName = LLMModelMgr.getKANTVAIModelFromName("Gemma3-4B").getName();
+         LLMModelURL = LLMModelMgr.getKANTVAIModelFromName("Gemma3-4B").getUrl();
      }
 
      public static LLMResearchFragment newInstance() {
@@ -158,13 +158,13 @@
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
 
-         _txtLLMInfo = mActivity.findViewById(R.id.llmInfo);
-         _txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfoLLM);
-         _btnInference = mActivity.findViewById(R.id.btnInference);
-         _btnStopInference      = mActivity.findViewById(R.id.btnStop);
-         _txtUserInput = mActivity.findViewById(R.id.txtUserInput);
-         _llInfoLayout = mActivity.findViewById(R.id.llLLMInfoLayout);
-         _txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+         txtLLMInfo = mActivity.findViewById(R.id.llmInfo);
+         txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfoLLM);
+         btnInference = mActivity.findViewById(R.id.btnInference);
+         btnStopInference      = mActivity.findViewById(R.id.btnStop);
+         txtUserInput = mActivity.findViewById(R.id.txtUserInput);
+         llInfoLayout = mActivity.findViewById(R.id.llLLMInfoLayout);
+         txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
 
          initLLMModels();
 
@@ -177,7 +177,7 @@
          }
 
          KANTVLog.j(TAG, "set ggml's llama.cpp info");
-         setTextGGMLInfo(LLMModelFileName);
+         setTextGGMLInfo(LLMModelFullName);
 
          Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerLLMThreadCounts);
          String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
@@ -217,7 +217,7 @@
          });
          spinnerBackendType.setSelection(ggmljava.HEXAGON_BACKEND_GGML - offset);
 
-         _btnStopInference.setOnClickListener(v -> {
+         btnStopInference.setOnClickListener(v -> {
              KANTVLog.g(TAG, "here");
              if (ggmljava.llm_is_running()) {
                  KANTVLog.g(TAG, "here");
@@ -226,16 +226,16 @@
              restoreUIAndStatus();
          });
 
-         _btnInference.setOnClickListener(v -> {
-             KANTVLog.j(TAG, "strModeName:" + LLMModelFileName);
-             KANTVLog.j(TAG, "threads:" + nThreadCounts + ", model:" + LLMModelFileName + ", backend:" + strBackend);
+         btnInference.setOnClickListener(v -> {
+             KANTVLog.j(TAG, "strModeName:" + LLMModelFullName);
+             KANTVLog.j(TAG, "threads:" + nThreadCounts + ", model:" + LLMModelFullName + ", backend:" + strBackend);
 
              //sanity check begin
              {
                  if (!checkLLMModelExist())
                      return;
 
-                 String strPrompt = _txtUserInput.getText().toString();
+                 String strPrompt = txtUserInput.getText().toString();
                  if (strPrompt.isEmpty()) {
                      //KANTVUtils.showMsgBox(mActivity, "pls check your input");
                      //return;
@@ -283,7 +283,7 @@
                      isBenchmarking.set(false);
                      mActivity.runOnUiThread(() -> {
                          restoreUIAndStatus();
-                         _txtLLMInfo.scrollTo(0, 0);
+                         txtLLMInfo.scrollTo(0, 0);
                          displayInferenceResult(strLLMInferenceInfo);
                          strLLMInferenceInfo = null;
                      });
@@ -325,7 +325,7 @@
 
              if (eventType.getValue() == KANTVEvent.KANTV_ERROR) {
                  KANTVLog.j(TAG, "ERROR:" + eventString);
-                 _txtLLMInfo.setText("ERROR:" + content);
+                 txtLLMInfo.setText("ERROR:" + content);
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
@@ -336,13 +336,13 @@
 
                  if (content.startsWith("reset")) {
                      KANTVLog.g(TAG, "reset");
-                     _txtLLMInfo.setText("");
+                     txtLLMInfo.setText("");
                      return;
                  }
 
                  //make UI happy when disable GGML_USE_HEXAGON manually
                  if (content.startsWith("ggml-hexagon")) {
-                     _txtLLMInfo.setText(content);
+                     txtLLMInfo.setText(content);
                      return;
                  }
 
@@ -363,14 +363,14 @@
                              return;
                          }
 
-                         _txtLLMInfo.append(content);
-                         int offset = _txtLLMInfo.getLineCount() * _txtLLMInfo.getLineHeight();
+                         txtLLMInfo.append(content);
+                         int offset = txtLLMInfo.getLineCount() * txtLLMInfo.getLineHeight();
                          int screenHeight = KANTVUtils.getScreenHeight();
                          int maxHeight = 500;
                          KANTVLog.j(TAG, "offset:" + offset);
                          KANTVLog.j(TAG, "screenHeight:" + screenHeight);
                          if (offset > maxHeight)
-                             _txtLLMInfo.scrollTo(0, offset - maxHeight);
+                             txtLLMInfo.scrollTo(0, offset - maxHeight);
                      }
                  }
              }
@@ -428,17 +428,17 @@
          }
 
          restoreUIAndStatus();
-         _txtLLMInfo.setText("");
-         _txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
+         txtLLMInfo.setText("");
+         txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
      }
 
      private void initUIAndStatus() {
          isBenchmarking.set(true);
          //Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
 
-         _txtLLMInfo.setText("");
-         _btnInference.setEnabled(false);
-         _btnInference.setBackgroundColor(0xffa9a9a9);
+         txtLLMInfo.setText("");
+         btnInference.setEnabled(false);
+         btnInference.setBackgroundColor(0xffa9a9a9);
 
          WindowManager.LayoutParams attributes = mActivity.getWindow().getAttributes();
          attributes.screenBrightness = 1.0f;
@@ -448,8 +448,8 @@
 
      private void restoreUIAndStatus() {
          isBenchmarking.set(false);
-         _btnInference.setEnabled(true);
-         _btnInference.setBackgroundColor(0xC3009688);
+         btnInference.setEnabled(true);
+         btnInference.setBackgroundColor(0xC3009688);
      }
 
      private void displayInferenceResult(String content) {
@@ -463,7 +463,7 @@
          }
          String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
 
-         String benchmarkTip =  " (model: " + LLMModelFileName
+         String benchmarkTip =  " (model: " + LLMModelFullName
                  + " ,threads: " + nThreadCounts
                  + " ,backend: " + backendDesc
                  + " ) cost " + duration + " milliseconds";
@@ -497,8 +497,8 @@
 
      private boolean checkLLMModelExist() {
          File selectModeFile = null;
-         KANTVLog.g(TAG, "selectModeFileName:" + LLMModelFileName);
-         selectModelFilePath = KANTVUtils.getSDCardDataPath() + LLMModelFileName;
+         KANTVLog.g(TAG, "selectModeFileName:" + LLMModelFullName);
+         selectModelFilePath = KANTVUtils.getSDCardDataPath() + LLMModelFullName;
          KANTVLog.g(TAG, "selectModelFilePath:" + selectModelFilePath);
          selectModeFile = new File(selectModelFilePath);
          if (!selectModeFile.exists()) {
@@ -508,16 +508,16 @@
          }
          return true;
      }
-     private void setTextGGMLInfo(String LLMModelFileName) {
-         _txtGGMLInfo.setText("");
-         _txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM));
-         _txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFileName);
+     private void setTextGGMLInfo(String LLMModelFullName) {
+         txtGGMLInfo.setText("");
+         txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM));
+         txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFullName);
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
          Date date = new Date(System.currentTimeMillis());
          timestamp = fullDateFormat.format(date);
-         _txtGGMLInfo.append("\n");
-         _txtGGMLInfo.append("running timestamp:" + timestamp);
+         txtGGMLInfo.append("\n");
+         txtGGMLInfo.append("running timestamp:" + timestamp);
      }
 
      public static native int kantv_anti_remove_rename_this_file();

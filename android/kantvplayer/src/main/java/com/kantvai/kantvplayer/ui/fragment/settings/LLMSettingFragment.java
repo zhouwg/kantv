@@ -153,8 +153,15 @@
              KANTVLog.g(TAG, "llmModeFile:" + llmModelFile.getAbsolutePath());
 
              //TODO:add support download other LLM models
-             if (mSettings.getLLMModel() != KANTVAIModelMgr.getInstance().getDefaultModelIndex()) {
-                 KANTVUtils.showMsgBox(mActivity, "currently only support download Gemma3-4B:model size 4.13 GiB, mmproj size 851 MiB");
+             int userSelectIndex = mSettings.getLLMModel();
+             KANTVAIModelMgr AIModelMgr = KANTVAIModelMgr.getInstance();
+             if ((userSelectIndex == AIModelMgr.getLLMModelIndex("Gemma3-4B"))
+               || (userSelectIndex == AIModelMgr.getLLMModelIndex("Gemma3-12B"))
+             ) {
+                 //do nothing
+             } else {
+                 KANTVUtils.showMsgBox(mActivity, "currently only support download Gemma3-4B(model size 4.13 GiB, mmproj size 851 MiB)" +
+                         " or Gemma3-12B(model size 6.8 GiB, mmproj size 815 MiB");
                  return true;
              }
              KANTVLog.g(TAG, "model url:" +  KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
