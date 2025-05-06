@@ -43,6 +43,16 @@
 #include "ggml-sycl.h"
 #endif
 
+
+#if defined(__ANDROID__) || defined(ANDROID)
+extern "C" {
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
+}
+#include "ggml-jni.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
+#endif
+
 #include "rng.hpp"
 #include "util.h"
 
@@ -1162,6 +1172,7 @@ public:
     }
 
     bool alloc_params_buffer() {
+        LOGGD("enter %s", __func__);
         size_t num_tensors = ggml_tensor_num(params_ctx);
         params_buffer      = ggml_backend_alloc_ctx_tensors(params_ctx, backend);
         if (params_buffer == NULL) {

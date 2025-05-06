@@ -78,6 +78,7 @@ enum SDMode {
 };
 
 struct SDParams {
+    int n_backend = 4;
     int n_threads = -1;
     SDMode mode   = TXT2IMG;
     std::string model_path;
@@ -812,6 +813,9 @@ int sd_inference_main(int argc, const char* argv[], int backend_type) {
     GGML_JNI_NOTIFY("%s\n", sd_get_system_info());
 #endif
 
+    LOGGD("backend_type %d", backend_type);
+    params.n_backend = backend_type;
+
     if (params.mode == CONVERT) {
         bool success = convert(params.model_path.c_str(), params.vae_path.c_str(), params.output_path.c_str(), params.wtype);
         if (!success) {
@@ -906,7 +910,7 @@ int sd_inference_main(int argc, const char* argv[], int backend_type) {
                                   vae_decode_only,
                                   params.vae_tiling,
                                   true,
-                                  params.n_threads,
+                                  params.n_threads, params.n_backend,
                                   params.wtype,
                                   params.rng_type,
                                   params.schedule,
@@ -916,7 +920,7 @@ int sd_inference_main(int argc, const char* argv[], int backend_type) {
                                   params.diffusion_flash_attn);
 
     if (sd_ctx == NULL) {
-        printf("new_sd_ctx_t failed\n");
+        LOG_DEBUG("new_sd_ctx_t failed\n");
         return 1;
     }
 
@@ -925,7 +929,7 @@ int sd_inference_main(int argc, const char* argv[], int backend_type) {
         int c                = 0;
         control_image_buffer = stbi_load(params.control_image_path.c_str(), &params.width, &params.height, &c, 3);
         if (control_image_buffer == NULL) {
-            fprintf(stderr, "load image from '%s' failed\n", params.control_image_path.c_str());
+            LOG_DEBUG("load image from '%s' failed\n", params.control_image_path.c_str());
             return 1;
         }
         control_image = new sd_image_t{(uint32_t)params.width,

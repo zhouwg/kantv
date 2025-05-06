@@ -92,8 +92,8 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
 
     if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
         if (HEXAGON_BACKEND_CDSP == backend_type) {
-            LOGGD("Text2Image via cDSP not supported currently");
-            GGML_JNI_NOTIFY("Text2Image via cDSP not supported currently");
+            LOGGD("StableDiffusion via cDSP cann't works correct currently");
+            GGML_JNI_NOTIFY("StableDiffusion via cDSP cann't works correct currently");
             goto failure;
         }
     }

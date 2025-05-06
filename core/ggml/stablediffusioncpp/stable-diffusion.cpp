@@ -20,6 +20,15 @@
 #define STB_IMAGE_STATIC
 #include "stb_image.h"
 
+#if defined(__ANDROID__) || defined(ANDROID)
+extern "C" {
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
+}
+#include "ggml-jni.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
+#endif
+
 // #define STB_IMAGE_WRITE_IMPLEMENTATION
 // #define STB_IMAGE_WRITE_STATIC
 // #include "stb_image_write.h"
@@ -87,6 +96,7 @@ public:
 
     std::shared_ptr<RNG> rng = std::make_shared<STDDefaultRNG>();
     int n_threads            = -1;
+    int n_backend            = 4;
     float scale_factor       = 0.18215f;
 
     std::shared_ptr<Conditioner> cond_stage_model;
@@ -114,12 +124,12 @@ public:
 
     StableDiffusionGGML() = default;
 
-    StableDiffusionGGML(int n_threads,
+    StableDiffusionGGML(int n_threads, int n_backend,
                         bool vae_decode_only,
                         bool free_params_immediately,
                         std::string lora_model_dir,
                         rng_type_t rng_type)
-        : n_threads(n_threads),
+        : n_threads(n_threads), n_backend(n_backend),
           vae_decode_only(vae_decode_only),
           free_params_immediately(free_params_immediately),
           lora_model_dir(lora_model_dir) {
@@ -183,7 +193,11 @@ public:
         LOG_DEBUG("Using SYCL backend");
         backend = ggml_backend_sycl_init(0);
 #endif
-
+#ifdef SD_USE_HEXAGON
+        LOGGD("enable GGML_HEXAGON\n");
+        //FIXME:hardcode runtime libpath
+        backend = ggml_backend_hexagon_init(n_backend, "/data/data/com.kantvai.kantvplayer/");
+#endif
         if (!backend) {
             LOG_DEBUG("Using CPU backend");
             backend = ggml_backend_cpu_init();
@@ -1123,7 +1137,7 @@ sd_ctx_t* new_sd_ctx(const char* model_path_c_str,
                      bool vae_decode_only,
                      bool vae_tiling,
                      bool free_params_immediately,
-                     int n_threads,
+                     int n_threads, int n_backend,
                      enum sd_type_t wtype,
                      enum rng_type_t rng_type,
                      enum schedule_t s,
@@ -1147,7 +1161,7 @@ sd_ctx_t* new_sd_ctx(const char* model_path_c_str,
     std::string id_embd_path(id_embed_dir_c_str);
     std::string lora_model_dir(lora_model_dir_c_str);
 
-    sd_ctx->sd = new StableDiffusionGGML(n_threads,
+    sd_ctx->sd = new StableDiffusionGGML(n_threads, n_backend,
                                          vae_decode_only,
                                          free_params_immediately,
                                          lora_model_dir,
