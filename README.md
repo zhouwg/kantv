@@ -43,7 +43,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 
 ### Screenshots
-<hr>
+
 here is a short video to demostrate realtime AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Gen3 mobile SoC - <b>fully offline, on-device</b>.
 
 https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
@@ -88,14 +88,7 @@ a screenshot to demostrate download LLM model in APK.
 </details>
 
 
-### Contribution
 
-Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
-
-<b>Report issue</b> in various Android-based phone and submit PR to this project is greatly welcomed.
-<!--
-English is preferred in this project, thanks for cooperation and understanding.
--->
 
 ### Docs
 - [How to build](./docs/how-to-build.md)
@@ -110,6 +103,16 @@ English is preferred in this project, thanks for cooperation and understanding.
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
 - [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
+
+### Contribution
+
+Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+
+Report issue and submit PR to this project is greatly welcomed.
+
+## Contributors
+
+[![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
 
 
 ### Special Acknowledgement
