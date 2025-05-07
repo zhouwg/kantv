@@ -113,10 +113,10 @@
     <string name="TrackType_subtitle">Subtitle</string>
     <string name="TrackType_timedtext">Timed text</string>
     <string name="TrackType_metadata">Meta data</string>
-    <string name="TrackType_unknown">Unknown</string>
+    <string name="TrackType_unknown">Unknown TrackType</string>
 
     <string name="VideoView_error_text_invalid_progressive_playback">Invalid progressive playback</string>
-    <string name="VideoView_error_text_unknown">Unknown</string>
+    <string name="VideoView_error_text_unknown">Playback Error(invalid URL or other reason)</string>
     <string name="VideoView_error_button">OK</string>
 
     <string name="VideoView_ar_aspect_fit_parent">Aspect / Fit parent</string>

@@ -455,7 +455,8 @@
                  try {
                      KANTVLog.d(TAG, "load img from internal res");
                      if (obj.getItemId() == testResID) {
-                         holder.setText(gridItemTextID, obj.getItemName());
+                         //FIXME: UI issue at here
+                         //holder.setText(gridItemTextID, obj.getItemName());
                          //dynamically generate a poster from user's specified "text"
                          //text ---> poster image
                          //FIXME: CJK not supported at the moment

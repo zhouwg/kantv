@@ -1774,7 +1774,7 @@ public class KANTVVideoView extends FrameLayout implements MediaController.Media
 
     public boolean toggleLandscape() {
         mEnableLandscape = !mEnableLandscape;
-        KANTVLog.d(TAG, "toggle land scape");
+        KANTVLog.d(TAG, "toggle landscape");
         if (mActivity == null)
             return false;
 

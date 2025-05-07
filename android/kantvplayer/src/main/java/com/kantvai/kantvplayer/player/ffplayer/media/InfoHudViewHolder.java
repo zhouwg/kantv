@@ -418,19 +418,19 @@ public class InfoHudViewHolder {
                         //(it is not backed by the same data on disk), and is not shared with any other processes.
                         //Another way to look at this is the RAM that will become available to the system when that
                         //process goes away (and probably quickly subsumed into caches and other uses of it).
-                        //int privateDirty = debugInfo.getTotalPrivateDirty();//获取USS数据
-                        //int totalPss = debugInfo.getTotalPss();//获取PSS数据， PSS (Proportional Set Size)
-                        //int sharedDirty = debugInfo.getTotalSharedDirty();//获取RSS数据
+                        //int privateDirty = debugInfo.getTotalPrivateDirty();
+                        //int totalPss = debugInfo.getTotalPss();//PSS (Proportional Set Size)
+                        //int sharedDirty = debugInfo.getTotalSharedDirty();
                         // dalvikPrivateClean + nativePrivateClean + otherPrivateClean;
                         int totalPrivateClean = debugInfo.getTotalPrivateClean();
                         // dalvikPrivateDirty + nativePrivateDirty + otherPrivateDirty;
-                        int totalPrivateDirty = debugInfo.getTotalPrivateDirty();//获取USS数据
+                        int totalPrivateDirty = debugInfo.getTotalPrivateDirty();
                         // dalvikPss + nativePss + otherPss;
-                        int totalPss = debugInfo.getTotalPss();//获取PSS数据， PSS (Proportional Set Size)
+                        int totalPss = debugInfo.getTotalPss();//PSS (Proportional Set Size)
                         // dalvikSharedClean + nativeSharedClean + otherSharedClean;
                         int totalSharedClean = debugInfo.getTotalSharedClean();
                         // dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
-                        int totalSharedDirty = debugInfo.getTotalSharedDirty();//获取RSS数据
+                        int totalSharedDirty = debugInfo.getTotalSharedDirty();
                         // dalvikSwappablePss + nativeSwappablePss + otherSwappablePss;
                         int totalSwappablePss = debugInfo.getTotalSwappablePss();
 
@@ -446,9 +446,9 @@ public class InfoHudViewHolder {
                         //getNativeHeapFreeSize()
                         String memoryInfoString = null;
                         if (mSettings.getUILang() == Settings.KANTV_UILANG_CN) {
-                            memoryInfoString = "设备总内存                              ：" + (totalMem >> 20) + "MB" + "  "
-                                    + "设备低内存阈值：" + threshold / Bytes2MBytes + "MB" + "  "
-                                    + "设备可用内存：" + availMem / Bytes2MBytes + "MB" + "\r\n"
+                            memoryInfoString = "total mem                              ：" + (totalMem >> 20) + "MB" + "  "
+                                    + "threshold of low mem：" + threshold / Bytes2MBytes + "MB" + "  "
+                                    + "available mem：" + availMem / Bytes2MBytes + "MB" + "\r\n"
                                     + "NativeHeapSize：" + (Debug.getNativeHeapSize() >> 20) + "MB" + "  "
                                     + "NativeHeapAllocatedSize：" + (Debug.getNativeHeapAllocatedSize() >> 20) + "MB" + " "
                                     + "NativeHeapFreeSize：" + (Debug.getNativeHeapFreeSize() >> 20) + "MB " + "\r\n"

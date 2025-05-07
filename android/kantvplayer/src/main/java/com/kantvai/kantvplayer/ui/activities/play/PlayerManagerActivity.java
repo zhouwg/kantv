@@ -42,7 +42,6 @@ public class PlayerManagerActivity extends BaseMvcActivity {
     private String zimuPath;
     private long currentPosition;
     private int episodeId;
-    private long thunderTaskId;
     private int sourceOrigin;
     private String searchWord;
 
@@ -81,6 +80,7 @@ public class PlayerManagerActivity extends BaseMvcActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == SELECT_DANMU) {
             if (resultCode == RESULT_OK) {
                 BindResourceBean bindResourceBean = data.getParcelableExtra("bind_data");
@@ -104,7 +104,6 @@ public class PlayerManagerActivity extends BaseMvcActivity {
         zimuPath = openIntent.getStringExtra("zimu_path");
         currentPosition = openIntent.getLongExtra("current_position", 0L);
         episodeId = openIntent.getIntExtra("episode_id", 0);
-        thunderTaskId = openIntent.getLongExtra("thunder_task_id", -1L);
         searchWord = openIntent.getStringExtra("search_word");
 
         sourceOrigin = openIntent.getIntExtra("source_origin", SOURCE_ORIGIN_LOCAL);
@@ -122,7 +121,7 @@ public class PlayerManagerActivity extends BaseMvcActivity {
         }
 
         if (TextUtils.isEmpty(videoPath)) {
-            ToastUtils.showShort("parse url of video failur:empty url");
+            ToastUtils.showShort("parse url of video failure:empty url");
             errorTv.setVisibility(View.VISIBLE);
             return;
         }

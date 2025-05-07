@@ -123,7 +123,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
         PlayParam playParam = getIntent().getParcelableExtra("video_data");
 
         if (playParam == null) {
-            ToastUtils.showShort("解析播放参数失败");
+            ToastUtils.showShort("failed to parse parameters");
             new CommonDialog.Builder(this)
                     .setDismissListener(dialog -> PlayerActivity.this.finish())
                     .setAutoDismiss()
@@ -131,7 +131,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
                     .setTouchNotCancel()
                     .hideOk()
                     .build()
-                    .show("解析播放参数失败", "", "退出重试");
+                    .show("failed to parse parameters", "", "Re-try");
             return;
         }
 
@@ -206,10 +206,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerReceiverL
                             .setTouchNotCancel();
                     if (sourceOrigin == PlayerManagerActivity.SOURCE_ONLINE_PREVIEW) {
                         builder.setHideOk(false).build()
-                                .show("播放失败，资源无法下载", "", "退出播放");
+                                .show("Playback failure", "", "Exit");
                     } else {
                         builder.setHideOk(true).build()
-                                .show("播放失败，请尝试更改播放器设置", "播放器设置", "退出播放");
+                                .show("Playback failure", "Player Setting", "Exit");
                     }
                     break;
 

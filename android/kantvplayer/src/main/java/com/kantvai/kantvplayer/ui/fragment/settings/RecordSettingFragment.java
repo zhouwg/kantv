@@ -285,7 +285,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                     Toast.makeText(mContext, "invalid time " + durationRecordESString, Toast.LENGTH_LONG).show();
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     key = mAppContext.getString(R.string.pref_key_record_duration);
-                    editor.putString(key, "3");
+                    editor.putString(key, "10"); // 10 minutes
                     editor.commit();
                     durationRecordESString = mSettings.getRecordDurationString();
                     KANTVLog.d(TAG, "duration of record es: " + durationRecordESString);
@@ -317,7 +317,7 @@ public class RecordSettingFragment extends BaseSettingsFragment {
                     Toast.makeText(mContext, "invalid value " + recordSizeString, Toast.LENGTH_LONG).show();
                     SharedPreferences.Editor editor = mSharedPreferences.edit();
                     key = mAppContext.getString(R.string.pref_key_record_size);
-                    editor.putString(key, "20");
+                    editor.putString(key, "200"); //200 MiB
                     editor.commit();
                     recordSizeString = mSettings.getRecordSizeString();
                     KANTVLog.d(TAG, "record size: " + recordSizeString);
