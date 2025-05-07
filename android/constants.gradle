@@ -36,11 +36,10 @@ API34：Android 14
 API35：Android 15
 */
 project.ext {
-    //zhouwg:2024-03-10, attention here,only validated ok on Xiaomi 14
+    //zhouwg:2024-03-10, attention here
     compileSdkVersion   = 34
     buildToolsVersion   = "34.0.0"
     targetSdkVersion    = 34
-    //34 is too strict and the generated apk couldn't run on low-end vivo Android phone,target phone should be above Android 8
     minSdkVersion       = 26
     appTargetSdkVersion = 29
 

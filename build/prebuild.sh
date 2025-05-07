@@ -2,10 +2,8 @@
 
 # Copyright (c) 2021- KanTV Authors
 
-# Description: prerequisites for project
+# Description: prerequisites for build project
 #
-# validated ok in Ubuntu 20.04
-
 sudo apt-get update
 sudo apt-get install build-essential -y
 sudo apt-get install cmake -y

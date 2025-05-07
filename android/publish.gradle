@@ -25,7 +25,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 artifact androidSourcesJar
-                groupId = 'com.google.android.exoplayer'
+                groupId = 'com.kantvai.kantvplayer'
                 artifactId = releaseArtifact
                 version releaseVersion
                 pom {
@@ -33,19 +33,19 @@ afterEvaluate {
                     description = releaseDescription
                     licenses {
                         license {
-                            name = 'The Apache Software License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            name = 'MIT license'
+                            url = 'https://mit-license.org/'
                             distribution = 'repo'
                         }
                     }
                     developers {
                         developer {
-                            name = 'The Android Open Source Project'
+                            name = 'The KanTV Project'
                         }
                     }
                     scm {
-                        connection = 'scm:git:https://github.com/zhouwg/kantv.git'
-                        url = 'https://github.com/zhouwg/kantv'
+                        connection = 'scm:git:https://github.com/kantv-ai/kantv.git'
+                        url = 'https://github.com/kantv-ai/kantv'
                     }
                 }
             }

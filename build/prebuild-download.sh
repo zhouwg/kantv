@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021- KanTV Authors
 
-# Description: download Android NDK for build project
+# Description: download Android NDK for build project with command-line mode
 
 set -e
 
@@ -43,12 +43,10 @@ if [ ${is_android_ndk_exist} -eq 0 ]; then
         mkdir -p ${PROJECT_ROOT_PATH}/prebuilts/toolchain
     fi
 
-    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-ndk-r25c-linux.zip  https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
     wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-ndk-r26c-linux.zip  https://dl.google.com/android/repository/android-ndk-r26c-linux.zip
 
     cd ${PROJECT_ROOT_PATH}/prebuilts/toolchain
 
-    unzip android-ndk-r25c-linux.zip
     unzip android-ndk-r26c-linux.zip
 
     cd ${PROJECT_ROOT_PATH}

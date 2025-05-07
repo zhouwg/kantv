@@ -3,7 +3,7 @@
 
 ```
 
-git clone https://github.com/zhouwg/kantv.git
+git clone https://github.com/kantv-ai/kantv.git
 
 cd kantv
 
@@ -15,85 +15,13 @@ cd kantv
 
 #### Setup development environment
 
-##### Option 1: Setup docker environment
+    - prerequisites
 
-- Build docker image
-  ```shell
-  docker build build -t kantv --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER_NAME=$(whoami)
-  ```
+      Ubuntu 20.04, 22.04, 24.04 is recommended.
 
-- Run docker container
-  ```shell
-  # map source code directory into docker container
-  docker run -it --name=kantv --volume=`pwd`:/home/`whoami`/kantv kantv
-
-  # in docker container
-  . build/envsetup.sh
-
-  ./build/prebuild-download.sh
-  ```
-
-##### Option 2: Setup local environment
-
-
-  - <details>
-      <summary>Prerequisites</summary>
-
-      <ol>
-
-        Host OS information:
-
-    ```
-    uname -a
-
-    Linux 5.8.0-43-generic #49~20.04.1-Ubuntu SMP Fri Feb 5 09:57:56 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
-
-    cat /etc/issue
-
-    Ubuntu 20.04.2 LTS \n \l
-
-    ```
     - tools & utilities
-    ```
-    sudo apt-get update
-    sudo apt-get install build-essential -y
-    sudo apt-get install cmake -y
-    sudo apt-get install curl -y
-    sudo apt-get install wget -y
-    sudo apt-get install python -y
-    sudo apt-get install tcl expect -y
-    sudo apt-get install nginx -y
-    sudo apt-get install git -y
-    sudo apt-get install vim -y
-    sudo apt-get install spawn-fcgi -y
-    sudo apt-get install u-boot-tools -y
-    sudo apt-get install ffmpeg -y
-    sudo apt-get install openssh-client -y
-    sudo apt-get install nasm -y
-    sudo apt-get install yasm -y
-    sudo apt-get install openjdk-17-jdk -y
 
-    sudo dpkg --add-architecture i386
-    sudo apt-get install lib32z1 -y
-
-    sudo apt-get install -y android-tools-adb android-tools-fastboot autoconf \
-            automake bc bison build-essential ccache cscope curl device-tree-compiler \
-            expect flex ftp-upload gdisk acpica-tools libattr1-dev libcap-dev \
-            libfdt-dev libftdi-dev libglib2.0-dev libhidapi-dev libncurses5-dev \
-            libpixman-1-dev libssl-dev libtool make \
-            mtools netcat python-crypto python3-crypto python-pyelftools \
-            python3-pycryptodome python3-pyelftools python3-serial \
-            rsync unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
-
-    sudo apt-get install python3-pip -y
-    sudo apt-get install indent -y
-    pip3 install meson ninja
-
-    echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
-
-    ```
-
-    or run below script accordingly after fetch project's source code
+    run below script accordingly after fetch project's source code
 
     ```
 
@@ -102,11 +30,10 @@ cd kantv
 
     ```
 
-    - Android Studio
+    - download and install Android Studio manually
 
-      download and install Android Studio manually
-
-      [Android Studio 4.2.1 or latest Android Studio](https://developer.android.google.cn/studio)
+      download Android Studio Jellyfish (| 2023.3.1 April 30, 2024) from https://developer.android.com/studio/archive
+![Screenshot from 2025-05-07 22-06-08](https://github.com/user-attachments/assets/bb801dfe-57a7-4832-a40d-bd1e39c9904e)
 
 
     - vim settings
@@ -136,11 +63,8 @@ cd kantv
     autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
 
     ```
-      </ol>
-    </details>
 
-
- - Download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist
+ - download android-ndk and android-sdk to prebuilts/toolchain
     ```
     . build/envsetup.sh
 
@@ -151,9 +75,6 @@ cd kantv
 
 
 
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L12">ggml/CMakeLists.txt#L12</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
-
--  Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L46">ggml/CMakeLists.txt#L46</a> accordingly if target Android phone is equipped with Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite mobile SoC
 
  - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
 
@@ -196,4 +117,8 @@ Modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/
 
 #### How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC
 
-modify [ggml/CMakeLists.txt#L12](https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L12) accordingly.
+ - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L12">ggml/CMakeLists.txt#L12</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
+
+-  Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L46">ggml/CMakeLists.txt#L46</a> accordingly if target Android phone is equipped with Qualcomm Snapdragon 8Gen3 SoC or Qualcomm Snapdragon 8Elite mobile SoC
+
+- modify [ggml/CMakeLists.txt#L12](https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L12) accordingly.
