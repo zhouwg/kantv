@@ -1,7 +1,7 @@
-// TODO: 03-05-2024, re-write entire whispercpp.java with standard Android JNI specification
-// TODO: 03-26-2024, rename this file to ggmljni to unify the JNI of whisper.cpp and llama.cpp, as these projects are all based on ggml
-
-package kantvai.ai;
+ /*
+  * Copyright (c) 2024- KanTV Authors
+  */
+ package kantvai.ai;
 
 public class ggmljava {
     private static final String TAG = ggmljava.class.getName();
