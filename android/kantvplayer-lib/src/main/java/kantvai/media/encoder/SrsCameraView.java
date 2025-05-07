@@ -393,27 +393,6 @@ public class SrsCameraView extends GLSurfaceView implements GLSurfaceView.Render
     }
 
     protected Camera openCamera() {
-/*
-ISO(感光度): CMOS（或胶卷）对光线的敏感程度，用ISO100的胶卷，相机2秒可以正确曝光的话，同样光线条件下用ISO200的胶卷只需要1秒即可，用ISO400则只要0.5秒。
-曝光时间:曝光时间是为了将光投射到相机感光片上，相机快门所要打开至关闭的时间
-光圈:用来控制光线透过镜头，进入相机内感光面光量的装置
-焦距:指的是平行的光线穿过镜片后，所汇集的焦点至镜片间之距离。数值越小，代表可以拍摄的角度越广，数值越大，代表可以拍摄的角度越小
-景深:拍摄时，当镜头聚集于某个被摄体时，这个被摄体就能在相机上结成清晰影像。使被摄体产生较为清晰影像的纵深的范围叫景深
-测光:测光模式：中央平均测光(average metering)、中央局部测光、点测光(spot metering)、多点测光、评价测光
-自动曝光(Auto Exposure):相机根据光线条件自动来调整曝光时间等来确定曝光量
-对焦: 对焦模式：自动对焦 AE(Auto Focus)、手动对焦 MF(Manual Focus) 自动对焦分为对比度对焦(contrast)、相位对焦(PDAF: Phase Detection Auto Focus)和混合对焦(hybrid)
-闪光灯(Flashlight):通过闪光灯打闪照亮物体来达到拍出清晰图片的目的
-ScreenFlash:通过屏幕打闪，照亮周围物体，拍出高清图片
-高动态范围图像(HDR):HDR全称是High-Dynamic Range，即高动态范围图像技术。在拍照过程中开启HDR，可以让原先的暗场景变得更明亮更通透。
-零延时拍照(ZSD):为了减少拍照延时,让拍照&回显瞬间完成的一种技术
-连拍(ContinuousShot):通过节约数据传输时间来捕捉摄影时机
-预览大小(PreviewSize):相机预览图片的大小
-拍照大小(PictureSize):拍照生成图片的大小
-自动白平衡(Auto white balance):AWB(Auto white balance)，自动白平衡是相机的默认设置，相机中有一结构复杂的矩形图，它可决定画面中的白平衡基准点，以此来达到白平衡调校
-对比度:图像最亮和最暗之间的区域之间的比率，比值越大，从黑到白的渐变层次就越多，从而色彩表现越丰富
-饱和度:指色彩的鲜艳程度
-锐度:是反映图像平面清晰度和图像边缘锐利程度的一个指标
-*/
         Camera camera = null;
         int frontCamId = -1;
         int backCamId = -1;
@@ -444,7 +423,7 @@ ScreenFlash:通过屏幕打闪，照亮周围物体，拍出高清图片
         }
 
         if (backCamId != -1) {
-            mCamId = backCamId; //强制使用后置摄像头
+            mCamId = backCamId; //use back camera
             KANTVLog.j(TAG, "using back cam");
         }
         try {

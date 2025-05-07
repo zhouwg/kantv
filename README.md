@@ -3,7 +3,7 @@
 KanTV("Kan", aka English "watch") , an open source project focus on study and practise on-device AI technology in <b>real scenario</b>(such as perform <b>online-TV playback</b> and <b>realtime transcription</b> and <b>online-TV record</b> at the same time) on Android phone:
 
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. developers or other users can [customize tv.xml](./docs/how-to-customize-tv-xml.md) very easily for R&D activities or personal needs.
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/kantv-ai/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/kantv-ai/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features, source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. developers or other users can [customize tv.xml](./docs/how-to-customize-tv-xml.md) very easily for R&D activities or personal needs.
 
 - Record online TV to automatically generate videos(useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider).
 - 2D graphic performance benchmark.
@@ -46,7 +46,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 here is a short video to demostrate realtime AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Gen3 mobile SoC - <b>fully offline, on-device</b>.
 
-https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
+https://github.com/kantv-ai/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
 
 ----
 
@@ -102,17 +102,17 @@ a screenshot to demostrate download LLM model in APK.
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
-- [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
+- [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
 
 ### Contribution
 
-Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+Be sure to review the [opening issues](https://github.com/kantv-ai/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/kantv-ai/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/kantv-ai/kantv/issues/1).
 
-Report issue and submit PR to this project is greatly welcomed.
-
+<!--
 ## Contributors
 
 [![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
+-->
 
 
 ### Special Acknowledgement
