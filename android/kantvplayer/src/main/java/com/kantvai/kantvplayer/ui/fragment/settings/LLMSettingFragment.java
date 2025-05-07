@@ -43,6 +43,7 @@
 
  import java.io.File;
 
+ import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
@@ -85,6 +86,8 @@
                  findPreference("pref.backend").setEnabled(false);
              }
          }
+
+         //TODO: dynamically load LLM models info from KANTVAIModelMgr.java to avoid hardcode LLM models in xml file
      }
 
      @Override
@@ -116,15 +119,15 @@
          public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
              KANTVLog.g(TAG, "key : " + key);
              if (
-                 (key.contains("pref.backend"))
-                 || (key.contains("pref.llmthreadcounts"))
-                 || (key.contains("pref.llmmodel"))
+                     (key.contains("pref.backend"))
+                             || (key.contains("pref.llmthreadcounts"))
+                             || (key.contains("pref.llmmodel"))
              ) {
                  KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
                  KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
                  KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
-                 KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel()));
-                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel());
+                 KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
+                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
                  KANTVLog.g(TAG, "modelPath:" + modelPath);
                  //KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
              }
@@ -147,45 +150,58 @@
              mActivity.getWindow().setAttributes(attributes);
              mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-             String userChooseModelName = KANTVAIModelMgr.getInstance().getName(mSettings.getLLMModel());
+             String userChooseModelName = KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
              KANTVLog.g(TAG, "LLM model name of user choose:" + userChooseModelName);
              File llmModelFile = new File(KANTVUtils.getSDCardDataPath() + userChooseModelName);
              KANTVLog.g(TAG, "llmModeFile:" + llmModelFile.getAbsolutePath());
 
+
+             String mmprojModelName = KANTVAIModelMgr.getInstance().getMMProjmodelName(mSettings.getLLMModel());
+             KANTVLog.g(TAG, "mmproj name:" + mmprojModelName);
+             File mmprojModelFile = null;
+             if (mmprojModelName != null) {
+                 mmprojModelFile = new File(KANTVUtils.getSDCardDataPath() + mmprojModelName);
+                 KANTVLog.g(TAG, "mmproj name:" + mmprojModelFile.getAbsolutePath());
+             }
+
              //TODO:add support download other LLM models
              int userSelectIndex = mSettings.getLLMModel();
+             KANTVLog.g(TAG, "userSelectIndex = " + userSelectIndex);
              KANTVAIModelMgr AIModelMgr = KANTVAIModelMgr.getInstance();
-             if ((userSelectIndex == AIModelMgr.getLLMModelIndex("Gemma3-4B"))
-               || (userSelectIndex == AIModelMgr.getLLMModelIndex("Gemma3-12B"))
-             ) {
-                 //do nothing
+             if (!AIModelMgr.isDownloadAble(userSelectIndex)) {
+                 KANTVUtils.showMsgBox(mActivity, "currently don't support download LLM model:"
+                         + AIModelMgr.getModelName(userSelectIndex) + " from " + AIModelMgr.getModelUrl(userSelectIndex));
+                 return true;
+             }
+             KANTVLog.g(TAG, "model url:" + KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
+             KANTVLog.g(TAG, "mmproj model url:" + KANTVAIModelMgr.getInstance().getMMProjmodelUrl(mSettings.getLLMModel()));
+
+             if (mmprojModelName != null) {
+                 if (llmModelFile.exists() && mmprojModelFile.exists()) {
+                     KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
+                     //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
+                     KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
+                     return true;
+                 }
              } else {
-                 KANTVUtils.showMsgBox(mActivity, "currently only support download Gemma3-4B(model size 4.13 GiB, mmproj size 851 MiB)" +
-                         " or Gemma3-12B(model size 6.8 GiB, mmproj size 815 MiB");
-                 return true;
-             }
-             KANTVLog.g(TAG, "model url:" +  KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()));
-             KANTVLog.g(TAG, "mmproj url:"+  KANTVAIModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
-
-             if (llmModelFile.exists()) {
-                 KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelName);
-                 //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
-                 KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getDataPath() + userChooseModelName);
-                 return true;
+                 if (llmModelFile.exists()) {
+                     KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
+                     //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
+                     KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
+                     return true;
+                 }
              }
 
-             if ((llmModelFile == null) || (!llmModelFile.exists())) {
-                 DownloadModel manager = new DownloadModel(mActivity);
-                 manager.setTitle("begin download LLM model");
-                 manager.setModelName("LLM");
-                 manager.setLLMModelName("GGML",  userChooseModelName,
-                         KANTVAIModelMgr.getInstance().getMMProjName(mSettings.getLLMModel()),
-                         KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
-                         KANTVAIModelMgr.getInstance().getMMProjUrl(mSettings.getLLMModel()));
-                 manager.setLLMModelSize(KANTVAIModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
-                         KANTVAIModelMgr.getInstance().getMMProjSize(mSettings.getLLMModel()));
-                 manager.showUpdateDialog();
-             }
+             DownloadModel manager = new DownloadModel(mActivity);
+             manager.setTitle("begin download LLM model");
+             manager.setModelName("LLM");
+             manager.setLLMModelName("GGML", userChooseModelName,
+                     KANTVAIModelMgr.getInstance().getMMProjmodelName(mSettings.getLLMModel()),
+                     KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
+                     KANTVAIModelMgr.getInstance().getMMProjmodelUrl(mSettings.getLLMModel()));
+             manager.setLLMModelSize(KANTVAIModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
+                     KANTVAIModelMgr.getInstance().getMMProjmodelSize(mSettings.getLLMModel()));
+             manager.showUpdateDialog();
          }
 
          return true;

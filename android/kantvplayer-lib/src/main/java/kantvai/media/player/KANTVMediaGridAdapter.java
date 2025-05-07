@@ -231,7 +231,7 @@ public abstract class KANTVMediaGridAdapter<T> extends BaseAdapter {
             //Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length);
             //FIXME: this is workaround
             Bitmap bitmap = BitmapFactory.decodeFile("/data/data/com.kantvai.kantvplayer/text2image.bmp");
-            KANTVLog.g(TAG, "bitmap.width" + bitmap.getWidth() + " height:" + bitmap.getHeight());
+            KANTVLog.g(TAG, "bitmap.width " + bitmap.getWidth() + " height:" + bitmap.getHeight());
             if (view instanceof ImageView) {
                 ((ImageView) view).setImageBitmap(bitmap);
             } else {

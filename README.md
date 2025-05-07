@@ -14,7 +14,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) text-to-text and image-to-text(multimodal) supportive and runs entirely offline(no Internet required). the Gemma3-4B LLM models can be downloadded in the Android APK directly without manually preparation.
+- Built-in [Gemma3-4B(text-to-text and image-to-text(multimodal)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Gemma3-12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B) supportive and runs entirely <b>offline(no Internet required)</b>. these LLM models can be downloadded in the Android APK directly without manually preparation. APK's users can compare the <b>real experience/performance</b> of these LLM models on the Android phone.
 
 - Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
@@ -151,6 +151,7 @@ English is preferred in this project, thanks for cooperation and understanding.
 
 This project is licensed under [the MIT License](./LICENSE).
 
+<!--
 ## Citation
 
 ```
@@ -173,3 +174,4 @@ This project is licensed under [the MIT License](./LICENSE).
 }
 
 ```
+-->

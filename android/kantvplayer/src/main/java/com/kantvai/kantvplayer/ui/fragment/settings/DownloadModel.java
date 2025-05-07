@@ -134,10 +134,12 @@
          //  /sdcardk/xxx.gguf
          //  /sdcard/mmproj-xxx.gguf.bin
          localModleFileA = KANTVUtils.getSDCardDataPath() + modelFileNameA;
-         localModleFileB = KANTVUtils.getSDCardDataPath() + modelFileNameB;
-
          remoteModleFileA = modelURL;
-         remoteModleFileB = mmprojModelURL;
+
+         if (mmprojModelName != null) {
+             localModleFileB = KANTVUtils.getSDCardDataPath() + modelFileNameB;
+             remoteModleFileB = mmprojModelURL;
+         }
 
          mIsDownloadLLMModel = true;
 
@@ -150,8 +152,8 @@
      }
 
      public void showUpdateDialog() {
-         if ((modelFileNameB == null) || (modelFileNameB == null)) {
-             KANTVLog.j(TAG, "please calling setModeName firstly");
+         if ((modelFileNameA == null) && (modelFileNameB == null)) {
+             KANTVLog.g(TAG, "please calling setModeName firstly");
              return;
          }
          AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -263,7 +265,15 @@
              KANTVLog.g(TAG, "download cost: " + (endTime - beginTime) + " milliseconds");
              float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
              KANTVLog.g(TAG, "download speed:" + String.format("%-8.2f", speed) + "KBytes/s");
-             if ((downloadBytes + 1) != expectedSize) {
+             //FIXME: better approach to check whether the AI model has downloaded successfully
+             KANTVLog.g(TAG, "expectedSize :" + expectedSize);
+             boolean download_ok      = ((expectedSize - downloadBytes) == 1);
+             boolean download_failure = ((expectedSize - downloadBytes) > (200 * 1024 * 1024));
+             if (download_ok) {
+                 KANTVLog.g(TAG, "download ok");
+                 return 0;
+             }
+             if (download_failure) {
                  KANTVLog.g(TAG, "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize);
                  //errorString = "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize;
                  checkDownloadedModels();
@@ -342,7 +352,14 @@
              File modelFile = new File(localModleFileA);
              if (modelFile.exists()) {
                  if (mIsDownloadLLMModel) {
-                     if (sizeOfLocalModelFileA != modelFile.length()) {
+                     KANTVLog.g(TAG, "sizeOfLocalModelFileA:" + sizeOfLocalModelFileA);
+                     KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
+                     //FIXME: better approach to check whether the AI model has downloaded successfully
+                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > (200 * 1024 * 1024));
+                     if (sizeOfLocalModelFileA == modelFile.length()) {
+                         //do nothing
+                     }
+                     if (download_failure) {
                          KANTVLog.g(TAG, "file: " + localModleFileA + " exist but not complete, remove it");
                          errorString = "file: " + localModleFileA + " exist but file size " + modelFile.length()
                                  + " is not equal to the expected size " + sizeOfLocalModelFileA + ", remove it";
@@ -356,21 +373,30 @@
                  result = 1;
              }
 
-             modelFile = new File(localModleFileB);
-             if (modelFile.exists()) {
-                 if (mIsDownloadLLMModel) {
-                     if (sizeOfLocalModelFileB != modelFile.length()) {
-                         KANTVLog.g(TAG, "file: " + localModleFileB + " exist but not complete, remove it");
-                         errorString += "file: " + localModleFileB + " exist but file size " + modelFile.length()
-                                 + " is not equal to the expected size " + sizeOfLocalModelFileB + ", remove it";
-                         modelFile.delete();
-                         result = 2;
+             if (modelFileNameB != null) {
+                 modelFile = new File(localModleFileB);
+                 if (modelFile.exists()) {
+                     if (mIsDownloadLLMModel) {
+                         KANTVLog.g(TAG, "sizeOfLocalModelFileB:" + sizeOfLocalModelFileB);
+                         KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
+                         //FIXME: better approach to check whether the AI model has downloaded successfully
+                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > (200 * 1024 * 1024));
+                         if (sizeOfLocalModelFileB == modelFile.length()) {
+                             //do nothing
+                         }
+                         if (download_failure) {
+                             KANTVLog.g(TAG, "file: " + localModleFileB + " exist but not complete, remove it");
+                             errorString += " file: " + localModleFileB + " exist but file size " + modelFile.length()
+                                     + " is not equal to the expected size " + sizeOfLocalModelFileB + ", remove it";
+                             modelFile.delete();
+                             result = 2;
+                         }
                      }
+                 } else {
+                     KANTVLog.g(TAG, "file " + localModleFileB + " not exist");
+                     errorString += ",file " + localModleFileB + " not exist";
+                     result = 2;
                  }
-             } else {
-                 KANTVLog.g(TAG, "file " + localModleFileB + " not exist");
-                 errorString += "file " + localModleFileB + " not exist";
-                 result = 2;
              }
          } catch (Exception e) {
              errorString += "error: " + e.toString();
@@ -378,7 +404,10 @@
          }
 
          if (0 == result) {
-             errorString = "succeed to download model file: " + modelFileNameA + " and " + modelFileNameB;
+             if (modelFileNameB != null)
+                errorString = "succeed to download model file: " + modelFileNameA + " and " + modelFileNameB;
+             else
+                 errorString = "succeed to download model file: " + modelFileNameA;
          }
          return result;
      }

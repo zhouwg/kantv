@@ -553,6 +553,7 @@
     <string-array name="pref_entries_llmmodel">
         <item>Qwen1.5-1.8B</item>
         <item>Qwen2.5-3B</item>
+        <item>Qwen2.5-VL-3B</item>
         <item>Qwen3-4B</item>
         <item>Qwen3-8B</item>
         <item>Gemma3-4B</item>
@@ -570,6 +571,7 @@
     <string-array name="pref_entry_summaries_llmmodel">
         <item>Qwen1.5-1.8B</item>
         <item>Qwen2.5-3B</item>
+        <item>Qwen2.5-VL-3B</item>
         <item>Qwen3-4B</item>
         <item>Qwen3-8B</item>
         <item>Gemma3-4B</item>

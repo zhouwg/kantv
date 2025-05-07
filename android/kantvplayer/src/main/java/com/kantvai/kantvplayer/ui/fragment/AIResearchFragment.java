@@ -81,6 +81,7 @@
 
  import butterknife.BindView;
  import kantvai.ai.KANTVAIModelMgr;
+ import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVAssetLoader;
  import kantvai.media.player.KANTVLibraryLoader;
@@ -364,7 +365,7 @@
 
              //sanity check begin
              {
-                 isASRModel = KANTVUtils.isASRModel(strModeName);
+                 isASRModel = KANTVAIUtils.isASRModel(strModeName);
                  if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
                      //attention here
                      if (selectModelIndex < 0) {
@@ -403,15 +404,15 @@
 
                  //FIXME: refine logic here
                  if ((pathSelectedImage != null) && (!pathSelectedImage.isEmpty())) {
-                     if (selectModeFileName.contains("gemma-3")) {
+                     if (KANTVAIUtils.isLLMVModel(selectModeFileName)) {
                          isLLMVModel = true;
                          txtUserInput.setText("What is in the image?");
-                         File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjName(selectModelIndex));
+                         File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex));
                          if (!mmprModelFile.exists()) {
                              KANTVUtils.showMsgBox(mActivity, "LLM mmproj model file:" +
-                                     AIModelMgr.getMMProjName(selectModelIndex) +
+                                     AIModelMgr.getMMProjmodelName(selectModelIndex) +
                                      " not exist, pls download from: "
-                                     + AIModelMgr.getMMProjUrl(selectModelIndex) + " in LLM Setting");
+                                     + AIModelMgr.getMMProjmodelUrl(selectModelIndex) + " in LLM Setting");
                              return;
                          }
                      }
@@ -530,8 +531,8 @@
                              //LLM multimodal inference
                              KANTVLog.g(TAG, "LLMV model, image path:" + pathSelectedImage);
                              strBenchmarkInfo = ggmljava.llava_inference(
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getName(selectModelIndex),
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjName(selectModelIndex),
+                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
                                      pathSelectedImage,
                                      strUserInput,
                                      2,
@@ -539,7 +540,7 @@
                          } else {
                              //general LLM inference
                              strBenchmarkInfo = ggmljava.llm_inference(
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getName(selectModelIndex),
+                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
                                      strUserInput,
                                      1,
                                      nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);

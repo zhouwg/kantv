@@ -26,25 +26,20 @@
  public class KANTVAIModelMgr {
      private static final String TAG = KANTVAIModelMgr.class.getSimpleName();
 
-     private int defaultLLMModelIndex = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
-     private final int LLM_MODEL_COUNTS = 8; // counts of LLM models
+     private int defaultLLMModelIndex       = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
+     private final int LLM_MODEL_COUNTS     = 8; // counts of LLM models
+     private final int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
 
-     //1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
-     private final int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models
+     private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS;
 
-     private int capacity = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS;
 
-     //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
-     private KANTVAIModel[] AIModels;
-     //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
+     private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
      private String[] arrayModelName;
-     private static KANTVAIModelMgr instance = null;
+     private static KANTVAIModelMgr instance      = null;
      private static volatile boolean isInitModels = false;
 
-     private int modelIndex = 0;
-
-     //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
-     private int modelCounts = 0;
+     private int modelIndex  = 0;
+     private int modelCounts = 0;              //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
 
      private KANTVAIModelMgr() {
          AIModels = new KANTVAIModel[capacity];
@@ -72,6 +67,7 @@
              AIModels = newAIModels;
          }
      }
+
      private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String url) {
          checkCapacity();
          AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, url);
@@ -101,14 +97,24 @@
          return null;
      }
 
-     public KANTVAIModel getKANTVAIModelFromIndex(int expectedIndex) {
+     public KANTVAIModel getKANTVAIModelFromIndex(int modelIndex) {
          for (int index = 0; index  < modelCounts; index++) {
-             if (expectedIndex == AIModels[index].getIndex()) {
+             if (modelIndex == AIModels[index].getIndex()) {
                  return AIModels[index];
              }
          }
          return null;
      }
+
+     public KANTVAIModel getLLMModelFromIndex(int modelIndex) {
+         for (int index = 0; index  < modelCounts; index++) {
+             if (modelIndex == AIModels[index + NON_LLM_MODEL_COUNTS].getIndex()) {
+                 return AIModels[index];
+             }
+         }
+         return null;
+     }
+
      public int getModelIndex(String nickName) {
          for (int index = 0; index  < modelCounts; index++) {
              if (nickName.equals(AIModels[index].getNickname())) {
@@ -139,8 +145,12 @@
          return NON_LLM_MODEL_COUNTS;
      }
 
-     public String getName(int index) {
+     public String getModelName(int index) {
          return AIModels[index + NON_LLM_MODEL_COUNTS].getName();
+     }
+
+     public boolean isDownloadAble(int index) {
+         return AIModels[index + NON_LLM_MODEL_COUNTS].isDownloadAble();
      }
 
      public String getNickname(int index) {
@@ -151,11 +161,11 @@
          return AIModels[index + NON_LLM_MODEL_COUNTS].getUrl();
      }
 
-     public String getMMProjName(int index) {
-         return AIModels[index - NON_LLM_MODEL_COUNTS].getMMProjName();
+     public String getMMProjmodelName(int index) {
+         return AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjName();
      }
 
-     public String getMMProjUrl(int index) {
+     public String getMMProjmodelUrl(int index) {
          return AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjUrl();
      }
 
@@ -166,11 +176,12 @@
      public void setDefaultModelIndex(int index) {
          defaultLLMModelIndex = index;
      }
+
      public long getModelSize(int index) {
          return AIModels[index + NON_LLM_MODEL_COUNTS].getSize();
      }
 
-     public long getMMProjSize(int index) {
+     public long getMMProjmodelSize(int index) {
          return AIModels[index + NON_LLM_MODEL_COUNTS].getMMprojSize();
      }
 
@@ -194,16 +205,31 @@
 
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
-                 "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/blob/main/qwen1_5-1_8b-chat-q4_0.gguf");
+                 "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true",
+                 (long)(1.12 * 1024 * 1024 * 1024L)
+                 );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf",
-                 "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/tree/main");
+                 "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true",
+                 (long)(2 * 1024 * 1024 * 1024)
+                 );
+
+
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-VL-3B",
+                 "Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf", "mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf",
+                 "https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true",
+                 "https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true",
+                 (long)(1.93 * 1024 * 1024 * 1024L),
+                 845 * 1024 * 1024L
+         );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-4B", "Qwen3-4B-Q8_0.gguf",
-                 "https://huggingface.co/Qwen/Qwen3-4B/tree/main");
+                 "https://huggingface.co/ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true",
+                 (long)(4.28 * 1024 * 1024 * 1024L));
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf",
-                 "https://huggingface.co/Qwen/Qwen3-8B");
+                 "https://huggingface.co/ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true",
+                 (long)(8.71 * 1024 * 1024 * 1024L));
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
                  "https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
@@ -226,7 +252,7 @@
                  "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main", 8098524896L);
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Nemotron-Nano-8B-v1", "Llama-3.1-Nemotron-Nano-8B-v1.gguf",
-                 "https://huggingface.co/nvidia/Llama-3.1-Nemotron-Nano-8B-v1/tree/main", 16 * 1024 * 1024 * 1024L);
+                 "https://huggingface.co/nvidia/Llama-3.1-Nemotron-Nano-8B-v1/tree/main");
 
 
          modelCounts = modelIndex;
@@ -240,22 +266,14 @@
              setDefaultModelIndex(getKANTVAIModelFromName("Gemma3-4B").getIndex() - NON_LLM_MODEL_COUNTS);
          }
 
-         /*
-         AIModels[0 + NON_LLM_MODEL_COUNTS].setQuality("not bad and fast");
-         AIModels[1 + NON_LLM_MODEL_COUNTS].setQuality("good");
-         AIModels[2 + NON_LLM_MODEL_COUNTS].setQuality("not bad");
-         AIModels[3 + NON_LLM_MODEL_COUNTS].setQuality("slow but impressive");//can understand word counts should be less then 100, but many repeated sentences
-         AIModels[4 + NON_LLM_MODEL_COUNTS].setQuality("perfect"); //inference speed is fast and the answer is concise and accurate is exactly what I
-         AIModels[5 + NON_LLM_MODEL_COUNTS].setQuality("slow and good");
-         AIModels[6 + NON_LLM_MODEL_COUNTS].setQuality("bad"); //inference speed is fast but the answer is wrong
-         AIModels[7 + NON_LLM_MODEL_COUNTS].setQuality("not bad"); //the answer is not concise
-         */
-
-         //local UT for download the default LLM model in APK
+         //UT for download the default LLM model in APK
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
 
+         //UT for download Qwen2.5-VL-3B from huggingface's mirror in China, validate ok although it seems that this mirror site is NOT stable
+         if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
+             getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
+             getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
+         }
      }
-
-
  }

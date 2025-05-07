@@ -48,17 +48,21 @@ package kantvai.ai;
     private String sample_name;
     private long sample_size;
 
+    private boolean downloadAble;
+
     public KANTVAIModel(int index, AIModelType type, String nick, String name, String url) {
         this.index = index;
         this.type = type;
         this.nickname  = nick;
         this.name  = name;
         this.url   = url;
+        this.downloadAble = false;
     }
 
      public KANTVAIModel(int index, AIModelType type, String nick, String name, String url, long size) {
          this(index, type, nick, name, url);
          this.size = size;
+         this.downloadAble = true;
      }
 
 
@@ -68,6 +72,7 @@ package kantvai.ai;
          this.mmproj_url  = mmprojUrl;
          this.size = modelSize;
          this.mmproj_size = mmprojModelSize;
+         this.downloadAble = true;
          KANTVLog.j(TAG, "init");
      }
 
@@ -107,4 +112,7 @@ package kantvai.ai;
         this.url = url;
     }
 
+    public boolean isDownloadAble() {
+        return downloadAble;
+    }
 }

@@ -394,7 +394,7 @@
              if (resName.equals("test")) {
                  resID = res.getIdentifier("test", "mipmap", mActivity.getPackageName());
                  testResID = resID;
-                 KANTVLog.g(TAG, "test res id: " + resID);
+                 KANTVLog.j(TAG, "test res id: " + resID);
              }
              for (int index = 0; index < mContentList.size(); index++) {
                  resID = 0;
@@ -404,7 +404,7 @@
                      posterName = posterName.trim();
                      resName = posterName.substring(0, posterName.indexOf('.'));
                  } else {
-                     KANTVLog.g(TAG, "can't find poster name, pls check epg data in tv.xml");
+                     KANTVLog.j(TAG, "can't find poster name, pls check epg data in tv.xml");
                      //can't find a valid poster for a specified TV program, use the default "test.jpg"
                      resName = "test";
                  }
