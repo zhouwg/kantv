@@ -271,9 +271,9 @@
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
 
          //UT for download Qwen2.5-VL-3B from huggingface's mirror in China, validate ok although it seems that this mirror site is NOT stable
-         if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
-             getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
-             getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
-         }
+         //if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
+         //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
+         //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
+         //}
      }
  }
