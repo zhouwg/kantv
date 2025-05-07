@@ -164,7 +164,6 @@
                  KANTVLog.g(TAG, "mmproj name:" + mmprojModelFile.getAbsolutePath());
              }
 
-             //TODO:add support download other LLM models
              int userSelectIndex = mSettings.getLLMModel();
              KANTVLog.g(TAG, "userSelectIndex = " + userSelectIndex);
              KANTVAIModelMgr AIModelMgr = KANTVAIModelMgr.getInstance();
