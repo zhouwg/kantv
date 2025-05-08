@@ -11,7 +11,7 @@ afterEvaluate {
             release(MavenPublication) {
                 from components.release
                 artifact androidSourcesJar
-                groupId = 'com.kantvai.kantvplayer'
+                groupId = 'kantvai.media.kantvplayer'
                 artifactId = releaseArtifact
                 version releaseVersion
                 pom {

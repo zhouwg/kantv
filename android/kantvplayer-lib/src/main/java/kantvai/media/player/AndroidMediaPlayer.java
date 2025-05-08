@@ -844,13 +844,13 @@ public class AndroidMediaPlayer extends AbstractMediaPlayer {
             if (self == null)
                 return;
 
-            IjkTimedText cdeText = null;
+            IjkTimedText timedText = null;
 
             if (text != null) {
-                cdeText = new IjkTimedText(text.getBounds(), text.getText());
+                timedText = new IjkTimedText(text.getBounds(), text.getText());
             }
 
-            notifyOnTimedText(cdeText);
+            notifyOnTimedText(timedText);
         }
     }
 

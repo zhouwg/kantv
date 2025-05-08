@@ -457,7 +457,7 @@ public final class FFmpegMediaPlayer extends AbstractMediaPlayer {
                     sb.append(entry.getValue());
                 sb.append("\r\n");
                 setOption(OPT_CATEGORY_FORMAT, "headers", sb.toString());
-                setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "async,cache,crypto,file,http,https,cdehttphook,cdeinject,cdelivehook,cdelongurl,cdesegment,cdetcphook,pipe,rtp,tcp,tls,udp,cdeurlhook,data");
+                setOption(FFmpegMediaPlayer.OPT_CATEGORY_FORMAT, "protocol_whitelist", "async,cache,crypto,file,http,https,kantvhttphook,kantvinject,kantvlivehook,kantvlongurl,kantvsegment,kantvtcphook,pipe,rtp,tcp,tls,udp,kantvurlhook,data");
             }
         }
         setDataSource(path);

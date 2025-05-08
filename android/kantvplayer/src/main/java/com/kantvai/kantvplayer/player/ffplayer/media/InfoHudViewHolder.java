@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
+import kantvai.media.exo2.KANTVExo2MediaPlayer;
 import kantvai.media.player.AndroidMediaPlayer;
 import kantvai.media.player.IMediaPlayer;
 import kantvai.media.player.KANTVDRM;
@@ -180,6 +181,19 @@ public class InfoHudViewHolder {
                     tmpString = KANTVUtils.convertLongString(tmpString, 30);
                     setRowValue(R.string.mi_resolution, tmpString);
 
+                    if (mMediaPlayer instanceof KANTVExo2MediaPlayer) {
+                        tmpString = "SDK:" + KANTVDRM.getInstance().ANDROID_JNI_GetSDKVersion() +
+                                " "  + mMediaPlayer.getVideoDecoderName() +
+                                " "  + mActivity.getBaseContext().getString(R.string.playengine) +
+                                ": " + "ExoPlayer";
+                        tmpString = KANTVUtils.convertLongString(tmpString, 30);
+                        setRowValue(R.string.vdec, tmpString);
+
+                        long bitRate = mMediaPlayer.getBitRate();
+                        KANTVLog.d(TAG, "bandwidth: " + bitRate);
+                        setRowValue(R.string.bandwidth, String.format(Locale.US, "%.2f Mb/s", bitRate / 1024f / 1024f));
+                    }
+
                     if (mMediaPlayer instanceof FFmpegMediaPlayer) {
                         int vdec = mp.getVideoDecoder();
                         switch (vdec) {
@@ -196,7 +210,6 @@ public class InfoHudViewHolder {
                                 tmpString = "unknown";
                                 break;
                         }
-                        //setRowValue(R.string.playengine, "FFmpeg");
                         tmpString = "SDK:" + KANTVDRM.getInstance().ANDROID_JNI_GetSDKVersion() +
                                 " "  + mMediaPlayer.getVideoDecoderName() +
                                 " "  + mActivity.getBaseContext().getString(R.string.playengine) +

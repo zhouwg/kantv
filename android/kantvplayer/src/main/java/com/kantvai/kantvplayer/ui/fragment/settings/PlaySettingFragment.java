@@ -157,6 +157,7 @@ public class PlaySettingFragment extends BaseSettingsFragment {
             isExoPlayer = false;
             if (mWidgetUsingFFmpegCodec != null) {
                 mWidgetUsingFFmpegCodec.setEnabled(false);
+                mWidgetUsingFFmpegCodec.setChecked(true);
             }
             if (mWidgetTEEEnabled != null) {
                 mWidgetTEEEnabled.setEnabled(false);
@@ -524,6 +525,11 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                         mWidgetUsingFFmpegCodec.setEnabled(true);
                     }
 
+                    if (mWidgetMediaCodecEnabled != null) {
+                        mWidgetMediaCodecEnabled.setEnabled(true);
+                        mWidgetMediaCodecEnabled.setChecked(true);
+                    }
+
                     if ((mWidgetTEEEnabled != null) && (KANTVUtils.isRunningOnAmlogicBox())) {
                         mWidgetTEEEnabled.setEnabled(true);
                     }
@@ -554,10 +560,12 @@ public class PlaySettingFragment extends BaseSettingsFragment {
                     if (mWidgetMediaCodecEnabled != null) {
                         SharedPreferences.Editor editor = mSharedPreferences.edit();
                         key = mContext.getString(R.string.pref_key_using_media_codec);
-                        editor.putBoolean(key, mSettings.getUsingMediaCodec());
+                        //editor.putBoolean(key, mSettings.getUsingMediaCodec());
+                        editor.putBoolean(key, false);
                         editor.commit();
-                        mWidgetMediaCodecEnabled.setChecked(mSettings.getUsingMediaCodec());
+                        mWidgetMediaCodecEnabled.setChecked(false);
                         mWidgetMediaCodecEnabled.setEnabled(true);
+                        mWidgetUsingFFmpegCodec.setChecked(true);
                     }
                 }
 

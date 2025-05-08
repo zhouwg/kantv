@@ -252,7 +252,7 @@
      private static long mLoopPlayErrorCounts = 0;
 
      private static boolean mIsPermissionGranted = false;
-     private static boolean mUsingFFmpegCodec = true;
+     private static boolean mUsingFFmpegCodec = true; //using FFmpeg audio decoder for Exo2
      private static boolean mIsAPKForTV = false;
 
      public static final int  ASR_MODE_NORMAL       = 0;     // transcription
@@ -960,7 +960,7 @@
                  out.close();
                  KANTVLog.d(TAG, "create epg timestamp file success: " + file.getAbsolutePath());
              } else {
-                 //KANTVLog.d(TAG, "cdeepg timestamp file already exist: " + file.getAbsolutePath());
+                 KANTVLog.d(TAG, "timestamp file already exist: " + file.getAbsolutePath());
              }
          } catch (FileNotFoundException e) {
              e.printStackTrace();

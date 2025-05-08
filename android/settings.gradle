@@ -1,15 +1,40 @@
 apply from: 'config.gradle'
 
 println '@settings enter-----------------'
+println '@settings.gradle ExoPlayer2Enabled：' +  ExoPlayer2Enabled
+println '@settings.gradle ExoPlayer2Prefix：'  +  ExoPlayer2Prefix
 
 include ':kantvplayer-lib'
+include ':kantvplayer-exo2'
 include ':kantvplayer'
-
 
 gradle.ext.exoplayerRoot = settingsDir
 def rootDir = gradle.ext.exoplayerRoot
 println 'rootDir：' + rootDir
 println 'modulePrefix：' +  modulePrefix
+if (!gradle.ext.has('exoplayerSettingsDir')) {
+    gradle.ext.exoplayerSettingsDir =
+            new File(rootDir.toString()).getCanonicalPath()
+}
+
+
+include modulePrefix + 'library-common'
+include modulePrefix + 'library-core'
+include modulePrefix + 'library-hls'
+include modulePrefix + 'library-extractor'
+include modulePrefix + 'library-dash'
+
+project(modulePrefix + 'library-common').projectDir = new File(rootDir, 'kantvplayer-exo2/library/common')
+project(modulePrefix + 'library-core').projectDir = new File(rootDir, 'kantvplayer-exo2/library/core')
+project(modulePrefix + 'library-hls').projectDir = new File(rootDir, 'kantvplayer-exo2/library/hls')
+project(modulePrefix + 'library-extractor').projectDir = new File(rootDir, 'kantvplayer-exo2/library/extractor')
+project(modulePrefix + 'library-dash').projectDir = new File(rootDir, 'kantvplayer-exo2/library/dash')
+
+include modulePrefix + 'extension-cronet'
+include modulePrefix + 'extension-ffmpeg'
+
+project(modulePrefix + 'extension-cronet').projectDir = new File(rootDir, 'kantvplayer-exo2/extensions/cronet')
+project(modulePrefix + 'extension-ffmpeg').projectDir = new File(rootDir, 'kantvplayer-exo2/extensions/ffmpeg')
 
 
 gradle.addBuildListener(new BuildListener() {
@@ -22,6 +47,8 @@ gradle.addBuildListener(new BuildListener() {
     void projectsLoaded(Gradle var1) {
         println 'gradle.rootProject：' + gradle.rootProject
         println 'rootDir：' + rootDir
+        println 'gradle.ext.exoplayerRoot：'         +  gradle.ext.exoplayerRoot
+        println 'gradle.ext.exoplayerSettingsDir：'  +  gradle.ext.exoplayerSettingsDir
         println 'modulePrefix：' +  modulePrefix
 
     }

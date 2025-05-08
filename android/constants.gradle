@@ -34,7 +34,11 @@ project.ext {
     releaseVersion     = '1.6.8'
     releaseVersionCode = 1000608
 
+    //version and version code of internal customized Exoplayer2
+    releaseVersionExoplayer     = '2.15.1'
+    releaseVersionCodeExoplayer = 2015001
     modulePrefix = ':'
+
     guavaVersion = '27.1-android'
     androidxAnnotationVersion = '1.2.0'
     checkerframeworkVersion = '3.5.0'
@@ -46,4 +50,8 @@ project.ext {
     androidxMultidexVersion = '2.0.0'
     dexmakerVersion = '2.21.0'
     androidxAppCompatVersion = '1.1.0'
+
+    if (gradle.ext.has('exoplayerModulePrefix')) {
+        modulePrefix += gradle.ext.exoplayerModulePrefix
+    }
 }

@@ -858,9 +858,16 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
                         }
 
                         //TODO:kantv-record with Exoplayer engine is not finished currently,so disable it here
-                        if ((KANTVUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine()) || (mSettings.getUsingMediaCodec())
+                        if ((KANTVUtils.PV_PLAYERENGINE__FFmpeg != mSettings.getPlayerEngine())
                         ) {
-                            Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg or pls check FFmpeg configuration in \"Playback Setting", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "record not supported because playEngine is not FFmpeg", Toast.LENGTH_SHORT).show();
+                            topBarView.updateTVRecordingVisibility(false);
+                            return;
+                        }
+
+                        if ((KANTVUtils.PV_PLAYERENGINE__FFmpeg == mSettings.getPlayerEngine()) && (mSettings.getUsingMediaCodec())
+                        ) {
+                            Toast.makeText(getContext(), "record not supported with FFmpeg + MediaCodec, pls check FFmpeg configuration in \"Playback Setting\"", Toast.LENGTH_SHORT).show();
                             topBarView.updateTVRecordingVisibility(false);
                             return;
                         }

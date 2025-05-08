@@ -1,0 +1,103 @@
+apply from: '../config.gradle'
+apply from: '../constants.gradle'
+apply plugin: 'com.android.library'
+
+println '@kantvplayer-exo2 enter-----------------'
+println '@kantvplayer-exo2 ExoPlayer2Enabled：' +  ExoPlayer2Enabled
+println '@kantvplayer-exo2 ExoPlayer2Prefix：'  +  ExoPlayer2Prefix
+
+android {
+    // http://tools.android.com/tech-docs/new-build-system/tips
+    //noinspection GroovyAssignabilityCheck
+    compileSdkVersion project.ext.compileSdkVersion
+    //noinspection GroovyAssignabilityCheck
+    buildToolsVersion project.ext.buildToolsVersion
+
+    lintOptions {
+        abortOnError false
+    }
+    defaultConfig {
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.targetSdkVersion
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+
+    task cleanKANTVExo2Jar(type: Delete) {
+        println '@kantvexoplayer2  enter cleanJar-----------------'
+        delete 'build/libs/kantvplayer-exo2.jar'
+        println '@kantvexoplayer2  leave cleanJar-----------------'
+    }
+
+    task buildKANTVExo2Jar(type: Jar) {
+        println '@@kantvexoplayer2  enter buildJar-----------------'
+        from(project.zipTree('build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('library/common/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('library/hls/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        //from(project.zipTree('library/ui/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('library/dash/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('library/core/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('library/extractor/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('extensions/cronet/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+        from(project.zipTree('extensions/ffmpeg/build/intermediates/runtime_library_classes_jar/debug/classes.jar'))
+
+        into('')
+
+        exclude('**/R.class')
+        exclude('**/BuildConfig.class')
+        exclude('test/', 'BuildConfig.class', 'R.class')
+        exclude{it.name.startsWith('R$')}
+
+        manifest {
+            attributes(
+                    'Implementation-Title': "kantvplayer-exo2",
+                    'Implementation-Version': "2.15",
+                    'Built-By':"kantv-ai",
+                    'Bundle-Description':"Exoplayer engine for project KanTV",
+                    'Bundle-Vendor': "kantv-ai",
+                    'Built-Date': new Date().getDateTimeString(),
+                    'Built-With':
+                            "gradle-${project.getGradle().getGradleVersion()},groovy-${GroovySystem.getVersion()}",
+                    'Created-By':
+                            'Java ' + System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ')')
+        }
+
+        rename('classes.jar', 'kantvplayer-exo2.jar')
+        println '@@kantvexoplayer2  leave buildJar-----------------'
+    }
+
+    buildKANTVExo2Jar.dependsOn(cleanKANTVExo2Jar, build)
+}
+
+dependencies {
+    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    api project(':kantvplayer-lib')
+    implementation project(path: ':library-core')
+    implementation project(path: ':library-hls')
+    implementation project(path: ':library-extractor')
+    implementation project(modulePrefix + 'kantvplayer-lib')
+    implementation 'org.jetbrains:annotations:15.0'
+    implementation project(modulePrefix + 'extension-cronet')
+    implementation project(modulePrefix + 'extension-ffmpeg')
+    implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
+    implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
+}
+
+gradle.startParameter.taskNames.each { task ->
+    def subProjectName = task;
+    if (task.startsWith(':'))
+        subProjectName = task.split(":")[1]
+    if (subProjectName.equals(project.name))
+        apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");
+}
+
+
+
+println '@kantvplayer-exo2 leave-----------------'

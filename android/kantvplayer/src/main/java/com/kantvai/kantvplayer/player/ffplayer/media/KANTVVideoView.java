@@ -42,6 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import kantvai.ai.ggmljava;
+import kantvai.media.exo2.KANTVExo2MediaPlayer;
 import kantvai.media.player.AndroidMediaPlayer;
 import kantvai.media.player.KANTVLibraryLoader;
 import kantvai.media.player.KANTVDRM;
@@ -546,8 +547,11 @@ public class KANTVVideoView extends FrameLayout implements MediaController.Media
         am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 
         try {
-            KANTVLog.d(TAG, "play engine " + mSettings.getPlayerEngine());
+            KANTVLog.g(TAG, "play engine " + mSettings.getPlayerEngine());
             mMediaPlayer = createPlayer(mSettings.getPlayerEngine());
+            if (mMediaPlayer instanceof KANTVExo2MediaPlayer) {
+                mIsExoplayer = true;
+            }
 
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
@@ -1416,8 +1420,7 @@ public class KANTVVideoView extends FrameLayout implements MediaController.Media
                     mProgressDialog = null;
                 }
                 if (mCurrentState != STATE_PLAYING) {
-                
-                    if (mMediaPlayer instanceof CDEExo2MediaPlayer) {
+                    if (mMediaPlayer instanceof KANTVExo2MediaPlayer) {
                         KANTVLog.d(TAG, "resetting to STATE_PLAYING");
                         mCurrentState = STATE_PLAYING;
                     }
@@ -1884,7 +1887,42 @@ public class KANTVVideoView extends FrameLayout implements MediaController.Media
         KANTVLog.d(TAG, "disableAudio:" + KANTVUtils.getDisableAudioTrack());
         KANTVLog.d(TAG, "disableVideo:" + KANTVUtils.getDisableVideoTrack());
         switch (playerEngineType) {
-            case KANTVUtils.PV_PLAYERENGINE__FFmpeg:
+            case KANTVUtils.PV_PLAYERENGINE__Exoplayer: {
+                KANTVExo2MediaPlayer kantvExoMediaPlayer = new KANTVExo2MediaPlayer(mActivity, mAppContext);
+                mediaPlayer = kantvExoMediaPlayer;
+
+                if (mSettings.getTEEEnabled()) {
+                    KANTVLog.d(TAG, "using TEE");
+                    KANTVUtils.setDecryptMode(KANTVUtils.DECRYPT_TEE);
+                    mediaPlayer.setDecryptMode(KANTVUtils.DECRYPT_TEE);
+                } else {
+                    KANTVLog.d(TAG, "not using TEE");
+                    KANTVUtils.setDecryptMode(KANTVUtils.DECRYPT_SOFT);
+                    mediaPlayer.setDecryptMode(KANTVUtils.DECRYPT_SOFT);
+                }
+
+                if (mDrmScheme != null && (!mDrmScheme.isEmpty())) {
+                    KANTVUtils.setDrmSchemeName(mDrmScheme);
+                }
+                if (mDrmLicenseURL != null && (!mDrmLicenseURL.isEmpty())) {
+                    KANTVUtils.setDrmLicenseURL(mDrmLicenseURL);
+                }
+                //if (mIsLive) {
+                if (true) {
+                    KANTVUtils.setHLSPlaylistType(KANTVUtils.PLAYLIST_TYPE_LIVE);
+                } else {
+                    KANTVUtils.setHLSPlaylistType(KANTVUtils.PLAYLIST_TYPE_VOD);
+                }
+                mediaPlayer.setDisableAudioTrack(KANTVUtils.getDisableAudioTrack());
+                mediaPlayer.setDisableVideoTrack(KANTVUtils.getDisableVideoTrack());
+                mediaPlayer.setEnableDumpVideoES(KANTVUtils.getEnableDumpVideoES());
+                mediaPlayer.setEnableDumpAudioES(KANTVUtils.getEnableDumpAudioES());
+                mediaPlayer.setDurationDumpES(KANTVUtils.getDumpDuration());
+            }
+            break;
+
+
+                case KANTVUtils.PV_PLAYERENGINE__FFmpeg:
             default: {
                 FFmpegMediaPlayer ffMediaPlayer = null;
                 if (mUri != null) {
@@ -2184,7 +2222,7 @@ public class KANTVVideoView extends FrameLayout implements MediaController.Media
             builder.appendRow2(R.string.vdec, tmpString);
         }
 
-        if (mMediaPlayer instanceof CDEExo2MediaPlayer) {
+        if (mMediaPlayer instanceof KANTVExo2MediaPlayer) {
             tmpString = "MediaCodec  " + mActivity.getBaseContext().getString(R.string.playengine) + ": " + "ExoPlayer";
             tmpString = KANTVUtils.convertLongString(tmpString, 30);
             builder.appendRow2(R.string.vdec, tmpString);

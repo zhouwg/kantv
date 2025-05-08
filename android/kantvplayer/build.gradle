@@ -214,6 +214,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
     implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
 
+    api project(':kantvplayer-exo2')
     api project(':kantvplayer-lib')
 }
 

@@ -1,3 +1,5 @@
 ext {
     modulePrefix = ':'
+    ExoPlayer2Enabled = 'yes'
+    ExoPlayer2Prefix  = "kantvplayer-exo2"
 }

@@ -8,7 +8,7 @@ android {
         minSdkVersion project.ext.minSdkVersion
         targetSdkVersion project.ext.targetSdkVersion
         consumerProguardFiles 'proguard-rules.txt'
-        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        //testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -16,5 +16,5 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    testOptions.unitTests.includeAndroidResources = true
+    testOptions.unitTests.includeAndroidResources = false
 }

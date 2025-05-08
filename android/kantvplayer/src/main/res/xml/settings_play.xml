@@ -4,6 +4,14 @@
 
     <PreferenceCategory android:title="@string/pref_title_general">
 
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_player"
+            android:entryValues="@array/pref_entry_values_player"
+            android:key="@string/pref_key_playerengine"
+            android:persistent="true"
+            android:title="@string/pref_title_player"
+            app:entrySummaries="@array/pref_entry_summaries_player" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -21,6 +29,12 @@
             android:summary="@string/pref_summary_using_media_codec"
             android:title="@string/pref_title_using_media_codec" />
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_using_ffmpeg_codec"
+            android:persistent="true"
+            android:summary="@string/pref_summary_using_ffmpeg_codec"
+            android:title="@string/pref_title_using_ffmpeg_codec" />
 
         <CheckBoxPreference
             android:defaultValue="false"
