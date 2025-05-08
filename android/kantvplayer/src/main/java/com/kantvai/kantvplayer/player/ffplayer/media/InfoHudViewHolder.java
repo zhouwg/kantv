@@ -25,7 +25,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.text.SimpleDateFormat;
 
-import kantvai.media.exo2.KANTVExo2MediaPlayer;
+import kantvai.media.exoplayer2.kantvexo2.KANTVExo2MediaPlayer;
 import kantvai.media.player.AndroidMediaPlayer;
 import kantvai.media.player.IMediaPlayer;
 import kantvai.media.player.KANTVDRM;

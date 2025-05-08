@@ -42,7 +42,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import kantvai.ai.ggmljava;
-import kantvai.media.exo2.KANTVExo2MediaPlayer;
+import kantvai.media.exoplayer2.kantvexo2.KANTVExo2MediaPlayer;
 import kantvai.media.player.AndroidMediaPlayer;
 import kantvai.media.player.KANTVLibraryLoader;
 import kantvai.media.player.KANTVDRM;

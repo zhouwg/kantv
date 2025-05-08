@@ -59,6 +59,33 @@ dependencies {
     implementation 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
     implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
+    implementation 'org.chromium.net:cronet-api:119.6045.31'
+
+
+    //for customized exo2
+    api ('com.google.guava:guava:' + guavaVersion) {
+        // Exclude dependencies that are only used by Guava at compile time
+        // (but declared as runtime deps) [internal b/168188131].
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'org.checkerframework', module: 'checker-compat-qual'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
+        exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
+    }
+
+    compileOnly 'com.google.code.findbugs:jsr305:' + jsr305Version
+    compileOnly 'org.checkerframework:checker-compat-qual:' + checkerframeworkCompatVersion
+    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
+    compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
+
+    //api 'androidx.media:media:' + androidxMediaVersion
+    //implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
+    //implementation 'androidx.recyclerview:recyclerview:' + androidxRecyclerViewVersion
+    //implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
+    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
+    compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
+
+    implementation 'org.jetbrains:annotations:15.0'
 }
 
 apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");
