@@ -158,6 +158,16 @@
              KANTVLog.g(TAG, "mmproj model url:" + KANTVAIModelMgr.getInstance().getMMProjmodelUrl(mSettings.getLLMModel()));
 
              if (mmprojModelName != null) {
+                 long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
+                 if (realModelSize - llmModelFile.length() > (700 * 1024 * 1024)) {
+                     KANTVLog.g(TAG, "not completed model, remove it");
+                     llmModelFile.delete();
+                 }
+                 realModelSize = AIModelMgr.getMMProjmodelSize(userSelectIndex);
+                 if (realModelSize - mmprojModelFile.length() > (700 * 1024 * 1024)) {
+                     KANTVLog.g(TAG, "not completed model, remove it");
+                     mmprojModelFile.delete();
+                 }
                  if (llmModelFile.exists() && mmprojModelFile.exists()) {
                      KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
                      //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
@@ -165,8 +175,13 @@
                      return true;
                  }
              } else {
+                 long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
+                 if (realModelSize - llmModelFile.length() > (700 * 1024 * 1024)) {
+                     KANTVLog.g(TAG, "not completed model, remove it");
+                     llmModelFile.delete();
+                 }
+
                  if (llmModelFile.exists()) {
-                     KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
                      //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
                      KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
                      return true;

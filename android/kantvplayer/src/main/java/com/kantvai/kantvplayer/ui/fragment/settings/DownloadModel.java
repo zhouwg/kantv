@@ -71,6 +71,8 @@
      private long sizeOfLocalModelFileB = 0; //expected size of the mmproj model for a specified LLM model
      private String errorString = "";
 
+     private final long DOWNLOAD_SIZE_CHECK_RANGE = 700 * 1024 * 1024;
+
      public DownloadModel(Context context) {
          mContext = context;
          KANTVLog.j(TAG, "enter update manager");
@@ -250,7 +252,7 @@
              //FIXME: better approach to check whether the AI model has downloaded successfully
              KANTVLog.g(TAG, "expectedSize :" + expectedSize);
              boolean download_ok      = ((expectedSize - downloadBytes) == 1);
-             boolean download_failure = ((expectedSize - downloadBytes) > (200 * 1024 * 1024));
+             boolean download_failure = ((expectedSize - downloadBytes) > DOWNLOAD_SIZE_CHECK_RANGE);
              if (download_ok) {
                  KANTVLog.g(TAG, "download ok");
                  return 0;
@@ -337,7 +339,7 @@
                      KANTVLog.g(TAG, "sizeOfLocalModelFileA:" + sizeOfLocalModelFileA);
                      KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
                      //FIXME: better approach to check whether the AI model has downloaded successfully
-                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > (200 * 1024 * 1024));
+                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > DOWNLOAD_SIZE_CHECK_RANGE);
                      if (sizeOfLocalModelFileA == modelFile.length()) {
                          //do nothing
                      }
@@ -362,7 +364,7 @@
                          KANTVLog.g(TAG, "sizeOfLocalModelFileB:" + sizeOfLocalModelFileB);
                          KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
                          //FIXME: better approach to check whether the AI model has downloaded successfully
-                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > (200 * 1024 * 1024));
+                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > DOWNLOAD_SIZE_CHECK_RANGE);
                          if (sizeOfLocalModelFileB == modelFile.length()) {
                              //do nothing
                          }
