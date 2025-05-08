@@ -107,15 +107,12 @@ a screenshot to demostrate download LLM model in APK.
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
 - [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
 
-### Contribution
 
-Be sure to review the [opening issues](https://github.com/kantv-ai/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/kantv-ai/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/kantv-ai/kantv/issues/1).
 
-<!--
-## Contributors
+### Contributors
 
 [![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
--->
+
 
 
 ### Special Acknowledgement
