@@ -15,7 +15,9 @@
  import androidx.annotation.NonNull;
  import androidx.annotation.Nullable;
  import androidx.preference.CheckBoxPreference;
+ import androidx.preference.ListPreference;
  import androidx.preference.Preference;
+ import androidx.preference.PreferenceCategory;
 
 
  import com.kantvai.kantvplayer.ui.activities.ShellActivity;
@@ -27,6 +29,7 @@
 
  import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
+ import kantvai.ai.KANTVAIUtils;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -58,9 +61,32 @@
          mSettings = new Settings(mAppContext);
          mContext = mActivity.getBaseContext();
          mSettings.updateUILang(mActivity);
-
          addPreferencesFromResource(R.xml.settings_llm);
          mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
+
+         PreferenceCategory category = findPreference("llm-models");
+         if (category != null) {
+             IjkListPreference preference = findPreference("pref.llmmodel");
+             if (preference != null) {
+                 //May/08/2025, decoupling UI and data: dynamically initialize UI data of LLM models info from KANTVAIModelMgr.java
+                 String[] arrayLLMModelName = KANTVAIModelMgr.getInstance().getAllLLMModelNickName();
+                 int nLLMModelCounts = KANTVAIModelMgr.getInstance().getLLMModelCounts();
+                 assert(arrayLLMModelName.length == nLLMModelCounts);
+                 String[] arrayModelIndex = new String[nLLMModelCounts];
+                 for (int i = 0; i < nLLMModelCounts; i++) {
+                     arrayModelIndex[i] = String.valueOf(i);
+                 }
+                 preference.setEntries(arrayLLMModelName);
+                 preference.setEntryValues(arrayModelIndex);
+                 preference.setEntrySummaries(arrayLLMModelName);
+             } else {
+                 KANTVLog.g(TAG, "can't find preference");
+             }
+         } else {
+             KANTVLog.g(TAG, "can't find category");
+         }
+
+
 
          KANTVLog.g(TAG, "getHexagonEnabled:" + mSettings.getHexagonEnabled());
          if (!mSettings.getHexagonEnabled()) {
@@ -105,13 +131,17 @@
                              || (key.contains("pref.llmthreadcounts"))
                              || (key.contains("pref.llmmodel"))
              ) {
-                 KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
-                 KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
-                 KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
-                 KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
-                 String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
-                 KANTVLog.g(TAG, "modelPath:" + modelPath);
-                 //KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
+                 try {
+                     KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
+                     KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
+                     KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
+                     KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
+                     String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
+                     KANTVLog.g(TAG, "modelPath:" + modelPath);
+                 } catch (Exception ex) {
+                     KANTVLog.g(TAG, "error: " + ex.toString());
+                     KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());
+                 }
              }
          }
      };
@@ -159,13 +189,15 @@
 
              if (mmprojModelName != null) {
                  long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
-                 if (realModelSize - llmModelFile.length() > (700 * 1024 * 1024)) {
-                     KANTVLog.g(TAG, "not completed model, remove it");
+                 //FIXME: better approach to check whether the AI model has downloaded successfully
+                 if (realModelSize - llmModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
+                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
                      llmModelFile.delete();
                  }
                  realModelSize = AIModelMgr.getMMProjmodelSize(userSelectIndex);
-                 if (realModelSize - mmprojModelFile.length() > (700 * 1024 * 1024)) {
-                     KANTVLog.g(TAG, "not completed model, remove it");
+                 //FIXME: better approach to check whether the AI model has downloaded successfully
+                 if (realModelSize - mmprojModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
+                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
                      mmprojModelFile.delete();
                  }
                  if (llmModelFile.exists() && mmprojModelFile.exists()) {
@@ -176,8 +208,9 @@
                  }
              } else {
                  long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
-                 if (realModelSize - llmModelFile.length() > (700 * 1024 * 1024)) {
-                     KANTVLog.g(TAG, "not completed model, remove it");
+                 //FIXME: better approach to check whether the AI model has downloaded successfully
+                 if (realModelSize - llmModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
+                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
                      llmModelFile.delete();
                  }
 

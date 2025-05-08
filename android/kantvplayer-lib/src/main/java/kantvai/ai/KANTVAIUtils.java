@@ -4,7 +4,17 @@
 
 package kantvai.ai;
 
-public final class KANTVAIUtils {
+ import kantvai.media.player.KANTVLog;
+
+ public final class KANTVAIUtils {
+
+    //this is experimental value to check whether a specified AI model has downloaded successfully
+    // naive algorithm at the moment:
+    // if (real size of AI model - size of downloaded file == 1
+    //     download ok
+    // if (real size of AI model - size of downloaded file > DOWNLOAD_SIZE_CHECK_RANGE)
+    //     download failure
+    public static final long DOWNLOAD_SIZE_CHECK_RANGE = 700 * 1024 * 1024L;
 
     //FIXME: should I move these helper functions to KANTVAIModelMgr.java?
     public static boolean isASRModel(String name) {

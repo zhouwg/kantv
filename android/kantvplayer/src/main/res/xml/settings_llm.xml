@@ -20,29 +20,21 @@
             android:persistent="true"
             android:title="@string/pref_title_llmthreadcounts"
              />
-
-        <!-- not implemented currently
-        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
-            android:entries="@@array/pref_entries_voiceapi"
-            android:entryValues="@array/pref_entry_values_voiceapi"
-            android:key="@string/pref_key_voiceapi"
-            android:persistent="true"
-            android:title="@string/pref_title_voiceapi"
-            app:entrySummaries="@array/pref_entry_summaries_voiceapi" />
-        -->
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="LLM Model">
+    <!--
+     May/08/2025, replace with dynamically initialize UI data of LLM models info from KANTVAIModelMgr.java
+     android:entries="@@array/pref_entries_llmmodel"
+     android:entryValues="@array/pref_entry_values_llmmodel"
+     app:entrySummaries="@array/pref_entry_summaries_llmmodel"
+    -->
+    <PreferenceCategory android:key="llm-models" android:title="LLM Model">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
             android:defaultValue="0"
-            android:entries="@@array/pref_entries_llmmodel"
-            android:entryValues="@array/pref_entry_values_llmmodel"
             android:key="@string/pref_key_llmmodel"
             android:persistent="true"
             android:title="@string/pref_title_llmmodel"
-            app:entrySummaries="@array/pref_entry_summaries_llmmodel" />
-
+        />
 
         <CheckBoxPreference
             android:defaultValue="true"

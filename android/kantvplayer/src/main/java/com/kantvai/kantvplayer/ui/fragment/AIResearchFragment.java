@@ -154,7 +154,7 @@
      //=============================================================================================
      private String[]        arrayModelName;
      private void initLLMModels() {
-         arrayModelName = AIModelMgr.getArrayModelName();
+         arrayModelName = AIModelMgr.getAllAIModelNickName();
      }
      //=============================================================================================
 
@@ -685,9 +685,9 @@
                      KANTVLog.g(TAG, "image path:" + imgPath);
                      displayImage(imgPath);
                  }
-             } catch (FileNotFoundException e) {
-                 KANTVLog.g(TAG, "FileNotFoundException: " + e.toString());
-                 KANTVUtils.showMsgBox(mActivity, "FileNotFoundException: " + e.toString());
+             } catch (Exception exception) {
+                 KANTVLog.g(TAG, "error occurred: " + exception.toString());
+                 KANTVUtils.showMsgBox(mActivity, "error occurred: " + exception.toString());
              }
          } else {
              KANTVLog.g(TAG, "it shouldn't happen, pls check why?");

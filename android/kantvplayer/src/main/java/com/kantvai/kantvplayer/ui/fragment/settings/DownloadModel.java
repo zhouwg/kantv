@@ -33,6 +33,7 @@
 
  import com.kantvai.kantvplayer.R;
 
+ import kantvai.ai.KANTVAIUtils;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -70,8 +71,6 @@
      private long sizeOfLocalModelFileA = 0; //expected size of the main model for a specified LLM model
      private long sizeOfLocalModelFileB = 0; //expected size of the mmproj model for a specified LLM model
      private String errorString = "";
-
-     private final long DOWNLOAD_SIZE_CHECK_RANGE = 700 * 1024 * 1024;
 
      public DownloadModel(Context context) {
          mContext = context;
@@ -252,7 +251,7 @@
              //FIXME: better approach to check whether the AI model has downloaded successfully
              KANTVLog.g(TAG, "expectedSize :" + expectedSize);
              boolean download_ok      = ((expectedSize - downloadBytes) == 1);
-             boolean download_failure = ((expectedSize - downloadBytes) > DOWNLOAD_SIZE_CHECK_RANGE);
+             boolean download_failure = ((expectedSize - downloadBytes) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
              if (download_ok) {
                  KANTVLog.g(TAG, "download ok");
                  return 0;
@@ -339,7 +338,7 @@
                      KANTVLog.g(TAG, "sizeOfLocalModelFileA:" + sizeOfLocalModelFileA);
                      KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
                      //FIXME: better approach to check whether the AI model has downloaded successfully
-                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > DOWNLOAD_SIZE_CHECK_RANGE);
+                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
                      if (sizeOfLocalModelFileA == modelFile.length()) {
                          //do nothing
                      }
@@ -364,7 +363,7 @@
                          KANTVLog.g(TAG, "sizeOfLocalModelFileB:" + sizeOfLocalModelFileB);
                          KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
                          //FIXME: better approach to check whether the AI model has downloaded successfully
-                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > DOWNLOAD_SIZE_CHECK_RANGE);
+                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
                          if (sizeOfLocalModelFileB == modelFile.length()) {
                              //do nothing
                          }

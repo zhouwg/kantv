@@ -16,7 +16,7 @@
 
 
      private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
-     private String[] arrayModelName;
+     private String[] arrayModelName;           //space/memory ---> time/performance
      private static KANTVAIModelMgr instance      = null;
      private static volatile boolean isInitModels = false;
 
@@ -115,8 +115,16 @@
          return 0;
      }
 
-     public String[] getArrayModelName() {
+     public String[] getAllAIModelNickName() {
          return arrayModelName;
+     }
+
+     public String[] getAllLLMModelNickName() {
+         String[] arrayLLMModelsName = new String[getLLMModelCounts()];
+         for (int i = 0; i < getLLMModelCounts(); i++) {
+             arrayLLMModelsName[i] = AIModels[i + NON_LLM_MODEL_COUNTS].getNickname();
+         }
+         return arrayLLMModelsName;
      }
 
      public int getLLMModelCounts() {
@@ -214,7 +222,7 @@
                  (long)(8.71 * 1024 * 1024 * 1024L));
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-14B", "Qwen3-14B-Q4_K_M.gguf",
-                 "https://hf-mirror.com/Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true",
+                 "https://huggingface.co/Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true",
                  (long)(9 * 1024 * 1024 * 1024L));
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
@@ -256,10 +264,15 @@
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
 
-         //UT for download Qwen2.5-VL-3B from huggingface's mirror in China, validate ok although it seems that this mirror site is NOT stable
+         //UT for download Qwen2.5-VL-3B from huggingface's mirror site in China, validate ok
          //if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
          //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
          //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
+         //}
+
+         //UT for download Qwen3-14B from huggingface's mirror site in China, validate ok
+         //if (getKANTVAIModelFromName("Qwen3-14B") != null) {
+         //    getKANTVAIModelFromName("Qwen3-14B").setUrl("https://hf-mirror.com/Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true");
          //}
      }
  }
