@@ -105,6 +105,7 @@ a screenshot to demostrate download LLM model in APK.
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
+- [ggml-hexagon:why ggml-hexagon(HWACCEL_CDSP) is a reference implementation rather than a product-level implementation](https://github.com/zhouwg/ggml-hexagon/discussions/28)
 - [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
 
 
