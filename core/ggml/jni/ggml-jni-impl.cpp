@@ -1101,8 +1101,8 @@ static const char * whisper_asr_callback(void * opaque) {
         static std::string test_info;
 
         test_info = whisper_get_time_string() + "\n" +
-                    " First line:this is ASR pressure test powered by whisper.cpp(https://github.com/ggerganov/whisper.cpp)\n "
-                    "second line:thanks for your interesting in project KanTV(https://github.com/zhouwg/kantv)\n"
+                    " First line:this is ASR pressure test powered by whisper.cpp(https://github.com/ggml-org/whisper.cpp)\n "
+                    "second line:thanks for your interesting in project KanTV(https://github.com/kantv-ai/kantv)\n"
                     " third line:have fun with great and amazing whisper.cpp\n";
         return test_info.c_str();
     }
