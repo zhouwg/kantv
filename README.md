@@ -21,11 +21,11 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
-- Probably be the first [open-source implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) on Android phone, PR in the upstream llama.cpp community: https://github.com/ggml-org/llama.cpp/pull/12326
+- The [ggml-hexagon(original name is ggml-qnn)](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp)  in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone.
 
 ### Software architecture of KanTV Android
 
-![kantv-arch-320-240](https://github.com/user-attachments/assets/48e18ace-b667-45f9-8e0f-9faf1427e6bf)
+![Image](https://github.com/user-attachments/assets/006ace20-20be-414c-b1f9-d185af438ec3)
 
 ### Building the project
 
@@ -109,10 +109,14 @@ a screenshot to demostrate download LLM model in APK.
 
 
 
+<!--
+comment out this section because some contributors in the upstream project might-be don't want to be appeared here
+
 ### Contributors
 
 [![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
 
+-->
 
 
 ### Special Acknowledgement

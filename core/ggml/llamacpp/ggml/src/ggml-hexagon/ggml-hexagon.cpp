@@ -5195,7 +5195,7 @@ static int ggmlhexagon_init_rpcmempool(ggml_backend_hexagon_context * ctx) {
     if ((g_hexagon_appcfg.hwaccel_approach == HWACCEL_CDSP) && (1 == g_hexagon_appcfg.enable_rpc_ion_mempool)) {
         GGML_ASSERT(ctx->rpc_mempool_capacity > (8 * SIZE_IN_MB));
         ctx->rpc_mempool_len = ctx->rpc_mempool_capacity - (8 * SIZE_IN_MB);
-        //use rpcmem_alloc2 to alloc 2GiB memory, it's a workaround to make stablediffusion.cpp in Project KanTV happy
+        //use rpcmem_alloc2 to alloc 2+ GiB memory, it's a workaround to make stablediffusion.cpp happy
         //because there are unknown issues with memory allocated by rpcmem_alloc2
         ctx->rpc_mempool = rpcmem_alloc2(RPCMEM_HEAP_ID_SYSTEM, RPCMEM_DEFAULT_FLAGS | RPCMEM_TRY_MAP_STATIC, ctx->rpc_mempool_len);
         if (nullptr == ctx->rpc_mempool) {
@@ -5569,7 +5569,6 @@ static bool ggmlhexagon_can_handle_op_through_cdsp(ggml_backend_dev_t dev, const
         {
             //TODO:workaround approach to fix HWACCEL_CDSP can't works in ASR inference and  LLM inference
             //     with some LLM models in a standard Android APP
-            //     one more thing, I think the latest QNN SDK's internal also use the similar approach
             if (ne00 < 1024) {
                 return false;
             }

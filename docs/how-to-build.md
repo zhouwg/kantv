@@ -12,9 +12,8 @@ git checkout master
 
 #### Prerequisites
 
-- OS 
-    
-      Ubuntu 20.04(EOL on 31 May 2025), 22.04, 24.04 is recommended.
+- OS
+    Ubuntu 20.04(EOL on 31 May 2025), 22.04, 24.04 is recommended.
 
 - tools & utilities
 
@@ -23,15 +22,15 @@ git checkout master
     ./build/prebuild.sh
     ```
 
- - download Android-NDK and Android-SDK for **command-line mode build**(can be skipped)
-   
+ - download Android-NDK and Android-SDK for **command-line mode build**
+
    run below script accordingly
     ```
     . build/envsetup.sh
 
     ./build/prebuild-download.sh
 
-    ```    
+    ```
  - download and install Android Studio manually
 
    download Android Studio Jellyfish (| 2023.3.1 April 30, 2024) from https://developer.android.com/studio/archive
@@ -88,8 +87,6 @@ build the entire project by Android Studio IDE
 
 
 #### Build with command line mode
-
-the command line mode build must be performed after build with Android Studio IDE at the **first time**.
 
 ```
   . build/envsetup.sh
