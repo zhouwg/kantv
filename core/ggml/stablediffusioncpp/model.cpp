@@ -18,6 +18,15 @@
 
 #include "stable-diffusion.h"
 
+#if defined(__ANDROID__) || defined(ANDROID)
+extern "C" {
+#include "libavutil/cde_log.h"
+#include "libavutil/cde_assert.h"
+}
+#include "ggml-jni.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
+#endif
+
 #ifdef SD_USE_METAL
 #include "ggml-metal.h"
 #endif
@@ -1726,6 +1735,11 @@ bool ModelLoader::load_tensors(on_new_tensor_cb_t on_new_tensor_cb, ggml_backend
         std::string file_path = file_paths_[file_index];
         LOG_DEBUG("loading tensors from %s", file_path.c_str());
 
+#if (defined __ANDROID__) || (defined ANDROID)
+        GGML_JNI_NOTIFY("pls waiting(don't stop StableDiffusion inference "
+                        "before the final generated image can be seen, otherwise unexpected behaviour would happen)...\n");
+
+#endif
         std::ifstream file(file_path, std::ios::binary);
         if (!file.is_open()) {
             LOG_ERROR("failed to open '%s'", file_path.c_str());

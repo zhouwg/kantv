@@ -1,18 +1,18 @@
- /*
-  * Copyright (c) 2024- KanTV Authors
-  */
- package kantvai.ai;
+/*
+ * Copyright (c) 2024- KanTV Authors
+ */
+package kantvai.ai;
 
- import kantvai.media.player.KANTVLog;
+import kantvai.media.player.KANTVLog;
 
- public class KANTVAIModelMgr {
+public class KANTVAIModelMgr {
      private static final String TAG = KANTVAIModelMgr.class.getSimpleName();
 
      private int defaultLLMModelIndex       = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
-     private final int LLM_MODEL_COUNTS     = 8; // counts of LLM models
+     private final int LLM_MODEL_COUNTS     = 8; // default counts of LLM models, might-be not the real counts of all LLM models
      private final int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
 
-     private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS;
+     private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS; // default capacity of all AI models
 
 
      private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
@@ -127,6 +127,9 @@
          return arrayLLMModelsName;
      }
 
+     /*
+       return the real counts of all LLM models
+      */
      public int getLLMModelCounts() {
          return modelCounts - NON_LLM_MODEL_COUNTS;
      }
@@ -249,8 +252,8 @@
                  "https://huggingface.co/nvidia/Llama-3.1-Nemotron-Nano-8B-v1/tree/main");
 
 
-         modelCounts = modelIndex;
-         //initialize arrayModeName for UI
+         modelCounts = modelIndex;  //store to the real counts of all AI models
+         //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + 1 StableDiffusion model + all LLM models)
          arrayModelName = new String[modelCounts];
          for (int i = 0; i < modelCounts; i++) {
              arrayModelName[i] = AIModels[i].getNickname();
@@ -264,13 +267,13 @@
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
 
-         //UT for download Qwen2.5-VL-3B from huggingface's mirror site in China, validate ok
+         //UT for download Qwen2.5-VL-3B from huggingface's mirror site, validate ok although it seems that this site is not stable
          //if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
          //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
          //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
          //}
 
-         //UT for download Qwen3-14B from huggingface's mirror site in China, validate ok
+         //UT for download Qwen3-14B from huggingface's mirror site, validate ok although it seems that this site is not stable
          //if (getKANTVAIModelFromName("Qwen3-14B") != null) {
          //    getKANTVAIModelFromName("Qwen3-14B").setUrl("https://hf-mirror.com/Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true");
          //}

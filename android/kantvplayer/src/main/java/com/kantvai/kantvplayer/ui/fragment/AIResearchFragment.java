@@ -98,7 +98,7 @@
      private static final int SELECT_IMAGE = 1;
 
      private int nThreadCounts = 1;
-     private int nBenchmarkIndex = KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal();
+     private int nBenchmarkIndex = KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal();
      private int nPreviousBenchmakrIndex = 0;
      private String strModeName = "tiny.en-q8_0";
      private String strBackend = "ggml";
@@ -221,26 +221,26 @@
                  nBenchmarkIndex = Integer.valueOf(position);
                  KANTVLog.j(TAG, "benchmark index:" + nBenchmarkIndex);
 
-                 if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
                      spinnerModelName.setSelection(0); //hardcode to ggml-tiny.en-q8_0.bin for purpose of validate various models more easily on Android phone
                  }
-                 if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
                      //hardcode to gemma-3-4b-it-Q8_0.gguf for purpose of validate LLM multimodal more easily on Android phone
                      spinnerModelName.setSelection(AIModelMgr.getDefaultModelIndex() + AIModelMgr.getNonLLMModelCounts());
                      txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
                  }
 
-                 if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
+                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
                      spinnerModelName.setSelection(1); //hardcode to SD model name for purpose of validate LLM multimodal more easily on Android phone
                      txtUserInput.setText("a lovely cat");
                  }
 
-                 if ((nPreviousBenchmakrIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (nBenchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
+                 if ((nPreviousBenchmakrIndex < KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (nBenchmarkIndex < KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
                      nPreviousBenchmakrIndex = nBenchmarkIndex;
                      return;
                  }
 
-                 if ((nPreviousBenchmakrIndex >= KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (nBenchmarkIndex >= KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
+                 if ((nPreviousBenchmakrIndex >= KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal()) && (nBenchmarkIndex >= KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())) {
                      nPreviousBenchmakrIndex = nBenchmarkIndex;
                      return;
                  }
@@ -256,7 +256,7 @@
 
              }
          });
-         spinnerBenchType.setSelection(KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal());
+         spinnerBenchType.setSelection(KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal());
 
          Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerThreadCounts);
          String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
@@ -321,6 +321,7 @@
          spinnerModelName.setSelection(0); // ggml-tiny.en-q8_0.bin, 42M
 
          btnSelectImage.setOnClickListener(v -> {
+             resetUIAndStatus(null, true, false);
              Intent intent = new Intent(Intent.ACTION_PICK);
              intent.setType("image/*");
              startActivityForResult(intent, SELECT_IMAGE);
@@ -328,9 +329,9 @@
 
          btnStop.setOnClickListener(v -> {
              KANTVLog.g(TAG, "here");
-             if (ggmljava.llm_is_running()) {
+             if (ggmljava.inference_is_running()) {
                  KANTVLog.g(TAG, "here");
-                 ggmljava.llm_stop_inference();
+                 ggmljava.inference_stop_inference();
              }
              resetUIAndStatus(null,true, false);
          });
@@ -339,7 +340,7 @@
              KANTVLog.g(TAG, "selectUIIndex:" + selectedUIIndex);
              KANTVLog.g(TAG, "selectModeIndex:" + selectModelIndex);
              KANTVLog.g(TAG, "strModeName:" + arrayModelName[selectedUIIndex]);
-             KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex)
+             KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex)
                      + ", threads:" + nThreadCounts + ", model:" + strModeName + ", backend:" + strBackend);
              String selectModelFilePath = "";
 
@@ -348,7 +349,7 @@
              //sanity check begin
              {
                  isASRModel = KANTVAIUtils.isASRModel(strModeName);
-                 if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
                      //attention here
                      if (selectModelIndex < 0) {
                          selectModelIndex = 0;
@@ -357,7 +358,7 @@
                          selectModeFileName = AIModelMgr.getKANTVAIModelFromName(strModeName).getName();
                      }
                      isLLMModel = true;
-                 } else if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
+                 } else if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal()) {
                      isSDModel = true;
                      selectModeFileName = AIModelMgr.getKANTVAIModelFromName(strModeName).getName();
                  } else {
@@ -367,19 +368,19 @@
                  setTextGGMLInfo(selectModeFileName);
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
-                 if ((KANTVUtils.bench_type.GGML_BENCHMARK_MEMCPY.ordinal() == nBenchmarkIndex)
-                         || (KANTVUtils.bench_type.GGML_BENCHMARK_MULMAT.ordinal() == nBenchmarkIndex)) {
+                 if ((KANTVAIUtils.bench_type.GGML_BENCHMARK_MEMCPY.ordinal() == nBenchmarkIndex)
+                         || (KANTVAIUtils.bench_type.GGML_BENCHMARK_MULMAT.ordinal() == nBenchmarkIndex)) {
                      //reset to ASR model name
                      setTextGGMLInfo(AIModelMgr.getKANTVAIModelFromIndex(0).getName());
                  } else {
-                     if (isASRModel && (nBenchmarkIndex != KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                         KANTVLog.j(TAG, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     if (isASRModel && (nBenchmarkIndex != KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                         KANTVLog.j(TAG, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                         KANTVUtils.showMsgBox(mActivity, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
                          return;
                      }
-                     if ((!isASRModel) && (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                         KANTVLog.j(TAG, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     if ((!isASRModel) && (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                         KANTVLog.j(TAG, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                         KANTVUtils.showMsgBox(mActivity, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
                          return;
                      }
                  }
@@ -417,10 +418,11 @@
                  }
 
                  if (isASRModel) //ASR inference
-                     //ASR inference: built-in ASR model which located in path /sdcard/kantv/
-                     selectModelFilePath = KANTVUtils.getDataPath() + selectModeFileName;
+                     //ASR inference: built-in ASR model which located in path /sdcard/kantv/ or internal data path
+                     selectModelFilePath = KANTVUtils.getDataPath(mContext) + selectModeFileName;
                  else {
-                     //LLM inference: LLM model is located on /sdcard/ and manually uploaded by user currently
+                     //LLM inference: LLM model is located on /sdcard/ and can be downloaded in the APK,
+                     //               or manually uploaded to the phone by user
                      selectModelFilePath = KANTVUtils.getSDCardDataPath() + selectModeFileName;
                  }
 
@@ -473,7 +475,7 @@
              ggmlModelFileName = selectModelFilePath;
              KANTVLog.j(TAG, "model file:" + ggmlModelFileName);
              if (isASRModel) { //avoid crash
-                 int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVUtils.ASR_MODE_BECHMARK, backendIndex);
+                 int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVAIUtils.ASR_MODE_BECHMARK, backendIndex);
                  if (0 != result) {
                      KANTVLog.j(TAG, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
                      KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
@@ -721,7 +723,7 @@
                      return;
                  }
 
-                 if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
                      if (content.contains("not initialized")) {
                          bASROK = false;
                      }
@@ -753,8 +755,8 @@
                              //txtASRInfo.setText("");
                              nLogCounts = 0;
                          }
-                         if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                             if (!ggmljava.llm_is_running()) {
+                         if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+                             if (!ggmljava.inference_is_running()) {
                                  return;
                              }
                          }
@@ -799,8 +801,8 @@
          if (mKANTVMgr == null) {
              return;
          }
-         if (ggmljava.llm_is_running()) {
-             ggmljava.llm_stop_inference();
+         if (ggmljava.inference_is_running()) {
+             ggmljava.inference_stop_inference();
          }
 
          try {
@@ -819,8 +821,8 @@
      }
 
      public void stopLLMInference() {
-         if (ggmljava.llm_is_running()) {
-             ggmljava.llm_stop_inference();
+         if (ggmljava.inference_is_running()) {
+             ggmljava.inference_stop_inference();
          }
 
          resetUIAndStatus(null,true, false);
@@ -851,14 +853,14 @@
      */
 
      private boolean isGGMLInfernce() {
-         if (nBenchmarkIndex < KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
+         if (nBenchmarkIndex < KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
              return true;
          else
              return false;
      }
 
      private boolean isNCNNInference() {
-         if (nBenchmarkIndex >= KANTVUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
+         if (nBenchmarkIndex >= KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
              return true;
          else
              return false;
@@ -971,6 +973,8 @@
                  llInfoLayout.removeView(ivInfo);
                  ivInfo = null;
              }
+             bitmapSelectedImage = null;
+             pathSelectedImage = null;
          } else {
              if (isMNISTModel) {
                  String imgPath = KANTVUtils.getDataPath() + ggmlMNISTImageFile;
@@ -1008,8 +1012,8 @@
      }
 
      private String getBenchmarkTip() {
-         String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
-         String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
+         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
+         String benchmarkTip = "\nBench:" + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
                  + " ,threads: " + nThreadCounts
                  + " ,backend: " + backendDesc
                  + " ) cost " + duration + " milliseconds";
@@ -1030,7 +1034,7 @@
          if (strBenchmarkInfo.startsWith("unknown")) {
              return;
          }
-         String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
+         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
          /*
          String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
                  + " ,threads: " + nThreadCounts
@@ -1053,7 +1057,7 @@
              }
          }
 
-         if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
+         if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal()) {
              if (!bASROK) {
                  return;
              }
@@ -1065,10 +1069,10 @@
          KANTVLog.j(TAG, benchmarkTip);
          String dispInfo;
          if (!bOnlyDisplayBenchmarkTip) { //compatible with previous showMsgBox
-             if (nBenchmarkIndex == KANTVUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
-                 dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR);
+             if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())
+                 dispInfo = KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_ASR);
              else
-                 dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
+                 dispInfo = KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_LLM);
              dispInfo += "\n\n";
 
              dispInfo += benchmarkTip;
@@ -1089,7 +1093,7 @@
 
      private void setTextGGMLInfo(String LLMModelFileName) {
          txtGGMLInfo.setText("");
-         txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_ASR));
+         txtGGMLInfo.append(KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_ASR));
          txtGGMLInfo.append("\n" + "AI model:" + LLMModelFileName);
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");

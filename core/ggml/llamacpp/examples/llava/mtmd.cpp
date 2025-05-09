@@ -586,6 +586,12 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
                     text_batch.n_seq_id[i]    = 1;
                     text_batch.seq_id  [i][0] = seq_id;
                     text_batch.logits  [i]    = false;
+#if (defined __ANDROID__) || (defined ANDROID)
+                    if (0 == inference_is_running_state()) {
+                        llama_batch_free(text_batch);
+                        return AI_INFERENCE_INTERRUPTED;
+                    }
+#endif
                 }
                 if (is_last) {
                     // always get logits for last input chunk
@@ -594,6 +600,9 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
                 ret = llama_decode(lctx, text_batch);
                 if (ret != 0) {
                     LOG_ERR("failed to decode text\n");
+#if (defined __ANDROID__) || (defined ANDROID)
+                    GGML_JNI_NOTIFY("failed to decode text\n");
+#endif
                     llama_batch_free(text_batch);
                     return ret;
                 }
@@ -609,6 +618,9 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
             ret = mtmd_encode(ctx, chunk.tokens_image.get());
             if (ret != 0) {
                 LOG_ERR("failed to encode image\n");
+#if (defined __ANDROID__) || (defined ANDROID)
+                GGML_JNI_NOTIFY("failed to encode image\n");
+#endif
                 llama_batch_free(text_batch);
                 return ret;
             }
@@ -616,13 +628,11 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
                 LOG_INF("image/slice encoded in %" PRId64 " ms\n", ggml_time_ms() - t0);
             }
 #if (defined __ANDROID__) || (defined ANDROID)
-            if (0 == llama_is_running_state()) {
+            if (0 == inference_is_running_state()) {
                 llama_batch_free(text_batch);
-                return LLM_INFERENCE_INTERRUPTED;
+                return AI_INFERENCE_INTERRUPTED;
             } else {
-                memset(tmpbuf, 0, 1024);
-                snprintf(tmpbuf, 1024, "image/slice encoded in %" PRId64 " ms\n", ggml_time_ms() - t0);
-                kantv_asr_notify_benchmark_c(tmpbuf);
+                GGML_JNI_NOTIFY("image/slice encoded in %" PRId64 " ms\n", ggml_time_ms() - t0);
             }
 #endif
             int32_t n_tokens = mtmd_image_tokens_get_n_tokens(chunk.tokens_image.get());
@@ -652,13 +662,11 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
 
                 LOG_INF("decoding image batch %d/%d, n_tokens_batch = %d\n", i_batch+1, n_img_batches, n_tokens_batch);
 #if (defined __ANDROID__) || (defined ANDROID)
-                if (0 == llama_is_running_state()) {
+                if (0 == inference_is_running_state()) {
                     llama_batch_free(text_batch);
-                    return LLM_INFERENCE_INTERRUPTED;
+                    return AI_INFERENCE_INTERRUPTED;
                 } else {
-                    memset(tmpbuf, 0, 1024);
-                    snprintf(tmpbuf, 1024, "decoding image batch %d/%d, n_tokens_batch = %d\n", i_batch+1, n_img_batches, n_tokens_batch);
-                    kantv_asr_notify_benchmark_c(tmpbuf);
+                    GGML_JNI_NOTIFY("decoding image batch %d/%d, n_tokens_batch = %d\n", i_batch+1, n_img_batches, n_tokens_batch);
                 }
 #endif
 
@@ -666,6 +674,9 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
                 ret = llama_decode(lctx, batch_embd_view);
                 if (ret != 0) {
                     LOG_ERR("failed to decode image\n");
+#if (defined __ANDROID__) || (defined ANDROID)
+                    GGML_JNI_NOTIFY("failed to decode image\n");
+#endif
                     llama_set_causal_attn(lctx, true); // restore causal attn
                     llama_batch_free(text_batch);
                     return ret;
@@ -675,13 +686,11 @@ int32_t mtmd_helper_eval(mtmd_context * ctx,
                     LOG_INF("image decoded (batch %d/%d) in %" PRId64 " ms\n", i_batch+1, n_img_batches, ggml_time_ms() - t1);
                 }
 #if (defined __ANDROID__) || (defined ANDROID)
-                if (0 == llama_is_running_state()) {
+                if (0 == inference_is_running_state()) {
                     llama_batch_free(text_batch);
-                    return LLM_INFERENCE_INTERRUPTED;
+                    return AI_INFERENCE_INTERRUPTED;
                 } else {
-                    memset(tmpbuf, 0, 1024);
-                    snprintf(tmpbuf, 1024, "image decoded (batch %d/%d) in %" PRId64 " ms\n", i_batch+1, n_img_batches, ggml_time_ms() - t1);
-                    kantv_asr_notify_benchmark_c(tmpbuf);
+                    GGML_JNI_NOTIFY("image decoded (batch %d/%d) in %" PRId64 " ms\n", i_batch+1, n_img_batches, ggml_time_ms() - t1);
                 }
 #endif
 

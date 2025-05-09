@@ -747,10 +747,10 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 max_tokens++;
 #if (defined __ANDROID__) || (defined ANDROID)
                 if (ggml_jni_is_valid_utf8(token_str.c_str())) {
-                    if (0 == llama_is_running_state()) {
+                    if (0 == inference_is_running_state()) {
                         llm_inference_interrupted = 1;
                     } else {
-                        kantv_asr_notify_benchmark_c(token_str.c_str());
+                        GGML_JNI_NOTIFY(token_str.c_str());
                     }
                 }
 #endif
@@ -965,18 +965,18 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 #if 0  //dirty method to fix issue:https://github.com/zhouwg/kantv/issues/116, it seems not required from now on
         if (max_tokens > 300) {
 
-            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+            GGML_JNI_NOTIFY("\n[end of text]\n\n");
             break;
         }
         int64_t end_duration = ggml_time_ms();
         if (end_duration - start_duration > 60000) {
-            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+            GGML_JNI_NOTIFY("\n[end of text]\n\n");
             break;
         }
 #endif
 #endif
 
-        if (0 == llama_is_running_state()) {
+        if (0 == inference_is_running_state()) {
             llm_inference_interrupted = 1;
             break;
         }
@@ -984,7 +984,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back()) && !(params.interactive)) {
             LOG(" [end of text]\n");
 #if (defined __ANDROID__) || (defined ANDROID)
-            kantv_asr_notify_benchmark_c("\n[end of text]\n\n");
+            GGML_JNI_NOTIFY("\n[end of text]\n\n");
 #endif
             break;
         }
@@ -1003,7 +1003,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG("\n\n");
-    if (1 == llama_is_running_state()) {
+    if (1 == inference_is_running_state()) {
         llm_inference_interrupted = 0;
         common_perf_print(ctx, smpl);
     } else {
@@ -1018,7 +1018,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     ggml_threadpool_free_fn(threadpool_batch);
 
     if (1 == llm_inference_interrupted)
-        return LLM_INFERENCE_INTERRUPTED;
+        return AI_INFERENCE_INTERRUPTED;
 
     return 0;
 }

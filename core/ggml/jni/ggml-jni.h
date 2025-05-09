@@ -21,9 +21,13 @@
 extern "C" {
 #endif
 
-#define LLM_INFERENCE_INTERRUPTED             8
+/**
+ * AI inference in native layer was stopped/interrupted from Java layer
+ */
+#define AI_INFERENCE_INTERRUPTED             8
+
 //=============================================================================================
-//add new AI benchmark type / new backend using GGML inference framework here, keep sync with KANTVUtils.java
+//add new AI benchmark type / new backend using GGML inference framework here, keep sync with KANTVAIUtils.java
 
 // available bench type for ggml-jni
 enum ggml_jni_bench_type {
@@ -113,9 +117,12 @@ enum ggml_jni_bench_type {
 
     int          llama_inference_main(int argc, char * argv[], int backend);
 
-    void         llama_init_running_state(void);
-    void         llama_reset_running_state(void);
-    int          llama_is_running_state(void);
+    /**
+     *helper functions to check whether AI inference is running, these helper functions is useful&necessary for UI in Java layer
+     */
+    void         inference_reset_running_state(void);
+    void         inference_reset_running_state(void);
+    int          inference_is_running_state(void);
 
     /**
     * multi-modal inference

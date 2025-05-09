@@ -5195,6 +5195,8 @@ static int ggmlhexagon_init_rpcmempool(ggml_backend_hexagon_context * ctx) {
     if ((g_hexagon_appcfg.hwaccel_approach == HWACCEL_CDSP) && (1 == g_hexagon_appcfg.enable_rpc_ion_mempool)) {
         GGML_ASSERT(ctx->rpc_mempool_capacity > (8 * SIZE_IN_MB));
         ctx->rpc_mempool_len = ctx->rpc_mempool_capacity - (8 * SIZE_IN_MB);
+        //use rpcmem_alloc2 to alloc 2GiB memory, it's a workaround to make stablediffusion.cpp in Project KanTV happy
+        //because there are unknown issues with memory allocated by rpcmem_alloc2
         ctx->rpc_mempool = rpcmem_alloc2(RPCMEM_HEAP_ID_SYSTEM, RPCMEM_DEFAULT_FLAGS | RPCMEM_TRY_MAP_STATIC, ctx->rpc_mempool_len);
         if (nullptr == ctx->rpc_mempool) {
             GGMLHEXAGON_LOG_WARN("alloc rpc memorypool %ld(%d MiB) failed", ctx->rpc_mempool_len, ctx->rpc_mempool_capacity / SIZE_IN_MB);

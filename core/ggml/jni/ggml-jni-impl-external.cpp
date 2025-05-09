@@ -7419,20 +7419,33 @@ const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
 }
 #endif
 
-static static std::atomic<uint32_t> g_ggmljni_llm_is_running(0);
+static static std::atomic<uint32_t> g_ggmljni_inference_is_running(0);
 
-void llama_init_running_state() {
-    g_ggmljni_llm_is_running.store(1);
+/**
+*helper functions to check whether AI inference is running, these helper functions is useful&necessary for UI in Java layer
+*/
+void inference_init_running_state() {
+    g_ggmljni_inference_is_running.store(1);
 }
 
-void llama_reset_running_state() {
-    g_ggmljni_llm_is_running.store(0);
+void inference_reset_running_state() {
+    g_ggmljni_inference_is_running.store(0);
 }
 
-int llama_is_running_state() {
-    return g_ggmljni_llm_is_running.load();
+int inference_is_running_state() {
+    return g_ggmljni_inference_is_running.load();
 }
 
+/**
+ * helper function to performan llama inference in native layer
+ * @param sz_model_path
+ * @param sz_user_data
+ * @param llm_type
+ * @param n_threads
+ * @param n_backend_type
+ * @param n_hwaccel_type
+ * @return
+ */
 int llama_inference(const char * sz_model_path, const char * sz_user_data, int llm_type,
                        int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
@@ -7456,14 +7469,25 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
-    llama_init_running_state();
+    inference_init_running_state();
     ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
-    llama_reset_running_state();
+    inference_reset_running_state();
 
     return ret;
 }
 
-
+/**
+ * helper function to performan llava(multimodal) inference in native layer
+ * @param sz_model_path
+ * @param sz_mmproj_model_path
+ * @param img_path
+ * @param sz_user_data
+ * @param llm_type
+ * @param n_threads
+ * @param n_backend_type
+ * @param n_hwaccel_type
+ * @return
+ */
 int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path, const char * img_path, const char *sz_user_data, int llm_type,
                        int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
@@ -7494,14 +7518,25 @@ int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path,
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
-    llama_init_running_state();
+    inference_init_running_state();
     ret = llava_inference_main(argc, const_cast<char **>(argv), n_backend_type);
-    llama_reset_running_state();
+    inference_reset_running_state();
 
     LOGGD("ret %d", ret);
     return ret;
 }
 
+/**
+ * helper function to perform stable-diffusion inference in native layer
+ * @param sz_model_path
+ * @param sz_aux_model_path
+ * @param sz_user_data
+ * @param llm_type
+ * @param n_threads
+ * @param n_backend_type
+ * @param n_hwaccel_type
+ * @return
+ */
 int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const char *sz_user_data, int llm_type,
                     int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
@@ -7530,7 +7565,9 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
                           "--height", "64",
                           "-t", std::to_string(n_threads).c_str()
     };
+    inference_init_running_state();
     ret = sd_inference_main(argc, argv, n_backend_type);
+    inference_reset_running_state();
     LOGGD("ret %d", ret);
     return ret;
 }

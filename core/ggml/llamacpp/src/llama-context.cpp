@@ -1285,6 +1285,12 @@ int llama_context::decode(llama_batch & inp_batch) {
 
         const auto & n_ubatch = cparams.n_ubatch;
 
+#if (defined __ANDROID__) || (defined ANDROID)
+        if (0 == inference_is_running_state()) {
+            return AI_INFERENCE_INTERRUPTED;
+        }
+#endif
+
         if (kv_self->recurrent) {
             if (embd_pooled) {
                 // Pooled embeddings cannot be split across ubatches (yet)

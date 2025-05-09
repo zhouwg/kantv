@@ -17,11 +17,11 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Gemma3-4B(text-to-text and image-to-text(multimodal))](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Gemma3-12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Qwen2.5-VL-3B](https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF), [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B) supportive and runs entirely <b>offline(no Internet required)</b>. these LLM models can be downloadded in the Android APK directly without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone.
+- Built-in [Gemma3-4B(text-to-text and image-to-text(multimodal))](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Gemma3-12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Qwen2.5-VL-3B](https://huggingface.co/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF), [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B) supportive and runs entirely <b>offline(no Internet required)</b>. these LLM models can be downloadded in the Android APK directly without manually preparation(directly access to huggingface.co is required for this feature). APK's users can compare the <b>real experience</b> of these LLM models on the Android phone.
 
 - Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
-- Probably be the first [open-source implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) on Android phone.
+- Probably be the first [open-source implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp) on Android phone, PR in the upstream llama.cpp community: https://github.com/ggml-org/llama.cpp/pull/12326
 
 ### Software architecture of KanTV Android
 

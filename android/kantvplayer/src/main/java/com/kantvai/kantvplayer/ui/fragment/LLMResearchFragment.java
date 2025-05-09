@@ -42,6 +42,7 @@
 
  import butterknife.BindView;
  import kantvai.ai.KANTVAIModelMgr;
+ import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
  import kantvai.media.player.KANTVEvent;
  import kantvai.media.player.KANTVEventListener;
@@ -54,7 +55,7 @@
 
 
  //the feature in this UI page is exactly similar to AIResearchFragment.java
- //keep it for further usage
+ //keep it for further usage(realtime LLM inference on Android phone: voice input ---> ASR ---> LLM ---> TTS)
  public class LLMResearchFragment extends BaseMvpFragment<LLMResearchPresenter> implements LLMResearchView {
      @BindView(R.id.llmresearchLayout)
      LinearLayout layout;
@@ -200,9 +201,9 @@
 
          btnStopInference.setOnClickListener(v -> {
              KANTVLog.g(TAG, "here");
-             if (ggmljava.llm_is_running()) {
+             if (ggmljava.inference_is_running()) {
                  KANTVLog.g(TAG, "here");
-                 ggmljava.llm_stop_inference();
+                 ggmljava.inference_stop_inference();
              }
              restoreUIAndStatus();
          });
@@ -340,7 +341,7 @@
                              nLogCounts = 0;
                          }
 
-                         if (!ggmljava.llm_is_running()) {
+                         if (!ggmljava.inference_is_running()) {
                              return;
                          }
 
@@ -384,8 +385,8 @@
          if (mKANTVMgr == null) {
              return;
          }
-         if (ggmljava.llm_is_running()) {
-             ggmljava.llm_stop_inference();
+         if (ggmljava.inference_is_running()) {
+             ggmljava.inference_stop_inference();
          }
 
          try {
@@ -404,8 +405,8 @@
      }
 
      public void stopLLMInference() {
-         if (ggmljava.llm_is_running()) {
-             ggmljava.llm_stop_inference();
+         if (ggmljava.inference_is_running()) {
+             ggmljava.inference_stop_inference();
          }
 
          restoreUIAndStatus();
@@ -442,7 +443,7 @@
              restoreUIAndStatus();
              return;
          }
-         String backendDesc = KANTVUtils.getGGMLBackendDesc(backendIndex);
+         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
 
          String benchmarkTip =  " (model: " + LLMModelFullName
                  + " ,threads: " + nThreadCounts
@@ -463,7 +464,7 @@
 
          String dispInfo;
 
-         dispInfo = KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM);
+         dispInfo = KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_LLM);
          dispInfo += "\n\n";
 
          benchmarkTip += "\n";
@@ -491,7 +492,7 @@
      }
      private void setTextGGMLInfo(String LLMModelFullName) {
          txtGGMLInfo.setText("");
-         txtGGMLInfo.append(KANTVUtils.getDeviceInfo(mActivity, KANTVUtils.INFERENCE_LLM));
+         txtGGMLInfo.append(KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_LLM));
          txtGGMLInfo.append("\n" + "LLM model:" + LLMModelFullName);
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");

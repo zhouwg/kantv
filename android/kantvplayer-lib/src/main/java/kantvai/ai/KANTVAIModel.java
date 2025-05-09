@@ -1,11 +1,11 @@
- /*
-  * Copyright (c) 2024- KanTV Authors
-  */
+/*
+ * Copyright (c) 2024- KanTV Authors
+ */
 package kantvai.ai;
 
- import kantvai.media.player.KANTVLog;
+import kantvai.media.player.KANTVLog;
 
- public class KANTVAIModel {
+public class KANTVAIModel {
      public enum AIModelType {
          TYPE_ASR,
          TYPE_TEXT2IMAGE,

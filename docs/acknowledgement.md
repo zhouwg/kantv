@@ -30,6 +30,7 @@ Project KanTV has used/tried following open-source projects(list in here is inco
      <li><a href="https://webrtc.github.io/webrtc-org/start/" target="_blank" rel="noopener">WebRTC</a></li>
      <li><a href="https://github.com/shaka-project/shaka-packager" target="_blank" rel="noopener">Google ShakaPackager</a></li>
      <li><a href="https://github.com/ossrs/srs" target="_blank" rel="noopener">SRS</a></li>
+     <li><a href="https://github.com/begeekmyfriend/yasea" target="_blank" rel="noopener">yasea</a></li>
      <li><a href="https://github.com/nihui/ruapu" target="_blank" rel="noopener">RUAPU</a></li>
      <li>......</li>
 </ul>

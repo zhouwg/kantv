@@ -424,8 +424,9 @@ void log_printf(sd_log_level_t level, const char* file, int line, const char* fo
     if (sd_log_cb) {
         sd_log_cb(level, log_buffer, sd_log_cb_data);
     }
-
+#if defined(__ANDROID__) || defined(ANDROID)
     GGML_JNI_NOTIFY("%s", log_buffer);
+#endif
 
     va_end(args);
 }

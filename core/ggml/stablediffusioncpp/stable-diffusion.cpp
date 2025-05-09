@@ -1450,6 +1450,12 @@ sd_image_t* generate_image(sd_ctx_t* sd_ctx,
         int64_t sampling_start = ggml_time_ms();
         int64_t cur_seed       = seed + b;
         LOG_INFO("generating image: %i/%i - seed %" PRId64, b + 1, batch_count, cur_seed);
+#if (defined __ANDROID__) || (defined ANDROID)
+        if (0 == inference_is_running_state()) {
+            ggml_free(work_ctx);
+            return NULL;
+        }
+#endif
 
         sd_ctx->sd->rng->manual_seed(cur_seed);
         struct ggml_tensor* x_t   = init_latent;

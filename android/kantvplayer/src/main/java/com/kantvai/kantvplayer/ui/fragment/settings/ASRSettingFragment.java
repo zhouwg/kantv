@@ -26,6 +26,7 @@
 
  import java.io.File;
 
+ import kantvai.ai.KANTVAIUtils;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -115,8 +116,8 @@
                  KANTVLog.j(TAG, "asrmode: " + mSettings.getASRMode());
                  KANTVLog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts());
                  KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
-                 KANTVLog.j(TAG, "ASR model name: " + KANTVUtils.getASRModelString(mSettings.getASRModel()));
-                 String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
+                 KANTVLog.j(TAG, "ASR model name: " + KANTVAIUtils.getASRModelString(mSettings.getASRModel()));
+                 String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVAIUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
                  KANTVLog.j(TAG, "modelPath:" + modelPath);
                  KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
              }
@@ -143,7 +144,7 @@
 
              String asrAudioFileName = KANTVUtils.getDataPath() + "jfk.wav";
              //String asrModelFileName = KANTVUtils.getDataPath(mContext) + "ggml-tiny.en-q8_0.bin";
-             String userChooseModelName = KANTVUtils.getASRModelString(mSettings.getASRModel());
+             String userChooseModelName = KANTVAIUtils.getASRModelString(mSettings.getASRModel());
              KANTVLog.g(TAG, "ASR model name of user choose:" + userChooseModelName);
              String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
              File asrAudioFile = new File(asrAudioFileName);

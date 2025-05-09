@@ -86,6 +86,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kantvai.ai.KANTVAIUtils;
 import kantvai.ai.ggmljava;
 import kantvai.media.player.KANTVDRM;
 import kantvai.media.player.IMediaPlayer;
@@ -1532,7 +1533,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             return;
         }
 
-        if (asrMode == KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+        if (asrMode == KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
             KANTVLog.j(TAG, "asr saved filename:" + KANTVUtils.getASRSavedFileName());
         }
 
@@ -1540,7 +1541,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         //String ggmlModelFileName = "ggml-tiny-q5_1.bin";      // 31M
         //String ggmlModelFileName = "ggml-tiny.en-q5_1.bin";   // 31M
         String ggmlModelFileName = "ggml-tiny.en-q8_0.bin";     // 42M, very good, about 500-700 ms
-        String userChooseModelName = KANTVUtils.getASRModelString(mSettings.getASRModel());
+        String userChooseModelName = KANTVAIUtils.getASRModelString(mSettings.getASRModel());
         String userChooseModelFileName = "ggml-" + userChooseModelName + ".bin";
         KANTVLog.j(TAG, "ggml model name of user's choose:" + userChooseModelFileName);
 
@@ -1555,7 +1556,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         ggmlModelFileName = userChooseModelFileName;
         KANTVLog.j(TAG, "model: " + ggmlModelFileName);
 
-        File file = new File(KANTVUtils.getDataPath() + ggmlModelFileName);
+        File file = new File(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName);
         if (!file.exists()) {
             KANTVLog.j(TAG, "GGML model file not found:" + file.getAbsolutePath());
             Toast.makeText(getContext(), "GGML model file not found:" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
@@ -1567,13 +1568,13 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             KANTVLog.j(TAG, "ASR with GGML model file:" + file.getAbsolutePath());
         }
 
-        if (KANTVUtils.getASRSubsystemInit()) {
+        if (KANTVAIUtils.getASRSubsystemInit()) {
             int result = 0;
-            KANTVLog.j(TAG, "asr mode string: " + KANTVUtils.getASRModeString(mSettings.getASRMode()));
-            if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_reset(KANTVUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
+            KANTVLog.j(TAG, "asr mode string: " + KANTVAIUtils.getASRModeString(mSettings.getASRMode()));
+            if ((KANTVAIUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {
-                result = ggmljava.asr_reset(KANTVUtils.getDataPath() + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
             }
             if (0 == result) {
                 ggmljava.asr_start();
@@ -1595,7 +1596,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         topBarView.updateTVASRVisibility(true);
 
         String tipInfo = "TV transcription will be launched.\n";
-        if (asrMode == KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+        if (asrMode == KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
             tipInfo += "raw audio data would be saved to file for further usage:" + KANTVUtils.getASRSavedFileName();
         }
         showWarningDialog(mAttachActivity, tipInfo);
@@ -1618,7 +1619,7 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
         //ggmljava.asr_finalize();
         KANTVUtils.setTVASR(false);
         topBarView.updateTVASRVisibility(false);
-        if (asrMode == KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
+        if (asrMode == KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD) {
             KANTVLog.j(TAG, "saved raw audio data file:" + KANTVUtils.getASRSavedFileName());
             File file = new File(KANTVUtils.getASRSavedFileName());
             if (file.exists()) {

@@ -42,6 +42,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import cat.ereza.customactivityoncrash.config.CaocConfig;
+import kantvai.ai.KANTVAIUtils;
 import kantvai.ai.ggmljava;
 import kantvai.media.player.KANTVAssetLoader;
 import kantvai.media.player.KANTVLibraryLoader;
@@ -381,8 +382,8 @@ public class IApplication extends Application {
         int asrMode = mSettings.getASRMode();  //default is normal transcription
         int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
         KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
-        KANTVLog.j(TAG, "ASR model name: " + KANTVUtils.getASRModelString(mSettings.getASRModel()));
-        String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
+        KANTVLog.j(TAG, "ASR model name: " + KANTVAIUtils.getASRModelString(mSettings.getASRModel()));
+        String modelPath = KANTVUtils.getDataPath(mContext) + "ggml-" + KANTVAIUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
         KANTVLog.j(TAG, "modelPath:" + modelPath);
 
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
@@ -391,16 +392,16 @@ public class IApplication extends Application {
             KANTVLibraryLoader.load("ggml-jni");
             KANTVLog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             KANTVLog.j(TAG, "asr mode: " + mSettings.getASRMode());
-            KANTVLog.g(TAG, "asr mode string: " + KANTVUtils.getASRModeString(mSettings.getASRMode()));
-            if ((KANTVUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
+            KANTVLog.g(TAG, "asr mode string: " + KANTVAIUtils.getASRModeString(mSettings.getASRMode()));
+            if ((KANTVAIUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
             }
             KANTVUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
             KANTVUtils.setTVASR(false);
             if (0 == result) {
-                KANTVUtils.setASRSubsystemInit(true);
+                KANTVAIUtils.setASRSubsystemInit(true);
             } else {
                 KANTVLog.j(TAG, "********************************************\n");
                 KANTVLog.j(TAG, " pls check why failed to initialize ggml jni\n");

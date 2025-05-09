@@ -965,6 +965,9 @@ int sd_inference_main(int argc, const char* argv[], int backend_type) {
         LOGGD("Text2Image:width %d, height %d\n", params.width, params.height);
 #if (defined __ANDROID__) || (defined ANDROID)
         GGML_JNI_NOTIFY("Text2Image:width %d, height %d\n", params.width, params.height);
+        GGML_JNI_NOTIFY("pls waiting(don't stop StableDiffusion inference "
+                            "before the final generated image can be seen, otherwise unexpected behaviour would happen)...\n");
+
 #endif
         results = txt2img(sd_ctx,
                           params.prompt.c_str(),

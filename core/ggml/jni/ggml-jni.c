@@ -267,7 +267,7 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
     result = llama_inference(sz_model_path, sz_prompt, n_llm_type, n_thread_counts, n_backend, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
-        if (result != LLM_INFERENCE_INTERRUPTED) {
+        if (result != AI_INFERENCE_INTERRUPTED) {
             GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend);
         }
     }
@@ -294,20 +294,20 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
     memset(s_ggml_jni_buf, 0, JNI_BUF_LEN);
     va_start(va, format);
     len_content = vsnprintf(s_ggml_jni_buf, JNI_BUF_LEN, format, va);
-    snprintf(s_ggml_jni_buf + len_content, JNI_BUF_LEN - len_content, "\n");
+    //snprintf(s_ggml_jni_buf + len_content, JNI_BUF_LEN - len_content, "\n");
     va_end(va);
 
     kantv_asr_notify_benchmark_c(s_ggml_jni_buf);
 }
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_llm_1stop_1inference(JNIEnv * env, jclass clazz) {
-    llama_reset_running_state();
+Java_kantvai_ai_ggmljava_inference_1stop_1inference(JNIEnv * env, jclass clazz) {
+    inference_reset_running_state();
 }
 
 JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_llm_1is_1running(JNIEnv * env, jclass clazz) {
-    if (1 == llama_is_running_state()) {
+Java_kantvai_ai_ggmljava_inference_1is_1running(JNIEnv * env, jclass clazz) {
+    if (1 == inference_is_running_state()) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -374,8 +374,8 @@ Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring mo
     result = llava_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
-        if (result != LLM_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
+        if (result != AI_INFERENCE_INTERRUPTED) {
+            GGML_JNI_NOTIFY("LLAVA inference with backend %d failure", n_backend_type);
         }
     }
 
@@ -453,8 +453,8 @@ Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, j
     result = sd_inference(sz_model_path, sz_auxmodel_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
-        if (result != LLM_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
+        if (result != AI_INFERENCE_INTERRUPTED) {
+            GGML_JNI_NOTIFY("StableDiffusion inference with backend %d failure", n_backend_type);
         }
     }
 

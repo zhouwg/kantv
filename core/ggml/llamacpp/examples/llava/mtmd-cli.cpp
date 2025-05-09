@@ -165,11 +165,11 @@ static int generate_response(mtmd_cli_context & ctx, common_sampler * smpl, int 
         const char * tmp = common_token_to_piece(ctx.lctx, token_id).c_str();
 #if (defined __ANDROID__) || (defined ANDROID)
         if (ggml_jni_is_valid_utf8(tmp)) {
-            if (0 == llama_is_running_state()) {
+            if (0 == inference_is_running_state()) {
                 llm_inference_interrupted = 1;
                 break;
             } else {
-                kantv_asr_notify_benchmark_c(tmp);
+                GGML_JNI_NOTIFY(tmp);
             }
         }
 #endif
@@ -187,7 +187,7 @@ static int generate_response(mtmd_cli_context & ctx, common_sampler * smpl, int 
         }
     }
     if (1 == llm_inference_interrupted)
-        return LLM_INFERENCE_INTERRUPTED;
+        return AI_INFERENCE_INTERRUPTED;
     return 0;
 }
 
@@ -201,13 +201,10 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, std::vect
     auto formatted_chat = common_chat_templates_apply(ctx.tmpls.get(), tmpl_inputs);
     LOGGD("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
 #if (defined __ANDROID__) || (defined ANDROID)
-    if (0 == llama_is_running_state()) {
-        return LLM_INFERENCE_INTERRUPTED;
+    if (0 == inference_is_running_state()) {
+        return AI_INFERENCE_INTERRUPTED;
     } else {
-        char tmpbuf[256];
-        memset(tmpbuf, 0, 256);
-        snprintf(tmpbuf, 256, "formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
-        kantv_asr_notify_benchmark_c(tmpbuf);
+        GGML_JNI_NOTIFY("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
     }
 #endif
 
@@ -234,10 +231,11 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, std::vect
     }
 
 #if (defined __ANDROID__) || (defined ANDROID)
-    if (0 == llama_is_running_state()) {
-        return LLM_INFERENCE_INTERRUPTED;
+    if (0 == inference_is_running_state()) {
+        return AI_INFERENCE_INTERRUPTED;
     } else {
-        kantv_asr_notify_benchmark_c("starting image encoding & decoding, pls waiting(don't stop LLM inference before the first token can be seen)...\n");
+        GGML_JNI_NOTIFY("starting image encoding & decoding, pls waiting(don't stop LLM inference "
+                        "before the first token can be seen, otherwise unexpected behaviour would happen)...\n");
     }
 #endif
 
@@ -245,8 +243,8 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, std::vect
     //if (mtmd_helper_eval(ctx.ctx_vision.get(), ctx.lctx, chunks, ctx.n_past, 0, ctx.n_batch)) {
     if (result != 0) {
         LOGGD("Unable to eval prompt\n");
-        if (result == LLM_INFERENCE_INTERRUPTED)
-            return LLM_INFERENCE_INTERRUPTED;
+        if (result == AI_INFERENCE_INTERRUPTED)
+            return AI_INFERENCE_INTERRUPTED;
         return 1;
     }
 
@@ -325,17 +323,24 @@ int llava_inference_main(int argc, char ** argv, int backend_type) {
         result = eval_message(ctx, msg, params.image, true);
         if (0 != result) {
         //if (eval_message(ctx, msg, params.image, true)) {
-            if (LLM_INFERENCE_INTERRUPTED == result)
-                return LLM_INFERENCE_INTERRUPTED;
+            if (AI_INFERENCE_INTERRUPTED == result)
+                return AI_INFERENCE_INTERRUPTED;
             return 1;
         }
         //if (!g_is_interrupted && generate_response(ctx, smpl, n_predict)) {
         //    return 1;
         //}
         if (!g_is_interrupted) {
+#if (defined __ANDROID__) || (defined ANDROID)
+            if (0 == inference_is_running_state()) {
+                return AI_INFERENCE_INTERRUPTED;
+            } else {
+                GGML_JNI_NOTIFY("generate_reponse\n");
+            }
+#endif
             int result = generate_response(ctx, smpl, n_predict);
             LOGGD("result %d", result);
-            if (result == LLM_INFERENCE_INTERRUPTED)
+            if (result == AI_INFERENCE_INTERRUPTED)
                 return result;
         }
 

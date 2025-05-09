@@ -1,7 +1,7 @@
  /*
   * Copyright (c) 2024- KanTV Authors
   */
- package kantvai.ai;
+package kantvai.ai;
 
 public class ggmljava {
     private static final String TAG = ggmljava.class.getName();
@@ -63,9 +63,15 @@ public class ggmljava {
      */
     public static native String llm_inference(String modelPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 
-    public static native void    llm_stop_inference();
+    /**
+     * stop AI inference
+     */
+    public static native void    inference_stop_inference();
 
-    public static native boolean llm_is_running();
+    /**
+     * check whether AI inference is running
+     */
+    public static native boolean inference_is_running();
 
     /**
      * @param modelPath     /sdcard/xxxxxx.gguf
