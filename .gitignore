@@ -74,3 +74,5 @@ kantv.jks
 CMakeLists.txt
 libggmlop-skel*.so
 cmake/
+
+*.pro

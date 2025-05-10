@@ -30,7 +30,7 @@
     -->
     <PreferenceCategory android:key="llm-models" android:title="LLM Model">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
+            android:defaultValue="6"
             android:key="@string/pref_key_llmmodel"
             android:persistent="true"
             android:title="@string/pref_title_llmmodel"

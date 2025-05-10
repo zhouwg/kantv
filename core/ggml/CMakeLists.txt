@@ -12,7 +12,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(GGML_ENABLE_HEXAGON             ON)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(DEBUG_FLAG "-Wall")
+    set(DEBUG_FLAG "-DDEBUG -Wall")
     message("Debug mode:${DEBUG_FLAG}")
 else()
     set(DEBUG_FLAG "-DNDEBUG -Wall")

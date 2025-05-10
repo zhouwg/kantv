@@ -5,7 +5,6 @@ API16：Android 4.1 Jelly Bean
 API17：Android 4.2 Jelly Bean
 API18：Android 4.3 Jelly Bean
 API19：Android 4.4 KitKat
-API20：Android 4.4W Kitkat Watch
 API21：Android 5.0 (Android L)Lollipop
 API22：Android 5.1 (Android L)Lollipop
 API23：Android 6.0 (Android M)Marshmallow
@@ -23,7 +22,6 @@ API34：Android 14
 API35：Android 15
 */
 project.ext {
-    //zhouwg:2024-03-10, attention here
     compileSdkVersion   = 34
     buildToolsVersion   = "34.0.0"
     targetSdkVersion    = 34
@@ -31,8 +29,8 @@ project.ext {
     appTargetSdkVersion = 29
 
     //version and version code of KanTV Android APP
-    releaseVersion     = '1.6.8'
-    releaseVersionCode = 1000608
+    releaseVersion     = '1.6.9'
+    releaseVersionCode = 1000609
 
     //version and version code of internal customized Exoplayer2
     releaseVersionExoplayer     = '2.15.1'

@@ -287,3 +287,14 @@
                        <li>make tv.xml can be edited by APK's user(whom doesn't have tech background)</li>
                        <li>refine and simplify toplevel README.md</li>
                     </ul>
+- v1.6.9, 2025-05-10,
+                    <ul>
+                       <li>integrate stablediffusion.cpp for text-2-image on Android phone</li>
+                       <li>make stable-diffusion inference can work(not correct) on Hexagon-cDSP with ggml-hexagon</li>
+
+                       <li>enable another playback engine --- a customized Google Exoplayer2.15.1</li>
+                       <li>decoupling UI and data, refine UI and logic of download LLM models in APK</li>
+                       <li>refine JNI and try to improve stability of llava inference and stablediffusion inference in some corner cases</li>
+                       <li>refine docs</li>
+                       <li>refine ggml-hexagon.cpp and sync to the PR in upstream llama.cpp community</li>
+                    </ul>

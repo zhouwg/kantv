@@ -33,9 +33,9 @@
         -->
     </PreferenceCategory>
 
-    <PreferenceCategory android:title="@string/pref_title_asr">
+    <PreferenceCategory android:key="asr-models" android:title="@string/pref_title_asr">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="0"
+            android:defaultValue="3"
             android:entries="@@array/pref_entries_asrmodel"
             android:entryValues="@array/pref_entry_values_asrmodel"
             android:key="@string/pref_key_asrmodel"

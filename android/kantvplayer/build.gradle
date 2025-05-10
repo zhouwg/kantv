@@ -15,7 +15,7 @@ android {
             cmake {
                 //modify to -DCMAKE_BUILD_TYPE=Release before prepare release apk
                 arguments += "-DCMAKE_BUILD_TYPE=Debug"
-                //zhouwg:2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
+                //2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
                 arguments += "-DCMAKE_ANDROID_STL_TYPE=c++_shared"
                 arguments += "-DANDROID_STL=c++_shared"
                 arguments += "-DANDROID_CPP_FEATURES=exceptions"
@@ -48,7 +48,7 @@ android {
         multiDexEnabled true
         buildConfigField("String", "BUILD_TIME", getBuildTime())
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
 
@@ -60,10 +60,6 @@ android {
         }
     }
 
-
-
-    //zhouwg: 2024-03-10, attention here
-    //ndkVersion '21.1.6352462'
     ndkVersion  '26.2.11394342'
 
     sourceSets {
@@ -91,7 +87,8 @@ android {
             minifyEnabled false
             //zipAlignEnabled true
             //shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //don't' need this because all Java source codes are open-source code
+            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 

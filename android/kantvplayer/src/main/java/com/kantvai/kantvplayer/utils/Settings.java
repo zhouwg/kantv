@@ -473,12 +473,12 @@ public class Settings {
 
     public int getLLMModel() {
         String key = mAppContext.getString(R.string.pref_key_llmmodel);
-        String value = mSharedPreferences.getString(key, "4"); //Gemma3-4B
+        String value = mSharedPreferences.getString(key, "6"); //Gemma3-4B
         try {
             return Integer.valueOf(value).intValue();
         } catch (NumberFormatException e) {
             KANTVLog.j(TAG, "exception occurred");
-            return 4;
+            return 6;
         }
     }
 
