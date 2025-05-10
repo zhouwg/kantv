@@ -291,7 +291,6 @@
                     <ul>
                        <li>integrate stablediffusion.cpp for text-2-image on Android phone</li>
                        <li>make stable-diffusion inference can work(not correct) on Hexagon-cDSP with ggml-hexagon</li>
-
                        <li>enable another playback engine --- a customized Google Exoplayer2.15.1</li>
                        <li>decoupling UI and data, refine UI and logic of download LLM models in APK</li>
                        <li>refine JNI and try to improve stability of llava inference and stablediffusion inference in some corner cases</li>
