@@ -118,6 +118,7 @@ android {
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.kantvai.kantvplayer'
 }
 
 String getBuildTime() {
@@ -210,6 +211,10 @@ dependencies {
     implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
     implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
     implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
+
+    implementation "io.noties.markwon:core:4.6.2"
+    implementation "io.noties.markwon:ext-strikethrough:4.6.2"
+    implementation "io.noties.markwon:ext-tables:4.6.2"
 
     api project(':kantvplayer-lib')
 }

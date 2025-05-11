@@ -46,6 +46,7 @@ android {
         rename('classes.jar', 'kantvplayer-lib.jar')
         println '@kantvplayer-lib leave makeJar-----------------'
     }
+    namespace 'com.kantvai.kantvplayerlib'
 
 
     buildKANTVMediaPlayerJar.dependsOn(cleanKANTVMediaPlayerJar, build)

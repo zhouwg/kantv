@@ -62,6 +62,7 @@
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
+ import io.noties.markwon.Markwon;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
@@ -81,7 +82,7 @@
      LinearLayout layout;
 
      private static final String TAG = AIResearchFragment.class.getName();
-     TextView txtASRInfo;
+     TextView txtInferenceResult;
      TextView txtGGMLInfo;
      EditText txtUserInput;
      ImageView ivInfo;
@@ -89,6 +90,9 @@
      Button btnBenchmark;
      Button btnStop;
      Button btnSelectImage;
+
+     Markwon markwon;
+     String strInferenceResult;
 
      Spinner spinnerBackendType = null;
      Spinner spinnerModelName = null;
@@ -188,14 +192,15 @@
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
 
-         txtASRInfo = mActivity.findViewById(R.id.asrInfo);
+         txtInferenceResult = mActivity.findViewById(R.id.asrInfo);
          txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
          btnBenchmark = mActivity.findViewById(R.id.btnBenchmark);
          btnStop = mActivity.findViewById(R.id.btnStop);
          btnSelectImage = mActivity.findViewById(R.id.btnSelectImage);
          txtUserInput = mActivity.findViewById(R.id.txtPrompt);
          llInfoLayout = mActivity.findViewById(R.id.llInfoLayout);
-         txtASRInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+         txtInferenceResult.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+         markwon = Markwon.create(mActivity);
 
          initLLMModels();
 
@@ -710,7 +715,7 @@
 
              if (eventType.getValue() == KANTVEvent.KANTV_ERROR) {
                  KANTVLog.j(TAG, "ERROR:" + eventString);
-                 txtASRInfo.setText("ERROR:" + content);
+                 txtInferenceResult.setText("ERROR:" + content);
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
@@ -719,7 +724,7 @@
                  }
 
                  if (content.startsWith("reset")) {
-                     txtASRInfo.setText("");
+                     txtInferenceResult.setText("");
                      return;
                  }
 
@@ -731,7 +736,7 @@
 
                  //make UI happy when disable GGML_USE_HEXAGON manually
                  if (content.startsWith("ggml-hexagon")) {
-                     txtASRInfo.setText(content);
+                     txtInferenceResult.setText(content);
                      return;
                  }
 
@@ -752,7 +757,7 @@
                      } else {
                          nLogCounts++;
                          if (nLogCounts > 100) {
-                             //txtASRInfo.setText("");
+                             //txtInferenceResult.setText("");
                              nLogCounts = 0;
                          }
                          if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
@@ -760,14 +765,18 @@
                                  return;
                              }
                          }
-                         txtASRInfo.append(content);
-                         int offset = txtASRInfo.getLineCount() * txtASRInfo.getLineHeight();
+                         //replace with Markdown rendering since 05/11/2025
+                         //txtInferenceResult.append(content);
+                         strInferenceResult += content;
+                         markwon.setMarkdown(txtInferenceResult, strInferenceResult);
+
+                         int offset = txtInferenceResult.getLineCount() * txtInferenceResult.getLineHeight();
                          int screenHeight = KANTVUtils.getScreenHeight();
                          int maxHeight = 500;
                          KANTVLog.j(TAG, "offset:" + offset);
                          KANTVLog.j(TAG, "screenHeight:" + screenHeight);
                          if (offset > maxHeight)
-                             txtASRInfo.scrollTo(0, offset - maxHeight);
+                             txtInferenceResult.scrollTo(0, offset - maxHeight);
                      }
                  }
              }
@@ -951,7 +960,7 @@
          isBenchmarking.set(true);
          //Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
 
-         txtASRInfo.setText("");
+         txtInferenceResult.setText("");
          btnBenchmark.setEnabled(false);
          btnBenchmark.setBackgroundColor(0xffa9a9a9);
 
@@ -998,7 +1007,7 @@
          }
 
          if (removeInferenceResult)
-             txtASRInfo.setText("");
+             txtInferenceResult.setText("");
 
          isLLMModel = false;
          isSDModel = false;
@@ -1009,6 +1018,7 @@
          isLLMOModel = false;
 
          selectModeFileName = "";
+         strInferenceResult = "";
      }
 
      private String getBenchmarkTip() {
@@ -1030,7 +1040,7 @@
      }
 
      private void displayInferenceResult(String content, boolean bOnlyDisplayBenchmarkTip) {
-         txtASRInfo.scrollTo(0, 0);
+         txtInferenceResult.scrollTo(0, 0);
          if (strBenchmarkInfo.startsWith("unknown")) {
              return;
          }
@@ -1087,8 +1097,8 @@
          }
          //don't call showMsgBox since 05/05/2025
          //KANTVUtils.showMsgBox(mActivity, dispInfo);
-         txtASRInfo.append("\n");
-         txtASRInfo.append(dispInfo);
+         txtInferenceResult.append("\n");
+         txtInferenceResult.append(dispInfo);
      }
 
      private void setTextGGMLInfo(String LLMModelFileName) {
