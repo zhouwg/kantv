@@ -1,15 +1,15 @@
-apply from: '../config.gradle'
 apply from: '../constants.gradle'
 apply plugin: 'com.android.application'
 
+android.buildFeatures.buildConfig true
+
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdkVersion = project.ext.compileSdkVersion
+    buildToolsVersion = project.ext.buildToolsVersion
 
     defaultConfig {
         applicationId "com.kantvai.kantvplayer"
-        minSdkVersion project.ext.minSdkVersion
-        flavorDimensions "versionCode"
+        flavorDimensions = ["versionCode"]
 
         externalNativeBuild {
             cmake {
@@ -28,7 +28,6 @@ android {
             abiFilters  "arm64-v8a"
         }
 
-        //fix conflict between open source native libs and prebuilt proprietary native libs(IDE would complain more than one file was found)
         packagingOptions {
             //native libs packing,legacy mode is used for better compatibility
             jniLibs {
@@ -47,15 +46,11 @@ android {
         targetSdkVersion project.ext.appTargetSdkVersion
         multiDexEnabled true
         buildConfigField("String", "BUILD_TIME", getBuildTime())
-
-        //testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
-
 
     externalNativeBuild {
         cmake {
-            version "3.22.1" //make llamacpp happy
+            version "3.22.1" //make llama.cpp happy
             path "../../core/CMakeLists.txt"
         }
     }
@@ -78,17 +73,10 @@ android {
         }
     }
 
-    repositories {
-        flatDir { dirs 'libs' }
-    }
-
     buildTypes {
         release {
             minifyEnabled false
-            //zipAlignEnabled true
             //shrinkResources true
-            //don't' need this because all Java source codes are open-source code
-            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
@@ -121,10 +109,10 @@ android {
     namespace 'com.kantvai.kantvplayer'
 }
 
-String getBuildTime() {
-    Date date = new Date();
-    String dataStr = "\"" + date.format("yyyy-MM-dd,HH:mm") + "\"";
-    return dataStr;
+static String getBuildTime() {
+    Date date = new Date()
+    String dataStr = "\"" + date.format("yyyy-MM-dd,HH:mm") + "\""
+    return dataStr
 }
 
 def skin_support_version = "4.0.5"
@@ -132,10 +120,6 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.2.0-rc01'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'junit:junit:4.12'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.preference:preference:1.1.0"
     implementation "androidx.legacy:legacy-support-core-ui:1.0.0"
@@ -144,14 +128,22 @@ dependencies {
     implementation "androidx.core:core:1.3.0"
     implementation "androidx.viewpager:viewpager:1.0.0"
     implementation "androidx.viewpager2:viewpager2:1.0.0"
+    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'com.google.android.material:material:1.2.0-rc01'
 
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    //implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
+    //implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
+    //implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
 
     implementation 'com.tencent.bugly:crashreport_upgrade:1.4.2'
     implementation 'com.tencent.bugly:nativecrashreport:3.7.1'
 
-    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'com.google.zxing:core:3.2.1'
+    implementation 'com.alibaba:fastjson:1.2.71'
+    implementation 'org.greenrobot:eventbus:3.1.1'
 
     implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
@@ -166,7 +158,6 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.11.2'
     implementation 'com.youth.banner:banner:1.4.10'
     implementation 'com.contrarywind:Android-PickerView:4.1.6'
-    implementation 'com.google.zxing:core:3.2.1'
     implementation 'com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar'
     implementation 'cat.ereza:customactivityoncrash:2.3.0'
 
@@ -198,19 +189,12 @@ dependencies {
     implementation 'com.github.albfernandez:juniversalchardet:2.0.2'
 
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.0.0'
-    implementation 'androidx.preference:preference:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
+
     implementation 'com.squareup:otto:1.3.8'
     implementation 'com.haibin:calendarview:3.7.1'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'com.alibaba:fastjson:1.2.71'
-    implementation 'org.greenrobot:eventbus:3.1.1'
+
 
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
-    implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
-    implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
-    implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
 
     implementation "io.noties.markwon:core:4.6.2"
     implementation "io.noties.markwon:ext-strikethrough:4.6.2"

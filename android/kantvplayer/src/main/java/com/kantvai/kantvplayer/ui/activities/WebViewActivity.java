@@ -92,11 +92,11 @@ public class WebViewActivity extends BaseMvcActivity {
         WebSettings webSetting = mWebView.getSettings();
         webSetting.setJavaScriptEnabled(true);
         webSetting.setCacheMode(android.webkit.WebSettings.LOAD_NO_CACHE);
-        webSetting.setAppCacheEnabled(true);
+        //webSetting.setAppCacheEnabled(true);
         String appCachePath = this.getApplicationContext().getCacheDir().getAbsolutePath();
-        webSetting.setAppCachePath(appCachePath);
+        //webSetting.setAppCachePath(appCachePath);
         webSetting.setDomStorageEnabled(true);
-        webSetting.setAppCacheEnabled(true);
+        //webSetting.setAppCacheEnabled(true);
         webSetting.setJavaScriptCanOpenWindowsAutomatically(true);
         webSetting.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         webSetting.setAllowFileAccess(true);

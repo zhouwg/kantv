@@ -1,45 +1,4 @@
 apply plugin: 'maven-publish'
-/*
-afterEvaluate {
-    publishing {
-        repositories {
-            maven {
-                url = findProperty('mavenRepo') ?: "${buildDir}/repo"
-            }
-        }
-        publications {
-            release(MavenPublication) {
-                from components.release
-                artifact androidSourcesJar
-                groupId = 'kantvai.media.kantvplayer'
-                artifactId = releaseArtifact
-                version releaseVersion
-                pom {
-                    name = releaseArtifact
-                    description = releaseDescription
-                    licenses {
-                        license {
-                            name = 'MIT license'
-                            url = 'https://mit-license.org/'
-                            distribution = 'repo'
-                        }
-                    }
-                    developers {
-                        developer {
-                            name = 'The KanTV Project'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:https://github.com/kantv-ai/kantv.git'
-                        url = 'https://github.com/kantv-ai/kantv'
-                    }
-                }
-            }
-        }
-    }
-}
-tasks.withType(PublishToMavenRepository) { it.dependsOn lint, test }
-*/
 
 task androidSourcesJar(type: Jar) {
     archiveClassifier.set('sources')

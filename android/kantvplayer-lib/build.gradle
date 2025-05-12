@@ -1,14 +1,11 @@
-apply from: '../config.gradle'
 apply from: '../constants.gradle'
 apply plugin: 'com.android.library'
 
 println '@kantvplayer-lib enter -----------------'
 
 android {
-    // http://tools.android.com/tech-docs/new-build-system/tips
-    //noinspection GroovyAssignabilityCheck
-    compileSdkVersion project.ext.compileSdkVersion
-    buildToolsVersion project.ext.buildToolsVersion
+    compileSdkVersion = project.ext.compileSdkVersion
+    buildToolsVersion = project.ext.buildToolsVersion
 
     useLibrary'org.apache.http.legacy'
 
@@ -23,26 +20,24 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            //don't' need this because all Java source codes are open-source code
-            //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
 
-    task cleanKANTVMediaPlayerJar(type: Delete) {
+    tasks.register('cleanKANTVMediaPlayerJar', Delete) {
         println '@kantvplayer-lib enter cleanJar-----------------'
         delete 'buildout/libs/kantvplayer-lib.jar'
         println '@kantvplayer-lib leave cleanJar-----------------'
     }
 
-    task buildKANTVMediaPlayerJar(type: Copy) {
+    tasks.register('buildKANTVMediaPlayerJar', Copy) {
         println '@kantvplayer-lib enter makeJar-----------------'
         from('build/intermediates/runtime_library_classes_jar/release/classes.jar')
         into('build/libs')
         exclude('**/R.class')
         exclude('**/BuildConfig.class')
         exclude('test/', 'BuildConfig.class', 'R.class')
-        exclude{it.name.startsWith('R$')}
+        exclude { it.name.startsWith('R$') }
         rename('classes.jar', 'kantvplayer-lib.jar')
         println '@kantvplayer-lib leave makeJar-----------------'
     }
@@ -66,28 +61,22 @@ dependencies {
 
     //for customized exo2
     api ('com.google.guava:guava:' + guavaVersion) {
-        // Exclude dependencies that are only used by Guava at compile time
-        // (but declared as runtime deps) [internal b/168188131].
         exclude group: 'com.google.code.findbugs', module: 'jsr305'
         exclude group: 'org.checkerframework', module: 'checker-compat-qual'
         exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
         exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
         exclude group: 'org.codehaus.mojo', module: 'animal-sniffer-annotations'
     }
-
     compileOnly 'com.google.code.findbugs:jsr305:' + jsr305Version
     compileOnly 'org.checkerframework:checker-compat-qual:' + checkerframeworkCompatVersion
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
 
     //api 'androidx.media:media:' + androidxMediaVersion
-    //implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
-    //implementation 'androidx.recyclerview:recyclerview:' + androidxRecyclerViewVersion
-    //implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
 
-    implementation 'org.jetbrains:annotations:15.0'
+    implementation 'org.jetbrains:annotations:23.0.0'
 }
 
 apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");
