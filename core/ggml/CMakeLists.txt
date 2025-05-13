@@ -13,6 +13,10 @@ set(GGML_ENABLE_HEXAGON             ON)
 
 set(GGML_ENABLE_STABLEDIFFUSION     ON)
 
+# self-contained build with internal customized/tailored QNN-SDK and Hexagon-SDK
+# the customized/tailored QNN-SDK and Hexagon-SDK also follow Qualcomm's IPR policy
+set(ENABLE_SELF_CONTAINED_BUILD     ON)
+
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
 set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
@@ -21,12 +25,18 @@ set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
-#set(QNN_SDK_PATH                "/opt/qcom/aistack/qairt/2.34.0.250424/")
+
+if (ENABLE_SELF_CONTAINED_BUILD)
 set(QNN_SDK_PATH                ${GGML_SRC_DIR}/../../prebuilts/QNN_SDK/2.34.0.250424/)
+set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../../prebuilts/Hexagon_SDK/6.2.0.1)
+else()
+set(QNN_SDK_PATH                "/opt/qcom/aistack/qairt/2.34.0.250424/")
+set(HEXAGON_SDK_PATH            "/opt/qcom/Hexagon_SDK/6.2.0.1/")
+endif()
+
 set(QNN_INC_PATH                ${QNN_SDK_PATH}/include/QNN/)
 set(QNN_LIB_PATH                ${QNN_SDK_PATH}/lib/aarch64-android/)
-#set(HEXAGON_SDK_PATH            "/opt/qcom/Hexagon_SDK/6.2.0.1/")
-set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../../prebuilts/Hexagon_SDK/6.2.0.1)
+
 set(OPT_FLAG                    " ")
 
 message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
