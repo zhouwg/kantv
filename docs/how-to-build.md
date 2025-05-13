@@ -22,7 +22,7 @@ git checkout master
     ./build/prebuild.sh
     ```
 
- - download Android-NDK and Android-SDK for **command-line mode build**
+ - download Android-NDK and Android-SDK and necessary LLVM toolchain for **command-line mode build**
 
    run below script accordingly
     ```
@@ -31,7 +31,7 @@ git checkout master
     ./build/prebuild-download.sh
 
     ```
- - download and install Android Studio manually
+ - download and install Android Studio manually (can be skipped for AI experts/researchers)
 
    download Android Studio Jellyfish (| 2023.3.1 April 30, 2024) from https://developer.android.com/studio/archive
 ![Screenshot from 2025-05-07 22-06-08](https://github.com/user-attachments/assets/bb801dfe-57a7-4832-a40d-bd1e39c9904e)
@@ -64,24 +64,9 @@ git checkout master
 
     ```
 
-
-
- - remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
-
-    ```
-
-    # open $ANDROID_NDK/build/cmake/android.toolchain.cmake for ndk < r23
-    # or $ANDROID_NDK/build/cmake/android-legacy.toolchain.cmake for ndk >= r23
-    # delete "-g" line
-    list(APPEND ANDROID_COMPILER_FLAGS
-    -g
-    -DANDROID
-
-    ```
-
 ### Build
 
-#### Build with Android Studio IDE
+#### Build with Android Studio IDE(can be skipped for AI experts/researchers)
 
 build the entire project by Android Studio IDE
 

@@ -2,7 +2,7 @@
 
 # Copyright (c) 2021- KanTV Authors
 
-# Description: download Android NDK for build project with command-line mode
+# Description: download Android SDK and Android NDK and HEXAGON_TOOLs_8.8.06.tar.gz for build the entire project in command-line mode
 
 set -e
 
@@ -20,6 +20,7 @@ echo "ANDROID_NDK: ${ANDROID_NDK}"
 
 is_android_ndk_exist=1
 is_cmdlinetools_exist=1
+is_hexagon_llvm_exist=1
 
 if [ ! -d ${ANDROID_NDK} ]; then
     echo -e "${TEXT_RED}NDK ${ANDROID_NDK} not exist, pls check...${TEXT_RESET}\n"
@@ -34,6 +35,11 @@ fi
 if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/toolchain/android-sdk/cmdline-tools/bin/sdkmanager ]; then
     echo -e "${TEXT_RED}Android SDK cmdline-tools not exist, pls check...${TEXT_RESET}\n"
     is_cmdlinetools_exist=0
+fi
+
+if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/8.8.06/NOTICE.txt ]; then
+    echo -e "${TEXT_RED}HEXAGON_TOOLS not exist, pls check...${TEXT_RESET}\n"
+    is_hexagon_llvm_exist=0
 fi
 
 if [ ${is_android_ndk_exist} -eq 0 ]; then
@@ -104,3 +110,15 @@ yes | sdkmanager --install "platforms;android-34"
 yes | sdkmanager --install "build-tools;34.0.0"
 yes | sdkmanager --install "cmake;3.22.1"
 
+
+#download customized LLVM toolchain HEXAGON_TOOLs_8.8.06.tar.gz
+if [ ${is_hexagon_llvm_exist} -eq 0 ]; then
+    echo -e "begin downloading HEXAGON_TOOLs(a customized LLVM toolchain) \n"
+    wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz https://github.com/kantv-ai/toolchain/raw/refs/heads/main/HEXAGON_TOOLs_8.8.06.tar.gz
+    if [ $? -ne 0 ]; then
+        printf "failed to download HEXAGON_TOOLs(a customized LLVM toolchain)\n"
+        exit 1
+    fi
+
+    zcat ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz | tar -C ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools -xf -
+fi

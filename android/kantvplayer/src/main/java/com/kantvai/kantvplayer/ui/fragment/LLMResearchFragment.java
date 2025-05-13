@@ -41,6 +41,7 @@
  import java.util.concurrent.atomic.AtomicBoolean;
 
  import butterknife.BindView;
+ import io.noties.markwon.Markwon;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
@@ -70,10 +71,12 @@
      Button btnInference;
      Button btnStopInference;
 
+     Markwon markwon;
+     String strInferenceResult;
+
      private int nThreadCounts = 4;
      private int nLLMType = 1;
 
-     private String strLLMInferenceInfo;
      private String strBackend = "ggml";
      
      private int offset = 3;
@@ -103,7 +106,7 @@
      private Activity mActivity;
      private Settings mSettings;
      private KANTVMgr mKANTVMgr = null;
-     private LLMResearchFragment.MyEventListener mEventListener = new LLMResearchFragment.MyEventListener();
+     private MyEventListener mEventListener = new MyEventListener();
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
      private void initLLMModels() {
@@ -147,6 +150,7 @@
          txtUserInput = mActivity.findViewById(R.id.txtUserInput);
          llInfoLayout = mActivity.findViewById(R.id.llLLMInfoLayout);
          txtLLMInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+         markwon = Markwon.create(mActivity);
 
          initLLMModels();
 
@@ -212,6 +216,7 @@
              KANTVLog.j(TAG, "strModeName:" + LLMModelFullName);
              KANTVLog.j(TAG, "threads:" + nThreadCounts + ", model:" + LLMModelFullName + ", backend:" + strBackend);
 
+             restoreUIAndStatus();
              //sanity check begin
              {
                  if (!checkLLMModelExist())
@@ -264,10 +269,8 @@
 
                      isBenchmarking.set(false);
                      mActivity.runOnUiThread(() -> {
+                         displayInferenceResult(strInferenceResult);
                          restoreUIAndStatus();
-                         txtLLMInfo.scrollTo(0, 0);
-                         displayInferenceResult(strLLMInferenceInfo);
-                         strLLMInferenceInfo = null;
                      });
                  }
              }
@@ -333,11 +336,10 @@
                  } else {
                      if (content.startsWith("llama-timings")) {
                          KANTVLog.g(TAG, "LLM timings");
-                         strLLMInferenceInfo = content;
+                         strInferenceResult = content;
                      } else {
                          nLogCounts++;
                          if (nLogCounts > 100) {
-                             //_txtASRInfo.setText("");
                              nLogCounts = 0;
                          }
 
@@ -345,7 +347,11 @@
                              return;
                          }
 
-                         txtLLMInfo.append(content);
+                         //replace with Markdown rendering since 05/12/2025
+                         //txtLLMInfo.append(content);
+                         strInferenceResult += content;
+                         markwon.setMarkdown(txtLLMInfo, strInferenceResult);
+
                          int offset = txtLLMInfo.getLineCount() * txtLLMInfo.getLineHeight();
                          int screenHeight = KANTVUtils.getScreenHeight();
                          int maxHeight = 500;
@@ -417,7 +423,7 @@
      private void initUIAndStatus() {
          isBenchmarking.set(true);
          //Toast.makeText(mContext, mContext.getString(R.string.ggml_benchmark_start), Toast.LENGTH_LONG).show();
-
+         strInferenceResult = "";
          txtLLMInfo.setText("");
          btnInference.setEnabled(false);
          btnInference.setBackgroundColor(0xffa9a9a9);
@@ -432,9 +438,13 @@
          isBenchmarking.set(false);
          btnInference.setEnabled(true);
          btnInference.setBackgroundColor(0xC3009688);
+
+         strInferenceResult = "";
+         txtLLMInfo.scrollTo(0, 0);
      }
 
      private void displayInferenceResult(String content) {
+         txtLLMInfo.scrollTo(0, 0);
          if (null == content)
              return;
 
@@ -464,17 +474,19 @@
 
          String dispInfo;
 
-         dispInfo = KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_LLM);
-         dispInfo += "\n\n";
+         //dispInfo = KANTVAIUtils.getDeviceInfo(mActivity, KANTVAIUtils.INFERENCE_LLM);
+         //dispInfo += "\n\n";
 
          benchmarkTip += "\n";
-         dispInfo += benchmarkTip;
+         dispInfo = "\n\n" + benchmarkTip;
          dispInfo += "\n";
 
          if (content != null) {
              dispInfo += content;
          }
-         KANTVUtils.showMsgBox(mActivity, dispInfo);
+         //KANTVUtils.showMsgBox(mActivity, dispInfo);
+         txtLLMInfo.append("\n");
+         txtLLMInfo.append(dispInfo);
      }
 
      private boolean checkLLMModelExist() {

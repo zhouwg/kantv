@@ -235,16 +235,6 @@ function do_buildlinux()
     cd ${PROJECT_ROOT_PATH}/external/ffmpeg
     ./clean-all.sh
     ./build-ffmpeg-x86.sh
-
-    cd ${PROJECT_ROOT_PATH}/examples/ff_terminal
-    ./clean.sh
-    ./build.sh
-    cd ${PROJECT_ROOT_PATH}/examples/ff_encode
-    make clean
-    make
-    #make ff-encode happy
-    /bin/cp -fv ${FF_PREFIX}/bin/ffplay  ./
-    /bin/cp -fv ${FF_PREFIX}/bin/ffprobe ./
 }
 
 

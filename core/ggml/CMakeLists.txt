@@ -1,6 +1,6 @@
 # Description: build libggml-jni.so for a standard Android APP
 
-cmake_minimum_required(VERSION 3.22.1) # make llamacpp happy
+cmake_minimum_required(VERSION 3.22.1)
 project(ggml-jni)
 
 set(CMAKE_VERBOSE_MAKEFILE          ON)
@@ -10,6 +10,39 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
 # set it to OFF if target Android phone is not Qualcomm SoC based phone
 set(GGML_ENABLE_HEXAGON             ON)
+
+set(GGML_ENABLE_STABLEDIFFUSION     ON)
+
+set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
+set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
+set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
+set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
+set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
+set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
+set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
+set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
+#set(QNN_SDK_PATH                "/opt/qcom/aistack/qairt/2.34.0.250424/")
+set(QNN_SDK_PATH                ${GGML_SRC_DIR}/../../prebuilts/QNN_SDK/2.34.0.250424/)
+set(QNN_INC_PATH                ${QNN_SDK_PATH}/include/QNN/)
+set(QNN_LIB_PATH                ${QNN_SDK_PATH}/lib/aarch64-android/)
+#set(HEXAGON_SDK_PATH            "/opt/qcom/Hexagon_SDK/6.2.0.1/")
+set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../../prebuilts/Hexagon_SDK/6.2.0.1)
+set(OPT_FLAG                    " ")
+
+message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
+message("GGML_SRC_DIR         : ${GGML_SRC_DIR}")
+message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
+message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
+message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
+message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
+message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
+message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
+message("target name          : ${TARGET_NAME}")
+message("build target         : ${BUILD_TARGET}")
+message("QNN_SDK_PATH         : ${QNN_SDK_PATH}")
+message("QNN_INC_PATH         : ${QNN_INC_PATH}")
+message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
+message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(DEBUG_FLAG "-DDEBUG -Wall")
@@ -23,86 +56,46 @@ else()
 endif()
 
 if (GGML_ENABLE_HEXAGON)
-if(NOT DEFINED QNN_SDK_PATH)
-    message(WARNING "QNN_SDK_PATH not defined")
-    #set(QNN_SDK_PATH "/opt/qcom/aistack/qairt/2.33.0.250327/")
-    set(QNN_SDK_PATH "/opt/qcom/aistack/qairt/2.34.0.250424/")
-endif()
-
-if(NOT DEFINED HEXAGON_SDK_PATH)
-    message(WARNING "HEXAGON_SDK_PATH not defined")
-    #Hexagon SDK must be obtained with a Qualcomm Developer Account and cannot be downloaded automatically in this script
-    set(HEXAGON_SDK_PATH "/opt/qcom/Hexagon_SDK/6.2.0.1/")
-endif()
-
-#available htp arch version:
-#v68 --- Snapdragon 888
-#v69 --- Snapdragon 8 Gen1
-#v73 --- Snapdragon 8 Gen2
-#v75 --- Snapdragon 8 Gen3
-#v79 --- Snapdragon 8 Elite(aka Gen4)
-if(NOT DEFINED HTP_ARCH_VERSION)
-    message(WARNING "HTP_ARCH_VERSION not defined, valid htp arch: v68,v69,v73,v75,v79")
-    #manually set to v75
-    set(HTP_ARCH_VERSION v75)
-endif()
-#check whether user's specified htp arch is valid
-set(CHECK_HTP_ARCH "WRONG")
-foreach (feat v68 v69 v73 v75 v79)
-    if (${feat} STREQUAL ${HTP_ARCH_VERSION})
-        set(CHECK_HTP_ARCH "GOOD")
+    #available htp arch version:
+    #v68 --- Snapdragon 888
+    #v69 --- Snapdragon 8 Gen1
+    #v73 --- Snapdragon 8 Gen2
+    #v75 --- Snapdragon 8 Gen3
+    #v79 --- Snapdragon 8 Elite(aka Gen4)
+    if(NOT DEFINED HTP_ARCH_VERSION)
+        message(WARNING "HTP_ARCH_VERSION not defined, valid htp arch: v68,v69,v73,v75,v79")
+        #manually set to v75
+        set(HTP_ARCH_VERSION v75)
     endif()
-endforeach()
-if (${CHECK_HTP_ARCH} STREQUAL "WRONG")
-    message(FATAL_ERROR "ggml-hexagon backend only support htp arch v68,v69,v73,v75,v79")
-endif()
+    #check whether user's specified htp arch is valid
+    set(CHECK_HTP_ARCH "WRONG")
+    foreach (feat v68 v69 v73 v75 v79)
+        if (${feat} STREQUAL ${HTP_ARCH_VERSION})
+            set(CHECK_HTP_ARCH "GOOD")
+        endif()
+    endforeach()
+    if (${CHECK_HTP_ARCH} STREQUAL "WRONG")
+        message(FATAL_ERROR "ggml-hexagon backend only support htp arch v68,v69,v73,v75,v79")
+    endif()
 
-endif() #if (GGML_ENABLE_HEXAGON)
-
-#check optimization flags
-set(OPT_FLAG " ")
-if(DEFINED HTP_ARCH_VERSION)
-    if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
-        #refer to:https://github.com/kantv-ai/kantv/issues/287
-        #set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
-        set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
+    #check optimization flags
+    if(DEFINED HTP_ARCH_VERSION)
+        if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
+            #refer to:https://github.com/kantv-ai/kantv/issues/287
+            #set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
+            set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
+        else()
+            set(OPT_FLAG " -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
+        endif()
     else()
         set(OPT_FLAG " -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
     endif()
 else()
-    set(OPT_FLAG " -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
-endif()
+    #verified on Android phone equipped with mainstream high-end mobile SoC
+    set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 ")
+endif() #if (GGML_ENABLE_HEXAGON)
+
 message("OPT_FLAG:${OPT_FLAG}")
-
-set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)
-set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
-set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
-set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
-set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
-set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
-set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
-set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
-
-if (GGML_ENABLE_HEXAGON)
-set(QNN_INC_PATH                ${GGML_SRC_DIR}/../../prebuilts/include/QNN)
-set(QNN_LIB_PATH                ${GGML_SRC_DIR}/../../prebuilts/lib/)
-endif()
-
-message("CMAKE_BUILD_TYPE     : ${CMAKE_BUILD_TYPE}")
-message("GGML_SRC_DIR         : ${GGML_SRC_DIR}")
-message("WHISPERCPP_SRC_DIR   : ${WHISPERCPP_SRC_DIR}")
-message("LLAMACPP_SRC_DIR     : ${LLAMACPP_SRC_DIR}")
-message("SDCPP_SRC_DIR        : ${SDCPP_SRC_DIR}")
-message("PREBUILT_INC_PATH    : ${PREBUILT_INC_PATH}")
-message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
-message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
-message("target name          : ${TARGET_NAME}")
-message("build target         : ${BUILD_TARGET}")
-
-if (GGML_ENABLE_HEXAGON)
-message("QNN_INC_PATH         : ${QNN_INC_PATH}")
-message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
-endif()
 
 include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
 include_directories(${LLAMACPP_SRC_DIR}/include)
@@ -121,9 +114,7 @@ include_directories(${SDCPP_SRC_DIR}/)
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
-
 include_directories(${QNN_INC_PATH}/)
-
 include_directories(${HEXAGON_SDK_PATH}/incs)
 include_directories(${HEXAGON_SDK_PATH}/incs/stddef)
 include_directories(${HEXAGON_SDK_PATH}/libs/qprintf/inc)
@@ -136,13 +127,11 @@ include_directories(${HEXAGON_SDK_PATH}/libs/atomic/inc)
 include_directories(${HEXAGON_SDK_PATH}/libs/atomic/android_Debug_aarch64/ship)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/)
-
 #set(HEXAGON_BACKEND_SRCS ${LLAMACPP_SRC_DIR}/ggml/src/ggml-qnn/ggml-hexagon.cpp)
 file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp" "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/stub.c")
 endif()
 
 aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
-
 set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml.c
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-alloc.c
@@ -245,23 +234,30 @@ else()
             "-Wno-unused-command-line-argument")
 endif()
 
-#weiguo:2024-05-28, fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
+#2024-05-28, fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
 add_definitions(-fexceptions)
 add_definitions(-D_LIBCPP_EXCEPTIONS)
 add_definitions(-D_LIBCXXABI_EXCEPTIONS)
 add_link_options( "-lc++_shared" )
 
 if (GGML_ENABLE_HEXAGON)
-    set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+    if (GGML_ENABLE_STABLEDIFFUSION)
+        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+    else()
+        set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
+    endif()
 else()
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}    ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  ${DEBUG_FLAG} ${OPT_FLAG}")
-endif ()
+endif()
 
 find_library(LOG_LIB log)
 
@@ -281,7 +277,7 @@ add_library(cdsprpc
 set_target_properties(cdsprpc
         PROPERTIES
         IMPORTED_LOCATION
-        /opt/qcom/Hexagon_SDK/6.2.0.1/ipc/fastrpc/remote/ship/android_aarch64/libcdsprpc.so)
+        ${HEXAGON_SDK_PATH}/ipc/fastrpc/remote/ship/android_aarch64/libcdsprpc.so)
 endif()
 
 function(build_library target_name)
@@ -295,7 +291,6 @@ function(build_library target_name)
         #file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
         #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android ${allPrebuiltQNNLibs})
-
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
     else()
         target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)

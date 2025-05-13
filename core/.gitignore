@@ -1,8 +1,1 @@
-out/
-build/
-
-*.a
-*.so
-*.o
-
-
+media/src/

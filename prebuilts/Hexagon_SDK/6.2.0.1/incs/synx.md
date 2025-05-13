@@ -1,0 +1,7 @@
+##  Overview
+
+Heterogeneous Systems involve more than one core to efficiently process a task. Nowadays, there are lot of new advanced use cases that require computation across multiple cores. One example of such use case is for the camera core to capture an image, pass it on to DSP and/or GPU cores for post processing and send the final output to the display subsystem for rendering. Such use cases involve transferring of control points and sharing of buffers across multiple cores. This type of application use case drives the need for a generic synchronization framework which explicitly describes dependencies between different asynchronous operations across the SoC.
+
+The synx framework helps to capture such dependencies across cores. It notifies task completions and /or buffer ready information between a producer and consumers.
+
+***Note***: There are many synchronization/fence mechanisms available today but those work best within a single core/device. In Android systems, buffers are usually allocated as ION buffers so that these buffer can be shared across various components (UMD, KMD, and HW). If another core needs to access such buffers, we need to synchronously transfer control (along with data payload) from one core to the other. This explicit transfer of control from one core to the other eliminates the possibilities of optimization and hence drives the idea of introducing synx handle for synchronization.

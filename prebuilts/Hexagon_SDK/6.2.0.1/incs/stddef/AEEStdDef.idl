@@ -1,0 +1,91 @@
+#ifndef AEESTDDEF_IDL
+#define AEESTDDEF_IDL
+//============================================================================
+/// @file AEEStdDef.idl
+///
+/// This file contains definitions of primitive  types.
+                                                           //qidl copyright
+//%   Copyright (c) 2006-2014, 2020 Qualcomm Technologies, Inc.
+                                                           //qidl nested=false
+//% All Rights Reserved.
+//% Redistribution and use in source and binary forms, with or without
+//% modification, are permitted provided that the following conditions are met:
+//%
+//% 1. Redistributions of source code must retain the above copyright notice,
+//% this list of conditions and the following disclaimer.
+//%
+//% 2. Redistributions in binary form must reproduce the above copyright notice,
+//% this list of conditions and the following disclaimer in the documentation
+//% and/or other materials provided with the distribution.
+//%
+//% 3. Neither the name of the copyright holder nor the names of its contributors
+//% may be used to endorse or promote products derived from this software without
+//% specific prior written permission.
+//%
+//% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+//% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+//% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//% POSSIBILITY OF SUCH DAMAGE.
+//============================================================================
+
+/* NOTE: THIS FILE SHOULD NEVER BE COMPILED DIRECTLY.  That is, code should
+ * never be generated from these definitions, as they will conflict with the
+ * "real" hand-written AEEStdDef.h.  Note also that if the definitions here
+ * become out of sync with the hand-written AEEStdDef.h, bad things will
+ * happen.
+ */
+
+/**
+ * @name Primitive Types
+ */
+/*@{*/
+
+typedef octet              byte;        ///< Alternate alias for an unsigned
+                                        ///< 8-bit integer
+/*@}*/
+
+/**
+ * @name Types
+ */
+/*@{*/
+
+/**
+ * This is a unique ID type.  Used to express types,
+ * interfaces, classes, and privileges.  The class ID generator generates
+ * unique IDs that can be used anywhere a new #AEEIID, #AEECLSID, or
+ * #AEEPRIVID is needed.
+ */
+typedef uint32             AEEUID;
+
+/**
+ * This is an interface ID type, used to denote an interface.  It is a special
+ case of #AEEUID.
+ */
+typedef uint32             AEEIID;
+
+/**
+ * This is a class ID type, used to denote a class.  It is  a special case of
+ #AEEUID.
+ */
+typedef uint32             AEECLSID;
+
+/**
+ * This is a privilege ID type, used to express a privilege.  It is a special
+ * case of #AEEUID.
+ */
+typedef uint32             AEEPRIVID;
+
+typedef wchar              AECHAR;      ///< Wide character type
+
+typedef long               AEEResult;   ///< Common return type
+
+/*@}*/
+
+#endif /* #ifndef AEESTDDEF_IDL */

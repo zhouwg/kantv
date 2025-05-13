@@ -11,17 +11,26 @@ bin/
 gen/
 libs/
 obj/
+cmake/
 .cxx/
+all64/
+all32/
+out/
+build/
 
+#only target arm64-v8a used in this project
+armeabi-v7a/
+x86/
+x86_64/
+abi-armeabi-v7a/
+abi-x86/
+abi-x86_64/
 
 local.properties
 project.properties
 
 .idea
 .gradle
-all64
-all32
-
 
 xcuserdata
 xcshareddata
@@ -52,27 +61,27 @@ tags
 *.hprof
 .travis.yml
 
-
 out
 out.*
 build
 android-ndk-*
-ggml-qnn-ut
-ggml-qnn-test
 
 *.mp4
 *.ts
-
-prebuilts/toolchain/android-ndk*
-prebuilts/toolchain/emsdk/
-prebuilts/toolchain/*.zip
-prebuilts/toolchain/*.xz
-prebuilts/toolchain/*.gz
+*.tar.gz
+*.pro
+*.scorer
+*.nb
+*.zip
+*.xz
+*.gz
 
 crash.log
 kantv.jks
-CMakeLists.txt
 libggmlop-skel*.so
-cmake/
+CMakeLists.txt
 
-*.pro
+prebuilts/toolchain/android-ndk*
+prebuilts/toolchain/android-sdk*
+prebuilts/toolchain/emsdk/
+prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/8.8.06/

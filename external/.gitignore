@@ -1,12 +1,3 @@
 gstreamer/
 qualcomm/
-
-*.a
-*.so
-*.o
-
-whispercpp/bench
-whispercpp/main
-whispercpp/quantize
-
 ffmpeg-android-build/
