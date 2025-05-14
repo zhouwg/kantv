@@ -23,7 +23,7 @@ ANDROID_PLATFORM=android-34
 ANDROID_NDK_VERSION=r28
 ANDROID_NDK_NAME=android-ndk-${ANDROID_NDK_VERSION}
 ANDROID_NDK_FULLNAME=${ANDROID_NDK_NAME}-linux.zip
-ANDROID_NDK=${PWD}/${ANDROID_NDK_NAME}
+ANDROID_NDK=${PROJECT_ROOT_PATH}/prebuilts/toolchain/${ANDROID_NDK_NAME}
 
 #QNN SDK can be found at:
 #https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
@@ -59,10 +59,10 @@ running_params=" -mg 2 -ngl 99 -t 8 "
 
 function dump_vars()
 {
-    echo -e "ANDROID_NDK:          ${ANDROID_NDK}"
-    echo -e "QNN_SDK_PATH:         ${QNN_SDK_PATH}"
-    echo -e "HEXAGON_SDK_PATH:     ${HEXAGON_SDK_PATH}"
-    echo -e "HEXAGON_LLVM_TOOLCHAIN_PATH: ${HEXAGON_LLVM_TOOLCHAIN_PATH}"
+    echo -e "ANDROID_NDK:                   ${ANDROID_NDK}"
+    echo -e "QNN_SDK_PATH:                  ${QNN_SDK_PATH}"
+    echo -e "HEXAGON_SDK_PATH:              ${HEXAGON_SDK_PATH}"
+    echo -e "HEXAGON_LLVM_TOOLCHAIN_PATH:   ${HEXAGON_LLVM_TOOLCHAIN_PATH}"
 }
 
 
@@ -74,103 +74,32 @@ function show_pwd()
 
 function check_hexagon_sdk()
 {
+    echo "check Hexagon SDK"
     if [ ! -d ${HEXAGON_SDK_PATH} ]; then
         echo -e "HEXAGON_SDK_PATH ${HEXAGON_SDK_PATH} not exist, pls install it accordingly...\n"
-        exit 0
     else
         printf "Qualcomm Hexagon SDK already exist:${HEXAGON_SDK_PATH} \n\n"
     fi
 }
 
 
-function check_and_download_qnn_sdk()
+function check_qnn_sdk()
 {
-    is_qnn_sdk_exist=1
-
+    echo "check QNN SDK"
     if [ ! -d ${QNN_SDK_PATH} ]; then
-        echo -e "QNN_SDK_PATH ${QNN_SDK_PATH} not exist, download it from ${QNN_SDK_URL}...\n"
-        is_qnn_sdk_exist=0
-    fi
-
-    if [ ! -f ${QNN_SDK_PATH}/sdk.yaml ]; then
-        is_qnn_sdk_exist=0
-    fi
-
-    if [ ${is_qnn_sdk_exist} -eq 0 ]; then
-        echo "sudo mkdir -p ${QNN_SDK_INSTALL_PATH}"
-        sudo mkdir -p ${QNN_SDK_INSTALL_PATH}
-        if [ ! -f v${QNN_SDK_VERSION}.zip ]; then
-            wget --no-config --quiet --show-progress -O v${QNN_SDK_VERSION}.zip https://softwarecenter.qualcomm.com/api/download/software/sdks/Qualcomm_AI_Runtime_Community/All/${QNN_SDK_VERSION}/v${QNN_SDK_VERSION}.zip
-        fi
-        unzip v${QNN_SDK_VERSION}.zip
-        if [ $? -ne 0 ]; then
-            printf "failed to download Qualcomm QNN SDK to %s \n" "${QNN_SDK_PATH}"
-            exit 1
-        fi
-        sudo mv qairt/${QNN_SDK_VERSION} ${QNN_SDK_INSTALL_PATH}/
-        printf "Qualcomm QNN SDK saved to ${QNN_SDK_PATH} \n\n"
-        sudo rm -rf qairt
-        sudo mv v${QNN_SDK_VERSION}.zip /tmp/
+        echo -e "QNN_SDK_PATH ${QNN_SDK_PATH} not exist\n"
     else
-        printf "Qualcomm QNN SDK already exist:${QNN_SDK_PATH} \n\n"
+        echo -e "QNN_SDK_PATH ${QNN_SDK_PATH} already exist\n"
     fi
 }
 
-
-function check_and_download_ndk()
+function check_hexagon_llvm_toolchain()
 {
-    is_android_ndk_exist=1
-
-    if [ ! -d ${ANDROID_NDK} ]; then
-        is_android_ndk_exist=0
-    fi
-
-    if [ ! -f ${ANDROID_NDK}/build/cmake/android.toolchain.cmake ]; then
-        is_android_ndk_exist=0
-    fi
-
-    if [ ${is_android_ndk_exist} -eq 0 ]; then
-
-        if [ ! -f ${ANDROID_NDK_FULLNAME} ]; then
-            wget --no-config --quiet --show-progress -O ${ANDROID_NDK_FULLNAME} https://dl.google.com/android/repository/${ANDROID_NDK_FULLNAME}
-        fi
-
-        unzip ${ANDROID_NDK_FULLNAME}
-
-        if [ $? -ne 0 ]; then
-            printf "failed to download android ndk to %s \n" "${ANDROID_NDK}"
-            exit 1
-        fi
-
-        printf "android ndk saved to ${ANDROID_NDK} \n\n"
-    else
-        printf "android ndk already exist:${ANDROID_NDK} \n\n"
-    fi
-}
-
-
-function check_and_download_hexagon_llvm_toolchain()
-{
-    echo "check hexagon llvm toolchain"
-    is_hexagon_llvm_exist=1
-
+    echo "check hexagon LLVM toolchain"
     if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/8.8.06/NOTICE.txt ]; then
-        echo -e "${TEXT_RED}HEXAGON_TOOLS not exist, pls check...${TEXT_RESET}\n"
-        is_hexagon_llvm_exist=0
-    fi
-
-    #download customized LLVM toolchain HEXAGON_TOOLs_8.8.06.tar.gz
-    if [ ${is_hexagon_llvm_exist} -eq 0 ]; then
-        echo -e "begin downloading HEXAGON_TOOLs(a customized LLVM toolchain) \n"
-        wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz https://github.com/kantv-ai/toolchain/raw/refs/heads/main/HEXAGON_TOOLs_8.8.06.tar.gz
-        if [ $? -ne 0 ]; then
-            printf "failed to download HEXAGON_TOOLs(a customized LLVM toolchain)\n"
-            exit 1
-        fi
-
-        zcat ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz | tar -C ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools -xf -
+        echo -e "${TEXT_RED}hexagon LLVM toolchain not exist, pls download it via ${PROJECT_ROOT_PATH}/build/prebuild-download.sh${TEXT_RESET}\n"
     else
-        printf "hexagon llvm toolchain already exist:${HEXAGON_LLVM_TOOLCHAIN_PATH} \n\n"
+        echo -e "${TEXT_RED}hexagon LLVM toolchain already exist${TEXT_RESET}\n"
     fi
 }
 
@@ -201,10 +130,9 @@ function show_usage()
 
 
 show_pwd
-#check_and_download_ndk
-check_and_download_qnn_sdk
+check_qnn_sdk
 check_hexagon_sdk
-check_and_download_hexagon_llvm_toolchain
+check_hexagon_llvm_toolchain
 dump_vars
 
 if [ $# == 0 ]; then
