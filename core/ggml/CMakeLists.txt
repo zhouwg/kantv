@@ -245,7 +245,7 @@ else()
             "-Wno-unused-command-line-argument")
 endif()
 
-#2024-05-28, fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
+#2024-05-28, fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
 add_definitions(-fexceptions)
 add_definitions(-D_LIBCPP_EXCEPTIONS)
 add_definitions(-D_LIBCXXABI_EXCEPTIONS)
