@@ -2,13 +2,7 @@
 
 the steps here has verified on Ubutun 20.04, Ubutun 24.04:
 
-follow the steps below to generate the specified Android APK
-
-in a fresh and clean Ubuntu 24.04. the generated Android APK
-
-can be installed and run properly on Android phones equipped
-
-with Qualcomm high-end mobile SoCs.
+follow the steps below to generate the specified Android APK in a <b>fresh and clean</b> Ubuntu 24.04. the generated Android APK can be installed and run properly on Android phones equipped with Qualcomm Snapdragon 8Gen3 and 8Elite.
 
 ### Fetch source codes
 ```
