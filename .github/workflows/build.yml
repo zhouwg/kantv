@@ -40,9 +40,11 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{  success() }}
         with:
-          name: kantv-release-v1.6.9-signed.apk
+          #TODO: add prebuilt-apk for Android phone equipped without Qualcomm mobile SoC
+          #      kantv-release-v1.6.9-for-non-qcom-signed.apk
+          name: kantv-release-v1.6.9-for-qcom-signed.apk
           compression-level: 0
-          retention-days: 3
+          retention-days: 30
           path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-signed.apk
 
       - name: upload arm64-v8a release to release
