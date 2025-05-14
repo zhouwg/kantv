@@ -21,3 +21,16 @@ sudo apt-get install -y android-tools-adb autoconf \
         mtools unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
 
 echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
+
+#make hexagon-clang happy
+if [ -f /lib/x86_64-linux-gnu/libtinfo.so.5 ]; then
+    echo "libtinfo.so.5 already exist"
+else
+    echo "libtinfo.so.5 not exist"
+    if [ -f /lib/x86_64-linux-gnu/libtinfo.so.6 ]; then
+        echo "libtinfo.so.6 already exist"
+        sudo  ln -sf /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu/libtinfo.so.5
+    else
+        echo "libtinfo.so.6 not exist"
+    fi
+fi
