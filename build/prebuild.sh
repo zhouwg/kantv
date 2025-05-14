@@ -15,10 +15,10 @@ sudo apt-get install openjdk-17-jdk -y
 
 sudo apt-get install -y android-tools-adb autoconf \
         automake bc bison build-essential ccache cscope curl device-tree-compiler \
-        expect flex ftp-upload gdisk acpica-tools libattr1-dev libcap-dev \
+        expect flex libattr1-dev libcap-dev \
         libfdt-dev libftdi-dev libglib2.0-dev libhidapi-dev libncurses5-dev \
         libpixman-1-dev libssl-dev libtool make \
-        mtools unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
+        mtools unzip xz-utils zlib1g-dev
 
 echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
 
