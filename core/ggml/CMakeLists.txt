@@ -13,8 +13,9 @@ set(GGML_ENABLE_HEXAGON             ON)
 
 set(GGML_ENABLE_STABLEDIFFUSION     ON)
 
-# self-contained build with internal customized/tailored QNN-SDK and Hexagon-SDK
-# the customized/tailored QNN-SDK and Hexagon-SDK also follow Qualcomm's IPR policy
+# self-contained build with internal customized/tailored QNN-SDK and Hexagon-SDK,
+# without download fully official QNN-SDK and Hexagon-SDK.
+# the internal customized/tailored QNN-SDK and Hexagon-SDK also follow Qualcomm's IPR policy.
 set(ENABLE_SELF_CONTAINED_BUILD     ON)
 
 set(KANTV_MEDIA_SRC_DIR         ${CMAKE_SOURCE_DIR}/media/)

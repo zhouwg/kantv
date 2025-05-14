@@ -1,3 +1,6 @@
+### Overview
+
+the steps here has verified on Ubutun 20.04, Ubutun 24.04
 
 ### Fetch source codes
 ```
@@ -36,33 +39,6 @@ git checkout master
    download Android Studio Jellyfish (| 2023.3.1 April 30, 2024) from https://developer.android.com/studio/archive
 ![Screenshot from 2025-05-07 22-06-08](https://github.com/user-attachments/assets/bb801dfe-57a7-4832-a40d-bd1e39c9904e)
 
-- vim settings (can be skipped for non-vim users)
-
-
-    borrow from http://ffmpeg.org/developer.html#Editor-configuration
-
-    ```
-    set ai
-    set nu
-    set expandtab
-    set tabstop=4
-    set shiftwidth=4
-    set softtabstop=4
-    set noundofile
-    set nobackup
-    set fileformat=unix
-    set undodir=~/.undodir
-    set cindent
-    set cinoptions=(0
-    " Allow tabs in Makefiles.
-    autocmd FileType make,automake set noexpandtab shiftwidth=8 softtabstop=8
-    " Trailing whitespace and tabs are forbidden, so highlight them.
-    highlight ForbiddenWhitespace ctermbg=red guibg=red
-    match ForbiddenWhitespace /\s\+$\|\t/
-    " Do not highlight spaces at the end of line while typing on that line.
-    autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
-
-    ```
 
 ### Build
 

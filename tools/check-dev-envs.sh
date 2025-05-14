@@ -76,7 +76,7 @@ function check_hexagon_sdk()
 {
     echo "check Hexagon SDK"
     if [ ! -d ${HEXAGON_SDK_PATH} ]; then
-        echo -e "HEXAGON_SDK_PATH ${HEXAGON_SDK_PATH} not exist, pls install it accordingly...\n"
+        echo -e "HEXAGON_SDK_PATH ${HEXAGON_SDK_PATH} not exist\n"
     else
         printf "Qualcomm Hexagon SDK already exist:${HEXAGON_SDK_PATH} \n\n"
     fi
@@ -93,13 +93,14 @@ function check_qnn_sdk()
     fi
 }
 
+
 function check_hexagon_llvm_toolchain()
 {
     echo "check hexagon LLVM toolchain"
     if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/8.8.06/NOTICE.txt ]; then
         echo -e "${TEXT_RED}hexagon LLVM toolchain not exist, pls download it via ${PROJECT_ROOT_PATH}/build/prebuild-download.sh${TEXT_RESET}\n"
     else
-        echo -e "${TEXT_RED}hexagon LLVM toolchain already exist${TEXT_RESET}\n"
+        echo -e "hexagon LLVM toolchain already exist\n"
     fi
 }
 
