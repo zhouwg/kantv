@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Description: prerequisites for build project
+# Description: prerequisites for build project KanTV in command-line mode
 
 # verified on Ubuntu 20.04, Ubuntu 24.04
 
