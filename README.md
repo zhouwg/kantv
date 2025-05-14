@@ -96,18 +96,12 @@ a screenshot to demostrate download LLM model in APK.
 ### Docs
 - [How to build](./docs/how-to-build.md)
 - [How to customize tv.xml for personal needs](./docs/how-to-customize-tv-xml.md)
-- [How to troubleshooting issues in APP](./docs/FAQ.md)
-- [How to utilize this project for validate/verify a specified LLM model on Android phone](./docs/how-to-use-this-project-for-ai-expert.md)
-- [AI-assisted programming via Grok-3](https://github.com/kantv-ai/kantv/blob/4233a85f5e6bf488a5ccf897199ebe4b474e7ae7/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp#L4164-L4361) and AI-assisted programming via DeepSeek-R1.
-- <b>[How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](./docs/how-to-customize.md)</b>
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
-- [ggml-hexagon:why ggml-hexagon(HWACCEL_CDSP) is a reference implementation rather than a product-level implementation](https://github.com/zhouwg/ggml-hexagon/discussions/28)
 - [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
-
 
 
 <!--

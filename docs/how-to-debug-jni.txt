@@ -1,5 +1,0 @@
-adb logcat -c
-
-adb logcat > crash.log | tail -f crash.log
-
-ndk-stack -sym ./cdeosplayer/kantv/build/intermediates/cmake/all64Debug/obj/arm64-v8a/ -dump crash.log
