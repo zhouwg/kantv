@@ -1,6 +1,8 @@
 #!/bin/bash
-# this script can download Android SDK, Android NDK, Qualcomm QNN SDK, a customized hexagon LLVM toolchain automaically.
 # check dev envs for Project KanTV.
+#
+# setup dev envs for Project KanTV can be found at ${PROJECT_ROOT_PATH}/docs/how-to-build.md
+# all dependent SDKs/Toolchains can be downloaded automatically via ${PROJECT_ROOT_PATH}/build/prebuild-download.sh
 
 set -e
 
