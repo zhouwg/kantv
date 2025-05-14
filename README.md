@@ -31,6 +31,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Clone this repository and build locally, see [how to build](./docs/how-to-build.md)
 - Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
+- Download pre-built Android APK from Github CI-build: https://github.com/kantv-ai/kantv/actions/
 
 ### Run Android APK on Android phone
 - Android 5.1 --- Android 15 and higher version with <b>ANY</b> mainstream mobile SoC might/should/could be supported.
