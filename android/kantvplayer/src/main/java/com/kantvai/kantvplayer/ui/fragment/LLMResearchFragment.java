@@ -56,11 +56,10 @@
      private Activity mActivity;
      private Settings mSettings;
 
-     TextView _txtLLMInfo;
+     TextView txtLLMInfo;
      TextView txtGGMLInfo;
 
      private KANTVMgr mKANTVMgr = null;
-
      private MyEventListener mEventListener = new MyEventListener();
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
@@ -311,7 +310,7 @@
 
              if (eventType.getValue() == KANTVEvent.KANTV_ERROR) {
                  KANTVLog.j(TAG, "ERROR:" + eventString);
-                 _txtLLMInfo.setText("ERROR:" + content);
+                 txtLLMInfo.setText("ERROR:" + content);
              }
 
              if (eventType.getValue() == KANTVEvent.KANTV_INFO) {
@@ -326,11 +325,11 @@
 
                  } else {
                      {
-                         _txtLLMInfo.append(content);
+                         txtLLMInfo.append(content);
 
-                         int offset = _txtLLMInfo.getLineCount() * _txtLLMInfo.getLineHeight();
-                         if (offset > _txtLLMInfo.getHeight())
-                             _txtLLMInfo.scrollTo(0, offset - _txtLLMInfo.getHeight());
+                         int offset = txtLLMInfo.getLineCount() * txtLLMInfo.getLineHeight();
+                         if (offset > txtLLMInfo.getHeight())
+                             txtLLMInfo.scrollTo(0, offset - txtLLMInfo.getHeight());
                      }
                  }
              }
