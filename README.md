@@ -34,7 +34,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 - Download pre-built Android APK from Github CI-build: https://github.com/kantv-ai/kantv/actions/
 
 ### Run Android APK on Android phone
-- Android 7.0(2016.08) --- Android 15 and higher version with <b>ANY</b> mainstream mobile SoC.
+- Android 7.0(2016.08) --- Android 15(2024.10) and higher version with <b>ANY</b> mainstream mobile SoC.
 - Android smartphone equipped with <b>ANY</b> mainstream <b>high-end</b> mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen.
 - Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm's state-of-the-art high-end mobile SoC <b>Snapdragon 8Gen3 series and Snapdragon 8Elite series</b> are highly recommended) <b>is required</b> for verify/running ggml-hexagon backend on Android phone:
 ```
@@ -104,6 +104,12 @@ a screenshot to demostrate download LLM model in APK.
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
 - [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
 
+
+### Contribution
+
+Report issue in Android phone equipped with <b>mainstream</b> mobile SoC or submit PR to this project is greatly welcomed.
+
+We use [GitHub issues](https://github.com/kantv-ai/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/kantv-ai/kantv/issues/1).
 
 <!--
 comment out this section because some contributors in the upstream project might-be don't want to be appeared here
