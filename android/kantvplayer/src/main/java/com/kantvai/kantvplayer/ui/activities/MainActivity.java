@@ -402,6 +402,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
                 getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
             } else {
                 getFragmentTransaction().show(llmFragment).commit();
+                llmFragment.reload(1);
             }
             previousFragment = llmFragment;
         } else if (clazz == AIResearchFragment.class) {

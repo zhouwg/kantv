@@ -285,6 +285,7 @@
         String[] llmModels = {
                 "gemma-3",
                 "Qwen2.5-VL-3B",
+                "SmolVLM"
         };
         for (int i = 0; i < llmModels.length; i++) {
             if (name.contains(llmModels[i])) {

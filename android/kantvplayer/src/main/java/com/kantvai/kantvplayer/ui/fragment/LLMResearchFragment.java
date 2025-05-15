@@ -66,7 +66,7 @@
 
      private boolean mCameraInit = false;
 
-     private int facing = 0;
+     private int facing = 1; //default is front camera
 
      private SurfaceView cameraView;
 
@@ -75,11 +75,11 @@
      private String LLMModelFullName;
      private String LLMModelURL;
      String selectModelFilePath = "";
-     private String strUserInput = "what's in the image?\n";
+     private String strUserInput = "what do you see in this image?";
 
      private void initLLMModels() {
-         LLMModelFullName = LLMModelMgr.getKANTVAIModelFromName("Gemma3-4B").getName();
-         LLMModelURL = LLMModelMgr.getKANTVAIModelFromName("Gemma3-4B").getUrl();
+         LLMModelFullName = LLMModelMgr.getKANTVAIModelFromName("SmolVLM-500M").getName();
+         LLMModelURL = LLMModelMgr.getKANTVAIModelFromName("SmolVLM-500M").getUrl();
      }
 
 
@@ -111,7 +111,7 @@
          mSettings = new Settings(mContext);
          mSettings.updateUILang((AppCompatActivity) getActivity());
          Resources res = mActivity.getResources();
-         txtGGMLInfo = mActivity.findViewById(R.id.ggmlInfo);
+         txtGGMLInfo = mActivity.findViewById(R.id.agentDeviceInfo);
 
          mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
          mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -144,10 +144,7 @@
 
          Button buttonSwitchCamera = mActivity.findViewById(R.id.buttonSwitchCamera);
          buttonSwitchCamera.setOnClickListener(arg0 -> {
-             int new_facing = 1 - facing;
-             ggmljava.closeCamera();
-             ggmljava.openCamera(new_facing);
-             facing = new_facing;
+            reload();
          });
 
          reload();
@@ -164,7 +161,17 @@
      }
 
      private void reload() {
-         //reload model
+         int new_facing = 1 - facing;
+         ggmljava.closeCamera();
+         ggmljava.openCamera(new_facing);
+         facing = new_facing;
+     }
+
+     public void reload(int front_camera) {
+         int new_facing = 1 - front_camera;
+         ggmljava.closeCamera();
+         ggmljava.openCamera(new_facing);
+         facing = new_facing;
      }
 
      @Override
@@ -407,7 +414,7 @@
          Date date = new Date(System.currentTimeMillis());
          timestamp = fullDateFormat.format(date);
          txtGGMLInfo.append("\n");
-         txtGGMLInfo.append(" running timestamp:" + timestamp);
+         //txtGGMLInfo.append(" running timestamp:" + timestamp);
      }
 
      public static native int kantv_anti_remove_rename_this_file();

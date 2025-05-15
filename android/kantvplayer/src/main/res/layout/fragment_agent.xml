@@ -17,7 +17,7 @@
             android:text="switch camera" />
 
         <TextView
-            android:id="@+id/ggmlInfo"
+            android:id="@+id/agentDeviceInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

@@ -1023,6 +1023,8 @@
 
      private String getBenchmarkTip() {
          String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
+         endTime = System.currentTimeMillis();
+         duration = (endTime - beginTime);
          String benchmarkTip = "\nBench:" + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
                  + " ,threads: " + nThreadCounts
                  + " ,backend: " + backendDesc

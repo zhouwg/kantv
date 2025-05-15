@@ -480,3 +480,21 @@ JNIEXPORT jbyteArray JNICALL
 Java_kantvai_ai_ggmljava_jni_1text2image(JNIEnv *env, jclass clazz, jstring text) {
     // TODO: implement jni_text2image() through StableDiffusion.cpp
 }
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_isStableDiffusionEnabled(JNIEnv *env, jclass clazz) {
+#ifdef SD_USE_HEXAGON
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_isGGMLHexagonEnabled(JNIEnv *env, jclass clazz) {
+#ifdef GGML_USE_HEXAGON
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
+}

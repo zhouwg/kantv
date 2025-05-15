@@ -11,7 +11,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # set it to OFF if target Android phone is not Qualcomm SoC based phone
 set(GGML_ENABLE_HEXAGON             ON)
 
-set(GGML_ENABLE_STABLEDIFFUSION     ON)
+set(GGML_ENABLE_STABLEDIFFUSION     OFF)
 
 # self-contained build with internal customized/tailored QNN-SDK and Hexagon-SDK,
 # without download fully official QNN-SDK and Hexagon-SDK.
@@ -99,9 +99,9 @@ if (GGML_ENABLE_HEXAGON)
     #check optimization flags
     if(DEFINED HTP_ARCH_VERSION)
         if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
+            set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
             #refer to:https://github.com/kantv-ai/kantv/issues/287
-            #set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
-            set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
+            #set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
         else()
             set(OPT_FLAG " -mcpu=cortex-a72 -mfloat-abi=hard -mfpu=neon-fp-armv8")
         endif()

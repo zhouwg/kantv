@@ -7595,7 +7595,7 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
 }
 
 
-static ncnn::Mutex lock;
+static ncnn::Mutex ncnn_lock;
 class MyNdkCamera : public NdkCameraWindow {
 public:
     virtual void on_image_render(cv::Mat &rgb) const;
@@ -7620,7 +7620,7 @@ static int draw_unsupported(cv::Mat &rgb) {
     return 0;
 }
 
-static int draw_fps(cv::Mat &rgb) {
+static int draw_fps(cv::Mat & rgb) {
     // resolve moving average
     float avg_fps = 0.f;
     {
@@ -7652,7 +7652,7 @@ static int draw_fps(cv::Mat &rgb) {
     }
 
     char text[32];
-    sprintf(text, "FPS=%.2f", avg_fps);
+    snprintf(text, 32,"FPS=%.2f", avg_fps);
 
     int baseLine = 0;
     cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
@@ -7670,33 +7670,15 @@ static int draw_fps(cv::Mat &rgb) {
     return 0;
 }
 
-void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
-    {
-        ncnn::MutexLockGuard g(lock);
-
-        //if (g_scrfd) {
-        //    std::vector<FaceObject> faceobjects;
-        //    g_scrfd->detect(rgb, faceobjects);
-
-         //   g_scrfd->draw(rgb, faceobjects);
-        //} else if (g_nanodet) {
-        //    std::vector<NanoObject> objects;
-         //   g_nanodet->detect(rgb, objects);
-
-         //   g_nanodet->draw(rgb, objects);
-        //} else {
-            //draw_unsupported(rgb);
-        //}
-    }
-
+void MyNdkCamera::on_image_render(cv::Mat & rgb) const {
     draw_fps(rgb);
 }
 
-static MyNdkCamera *g_camera = NULL;
+static MyNdkCamera * g_camera = NULL;
 
 extern "C" {
 
-JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+JNIEXPORT jint JNI_OnLoad(JavaVM * vm, void * reserved) {
     LOGGD("JNI_OnLoad");
 
     ncnn::create_gpu_instance();
@@ -7706,31 +7688,15 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_4;
 }
 
-JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
+JNIEXPORT void JNI_OnUnload(JavaVM * vm, void * reserved) {
     LOGGD("JNI_OnUnload");
-
-    {
-        ncnn::MutexLockGuard g(lock);
-
-        //if (g_scrfd) {
-        //    delete g_scrfd;
-         //   g_scrfd = NULL;
-        //}
-
-        //if (g_nanodet) {
-        //    delete g_nanodet;
-         //   g_nanodet = NULL;
-       // }
-    }
-
     ncnn::destroy_gpu_instance();
-
     delete g_camera;
     g_camera = NULL;
 }
 
 JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_openCamera(JNIEnv *env, jclass clazz, jint facing) {
+Java_kantvai_ai_ggmljava_openCamera(JNIEnv * env, jclass clazz, jint facing) {
     if (facing < 0 || facing > 1)
         return JNI_FALSE;
 
@@ -7742,18 +7708,19 @@ Java_kantvai_ai_ggmljava_openCamera(JNIEnv *env, jclass clazz, jint facing) {
 }
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_closeCamera(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_closeCamera(JNIEnv * env, jclass clazz) {
     LOGGD("closeCamera");
 
     g_camera->close();
 }
 
 JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv *env, jclass clazz, jobject surface) {
+Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv * env, jclass clazz, jobject surface) {
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
 
     LOGGD("setOutputWindow %p", win);
 
     g_camera->set_window(win);
 }
-}
+
+} //end extern "C" {

@@ -3,6 +3,7 @@
  */
 package kantvai.ai;
 
+import kantvai.media.player.KANTVLibraryLoader;
 import kantvai.media.player.KANTVLog;
 
 public class KANTVAIModelMgr {
@@ -10,7 +11,7 @@ public class KANTVAIModelMgr {
 
      private int defaultLLMModelIndex       = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
      private final int LLM_MODEL_COUNTS     = 8; // default counts of LLM models, might-be not the real counts of all LLM models
-     private final int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
+     private int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
 
      private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS; // default capacity of all AI models
 
@@ -181,6 +182,17 @@ public class KANTVAIModelMgr {
      //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
      private void initAIModels() {
          KANTVLog.g(TAG, "init AI Models");
+         try {
+             KANTVLibraryLoader.load("ggml-jni");
+             KANTVLog.g(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
+         } catch (Exception e) {
+             KANTVLog.g(TAG, "failed to initialize ggml jni");
+             return;
+         }
+
+         boolean isStableDiffusionEnabled = ggmljava.isStableDiffusionEnabled();
+         boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
+         KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
                  "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
@@ -191,11 +203,14 @@ public class KANTVAIModelMgr {
                  "https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav");
 
 
-         //there are only one StableDiffusion model currently
-         addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
-                 "https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
-                 4265380512L); // size of the StableDiffusion model, about 4.0 GiB
-
+         if (isStableDiffusionEnabled) {
+             //there are only one StableDiffusion model currently
+             addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
+                     "https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
+                     4265380512L); // size of the StableDiffusion model, about 4.0 GiB
+         } else {
+             NON_LLM_MODEL_COUNTS = 1;
+         }
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
                  "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true",
@@ -242,18 +257,16 @@ public class KANTVAIModelMgr {
                  854200224L
          );
 
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "DS-R1-Distill-Qwen-1.5B", "DeepSeek-R1-Distill-Qwen-1.5B-Q8_0.gguf",
-                 "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B", 1646570368L);
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "DS-R1-Distill-Qwen-7B", "DeepSeek-R1-Distill-Qwen-7B-Q8_0.gguf",
-                 "https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B/tree/main", 8098524896L);
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Nemotron-Nano-8B-v1", "Llama-3.1-Nemotron-Nano-8B-v1.gguf",
-                 "https://huggingface.co/nvidia/Llama-3.1-Nemotron-Nano-8B-v1/tree/main");
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM-500M", "SmolVLM-500M-Instruct-f16.gguf", "mmproj-SmolVLM-500M-Instruct-f16.gguf",
+                 "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/SmolVLM-500M-Instruct-f16.gguf?download=true",
+                 "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-f16.gguf?download=true",
+                 820422912L,
+                 199468800L
+         );
 
 
-         modelCounts = modelIndex;  //store to the real counts of all AI models
-         //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + 1 StableDiffusion model + all LLM models)
+         modelCounts = modelIndex;  //modelCounts is real counts of all AI models
+         //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + all LLM models + others)
          arrayModelName = new String[modelCounts];
          for (int i = 0; i < modelCounts; i++) {
              arrayModelName[i] = AIModels[i].getNickname();

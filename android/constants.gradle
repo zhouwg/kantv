@@ -8,7 +8,7 @@ API19：Android 4.4 KitKat                                    2013.10
 API21：Android 5.0 (Android L)Lollipop                       2014.10
 API22：Android 5.1 (Android L)Lollipop                       2015.03
 API23：Android 6.0 (Android M)Marshmallow                    2015.11
-API24: Android 7.0 (Android N)Nougat                         2016.05
+API24: Android 7.0 (Android N)Nougat                         2016.08
 API25: Android 7.1 (Android N)Nougat                         2016.12
 API26：Android 8.0 (Android O)Oreo                           2017.08
 API27：Android 8.1 (Android O)Oreo                           2017.12
@@ -24,7 +24,7 @@ project.ext {
     compileSdkVersion   = 34
     buildToolsVersion   = "34.0.0"
     targetSdkVersion    = 34
-    minSdkVersion       = 26
+    minSdkVersion       = 24
     appTargetSdkVersion = 29
 
     //version and version code of KanTV Android APP

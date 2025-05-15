@@ -107,4 +107,8 @@ package kantvai.ai;
     public static native void closeCamera();
 
     public static native void setOutputWindow(Surface surface);
+
+    public static native boolean isStableDiffusionEnabled();
+
+    public static native boolean isGGMLHexagonEnabled();
 }
