@@ -23,6 +23,7 @@ set(GGML_SRC_DIR                ${CMAKE_SOURCE_DIR}/ggml)
 set(WHISPERCPP_SRC_DIR          ${GGML_SRC_DIR}/whispercpp/)
 set(LLAMACPP_SRC_DIR            ${GGML_SRC_DIR}/llamacpp/)
 set(SDCPP_SRC_DIR               ${GGML_SRC_DIR}/stablediffusioncpp/)
+set(PREBUILT_PATH               ${GGML_SRC_DIR}/../../prebuilts/)
 set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/jniLibs/${ANDROID_ABI}/)
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
@@ -37,6 +38,7 @@ endif()
 
 set(QNN_INC_PATH                ${QNN_SDK_PATH}/include/QNN/)
 set(QNN_LIB_PATH                ${QNN_SDK_PATH}/lib/aarch64-android/)
+set(OpenCV_DIR                  ${PREBUILT_PATH}/opencv-mobile-4.9.0-android/sdk/native/jni)
 
 set(OPT_FLAG                    " ")
 
@@ -54,6 +56,7 @@ message("QNN_SDK_PATH         : ${QNN_SDK_PATH}")
 message("QNN_INC_PATH         : ${QNN_INC_PATH}")
 message("QNN_LIB_PATH         : ${QNN_LIB_PATH}")
 message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
+message("OpenCV_DIR           : ${OpenCV_DIR}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(DEBUG_FLAG "-DDEBUG -Wall")
@@ -121,6 +124,7 @@ include_directories(${LLAMACPP_SRC_DIR}/common/)
 include_directories(${LLAMACPP_SRC_DIR}/common/minja/)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 include_directories(${SDCPP_SRC_DIR}/)
+include_directories(${OpenCV_DIR}/include/)
 
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
@@ -271,6 +275,8 @@ else()
 endif()
 
 find_library(LOG_LIB log)
+set(CMAKE_MODULE_PATH "${OpenCV_DIR};${CMAKE_MODULE_PATH}")
+find_package(OpenCV REQUIRED core imgproc)
 
 add_library(kantvmedia
         SHARED
@@ -302,9 +308,9 @@ function(build_library target_name)
         #file(GLOB allPrebuiltQNNLibs "${QNN_LIB_PATH}/libQnn*.so")
         #file(COPY ${allPrebuiltQNNLibs}  DESTINATION ${PREBUILT_LIB_PATH}/ )
         #target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android ${allPrebuiltQNNLibs})
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc ${OpenCV_LIBS} camera2ndk mediandk)
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android ${OpenCV_LIBS} camera2ndk mediandk)
     endif()
 
 endfunction()
