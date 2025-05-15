@@ -94,6 +94,27 @@ extern "C" {
 
 #include "llamacpp/ggml/include/ggml-hexagon.h"
 
+#include <android/asset_manager_jni.h>
+#include <android/native_window_jni.h>
+#include <android/native_window.h>
+#include <android/bitmap.h>
+#include <android/log.h>
+
+//ncnn
+#include "platform.h"
+#include "benchmark.h"
+#include "net.h"
+#include "gpu.h"
+
+//opencv-android
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+
+#include "ndkcamera.h"
+
+#if __ARM_NEON
+#include <arm_neon.h>
+#endif // __ARM_NEON
 
 // =================================================================================================
 //
@@ -921,6 +942,7 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 #include "ggml-hexagon.h"
 
 #include "ggml-jni.h"
+#include "ndkcamera.h"
 
 
 // =================================================================================================
@@ -7570,4 +7592,168 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
     inference_reset_running_state();
     LOGGD("ret %d", ret);
     return ret;
+}
+
+
+static ncnn::Mutex lock;
+class MyNdkCamera : public NdkCameraWindow {
+public:
+    virtual void on_image_render(cv::Mat &rgb) const;
+};
+
+static int draw_unsupported(cv::Mat &rgb) {
+    const char text[] = "unsupported";
+
+    int baseLine = 0;
+    cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 1.0, 1, &baseLine);
+
+    int y = (rgb.rows - label_size.height) / 2;
+    int x = (rgb.cols - label_size.width) / 2;
+
+    cv::rectangle(rgb, cv::Rect(cv::Point(x, y),
+                                cv::Size(label_size.width, label_size.height + baseLine)),
+                  cv::Scalar(255, 255, 255), -1);
+
+    cv::putText(rgb, text, cv::Point(x, y + label_size.height),
+                cv::FONT_HERSHEY_SIMPLEX, 1.0, cv::Scalar(0, 0, 0));
+
+    return 0;
+}
+
+static int draw_fps(cv::Mat &rgb) {
+    // resolve moving average
+    float avg_fps = 0.f;
+    {
+        static double t0 = 0.f;
+        static float fps_history[10] = {0.f};
+
+        double t1 = ncnn::get_current_time();
+        if (t0 == 0.f) {
+            t0 = t1;
+            return 0;
+        }
+
+        float fps = 1000.f / (t1 - t0);
+        t0 = t1;
+
+        for (int i = 9; i >= 1; i--) {
+            fps_history[i] = fps_history[i - 1];
+        }
+        fps_history[0] = fps;
+
+        if (fps_history[9] == 0.f) {
+            return 0;
+        }
+
+        for (int i = 0; i < 10; i++) {
+            avg_fps += fps_history[i];
+        }
+        avg_fps /= 10.f;
+    }
+
+    char text[32];
+    sprintf(text, "FPS=%.2f", avg_fps);
+
+    int baseLine = 0;
+    cv::Size label_size = cv::getTextSize(text, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+    int y = 0;
+    int x = rgb.cols - label_size.width;
+
+    cv::rectangle(rgb, cv::Rect(cv::Point(x, y),
+                                cv::Size(label_size.width, label_size.height + baseLine)),
+                  cv::Scalar(255, 255, 255), -1);
+
+    cv::putText(rgb, text, cv::Point(x, y + label_size.height),
+                cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
+
+    return 0;
+}
+
+void MyNdkCamera::on_image_render(cv::Mat &rgb) const {
+    {
+        ncnn::MutexLockGuard g(lock);
+
+        //if (g_scrfd) {
+        //    std::vector<FaceObject> faceobjects;
+        //    g_scrfd->detect(rgb, faceobjects);
+
+         //   g_scrfd->draw(rgb, faceobjects);
+        //} else if (g_nanodet) {
+        //    std::vector<NanoObject> objects;
+         //   g_nanodet->detect(rgb, objects);
+
+         //   g_nanodet->draw(rgb, objects);
+        //} else {
+            //draw_unsupported(rgb);
+        //}
+    }
+
+    draw_fps(rgb);
+}
+
+static MyNdkCamera *g_camera = NULL;
+
+extern "C" {
+
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    LOGGD("JNI_OnLoad");
+
+    ncnn::create_gpu_instance();
+
+    g_camera = new MyNdkCamera;
+
+    return JNI_VERSION_1_4;
+}
+
+JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
+    LOGGD("JNI_OnUnload");
+
+    {
+        ncnn::MutexLockGuard g(lock);
+
+        //if (g_scrfd) {
+        //    delete g_scrfd;
+         //   g_scrfd = NULL;
+        //}
+
+        //if (g_nanodet) {
+        //    delete g_nanodet;
+         //   g_nanodet = NULL;
+       // }
+    }
+
+    ncnn::destroy_gpu_instance();
+
+    delete g_camera;
+    g_camera = NULL;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_openCamera(JNIEnv *env, jclass clazz, jint facing) {
+    if (facing < 0 || facing > 1)
+        return JNI_FALSE;
+
+    LOGGD("openCamera %d", facing);
+
+    g_camera->open((int) facing);
+
+    return JNI_TRUE;
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_closeCamera(JNIEnv *env, jclass clazz) {
+    LOGGD("closeCamera");
+
+    g_camera->close();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv *env, jclass clazz, jobject surface) {
+    ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
+
+    LOGGD("setOutputWindow %p", win);
+
+    g_camera->set_window(win);
+}
 }

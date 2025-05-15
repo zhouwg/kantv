@@ -3,7 +3,9 @@
   */
 package kantvai.ai;
 
-public class ggmljava {
+ import android.view.Surface;
+
+ public class ggmljava {
     private static final String TAG = ggmljava.class.getName();
 
     //keep sync with ggml-hexagon.cpp
@@ -99,4 +101,10 @@ public class ggmljava {
     public static native String stablediffusion_inference(String modelPath, String auxModePath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 
     public static native byte[] jni_text2image(String text);
+
+    public static native boolean openCamera(int facing);
+
+    public static native void closeCamera();
+
+    public static native void setOutputWindow(Surface surface);
 }
