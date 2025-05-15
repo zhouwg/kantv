@@ -25,7 +25,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/006ace20-20be-414c-b1f9-d185af438ec3)
+![Image](https://github.com/user-attachments/assets/a01efc55-b9be-4e4b-b5b9-7a4c8723278b)
 
 ### Building the project
 
