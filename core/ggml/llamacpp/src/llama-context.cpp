@@ -2874,7 +2874,7 @@ void llama_perf_context_print(const llama_context * ctx) {
            << "  tokens";
 
     std::string result = timing.str();
-    kantv_asr_notify_benchmark(result);
+    GGML_JNI_NOTIFY(result.c_str());
 #else
     LLAMA_LOG_INFO("%s:        load time = %10.2f ms\n", __func__, data.t_load_ms);
     LLAMA_LOG_INFO("%s: prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n",

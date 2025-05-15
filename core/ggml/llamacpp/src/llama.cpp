@@ -141,7 +141,7 @@ static int llama_model_load(const std::string & fname, std::vector<std::string> 
     } catch (const std::exception & err) {
         LOGGD("%s: error loading model: %s\n", __func__, err.what());
         std::string info = std::string("error loading model: ") + err.what() + " at [" + __FILE__ + ", " +  __FUNCTION__ + " ]\n";
-        kantv_asr_notify_benchmark_c(info.c_str());
+        GGML_JNI_NOTIFY(info.c_str());
         return -1;
     }
 

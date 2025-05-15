@@ -4,7 +4,7 @@
 
 # Description: top level build script for entire project
 
-# validated ok or works well on host Ubuntu 20.04
+# validated ok or works well on host Ubuntu 20.04, Ubuntu 24.04
 
 
 function build_init()
