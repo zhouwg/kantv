@@ -1,4 +1,4 @@
-// ref&author:https://github.com/nihui/ncnn-android-scrfd
+// ref:https://github.com/nihui/ncnn-android-scrfd
 // Tencent is pleased to support the open source community by making ncnn available.
 //
 // Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
@@ -22,6 +22,8 @@
 #include <opencv2/core/core.hpp>
 
 #include "mat.h"
+
+static const int NDKCAMERAWINDOW_ID = 233;
 
 static void onDisconnected(void* context, ACameraDevice* device)
 {
@@ -327,7 +329,7 @@ int NdkCamera::open(int _camera_facing)
 
 void NdkCamera::close()
 {
-    LOGGI("NdkCamera:close");
+    LOGGD("NdkCamera:close");
 
     if (capture_session)
     {
@@ -420,7 +422,6 @@ void NdkCamera::on_image(const unsigned char* nv21, int nv21_width, int nv21_hei
     on_image(rgb);
 }
 
-static const int NDKCAMERAWINDOW_ID = 233;
 
 NdkCameraWindow::NdkCameraWindow() : NdkCamera()
 {

@@ -17,6 +17,8 @@ all64/
 all32/
 out/
 build/
+make/
+out.*/
 
 #only target arm64-v8a used in this project
 armeabi-v7a/
@@ -44,6 +46,7 @@ xcshareddata
 *.Po
 .libs
 .deps
+.travis.yml
 ndkBuild
 tags
 
@@ -59,11 +62,7 @@ tags
 *.obj
 *.swp
 *.hprof
-.travis.yml
 
-out
-out.*
-build
 android-ndk-*
 
 *.mp4
@@ -75,6 +74,8 @@ android-ndk-*
 *.zip
 *.xz
 *.gz
+*.wav
+*.bin
 
 crash.log
 kantv.jks
