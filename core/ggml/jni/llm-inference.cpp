@@ -667,7 +667,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     n_eval = params.n_batch;
                 }
 
-                LOG_DBG("eval: %s\n", string_from(ctx, embd).c_str());
+                //LOG_DBG("eval: %s\n", string_from(ctx, embd).c_str());
 
                 if (llama_decode(ctx, llama_batch_get_one(&embd[i], n_eval))) {
                     LOG_ERR("%s : failed to eval\n", __func__);
@@ -676,7 +676,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
                 n_past += n_eval;
 
-                LOG_DBG("n_past = %d\n", n_past);
+                //LOG_DBG("n_past = %d\n", n_past);
                 // Display total tokens alongside total time
                 if (params.n_print > 0 && n_past % params.n_print == 0) {
                     LOG_DBG("\n\033[31mTokens consumed so far = %d / %d \033[0m\n", n_past, n_ctx);
@@ -714,7 +714,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             // decrement remaining sampling budget
             --n_remain;
 
-            LOG_DBG("n_remain: %d\n", n_remain);
+            //LOG_DBG("n_remain: %d\n", n_remain);
         } else {
             // some user input remains from prompt or interaction, forward it to processing
             LOG_DBG("embd_inp.size(): %d, n_consumed: %d\n", (int) embd_inp.size(), n_consumed);

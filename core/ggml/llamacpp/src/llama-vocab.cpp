@@ -1997,8 +1997,7 @@ void llama_vocab::impl::load(llama_model_loader & ml, const LLM_KV & kv) {
             } else {
                 // token is control, but not marked as EOG -> print a debug log
                 if (id_to_token[t.second].attr & LLAMA_TOKEN_ATTR_CONTROL && special_eog_ids.count(t.second) == 0) {
-                    LLAMA_LOG_DEBUG("%s: control token: %6d '%s' is not marked as EOG\n",
-                            __func__, t.second, t.first.c_str());
+                    //LLAMA_LOG_DEBUG("%s: control token: %6d '%s' is not marked as EOG\n", __func__, t.second, t.first.c_str());
                 }
             }
         }
