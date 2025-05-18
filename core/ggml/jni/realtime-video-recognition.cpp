@@ -205,19 +205,17 @@ static std::string fnv_hash(const uint8_t * data, size_t len) {
 
 /**
  * @brief  MTMD inference by MTMD API and libllama API
- * @param  rgb  rgb data
+ * @param  rgb  rgb data in OpenCV::Mat
  */
 static void mtmd_inference(cv::Mat & rgb) {
     common_params params;
-
     common_init_result llama_init;
 
-    llama_model * model = nullptr;
-    llama_context * lctx = nullptr;
+    llama_model * model         = nullptr;
+    llama_context * lctx        = nullptr;
+    const llama_vocab * vocab   = nullptr;
 
-    const llama_vocab * vocab = nullptr;
-
-    mtmd_context * mctx = nullptr;
+    mtmd_context * mctx         = nullptr;
     mtmd_context_params mparams;
     mtmd::bitmaps bitmaps;
     int llm_inference_interrupted = 0;
@@ -230,15 +228,17 @@ static void mtmd_inference(cv::Mat & rgb) {
     int n_batch;
     bool has_eos_token = false;
     llama_pos new_n_past;
-    int32_t n_ctx = 0;  // context size per slot
+    int32_t n_ctx = 0;
     int32_t n_past = 0;
     int32_t n_predict = -1;
 
     llama_tokens generated_tokens;
 
-    int backend_type = HEXAGON_BACKEND_GGML;
+    int backend_type = HEXAGON_BACKEND_GGML; //hardcode to the default ggml backend
+    int thread_counts = 4;
 
     std::string prompt_str = "what do you see in this image?";
+    thread_counts = std::thread::hardware_concurrency();
 
     //step-1: common params parse
     int argc = 5;
@@ -247,6 +247,7 @@ static void mtmd_inference(cv::Mat & rgb) {
                           "--mmproj", "/sdcard/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
     };
     params.sampling.temp = 0.2; // lower temp by default for better quality
+    params.cpuparams.n_threads  = thread_counts;
     if (!common_params_parse(argc, const_cast<char **>(argv), params, LLAMA_EXAMPLE_SERVER)) {
         LOGGD("common params parse failure\n");
         return;
@@ -299,11 +300,13 @@ static void mtmd_inference(cv::Mat & rgb) {
     mparams = mtmd_context_params_default();
     mparams.use_gpu = false;
     mparams.print_timings = false;
-    mparams.n_threads = 8;
+    mparams.n_threads = thread_counts;
     mparams.verbosity = GGML_LOG_LEVEL_DEBUG;
     mctx = mtmd_init_from_file(mmproj_path.c_str(), model, mparams);
     if (mctx == nullptr) {
         LOGGD("failed to load multimodal model, '%s'\n", mmproj_path.c_str());
+        common_sampler_free(smpl);
+        llama_backend_free();
         return;
     }
     LOGGD("loaded multimodal model, '%s'\n", mmproj_path.c_str());
@@ -314,6 +317,9 @@ static void mtmd_inference(cv::Mat & rgb) {
     if (!bmp.ptr) {
         LOGGD("failed to load image\n");
         GGML_JNI_NOTIFY("failed to load image\n");
+        common_sampler_free(smpl);
+        mtmd_free(mctx);
+        llama_backend_free();
         return;
     }
     // calculate bitmap hash (for KV caching)
