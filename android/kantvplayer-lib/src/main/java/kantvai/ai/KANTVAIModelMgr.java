@@ -233,7 +233,7 @@ public class KANTVAIModelMgr {
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-4B", "Qwen3-4B-Q8_0.gguf",
                  "https://huggingface.co/ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true",
-                 (long)(4.28 * 1024 * 1024 * 1024L));
+                 4280404640L);
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf",
                  "https://huggingface.co/ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true",

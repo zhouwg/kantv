@@ -126,6 +126,7 @@ include_directories(${PREBUILT_INC_PATH}/)
 include_directories(${LLAMACPP_SRC_DIR}/)
 include_directories(${LLAMACPP_SRC_DIR}/common/)
 include_directories(${LLAMACPP_SRC_DIR}/common/minja/)
+include_directories(${LLAMACPP_SRC_DIR}/tools/mtmd)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 include_directories(${SDCPP_SRC_DIR}/)
 include_directories(${OpenCV_DIR}/include/)
