@@ -70,6 +70,39 @@ make -j${HOST_CPU_COUNTS}
 cd -
 }
 
+function build_arm64_non_qcom
+{
+cmake -H. -B./out/arm64-v8a -DPROJECT_ROOT_PATH=${PROJECT_ROOT_PATH} -DTARGET_NAME=${TARGET} -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DBUILD_TARGET="android" -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=${ANDROID_PLATFORM} -DANDROID_NDK=${ANDROID_NDK}  -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DLOCAL_WHISPERCPP_PATH=${LOCAL_WHISPERCPP_PATH} -DGGML_OPENMP=OFF -DCMAKE_C_FLAGS=-march=armv8.7-a -DGGML_HEXAGON=OFF -DLLAMA_CURL=OFF -DQNN_SDK_PATH=${QNN_SDK_PATH} -DHEXAGON_SDK_PATH=${HEXAGON_SDK_PATH} -DHTP_ARCH_VERSION=${HTP_ARCH_VERSION}
+cd ./out/arm64-v8a
+make -j${HOST_CPU_COUNTS}
 
-build_arm64
+cd -
+}
+
 #build_armv7a
+
+function show_usage()
+{
+    echo "Usage:"
+    echo "  $0 qcom"
+    echo "  $0 non_qcom"
+    echo "  $0 help"
+    echo -e "\n\n\n"
+}
+
+if [ $# == 0 ]; then
+    #default is build for qcom
+    build_arm64
+elif [ $# == 1 ]; then
+    if [ "$1" == "help" ]; then
+        show_usage
+        exit 1
+    elif [ "$1" == "qcom" ]; then
+        build_arm64
+    else
+        build_arm64_non_qcom
+    fi
+else
+    show_usage
+    exit 1
+fi

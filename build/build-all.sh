@@ -75,16 +75,16 @@ function build_thirdparty()
 
 function build_jni()
 {
-    #jni_libs=" ggml "
-
     cd ${PROJECT_ROOT_PATH}/core/
-    #for item in ${jni_libs};do
-    #    cd ${PROJECT_ROOT_PATH}/core/${item}/
-    #    echo "build Android JNI lib${item}.so in `pwd` for target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST}"
-        ./build-android-jni-lib.sh
-    #    cd ${PROJECT_ROOT_PATH}/core/
-    #done
+    ./build-android-jni-lib.sh qcom
+    cd ${PROJECT_ROOT_PATH}
+}
 
+
+function build_jni_non_qcom()
+{
+    cd ${PROJECT_ROOT_PATH}/core/
+    ./build-android-jni-lib.sh non_qcom
     cd ${PROJECT_ROOT_PATH}
 }
 
@@ -227,6 +227,19 @@ function do_buildandroid()
 }
 
 
+function do_buildandroid_non_qcom()
+{
+    build_init
+
+    build_nativelibs
+    build_jni_non_qcom
+
+    build_check
+
+    build_kantv_androidapk
+}
+
+
 function do_buildlinux()
 {
     cd ${PROJECT_ROOT_PATH}/external/ffmpeg-deps
@@ -243,6 +256,8 @@ function dump_usage()
     echo "Usage:"
     echo "  $0 clean"
     echo "  $0 android"
+    echo "  $0 android_qcom"
+    echo "  $0 android_non_qcom"
     echo "  $0 linux"
     echo "  $0 ios"
 #   echo "  $0 wasm"
@@ -287,6 +302,12 @@ case "$user_command" in
     ;;
     android)
         do_buildandroid
+    ;;
+    android_qcom)
+        do_buildandroid
+    ;;
+    android_non_qcom)
+        do_buildandroid_non_qcom
     ;;
     linux)
         do_buildlinux

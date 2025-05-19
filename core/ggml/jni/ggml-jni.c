@@ -361,9 +361,9 @@ Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring mo
 
 
 #if !defined GGML_USE_HEXAGON
-    if (n_backend != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
+        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
         goto failure;
     }
 #endif
@@ -440,9 +440,9 @@ Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, j
 
 
 #if !defined GGML_USE_HEXAGON
-    if (n_backend != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+    if (n_backend_type != HEXAGON_BACKEND_GGML) {
+        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
         goto failure;
     }
 #endif

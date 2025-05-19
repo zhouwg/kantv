@@ -157,8 +157,10 @@
 
      //=============================================================================================
      private String[]        arrayModelName;
+     private String[]        arrayBenchType;
      private void initLLMModels() {
          arrayModelName = AIModelMgr.getAllAIModelNickName();
+         arrayBenchType = AIModelMgr.getAllAIModelBenchType();
      }
      //=============================================================================================
 
@@ -216,7 +218,7 @@
          setTextGGMLInfo(AIModelMgr.getKANTVAIModelFromName("Gemma3-4B").getName());
 
          Spinner spinnerBenchType = mActivity.findViewById(R.id.spinnerBenchType);
-         String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
+         //String[] arrayBenchType = getResources().getStringArray(R.array.benchType);
          ArrayAdapter<String> adapterBenchType = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayBenchType);
          spinnerBenchType.setAdapter(adapterBenchType);
          spinnerBenchType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {

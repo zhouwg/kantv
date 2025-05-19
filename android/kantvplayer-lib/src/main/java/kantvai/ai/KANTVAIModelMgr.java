@@ -18,6 +18,7 @@ public class KANTVAIModelMgr {
 
      private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
      private String[] arrayModelName;           //space/memory ---> time/performance
+     private String[] arrayBenchType;
      private static KANTVAIModelMgr instance      = null;
      private static volatile boolean isInitModels = false;
 
@@ -120,6 +121,10 @@ public class KANTVAIModelMgr {
          return arrayModelName;
      }
 
+    public String[] getAllAIModelBenchType() {
+         return arrayBenchType;
+    }
+
      public String[] getAllLLMModelNickName() {
          String[] arrayLLMModelsName = new String[getLLMModelCounts()];
          for (int i = 0; i < getLLMModelCounts(); i++) {
@@ -193,6 +198,21 @@ public class KANTVAIModelMgr {
          boolean isStableDiffusionEnabled = ggmljava.isStableDiffusionEnabled();
          boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
          KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
+
+         if (isStableDiffusionEnabled) {
+             arrayBenchType = new String[5];
+             arrayBenchType[0] = "memcpy";
+             arrayBenchType[1] = "mulmat";
+             arrayBenchType[2] = "ASR";
+             arrayBenchType[3] = "LLM";
+             arrayBenchType[4] = "Text2Image";
+         } else {
+             arrayBenchType = new String[4];
+             arrayBenchType[0] = "memcpy";
+             arrayBenchType[1] = "mulmat";
+             arrayBenchType[2] = "ASR";
+             arrayBenchType[3] = "LLM";
+         }
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
                  "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
