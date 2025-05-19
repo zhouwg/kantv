@@ -261,7 +261,7 @@ static void mtmd_inference(cv::Mat & rgb) {
 #else
         LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
         GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        return 1;
+        return;
 #endif
     } else {
         params.main_gpu = backend_type;
@@ -284,6 +284,7 @@ static void mtmd_inference(cv::Mat & rgb) {
     lctx = llama_init.context.get();
     if (model == nullptr) {
         LOGGD("failed to load model, '%s'\n", params.model.path.c_str());
+        llama_backend_free();
         return;
     }
     vocab = llama_model_get_vocab(model);
