@@ -306,6 +306,7 @@ case "$user_command" in
         #FIXME:better approach rather than workaround approach
         sed -i 's/set(GGML_HEXAGON ON)/set(GGML_HEXAGON OFF)/' ${PROJECT_ROOT_PATH}/core/ggml/CMakeLists.txt
         do_buildandroid
+        sed -i 's/set(GGML_HEXAGON OFF)/set(GGML_HEXAGON ON)/' ${PROJECT_ROOT_PATH}/core/ggml/CMakeLists.txt
     ;;
     linux)
         do_buildlinux
