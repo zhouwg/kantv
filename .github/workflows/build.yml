@@ -43,14 +43,14 @@ jobs:
           name: kantv-release-v1.6.9-for-qcom-signed.apk
           compression-level: 0
           retention-days: 30
-          path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-signed.apk
+          path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-qcom-signed.apk
 
       - name: upload arm64-v8a release to release
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-signed.apk
+          file: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-qcom-signed.apk
           tag: ${{ github.ref }}
           file_glob: true
 
@@ -80,14 +80,14 @@ jobs:
           name: kantv-release-v1.6.9-for-nonqcom-signed.apk
           compression-level: 0
           retention-days: 30
-          path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-signed.apk
+          path: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-non-qcom-signed.apk
 
       - name: upload arm64-v8a release to release
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-signed.apk
+          file: ${{ github.workspace }}/android/kantvplayer/build/outputs/apk/all64/release/kantv-release-v1.6.9-non-qcom-signed.apk
           tag: ${{ github.ref }}
           file_glob: true
 

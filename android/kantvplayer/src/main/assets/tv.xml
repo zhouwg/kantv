@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-
-    <entry>
-        <title> CGTN </title>
-        <link href="https://english-livebkws.cgtn.com/live/encgtn.m3u8" poster="cgtn.png" urltype="hls" />
-    </entry>
-
     <entry>
         <title> CNA(Channel News Asia) </title>
         <link href="https://d2e1asnsl7br7b.cloudfront.net/7782e205e72f43aeb4a48ec97f66ebbe/index_5.m3u8" poster="cna.png" protected="no" urltype="hls" />

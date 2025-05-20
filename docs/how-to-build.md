@@ -63,12 +63,12 @@ build the entire project by Android Studio IDE
 
 #### How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC in AndroidStudio
 
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt#L15</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
+- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt#L14</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
 
 #### How to enable/disable StableDiffusion
 
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L27">ggml/CMakeLists.txt#L27</a> accordingly
+- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L26">ggml/CMakeLists.txt#L26</a> accordingly
 
 #### How to build project for Android phone equipped with Qualcomm high-end mobile SoC
 
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L100">ggml/CMakeLists.txt#L100</a> accordingly if target Android phone is equipped with Qualcomm Snapdragon 8Gen3 series SoC or Qualcomm Snapdragon 8Elite series mobile SoC
+- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L99">ggml/CMakeLists.txt#L99</a> accordingly if target Android phone is equipped with Qualcomm Snapdragon 8Gen3 series SoC or Qualcomm Snapdragon 8Elite series mobile SoC

@@ -82,8 +82,8 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
 
 #if !defined GGML_USE_HEXAGON
     if (HEXAGON_BACKEND_GGML != backend_type) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
+        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
         goto failure;
     }
 #endif
@@ -255,8 +255,8 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
 
 #if !defined GGML_USE_HEXAGON
     if (n_backend != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend));
+        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
         goto failure;
     }
 #endif
@@ -362,8 +362,8 @@ Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring mo
 
 #if !defined GGML_USE_HEXAGON
     if (n_backend_type != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
         goto failure;
     }
 #endif

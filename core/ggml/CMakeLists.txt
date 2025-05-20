@@ -8,20 +8,19 @@ set(CMAKE_CXX_STANDARD              20)
 set(CMAKE_CXX_STANDARD_REQUIRED     ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-if(NOT DEFINED GGML_HEXAGON)
-    #build in Android Studio
-    # set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
-    # set it to OFF if target Android phone is not Qualcomm SoC based phone
-    set(GGML_ENABLE_HEXAGON             ON)
+
+# set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
+# set it to OFF if target Android phone is not Qualcomm SoC based phone
+set(GGML_HEXAGON ON)
+
+if (GGML_HEXAGON)
+    #build apk for phone with qcom mobile SoC
+    message("set GGML_ENABLE_HEXAGON  to ON")
+    set(GGML_ENABLE_HEXAGON ON)
 else()
-    #build in command-line mode
-    if (GGML_HEXAGON STREQUAL "ON")
-        #build apk for phone with qcom mobile SoC
-        set(GGML_ENABLE_HEXAGON             ON)
-    else()
-        #build apk for phone with non-qcom mobile SoC
-        set(GGML_ENABLE_HEXAGON             OFF)
-    endif()
+    #build apk for phone with non-qcom mobile SoC
+    message("set GGML_ENABLE_HEXAGON  to OFF")
+    set(GGML_ENABLE_HEXAGON OFF)
 endif()
 
 set(STABLEDIFFUSION_ENABLE_HEXAGON     OFF)
@@ -127,7 +126,8 @@ else()
     set(OPT_FLAG " -O3 -march=armv8.7-a -ffp-model=fast -fno-finite-math-only")
 endif() #if (GGML_ENABLE_HEXAGON)
 
-message("OPT_FLAG:${OPT_FLAG}")
+message("OPT_FLAG:          ${OPT_FLAG}")
+message("DEBUG_FLAGS:       ${DEBUG_FLAG}")
 
 include_directories(${LLAMACPP_SRC_DIR}/ggml/include)
 include_directories(${LLAMACPP_SRC_DIR}/include)
@@ -283,22 +283,30 @@ add_link_options( "-lc++_shared" )
 
 if (GGML_ENABLE_HEXAGON)
     if (STABLEDIFFUSION_ENABLE_HEXAGON)
+        message("ggml_use_hexagon and sd_use_hexagon")
         set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON -DSD_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
     else()
+        message("ggml_use_hexagon")
         set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DGGML_USE_HEXAGON ${DEBUG_FLAG} ${OPT_FLAG}")
     endif()
 else()
+    message("no ggml_use_hexagon")
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}    ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  ${DEBUG_FLAG} ${OPT_FLAG}")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  ${DEBUG_FLAG} ${OPT_FLAG}")
 endif()
+
+message("CMAKE_C_FLAGS:                 ${CMAKE_C_FLAGS}")
+message("CMAKE_CXX_FLAGS:               ${CMAKE_CXX_FLAGS}")
+message("CMAKE_C_FLAGS_RELEASE:         ${CMAKE_C_FLAGS_RELEASE}")
+message("CMAKE_CXX_FLAGS_RELEASE:       ${CMAKE_CXX_FLAGS_RELEASE}")
 
 find_library(LOG_LIB log)
 set(CMAKE_MODULE_PATH "${OpenCV_DIR};${CMAKE_MODULE_PATH}")

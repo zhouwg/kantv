@@ -4341,6 +4341,15 @@ static int whisper_has_openvino(void) {
 #endif
 }
 
+static int whipser_has_hexagon(void) {
+#ifndef GGML_USE_HEXAGON
+    LOGGD("not use hexagon\n");
+    return 0;
+#else
+    LOGGD("use hexagon\n");
+    return 1;
+#endif
+}
 const char * whisper_print_system_info(void) {
     static std::string s;
 
@@ -4350,6 +4359,7 @@ const char * whisper_print_system_info(void) {
     s += "WHISPER : ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
     s += "OPENVINO = "  + std::to_string(whisper_has_openvino())   + " | ";
+    s += "HEXAGON = "  + std::to_string(whipser_has_hexagon())   + " | ";
 
     for (size_t i = 0; i < ggml_backend_reg_count(); i++) {
         auto * reg = ggml_backend_reg_get(i);

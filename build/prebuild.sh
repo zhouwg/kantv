@@ -11,6 +11,7 @@ sudo apt-get install curl -y
 sudo apt-get install wget -y
 sudo apt-get install git -y
 sudo apt-get install vim -y
+sudo apt-get install sed -y
 sudo apt-get install openjdk-17-jdk -y
 
 sudo apt-get install -y android-tools-adb autoconf \

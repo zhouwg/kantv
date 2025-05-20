@@ -79,7 +79,6 @@ make -j${HOST_CPU_COUNTS}
 cd -
 }
 
-#build_armv7a
 
 function show_usage()
 {
@@ -98,8 +97,10 @@ elif [ $# == 1 ]; then
         show_usage
         exit 1
     elif [ "$1" == "qcom" ]; then
+        echo "build arm64_qcom"
         build_arm64
     else
+        echo "build arm64_non_qcom"
         build_arm64_non_qcom
     fi
 else

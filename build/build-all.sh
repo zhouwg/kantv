@@ -76,15 +76,13 @@ function build_thirdparty()
 function build_jni()
 {
     cd ${PROJECT_ROOT_PATH}/core/
-    ./build-android-jni-lib.sh qcom
-    cd ${PROJECT_ROOT_PATH}
-}
-
-
-function build_jni_non_qcom()
-{
-    cd ${PROJECT_ROOT_PATH}/core/
-    ./build-android-jni-lib.sh non_qcom
+    if [ ${is_build_for_qcom} -eq 1 ]; then
+        echo "build jni qcom"
+        ./build-android-jni-lib.sh qcom
+    else
+        echo "build jni non_qcom"
+        ./build-android-jni-lib.sh non_qcom
+    fi
     cd ${PROJECT_ROOT_PATH}
 }
 
@@ -109,8 +107,6 @@ function build_nativelibs
 
     build_thirdparty
     build_jni
-
-
 }
 
 
@@ -119,9 +115,11 @@ function build_kantv_androidapk()
     echo ""
     cd ${PROJECT_ROOT_PATH}/android
 
-    #./gradlew assembleDebug
-
-    ./gradlew assembleRelease
+    if [ ${is_build_for_qcom} -eq 1 ]; then
+        ./gradlew assembleRelease -PGGML_HEXAGON=ON
+    else
+        ./gradlew assembleRelease -PGGML_HEXAGON=OFF
+    fi
 
     if [ $? -eq 0 ]; then
         echo ""
@@ -178,7 +176,8 @@ function sign_kantv_androidapk()
         exit 1
     fi
     #sign apk
-    jarsigner -verbose -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
+    #jarsigner -verbose -keystore "${PROJECT_ROOT_PATH}/kantv.jks"
+    jarsigner -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
               -storepass "$KANTV_KEYSTORE_PASSWORD" \
               -keypass "$KANTV_KEY_PASSWORD" "${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-unsigned.apk" "$KANTV_KEY_ALIAS" \
               -signedjar "${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk"
@@ -190,6 +189,14 @@ function sign_kantv_androidapk()
     else
         echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"
         ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk
+        if [ ${is_build_for_qcom} -eq 1 ]; then
+            echo "build apk for qcom"
+            mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk
+        else
+            echo "build apk for non-qcom"
+            mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk
+        fi
+        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-*-signed.apk
     fi
 }
 
@@ -219,20 +226,6 @@ function do_buildandroid()
     build_init
 
     build_nativelibs
-    build_jni
-
-    build_check
-
-    build_kantv_androidapk
-}
-
-
-function do_buildandroid_non_qcom()
-{
-    build_init
-
-    build_nativelibs
-    build_jni_non_qcom
 
     build_check
 
@@ -301,13 +294,18 @@ case "$user_command" in
         do_clean
     ;;
     android)
+        is_build_for_qcom=1
         do_buildandroid
     ;;
     android_qcom)
+        is_build_for_qcom=1
         do_buildandroid
     ;;
     android_non_qcom)
-        do_buildandroid_non_qcom
+        is_build_for_qcom=0
+        #FIXME:better approach rather than workaround approach
+        sed -i 's/set(GGML_HEXAGON ON)/set(GGML_HEXAGON OFF)/' ${PROJECT_ROOT_PATH}/core/ggml/CMakeLists.txt
+        do_buildandroid
     ;;
     linux)
         do_buildlinux
@@ -326,6 +324,8 @@ esac
 }
 
 
+unset user_command
+unset is_build_for_qcom
 
 if [ $# == 0 ]; then
     #default target is android
@@ -337,6 +337,4 @@ fi
 build_init
 
 #read -p "Press any key to continue..."
-
-unset $user_command
 main $user_command
