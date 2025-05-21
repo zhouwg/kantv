@@ -102,16 +102,16 @@
              }
          }
 
-         int value = mSharedPreferences.getInt("pref.temperature", 40); //default temp is 0.8, 40.0 / 50.0 = 0.8
+         int value = mSharedPreferences.getInt("pref.temperature", 40); //default temperature is 0.8, 40.0 / 50.0 = 0.8
          float realvalue = (float) (value / 50.0);
-         KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+         KANTVLog.g(TAG, "pref.temperature:" + realvalue);
          mSeekBarTemperature.setSummary(String.valueOf(realvalue));
          mSeekBarTemperature.setValue(value);
          KANTVAIUtils.setLLMTemperature(realvalue);
 
          value = mSharedPreferences.getInt("pref.top-p", 90);//default top-p is 0.9, 90.0 / 100.0 = 0.9
          realvalue = (float) (value / 100.0);
-         KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+         KANTVLog.g(TAG, "pref.top-p:" + realvalue);
          mSeekBarTopP.setSummary(String.valueOf(realvalue));
          mSeekBarTopP.setValue(value);
          KANTVAIUtils.setLLMTopP(realvalue);
@@ -166,7 +166,7 @@
              if (key.contains("pref.temperature")) {
                  int value = mSharedPreferences.getInt("pref.temperature", 40);
                  float realvalue = (float) (value / 50.0);
-                 KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+                 KANTVLog.g(TAG, "pref.temperature:" + realvalue);
                  mSeekBarTemperature.setSummary(String.valueOf(realvalue));
                  KANTVAIUtils.setLLMTemperature(realvalue);
              }
@@ -174,7 +174,7 @@
              if (key.contains("pref.top-p")) {
                  int value = mSharedPreferences.getInt("pref.top-p", 90);
                  float realvalue = (float) (value / 100.0);
-                 KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+                 KANTVLog.g(TAG, "pref.top-p:" + realvalue);
                  mSeekBarTopP.setSummary(String.valueOf(realvalue));
                  KANTVAIUtils.setLLMTopP(realvalue);
              }
