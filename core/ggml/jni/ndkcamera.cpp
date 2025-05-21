@@ -40,6 +40,7 @@ static void onError(void* context, ACameraDevice* device, int error)
 static void onImageAvailable(void* context, AImageReader* reader)
 {
     //LOGGD("NdkCamera: onImageAvailable %p", reader);
+    //FIXME: deadlock???
     if (0 == inference_is_running_state())
         return;
 
