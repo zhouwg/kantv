@@ -306,4 +306,20 @@
         }
         return false;
     }
+
+    public static float getLLMTemperature() {
+         return ggmljava.getLLMTemperature();
+    }
+
+    public static void setLLMTemperature(float temperature) {
+         ggmljava.setLLMTemperature(temperature);
+    }
+
+     public static float getLLMTopP() {
+         return ggmljava.getLLMTopP();
+     }
+
+     public static void setLLMTopP(float top_p) {
+         ggmljava.setLLMTopP(top_p);
+     }
 }

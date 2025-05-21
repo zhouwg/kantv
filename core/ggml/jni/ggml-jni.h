@@ -168,6 +168,12 @@ enum hwaccel_approach_type {
 
     int          write_bmp(const char * filename, int width, int height, int bpp, const unsigned char * data);
 
+    void          llm_set_temperature(float temp);
+    float         llm_get_temperature(void);
+
+    void          llm_set_topp(float value);
+    float         llm_get_topp(void);
+
 #ifdef __cplusplus
 }
 #endif

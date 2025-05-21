@@ -114,6 +114,10 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     } else {
         params.main_gpu = backend_type;
     }
+    params.sampling.temp = llm_get_temperature();
+    LOGGD("temp %.2f\n", params.sampling.temp);
+    params.sampling.top_p = llm_get_topp();
+    LOGGD("top_p %.2f\n", params.sampling.top_p);
     common_init();
 
     auto & sparams = params.sampling;

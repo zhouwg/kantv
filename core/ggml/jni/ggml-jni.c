@@ -498,3 +498,23 @@ Java_kantvai_ai_ggmljava_isGGMLHexagonEnabled(JNIEnv *env, jclass clazz) {
     return JNI_FALSE;
 #endif
 }
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setLLMTemperature(JNIEnv *env, jclass clazz, jfloat temperature) {
+    llm_set_temperature(temperature);
+}
+
+JNIEXPORT jfloat JNICALL
+Java_kantvai_ai_ggmljava_getLLMTemperature(JNIEnv *env, jclass clazz) {
+    return llm_get_temperature();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setLLMTopP(JNIEnv *env, jclass clazz, jfloat top_p) {
+    llm_set_topp(top_p);
+}
+
+JNIEXPORT jfloat JNICALL
+Java_kantvai_ai_ggmljava_getLLMTopP(JNIEnv *env, jclass clazz) {
+    return llm_get_topp();
+}

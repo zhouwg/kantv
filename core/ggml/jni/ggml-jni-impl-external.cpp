@@ -7436,6 +7436,28 @@ int inference_is_running_state() {
     return g_ggmljni_inference_is_running.load();
 }
 
+
+static float g_llm_temperature = 0.8;
+
+void llm_set_temperature(float temp) {
+    g_llm_temperature = temp;
+}
+
+float llm_get_temperature() {
+    return g_llm_temperature;
+}
+
+static float g_llm_topp = 0.9;
+
+void llm_set_topp(float value) {
+    g_llm_topp = value;
+}
+
+float llm_get_topp() {
+    return g_llm_topp;
+}
+
+
 /**
  * helper function to performan llama inference in native layer
  * @param sz_model_path

@@ -28,7 +28,7 @@ import android.content.Context;
 import java.nio.ByteBuffer;
 
 
-final public class KANTVDRM {
+public final class KANTVDRM {
     private static final String TAG = KANTVDRM.class.getName();
     private static KANTVDRM instance = null;
     private static volatile boolean mIsLibLoaded = false;

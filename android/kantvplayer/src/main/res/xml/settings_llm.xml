@@ -20,6 +20,30 @@
             android:persistent="true"
             android:title="@string/pref_title_llmthreadcounts"
              />
+
+        <SeekBarPreference
+            android:id="@+id/seekbarTemperature"
+            android:key="pref.temperature"
+            android:title="Temperature(0.0 - 2.0, default 0.8)"
+            android:valueFrom="0.0"
+            android:valueTo="2.0"
+            android:stepSize="0.1"
+            android:value="0.8"
+            android:persistent="true"
+            android:summary="0.8"
+            />
+
+        <SeekBarPreference
+            android:id="@+id/seekbarTopP"
+            android:key="pref.top-p"
+            android:title="Top-P(0.0 - 1.0, default 0.9)"
+            android:valueFrom="0.0"
+            android:valueTo="1.0"
+            android:stepSize="0.1"
+            android:value="0.9"
+            android:persistent="true"
+            android:summary="0.9"
+            />
     </PreferenceCategory>
 
     <!--

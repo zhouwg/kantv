@@ -5,7 +5,9 @@ package kantvai.ai;
 
  import android.view.Surface;
 
- public class ggmljava {
+ import kantvai.media.player.KANTVLibraryLoader;
+
+ public final class ggmljava {
     private static final String TAG = ggmljava.class.getName();
 
     //keep sync with ggml-hexagon.cpp
@@ -20,6 +22,10 @@ package kantvai.ai;
     public static final int HWACCEL_QNN_SINGLEGRAPH = 1;
     public static final int HWACCEL_CDSP = 2;
 
+
+     static {
+       KANTVLibraryLoader.load("ggml-jni");
+    }
 
     public static native int asr_init(String strModelPath, int nThreadCounts, int nASRMode, int nBackendType);
 
@@ -111,4 +117,12 @@ package kantvai.ai;
     public static native boolean isStableDiffusionEnabled();
 
     public static native boolean isGGMLHexagonEnabled();
+
+    public static native void setLLMTemperature(float temperature);
+
+    public static native float getLLMTemperature();
+
+    public static native void setLLMTopP(float top_p);
+
+    public static native float getLLMTopP();
 }

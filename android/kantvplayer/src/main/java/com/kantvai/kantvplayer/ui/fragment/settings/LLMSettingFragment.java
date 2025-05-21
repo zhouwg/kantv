@@ -18,6 +18,7 @@
  import androidx.preference.ListPreference;
  import androidx.preference.Preference;
  import androidx.preference.PreferenceCategory;
+ import androidx.preference.SeekBarPreference;
 
 
  import com.kantvai.kantvplayer.ui.activities.ShellActivity;
@@ -30,6 +31,8 @@
  import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.KANTVAIUtils;
+ import kantvai.ai.ggmljava;
+ import kantvai.media.player.KANTVLibraryLoader;
  import kantvai.media.player.KANTVLog;
  import kantvai.media.player.KANTVUtils;
 
@@ -41,6 +44,9 @@
      private Context mAppContext;
      private SharedPreferences mSharedPreferences;
      private Settings mSettings;
+
+     private SeekBarPreference mSeekBarTemperature;
+     private SeekBarPreference mSeekBarTopP;
 
 
      @Override
@@ -64,6 +70,9 @@
          addPreferencesFromResource(R.xml.settings_llm);
          mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
 
+         mSeekBarTemperature = findPreference("pref.temperature");
+         mSeekBarTopP = findPreference("pref.top-p");
+
          PreferenceCategory category = findPreference("llm-models");
          if (category != null) {
              IjkListPreference preference = findPreference("pref.llmmodel");
@@ -86,8 +95,6 @@
              KANTVLog.g(TAG, "can't find category");
          }
 
-
-
          KANTVLog.g(TAG, "getHexagonEnabled:" + mSettings.getHexagonEnabled());
          if (!mSettings.getHexagonEnabled()) {
              if (findPreference("pref.backend") != null) {
@@ -95,7 +102,19 @@
              }
          }
 
-         //TODO: dynamically load LLM models info from KANTVAIModelMgr.java to avoid hardcode LLM models in xml file
+         int value = mSharedPreferences.getInt("pref.temperature", 40); //default temp is 0.8, 40.0 / 50.0 = 0.8
+         float realvalue = (float) (value / 50.0);
+         KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+         mSeekBarTemperature.setSummary(String.valueOf(realvalue));
+         mSeekBarTemperature.setValue(value);
+         KANTVAIUtils.setLLMTemperature(realvalue);
+
+         value = mSharedPreferences.getInt("pref.top-p", 90);//default top-p is 0.9, 90.0 / 100.0 = 0.9
+         realvalue = (float) (value / 100.0);
+         KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+         mSeekBarTopP.setSummary(String.valueOf(realvalue));
+         mSeekBarTopP.setValue(value);
+         KANTVAIUtils.setLLMTopP(realvalue);
      }
 
      @Override
@@ -143,6 +162,23 @@
                      KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());
                  }
              }
+
+             if (key.contains("pref.temperature")) {
+                 int value = mSharedPreferences.getInt("pref.temperature", 40);
+                 float realvalue = (float) (value / 50.0);
+                 KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+                 mSeekBarTemperature.setSummary(String.valueOf(realvalue));
+                 KANTVAIUtils.setLLMTemperature(realvalue);
+             }
+
+             if (key.contains("pref.top-p")) {
+                 int value = mSharedPreferences.getInt("pref.top-p", 90);
+                 float realvalue = (float) (value / 100.0);
+                 KANTVLog.g(TAG, "preference : "  + ", status:" + realvalue);
+                 mSeekBarTopP.setSummary(String.valueOf(realvalue));
+                 KANTVAIUtils.setLLMTopP(realvalue);
+             }
+
          }
      };
 
@@ -153,6 +189,11 @@
          KANTVLog.g(TAG, "key : " + key);
          if (preference instanceof CheckBoxPreference) {
              KANTVLog.d(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getBoolean(key, false));
+         }
+
+         if (preference instanceof SeekBarPreference) {
+             KANTVLog.g(TAG, "preference : " + preference.getKey() + ", status:" + mSharedPreferences.getInt("pref.temperature", 40));
+             return true;
          }
 
          if (key.contains("pref.downloadLLMmodel")) {
