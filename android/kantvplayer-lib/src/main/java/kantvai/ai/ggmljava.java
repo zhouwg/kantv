@@ -71,6 +71,7 @@ package kantvai.ai;
      */
     public static native String llm_inference(String modelPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 
+    public static native void   inference_init_inference();
     /**
      * stop AI inference
      */

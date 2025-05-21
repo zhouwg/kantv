@@ -382,6 +382,13 @@ static void mtmd_inference(cv::Mat & rgb) {
     }
     n_past = new_n_past;
 
+    if (0 == inference_is_running_state()) {
+        llm_inference_interrupted = 1;
+        goto failure;
+    } else {
+        GGML_JNI_NOTIFY("realtime-cam-reset");
+    }
+
     //step-5: LLM inference with the generated tokens
     for (int i = 0; i < n_predict; i++) {
         if (i > n_predict) {
@@ -432,9 +439,12 @@ failure:
 
 void MyNdkCamera::on_image_render(cv::Mat & rgb) const {
     g_bmp_idx++;
+    if (0 == inference_is_running_state()) {
+        draw_fps(rgb);
+        return;
+    }
     //TODO: stability issue between UI layer and native layer
     if (0 == (g_bmp_idx % 100)) { // 100 / 30 ~= 3 seconds
-        GGML_JNI_NOTIFY("realtime-cam-reset");
 #if 0
         //snprintf(g_bmp_filename, JNI_TMP_LEN, "/sdcard/bmp-%04d.bmp", g_bmp_idx);
         snprintf(g_bmp_filename, JNI_TMP_LEN, "/sdcard/bmp-tmp.bmp");
@@ -451,9 +461,7 @@ void MyNdkCamera::on_image_render(cv::Mat & rgb) const {
         inference_reset_running_state();
 #else
         //better approach: using MTMD API directly to avoid write bmp data to storage
-        inference_init_running_state();
         mtmd_inference(rgb);
-        inference_reset_running_state();
 #endif
     }
 
@@ -467,8 +475,8 @@ JNIEXPORT jint JNI_OnLoad(JavaVM * vm, void * reserved) {
     LOGGD("JNI_OnLoad");
 
     ncnn::create_gpu_instance();
-
-    g_camera = new MyNdkCamera;
+    if (nullptr == g_camera)
+        g_camera = new MyNdkCamera;
 
     return JNI_VERSION_1_6;
 }
@@ -476,8 +484,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM * vm, void * reserved) {
 JNIEXPORT void JNI_OnUnload(JavaVM * vm, void * reserved) {
     LOGGD("JNI_OnUnload");
     ncnn::destroy_gpu_instance();
-    delete g_camera;
-    g_camera = NULL;
+    if (nullptr != g_camera) {
+        delete g_camera;
+        g_camera = nullptr;
+    }
 }
 
 JNIEXPORT jboolean JNICALL
@@ -486,8 +496,12 @@ Java_kantvai_ai_ggmljava_openCamera(JNIEnv * env, jclass clazz, jint facing) {
         return JNI_FALSE;
 
     LOGGD("openCamera %d", facing);
-
-    g_camera->open((int) facing);
+    if (nullptr == g_camera) {
+        g_camera = new MyNdkCamera;
+        g_camera->open((int) facing);
+    } else {
+        LOGGD("camera already opened");
+    }
 
     return JNI_TRUE;
 }
@@ -495,8 +509,10 @@ Java_kantvai_ai_ggmljava_openCamera(JNIEnv * env, jclass clazz, jint facing) {
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_closeCamera(JNIEnv * env, jclass clazz) {
     LOGGD("closeCamera");
-
-    g_camera->close();
+    if (nullptr != g_camera) {
+        delete g_camera;
+        g_camera = nullptr;
+    }
 }
 
 JNIEXPORT void JNICALL
@@ -504,8 +520,10 @@ Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv * env, jclass clazz, jobject sur
     ANativeWindow *win = ANativeWindow_fromSurface(env, surface);
 
     LOGGD("setOutputWindow %p", win);
-
-    g_camera->set_window(win);
+    if (nullptr != g_camera) {
+        LOGGD("setOutputWindow %p", win);
+        g_camera->set_window(win);
+    }
 }
 
 } //end extern "C" {

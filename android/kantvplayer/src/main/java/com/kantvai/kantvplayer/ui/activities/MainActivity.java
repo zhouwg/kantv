@@ -77,6 +77,8 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
 
     private long touchTime = 0;
 
+    private long switchTime = 0;
+
     @Override
     protected int initPageLayoutID() {
         return R.layout.activity_main;
@@ -173,6 +175,17 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     @Override
     public void initListener() {
         navigationView.setOnNavigationItemSelectedListener(item -> {
+            KANTVLog.g(TAG, "System.currentTimeMillis() - switchTime " + (System.currentTimeMillis() - switchTime));
+            //FIXME:workaround to fix a potential deadlock in a special scenario of AI inference(realtime video inference)
+            if (item.getItemId() == R.id.navigation_aiagent) {
+                if (System.currentTimeMillis() - switchTime < 900) {
+                    ToastUtils.showShort("switch duration is too short");
+                    switchTime = System.currentTimeMillis();
+                    return false;
+                }
+            }
+            switchTime = System.currentTimeMillis();
+
             KANTVLog.d(TAG, "item id: " + item.getItemId());
             switch (item.getItemId()) {
                 case R.id.navigation_home:

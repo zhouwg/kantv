@@ -23,6 +23,8 @@
 
 #include "mat.h"
 
+#include "ggml-jni.h"
+
 static const int NDKCAMERAWINDOW_ID = 233;
 
 static void onDisconnected(void* context, ACameraDevice* device)
@@ -38,6 +40,8 @@ static void onError(void* context, ACameraDevice* device, int error)
 static void onImageAvailable(void* context, AImageReader* reader)
 {
     //LOGGD("NdkCamera: onImageAvailable %p", reader);
+    if (0 == inference_is_running_state())
+        return;
 
     AImage* image = 0;
     media_status_t status = AImageReader_acquireLatestImage(reader, &image);
@@ -133,6 +137,7 @@ static void onImageAvailable(void* context, AImageReader* reader)
 static void onSessionActive(void* context, ACameraCaptureSession *session)
 {
     LOGGI("NdkCamera: onSessionActive %p", session);
+    inference_init_running_state();
 }
 
 static void onSessionReady(void* context, ACameraCaptureSession *session)
@@ -143,6 +148,10 @@ static void onSessionReady(void* context, ACameraCaptureSession *session)
 static void onSessionClosed(void* context, ACameraCaptureSession *session)
 {
     LOGGI("NdkCamera: onSessionClosed %p", session);
+    if (0 != inference_is_running_state()) {
+        LOGGI("it shouldn't happen");
+        inference_reset_running_state();
+    }
 }
 
 void onCaptureFailed(void* context, ACameraCaptureSession* session, ACaptureRequest* request, ACameraCaptureFailure* failure)

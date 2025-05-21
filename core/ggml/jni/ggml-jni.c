@@ -301,6 +301,11 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 }
 
 JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_inference_1init_1inference(JNIEnv *env, jclass clazz) {
+    inference_init_running_state();
+}
+
+JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_inference_1stop_1inference(JNIEnv * env, jclass clazz) {
     inference_reset_running_state();
 }

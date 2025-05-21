@@ -166,6 +166,8 @@
          int new_facing = 1 - facing;
          ggmljava.closeCamera();
          ggmljava.openCamera(new_facing);
+         if (cameraView.getHolder().getSurface().isValid())
+            ggmljava.setOutputWindow(cameraView.getHolder().getSurface());
          facing = new_facing;
      }
 
@@ -173,6 +175,8 @@
          int new_facing = 1 - back_camera;
          ggmljava.closeCamera();
          ggmljava.openCamera(new_facing);
+         if (cameraView.getHolder().getSurface().isValid())
+            ggmljava.setOutputWindow(cameraView.getHolder().getSurface());
          facing = new_facing;
 
          initKANTVMgr();
@@ -181,7 +185,13 @@
 
      @Override
      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-         ggmljava.setOutputWindow(holder.getSurface());
+         if (cameraView.getHolder().getSurface().isValid()) {
+             ggmljava.setOutputWindow(holder.getSurface());
+             ggmljava.inference_init_inference();
+         } else {
+             release();
+             stopLLMInference();
+         }
      }
 
      @Override
