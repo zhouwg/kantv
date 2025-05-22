@@ -23,7 +23,7 @@ else()
     set(GGML_ENABLE_HEXAGON OFF)
 endif()
 
-set(STABLEDIFFUSION_ENABLE_HEXAGON     OFF)
+set(STABLEDIFFUSION_ENABLE_HEXAGON     ON)
 
 # self-contained build with internal customized/tailored QNN-SDK and Hexagon-SDK,
 # without download fully official QNN-SDK and Hexagon-SDK.

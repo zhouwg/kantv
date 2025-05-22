@@ -39,10 +39,13 @@
 #include "ggml-vulkan.h"
 #endif
 
+#ifdef SD_USE_OPENCL
+#include "ggml-opencl.h"
+#endif
+
 #ifdef SD_USE_SYCL
 #include "ggml-sycl.h"
 #endif
-
 
 #if defined(__ANDROID__) || defined(ANDROID)
 extern "C" {
@@ -123,7 +126,8 @@ __STATIC_INLINE__ struct ggml_tensor* ggml_kronecker(ggml_context* ctx, struct g
                                      a->ne[0] * b->ne[0],
                                      a->ne[1] * b->ne[1],
                                      a->ne[2] * b->ne[2],
-                                     a->ne[3] * b->ne[3], GGML_SCALE_MODE_BILINEAR),
+                                     a->ne[3] * b->ne[3],
+                                     GGML_SCALE_MODE_NEAREST),
                     b);
 }
 
@@ -498,9 +502,9 @@ __STATIC_INLINE__ void ggml_merge_tensor_2d(struct ggml_tensor* input,
                     const float y_f = std::min(std::min(y_f_0, y_f_1), 1.f);
 
                     ggml_tensor_set_f32(
-                        output,
-                        old_value + new_value * ggml_smootherstep_f32(y_f) * ggml_smootherstep_f32(x_f),
-                        x + ix, y + iy, k);
+                            output,
+                            old_value + new_value * ggml_smootherstep_f32(y_f) * ggml_smootherstep_f32(x_f),
+                            x + ix, y + iy, k);
                 } else {
                     ggml_tensor_set_f32(output, new_value, x + ix, y + iy, k);
                 }
@@ -1046,11 +1050,11 @@ __STATIC_INLINE__ struct ggml_tensor* new_timestep_embedding(struct ggml_context
 }
 
 __STATIC_INLINE__ struct ggml_tensor* ggml_nn_timestep_embedding(
-    struct ggml_context* ctx,
-    struct ggml_tensor* timesteps,
-    int dim,
-    int max_period    = 10000,
-    float time_factor = 1.0f) {
+        struct ggml_context* ctx,
+        struct ggml_tensor* timesteps,
+        int dim,
+        int max_period    = 10000,
+        float time_factor = 1.0f) {
     timesteps = ggml_scale(ctx, timesteps, time_factor);
     return ggml_timestep_embedding(ctx, timesteps, dim, max_period);
 }
@@ -1074,12 +1078,13 @@ protected:
     struct ggml_context* params_ctx     = NULL;
     ggml_backend_buffer_t params_buffer = NULL;
 
-    struct ggml_context* compute_ctx    = NULL;
-    struct ggml_gallocr* compute_allocr = NULL;
+    struct ggml_context* compute_ctx     = NULL;
+    ggml_backend_sched_t compute_sched   = NULL;
 
     std::map<struct ggml_tensor*, const void*> backend_tensor_data_map;
 
-    ggml_backend_t backend = NULL;
+    ggml_backend_t backend     = NULL;
+    ggml_backend_t cpu_backend = NULL;
 
     void alloc_params_ctx() {
         struct ggml_init_params params;
@@ -1100,7 +1105,7 @@ protected:
 
     void alloc_compute_ctx() {
         struct ggml_init_params params;
-        params.mem_size   = static_cast<size_t>(ggml_tensor_overhead() * MAX_GRAPH_SIZE + ggml_graph_overhead());
+        params.mem_size   = static_cast<size_t>(ggml_tensor_overhead() * MAX_GRAPH_SIZE * 2 + ggml_graph_overhead_custom(MAX_GRAPH_SIZE, false));
         params.mem_buffer = NULL;
         params.no_alloc   = true;
 
@@ -1116,47 +1121,72 @@ protected:
     }
 
     bool alloc_compute_buffer(get_graph_cb_t get_graph) {
-        if (compute_allocr != NULL) {
+        if (compute_sched != NULL) {
             return true;
         }
         reset_compute_ctx();
         struct ggml_cgraph* gf = get_graph();
         backend_tensor_data_map.clear();
-        compute_allocr = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
 
-        if (!ggml_gallocr_reserve(compute_allocr, gf)) {
-            // failed to allocate the compute buffer
-            LOG_ERROR("%s: failed to allocate the compute buffer\n", get_desc().c_str());
-            free_compute_buffer();
+        ggml_backend_t backends_list[2];
+        int n_backends_for_sched = 0;
+
+        backends_list[n_backends_for_sched++] = this->backend;
+        if (this->cpu_backend) {
+            backends_list[n_backends_for_sched++] = this->cpu_backend;
+        }
+
+        compute_sched = ggml_backend_sched_new(backends_list, NULL, n_backends_for_sched, MAX_GRAPH_SIZE, false, false);
+        if (!compute_sched) {
+            LOG_ERROR("%s: failed to create backend scheduler\n", get_desc().c_str());
             return false;
         }
 
-        // compute the required memory
-        size_t compute_buffer_size = ggml_gallocr_get_buffer_size(compute_allocr, 0);
-        LOG_DEBUG("%s compute buffer size: %.2f MB(%s)",
-                  get_desc().c_str(),
-                  compute_buffer_size / 1024.0 / 1024.0,
-                  ggml_backend_is_cpu(backend) ? "RAM" : "VRAM");
+        if (!ggml_backend_sched_reserve(compute_sched, gf)) {
+            LOG_ERROR("%s: failed to reserve memory with backend scheduler for graph\n", get_desc().c_str());
+            ggml_backend_sched_free(compute_sched);
+            compute_sched = NULL;
+            return false;
+        }
+
+        for (int i = 0; i < n_backends_for_sched; ++i) {
+            size_t buffer_size = ggml_backend_sched_get_buffer_size(compute_sched, backends_list[i]);
+            LOG_DEBUG("%s compute buffer size for %s: %.2f MB",
+                      get_desc().c_str(),
+                      ggml_backend_name(backends_list[i]),
+                      buffer_size / 1024.0 / 1024.0);
+        }
         return true;
     }
 
     void cpy_data_to_backend_tensor() {
         for (auto& kv : backend_tensor_data_map) {
             auto tensor = kv.first;
-            auto data   = kv.second;
+            auto data_src = kv.second;
 
-            ggml_backend_tensor_set(tensor, data, 0, ggml_nbytes(tensor));
+            if (tensor->data == NULL && tensor->buffer == NULL) {
+                continue;
+            }
+            ggml_backend_tensor_set(tensor, data_src, 0, ggml_nbytes(tensor));
         }
-
         backend_tensor_data_map.clear();
     }
 
 public:
     virtual std::string get_desc() = 0;
 
-    GGMLRunner(ggml_backend_t backend)
-        : backend(backend) {
+    GGMLRunner(ggml_backend_t backend_in)
+            : backend(backend_in) {
         alloc_params_ctx();
+        if (!ggml_backend_is_cpu(this->backend)) {
+            this->cpu_backend = ggml_backend_cpu_init();
+            if (!this->cpu_backend) {
+                // Avoid calling pure virtual get_desc() here.
+                LOG_ERROR("FATAL: Failed to initialize CPU backend for fallback.");
+            }
+        } else {
+            this->cpu_backend = NULL;
+        }
     }
 
     virtual ~GGMLRunner() {
@@ -1164,6 +1194,10 @@ public:
         free_compute_buffer();
         free_params_ctx();
         free_compute_ctx();
+        if (cpu_backend) {
+            ggml_backend_free(cpu_backend);
+            cpu_backend = NULL;
+        }
     }
 
     void reset_compute_ctx() {
@@ -1172,26 +1206,20 @@ public:
     }
 
     bool alloc_params_buffer() {
-        LOGGD("enter %s", __func__);
         size_t num_tensors = ggml_tensor_num(params_ctx);
         params_buffer      = ggml_backend_alloc_ctx_tensors(params_ctx, backend);
         if (params_buffer == NULL) {
-            LOG_ERROR("%s alloc params backend buffer failed, num_tensors = %i",
+            LOG_ERROR("%s alloc params backend buffer failed, num_tensors = %zu",
                       get_desc().c_str(),
                       num_tensors);
             return false;
         }
         size_t params_buffer_size = ggml_backend_buffer_get_size(params_buffer);
-        LOG_DEBUG("%s params backend buffer size = % 6.2f MB(%s) (%i tensors)",
+        LOG_DEBUG("%s params backend buffer size = % 6.2f MB(%s) (%zu tensors)",
                   get_desc().c_str(),
                   params_buffer_size / (1024.0 * 1024.0),
                   ggml_backend_is_cpu(backend) ? "RAM" : "VRAM",
                   num_tensors);
-        // printf("%s params backend buffer size = % 6.2f MB(%s) (%i tensors)\n",
-        //           get_desc().c_str(),
-        //           params_buffer_size / (1024.0 * 1024.0),
-        //           ggml_backend_is_cpu(backend) ? "RAM" : "VRAM",
-        //           num_tensors);
         return true;
     }
 
@@ -1210,13 +1238,12 @@ public:
     }
 
     void free_compute_buffer() {
-        if (compute_allocr != NULL) {
-            ggml_gallocr_free(compute_allocr);
-            compute_allocr = NULL;
+        if (compute_sched != NULL) {
+            ggml_backend_sched_free(compute_sched);
+            compute_sched = NULL;
         }
     }
 
-    // do copy after alloc graph
     void set_backend_tensor_data(struct ggml_tensor* tensor, const void* data) {
         backend_tensor_data_map[tensor] = data;
     }
@@ -1226,11 +1253,12 @@ public:
         if (tensor == NULL) {
             return NULL;
         }
-        // it's performing a compute, check if backend isn't cpu
-        if (!ggml_backend_is_cpu(backend) && (tensor->buffer == NULL || ggml_backend_buffer_is_host(tensor->buffer))) {
-            // pass input tensors to gpu memory
-            auto backend_tensor = ggml_dup_tensor(compute_ctx, tensor);
+        bool tensor_on_host_or_unmanaged = tensor->buffer == NULL || ggml_backend_buffer_is_host(tensor->buffer);
+        bool is_param_tensor = false;
 
+        if (tensor_on_host_or_unmanaged && !is_param_tensor) {
+            auto backend_tensor = ggml_dup_tensor(compute_ctx, tensor);
+            ggml_set_name(backend_tensor, tensor->name);
             set_backend_tensor_data(backend_tensor, tensor->data);
             return backend_tensor;
         } else {
@@ -1243,26 +1271,56 @@ public:
                  bool free_compute_buffer_immediately = true,
                  struct ggml_tensor** output          = NULL,
                  struct ggml_context* output_ctx      = NULL) {
-        alloc_compute_buffer(get_graph);
-        reset_compute_ctx();
-        struct ggml_cgraph* gf = get_graph();
-        GGML_ASSERT(ggml_gallocr_alloc_graph(compute_allocr, gf));
-        cpy_data_to_backend_tensor();
-        if (ggml_backend_is_cpu(backend)) {
-            ggml_backend_cpu_set_n_threads(backend, n_threads);
+
+        if (!alloc_compute_buffer(get_graph)) {
+            LOG_ERROR("%s: Failed to allocate/reserve compute buffer with scheduler.", get_desc().c_str());
+            return;
         }
 
-        ggml_backend_graph_compute(backend, gf);
+        reset_compute_ctx();
+        struct ggml_cgraph* gf = get_graph();
+
+        GGML_ASSERT(compute_sched != NULL);
+        ggml_backend_sched_reset(compute_sched);
+
+        if (!ggml_backend_sched_alloc_graph(compute_sched, gf)) {
+            LOG_ERROR("%s: ggml_backend_sched_alloc_graph failed\n", get_desc().c_str());
+            return;
+        }
+
+        cpy_data_to_backend_tensor();
+
+        if (ggml_backend_is_cpu(this->backend)) {
+            ggml_backend_cpu_set_n_threads(this->backend, n_threads);
+        } else if (this->cpu_backend) {
+            ggml_backend_cpu_set_n_threads(this->cpu_backend, n_threads);
+        }
+
+        enum ggml_status status = ggml_backend_sched_graph_compute(compute_sched, gf);
+        if (status != GGML_STATUS_SUCCESS) {
+            LOG_ERROR("%s: ggml_backend_sched_graph_compute failed with status %d (%s)\n",
+                      get_desc().c_str(), status, ggml_status_to_string(status));
+            return;
+        }
+
 #ifdef GGML_PERF
-        ggml_graph_print(gf);
+        // ggml_graph_print(gf);
 #endif
-        if (output != NULL) {
-            auto result = ggml_graph_node(gf, -1);
+        if (output != NULL && ggml_graph_n_nodes(gf) > 0) {
+            struct ggml_tensor* result_tensor_in_graph = ggml_graph_node(gf, ggml_graph_n_nodes(gf) - 1);
+
             if (*output == NULL && output_ctx != NULL) {
-                *output = ggml_dup_tensor(output_ctx, result);
+                *output = ggml_dup_tensor(output_ctx, result_tensor_in_graph);
             }
             if (*output != NULL) {
-                ggml_backend_tensor_get_and_sync(backend, result, (*output)->data, 0, ggml_nbytes(*output));
+                ggml_backend_t result_backend = ggml_backend_sched_get_tensor_backend(compute_sched, result_tensor_in_graph);
+                if (result_backend == NULL) {
+                    LOG_ERROR("%s: Could not determine backend for result tensor %s\n", get_desc().c_str(), result_tensor_in_graph->name);
+                } else {
+                    ggml_backend_tensor_get_and_sync(result_backend,
+                                                     result_tensor_in_graph,
+                                                     (*output)->data, 0, ggml_nbytes(*output));
+                }
             }
         }
 
@@ -1367,10 +1425,10 @@ public:
            int64_t out_features,
            bool bias      = true,
            bool force_f32 = false)
-        : in_features(in_features),
-          out_features(out_features),
-          bias(bias),
-          force_f32(force_f32) {}
+            : in_features(in_features),
+              out_features(out_features),
+              bias(bias),
+              force_f32(force_f32) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
         struct ggml_tensor* w = params["weight"];
@@ -1393,8 +1451,8 @@ protected:
 
 public:
     Embedding(int64_t num_embeddings, int64_t embedding_dim)
-        : embedding_dim(embedding_dim),
-          num_embeddings(num_embeddings) {
+            : embedding_dim(embedding_dim),
+              num_embeddings(num_embeddings) {
     }
 
     struct ggml_tensor* forward(struct ggml_context* ctx,
@@ -1443,13 +1501,13 @@ public:
            std::pair<int, int> padding  = {0, 0},
            std::pair<int, int> dilation = {1, 1},
            bool bias                    = true)
-        : in_channels(in_channels),
-          out_channels(out_channels),
-          kernel_size(kernel_size),
-          stride(stride),
-          padding(padding),
-          dilation(dilation),
-          bias(bias) {}
+            : in_channels(in_channels),
+              out_channels(out_channels),
+              kernel_size(kernel_size),
+              stride(stride),
+              padding(padding),
+              dilation(dilation),
+              bias(bias) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
         struct ggml_tensor* w = params["weight"];
@@ -1488,13 +1546,13 @@ public:
                 int64_t padding  = 0,
                 int64_t dilation = 1,
                 bool bias        = true)
-        : in_channels(in_channels),
-          out_channels(out_channels),
-          kernel_size(kernel_size),
-          stride(stride),
-          padding(padding),
-          dilation(dilation),
-          bias(bias) {}
+            : in_channels(in_channels),
+              out_channels(out_channels),
+              kernel_size(kernel_size),
+              stride(stride),
+              padding(padding),
+              dilation(dilation),
+              bias(bias) {}
 
     // x: [N, IC, ID, IH*IW]
     // result: [N, OC, OD, OH*OW]
@@ -1531,10 +1589,10 @@ public:
               float eps               = 1e-05f,
               bool elementwise_affine = true,
               bool bias               = true)
-        : normalized_shape(normalized_shape),
-          eps(eps),
-          elementwise_affine(elementwise_affine),
-          bias(bias) {}
+            : normalized_shape(normalized_shape),
+              eps(eps),
+              elementwise_affine(elementwise_affine),
+              bias(bias) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
         struct ggml_tensor* w = NULL;
@@ -1571,10 +1629,10 @@ public:
               int64_t num_channels,
               float eps   = 1e-05f,
               bool affine = true)
-        : num_groups(num_groups),
-          num_channels(num_channels),
-          eps(eps),
-          affine(affine) {}
+            : num_groups(num_groups),
+              num_channels(num_channels),
+              eps(eps),
+              affine(affine) {}
 
     struct ggml_tensor* forward(struct ggml_context* ctx, struct ggml_tensor* x) {
         struct ggml_tensor* w = NULL;
@@ -1590,7 +1648,7 @@ public:
 class GroupNorm32 : public GroupNorm {
 public:
     GroupNorm32(int64_t num_channels)
-        : GroupNorm(32, num_channels, 1e-06f) {}
+            : GroupNorm(32, num_channels, 1e-06f) {}
 };
 
 class MultiheadAttention : public GGMLBlock {
@@ -1611,12 +1669,12 @@ public:
                        std::string k_proj_name   = "k_proj",
                        std::string v_proj_name   = "v_proj",
                        std::string out_proj_name = "out_proj")
-        : embed_dim(embed_dim),
-          n_head(n_head),
-          q_proj_name(q_proj_name),
-          k_proj_name(k_proj_name),
-          v_proj_name(v_proj_name),
-          out_proj_name(out_proj_name) {
+            : embed_dim(embed_dim),
+              n_head(n_head),
+              q_proj_name(q_proj_name),
+              k_proj_name(k_proj_name),
+              v_proj_name(v_proj_name),
+              out_proj_name(out_proj_name) {
         blocks[q_proj_name]   = std::shared_ptr<GGMLBlock>(new Linear(embed_dim, embed_dim, qkv_proj_bias));
         blocks[k_proj_name]   = std::shared_ptr<GGMLBlock>(new Linear(embed_dim, embed_dim, qkv_proj_bias));
         blocks[v_proj_name]   = std::shared_ptr<GGMLBlock>(new Linear(embed_dim, embed_dim, qkv_proj_bias));
