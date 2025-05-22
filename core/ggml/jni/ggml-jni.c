@@ -76,7 +76,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         if (HEXAGON_BACKEND_CDSP == backend_type) {
             LOGGD("StableDiffusion via cDSP cann't works correct currently");
             GGML_JNI_NOTIFY("StableDiffusion via cDSP cann't works correct currently");
-            goto failure;
+            //goto failure;
         }
     }
 
@@ -85,6 +85,18 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
         GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
         goto failure;
+    }
+#endif
+
+#if !defined SD_USE_HEXAGON
+    if (bench_type == GGML_BENCHMARK_TEXT2IMAGE) {
+        if (HEXAGON_BACKEND_GGML != backend_type) {
+            LOGGW("ggml-hexagon backend %s is disabled with stablediffusion\n",
+                  ggml_backend_hexagon_get_devname(backend_type));
+            GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled with stablediffusion\n",
+                            ggml_backend_hexagon_get_devname(backend_type));
+            goto failure;
+        }
     }
 #endif
 
@@ -446,8 +458,8 @@ Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, j
 
 #if !defined GGML_USE_HEXAGON
     if (n_backend_type != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
+        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
         goto failure;
     }
 #endif
@@ -463,7 +475,7 @@ Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, j
         }
     }
 
-    failure:
+failure:
     if (NULL != sz_prompt) {
         (*env)->ReleaseStringUTFChars(env, prompt, sz_prompt);
     }
@@ -487,7 +499,7 @@ Java_kantvai_ai_ggmljava_jni_1text2image(JNIEnv *env, jclass clazz, jstring text
 }
 
 JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_isStableDiffusionEnabled(JNIEnv *env, jclass clazz) {
+Java_kantvai_ai_ggmljava_isStableDiffusionHexagonEnabled(JNIEnv *env, jclass clazz) {
 #ifdef SD_USE_HEXAGON
     return JNI_TRUE;
 #else

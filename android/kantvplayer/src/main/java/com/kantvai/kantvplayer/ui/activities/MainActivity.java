@@ -78,6 +78,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     private long touchTime = 0;
 
     private long switchTime = 0;
+    private MenuItem previousMenuItem;
 
     @Override
     protected int initPageLayoutID() {
@@ -176,15 +177,33 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     public void initListener() {
         navigationView.setOnNavigationItemSelectedListener(item -> {
             KANTVLog.g(TAG, "System.currentTimeMillis() - switchTime " + (System.currentTimeMillis() - switchTime));
-            //FIXME:workaround to fix a potential deadlock in a special scenario of AI inference(realtime video inference)
-            if (item.getItemId() == R.id.navigation_aiagent) {
-                if (System.currentTimeMillis() - switchTime < 900) {
-                    ToastUtils.showShort("switch duration is too short");
-                    switchTime = System.currentTimeMillis();
-                    return false;
+            if (previousMenuItem != null) {
+                //FIXME:workaround to fix potential issue when stablediffusion inference is running
+                if (previousMenuItem.getItemId() == R.id.navigation_asr) {
+                    if (airesearchFragment.isStableDiffusionInference()) {
+                        ToastUtils.showShort("cann't switch when benchmark type is stablediffusion inference");
+                        return false;
+                    }
+                }
+
+                //FIXME:workaround to fix a potential deadlock in a special scenario of AI inference(realtime video inference)
+                if ((item.getItemId() == R.id.navigation_aiagent) && (previousMenuItem.getItemId() == R.id.navigation_asr)) {
+                    if (System.currentTimeMillis() - switchTime < 1000) {
+                        ToastUtils.showShort("switch duration is too short");
+                        switchTime = System.currentTimeMillis();
+                        return false;
+                    }
+                }
+                if ((item.getItemId() == R.id.navigation_asr) && (previousMenuItem.getItemId() == R.id.navigation_aiagent)) {
+                    if (System.currentTimeMillis() - switchTime < 1000) {
+                        ToastUtils.showShort("switch duration is too short");
+                        switchTime = System.currentTimeMillis();
+                        return false;
+                    }
                 }
             }
             switchTime = System.currentTimeMillis();
+            previousMenuItem = item;
 
             KANTVLog.d(TAG, "item id: " + item.getItemId());
             switch (item.getItemId()) {

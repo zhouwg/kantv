@@ -195,24 +195,16 @@ public class KANTVAIModelMgr {
              return;
          }
 
-         boolean isStableDiffusionEnabled = ggmljava.isStableDiffusionEnabled();
+         boolean isStableDiffusionHexagonEnabled = ggmljava.isStableDiffusionHexagonEnabled();
          boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
          KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
 
-         if (isStableDiffusionEnabled) {
-             arrayBenchType = new String[5];
-             arrayBenchType[0] = "memcpy";
-             arrayBenchType[1] = "mulmat";
-             arrayBenchType[2] = "ASR";
-             arrayBenchType[3] = "LLM";
-             arrayBenchType[4] = "Text2Image";
-         } else {
-             arrayBenchType = new String[4];
-             arrayBenchType[0] = "memcpy";
-             arrayBenchType[1] = "mulmat";
-             arrayBenchType[2] = "ASR";
-             arrayBenchType[3] = "LLM";
-         }
+         arrayBenchType = new String[5];
+         arrayBenchType[0] = "memcpy";
+         arrayBenchType[1] = "mulmat";
+         arrayBenchType[2] = "ASR";
+         arrayBenchType[3] = "LLM";
+         arrayBenchType[4] = "Text2Image";
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
                  "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
@@ -223,14 +215,11 @@ public class KANTVAIModelMgr {
                  "https://huggingface.co/datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav");
 
 
-         if (isStableDiffusionEnabled) {
-             //there are only one StableDiffusion model currently
-             addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
-                     "https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
-                     4265380512L); // size of the StableDiffusion model, about 4.0 GiB
-         } else {
-             NON_LLM_MODEL_COUNTS = 1;
-         }
+         //there are only one StableDiffusion model currently
+         addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
+                 "https://huggingface.co/CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
+                 4265380512L); // size of the StableDiffusion model, about 4.0 GiB
+
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
                  "https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true",

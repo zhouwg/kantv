@@ -40,7 +40,6 @@ static void onError(void* context, ACameraDevice* device, int error)
 static void onImageAvailable(void* context, AImageReader* reader)
 {
     //LOGGD("NdkCamera: onImageAvailable %p", reader);
-    //FIXME: deadlock???
     if (0 == inference_is_running_state())
         return;
 
@@ -213,8 +212,11 @@ NdkCamera::~NdkCamera()
 
     if (image_reader)
     {
+        LOGGD("calling AImageReader_delete");
+        //FIXME: deadlock here
         AImageReader_delete(image_reader);
         image_reader = 0;
+        LOGGD("after calling AImageReader_delete");
     }
 
     if (image_reader_surface)

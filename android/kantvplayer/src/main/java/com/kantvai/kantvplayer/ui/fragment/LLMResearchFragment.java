@@ -222,12 +222,7 @@
      }
 
      public void finalizeCamera() {
-         if (mCameraInit) {
-             ggmljava.closeCamera();
-             mCameraInit = false;
-         } else {
-             KANTVLog.j(TAG, "camera already finalized");
-         }
+         ggmljava.closeCamera();
      }
 
 

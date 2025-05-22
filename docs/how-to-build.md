@@ -65,7 +65,7 @@ build the entire project by Android Studio IDE
 
 - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt#L14</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
 
-#### How to enable/disable StableDiffusion
+#### How to enable/disable ggml-hexagon in StableDiffusion
 
 - modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L26">ggml/CMakeLists.txt#L26</a> accordingly
 

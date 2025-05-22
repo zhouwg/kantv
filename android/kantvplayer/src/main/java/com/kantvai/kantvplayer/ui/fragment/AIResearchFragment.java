@@ -839,6 +839,13 @@
          resetUIAndStatus(null,true, false);
      }
 
+     public boolean isStableDiffusionInference() {
+         if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_TEXT2IMAGE.ordinal())
+             return true;
+         else
+             return false;
+     }
+
      /* will be removed in the future
      private void displayFileStatus(String sampleFilePath, String modelFilePath) {
          _txtGGMLStatus.setText("");

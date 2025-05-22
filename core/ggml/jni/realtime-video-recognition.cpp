@@ -434,6 +434,7 @@ failure:
     mtmd_free(mctx);
     llama_backend_free();
 
+    LOGGD("return");
     return;
 }
 
@@ -499,6 +500,7 @@ Java_kantvai_ai_ggmljava_openCamera(JNIEnv * env, jclass clazz, jint facing) {
     if (nullptr == g_camera) {
         g_camera = new MyNdkCamera;
         g_camera->open((int) facing);
+        inference_reset_running_state();
     } else {
         LOGGD("camera already opened");
     }
@@ -510,8 +512,13 @@ JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_closeCamera(JNIEnv * env, jclass clazz) {
     LOGGD("closeCamera");
     if (nullptr != g_camera) {
-        delete g_camera;
+        inference_reset_running_state();
+        g_camera->close();
+        //FIXME:comment following line to avoid deadlock but brings memory leak
+        //delete g_camera;
         g_camera = nullptr;
+    } else {
+        LOGGD("camera already closed");
     }
 }
 
