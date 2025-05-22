@@ -54,7 +54,7 @@ build the entire project by Android Studio IDE
 ```
   . build/envsetup.sh
   lunch 1
-  ./build-all.sh android
+  ./build/build-all.sh android
 ```
 
 #### How to enable/disable debug build
