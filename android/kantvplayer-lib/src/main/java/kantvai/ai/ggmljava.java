@@ -126,4 +126,6 @@ package kantvai.ai;
     public static native void setLLMTopP(float top_p);
 
     public static native float getLLMTopP();
+
+    public static native void  llm_finalize();
 }

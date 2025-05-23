@@ -556,3 +556,8 @@ Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv *env, jclass clazz, jobject surf
     ANativeWindow * win = ANativeWindow_fromSurface(env, surface);
     jni_set_outputwindow(win);
 }
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_llm_1finalize(JNIEnv *env, jclass clazz) {
+    jni_cleanup_llm_resource();
+}

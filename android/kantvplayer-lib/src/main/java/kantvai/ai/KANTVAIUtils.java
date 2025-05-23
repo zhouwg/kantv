@@ -3,15 +3,15 @@
  */
  package kantvai.ai;
 
- import android.app.Activity;
- import android.app.ActivityManager;
- import android.content.Context;
- import android.os.Build;
- import android.os.Debug;
+import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.os.Build;
+import android.os.Debug;
 
- import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicBoolean;
 
- import kantvai.media.player.KANTVLog;
+import kantvai.media.player.KANTVLog;
 
  public final class KANTVAIUtils {
      private final static String TAG                        = KANTVAIUtils.class.getName();
@@ -20,6 +20,8 @@
         whether ASR subsystem is initialized
       */
      private static AtomicBoolean mASRSubsystemInit         = new AtomicBoolean(false);
+
+     private static AtomicBoolean mLLMSubsystemInit         = new AtomicBoolean(false);
 
      /**
       * ASR mode
@@ -263,6 +265,14 @@
 
      public static boolean getASRSubsystemInit() {
          return mASRSubsystemInit.get();
+     }
+
+     public static void setLLMSubsystemInit(boolean bEnabled) {
+         mLLMSubsystemInit.set(bEnabled);
+     }
+
+     public static boolean getLLMSubsystemInit() {
+         return mLLMSubsystemInit.get();
      }
 
     //FIXME: should I move these helper functions to KANTVAIModelMgr.java?

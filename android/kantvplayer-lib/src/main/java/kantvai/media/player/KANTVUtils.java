@@ -3222,6 +3222,11 @@
              ggmljava.asr_finalize();
          }
 
+         //if (KANTVAIUtils.getLLMSubsystemInit())
+         {
+             ggmljava.llm_finalize();
+         }
+
          umExitApp();
 
          if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 21) {

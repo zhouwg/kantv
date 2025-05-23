@@ -179,6 +179,7 @@ enum hwaccel_approach_type {
     bool          jni_open_camera(int facing);
     void          jni_close_camera(void);
     void          jni_set_outputwindow(ANativeWindow  * win);
+    void          jni_cleanup_llm_resource();
 
 #ifdef __cplusplus
 }

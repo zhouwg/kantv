@@ -36,7 +36,7 @@
 
 #include "myndkcamera.h"
 
-static int draw_unsupported(cv::Mat &rgb) {
+static int draw_unsupported(cv::Mat & rgb) {
     const char text[] = "unsupported";
 
     int baseLine = 0;

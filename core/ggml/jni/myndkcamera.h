@@ -8,5 +8,5 @@
 
 class MyNdkCamera : public NdkCameraWindow {
 public:
-    virtual void on_image_render(cv::Mat &rgb) const;
+    virtual void on_image_render(cv::Mat & rgb) const;
 };
