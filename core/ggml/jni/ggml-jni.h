@@ -8,11 +8,13 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <android/native_window.h>
 
 #include "libavutil/cde_log.h"
 #if (defined __ANDROID__) || (defined ANDROID)
 #include "kantv-asr.h"
 #include "kantv-media.h"
+#include "llamacpp/ggml/include/ggml-hexagon.h"
 #endif
 
 #include "ggml.h"
@@ -173,6 +175,10 @@ enum hwaccel_approach_type {
 
     void          llm_set_topp(float value);
     float         llm_get_topp(void);
+
+    bool          jni_open_camera(int facing);
+    void          jni_close_camera(void);
+    void          jni_set_outputwindow(ANativeWindow  * win);
 
 #ifdef __cplusplus
 }

@@ -2,6 +2,7 @@
  * Copyright (c) 2024- KanTV Authors
  */
 #include <jni.h>
+#include <android/native_window_jni.h>
 
 #include "whispercpp/whisper.h"
 #include "llamacpp/include/llama.h"
@@ -534,4 +535,24 @@ Java_kantvai_ai_ggmljava_setLLMTopP(JNIEnv *env, jclass clazz, jfloat top_p) {
 JNIEXPORT jfloat JNICALL
 Java_kantvai_ai_ggmljava_getLLMTopP(JNIEnv *env, jclass clazz) {
     return llm_get_topp();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_openCamera(JNIEnv *env, jclass clazz, jint facing) {
+    if (jni_open_camera(facing)) {
+        return JNI_TRUE;
+    } else {
+        return JNI_FALSE;
+    }
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_closeCamera(JNIEnv *env, jclass clazz) {
+    jni_close_camera();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv *env, jclass clazz, jobject surface) {
+    ANativeWindow * win = ANativeWindow_fromSurface(env, surface);
+    jni_set_outputwindow(win);
 }
