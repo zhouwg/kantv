@@ -83,7 +83,7 @@ public:
         }
     }
 
-    //TODO:for further usage: select different multimodal in UI layer
+    //TODO:for further usage: select different multimodal model in UI
     void init(const char * llm_model_name, const char * mmproj_model_name) {
         if (!initialized) {
             LOGGD("init model");
@@ -164,7 +164,6 @@ private:
     MyNdkCamera *    ndkcamera_instance        = nullptr;
 
     long long        frame_index       = 0;
-    char             bmp_filename[JNI_TMP_LEN];
 
     bool initialized = false;
 };
@@ -438,21 +437,7 @@ void multimodal_inference::do_inference(cv::Mat & rgb) {
         return;
     }
 
-#if 0
-    //snprintf(bmp_filename, JNI_TMP_LEN, "/sdcard/bmp-%04d.bmp", frame_index);
-    snprintf(bmp_filename, JNI_TMP_LEN, "/sdcard/bmp-tmp.bmp");
-    LOGGD("write bmp %s, width %d, height %d\n", bmp_filename, rgb.cols, rgb.rows);
-    //this is a lazy/dirty method to implement "realtime"(not realtime at the moment) video recognition via MTMD feature in llama.cpp
-    //using MTMD API directly is a better approach, can be seen in: https://github.com/ggml-org/llama.cpp/blob/master/tools/server/server.cpp#L4121
-    write_bmp(bmp_filename, rgb.cols, rgb.rows, 24, rgb.data);
-    llava_inference("/sdcard/SmolVLM2-256M-Video-Instruct-f16.gguf",
-                    "/sdcard/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
-                    bmp_filename, "what do you see in this image?",
-                    GGML_BENCHMARK_LLM, 8, HEXAGON_BACKEND_GGML, HWACCEL_CDSP);
-#else
-    //better approach: using MTMD API directly to avoid write bmp data to storage
     mtmd_inference(rgb);
-#endif
 }
 
 static class multimodal_inference & g_mmi_instance = multimodal_inference::get_instance();

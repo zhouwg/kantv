@@ -77,7 +77,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         if (HEXAGON_BACKEND_CDSP == backend_type) {
             LOGGD("StableDiffusion via cDSP cann't works correct currently");
             GGML_JNI_NOTIFY("StableDiffusion via cDSP cann't works correct currently");
-            //goto failure;
+            goto failure;
         }
     }
 

@@ -297,3 +297,14 @@
                        <li>refine docs</li>
                        <li>refine ggml-hexagon.cpp and sync to the PR in upstream llama.cpp community</li>
                     </ul>
+- v1.6.10, 2025-05-23,
+                    <ul>
+                        <li>enable Markdown rendering for LLM inference result</li>
+                        <li>enable self-contained build with internal customized toolchains https://github.com/kantv-ai/kantv/pull/325</li>
+                        <li>sync with upstream llama.cpp</li>
+                        <li>ggml-hexagon: fix bug "LLM inference with cDSP cann't works" https://github.com/kantv-ai/kantv/pull/330 </li>
+                        <li>add prebult-apk for Android phone equipped without Qualcomm mobile SoC</li>
+                        <li>realtime video recognition on Android phone,powered by MTMD in llama.cpp https://github.com/kantv-ai/kantv/pull/341 </li>
+                        <li> improve stability </li>
+                        <li> refine docs </li>
+                    </ul>
