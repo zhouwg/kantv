@@ -361,6 +361,7 @@ public class MainActivity extends BaseMvpActivity<MainPresenter> implements Main
     protected void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        KANTVUtils.exitAPK(mActivity);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

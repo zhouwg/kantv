@@ -321,7 +321,7 @@ public class KANTVAIModelMgr {
                  909777984L
          );
          */
-         
+
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models
          //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + all LLM models + others)
          arrayModelName = new String[modelCounts];
