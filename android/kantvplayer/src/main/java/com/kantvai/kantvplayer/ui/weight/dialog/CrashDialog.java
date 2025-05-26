@@ -54,7 +54,7 @@ public class CrashDialog extends Dialog {
                 ClipData mClipDataMagnet = ClipData.newPlainText("Label", content);
                 if (clipboardManagerMagnet != null) {
                     clipboardManagerMagnet.setPrimaryClip(mClipDataMagnet);
-                    ToastUtils.showShort("已复制错误日志");
+                    ToastUtils.showShort("Error log copied");
                 }
                 break;
         }

@@ -33,7 +33,7 @@ import android.provider.Settings;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 
 import java.io.BufferedReader;
 import java.io.File;

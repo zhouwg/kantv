@@ -24,7 +24,7 @@ project.ext {
     compileSdkVersion   = 34
     buildToolsVersion   = "34.0.0"
     targetSdkVersion    = 34
-    minSdkVersion       = 24
+    minSdkVersion       = 26
     appTargetSdkVersion = 29
 
     //version and version code of KanTV Android APP
@@ -36,17 +36,25 @@ project.ext {
     releaseVersionCodeExoplayer = 2015001
     modulePrefix = ':'
 
-    guavaVersion = '27.1-android'
-    androidxAnnotationVersion = '1.2.0'
-    checkerframeworkVersion = '3.5.0'
-    checkerframeworkCompatVersion = '2.5.0'
-    kotlinAnnotationsVersion = '1.5.20'
-    androidxRecyclerViewVersion = '1.1.0'
+    //https://github.com/google/guava/releases
+    guavaVersion = '33.4.8-android'
+    //https://developer.android.com/jetpack/androidx/releases/annotation
+    androidxAnnotationVersion = '1.9.1'
+    //https://github.com/typetools/checker-framework/releases
+    checkerframeworkVersion = '3.49.3'
+    //https://mvnrepository.com/artifact/org.checkerframework/checker-compat-qual
+    checkerframeworkCompatVersion = '2.5.6'
+    //https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-annotations-jvm
+    kotlinAnnotationsVersion = '2.1.21'
+    //https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
     jsr305Version = '3.0.2'
-    androidxMediaVersion = '1.2.1'
-    androidxMultidexVersion = '2.0.0'
+    //https://github.com/androidx/media/releases
+    androidxMediaVersion = '1.6.1'
+    //https://developer.android.com/jetpack/androidx/releases/multidex
+    androidxMultidexVersion = '2.0.1'
     dexmakerVersion = '2.21.0'
-    androidxAppCompatVersion = '1.1.0'
+    //https://developer.android.com/jetpack/androidx/releases/appcompat
+    androidxAppCompatVersion = '1.7.0'
 
     if (gradle.ext.has('exoplayerModulePrefix')) {
         modulePrefix += gradle.ext.exoplayerModulePrefix

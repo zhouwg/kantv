@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:gravity="center"
-        android:text="发生意外错误\n很抱歉，给您带来不便\n请将错误日志复制并发送给开发人员"
+        android:text="An unexpected error occurred\nSorry for the inconvenience\n"
         android:textColor="@color/immutable_text_black"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -33,7 +33,7 @@
             android:layout_height="46dp"
             android:layout_marginEnd="10dp"
             android:background="@drawable/btn_corner_blue"
-            android:text="重新启动"
+            android:text="Restart APP"
             android:textColor="@color/immutable_text_white"
             android:textSize="14sp" />
 
@@ -43,7 +43,7 @@
             android:layout_height="46dp"
             android:layout_marginStart="10dp"
             android:background="@drawable/btn_corner_blue"
-            android:text="错误日志"
+            android:text="Error Log"
             android:textColor="@color/immutable_text_white"
             android:textSize="14sp" />
     </LinearLayout>

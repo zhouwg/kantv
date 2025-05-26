@@ -119,52 +119,83 @@ def skin_support_version = "4.0.5"
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation "androidx.preference:preference:1.1.0"
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation "androidx.preference:preference:1.2.1"
     implementation "androidx.legacy:legacy-support-core-ui:1.0.0"
-    implementation "androidx.activity:activity:1.1.0"
-    implementation "androidx.fragment:fragment:1.2.4"
-    implementation "androidx.core:core:1.3.0"
-    implementation "androidx.viewpager:viewpager:1.0.0"
-    implementation "androidx.viewpager2:viewpager2:1.0.0"
-    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation "androidx.activity:activity:1.9.0"
+    implementation "androidx.fragment:fragment:1.8.7"
+    implementation "androidx.core:core:1.13.0"
+    implementation "androidx.viewpager:viewpager:1.1.0"
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
+    implementation 'androidx.annotation:annotation:1.9.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.multidex:multidex:2.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'com.google.android.material:material:1.2.0-rc01'
-
-    //implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
-    //implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
+    implementation 'androidx.multidex:multidex:2.0.1'
     //implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'com.google.android.material:material:1.3.0'
+    implementation 'com.google.zxing:core:3.5.3'
 
-    implementation 'com.tencent.bugly:crashreport_upgrade:1.4.2'
-    implementation 'com.tencent.bugly:nativecrashreport:3.7.1'
+    //not used since 05/26/2025
+    //implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
+    //implementation 'com.tencent.bugly:nativecrashreport:latest.release'
+    //https://github.com/alibaba/fastjson2
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
+    //https://github.com/greenrobot/EventBus
+    implementation 'org.greenrobot:eventbus:3.3.1'
 
-    implementation 'com.google.zxing:core:3.2.1'
-    implementation 'com.alibaba:fastjson:1.2.71'
-    implementation 'org.greenrobot:eventbus:3.1.1'
+    //https://jsoup.org/download
+    implementation 'org.jsoup:jsoup:1.20.1'
 
+    //https://github.com/typetools/checker-framework
+    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
+
+    //https://github.com/square/okhttp
     implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
     implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    //https://github.com/square/okio
     implementation 'com.squareup.okio:okio:1.15.0'
+    //https://github.com/square/retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    //https://github.com/square/otto
+    implementation 'com.squareup:otto:1.3.8'
+    //https://github.com/ReactiveX/RxJava
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 
-    implementation 'org.nanohttpd:nanohttpd:2.3.1'
-    implementation 'org.jsoup:jsoup:1.11.2'
+    //https://github.com/uber/AutoDispose
+    implementation 'com.uber.autodispose:autodispose:1.0.0-RC3'
+    implementation 'com.uber.autodispose:autodispose-android-archcomponents:1.0.0-RC3'
+    //https://github.com/Blankj/AndroidUtilCode
+    implementation 'com.blankj:utilcodex:1.31.1'
+    //https://github.com/gyf-dev/ImmersionBar
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    //https://github.com/huanghaibin-dev/CalendarView
+    implementation 'com.haibin:calendarview:3.7.1'
+    //https://github.com/bumptech/glide
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    //https://github.com/albfernandez/juniversalchardet
+    implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
+    //https://github.com/Ereza/CustomActivityOnCrash
+    implementation 'cat.ereza:customactivityoncrash:2.4.0'
+    //https://github.com/youth5201314/banner
+    //implementation 'io.github.youth5201314:banner:2.2.3'
     implementation 'com.youth.banner:banner:1.4.10'
-    implementation 'com.contrarywind:Android-PickerView:4.1.6'
-    implementation 'com.flyco.tablayout:FlycoTabLayout_Lib:2.1.2@aar'
-    implementation 'cat.ereza:customactivityoncrash:2.3.0'
+    //https://github.com/Bigkoo/Android-PickerView
+    implementation 'com.contrarywind:Android-PickerView:4.1.9'
+    //https://github.com/H07000223/FlycoTabLayout
+    implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
+    //https://github.com/JakeWharton/butterknife
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
 
-    implementation 'com.github.junrar:junrar:4.0.0'
-    implementation 'com.github.bumptech.glide:glide:4.11.0'
-    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
+    //https://github.com/noties/Markwon
+    implementation "io.noties.markwon:core:4.6.2"
+    implementation "io.noties.markwon:ext-strikethrough:4.6.2"
+    implementation "io.noties.markwon:ext-tables:4.6.2"
 
+    //TODO
     implementation "skin.support:skin-support:$skin_support_version"
     implementation "skin.support:skin-support-appcompat:$skin_support_version"
     implementation "skin.support:skin-support-design:$skin_support_version"
@@ -172,33 +203,10 @@ dependencies {
     implementation "skin.support:skin-support-constraint-layout:$skin_support_version"
     implementation 'skin.support:flycotablayout:2.1.2.2'
 
-    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
-
-    implementation 'com.uber.autodispose:autodispose:1.0.0-RC3'
-    implementation 'com.uber.autodispose:autodispose-android-archcomponents:1.0.0-RC3'
-
-    implementation 'com.jakewharton:butterknife:10.0.0'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.0.0'
-
-    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'
-
-    api 'org.greenrobot:eventbus:3.1.1'
-    api 'com.blankj:utilcodex:1.29.0'
+    //TODO
+    //https://github.com/CymChad/BaseRecyclerViewAdapterHelper
+    implementation "io.github.cymchad:BaseRecyclerViewAdapterHelper4:4.1.4"
     api 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.49-androidx'
-
-    implementation 'com.github.albfernandez:juniversalchardet:2.0.2'
-
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-
-    implementation 'com.squareup:otto:1.3.8'
-    implementation 'com.haibin:calendarview:3.7.1'
-
-
-    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
-
-    implementation "io.noties.markwon:core:4.6.2"
-    implementation "io.noties.markwon:ext-strikethrough:4.6.2"
-    implementation "io.noties.markwon:ext-tables:4.6.2"
 
     api project(':kantvplayer-lib')
 }

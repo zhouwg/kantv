@@ -12,6 +12,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     defaultConfig {
         minSdkVersion project.ext.minSdkVersion
         targetSdkVersion project.ext.targetSdkVersion
@@ -22,7 +23,6 @@ android {
             minifyEnabled false
         }
     }
-
 
     tasks.register('cleanKANTVMediaPlayerJar', Delete) {
         println '@kantvplayer-lib enter cleanJar-----------------'
@@ -43,21 +43,18 @@ android {
     }
     namespace 'com.kantvai.kantvplayerlib'
 
-
     buildKANTVMediaPlayerJar.dependsOn(cleanKANTVMediaPlayerJar, build)
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.alibaba:fastjson:1.2.71'
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
 
     implementation 'org.checkerframework:checker-compat-qual:' + checkerframeworkCompatVersion
     implementation 'org.checkerframework:checker-qual:' + checkerframeworkVersion
-    implementation 'androidx.annotation:annotation:' + androidxAnnotationVersion
-    implementation 'androidx.appcompat:appcompat:' + androidxAppCompatVersion
     implementation 'org.chromium.net:cronet-api:119.6045.31'
-
 
     //for customized exo2
     api ('com.google.guava:guava:' + guavaVersion) {
@@ -77,6 +74,7 @@ dependencies {
     compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
 
     implementation 'org.jetbrains:annotations:23.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
 }
 
 apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");

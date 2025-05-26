@@ -54,8 +54,8 @@ import kantvai.media.player.KANTVDataEntity;
 import kantvai.media.player.KANTVHttpsURLConnection;
 import kantvai.media.player.KANTVLog;
 import kantvai.media.player.KANTVUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 
 /** A {@link MediaDrmCallback} that makes requests using {@link HttpDataSource} instances. */
 public final class HttpMediaDrmCallback implements MediaDrmCallback {

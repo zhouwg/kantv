@@ -16,15 +16,16 @@ import android.preference.PreferenceManager;
 
 import androidx.multidex.MultiDex;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.blankj.utilcode.util.Utils;
 
 import com.kantvai.kantvplayer.BuildConfig;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.utils.Constants;
 import com.kantvai.kantvplayer.utils.Settings;
-import com.tencent.bugly.Bugly;
+//not used since 05/26/2025
+//import com.tencent.bugly.Bugly;
 
 import com.kantvai.kantvplayer.ui.activities.SplashActivity;
 import com.kantvai.kantvplayer.ui.activities.personal.CrashActivity;
@@ -108,8 +109,8 @@ public class IApplication extends Application {
                 .apply();
 
 
-        Bugly.init(getApplicationContext(), SoUtils.getInstance().getBuglyAppId(), false);
-
+        //not used since 05/26/2025
+        //Bugly.init(getApplicationContext(), SoUtils.getInstance().getBuglyAppId(), false);
 
         DataBaseManager.init(this);
 

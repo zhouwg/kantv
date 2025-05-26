@@ -8,15 +8,19 @@ package com.kantvai.kantvplayer.player.ffplayer.media;
 
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -29,8 +33,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.MediaController;
+import android.widget.TableLayout;
+import android.widget.TextClock;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.kantvai.kantvplayer.R;
@@ -38,45 +47,26 @@ import com.kantvai.kantvplayer.utils.Settings;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import kantvai.ai.ggmljava;
 import kantvai.media.exoplayer2.kantvexo2.KANTVExo2MediaPlayer;
 import kantvai.media.player.AndroidMediaPlayer;
-import kantvai.media.player.KANTVLibraryLoader;
-import kantvai.media.player.KANTVDRM;
-import kantvai.media.player.IMediaPlayer;
-import kantvai.media.player.KANTVDataEntity;
-import kantvai.media.player.KANTVLog;
 import kantvai.media.player.FFmpegMediaPlayer;
+import kantvai.media.player.IMediaPlayer;
 import kantvai.media.player.IjkTimedText;
+import kantvai.media.player.KANTVDRM;
+import kantvai.media.player.KANTVDRMManager;
+import kantvai.media.player.KANTVLog;
 import kantvai.media.player.KANTVUtils;
 import kantvai.media.player.MediaPlayerService;
-import kantvai.media.player.KANTVDRMManager;
 import kantvai.media.player.TextureMediaPlayer;
 import kantvai.media.player.misc.IMediaDataSource;
 import kantvai.media.player.misc.ITrackInfo;
-
-import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
-import android.content.res.Resources;
-
-import androidx.appcompat.app.AlertDialog;
-
-import android.widget.TableLayout;
-import android.widget.TextClock;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 
 
 public class KANTVVideoView extends FrameLayout implements MediaController.MediaPlayerControl {

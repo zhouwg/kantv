@@ -4,56 +4,54 @@
   */
 package com.kantvai.kantvplayer.ui.activities;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.ActivityInfo;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.WindowManager;
+ import android.Manifest;
+ import android.annotation.SuppressLint;
+ import android.app.Activity;
+ import android.app.AlertDialog;
+ import android.content.Context;
+ import android.content.DialogInterface;
+ import android.os.Bundle;
+ import android.view.KeyEvent;
+ import android.view.Menu;
+ import android.view.MenuItem;
+ import android.view.WindowManager;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.FragmentTransaction;
+ import androidx.annotation.NonNull;
+ import androidx.annotation.Nullable;
+ import androidx.appcompat.app.ActionBar;
+ import androidx.fragment.app.FragmentTransaction;
 
-import com.blankj.utilcode.util.AppUtils;
-import com.blankj.utilcode.util.ToastUtils;
-import com.kantvai.kantvplayer.ui.fragment.AIResearchFragment;
-import com.kantvai.kantvplayer.ui.fragment.LLMResearchFragment;
-import com.kantvai.kantvplayer.ui.fragment.TVGridFragment;
-import com.kantvai.kantvplayer.utils.Settings;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.kantvai.kantvplayer.ui.fragment.EPGListFragment;
-import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.kantvai.kantvplayer.R;
-import com.kantvai.kantvplayer.app.IApplication;
-import com.kantvai.kantvplayer.base.BaseMvpActivity;
-import com.kantvai.kantvplayer.base.BaseMvpFragment;
-import com.kantvai.kantvplayer.bean.event.UpdateFragmentEvent;
-import com.kantvai.kantvplayer.mvp.impl.MainPresenterImpl;
-import com.kantvai.kantvplayer.mvp.presenter.MainPresenter;
-import com.kantvai.kantvplayer.mvp.view.MainView;
-import com.kantvai.kantvplayer.ui.fragment.PersonalFragment;
-import com.kantvai.kantvplayer.ui.fragment.LocalMediaFragment;
-import com.kantvai.kantvplayer.ui.weight.dialog.CommonEditTextDialog;
+ import com.blankj.utilcode.util.AppUtils;
+ import com.blankj.utilcode.util.ToastUtils;
+ import com.google.android.material.bottomnavigation.BottomNavigationView;
+ import com.kantvai.kantvplayer.R;
+ import com.kantvai.kantvplayer.app.IApplication;
+ import com.kantvai.kantvplayer.base.BaseMvpActivity;
+ import com.kantvai.kantvplayer.base.BaseMvpFragment;
+ import com.kantvai.kantvplayer.bean.event.UpdateFragmentEvent;
+ import com.kantvai.kantvplayer.mvp.impl.MainPresenterImpl;
+ import com.kantvai.kantvplayer.mvp.presenter.MainPresenter;
+ import com.kantvai.kantvplayer.mvp.view.MainView;
+ import com.kantvai.kantvplayer.ui.fragment.AIResearchFragment;
+ import com.kantvai.kantvplayer.ui.fragment.LLMResearchFragment;
+ import com.kantvai.kantvplayer.ui.fragment.LocalMediaFragment;
+ import com.kantvai.kantvplayer.ui.fragment.PersonalFragment;
+ import com.kantvai.kantvplayer.ui.fragment.TVGridFragment;
+ import com.kantvai.kantvplayer.ui.weight.dialog.CommonEditTextDialog;
+ import com.kantvai.kantvplayer.utils.Settings;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+ import org.greenrobot.eventbus.EventBus;
+ import org.greenrobot.eventbus.Subscribe;
+ import org.greenrobot.eventbus.ThreadMode;
 
-import butterknife.BindView;
-import kantvai.media.player.KANTVUtils;
-import io.reactivex.Observer;
-import io.reactivex.disposables.Disposable;
-import kantvai.media.player.KANTVLog;
+ import butterknife.BindView;
+ import io.reactivex.rxjava3.core.Observer;
+ import io.reactivex.rxjava3.disposables.Disposable;
+ import kantvai.media.player.KANTVLog;
+ import kantvai.media.player.KANTVUtils;
+ import kantvai.tool.rxpermissions.RxPermissions;
 
-public class MainActivity extends BaseMvpActivity<MainPresenter> implements MainView {
+ public class MainActivity extends BaseMvpActivity<MainPresenter> implements MainView {
     @BindView(R.id.navigation_view)
     BottomNavigationView navigationView;
 
