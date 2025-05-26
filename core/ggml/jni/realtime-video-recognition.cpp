@@ -93,9 +93,11 @@ public:
         }
     }
 
-    bool camera_init(int facing);
+    void camera_init();
+    void camera_finalize();
+    bool camera_open(int facing);
+    void camera_close();
     void camera_set_outputwindow(ANativeWindow * win);
-    void camera_deinit();
 
     void finalize();
     void do_inference(cv::Mat & rgb);
@@ -262,36 +264,52 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     return true;
 }
 
-bool multimodal_inference::camera_init(int facing) {
-    if (facing < 0 || facing > 1)
-        return false;
-
-    LOGGD("open camera %d", facing);
+void multimodal_inference::camera_init() {
+    LOGGD("initialize camera");
     if (nullptr == ndkcamera_instance) {
         ncnn::create_gpu_instance();
         ndkcamera_instance = new MyNdkCamera;
+    } else {
+        LOGGD("camera already initialized");
+    }
+}
+
+bool multimodal_inference::camera_open(int facing) {
+    LOGGD("open camera");
+    if (facing < 0 || facing > 1) {
+        LOGGD("invalid param");
+        return false;
+    }
+    if (nullptr != ndkcamera_instance) {
         ndkcamera_instance->open(facing);
         inference_reset_running_state();
     } else {
         LOGGD("camera already opened");
     }
-
     return true;
 }
 
-void multimodal_inference::camera_deinit() {
-    LOGGD("close camera");
+void multimodal_inference::camera_finalize() {
+    LOGGD("finalize camera");
     if (nullptr != ndkcamera_instance) {
         ncnn::destroy_gpu_instance();
+        delete ndkcamera_instance;
+        ndkcamera_instance = nullptr;
+    } else {
+        LOGGD("camera already finalize");
+    }
+}
+
+void multimodal_inference::camera_close() {
+    LOGGD("close camera");
+    if (nullptr != ndkcamera_instance) {
         inference_reset_running_state();
         ndkcamera_instance->close();
-        //FIXME:comment following line to avoid deadlock but brings memory leak
-        //delete ndkcamera_instance;
-        ndkcamera_instance = nullptr;
     } else {
         LOGGD("camera already closed");
     }
 }
+
 
 void multimodal_inference::camera_set_outputwindow(ANativeWindow * win) {
     LOGGD("setOutputWindow %p", win);
@@ -415,7 +433,7 @@ void multimodal_inference::finalize() {
 
         llama_backend_free();
 
-        camera_deinit();
+        camera_finalize();
 
         initialized = false;
     } else {
@@ -445,13 +463,14 @@ static class multimodal_inference & g_mmi_instance = multimodal_inference::get_i
 bool jni_open_camera(int facing) {
     LOGGD("open camera");
     g_mmi_instance.init();
-    bool result = g_mmi_instance.camera_init(facing);
+    g_mmi_instance.camera_init();
+    bool result = g_mmi_instance.camera_open(facing);
     return result;
 }
 
 void jni_close_camera() {
     LOGGD("close camera");
-    g_mmi_instance.camera_deinit();
+    g_mmi_instance.camera_close();
 }
 
 void jni_set_outputwindow(ANativeWindow  * win) {

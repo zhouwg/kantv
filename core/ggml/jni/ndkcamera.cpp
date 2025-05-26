@@ -213,7 +213,9 @@ NdkCamera::~NdkCamera()
     if (image_reader)
     {
         LOGGD("calling AImageReader_delete");
-        //FIXME: deadlock here
+        //attention: deadlock here if used improperly
+        //source code of NDKCamera API AImageReader_delete refer to:
+        //https://github.com/yuchuangu85/Android-framework-code/blob/master/av/media/ndk/NdkImageReader.cpp#L750
         AImageReader_delete(image_reader);
         image_reader = 0;
         LOGGD("after calling AImageReader_delete");
@@ -224,6 +226,7 @@ NdkCamera::~NdkCamera()
         ANativeWindow_release(image_reader_surface);
         image_reader_surface = 0;
     }
+    LOGGD("leave %s", __func__);
 }
 
 int NdkCamera::open(int _camera_facing)
@@ -358,6 +361,7 @@ void NdkCamera::close()
 
     if (capture_session_output_container)
     {
+        ACaptureSessionOutputContainer_remove(capture_session_output_container, capture_session_output);
         ACaptureSessionOutputContainer_free(capture_session_output_container);
         capture_session_output_container = 0;
     }
@@ -370,6 +374,7 @@ void NdkCamera::close()
 
     if (capture_request)
     {
+        ACaptureRequest_removeTarget(capture_request, image_reader_target);
         ACaptureRequest_free(capture_request);
         capture_request = 0;
     }
