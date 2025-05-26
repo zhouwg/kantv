@@ -114,10 +114,21 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     } else {
         params.main_gpu = backend_type;
     }
-    params.sampling.temp = llm_get_temperature();
-    LOGGD("temp %.2f\n", params.sampling.temp);
-    params.sampling.top_p = llm_get_topp();
-    LOGGD("top_p %.2f\n", params.sampling.top_p);
+    LOGGD("model path %s", params.model.path.c_str());
+    if (params.model.path.find("gemma-3") != std::string::npos) {
+        LOGGD("gemma-3");
+        // according to the Gemma team, the optimal config for inference is
+        // temperature = 1.0, top_k = 64, top_p = 0.95, min_p = 0.0
+        params.sampling.temp = 1.0;
+        params.sampling.top_k = 64;
+        params.sampling.top_p = 0.95;
+        params.sampling.min_p = 0.0;
+    } else {
+        params.sampling.temp = llm_get_temperature();
+        LOGGD("temp %.2f\n", params.sampling.temp);
+        params.sampling.top_p = llm_get_topp();
+        LOGGD("top_p %.2f\n", params.sampling.top_p);
+    }
     common_init();
 
     auto & sparams = params.sampling;

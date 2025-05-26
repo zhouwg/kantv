@@ -267,12 +267,45 @@ public class KANTVAIModelMgr {
                  854200224L
          );
 
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM-500M", "SmolVLM-500M-Instruct-f16.gguf", "mmproj-SmolVLM-500M-Instruct-f16.gguf",
-                 hf_endpoint + "ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/SmolVLM-500M-Instruct-f16.gguf?download=true",
-                 hf_endpoint + "ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-f16.gguf?download=true",
-                 820422912L,
-                 199468800L
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+             "Llama-3.1-Nemotron-Nano-4B",
+             "Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf",
+             hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true",
+             2778285312L
          );
+
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+                 "Phi-4-mini-reasoning",
+                 "Phi-4-mini-reasoning-Q4_0.gguf",
+                 hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true",
+                 2331443104L
+         );
+
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+                 "DeepSeek-R1-Distill-Qwen-7B",
+                 "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
+                 hf_endpoint + "unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf?download=true",
+                 4683073248L
+         );
+
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+                 "Seed-Coder-8B-Reasoning-Q8_0",
+                 "Seed-Coder-8B-Reasoning-Q8_0.gguf",
+                 hf_endpoint + "ByteDance-Seed/Seed-Coder-8B-Reasoning/tree/main",
+                 8773161888L
+         );
+
+         /* //much worse than SmolVLM2-256M in realtime-video-inference
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+                 "moondream2-20250414-GGUF",
+                 "moondream2-text-model-f16_ct-vicuna.gguf",
+                 "moondream2-mmproj-f16-20250414.gguf",
+                 hf_endpoint + "ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-text-model-f16_ct-vicuna.gguf?download=true",
+                 hf_endpoint + "ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-mmproj-f16-20250414.gguf?download=true",
+                 2839535072L,
+                 909777984L
+         );
+         */
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
                  "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",

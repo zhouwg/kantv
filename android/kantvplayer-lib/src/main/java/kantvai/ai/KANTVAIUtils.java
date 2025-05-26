@@ -307,6 +307,7 @@ import kantvai.media.player.KANTVLog;
         String[] llmModels = {
                 "gemma-3",
                 "Qwen2.5-VL-3B",
+                "moondream2",
                 "SmolVLM"
         };
         for (int i = 0; i < llmModels.length; i++) {
