@@ -17,7 +17,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Gemma3-4B(text-to-text and image-to-text(multimodal))](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Gemma3-12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B), [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these LLM models can be downloadded in the Android APK directly without manually preparation(directly access to huggingface.co is required for this feature). APK's users can compare the <b>real experience</b> of these LLM models on the Android phone.
+- Built-in [Google's Gemma3-4B(text-to-text and image-to-text(multimodal))](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma3-12B](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Alibaba's Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B), [Nvidia's Llama-3.1-Nemotron-Nano-4B](https://huggingface.co/lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF), [Microsoft's Phi-4-mini-reasoning](https://huggingface.co/unsloth/Phi-4-mini-reasoning-GGUF), [DeepSeek-R1-Distill-Qwen-7B](https://huggingface.co/unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF), [Huggingface's SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these LLM models can be downloadded in the Android APK directly without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java#L284](https://github.com/kantv-ai/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java#L284).
 
 - Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
@@ -58,8 +58,10 @@ a screenshot to demostrate multi-modal inference by running the magic <a href="h
 
 ![Image](https://github.com/user-attachments/assets/c406951a-383a-4943-a58d-cda401148f9e)
 
+----
+a screenshot to demostrate realtime-video-recognition via [MTMD from llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) + a lightweight multimodal model [SmolVLM2-256M from Huggingface](https://huggingface.co/HuggingFaceTB/SmolVLM2-256M-Video-Instruct) on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
 
-
+![Image](https://github.com/user-attachments/assets/35841e4d-150f-4163-bc58-ada1e9b1a065)
 
 <details>
   <summary>some other screenshots</summary>
