@@ -166,8 +166,6 @@ dependencies {
     //https://github.com/uber/AutoDispose
     implementation 'com.uber.autodispose:autodispose:1.0.0-RC3'
     implementation 'com.uber.autodispose:autodispose-android-archcomponents:1.0.0-RC3'
-    //https://github.com/Blankj/AndroidUtilCode
-    implementation 'com.blankj:utilcodex:1.31.1'
     //https://github.com/gyf-dev/ImmersionBar
     implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
     //https://github.com/huanghaibin-dev/CalendarView
@@ -188,6 +186,10 @@ dependencies {
     implementation "io.noties.markwon:core:4.6.2"
     implementation "io.noties.markwon:ext-strikethrough:4.6.2"
     implementation "io.noties.markwon:ext-tables:4.6.2"
+
+    //TODO: SEND_SMS...
+    //https://github.com/Blankj/AndroidUtilCode
+    //implementation 'com.blankj:utilcodex:1.31.1'
 
     //TODO
     //https://github.com/H07000223/FlycoTabLayout
