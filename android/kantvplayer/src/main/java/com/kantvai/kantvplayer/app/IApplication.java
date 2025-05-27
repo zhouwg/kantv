@@ -3,9 +3,7 @@ package com.kantvai.kantvplayer.app;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -19,23 +17,17 @@ import androidx.multidex.MultiDex;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.blankj.utilcode.util.Utils;
-
 import com.kantvai.kantvplayer.BuildConfig;
 import com.kantvai.kantvplayer.R;
-import com.kantvai.kantvplayer.utils.Constants;
-import com.kantvai.kantvplayer.utils.Settings;
-//not used since 05/26/2025
-//import com.tencent.bugly.Bugly;
-
+import com.kantvai.kantvplayer.player.common.utils.PlayerConfigShare;
 import com.kantvai.kantvplayer.ui.activities.SplashActivity;
 import com.kantvai.kantvplayer.ui.activities.personal.CrashActivity;
 import com.kantvai.kantvplayer.ui.weight.material.MaterialViewInflater;
-import com.kantvai.kantvplayer.utils.SoUtils;
+import com.kantvai.kantvplayer.utils.Constants;
+import com.kantvai.kantvplayer.utils.Settings;
 import com.kantvai.kantvplayer.utils.database.DataBaseManager;
 import com.kantvai.kantvplayer.utils.net.okhttp.CookiesManager;
-import com.kantvai.kantvplayer.player.common.utils.PlayerConfigShare;
 
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -46,16 +38,16 @@ import cat.ereza.customactivityoncrash.config.CaocConfig;
 import kantvai.ai.KANTVAIUtils;
 import kantvai.ai.ggmljava;
 import kantvai.media.player.KANTVAssetLoader;
+import kantvai.media.player.KANTVDRM;
+import kantvai.media.player.KANTVDRMManager;
 import kantvai.media.player.KANTVLibraryLoader;
 import kantvai.media.player.KANTVLog;
 import kantvai.media.player.KANTVUtils;
-import kantvai.media.player.KANTVDRM;
-import kantvai.media.player.KANTVDRMManager;
-import skin.support.SkinCompatManager;
-import skin.support.app.SkinAppCompatViewInflater;
-import skin.support.app.SkinCardViewInflater;
-import skin.support.constraint.app.SkinConstraintViewInflater;
-import skin.support.flycotablayout.app.SkinFlycoTabLayoutInflater;
+import kantvai.tool.skinsupport.SkinCompatManager;
+import kantvai.tool.skinsupport.app.SkinAppCompatViewInflater;
+import kantvai.tool.skinsupport.app.SkinCardViewInflater;
+import kantvai.tool.skinsupport.constraint.app.SkinConstraintViewInflater;
+import kantvai.tool.skinsupport.flycotablayout.app.SkinFlycoTabLayoutInflater;
 
 public class IApplication extends Application {
     private final static String TAG = IApplication.class.getName();

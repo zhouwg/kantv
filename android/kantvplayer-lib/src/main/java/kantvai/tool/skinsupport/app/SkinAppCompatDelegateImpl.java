@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
-
 import android.util.AttributeSet;
 import android.view.MenuInflater;
 import android.view.View;
@@ -21,8 +20,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import kotlin.jvm.ImplicitlyActualizedByJvmDeclaration;
 
 public class SkinAppCompatDelegateImpl {
     private static Map<Activity, AppCompatDelegate> sDelegateMap = new HashMap<>();

@@ -7,8 +7,8 @@ import androidx.annotation.Nullable;
 
 import com.kantvai.kantvplayer.R;
 
-import skin.support.design.widget.SkinMaterialBottomNavigationView;
-import skin.support.widget.SkinCompatBackgroundHelper;
+import kantvai.tool.skinsupport.design.widget.SkinMaterialBottomNavigationView;
+import kantvai.tool.skinsupport.widget.SkinCompatBackgroundHelper;
 
 public class MaterialBottomNavigationView extends SkinMaterialBottomNavigationView {
     private SkinCompatBackgroundHelper backgroundHelper;

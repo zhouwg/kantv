@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.app.SkinAppCompatDelegateImpl;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,6 +22,7 @@ import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.utils.CommonUtils;
 
 import kantvai.media.player.KANTVLog;
+import kantvai.tool.skinsupport.app.SkinAppCompatDelegateImpl;
 
 
 public class ShellActivity extends AppCompatActivity {

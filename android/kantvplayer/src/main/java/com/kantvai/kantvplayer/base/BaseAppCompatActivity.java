@@ -27,8 +27,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.app.SkinAppCompatDelegateImpl;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -45,10 +45,10 @@ import butterknife.Unbinder;
 import kantvai.media.player.KANTVAssetLoader;
 import kantvai.media.player.KANTVLog;
 import kantvai.media.player.KANTVUtils;
-import skin.support.SkinCompatManager;
-import skin.support.observe.SkinObservable;
-import skin.support.observe.SkinObserver;
-
+import kantvai.tool.skinsupport.SkinCompatManager;
+import kantvai.tool.skinsupport.app.SkinAppCompatDelegateImpl;
+import kantvai.tool.skinsupport.observe.SkinObservable;
+import kantvai.tool.skinsupport.observe.SkinObserver;
 
 /**
  * onCreate()

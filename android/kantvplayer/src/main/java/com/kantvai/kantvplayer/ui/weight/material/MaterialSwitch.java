@@ -7,12 +7,11 @@ import android.util.AttributeSet;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.kantvai.kantvplayer.R;
 
-import skin.support.content.res.SkinCompatResources;
-import skin.support.widget.SkinCompatBackgroundHelper;
-import skin.support.widget.SkinCompatSupportable;
-import skin.support.widget.SkinCompatTextHelper;
-
-import static skin.support.widget.SkinCompatHelper.INVALID_ID;
+import kantvai.tool.skinsupport.content.res.SkinCompatResources;
+import kantvai.tool.skinsupport.widget.SkinCompatBackgroundHelper;
+import kantvai.tool.skinsupport.widget.SkinCompatSupportable;
+import kantvai.tool.skinsupport.widget.SkinCompatTextHelper;
+import static kantvai.tool.skinsupport.widget.SkinCompatHelper.INVALID_ID;
 
 public class MaterialSwitch extends SwitchMaterial implements SkinCompatSupportable {
 

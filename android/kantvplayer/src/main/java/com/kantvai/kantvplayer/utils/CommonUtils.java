@@ -33,7 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
 
-import skin.support.content.res.SkinCompatResources;
+import kantvai.tool.skinsupport.content.res.SkinCompatResources;
 
 //TODO:merge code to KANTVUtils.java
 public class CommonUtils {

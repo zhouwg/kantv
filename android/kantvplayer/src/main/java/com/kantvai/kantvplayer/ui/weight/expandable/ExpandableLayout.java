@@ -15,7 +15,7 @@ import android.widget.LinearLayout;
 
 import com.kantvai.kantvplayer.R;
 
-import skin.support.widget.SkinCompatFrameLayout;
+import kantvai.tool.skinsupport.widget.SkinCompatFrameLayout;
 
 /**
  * copyright https://github.com/cachapa/ExpandableLayout

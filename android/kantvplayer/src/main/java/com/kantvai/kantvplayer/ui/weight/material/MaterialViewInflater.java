@@ -6,7 +6,8 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import skin.support.design.app.SkinMaterialViewInflater;
+import kantvai.tool.skinsupport.design.app.SkinMaterialViewInflater;
+
 
 public class MaterialViewInflater extends SkinMaterialViewInflater {
     @Override

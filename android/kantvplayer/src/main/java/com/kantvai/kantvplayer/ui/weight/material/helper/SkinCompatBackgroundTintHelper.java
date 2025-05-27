@@ -6,7 +6,8 @@ import android.view.View;
 
 import com.kantvai.kantvplayer.R;
 
-import skin.support.widget.SkinCompatBackgroundHelper;
+import kantvai.media.player.KANTVLog;
+import kantvai.tool.skinsupport.widget.SkinCompatBackgroundHelper;
 
 public class SkinCompatBackgroundTintHelper extends SkinCompatBackgroundHelper {
     private View mView;
@@ -21,16 +22,17 @@ public class SkinCompatBackgroundTintHelper extends SkinCompatBackgroundHelper {
         super.loadFromAttributes(attrs, defStyleAttr);
         TypedArray array = mView.getContext().obtainStyledAttributes(attrs, R.styleable.ViewBackgroundHelper,defStyleAttr,0);
         if (array.hasValue(R.styleable.ViewBackgroundHelper_backgroundTint)) {
-//            backgroundTintId = array.getResourceId(R.styleable.ViewBackgroundHelper,)
+            KANTVLog.g("SkinCompatBackgroundTintHelper", "not supported");
+            //backgroundTintId = array.getResourceId(R.styleable.ViewBackgroundHelper,)
         }
     }
 
     @Override
     public void applySkin() {
         super.applySkin();
+        KANTVLog.g("SkinCompatBackgroundTintHelper", "not supported");
         if (backgroundTintId != INVALID_ID) {
-
-//            mView.setBackgroundTintList();
+           //mView.setBackgroundTintList();
         }
     }
 }

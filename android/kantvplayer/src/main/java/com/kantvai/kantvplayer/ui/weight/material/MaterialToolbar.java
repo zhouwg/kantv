@@ -7,8 +7,8 @@ import androidx.annotation.Nullable;
 
 import com.kantvai.kantvplayer.R;
 
-import skin.support.widget.SkinCompatBackgroundHelper;
-import skin.support.widget.SkinCompatSupportable;
+import kantvai.tool.skinsupport.widget.SkinCompatBackgroundHelper;
+import kantvai.tool.skinsupport.widget.SkinCompatSupportable;
 
 public class MaterialToolbar extends com.google.android.material.appbar.MaterialToolbar implements SkinCompatSupportable {
     private SkinCompatBackgroundHelper backgroundHelper;
