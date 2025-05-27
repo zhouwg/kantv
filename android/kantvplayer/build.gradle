@@ -196,12 +196,12 @@ dependencies {
     implementation "io.noties.markwon:ext-tables:4.6.2"
 
     //TODO
-    implementation "skin.support:skin-support:$skin_support_version"
-    implementation "skin.support:skin-support-appcompat:$skin_support_version"
-    implementation "skin.support:skin-support-design:$skin_support_version"
-    implementation "skin.support:skin-support-cardview:$skin_support_version"
-    implementation "skin.support:skin-support-constraint-layout:$skin_support_version"
-    implementation 'skin.support:flycotablayout:2.1.2.2'
+    //implementation "skin.support:skin-support:$skin_support_version"
+    //implementation "skin.support:skin-support-appcompat:$skin_support_version"
+    //implementation "skin.support:skin-support-design:$skin_support_version"
+    //implementation "skin.support:skin-support-cardview:$skin_support_version"
+    //implementation "skin.support:skin-support-constraint-layout:$skin_support_version"
+    //implementation 'skin.support:flycotablayout:2.1.2.2'
 
     //TODO
     //https://github.com/CymChad/BaseRecyclerViewAdapterHelper
