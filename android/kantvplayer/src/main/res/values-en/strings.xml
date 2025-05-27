@@ -215,5 +215,7 @@
 
     <string name="crash_details">Crash Details</string>
     <string name="copy_crashdetails">Copy Crash Logs</string>
+    <string name="crash_tipinfo">An unexpected error occurred\nSorry for the inconvenience\n</string>
+    <string name="restart_app">Restart APP</string>
 
 </resources>

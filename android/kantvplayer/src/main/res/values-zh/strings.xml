@@ -215,5 +215,7 @@
 
     <string name="crash_details">错误详情</string>
     <string name="copy_crashdetails">复制日志</string>
+    <string name="crash_tipinfo">发生意外错误\n很抱歉，给您带来不便\n</string>
+    <string name="restart_app">重新启动</string>
 
 </resources>

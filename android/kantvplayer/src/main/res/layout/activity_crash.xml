@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:gravity="center"
-        android:text="An unexpected error occurred\nSorry for the inconvenience\n"
+        android:text="@string/crash_tipinfo"
         android:textColor="@color/immutable_text_black"
         android:textSize="18sp"
         android:textStyle="bold" />
@@ -33,7 +33,7 @@
             android:layout_height="46dp"
             android:layout_marginEnd="10dp"
             android:background="@drawable/btn_corner_blue"
-            android:text="Restart APP"
+            android:text="@string/restart_app"
             android:textColor="@color/immutable_text_white"
             android:textSize="14sp" />
 
@@ -43,7 +43,7 @@
             android:layout_height="46dp"
             android:layout_marginStart="10dp"
             android:background="@drawable/btn_corner_blue"
-            android:text="Error Log"
+            android:text="@string/crash_details"
             android:textColor="@color/immutable_text_white"
             android:textSize="14sp" />
     </LinearLayout>
