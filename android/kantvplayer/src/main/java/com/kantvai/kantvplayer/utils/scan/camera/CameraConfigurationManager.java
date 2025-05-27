@@ -23,7 +23,7 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import com.blankj.utilcode.util.ScreenUtils;
+import kantvai.tool.blankj.utilcode.util.ScreenUtils;
 import com.kantvai.kantvplayer.utils.scan.camera.open.CameraFacing;
 import com.kantvai.kantvplayer.utils.scan.camera.open.OpenCamera;
 import com.kantvai.kantvplayer.utils.scan.view.SimpleLog;

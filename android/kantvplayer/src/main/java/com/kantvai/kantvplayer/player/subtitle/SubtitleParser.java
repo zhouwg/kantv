@@ -1,7 +1,7 @@
 package com.kantvai.kantvplayer.player.subtitle;
 
-import com.blankj.utilcode.util.StringUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.player.subtitle.util.FatalParsingException;
 import com.kantvai.kantvplayer.player.subtitle.util.SubtitleFormat;
 import com.kantvai.kantvplayer.player.subtitle.util.TimedTextFileFormat;

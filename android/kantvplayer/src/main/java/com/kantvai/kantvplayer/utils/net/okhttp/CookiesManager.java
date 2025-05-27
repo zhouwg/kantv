@@ -2,7 +2,7 @@ package com.kantvai.kantvplayer.utils.net.okhttp;
 
 import android.content.Context;
 
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 
 import java.util.List;
 

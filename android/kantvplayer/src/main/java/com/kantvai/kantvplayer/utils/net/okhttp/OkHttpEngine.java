@@ -2,7 +2,7 @@ package com.kantvai.kantvplayer.utils.net.okhttp;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 import com.kantvai.kantvplayer.app.IApplication;
 import com.kantvai.kantvplayer.utils.interf.Engine;
 

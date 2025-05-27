@@ -13,8 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.base.BaseMvpActivity;
 import com.kantvai.kantvplayer.base.BaseRvAdapter;

@@ -2,7 +2,7 @@ package com.kantvai.kantvplayer.player.subtitle;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.ConvertUtils;
+import kantvai.tool.blankj.utilcode.util.ConvertUtils;
 import com.kantvai.kantvplayer.player.subtitle.util.Caption;
 import com.kantvai.kantvplayer.player.subtitle.util.TimedTextObject;
 

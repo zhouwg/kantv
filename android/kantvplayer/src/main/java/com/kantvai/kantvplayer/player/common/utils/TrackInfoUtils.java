@@ -2,7 +2,7 @@ package com.kantvai.kantvplayer.player.common.utils;
 
 import android.text.TextUtils;
 
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 
 
 

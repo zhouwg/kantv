@@ -14,9 +14,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.blankj.utilcode.util.AppUtils;
-import com.blankj.utilcode.util.ServiceUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.AppUtils;
+import kantvai.tool.blankj.utilcode.util.ServiceUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.gyf.immersionbar.ImmersionBar;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.utils.CommonUtils;

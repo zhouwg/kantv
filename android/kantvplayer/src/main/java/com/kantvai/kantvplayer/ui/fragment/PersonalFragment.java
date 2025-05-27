@@ -19,7 +19,7 @@
  import androidx.annotation.NonNull;
  import androidx.appcompat.app.AppCompatActivity;
 
- import com.blankj.utilcode.util.ConvertUtils;
+ import kantvai.tool.blankj.utilcode.util.ConvertUtils;
  import com.kantvai.kantvplayer.ui.activities.personal.CustomEPGListActivity;
  import com.kantvai.kantvplayer.ui.fragment.settings.LLMSettingFragment;
  import com.kantvai.kantvplayer.ui.fragment.settings.SystemSettingFragment;

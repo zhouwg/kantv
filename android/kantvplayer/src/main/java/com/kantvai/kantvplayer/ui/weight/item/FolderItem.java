@@ -4,8 +4,8 @@ import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.bean.FolderBean;
 import com.kantvai.kantvplayer.utils.AppConfig;

@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 
 import com.kantvai.kantvplayer.base.BaseRvAdapter;
 import com.kantvai.kantvplayer.bean.FileManagerBean;

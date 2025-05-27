@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.AppUtils;
+import kantvai.tool.blankj.utilcode.util.AppUtils;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.base.BaseMvpActivity;
 import com.kantvai.kantvplayer.mvp.impl.SplashPresenterImpl;

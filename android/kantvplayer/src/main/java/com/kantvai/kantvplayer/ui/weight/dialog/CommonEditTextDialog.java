@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.KeyboardUtils;
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.KeyboardUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 import com.google.android.material.textfield.TextInputLayout;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.ui.activities.play.PlayerManagerActivity;

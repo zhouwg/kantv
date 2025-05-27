@@ -1,6 +1,6 @@
 package com.kantvai.kantvplayer.utils;
 
-import com.blankj.utilcode.util.SPUtils;
+import kantvai.tool.blankj.utilcode.util.SPUtils;
 
 //TODO: merge code to Settings.java
 public class AppConfig {

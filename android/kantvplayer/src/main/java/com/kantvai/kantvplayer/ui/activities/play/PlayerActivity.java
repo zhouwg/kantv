@@ -16,9 +16,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.bean.event.SendMsgEvent;
 import com.kantvai.kantvplayer.ui.fragment.LocalMediaFragment;
 import com.kantvai.kantvplayer.utils.Settings;

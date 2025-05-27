@@ -4,8 +4,8 @@ import android.os.Bundle;
 
 import androidx.lifecycle.LifecycleOwner;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 import com.kantvai.kantvplayer.app.IApplication;
 import com.kantvai.kantvplayer.base.BaseMvpPresenterImpl;
 import com.kantvai.kantvplayer.mvp.presenter.MainPresenter;

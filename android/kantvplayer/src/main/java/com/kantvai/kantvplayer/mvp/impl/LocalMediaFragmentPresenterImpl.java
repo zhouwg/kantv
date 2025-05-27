@@ -11,8 +11,8 @@ import android.provider.MediaStore;
 
 import androidx.lifecycle.LifecycleOwner;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 import com.kantvai.kantvplayer.app.IApplication;
 import com.kantvai.kantvplayer.base.BaseMvpPresenterImpl;
 import com.kantvai.kantvplayer.bean.FolderBean;

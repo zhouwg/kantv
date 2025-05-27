@@ -1,7 +1,7 @@
 package com.kantvai.kantvplayer.utils.net;
 
-import com.blankj.utilcode.util.LogUtils;
-import com.blankj.utilcode.util.NetworkUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.NetworkUtils;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;

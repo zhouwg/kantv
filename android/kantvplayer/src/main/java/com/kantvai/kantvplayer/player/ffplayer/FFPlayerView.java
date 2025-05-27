@@ -48,10 +48,10 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.SPUtils;
-import com.blankj.utilcode.util.StringUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.ConvertUtils;
+import kantvai.tool.blankj.utilcode.util.SPUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.player.common.widgets.CaptionStyleCompat;
 import com.kantvai.kantvplayer.player.ffplayer.media.VoisePlayingIcon;
 import com.kantvai.kantvplayer.R;

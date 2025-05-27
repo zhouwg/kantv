@@ -5,7 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
 import com.kantvai.kantvplayer.R;
 
 public class BaseLoadingDialog extends Dialog {

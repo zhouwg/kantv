@@ -16,7 +16,7 @@ import androidx.multidex.MultiDex;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.blankj.utilcode.util.Utils;
+import kantvai.tool.blankj.utilcode.util.Utils;
 import com.kantvai.kantvplayer.BuildConfig;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.player.common.utils.PlayerConfigShare;

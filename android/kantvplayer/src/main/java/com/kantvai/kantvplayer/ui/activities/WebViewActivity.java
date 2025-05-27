@@ -32,9 +32,9 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.widget.Toolbar;
 
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.StringUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.ConvertUtils;
+import kantvai.tool.blankj.utilcode.util.StringUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.R;
 import com.kantvai.kantvplayer.base.BaseMvcActivity;
 import com.kantvai.kantvplayer.ui.weight.ProgressView;

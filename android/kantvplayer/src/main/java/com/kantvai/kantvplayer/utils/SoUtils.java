@@ -2,7 +2,7 @@ package com.kantvai.kantvplayer.utils;
 
 import android.content.Context;
 
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.app.IApplication;
 
 

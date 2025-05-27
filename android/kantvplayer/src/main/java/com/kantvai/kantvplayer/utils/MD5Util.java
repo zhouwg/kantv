@@ -2,8 +2,8 @@ package com.kantvai.kantvplayer.utils;
 
 import android.media.MediaPlayer;
 
-import com.blankj.utilcode.util.FileUtils;
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 
 import java.io.File;
 import java.io.FileInputStream;

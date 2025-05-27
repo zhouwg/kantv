@@ -1,6 +1,6 @@
 package com.kantvai.kantvplayer.utils.scan.view;
 
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 
 public class SimpleLog {
 

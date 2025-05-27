@@ -21,8 +21,8 @@ package com.kantvai.kantvplayer.ui.activities;
  import androidx.appcompat.app.ActionBar;
  import androidx.fragment.app.FragmentTransaction;
 
- import com.blankj.utilcode.util.AppUtils;
- import com.blankj.utilcode.util.ToastUtils;
+ import kantvai.tool.blankj.utilcode.util.AppUtils;
+ import kantvai.tool.blankj.utilcode.util.ToastUtils;
  import com.google.android.material.bottomnavigation.BottomNavigationView;
  import com.kantvai.kantvplayer.R;
  import com.kantvai.kantvplayer.app.IApplication;

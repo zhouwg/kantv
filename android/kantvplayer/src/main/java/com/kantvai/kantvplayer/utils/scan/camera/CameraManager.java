@@ -22,7 +22,7 @@ import android.graphics.RectF;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.google.zxing.PlanarYUVLuminanceSource;
 import com.kantvai.kantvplayer.utils.scan.camera.open.OpenCamera;
 import com.kantvai.kantvplayer.utils.scan.camera.open.OpenCameraInterface;

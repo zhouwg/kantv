@@ -1,7 +1,7 @@
 package com.kantvai.kantvplayer.utils.net.okhttp;
 
 
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

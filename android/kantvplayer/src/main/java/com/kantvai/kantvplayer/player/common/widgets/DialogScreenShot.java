@@ -15,8 +15,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.ToastUtils;
+import kantvai.tool.blankj.utilcode.util.ConvertUtils;
+import kantvai.tool.blankj.utilcode.util.ToastUtils;
 import com.kantvai.kantvplayer.R;
 
 import java.io.File;

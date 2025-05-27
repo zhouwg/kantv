@@ -5,7 +5,7 @@ import android.app.ProgressDialog;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.blankj.utilcode.util.LogUtils;
+import kantvai.tool.blankj.utilcode.util.LogUtils;
 import com.google.gson.JsonSyntaxException;
 
 import java.net.SocketTimeoutException;

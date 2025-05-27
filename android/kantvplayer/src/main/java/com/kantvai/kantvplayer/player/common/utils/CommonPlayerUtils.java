@@ -7,7 +7,7 @@ import androidx.annotation.ColorRes;
 import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 
-import com.blankj.utilcode.util.FileUtils;
+import kantvai.tool.blankj.utilcode.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
