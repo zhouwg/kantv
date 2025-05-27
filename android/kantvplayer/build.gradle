@@ -128,7 +128,6 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.9.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.12.0'
     implementation "androidx.preference:preference:1.2.1"
     implementation "androidx.legacy:legacy-support-core-ui:1.0.0"
     implementation "androidx.fragment:fragment:1.8.7"
@@ -136,6 +135,7 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:1.1.0"
     implementation 'androidx.multidex:multidex:2.0.1'
     //implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'com.google.zxing:core:3.5.3'
 
     //https://github.com/alibaba/fastjson2
@@ -178,13 +178,8 @@ dependencies {
     implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
     //https://github.com/Ereza/CustomActivityOnCrash
     implementation 'cat.ereza:customactivityoncrash:2.4.0'
-    //https://github.com/youth5201314/banner
-    //implementation 'io.github.youth5201314:banner:2.2.3'
-    implementation 'com.youth.banner:banner:1.4.10'
     //https://github.com/Bigkoo/Android-PickerView
     implementation 'com.contrarywind:Android-PickerView:4.1.9'
-    //https://github.com/H07000223/FlycoTabLayout
-    implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
     //https://github.com/JakeWharton/butterknife
     implementation 'com.jakewharton:butterknife:10.2.3'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
@@ -193,6 +188,15 @@ dependencies {
     implementation "io.noties.markwon:core:4.6.2"
     implementation "io.noties.markwon:ext-strikethrough:4.6.2"
     implementation "io.noties.markwon:ext-tables:4.6.2"
+
+    //TODO
+    //https://github.com/H07000223/FlycoTabLayout
+    implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
+
+    //TODO
+    //https://github.com/youth5201314/banner
+    //implementation 'io.github.youth5201314:banner:2.2.3'
+    implementation 'com.youth.banner:banner:1.4.10'
 
     //TODO
     //https://github.com/CymChad/BaseRecyclerViewAdapterHelper
