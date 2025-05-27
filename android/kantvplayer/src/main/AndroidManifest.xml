@@ -105,15 +105,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize" >
         </activity>
 
-        <!--
-        //not used since 05/26/2025
-        <activity
-            android:name="com.tencent.bugly.beta.ui.BetaActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|locale"
-            android:theme="@android:style/Theme.Translucent" >
-        </activity>
-        -->
-
         <activity
             android:name="com.kantvai.kantvplayer.ui.activities.play.PlayerManagerActivity"
             android:configChanges="orientation|keyboardHidden"

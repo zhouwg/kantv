@@ -100,10 +100,6 @@ public class IApplication extends Application {
                 .errorActivity(CrashActivity.class)
                 .apply();
 
-
-        //not used since 05/26/2025
-        //Bugly.init(getApplicationContext(), SoUtils.getInstance().getBuglyAppId(), false);
-
         DataBaseManager.init(this);
 
         PlayerConfigShare.initPlayerConfigShare(this);

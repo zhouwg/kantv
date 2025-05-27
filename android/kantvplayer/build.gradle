@@ -138,9 +138,6 @@ dependencies {
     //implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
     implementation 'com.google.zxing:core:3.5.3'
 
-    //not used since 05/26/2025
-    //implementation 'com.tencent.bugly:crashreport_upgrade:latest.release'
-    //implementation 'com.tencent.bugly:nativecrashreport:latest.release'
     //https://github.com/alibaba/fastjson2
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
     //https://github.com/greenrobot/EventBus
