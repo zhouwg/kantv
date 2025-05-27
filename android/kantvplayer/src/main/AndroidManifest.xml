@@ -106,6 +106,7 @@
         </activity>
 
         <!--
+        //not used since 05/26/2025
         <activity
             android:name="com.tencent.bugly.beta.ui.BetaActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|locale"

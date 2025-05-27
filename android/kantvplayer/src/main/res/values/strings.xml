@@ -213,4 +213,7 @@
     <string name="personal_center">Person Center</string>
     <string name="key_press_warning">Exit app when press anykey</string>
 
+    <string name="crash_details">Crash Details</string>
+    <string name="copy_crashdetails">Copy Crash Logs</string>
+
 </resources>
