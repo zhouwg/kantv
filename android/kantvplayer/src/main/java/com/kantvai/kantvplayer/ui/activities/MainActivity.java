@@ -21,6 +21,7 @@ package com.kantvai.kantvplayer.ui.activities;
  import androidx.appcompat.app.ActionBar;
  import androidx.fragment.app.FragmentTransaction;
 
+ import kantvai.ai.ggmljava;
  import kantvai.tool.blankj.utilcode.util.AppUtils;
  import kantvai.tool.blankj.utilcode.util.ToastUtils;
  import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -175,6 +176,9 @@ package com.kantvai.kantvplayer.ui.activities;
     public void initListener() {
         navigationView.setOnNavigationItemSelectedListener(item -> {
             KANTVLog.g(TAG, "System.currentTimeMillis() - switchTime " + (System.currentTimeMillis() - switchTime));
+            //FIXME:add following line to fix a random bug, this is dirty method
+            ggmljava.inference_stop_inference();
+
             if (previousMenuItem != null) {
                 //FIXME:workaround to fix potential issue when stablediffusion inference is running
                 if (previousMenuItem.getItemId() == R.id.navigation_asr) {
