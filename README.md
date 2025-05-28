@@ -157,6 +157,10 @@ comment out this section because some contributors in the upstream project might
    CV engine <a href="https://github.com/nihui/opencv-mobile">opencv-mobile</a>
   </li>
 
+  <li>
+   MTMD(multimodal) engine <a href="https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md">MTMD subsystem in llama.cpp</a>
+  </li>
+
   </ul>
 
   </ul>
