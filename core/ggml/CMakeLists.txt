@@ -228,6 +228,7 @@ set(SOURCE_FILES
 
         ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd.cpp
         ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-helper.cpp
+        ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-audio.cpp
         ${LLAMACPP_SRC_DIR}/tools/mtmd/clip.cpp
         ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-cli.cpp
 

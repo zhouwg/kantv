@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// !!! Internal header, to be used by mtmd only !!!
+
 struct clip_ctx;
 
 struct clip_image_size {
@@ -15,12 +17,22 @@ struct clip_image_f32;
 struct clip_image_u8_batch;
 struct clip_image_f32_batch;
 
+enum clip_modality {
+    CLIP_MODALITY_VISION,
+    CLIP_MODALITY_AUDIO,
+};
+
 struct clip_context_params {
     bool use_gpu;
     enum ggml_log_level verbosity;
 };
 
-struct clip_ctx * clip_init(const char * fname, struct clip_context_params ctx_params);
+struct clip_init_result {
+    struct clip_ctx * ctx_v; // vision context
+    struct clip_ctx * ctx_a; // audio context
+};
+
+struct clip_init_result clip_init(const char * fname, struct clip_context_params ctx_params);
 
 void clip_free(struct clip_ctx * ctx);
 
@@ -46,10 +58,6 @@ int clip_n_output_tokens_y(const struct clip_ctx * ctx, struct clip_image_f32 * 
 
 // this should be equal to the embedding dimension of the text model
 int clip_n_mmproj_embd(const struct clip_ctx * ctx);
-
-int clip_uhd_num_image_embeds_col(struct clip_ctx * ctx_clip);
-void clip_add_load_image_size(struct clip_ctx * ctx_clip, struct clip_image_size * load_image_size);
-struct clip_image_size * clip_get_load_image_size(struct clip_ctx * ctx_clip);
 
 struct clip_image_size      * clip_image_size_init(void);
 struct clip_image_u8        * clip_image_u8_init (void);
@@ -97,3 +105,10 @@ bool clip_is_llava(const struct clip_ctx * ctx);
 bool clip_is_gemma3(const struct clip_ctx * ctx);
 
 bool clip_encode_float_image (struct clip_ctx * ctx, int n_threads, float * img, int h, int w, float * vec);
+
+// use by audio input
+void clip_image_f32_batch_add_mel(struct clip_image_f32_batch * batch, int n_mel, int n_frames, float * mel);
+
+bool clip_has_vision_encoder(const struct clip_ctx * ctx);
+bool clip_has_audio_encoder(const struct clip_ctx * ctx);
+bool clip_has_whisper_encoder(const struct clip_ctx * ctx);
