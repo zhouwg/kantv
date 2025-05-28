@@ -282,7 +282,7 @@
 
     <string name="pref_key_cleanupcache">pref.cleanupcache</string>
     <string name="pref_title_cleanupcache">Cleanup Cache</string>
-    <string name="pref_summary_cleanupcache">pleas restart app after cleanup cache</string>
+    <string name="pref_summary_cleanupcache">please restart app after cleanup cache</string>
 
     <string name="pref_key_rtmpserver">pref.rtmpserver</string>
     <string name="pref_title_rtmpserver">RTMP Server</string>
@@ -580,6 +580,23 @@
         <item>Gemma3-4B</item>
         <item>Gemma3-12B</item>
     </string-array>
+
+
+    <string name="pref_key_hfendpoint">pref.hfendpoint</string>
+    <string name="pref_title_hfendpoint">Choose HF Endpoint</string>
+    <string-array name="pref_entries_hfendpoint">
+        <item>https://huggingface.co/</item>
+        <item>https://hf-mirror.com/</item>
+    </string-array>
+    <string-array name="pref_entry_values_hfendpoint">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_hfendpoint">
+        <item>official hf site</item>
+        <item>mirror hf site in China</item>
+    </string-array>
+
 
     <string name="pref_title_LLMmodel"></string>
     <string name="pref_key_downloadLLMmodel">pref.downloadLLMmodel</string>

@@ -375,6 +375,9 @@ public class IApplication extends Application {
         String modelPath = KANTVUtils.getDataPath(mContext) + "ggml-" + KANTVAIUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
         KANTVLog.j(TAG, "modelPath:" + modelPath);
 
+        KANTVLog.g(TAG, "hf endpoint: " + mSettings.getHFEndpoint());
+        KANTVAIUtils.setHFEndpoint(mSettings.getHFEndpoint());
+
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         try {
             int result = 0;

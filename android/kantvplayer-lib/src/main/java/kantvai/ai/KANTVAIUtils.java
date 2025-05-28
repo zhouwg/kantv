@@ -48,6 +48,7 @@ import kantvai.media.player.KANTVLog;
     public static final long DOWNLOAD_SIZE_CHECK_RANGE      = 700 * 1024 * 1024L;
 
 
+    private static int mHFEndpoint = 0;
      //=============================================================================================
      //add new AI benchmark type / new backend / new realtime inference type for GGML/NCNN here
      //
@@ -332,5 +333,28 @@ import kantvai.media.player.KANTVLog;
 
      public static void setLLMTopP(float top_p) {
          ggmljava.setLLMTopP(top_p);
+     }
+
+     public static String getHFEndPointUrl(int hf_endpoint) {
+         if ((0 != hf_endpoint) && (1 != hf_endpoint)) {
+             return "https://huggingface.co/";
+         }
+
+         switch (hf_endpoint) {
+             case 0:
+                 return "https://huggingface.co/"; //the official default HuggingFace site
+             case 1:
+                 return "https://hf-mirror.com/";  //the mirror HuggingFace site in China
+         }
+
+         return "https://huggingface.co/";
+     }
+
+     public static void setHFEndpoint(int hfEndpoint) {
+         mHFEndpoint = hfEndpoint;
+     }
+
+     public static int getHFEndpoint() {
+         return mHFEndpoint;
      }
 }

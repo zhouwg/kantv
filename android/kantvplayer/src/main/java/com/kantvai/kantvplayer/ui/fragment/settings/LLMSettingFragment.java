@@ -179,6 +179,11 @@
                  KANTVAIUtils.setLLMTopP(realvalue);
              }
 
+             if (key.contains("pref.hfendpoint")) {
+                 int value = mSettings.getHFEndpoint();
+                 KANTVLog.g(TAG, "hfendpoint:" + value);
+                 KANTVAIUtils.setHFEndpoint(value);
+             }
          }
      };
 

@@ -186,15 +186,17 @@ public class KANTVAIModelMgr {
          return AIModels[index + NON_LLM_MODEL_COUNTS].getMMprojSize();
      }
 
-     //how to convert safetensors to GGUF and quantize LLM model:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
      private void initAIModels() {
-         String hf_endpoint = "https://huggingface.co/";
+         String hf_endpoint = "https://huggingface.co/"; //the official default HuggingFace site
          KANTVLog.g(TAG, "init AI Models");
          Locale local = Locale.getDefault();
          String language = local.getLanguage();
          KANTVLog.g(TAG, "language " + language);
-         if (language.equals("zh")) {
-             hf_endpoint = "https://hf-mirror.com/";
+         int hfendpoint = KANTVAIUtils.getHFEndpoint();
+         KANTVLog.g(TAG, "hfendpoint " + hfendpoint);
+         //if (language.equals("zh") || (1 == hfendpoint)) {
+         if (1 == hfendpoint) {
+             hf_endpoint = "https://hf-mirror.com/"; //the mirror HuggingFace site in China
          }
 
          try {
@@ -310,18 +312,6 @@ public class KANTVAIModelMgr {
          );
          */
 
-         /* //much worse than SmolVLM2-256M in realtime-video-inference
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "moondream2-20250414-GGUF",
-                 "moondream2-text-model-f16_ct-vicuna.gguf",
-                 "moondream2-mmproj-f16-20250414.gguf",
-                 hf_endpoint + "ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-text-model-f16_ct-vicuna.gguf?download=true",
-                 hf_endpoint + "ggml-org/moondream2-20250414-GGUF/resolve/main/moondream2-mmproj-f16-20250414.gguf?download=true",
-                 2839535072L,
-                 909777984L
-         );
-         */
-
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models
          //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + all LLM models + others)
          arrayModelName = new String[modelCounts];
@@ -336,16 +326,5 @@ public class KANTVAIModelMgr {
          //UT for download the default LLM model in APK
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
          //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
-
-         //UT for download Qwen2.5-VL-3B from huggingface's mirror site, validate ok although it seems that this site is not stable
-         //if (getKANTVAIModelFromName("Qwen2.5-VL-3B") != null) {
-         //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/Qwen2.5-VL-3B-Instruct-Q4_K_M.gguf?download=true");
-         //    getKANTVAIModelFromName("Qwen2.5-VL-3B").setMMprojUrl("https://hf-mirror.com/ggml-org/Qwen2.5-VL-3B-Instruct-GGUF/resolve/main/mmproj-Qwen2.5-VL-3B-Instruct-Q8_0.gguf?download=true");
-         //}
-
-         //UT for download Qwen3-14B from huggingface's mirror site, validate ok although it seems that this site is not stable
-         //if (getKANTVAIModelFromName("Qwen3-14B") != null) {
-         //    getKANTVAIModelFromName("Qwen3-14B").setUrl("https://hf-mirror.com/Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true");
-         //}
      }
  }

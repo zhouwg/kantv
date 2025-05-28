@@ -187,10 +187,6 @@ dependencies {
     implementation "io.noties.markwon:ext-strikethrough:4.6.2"
     implementation "io.noties.markwon:ext-tables:4.6.2"
 
-    //TODO: SEND_SMS...
-    //https://github.com/Blankj/AndroidUtilCode
-    //implementation 'com.blankj:utilcodex:1.31.1'
-
     //TODO
     //https://github.com/H07000223/FlycoTabLayout
     implementation 'io.github.h07000223:flycoTabLayout:3.0.0'

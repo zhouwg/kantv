@@ -482,6 +482,18 @@ public class Settings {
         }
     }
 
+
+    public int getHFEndpoint() {
+        String key = mAppContext.getString(R.string.pref_key_hfendpoint);
+        String value = mSharedPreferences.getString(key, "0"); //default is official HuggingFace site
+        try {
+            return Integer.valueOf(value);
+        } catch (Exception e) {
+            KANTVLog.j(TAG, "exception occurred");
+            return 0;
+        }
+    }
+
     public boolean getHexagonEnabled() {
         return true;
     }

@@ -7499,7 +7499,7 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
 }
 
 /**
- * helper function to performan llava(multimodal) inference in native layer
+ * helper function to perform llava(multimodal) inference in native layer
  * @param sz_model_path
  * @param sz_mmproj_model_path
  * @param img_path
@@ -7595,8 +7595,8 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
     const char *argv[] = {"sd-inference-main",
                           "-m", sz_model_path,
                           "-p", sz_user_data,
-                          "--width", "64", /* hardcode to 64, it should be suitable for poster of a specified online-TV program */
-                          "--height", "64",
+                          "--width", "512",
+                          "--height", "512",
                           "-t", std::to_string(n_threads).c_str()
     };
     inference_init_running_state();
