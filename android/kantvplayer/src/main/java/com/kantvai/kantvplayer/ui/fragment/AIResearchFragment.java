@@ -121,7 +121,7 @@
 
      private String selectModeFileName = "";
      private Bitmap bitmapSelectedImage = null;
-     private String pathSelectedImage = "";
+     private String pathSelectedMedia = "";
 
      private long beginTime = 0;
      private long endTime = 0;
@@ -135,8 +135,7 @@
      private boolean isASRModel = false;
 
      //05-25-2024, add for MiniCPM-V(A GPT-4V Level Multimodal LLM, https://github.com/OpenBMB/MiniCPM-V) or other GPT-4o style Multimodal LLM)
-     private boolean isLLMVModel = false; //A GPT-4V style multimodal LLM
-     private boolean isLLMOModel = false; //A GPT-4o style multimodal LLM
+     private boolean isMTMDModel = false; // multimodal LLM
 
      private AtomicBoolean isBenchmarking = new AtomicBoolean(false);
      private ProgressDialog mProgressDialog;
@@ -403,11 +402,11 @@
                  }
 
                  //FIXME: refine logic here
-                 if ((pathSelectedImage != null) && (!pathSelectedImage.isEmpty())) {
-                     if (KANTVAIUtils.isLLMVModel(selectModeFileName)) {
-                         isLLMVModel = true;
-                         if (KANTVAIUtils.isAudioFile(pathSelectedImage)) {
-                             txtUserInput.setText("Pls help transcribe this file:" + pathSelectedImage);
+                 if ((pathSelectedMedia != null) && (!pathSelectedMedia.isEmpty())) {
+                     if (KANTVAIUtils.isMTMDModel(selectModeFileName)) {
+                         isMTMDModel = true;
+                         if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
+                             txtUserInput.setText("Pls help transcribe this file:" + pathSelectedMedia);
                          } else {
                              txtUserInput.setText("What is in the image?");
                          }
@@ -422,7 +421,7 @@
                      }
                  }
 
-                 if ((!isMNISTModel) && (!isLLMVModel) && (!isLLMOModel)) {
+                 if ((!isMNISTModel) && (!isMTMDModel)) {
                      if (ivInfo != null) {
                          ivInfo.setVisibility(View.INVISIBLE);
                          llInfoLayout.removeView(ivInfo);
@@ -430,9 +429,9 @@
                      }
                  }
 
-                 if (isLLMVModel || isLLMOModel) {
-                     if (KANTVAIUtils.isImageFile(pathSelectedImage)) {
-                         if ((bitmapSelectedImage == null) || (pathSelectedImage.isEmpty())) {
+                 if (isMTMDModel) {
+                     if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
+                         if ((bitmapSelectedImage == null) || (pathSelectedMedia.isEmpty())) {
                              KANTVLog.j(TAG, "image is empty");
                              KANTVUtils.showMsgBox(mActivity, "please select a image for LLM multimodal inference");
                              return;
@@ -458,6 +457,27 @@
                  File sampleFile = new File(KANTVUtils.getDataPath() + ggmlSampleFileName);
                  if (!sampleFile.exists()) {
                      KANTVLog.j(TAG, "sample file not exist:" + sampleFile.getAbsolutePath());
+                 }
+
+                 //sanity check
+                 if (isMTMDModel) {
+                     if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
+                         if (!KANTVAIUtils.isMTMD_ImageModel(selectModeFile.getAbsolutePath())) {
+                             KANTVUtils.showMsgBox(mActivity, "selected image file " + pathSelectedMedia
+                                     + ", but the selected multimodal model:" + selectModeFile.getAbsolutePath() + " doesn't hava image capability"
+                             );
+                             return;
+                         }
+                     }
+
+                     if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
+                         if (!KANTVAIUtils.isMTMD_AudioModel(selectModeFile.getAbsolutePath())) {
+                             KANTVUtils.showMsgBox(mActivity, "selected audio file " + pathSelectedMedia
+                                     + ", but the selected multimodal model:" + selectModeFile.getAbsolutePath() + " doesn't hava audio capability"
+                             );
+                             return;
+                         }
+                     }
                  }
 
                  if (isASRModel) {
@@ -534,13 +554,13 @@
                      ggmljava.ggml_set_benchmark_status(0);
 
                      if (isLLMModel) {
-                         if (isLLMVModel) {
+                         if (isMTMDModel) {
                              //LLM multimodal inference
-                             KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedImage);
+                             KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedMedia);
                              strBenchmarkInfo = ggmljava.mtmd_inference(
                                      KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
                                      KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                     pathSelectedImage,
+                                     pathSelectedMedia,
                                      strUserInput,
                                      2,
                                      nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
@@ -706,7 +726,7 @@
                      //xiaomi14: image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
                      if (imgPath.startsWith("/raw/"))
                          imgPath = imgPath.substring(6);
-                     pathSelectedImage = imgPath;
+                     pathSelectedMedia = imgPath;
                      KANTVLog.g(TAG, "image path:" + imgPath);
                      displayImage(imgPath);
                  }
@@ -734,7 +754,7 @@
                  //xiaomi14: image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
                  if (audioPath.startsWith("/raw/"))
                      audioPath = audioPath.substring(6);
-                 pathSelectedImage = audioPath;
+                 pathSelectedMedia = audioPath;
                  KANTVLog.g(TAG, "audio path:" + audioPath);
                  displayAudio(audioPath);
              } catch (Exception exception) {
@@ -1039,21 +1059,21 @@
                  ivInfo = null;
              }
              bitmapSelectedImage = null;
-             pathSelectedImage = null;
+             pathSelectedMedia = null;
          } else {
              if (isMNISTModel) {
                  String imgPath = KANTVUtils.getDataPath() + ggmlMNISTImageFile;
                  displayImage(imgPath);
                  bitmapSelectedImage = null;
-                 pathSelectedImage = null;
+                 pathSelectedMedia = null;
              }
 
-             if (isLLMVModel) {
-                 if (pathSelectedImage != null && !pathSelectedImage.isEmpty()) {
-                     displayImage(pathSelectedImage);
+             if (isMTMDModel) {
+                 if (pathSelectedMedia != null && !pathSelectedMedia.isEmpty()) {
+                     displayImage(pathSelectedMedia);
                  }
                  bitmapSelectedImage = null;
-                 pathSelectedImage = null;
+                 pathSelectedMedia = null;
              }
 
              if (isSDModel) {
@@ -1070,8 +1090,7 @@
          isMNISTModel = false;
          isTTSModel = false;
          isASRModel = false;
-         isLLMVModel = false;
-         isLLMOModel = false;
+         isMTMDModel = false;
 
          selectModeFileName = "";
          strInferenceResult = "";

@@ -7545,7 +7545,7 @@ int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, 
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
     int argc = 11;
-    const char *argv[] = {"llava-inference-main",
+    const char *argv[] = {"mtmd-inference-main",
                           "-m", sz_model_path,
                           "--mmproj", sz_mmproj_model_path,
                           "--image", img_path,
@@ -7556,7 +7556,7 @@ int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, 
     ret = mtmd_inference_main(argc, const_cast<char **>(argv), n_backend_type);
     inference_reset_running_state();
 
-    LOGGD("llava_inference return %d", ret);
+    LOGGD("mtmd_inference return %d", ret);
     return ret;
 }
 

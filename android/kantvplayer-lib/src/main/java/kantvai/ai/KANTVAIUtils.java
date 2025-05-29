@@ -304,7 +304,7 @@ import kantvai.media.player.KANTVLog;
         return false;
     }
 
-    public static boolean isLLMVModel(String name) {
+    public static boolean isMTMDModel(String name) {
         String[] llmModels = {
                 "gemma-3",
                 "Qwen2.5-Omni-3B",
@@ -318,6 +318,32 @@ import kantvai.media.player.KANTVLog;
         }
         return false;
     }
+
+     public static boolean isMTMD_AudioModel(String name) {
+         String[] llmModels = {
+                 "Qwen2.5-Omni-3B",
+         };
+         for (int i = 0; i < llmModels.length; i++) {
+             if (name.contains(llmModels[i])) {
+                 return true;
+             }
+         }
+         return false;
+     }
+
+     public static boolean isMTMD_ImageModel(String name) {
+         String[] llmModels = {
+                 "gemma-3",
+                 "moondream2",
+                 "SmolVLM"
+         };
+         for (int i = 0; i < llmModels.length; i++) {
+             if (name.contains(llmModels[i])) {
+                 return true;
+             }
+         }
+         return false;
+     }
 
      public static boolean isAudioFile(String filename) {
          //naive method

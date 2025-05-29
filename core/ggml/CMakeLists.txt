@@ -230,7 +230,6 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-helper.cpp
         ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-audio.cpp
         ${LLAMACPP_SRC_DIR}/tools/mtmd/clip.cpp
-        ${LLAMACPP_SRC_DIR}/tools/mtmd/mtmd-cli.cpp
 
         ${WHISPERCPP_SRC_DIR}/whisper.cpp
 
@@ -246,6 +245,7 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/myndkcamera.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/bmp.c
         ${KANTV_GGMLJNI_SRC_DIR}/realtime-video-recognition.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/mtmd-inference.cpp
 )
 
 add_definitions(-DTARGET_ANDROID)
