@@ -68,7 +68,7 @@ static std::string fnv_hash(const uint8_t * data, size_t len) {
     return std::to_string(hash);
 }
 
-
+//ref:https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/mtmd-cli.cpp
 int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     common_params params;
     common_init_result llama_init;
