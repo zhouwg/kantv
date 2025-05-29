@@ -98,7 +98,6 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
 
     llama_tokens generated_tokens;
     int thread_counts = 4;
-    std::string prompt_str = "what do you see in this image?";
     thread_counts = std::thread::hardware_concurrency();
     int32_t tokenized = 0;
 
@@ -114,14 +113,14 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
 #else
         LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
         GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        return 2;
+        return 1;
 #endif
     } else {
         params.main_gpu = backend_type;
     }
     if (!common_params_parse(argc, const_cast<char **>(argv), params, LLAMA_EXAMPLE_MTMD)) {
         LOGGD("common params parse failure\n");
-        return 1;
+        return 2;
     }
     common_init();
 
@@ -169,29 +168,37 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     }
     LOGGD("loaded multimodal model, '%s'\n", mmproj_path.c_str());
 
-    //step-4: load image from memory
-    //mtmd_bitmap * bitmap = mtmd_bitmap_init(rgb.cols, rgb.rows, rgb.data);
-    mtmd_bitmap * bitmap = mtmd_helper_bitmap_init_from_file(params.image.front().c_str());
-    mtmd::bitmap bmp(bitmap);
-    if (!bmp.ptr) {
-        LOGGD("failed to load image\n");
-        GGML_JNI_NOTIFY("failed to load image\n");
-        common_sampler_free(smpl);
-        mtmd_free(mctx);
-        llama_backend_free();
-        return 5;
+    //step-4: load media(image / audio)
+    for (const auto & image : params.image) {
+        //mtmd_bitmap * bitmap = mtmd_helper_bitmap_init_from_file(params.image.front().c_str());
+        mtmd_bitmap * bitmap = mtmd_helper_bitmap_init_from_file(image.c_str());
+        mtmd::bitmap bmp(bitmap);
+        if (!bmp.ptr) {
+            LOGGD("failed to load media\n");
+            GGML_JNI_NOTIFY("failed to load media\n");
+            common_sampler_free(smpl);
+            mtmd_free(mctx);
+            llama_backend_free();
+            return 5;
+        }
+        // calculate bitmap hash (for KV caching)
+        std::string hash = fnv_hash(bmp.data(), bmp.nx() * bmp.ny() * 3);
+        bmp.set_id(hash.c_str());
+        bitmaps.entries.push_back(std::move(bmp));
     }
-    // calculate bitmap hash (for KV caching)
-    std::string hash = fnv_hash(bmp.data(), bmp.nx() * bmp.ny() * 3);
-    bmp.set_id(hash.c_str());
-    bitmaps.entries.push_back(std::move(bmp));
 
     if (0 == inference_is_running_state()) {
         llm_inference_interrupted = 1;
         goto failure;
     }
 
-    //step-4: create embedding tokens from image & prompt
+    //step-5: create embedding tokens from media(image or audio) & prompt
+    //ref:https://github.com/ggml-org/llama.cpp/discussions/13759#discussioncomment-13294811
+    if (params.prompt.find(mtmd_default_marker()) == std::string::npos) {
+        for (size_t i = 0; i < params.image.size(); i++) {
+            params.prompt += mtmd_default_marker();
+        }
+    }
     chat_templates = common_chat_templates_init(model, params.chat_template);
     try {
         common_chat_format_example(chat_templates.get(), params.use_jinja);
@@ -202,12 +209,11 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
         chat_templates = common_chat_templates_init(model, "chatml");
     }
     LOGGD("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja).c_str());
-    params.prompt = prompt_str;
-    if (params.prompt.find("<__image__>") == std::string::npos) {
-        params.prompt += " <__image__>";
-    }
-
-
+    //params.prompt = prompt_str;
+    //ref:https://github.com/ggml-org/llama.cpp/discussions/13759#discussioncomment-13294811
+    //if (params.prompt.find("<__media__>") == std::string::npos) {
+    //    params.prompt += " <__media__>";
+    //}
     if (0 == inference_is_running_state()) {
         return AI_INFERENCE_INTERRUPTED;
     } else {
@@ -219,11 +225,10 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
 
     tmpl_inputs.messages = {msg};
     tmpl_inputs.add_generation_prompt = true;
-    tmpl_inputs.use_jinja = false;
+    tmpl_inputs.use_jinja = false; // jinja is buggy here
     {
         auto formatted_chat = common_chat_templates_apply(chat_templates.get(), tmpl_inputs);
         LOGGD("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
-
         mtmd_input_text inp_txt = {
                 formatted_chat.prompt.c_str(),
                 /* add_special */   true,
@@ -263,7 +268,7 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
         goto failure;
     }
 
-    //step-5: LLM inference with the generated tokens
+    //step-6: LLM inference with the generated tokens
     for (int i = 0; i < n_predict; i++) {
         if (i > n_predict) {
             LOGGD("End of Text\n");
@@ -303,6 +308,7 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     }
 
 failure:
+    //step-7: cleanup
     common_sampler_free(smpl);
     mtmd_free(mctx);
     llama_backend_free();

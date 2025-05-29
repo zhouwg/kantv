@@ -7502,7 +7502,7 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
  * helper function to perform llava(multimodal) inference in native layer
  * @param sz_model_path
  * @param sz_mmproj_model_path
- * @param img_path
+ * @param sz_media_path
  * @param sz_user_data
  * @param llm_type
  * @param n_threads
@@ -7510,12 +7510,12 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
  * @param n_hwaccel_type
  * @return
  */
-int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, const char * img_path, const char *sz_user_data, int llm_type,
-                       int n_threads, int n_backend_type, int n_hwaccel_type) {
+int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path, const char * sz_media_path,
+                   const char * sz_user_data, int llm_type, int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("mmproj path:%s\n", sz_mmproj_model_path);
-    LOGGD("image path:%s\n", img_path);
+    LOGGD("media path:%s\n", sz_media_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
     LOGGD("num_threads:%d\n", n_threads);
@@ -7526,7 +7526,7 @@ int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, 
         LOGGD("pls check params\n");
         return 1;
     }
-    if (nullptr == sz_mmproj_model_path || nullptr == img_path) {
+    if (nullptr == sz_mmproj_model_path || nullptr == sz_media_path) {
         LOGGD("pls check params\n");
         return 1;
     }
@@ -7539,16 +7539,27 @@ int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, 
         return 1;
     }
 
-    if (0 != access(img_path, F_OK)) {
+    if (0 != access(sz_media_path, F_OK)) {
         return 1;
     }
+
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
     int argc = 11;
-    const char *argv[] = {"mtmd-inference-main",
+    const char * type = "--image";
+    switch (llm_type) {
+        case 1:
+            break;
+        case 2:
+            type = "--audio";
+            break;
+        default:
+            break;
+    }
+    const char * argv[] = {"mtmd-inference-main",
                           "-m", sz_model_path,
                           "--mmproj", sz_mmproj_model_path,
-                          "--image", img_path,
+                          type, sz_media_path,
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };

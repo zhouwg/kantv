@@ -557,13 +557,29 @@
                          if (isMTMDModel) {
                              //LLM multimodal inference
                              KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedMedia);
-                             strBenchmarkInfo = ggmljava.mtmd_inference(
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                     pathSelectedMedia,
-                                     strUserInput,
-                                     2,
-                                     nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                             if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
+                                 strBenchmarkInfo = ggmljava.mtmd_inference(
+                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                         pathSelectedMedia,
+                                         strUserInput,
+                                         1,
+                                         nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                             } else if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
+                                 strBenchmarkInfo = ggmljava.mtmd_inference(
+                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                         pathSelectedMedia,
+                                         strUserInput,
+                                         2,
+                                         nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                             } else {
+                                 endTime = System.currentTimeMillis();
+                                 duration = (endTime - beginTime);
+                                 isBenchmarking.set(false);
+                                 KANTVUtils.showMsgBox(mActivity, "only support MTMD audio and image currently");
+                                 return;
+                             }
                          } else {
                              //general LLM inference
                              strBenchmarkInfo = ggmljava.llm_inference(
@@ -751,7 +767,6 @@
 
                  String audioPath = selectedAudioUri.getPath();
                  KANTVLog.g(TAG, "audio path:" + audioPath);
-                 //xiaomi14: image path:/raw//storage/emulated/0/Pictures/mnist-7.png, skip /raw/
                  if (audioPath.startsWith("/raw/"))
                      audioPath = audioPath.substring(6);
                  pathSelectedMedia = audioPath;

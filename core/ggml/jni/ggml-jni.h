@@ -143,7 +143,7 @@ enum hwaccel_approach_type {
     * @param mmproj_model_path  /sdcard/mmproj_xxxxxx.gguf
     * @param img_path
     * @param prompt
-    * @param llm_type           not used currently
+    * @param llm_type           1: MTMD image, 2: MTMD audio
     * @param num_threads        1 - 8
     * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
     * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP

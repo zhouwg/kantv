@@ -87,7 +87,7 @@ package kantvai.ai;
      * @param mmprojModelPath      /sdcard/xxxxxx.gguf
      * @param mediaPath
      * @param prompt        user input from UI
-     * @param nLLMType      not used currently
+     * @param nLLMType      1: MTMD image, 2: MTMD audio
      * @param nThreadCounts 1 - 8
      * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
