@@ -149,9 +149,9 @@ enum hwaccel_approach_type {
     * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
     */
-    int          llava_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
+    int          mtmd_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
                                  const char * prompt, int llm_type, int num_threads, int backend_type, int hwaccel_type);
-    int          llava_inference_main(int argc, char * argv[], int backend);
+    int          mtmd_inference_main(int argc, char * argv[], int backend);
 
     /**
     * text-2-image inference
@@ -170,16 +170,16 @@ enum hwaccel_approach_type {
 
     int          write_bmp(const char * filename, int width, int height, int bpp, const unsigned char * data);
 
-    void          llm_set_temperature(float temp);
-    float         llm_get_temperature(void);
+    void         llm_set_temperature(float temp);
+    float        llm_get_temperature(void);
 
-    void          llm_set_topp(float value);
-    float         llm_get_topp(void);
+    void         llm_set_topp(float value);
+    float        llm_get_topp(void);
 
-    bool          jni_open_camera(int facing);
-    void          jni_close_camera(void);
-    void          jni_set_outputwindow(ANativeWindow  * win);
-    void          jni_cleanup_llm_resource();
+    bool         jni_open_camera(int facing);
+    void         jni_close_camera(void);
+    void         jni_set_outputwindow(ANativeWindow  * win);
+    void         jni_cleanup_llm_resource();
 
 #ifdef __cplusplus
 }

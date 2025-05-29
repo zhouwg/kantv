@@ -83,9 +83,9 @@ package kantvai.ai;
     public static native boolean inference_is_running();
 
     /**
-     * @param modelPath     /sdcard/xxxxxx.gguf
-     * @param mmprojModelPath
-     * @param imgPath
+     * @param modelPath            /sdcard/xxxxxx.gguf
+     * @param mmprojModelPath      /sdcard/xxxxxx.gguf
+     * @param mediaPath
      * @param prompt        user input from UI
      * @param nLLMType      not used currently
      * @param nThreadCounts 1 - 8
@@ -93,7 +93,7 @@ package kantvai.ai;
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
      */
-    public static native String llava_inference(String modelPath, String mmprojModelPath, String imgPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
+    public static native String mtmd_inference(String modelPath, String mmprojModelPath, String mediaPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 
     /**
      * @param modelPath     /sdcard/xxxxxx.ckpt or /sdcard/safetensors or other name of SD model

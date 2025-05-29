@@ -333,7 +333,7 @@ Java_kantvai_ai_ggmljava_inference_1is_1running(JNIEnv * env, jclass clazz) {
 }
 
 JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring model_path,
+Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring model_path,
                                           jstring mmproj_model_path, jstring img_path,
                                           jstring prompt, jint n_llmtype, jint n_thread_counts,
                                           jint n_backend_type, jint n_hwaccel_type) {
@@ -389,7 +389,7 @@ Java_kantvai_ai_ggmljava_llava_1inference(JNIEnv * env, jclass clazz, jstring mo
     if (0 == n_thread_counts)
         n_thread_counts = 1;
 
-    result = llava_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
+    result = mtmd_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {

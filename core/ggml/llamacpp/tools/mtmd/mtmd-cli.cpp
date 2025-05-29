@@ -217,11 +217,10 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, bool add_
     auto formatted_chat = common_chat_templates_apply(ctx.tmpls.get(), tmpl_inputs);
     LOG_DBG("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
     LOGGD("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
-#if (defined __ANDROID__) || (defined ANDROID)
+
     if (0 == inference_is_running_state()) {
         return AI_INFERENCE_INTERRUPTED;
     }
-#endif
 
     mtmd_input_text text;
     text.text          = formatted_chat.prompt.c_str();
@@ -242,13 +241,11 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, bool add_
         return 1;
     }
 
-#if (defined __ANDROID__) || (defined ANDROID)
     if (0 == inference_is_running_state()) {
         return AI_INFERENCE_INTERRUPTED;
     } else {
-        GGML_JNI_NOTIFY("starting image encoding & decoding, pls waiting...\n\n");
+        GGML_JNI_NOTIFY("starting media encoding & decoding, pls waiting...\n\n");
     }
-#endif
 
     ctx.bitmaps.entries.clear();
 
@@ -272,7 +269,7 @@ static int eval_message(mtmd_cli_context & ctx, common_chat_msg & msg, bool add_
     return 0;
 }
 
-int llava_inference_main(int argc, char ** argv, int backend_type) {
+int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     ggml_time_init();
 
     common_params params;
@@ -281,7 +278,7 @@ int llava_inference_main(int argc, char ** argv, int backend_type) {
     if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_MTMD, show_additional_info)) {
         return 1;
     }
-    LOGGD("enter llama_inference_main backend_type %d", backend_type);
+    LOGGD("mtmd_inference_main backend_type %d", backend_type);
     if (backend_type != HEXAGON_BACKEND_GGML) {
 #ifdef GGML_USE_HEXAGON
         LOGGD("using hexagon backend %d", backend_type);
@@ -312,139 +309,39 @@ int llava_inference_main(int argc, char ** argv, int backend_type) {
     struct common_sampler * smpl = common_sampler_init(ctx.model, params.sampling);
     int n_predict = params.n_predict < 0 ? INT_MAX : params.n_predict;
 
-    // Ctrl+C handling
-    if (0)
-    {
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-        struct sigaction sigint_action;
-        sigint_action.sa_handler = sigint_handler;
-        sigemptyset (&sigint_action.sa_mask);
-        sigint_action.sa_flags = 0;
-        sigaction(SIGINT, &sigint_action, NULL);
-#elif defined (_WIN32)
-        auto console_ctrl_handler = +[](DWORD ctrl_type) -> BOOL {
-            return (ctrl_type == CTRL_C_EVENT) ? (sigint_handler(SIGINT), true) : false;
-        };
-        SetConsoleCtrlHandler(reinterpret_cast<PHANDLER_ROUTINE>(console_ctrl_handler), true);
-#endif
-    }
-
-    if (g_is_interrupted) return 130;
-
     int result = 0;
-    if (is_single_turn) {
-        g_is_generating = true;
-        if (params.prompt.find(mtmd_default_marker()) == std::string::npos) {
-            for (size_t i = 0; i < params.image.size(); i++) {
-                params.prompt += mtmd_default_marker();
-            }
-        }
-        common_chat_msg msg;
-        msg.role = "user";
-        msg.content = params.prompt;
-        for (const auto & image : params.image) {
-            if (!ctx.load_media(image)) {
-                return 1; // error is already printed by libmtmd
-            }
-        }
-        if (eval_message(ctx, msg, true)) {
-            return 1;
-        }
-        //result = eval_message(ctx, msg, true);
-        if (0 != result) {
-            //if (eval_message(ctx, msg, params.image, true)) {
-            if (AI_INFERENCE_INTERRUPTED == result)
-                return AI_INFERENCE_INTERRUPTED;
-            return 1;
-        }
-        //if (!g_is_interrupted && generate_response(ctx, smpl, n_predict)) {
-        //    return 1;
-        //}
-        if (!g_is_interrupted) {
-#if (defined __ANDROID__) || (defined ANDROID)
-            if (0 == inference_is_running_state()) {
-                return AI_INFERENCE_INTERRUPTED;
-            }
-#endif
-            int result = generate_response(ctx, smpl, n_predict);
-            LOGGD("result %d", result);
-            if (result == AI_INFERENCE_INTERRUPTED)
-                return result;
-        }
 
-
-    } else {
-        LOG("\n Running in chat mode, available commands:");
-        if (mtmd_support_vision(ctx.ctx_vision.get())) {
-            LOG("\n   /image <path>    load an image");
-        }
-        if (mtmd_support_audio(ctx.ctx_vision.get())) {
-            LOG("\n   /audio <path>    load an audio");
-        }
-        LOG("\n   /clear           clear the chat history");
-        LOG("\n   /quit or /exit   exit the program");
-        LOG("\n");
-
-        bool is_first_msg = true;
-        std::string content;
-
-        while (!g_is_interrupted) {
-            g_is_generating = false;
-            LOG("\n> ");
-            console::set_display(console::user_input);
-            std::string line;
-            console::readline(line, false);
-            if (g_is_interrupted) break;
-            console::set_display(console::reset);
-            line = string_strip(line);
-            if (line.empty()) {
-                continue;
-            }
-            if (line == "/quit" || line == "/exit") {
-                break;
-            }
-            if (line == "/clear") {
-                ctx.n_past = 0;
-                llama_kv_self_seq_rm(ctx.lctx, 0, 1, -1); // keep BOS
-                LOG("Chat history cleared\n\n");
-                continue;
-            }
-            g_is_generating = true;
-            bool is_image = line == "/image" || line.find("/image ") == 0;
-            bool is_audio = line == "/audio" || line.find("/audio ") == 0;
-            if (is_image || is_audio) {
-                if (line.size() < 8) {
-                    LOG_ERR("ERR: Missing media filename\n");
-                    continue;
-                }
-                std::string media_path = line.substr(7);
-                if (ctx.load_media(media_path)) {
-                    LOG("%s %s loaded\n", media_path.c_str(), is_image ? "image" : "audio");
-                    content += mtmd_default_marker();
-                }
-
-                // else, error is already printed by libmtmd
-                continue;
-            } else {
-                content += line;
-            }
-            common_chat_msg msg;
-            msg.role = "user";
-            msg.content = content;
-            int ret = eval_message(ctx, msg, is_first_msg);
-            if (ret) {
-                return 1;
-            }
-            if (g_is_interrupted) break;
-            if (generate_response(ctx, smpl, n_predict)) {
-                return 1;
-            }
-            content.clear();
-            is_first_msg = false;
+    g_is_generating = true;
+    if (params.prompt.find(mtmd_default_marker()) == std::string::npos) {
+        for (size_t i = 0; i < params.image.size(); i++) {
+            params.prompt += mtmd_default_marker();
         }
     }
-    if (g_is_interrupted) LOG("\nInterrupted by user\n");
-    LOG("\n\n");
+    common_chat_msg msg;
+    msg.role = "user";
+    msg.content = params.prompt;
+    for (const auto &image: params.image) {
+        if (!ctx.load_media(image)) {
+            return 1; // error is already printed by libmtmd
+        }
+    }
+
+    result = eval_message(ctx, msg, true);
+    if (0 != result) {
+        if (AI_INFERENCE_INTERRUPTED == result)
+            return AI_INFERENCE_INTERRUPTED;
+        return 1;
+    }
+
+    if (0 == inference_is_running_state()) {
+        return AI_INFERENCE_INTERRUPTED;
+    }
+
+    result = generate_response(ctx, smpl, n_predict);
+    LOGGD("result %d", result);
+    if (result == AI_INFERENCE_INTERRUPTED)
+        return result;
+
     llama_perf_context_print(ctx.lctx);
-    return g_is_interrupted ? 130 : 0;
+    return result;
 }

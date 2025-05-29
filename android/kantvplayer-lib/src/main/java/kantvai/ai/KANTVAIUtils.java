@@ -307,7 +307,7 @@ import kantvai.media.player.KANTVLog;
     public static boolean isLLMVModel(String name) {
         String[] llmModels = {
                 "gemma-3",
-                "Qwen2.5-VL-3B",
+                "Qwen2.5-Omni-3B",
                 "moondream2",
                 "SmolVLM"
         };
@@ -318,6 +318,50 @@ import kantvai.media.player.KANTVLog;
         }
         return false;
     }
+
+     public static boolean isAudioFile(String filename) {
+         //naive method
+         String suffix = filename.substring(filename.lastIndexOf(".") + 1);
+         if (suffix.contains("wav")) {
+             return true;
+         }
+
+         if (suffix.contains("mp3")) {
+             return true;
+         }
+
+         if (suffix.contains("aac")) {
+             return true;
+         }
+
+         if (suffix.contains("ac3")) {
+             return true;
+         }
+
+         return false;
+     }
+
+     public static boolean isImageFile(String filename) {
+         //naive method
+         String suffix = filename.substring(filename.lastIndexOf(".") + 1);
+         if (suffix.contains("png")) {
+             return true;
+         }
+
+         if (suffix.contains("jpeg")) {
+             return true;
+         }
+
+         if (suffix.contains("jpg")) {
+             return true;
+         }
+
+         if (suffix.contains("bmp")) {
+             return true;
+         }
+
+         return false;
+     }
 
     public static float getLLMTemperature() {
          return ggmljava.getLLMTemperature();

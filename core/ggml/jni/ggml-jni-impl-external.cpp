@@ -7510,7 +7510,7 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
  * @param n_hwaccel_type
  * @return
  */
-int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path, const char * img_path, const char *sz_user_data, int llm_type,
+int mtmd_inference(const char *sz_model_path, const char *sz_mmproj_model_path, const char * img_path, const char *sz_user_data, int llm_type,
                        int n_threads, int n_backend_type, int n_hwaccel_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
@@ -7553,7 +7553,7 @@ int llava_inference(const char *sz_model_path, const char *sz_mmproj_model_path,
                           "-t", std::to_string(n_threads).c_str()
     };
     inference_init_running_state();
-    ret = llava_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    ret = mtmd_inference_main(argc, const_cast<char **>(argv), n_backend_type);
     inference_reset_running_state();
 
     LOGGD("llava_inference return %d", ret);

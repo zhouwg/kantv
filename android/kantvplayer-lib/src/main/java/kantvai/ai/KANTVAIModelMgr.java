@@ -258,6 +258,7 @@ public class KANTVAIModelMgr {
                  9001752960L // size of LLM model, in bytes
          );
 
+         //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
                  hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
                  hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
@@ -265,6 +266,7 @@ public class KANTVAIModelMgr {
                  851251104L //size of the mmproj model in bytes, 851 MiB
          );
 
+         //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf",
                  hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf?download=true",
                  hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
@@ -293,6 +295,7 @@ public class KANTVAIModelMgr {
                  4683073248L // size of LLM model, in bytes
          );
 
+         //MTMD-image(for realtime-video-inference)
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
                  "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
                  hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
@@ -301,16 +304,15 @@ public class KANTVAIModelMgr {
                  190033440L
          );
 
-         /*
-         //Bytedance's Seed-Coder-8B-Reasoning-Q8_0.gguf is required to manually created at the moment,
-         //steps can be founded at:https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "Seed-Coder-8B-Reasoning-Q8_0",
-                 "Seed-Coder-8B-Reasoning-Q8_0.gguf",
-                 hf_endpoint + "ByteDance-Seed/Seed-Coder-8B-Reasoning/tree/main",
-                 8773161888L // size of LLM model, in bytes
+         //MTMD-audio
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-Omni-3B",
+                 "Qwen2.5-Omni-3B-Q4_K_M.gguf",
+                 "mmproj-Qwen2.5-Omni-3B-Q8_0.gguf",
+                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/Qwen2.5-Omni-3B-Q4_K_M.gguf?download=true",
+                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true",
+                 2104931648L,
+                 1538031328L
          );
-         */
 
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models
          //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + all LLM models + others)
