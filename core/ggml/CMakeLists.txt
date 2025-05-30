@@ -238,7 +238,6 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni.c
         ${KANTV_GGMLJNI_SRC_DIR}/tinywav.c
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl.cpp
-        ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-impl-external.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/llm-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/sd-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ndkcamera.cpp
