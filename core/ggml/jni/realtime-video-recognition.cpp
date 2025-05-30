@@ -282,7 +282,7 @@ bool multimodal_inference::camera_open(int facing) {
     }
     if (nullptr != ndkcamera_instance) {
         ndkcamera_instance->open(facing);
-        inference_reset_running_state();
+        realtimemtmd_reset_running_state();
     } else {
         LOGGD("camera already opened");
     }
@@ -303,7 +303,7 @@ void multimodal_inference::camera_finalize() {
 void multimodal_inference::camera_close() {
     LOGGD("close camera");
     if (nullptr != ndkcamera_instance) {
-        inference_reset_running_state();
+        realtimemtmd_reset_running_state();
         ndkcamera_instance->close();
     } else {
         LOGGD("camera already closed");
@@ -373,7 +373,7 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
     }
     n_past = new_n_past;
 
-    if (0 == inference_is_running_state()) {
+    if (0 == realtimemtmd_is_running_state()) {
         llm_inference_interrupted = 1;
         return;
     } else {
@@ -399,7 +399,7 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
         tmp = common_token_to_piece(lctx, token_id).c_str();
 #if (defined __ANDROID__) || (defined ANDROID)
         if (ggml_jni_is_valid_utf8(tmp)) {
-            if (0 == inference_is_running_state()) {
+            if (0 == realtimemtmd_is_running_state()) {
                 llm_inference_interrupted = 1;
                 break;
             } else {
@@ -444,7 +444,7 @@ void multimodal_inference::finalize() {
 void multimodal_inference::do_inference(cv::Mat & rgb) {
     frame_index++;
 
-    if (0 == inference_is_running_state()) {
+    if (0 == realtimemtmd_is_running_state()) {
         return;
     }
 

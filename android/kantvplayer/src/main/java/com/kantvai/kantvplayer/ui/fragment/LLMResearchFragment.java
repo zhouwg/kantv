@@ -63,7 +63,7 @@
      private MyEventListener mEventListener = new MyEventListener();
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
-     private boolean mCameraInit = false;
+     //private boolean mCameraInit = false;
 
      private int facing = 0; //default is back camera
 
@@ -163,6 +163,7 @@
      }
 
      private void reload() {
+         KANTVLog.g(TAG, "reload");
          int new_facing = 1 - facing;
          ggmljava.closeCamera();
          ggmljava.openCamera(new_facing);
@@ -172,6 +173,7 @@
      }
 
      public void reload(int back_camera) {
+         KANTVLog.g(TAG, "reload: " + back_camera);
          int new_facing = 1 - back_camera;
          ggmljava.closeCamera();
          ggmljava.openCamera(new_facing);
@@ -187,7 +189,7 @@
      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
          if (cameraView.getHolder().getSurface().isValid()) {
              ggmljava.setOutputWindow(holder.getSurface());
-             ggmljava.inference_init_inference();
+             ggmljava.realtimemtmd_init_running_state();
          } else {
              release();
              stopLLMInference();
@@ -203,22 +205,17 @@
      }
 
      public void initCamera() {
-         if (mCameraInit) {
-             KANTVLog.j(TAG, "camera already initialized");
-             return;
-         }
+         KANTVLog.g(TAG, "init camera");
          getPreviewRotateDegree();
 
          KANTVLog.j(TAG, "running service: " + KANTVUtils.getRunningServicesInfo(mContext));
          try {
              ggmljava.openCamera(facing);
-             mCameraInit = true;
          } catch (Exception e) {
              e.printStackTrace();
              KANTVLog.j(TAG, "init failed:" + e.getMessage());
              Toast.makeText(mContext, "init failed:" + e.getMessage(), Toast.LENGTH_SHORT).show();
          }
-
      }
 
      public void finalizeCamera() {
@@ -271,42 +268,57 @@
 
      @Override
      public void onStart() {
-         KANTVLog.j(TAG, "onStart");
+         KANTVLog.g(TAG, "onStart");
          super.onStart();
+         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
+             KANTVLog.g(TAG, "it shouldn't happen");
+             return;
+         }
          initCamera();
      }
 
      @Override
      public void onResume() {
-         KANTVLog.j(TAG, "onResume");
+         KANTVLog.g(TAG, "onResume");
          super.onResume();
-         if (mCameraInit) {
-             ggmljava.openCamera(facing);
+         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
+             KANTVLog.g(TAG, "it shouldn't happen");
+             return;
          }
+         KANTVLog.g(TAG, "opencamera");
+         ggmljava.openCamera(facing);
      }
 
      @Override
      public void onPause() {
-         KANTVLog.j(TAG, "onPause");
+         KANTVLog.g(TAG, "onPause");
          super.onPause();
-         if (mCameraInit) {
-             ggmljava.closeCamera();
+         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
+             KANTVLog.g(TAG, "it shouldn't happen");
+             return;
          }
+         ggmljava.closeCamera();
      }
 
      @Override
      public void onDestroy() {
-         KANTVLog.j(TAG, "onDestroy");
+         KANTVLog.g(TAG, "onDestroy");
          super.onDestroy();
+         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
+             KANTVLog.g(TAG, "it shouldn't happen");
+             return;
+         }
          finalizeCamera();
      }
 
      @Override
      public void onStop() {
-         KANTVLog.j(TAG, "onStop");
+         KANTVLog.g(TAG, "onStop");
          super.onStop();
+         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
+             KANTVLog.g(TAG, "it shouldn't happen");
+         }
      }
-
 
      protected class MyEventListener implements KANTVEventListener {
 
@@ -400,8 +412,8 @@
      }
 
      public void stopLLMInference() {
-         if (ggmljava.inference_is_running()) {
-             ggmljava.inference_stop_inference();
+         if (ggmljava.llm_is_running_state()) {
+             ggmljava.llm_reset_running_state();
          }
      }
 

@@ -313,24 +313,6 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
     kantv_asr_notify_benchmark_c(s_ggml_jni_buf);
 }
 
-JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_inference_1init_1inference(JNIEnv *env, jclass clazz) {
-    inference_init_running_state();
-}
-
-JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_inference_1stop_1inference(JNIEnv * env, jclass clazz) {
-    inference_reset_running_state();
-}
-
-JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_inference_1is_1running(JNIEnv * env, jclass clazz) {
-    if (1 == inference_is_running_state()) {
-        return JNI_TRUE;
-    } else {
-        return JNI_FALSE;
-    }
-}
 
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring model_path,
@@ -529,12 +511,12 @@ Java_kantvai_ai_ggmljava_getLLMTemperature(JNIEnv *env, jclass clazz) {
 
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_setLLMTopP(JNIEnv *env, jclass clazz, jfloat top_p) {
-    llm_set_topp(top_p);
+    llm_set_top_p(top_p);
 }
 
 JNIEXPORT jfloat JNICALL
 Java_kantvai_ai_ggmljava_getLLMTopP(JNIEnv *env, jclass clazz) {
-    return llm_get_topp();
+    return llm_get_top_p();
 }
 
 JNIEXPORT jboolean JNICALL
@@ -560,4 +542,51 @@ Java_kantvai_ai_ggmljava_setOutputWindow(JNIEnv *env, jclass clazz, jobject surf
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_llm_1finalize(JNIEnv *env, jclass clazz) {
     jni_cleanup_llm_resource();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_llm_1init_1running_1state(JNIEnv *env, jclass clazz) {
+    llm_init_running_state();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_llm_1reset_1running_1state(JNIEnv *env, jclass clazz) {
+    llm_reset_running_state();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_llm_1is_1running_1state(JNIEnv *env, jclass clazz) {
+    int result = llm_is_running_state();
+    return (0 == result) ? JNI_FALSE : JNI_TRUE;
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_realtimemtmd_1init_1running_1state(JNIEnv *env, jclass clazz) {
+    realtimemtmd_init_running_state();
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_realtimemtmd_1reset_1running_1state(JNIEnv *env, jclass clazz) {
+    realtimemtmd_reset_running_state();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_realtimemtmd_1is_1running_1state(JNIEnv *env, jclass clazz) {
+    int result = realtimemtmd_is_running_state();
+    return (0 == result) ? JNI_FALSE : JNI_TRUE;
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_sd_1init_1running_1state(JNIEnv *env, jclass clazz) {
+    // TODO: implement sd_init_running_state()
+}
+
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_sd_1reset_1running_1state(JNIEnv *env, jclass clazz) {
+    // TODO: implement sd_reset_running_state()
+}
+
+JNIEXPORT jboolean JNICALL
+Java_kantvai_ai_ggmljava_sd_1is_1running_1state(JNIEnv *env, jclass clazz) {
+    // TODO: implement sd_is_running_state()
 }

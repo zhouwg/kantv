@@ -126,7 +126,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     } else {
         params.sampling.temp = llm_get_temperature();
         LOGGD("temp %.2f\n", params.sampling.temp);
-        params.sampling.top_p = llm_get_topp();
+        params.sampling.top_p = llm_get_top_p();
         LOGGD("top_p %.2f\n", params.sampling.top_p);
     }
     common_init();
@@ -756,7 +756,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 //LOG("%s", token_str.c_str());
 #if (defined __ANDROID__) || (defined ANDROID)
                 if (ggml_jni_is_valid_utf8(token_str.c_str())) {
-                    if (0 == inference_is_running_state()) {
+                    if (0 == llm_is_running_state()) {
                         llm_inference_interrupted = 1;
                     } else {
                         GGML_JNI_NOTIFY(token_str.c_str());
@@ -971,7 +971,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             }
         }
 
-        if (0 == inference_is_running_state()) {
+        if (0 == llm_is_running_state()) {
             llm_inference_interrupted = 1;
             break;
         }
@@ -998,7 +998,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG("\n\n");
-    if (1 == inference_is_running_state()) {
+    if (1 == llm_is_running_state()) {
         llm_inference_interrupted = 0;
         common_perf_print(ctx, smpl);
     } else {

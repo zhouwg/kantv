@@ -258,6 +258,7 @@
 
      private static AtomicBoolean mCouldExitApp = new AtomicBoolean(true);
 
+     private static int menuItemID = 0;
 
 
      //borrow from Google Exoplayer
@@ -4011,6 +4012,14 @@
              KANTVLog.g(TAG, "failed to load content from file:" + file.getAbsolutePath() + "reason: " +  ex.toString());
              return null;
          }
+     }
+
+     public static void setMenuItemID(int itemID) {
+         menuItemID = itemID;
+     }
+
+     public static int getMenuItemID() {
+         return menuItemID;
      }
 
      public static native int kantv_anti_remove_rename_this_file();

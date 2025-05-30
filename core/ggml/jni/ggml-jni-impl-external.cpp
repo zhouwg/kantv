@@ -464,7 +464,7 @@ const char *ggml_jni_bench_memcpy(int n_threads) {
     char strbuf[256];
 
 #ifdef TARGET_ANDROID
-    kantv_asr_notify_benchmark_c("calling ggml_time_init\n");
+    kantv_asr_notify_benchmark_c("calling ggml_time_init\n\n");
 #endif
 
     ggml_time_init();
@@ -500,7 +500,7 @@ const char *ggml_jni_bench_memcpy(int n_threads) {
             src[rand() % size] = rand() % 256;
         }
 
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n",
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n\n",
                  (double) (n * size) / (tsum * 1e9));
 #ifdef TARGET_ANDROID
         kantv_asr_notify_benchmark_c(strbuf);
@@ -540,7 +540,7 @@ const char *ggml_jni_bench_memcpy(int n_threads) {
             src[rand() % size] = rand() % 256;
         }
 
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n",
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n\n",
                  (double) (n * size) / (tsum * 1e9));
 #ifdef TARGET_ANDROID
         kantv_asr_notify_benchmark_c(strbuf);
@@ -597,7 +597,7 @@ const char *ggml_jni_bench_memcpy(int n_threads) {
 
         tsum += (t1 - t0) * 1e-6;
 
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n",
+        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n\n",
                  (double) (n * size) / (tsum * 1e9), k);
 #ifdef TARGET_ANDROID
         kantv_asr_notify_benchmark_c(strbuf);
@@ -614,7 +614,7 @@ const char *ggml_jni_bench_memcpy(int n_threads) {
         free(dst);
     }
 
-    snprintf(strbuf, sizeof(strbuf), "sum:    %f\n", sum);
+    snprintf(strbuf, sizeof(strbuf), "sum:    %f\n\n", sum);
 #ifdef TARGET_ANDROID
     kantv_asr_notify_benchmark_c(strbuf);
 #endif
@@ -663,30 +663,6 @@ bool ggml_jni_is_valid_utf8(const char *string) {
 
     return true;
 }
-
-
-//similar with original llama_print_timings and dedicated for project kantv, for merge/update latest source code of llama.cpp more easily and quickly
-void ggml_jni_llama_print_timings(struct llama_context *ctx) {
-
-}
-
-
-/**
- *
- * @param sz_model_path
- * @param prompt
- * @param bench_type            not used currently
- * @param n_threads             1 - 8
- * @param n_backend             0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
- * @return
-*/
-//don't remove and keep it for compare with llama inference using latest source code from upstream llama.cpp
-int llama_inference(const char *model_path, const char *prompt, int bench_type, int num_threads,
-                    int n_backend) {
-
-    return 0;
-}
-
 
 void ggml_bench_matrix(int num_threads, int backend_type) {
     int32_t n_threads = 1;
@@ -921,8 +897,6 @@ void ggml_bench_matrix(int num_threads, int backend_type) {
 
 #include "ggml-jni.h"
 #include "ndkcamera.h"
-
-
 // =================================================================================================
 //
 // self-defined structure / class / macro / const / pfn
@@ -7419,45 +7393,6 @@ const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
 }
 #endif
 
-static static std::atomic<uint32_t> g_ggmljni_inference_is_running(0);
-
-/**
-*helper functions to check whether AI inference is running, these helper functions is useful&necessary for UI in Java layer
-*/
-void inference_init_running_state() {
-    g_ggmljni_inference_is_running.store(1);
-}
-
-void inference_reset_running_state() {
-    g_ggmljni_inference_is_running.store(0);
-}
-
-int inference_is_running_state() {
-    return g_ggmljni_inference_is_running.load();
-}
-
-
-static float g_llm_temperature = 0.8;
-
-void llm_set_temperature(float temp) {
-    g_llm_temperature = temp;
-}
-
-float llm_get_temperature() {
-    return g_llm_temperature;
-}
-
-static float g_llm_topp = 0.9;
-
-void llm_set_topp(float value) {
-    g_llm_topp = value;
-}
-
-float llm_get_topp() {
-    return g_llm_topp;
-}
-
-
 /**
  * helper function to performan llama inference in native layer
  * @param sz_model_path
@@ -7491,15 +7426,15 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
-    inference_init_running_state();
+    llm_init_running_state();
     ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
-    inference_reset_running_state();
+    llm_reset_running_state();
 
     return ret;
 }
 
 /**
- * helper function to perform llava(multimodal) inference in native layer
+ * helper function to perform MTMD(multimodal) inference in native layer
  * @param sz_model_path
  * @param sz_mmproj_model_path
  * @param sz_media_path
@@ -7563,9 +7498,9 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
                           "-p", sz_user_data,
                           "-t", std::to_string(n_threads).c_str()
     };
-    inference_init_running_state();
+    llm_init_running_state();
     ret = mtmd_inference_main(argc, const_cast<char **>(argv), n_backend_type);
-    inference_reset_running_state();
+    llm_reset_running_state();
 
     LOGGD("mtmd_inference return %d", ret);
     return ret;
@@ -7610,9 +7545,9 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
                           "--height", "512",
                           "-t", std::to_string(n_threads).c_str()
     };
-    inference_init_running_state();
+    sd_init_running_state();
     ret = sd_inference_main(argc, argv, n_backend_type);
-    inference_reset_running_state();
+    sd_reset_running_state();
     LOGGD("ret %d", ret);
     return ret;
 }

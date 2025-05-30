@@ -1451,7 +1451,7 @@ sd_image_t* generate_image(sd_ctx_t* sd_ctx,
         int64_t cur_seed       = seed + b;
         LOG_INFO("generating image: %i/%i - seed %" PRId64, b + 1, batch_count, cur_seed);
 #if (defined __ANDROID__) || (defined ANDROID)
-        if (0 == inference_is_running_state()) {
+        if (0 == sd_is_running_state()) {
             ggml_free(work_ctx);
             return NULL;
         }

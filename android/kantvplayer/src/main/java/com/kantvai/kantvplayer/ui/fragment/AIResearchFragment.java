@@ -345,9 +345,9 @@
 
          btnStop.setOnClickListener(v -> {
              KANTVLog.g(TAG, "here");
-             if (ggmljava.inference_is_running()) {
+             if (ggmljava.llm_is_running_state()) {
                  KANTVLog.g(TAG, "here");
-                 ggmljava.inference_stop_inference();
+                 ggmljava.llm_reset_running_state();
              }
              resetUIAndStatus(null,true, false);
          });
@@ -838,7 +838,7 @@
                              nLogCounts = 0;
                          }
                          if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
-                             if (!ggmljava.inference_is_running()) {
+                             if (!ggmljava.llm_is_running_state()) {
                                  return;
                              }
                          }
@@ -887,8 +887,8 @@
          if (mKANTVMgr == null) {
              return;
          }
-         if (ggmljava.inference_is_running()) {
-             ggmljava.inference_stop_inference();
+         if (ggmljava.llm_is_running_state()) {
+             ggmljava.llm_reset_running_state();
          }
 
          try {
@@ -907,8 +907,8 @@
      }
 
      public void stopLLMInference() {
-         if (ggmljava.inference_is_running()) {
-             ggmljava.inference_stop_inference();
+         if (ggmljava.llm_is_running_state()) {
+             ggmljava.llm_reset_running_state();
          }
 
          resetUIAndStatus(null,true, false);
@@ -919,6 +919,18 @@
              return true;
          else
              return false;
+     }
+
+     public boolean isMTMDInference() {
+         if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+             if ((pathSelectedMedia != null) && (!pathSelectedMedia.isEmpty())) {
+                 if (KANTVAIUtils.isMTMDModel(selectModeFileName)) {
+                     return true;
+                 }
+             }
+         }
+
+         return false;
      }
 
      /* will be removed in the future

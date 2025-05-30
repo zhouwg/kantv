@@ -40,7 +40,7 @@ static void onError(void* context, ACameraDevice* device, int error)
 static void onImageAvailable(void* context, AImageReader* reader)
 {
     //LOGGD("NdkCamera: onImageAvailable %p", reader);
-    if (0 == inference_is_running_state())
+    if (0 == realtimemtmd_is_running_state())
         return;
 
     AImage* image = 0;
@@ -137,7 +137,7 @@ static void onImageAvailable(void* context, AImageReader* reader)
 static void onSessionActive(void* context, ACameraCaptureSession *session)
 {
     LOGGI("NdkCamera: onSessionActive %p", session);
-    inference_init_running_state();
+    realtimemtmd_init_running_state();
 }
 
 static void onSessionReady(void* context, ACameraCaptureSession *session)
@@ -148,9 +148,9 @@ static void onSessionReady(void* context, ACameraCaptureSession *session)
 static void onSessionClosed(void* context, ACameraCaptureSession *session)
 {
     LOGGI("NdkCamera: onSessionClosed %p", session);
-    if (0 != inference_is_running_state()) {
+    if (0 != realtimemtmd_is_running_state()) {
         LOGGI("it shouldn't happen");
-        inference_reset_running_state();
+        realtimemtmd_reset_running_state();
     }
 }
 

@@ -29,9 +29,7 @@ extern "C" {
 #define AI_INFERENCE_INTERRUPTED             8
 
 //=============================================================================================
-//add new AI benchmark type / new backend using GGML inference framework here, keep sync with KANTVAIUtils.java
-
-// available bench type for ggml-jni
+// available bench type in ggml-jni, keep sync with KANTVAIUtils.java
 enum ggml_jni_bench_type {
     GGML_BENCHMARK_MEMCPY = 0,                //memcpy  benchmark
     GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
@@ -130,12 +128,25 @@ enum hwaccel_approach_type {
     int          llama_inference_main(int argc, char * argv[], int backend);
 
     /**
-     *helper functions to check whether AI inference is running, these helper functions is useful&necessary for UI in Java layer
+     *helper functions to check whether normal LLM inference(LLM or normal MTMD) is running, these helper functions is useful&necessary for UI in Java layer
      */
-    void         inference_reset_running_state(void);
-    void         inference_reset_running_state(void);
-    int          inference_is_running_state(void);
-    void         inference_init_running_state(void);
+    void         llm_reset_running_state(void);
+    int          llm_is_running_state(void);
+    void         llm_init_running_state(void);
+
+    /**
+    *helper functions to check whether realtime MTMD inference is running, these helper functions is useful&necessary for UI in Java layer
+    */
+    void         realtimemtmd_reset_running_state(void);
+    int          realtimemtmd_is_running_state(void);
+    void         realtimemtmd_init_running_state(void);
+
+    /**
+    *helper functions to check whether stablediffusion inference is running, these helper functions is useful&necessary for UI in Java layer
+    */
+    void         sd_reset_running_state(void);
+    int          sd_is_running_state(void);
+    void         sd_init_running_state(void);
 
     /**
     * multi-modal inference
@@ -173,8 +184,8 @@ enum hwaccel_approach_type {
     void         llm_set_temperature(float temp);
     float        llm_get_temperature(void);
 
-    void         llm_set_topp(float value);
-    float        llm_get_topp(void);
+    void         llm_set_top_p(float value);
+    float        llm_get_top_p(void);
 
     bool         jni_open_camera(int facing);
     void         jni_close_camera(void);

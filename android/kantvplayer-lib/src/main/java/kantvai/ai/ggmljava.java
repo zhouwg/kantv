@@ -71,16 +71,18 @@ package kantvai.ai;
      */
     public static native String llm_inference(String modelPath, String prompt, int nLLMType, int nThreadCounts, int nBackendType, int nHWAccelType);
 
-    public static native void   inference_init_inference();
-    /**
-     * stop AI inference
-     */
-    public static native void    inference_stop_inference();
+    public static native void    llm_init_running_state();
+    public static native void    llm_reset_running_state();
+    public static native boolean llm_is_running_state();
 
-    /**
-     * check whether AI inference is running
-     */
-    public static native boolean inference_is_running();
+    public static native void    realtimemtmd_init_running_state();
+    public static native void    realtimemtmd_reset_running_state();
+    public static native boolean realtimemtmd_is_running_state();
+
+    public static native void    sd_init_running_state();
+    public static native void    sd_reset_running_state();
+    public static native boolean sd_is_running_state();
+
 
     /**
      * @param modelPath            /sdcard/xxxxxx.gguf

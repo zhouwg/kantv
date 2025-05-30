@@ -187,7 +187,7 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
         bitmaps.entries.push_back(std::move(bmp));
     }
 
-    if (0 == inference_is_running_state()) {
+    if (0 == llm_is_running_state()) {
         llm_inference_interrupted = 1;
         goto failure;
     }
@@ -214,8 +214,9 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     //if (params.prompt.find("<__media__>") == std::string::npos) {
     //    params.prompt += " <__media__>";
     //}
-    if (0 == inference_is_running_state()) {
-        return AI_INFERENCE_INTERRUPTED;
+    if (0 == llm_is_running_state()) {
+        llm_inference_interrupted = 1;
+        goto failure;
     } else {
         GGML_JNI_NOTIFY("starting media encoding & decoding, pls waiting...\n\n");
     }
@@ -248,6 +249,10 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
             goto failure;
         }
         bitmaps.entries.clear();
+        if (0 == llm_is_running_state()) {
+            llm_inference_interrupted = 1;
+            goto failure;
+        }
 
         if (mtmd_helper_eval_chunks(mctx,
                                     lctx, // lctx
@@ -260,10 +265,14 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
             LOGGD("Unable to eval prompt\n");
             goto failure;
         }
+        if (0 == llm_is_running_state()) {
+            llm_inference_interrupted = 1;
+            goto failure;
+        }
     }
     n_past = new_n_past;
 
-    if (0 == inference_is_running_state()) {
+    if (0 == llm_is_running_state()) {
         llm_inference_interrupted = 1;
         goto failure;
     }
@@ -274,11 +283,17 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
             LOGGD("End of Text\n");
             break;
         }
-
+        if (0 == llm_is_running_state()) {
+            llm_inference_interrupted = 1;
+            goto failure;
+        }
         llama_token token_id = common_sampler_sample(smpl, lctx, -1);
         generated_tokens.push_back(token_id);
         common_sampler_accept(smpl, token_id, true);
-
+        if (0 == llm_is_running_state()) {
+            llm_inference_interrupted = 1;
+            goto failure;
+        }
         if (llama_vocab_is_eog(vocab, token_id)) {
             LOGGD("End of Text\n");
             break; // end of generation
@@ -286,7 +301,7 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
 
         tmp = common_token_to_piece(lctx, token_id).c_str();
         if (ggml_jni_is_valid_utf8(tmp)) {
-            if (0 == inference_is_running_state()) {
+            if (0 == llm_is_running_state()) {
                 llm_inference_interrupted = 1;
                 break;
             } else {
@@ -299,6 +314,10 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
         common_batch_add(batch, token_id, n_past++, {0}, true);
         if (llama_decode(lctx, batch)) {
             LOGGD("failed to decode token\n");
+            goto failure;
+        }
+        if (0 == llm_is_running_state()) {
+            llm_inference_interrupted = 1;
             goto failure;
         }
     }
