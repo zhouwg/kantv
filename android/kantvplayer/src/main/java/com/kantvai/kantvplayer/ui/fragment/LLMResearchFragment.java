@@ -63,8 +63,6 @@
      private MyEventListener mEventListener = new MyEventListener();
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
-     //private boolean mCameraInit = false;
-
      private int facing = 0; //default is back camera
 
      private SurfaceView cameraView;
@@ -268,7 +266,7 @@
 
      @Override
      public void onStart() {
-         KANTVLog.g(TAG, "onStart");
+         KANTVLog.j(TAG, "onStart");
          super.onStart();
          if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
              KANTVLog.g(TAG, "it shouldn't happen");
@@ -279,45 +277,44 @@
 
      @Override
      public void onResume() {
-         KANTVLog.g(TAG, "onResume");
+         KANTVLog.j(TAG, "onResume");
          super.onResume();
          if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
              KANTVLog.g(TAG, "it shouldn't happen");
              return;
          }
-         KANTVLog.g(TAG, "opencamera");
+         KANTVLog.g(TAG, "open camera");
          ggmljava.openCamera(facing);
      }
 
      @Override
      public void onPause() {
-         KANTVLog.g(TAG, "onPause");
+         KANTVLog.j(TAG, "onPause");
          super.onPause();
          if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
              KANTVLog.g(TAG, "it shouldn't happen");
              return;
          }
+         KANTVLog.g(TAG, "close camera");
          ggmljava.closeCamera();
      }
 
      @Override
      public void onDestroy() {
-         KANTVLog.g(TAG, "onDestroy");
+         KANTVLog.j(TAG, "onDestroy");
          super.onDestroy();
          if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
              KANTVLog.g(TAG, "it shouldn't happen");
              return;
          }
+         KANTVLog.g(TAG, "finalize camera");
          finalizeCamera();
      }
 
      @Override
      public void onStop() {
-         KANTVLog.g(TAG, "onStop");
+         KANTVLog.j(TAG, "onStop");
          super.onStop();
-         if (KANTVUtils.getMenuItemID() != R.id.navigation_aiagent) {
-             KANTVLog.g(TAG, "it shouldn't happen");
-         }
      }
 
      protected class MyEventListener implements KANTVEventListener {
@@ -412,8 +409,8 @@
      }
 
      public void stopLLMInference() {
-         if (ggmljava.llm_is_running_state()) {
-             ggmljava.llm_reset_running_state();
+         if (ggmljava.realtimemtmd_is_running_state()) {
+             ggmljava.realtimemtmd_reset_running_state();
          }
      }
 

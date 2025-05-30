@@ -578,15 +578,16 @@ Java_kantvai_ai_ggmljava_realtimemtmd_1is_1running_1state(JNIEnv *env, jclass cl
 
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_sd_1init_1running_1state(JNIEnv *env, jclass clazz) {
-    // TODO: implement sd_init_running_state()
+    sd_init_running_state();
 }
 
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_sd_1reset_1running_1state(JNIEnv *env, jclass clazz) {
-    // TODO: implement sd_reset_running_state()
+    sd_reset_running_state();
 }
 
 JNIEXPORT jboolean JNICALL
 Java_kantvai_ai_ggmljava_sd_1is_1running_1state(JNIEnv *env, jclass clazz) {
-    // TODO: implement sd_is_running_state()
+    int result = sd_is_running_state();
+    return (0 == result) ? JNI_FALSE : JNI_TRUE;
 }

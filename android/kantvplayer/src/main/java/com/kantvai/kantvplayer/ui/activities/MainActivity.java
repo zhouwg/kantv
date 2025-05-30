@@ -109,7 +109,6 @@ package com.kantvai.kantvplayer.ui.activities;
             setTitle(getBaseContext().getString(R.string.onlinetv));
             navigationView.setSelectedItemId(R.id.navigation_home);
             KANTVUtils.setMenuItemID(R.id.navigation_home);
-            KANTVLog.g(TAG, "here");
             switchFragment(TVGridFragment.class);
         }
 
@@ -154,7 +153,6 @@ package com.kantvai.kantvplayer.ui.activities;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        KANTVLog.g(TAG, "here");
         if (!IApplication.startCorrectlyFlag) {
             IApplication.startCorrectlyFlag = true;
             FragmentTransaction fragmentTransaction = getFragmentTransaction();
@@ -163,7 +161,6 @@ package com.kantvai.kantvplayer.ui.activities;
             if (LocalMediaFragment != null)
                 fragmentTransaction.remove(LocalMediaFragment);
             if (llmFragment != null) {
-                KANTVLog.g(TAG, "here");
                 fragmentTransaction.remove(llmFragment);
             }
             if (personalFragment != null)
@@ -183,7 +180,7 @@ package com.kantvai.kantvplayer.ui.activities;
         navigationView.setOnNavigationItemSelectedListener(item -> {
             KANTVLog.g(TAG, "System.currentTimeMillis() - switchTime " + (System.currentTimeMillis() - switchTime));
             if (previousMenuItem != null) {
-                //FIXME:workaround to fix potential issue when stablediffusion & MTMD inference is running
+                //FIXME:workaround to fix potential issue when the time-consuming stablediffusion & MTMD inference is running
                 if (previousMenuItem.getItemId() == R.id.navigation_asr) {
                     if (airesearchFragment.isStableDiffusionInference()) {
                         ToastUtils.showShort("cann't switch when benchmark type is stablediffusion inference");
@@ -195,7 +192,7 @@ package com.kantvai.kantvplayer.ui.activities;
                     }
                 }
 
-                //FIXME:workaround to fix a potential deadlock in a special scenario of AI inference(realtime video inference)
+                //workaround to fix a potential stability issue in a special scenario of AI inference(realtime video inference)
                 if ((item.getItemId() == R.id.navigation_aiagent) && (previousMenuItem.getItemId() == R.id.navigation_asr)) {
                     if (System.currentTimeMillis() - switchTime < 1000) {
                         ToastUtils.showShort("switch duration is too short");
@@ -212,17 +209,17 @@ package com.kantvai.kantvplayer.ui.activities;
                 }
             }
 
-            //FIXME:add following line to fix a random bug, this is dirty method
+            //add following two lines to avoid potential stability issue
             ggmljava.llm_reset_running_state();
             ggmljava.realtimemtmd_reset_running_state();
+
             switchTime = System.currentTimeMillis();
             previousMenuItem = item;
 
-            KANTVLog.g(TAG, "item id: " + item.getItemId());
+            KANTVLog.d(TAG, "item id: " + item.getItemId());
             KANTVUtils.setMenuItemID(item.getItemId());
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    KANTVLog.g(TAG, "home");
                     setTitle(mActivity.getBaseContext().getString(R.string.onlinetv));
                     switchFragment(TVGridFragment.class);
                     //menuNetItem.setVisible(false);
@@ -230,7 +227,6 @@ package com.kantvai.kantvplayer.ui.activities;
                     return true;
 
                 case R.id.navigation_play:
-                    KANTVLog.g(TAG, "play");
                     setTitle(mActivity.getBaseContext().getString(R.string.localmedia));
                     switchFragment(LocalMediaFragment.class);
                     //menuNetItem.setVisible(true);
@@ -238,7 +234,6 @@ package com.kantvai.kantvplayer.ui.activities;
                     return true;
 
                 case R.id.navigation_aiagent:
-                    KANTVLog.g(TAG, "aiagent");
                     //setTitle("Realtime Inference");
                     //switchFragment(AIAgentFragment.class);
                     setTitle("LLM Inference");
@@ -248,7 +243,6 @@ package com.kantvai.kantvplayer.ui.activities;
                     return true;
 
                 case R.id.navigation_asr:
-                    KANTVLog.g(TAG, "asr");
                     setTitle("on-device AI on Android phone");
                     switchFragment(AIResearchFragment.class);
                     //menuNetItem.setVisible(false);
@@ -256,7 +250,6 @@ package com.kantvai.kantvplayer.ui.activities;
                     return true;
 
                 case R.id.navigation_personal:
-                    KANTVLog.g(TAG, "personal");
                     setTitle(mActivity.getBaseContext().getString(R.string.personal_center));
                     switchFragment(PersonalFragment.class);
                     //menuNetItem.setVisible(false);
@@ -398,7 +391,6 @@ package com.kantvai.kantvplayer.ui.activities;
     }
 
     private void switchFragment(Class clazz) {
-        KANTVLog.g(TAG, "here");
         if (previousFragment != null && clazz.isInstance(previousFragment)) {
             return;
         } else if (previousFragment != null) {
@@ -414,7 +406,7 @@ package com.kantvai.kantvplayer.ui.activities;
             }
 
             if (fragmentName.contains("LLMResearchFragment")) {
-                KANTVLog.g(TAG, "release LLM resource");
+                KANTVLog.d(TAG, "release LLM resource");
                 llmFragment.stopLLMInference();
                 llmFragment.release();
             }
@@ -450,17 +442,13 @@ package com.kantvai.kantvplayer.ui.activities;
             }
             previousFragment = LocalMediaFragment;
         } else if (clazz == LLMResearchFragment.class) {
-            KANTVLog.g(TAG, "here");
             if (llmFragment == null) {
                 llmFragment = LLMResearchFragment.newInstance();
                 getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
             } else {
-                KANTVLog.g(TAG, "here");
                 getFragmentTransaction().show(llmFragment).commit();
-                KANTVLog.g(TAG, "here");
                 llmFragment.reload(0);
             }
-            KANTVLog.g(TAG, "here");
             previousFragment = llmFragment;
         } else if (clazz == AIResearchFragment.class) {
             if (airesearchFragment == null) {
@@ -480,7 +468,6 @@ package com.kantvai.kantvplayer.ui.activities;
             }
             previousFragment = agentFragment;
         } */
-        KANTVLog.g(TAG, "here");
     }
 
 

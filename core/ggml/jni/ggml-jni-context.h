@@ -50,14 +50,14 @@ public:
         return instance;
     }
 
-    void init();
+    void    init();
 
-    void finalize();
+    void    finalize();
 
-    void set_top_p(float value) { llm_temperature  = value; }
-    float get_top_p()  { return llm_top_p; }
-    void set_temperature(float value) { llm_temperature = value; }
-    float get_temperature() { return llm_temperature; }
+    void    set_top_p(float value) { llm_temperature  = value; }
+    float   get_top_p()  { return llm_top_p; }
+    void    set_temperature(float value) { llm_temperature = value; }
+    float   get_temperature() { return llm_temperature; }
 
     void llm_init_running_state() {
         llm_inference_is_running.store(1);
@@ -107,6 +107,8 @@ private:
 private:
     float llm_temperature;
     float llm_top_p;
+    //TODO:add other LLM parameters
+
     std::atomic<uint32_t> llm_inference_is_running;
     std::atomic<uint32_t> realtimemtmd_inference_is_running;
     std::atomic<uint32_t> sd_inference_is_running;

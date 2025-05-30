@@ -38,8 +38,8 @@ void ggml_jni_context::init() {
         return;
     }
     llm_temperature = 0.8;
-    llm_top_p = 0.9;
-    initialized = true;
+    llm_top_p       = 0.9;
+    initialized     = true;
 }
 
 void ggml_jni_context::finalize() {
@@ -95,9 +95,9 @@ void realtimemtmd_reset_running_state() {
 }
 
 int realtimemtmd_is_running_state() {
-    static long realtimemtmd_idx = 0;
-    realtimemtmd_idx++;
-    if (0 == realtimemtmd_idx % 100) {
+    static long realtimemtmd_counter = 0;
+    realtimemtmd_counter++;
+    if (0 == realtimemtmd_counter % 100) {
         LOGGD("here");
     }
     return g_jni_ctx.realtimemtmd_is_running_state();
@@ -120,28 +120,24 @@ int sd_is_running_state() {
     return g_jni_ctx.sd_is_running_state();
 }
 
-//other helper functions
+//helper functions for adjust LLM inference parameters
 void llm_set_temperature(float temperature) {
-    LOGGD("here");
     g_jni_ctx.set_temperature(temperature);
 }
 
 float llm_get_temperature() {
-    LOGGD("here");
     return g_jni_ctx.get_temperature();
 }
 
 void llm_set_top_p(float value) {
-    LOGGD("here");
     g_jni_ctx.set_top_p(value);
 }
 
 float llm_get_top_p() {
-    LOGGD("here");
     return g_jni_ctx.get_top_p();
 }
 
-
+//ref:https://github.com/ggml-org/whisper.cpp/blob/master/src/whisper.cpp#L8046
 const char * ggml_jni_bench_memcpy(int n_threads) {
     std::string s;
     s = "";
@@ -301,7 +297,6 @@ const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
     return "deprecated";
 }
 
-// this function was referenced by this PR:https://github.com/ggerganov/llama.cpp/pull/5935/
 // ref:https://github.com/ggerganov/llama.cpp/pull/5935/
 bool ggml_jni_is_valid_utf8(const char *string) {
     if (!string) {
@@ -360,7 +355,7 @@ const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
 #endif
 
 /**
- * helper function to performan llama inference in native layer
+ * helper function to perform normal llama inference(text-to-text) in native layer
  * @param sz_model_path
  * @param sz_user_data
  * @param llm_type
@@ -400,7 +395,7 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
 }
 
 /**
- * helper function to perform MTMD(multimodal) inference in native layer
+ * helper function to perform MTMD(multimodal) inference in native layer, this is not realtime-MTMD inference
  * @param sz_model_path
  * @param sz_mmproj_model_path
  * @param sz_media_path
