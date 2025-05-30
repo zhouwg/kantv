@@ -1121,6 +1121,7 @@
 
          selectModeFileName = "";
          strInferenceResult = "";
+         txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
      }
 
      private String getBenchmarkTip() {
