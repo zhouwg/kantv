@@ -275,13 +275,6 @@ public class KANTVAIModelMgr {
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-             "Llama-3.1-Nemotron-Nano-4B",
-             "Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf",
-             hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true",
-             2778285312L // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
                  "Phi-4-mini-reasoning",
                  "Phi-4-mini-reasoning-Q4_0.gguf",
                  hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true",
@@ -293,6 +286,13 @@ public class KANTVAIModelMgr {
                  "DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf",
                  hf_endpoint + "unsloth/DeepSeek-R1-Distill-Qwen-7B-GGUF/resolve/main/DeepSeek-R1-Distill-Qwen-7B-Q4_K_M.gguf?download=true",
                  4683073248L // size of LLM model, in bytes
+         );
+
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
+                 "DeepSeek-R1-0528-Qwen3-8B",
+                 "DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf",
+                 hf_endpoint + "zhouwg/kantv/resolve/main/DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf?download=true",
+                 5027782720L // size of LLM model, in bytes
          );
 
          //MTMD-image(for realtime-video-inference)

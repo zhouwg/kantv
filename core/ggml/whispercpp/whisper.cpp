@@ -4359,7 +4359,7 @@ const char * whisper_print_system_info(void) {
     s += "WHISPER : ";
     s += "COREML = "    + std::to_string(whisper_has_coreml())     + " | ";
     s += "OPENVINO = "  + std::to_string(whisper_has_openvino())   + " | ";
-    s += "HEXAGON = "  + std::to_string(whipser_has_hexagon())   + " | ";
+    s += "HEXAGON = "   + std::to_string(whipser_has_hexagon())    + " | ";
 
     for (size_t i = 0; i < ggml_backend_reg_count(); i++) {
         auto * reg = ggml_backend_reg_get(i);
