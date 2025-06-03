@@ -352,6 +352,10 @@ const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
             return "unknown";
     }
 }
+
+void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach) {
+
+}
 #endif
 
 /**

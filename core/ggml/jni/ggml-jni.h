@@ -38,16 +38,6 @@ enum ggml_jni_bench_type {
     GGML_BENCHMARK_TEXT2IMAGE,                //Text2Image benchmark through stablediffusion.cpp
     GGML_BENCHMARK_MAX
 };
-
-//keep sync with ggml-hexagon.cpp
-//0: general approach through QNN:offload ggmlop to QNN
-//1: special approach through QNN-SINGLEGRAPH:mapping entire ggml cgraph to a single QNN graph
-//2: general approach through Hexagon cDSP:offload ggmlop to Hexagon cDSP directly
-enum hwaccel_approach_type {
-    HWACCEL_QNN                     = 0,
-    HWACCEL_QNN_SINGLEGRAPH         = 1,
-    HWACCEL_CDSP                    = 2,
-};
 //=============================================================================================
 
 
