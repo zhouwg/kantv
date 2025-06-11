@@ -1,0 +1,12 @@
+*.so
+*.a
+*.wav
+*.o
+*.bin
+
+out/
+obj/
+make/
+out.*/
+
+sherpa-ncnn/

@@ -45,6 +45,8 @@ lcov-report/
 tags
 .build/
 build*
+release
+debug
 !build-info.cmake
 !build-info.cpp.in
 !build-info.sh
@@ -94,10 +96,11 @@ perf-*.txt
 # Examples
 
 examples/jeopardy/results.txt
-examples/server/*.css.hpp
-examples/server/*.html.hpp
-examples/server/*.js.hpp
-examples/server/*.mjs.hpp
+tools/server/*.css.hpp
+tools/server/*.html.hpp
+tools/server/*.js.hpp
+tools/server/*.mjs.hpp
+tools/server/*.gz.hpp
 !build_64.sh
 !examples/*.bat
 !examples/*/*.kts
@@ -107,7 +110,7 @@ examples/server/*.mjs.hpp
 
 # Server Web UI temporary files
 node_modules
-examples/server/webui/dist
+tools/server/webui/dist
 
 # Python
 
@@ -143,3 +146,7 @@ poetry.toml
 # Local scripts
 /run-vim.sh
 /run-chat.sh
+*.sh
+*.jpeg
+*.mp3
+*.in

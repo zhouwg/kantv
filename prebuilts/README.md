@@ -1,7 +1,12 @@
-QNN: QNN(Qualcomm Neural Network, aka Qualcomm AI Engine Direct) SDK is verified to work with some machine learning frameworks. the prebuild libs of QNN SDK could be found in directory lib, the prebuild headers of QNN SDK could be found in directory include/QNN. the fully QNN SDK could be found at Qualcomm's offcial website:https://qpm.qualcomm.com/#/main/tools/details/qualcomm_ai_engine_direct
+### Compliance Statement
+
+we should strictly follow Qualcomm's IPR policy, even in open-source community.
 
 
-FFmpeg: the prebuild headers of FFmpeg 6.1 could be found in directory include. the fully source code of customized FFmpeg 6.1 could be found at ${PROJECT_ROOT_PATH}/external/
+### README
 
+- QNN_SDK: a customized/tailored Qualcomm's QNN SDK for build project KanTV conveniently. the fully QNN SDK could be found at Qualcomm's offcial website: https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
 
-Android NDK: Android NDK is located in directory toolchain, The Android NDK r26c could be download by  ${PROJECT_ROOT_PATH}/build/prebuild-download.sh
+- Hexagon_SDK: a customized/tailored Qualcomm's Hexagon SDK for build project KanTV conveniently. the fully Hexagon SDK could be found at Qualcomm's offcial website: https://developer.qualcomm.com/software/hexagon-dsp-sdk/tools. one more important thing, the fully Hexagon SDK must be obtained with a Qualcomm Developer Account.
+
+- toolchain: Android NDK and SDK for build project KanTV in command-line mode. The Android NDK and SDK could be download by ${PROJECT_ROOT_PATH}/build/prebuild-download.sh

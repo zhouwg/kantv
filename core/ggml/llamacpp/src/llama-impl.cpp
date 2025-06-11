@@ -31,36 +31,18 @@ void llama_log_set(ggml_log_callback log_callback, void * user_data) {
     g_logger_state.log_callback_user_data = user_data;
 }
 
-extern "C" {
-#if (defined __ANDROID__) || (defined ANDROID)
-extern int __android_log_print(int prio, const char *tag, const char *fmt, ...)
-#if defined(__GNUC__)
-__attribute__ ((format(printf, 3, 4)))
-#endif
-;
-#endif
-}
-
 static void llama_log_internal_v(ggml_log_level level, const char * format, va_list args) {
     va_list args_copy;
     va_copy(args_copy, args);
     char buffer[128];
     int len = vsnprintf(buffer, 128, format, args);
     if (len < 128) {
-#if (defined __ANDROID__) || (defined ANDROID)
-        __android_log_print(GGML_LOG_LEVEL_INFO, "KANTV", "%s", buffer);
-#else
         g_logger_state.log_callback(level, buffer, g_logger_state.log_callback_user_data);
-#endif
     } else {
         char * buffer2 = new char[len + 1];
         vsnprintf(buffer2, len + 1, format, args_copy);
         buffer2[len] = 0;
-#if (defined __ANDROID__) || (defined ANDROID)
-        __android_log_print(GGML_LOG_LEVEL_INFO, "KANTV", "%s", buffer2);
-#else
         g_logger_state.log_callback(level, buffer2, g_logger_state.log_callback_user_data);
-#endif
         delete[] buffer2;
     }
     va_end(args_copy);

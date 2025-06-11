@@ -1,0 +1,96 @@
+ /*
+  * Copyright (c) Project KanTV. 2021-2023
+  *
+  * Copyright (c) 2024- KanTV Authors
+  *
+  * Permission is hereby granted, free of charge, to any person obtaining a copy
+  * of this software and associated documentation files (the "Software"), to
+  * deal in the Software without restriction, including without limitation the
+  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+  * sell copies of the Software, and to permit persons to whom the Software is
+  * furnished to do so, subject to the following conditions:
+  *
+  * The above copyright notice and this permission notice shall be included in
+  * all copies or substantial portions of the Software.
+  *
+  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+  * IN THE SOFTWARE.
+  */
+
+package kantvai.media.player;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+
+public class KANTVVideoDecryptBuffer {
+    private static volatile boolean mIsInit = false;
+    private static KANTVVideoDecryptBuffer instance = null;
+    private int result;
+    private int dataLength;
+    private byte[] data;
+    private static ByteBuffer mDirectBuffer;
+    public static final int MAX_DECRYPT_BUFFER = 1024 * 2048;
+
+    private KANTVVideoDecryptBuffer() {
+
+    }
+    public static KANTVVideoDecryptBuffer getInstance() {
+        if (!mIsInit) {
+            mDirectBuffer = ByteBuffer.allocateDirect(MAX_DECRYPT_BUFFER);
+            mDirectBuffer.order(ByteOrder.LITTLE_ENDIAN);
+            instance = new KANTVVideoDecryptBuffer();
+            mIsInit = true;
+        }
+        return instance;
+
+    }
+
+    //public void setResult(int result){
+       // this.result = result;
+    //}
+
+    public int getResult(){
+        return this.result;
+    }
+
+    //public void setDataLength(int dataLength){
+     //   this.dataLength = dataLength;
+    //}
+
+    public int getDataLength(){
+        return this.dataLength;
+    }
+
+    //public void setData(byte[] data){
+     //   this.data = data;
+   // }
+
+    public static ByteBuffer getDirectBuffer() { return  mDirectBuffer; }
+    public static byte[] getDirectBufferData(){
+        return mDirectBuffer.array();
+    }
+
+    public  byte[] getData(){
+        return this.data;
+    }
+
+    public void setAll(int result, int dataLength){
+        this.result = result;
+        this.dataLength = dataLength;
+        //this.data = data;
+    }
+
+    public void setAll3(int result, int dataLength, byte [] data){
+        this.result = result;
+        this.dataLength = dataLength;
+        this.data = data;
+    }
+
+    public static native int kantv_anti_remove_rename_this_file();
+}

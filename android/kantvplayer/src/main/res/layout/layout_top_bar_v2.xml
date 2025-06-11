@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <!-- 2024-03-14, workaround to fix UI issue in low-end VIVO phone so tv record and tv transcription could be launched/tested at the same time -->
+    <LinearLayout
+        android:id="@+id/top_bar_ll"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/control_bar_height"
+        android:layout_marginRight="40dp"
+        android:background="@color/bg_video_view"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:translationY="-46dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/sel_item_background"
+            android:padding="10dp"
+            android:src="@mipmap/ic_return_back" />
+
+        <com.kantvai.kantvplayer.player.common.widgets.MarqueeTextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="15dp"
+            android:layout_weight="1"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="标题"
+            android:textColor="@color/text_white"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/tv_recording_iv"
+            android:layout_width="@dimen/settings_btn_width"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:src="@mipmap/tv_record" />
+
+        <TextView
+            android:id="@+id/tv_disk_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text=""
+            android:textColor="@color/text_white"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/tv_network_iv"
+            android:layout_width="@dimen/settings_btn_width"
+            android:layout_height="wrap_content"
+            android:padding="1dp"
+            android:src="@mipmap/ic_wifi" />
+
+        <ProgressBar
+            android:id="@+id/pb_battery"
+            style="@style/ProgressBarBattery"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:max="100" />
+
+        <TextView
+            android:id="@+id/tv_system_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:textColor="@color/text_white"
+            android:textSize="16sp" />
+
+
+        <ImageView
+            android:id="@+id/subtitle_settings_iv"
+            android:layout_width="@dimen/settings_btn_width"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:src="@drawable/sel_subtitle_setting" />
+
+
+        <ImageView
+            android:id="@+id/player_settings_iv"
+            android:layout_width="@dimen/settings_btn_width"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:src="@drawable/sel_player_setting" />
+    </LinearLayout>
+
+
+    <com.kantvai.kantvplayer.player.common.widgets.SettingPlayerView
+        android:id="@+id/player_setting_view"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:translationX="300dp"
+        android:visibility="gone">
+
+    </com.kantvai.kantvplayer.player.common.widgets.SettingPlayerView>
+
+    <com.kantvai.kantvplayer.player.common.widgets.SettingSubtitleView
+        android:id="@+id/subtitle_setting_view"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:translationX="300dp"
+        android:visibility="gone"></com.kantvai.kantvplayer.player.common.widgets.SettingSubtitleView>
+</FrameLayout>

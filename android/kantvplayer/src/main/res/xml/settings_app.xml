@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/pref_title_general">
+
+        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
+            android:defaultValue="0"
+            android:entries="@@array/pref_entries_lang"
+            android:entryValues="@array/pref_entry_values_lang"
+            android:key="@string/pref_key_lang"
+            android:persistent="true"
+            android:title="@string/pref_title_lang"
+            app:entrySummaries="@array/pref_entry_summaries_lang" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_epgupdate"
+            android:persistent="true"
+            android:summary="@string/pref_summary_epgupdate"
+            android:title="@string/pref_title_epgupdate"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <Preference
+            android:key="@string/pref_key_cleanupcache"
+            android:summary="@string/pref_summary_cleanupcache"
+            android:title="@string/pref_title_cleanupcache"
+            android:widgetLayout="@layout/my_checkbox"
+            />
+
+        <EditTextPreference
+            android:defaultValue="www.kantvai.com"
+            android:enabled="true"
+            android:key="@string/pref_key_kantvserver"
+            android:persistent="true"
+            android:summary="@string/pref_summary_kantvserver"
+            android:title="@string/pref_title_kantvserver"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <SwitchPreference
+            android:key="pref.close_splash_page"
+            android:title="@string/pref_title_closesplashpage" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_dev_mode"
+            android:persistent="true"
+            android:summary="@string/pref_summary_dev_mode"
+            android:title="@string/pref_title_dev_mode" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="@string/pref_title_about">
+
+        <Preference
+            android:key="@string/pref_key_author"
+            android:summary="@string/pref_summary_author"
+            android:title="@string/pref_title_author" />
+
+        <Preference
+            android:key="@string/pref_key_version"
+            android:summary="@string/pref_summary_version"
+            android:title="@string/pref_title_version" />
+
+        <Preference
+            android:key="@string/pref_key_ipr"
+            android:summary="@string/pref_summary_ipr"
+            android:title="@string/pref_title_ipr" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="@string/pref_title_exit">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_checkupdate"
+            android:persistent="true"
+            android:summary="@string/pref_summary_checkupdate"
+            android:title="@string/pref_title_checkupdate"
+            android:widgetLayout="@layout/my_checkbox" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:enabled="true"
+            android:key="@string/pref_key_exitapp"
+            android:persistent="true"
+            android:summary="@string/pref_summary_exitapp"
+            android:title="@string/pref_title_exitapp"
+            android:widgetLayout="@layout/my_checkbox" />
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

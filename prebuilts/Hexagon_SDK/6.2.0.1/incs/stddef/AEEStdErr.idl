@@ -1,0 +1,121 @@
+#ifndef AEESTDERR_IDL
+#define AEESTDERR_IDL
+//============================================================================
+/// @file AEEStdErr.idl
+///
+/// This file contains error codes.
+                                                           //qidl copyright
+//% C  Copyright (c) 2006-2014, 2020 Qualcomm Technologies, Inc.
+                                                           //qidl nested=false
+//% All Rights Reserved.
+//% Redistribution and use in source and binary forms, with or without
+//% modification, are permitted provided that the following conditions are met:
+//%
+//% 1. Redistributions of source code must retain the above copyright notice,
+//% this list of conditions and the following disclaimer.
+//%
+//% 2. Redistributions in binary form must reproduce the above copyright notice,
+//% this list of conditions and the following disclaimer in the documentation
+//% and/or other materials provided with the distribution.
+//%
+//% 3. Neither the name of the copyright holder nor the names of its contributors
+//% may be used to endorse or promote products derived from this software without
+//% specific prior written permission.
+//%
+//% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+//% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+//% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+//% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+//% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+//% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+//% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+//% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+//% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+//% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+//% POSSIBILITY OF SUCH DAMAGE.
+//============================================================================
+
+#include "AEEStdDef.idl"
+
+/** @name Error Codes
+ * Common error codes.
+ */
+/*@{*/
+
+const AEEResult AEE_SUCCESS            = 0;  ///< No error
+const AEEResult AEE_EFAILED            = 1;  ///< General failure
+const AEEResult AEE_ENOMEMORY          = 2;  ///< Insufficient RAM
+const AEEResult AEE_ECLASSNOTSUPPORT   = 3;  ///< Specified class unsupported
+const AEEResult AEE_EVERSIONNOTSUPPORT = 4;  ///< Version not supported
+const AEEResult AEE_EALREADYLOADED     = 5;  ///< Object already loaded
+const AEEResult AEE_EUNABLETOLOAD      = 6;  ///< Unable to load object/applet
+const AEEResult AEE_EUNABLETOUNLOAD    = 7;  ///< Unable to unload
+                                             ///< object/applet
+const AEEResult AEE_EALARMPENDING      = 8;  ///< Alarm is pending
+const AEEResult AEE_EINVALIDTIME       = 9;  ///< Invalid time
+const AEEResult AEE_EBADCLASS          = 10; ///< NULL class object
+const AEEResult AEE_EBADMETRIC         = 11; ///< Invalid metric specified
+const AEEResult AEE_EEXPIRED           = 12; ///< App/Component Expired
+const AEEResult AEE_EBADSTATE          = 13; ///< Invalid state
+const AEEResult AEE_EBADPARM           = 14; ///< Invalid parameter
+const AEEResult AEE_ESCHEMENOTSUPPORTED= 15; ///< Invalid URL scheme
+const AEEResult AEE_EBADITEM           = 16; ///< Invalid item
+const AEEResult AEE_EINVALIDFORMAT     = 17; ///< Invalid format
+const AEEResult AEE_EINCOMPLETEITEM    = 18; ///< Incomplete item
+const AEEResult AEE_ENOPERSISTMEMORY   = 19; ///< Insufficient flash
+const AEEResult AEE_EUNSUPPORTED       = 20; ///< API is not supported
+const AEEResult AEE_EPRIVLEVEL         = 21; ///< Privileges are insufficient
+                                             ///< for this operation
+const AEEResult AEE_ERESOURCENOTFOUND  = 22; ///< Unable to find specified
+                                             ///< resource
+const AEEResult AEE_EREENTERED         = 23; ///< Non re-entrant API
+                                             ///< re-entered
+const AEEResult AEE_EBADTASK           = 24; ///< API called in wrong task
+                                             ///< context
+const AEEResult AEE_EALLOCATED         = 25; ///< App/Module left memory
+                                             ///< allocated when released.
+const AEEResult AEE_EALREADY           = 26; ///< Operation is already in
+                                             ///< progress
+const AEEResult AEE_EADSAUTHBAD        = 27; ///< ADS mutual authorization
+                                             ///< failed
+const AEEResult AEE_ENEEDSERVICEPROG   = 28; ///< Need service programming
+const AEEResult AEE_EMEMPTR            = 29; ///< bad memory pointer
+const AEEResult AEE_EHEAP              = 30; ///< heap corruption
+const AEEResult AEE_EIDLE              = 31; ///< Context (system, interface,
+                                             ///< etc.) is idle
+const AEEResult AEE_EITEMBUSY          = 32; ///< Context (system, interface,
+                                             ///< etc.) is busy
+const AEEResult AEE_EBADSID            = 33; ///< Invalid subscriber ID
+const AEEResult AEE_ENOTYPE            = 34; ///< No type detected/found
+const AEEResult AEE_ENEEDMORE          = 35; ///< Need more data/info
+const AEEResult AEE_EADSCAPS           = 36; ///< ADS Capabilities do not
+                                             ///< match those required for
+                                             ///< phone
+const AEEResult AEE_EBADSHUTDOWN       = 37; ///< App failed to close properly
+const AEEResult AEE_EBUFFERTOOSMALL    = 38; ///< Destination buffer given is
+                                             ///< too small
+const AEEResult AEE_ENOSUCH            = 39; ///< No such name, port, socket
+                                             ///< or service exists or is
+                                             ///< valid
+const AEEResult AEE_EACKPENDING        = 40; ///< ACK pending on application
+const AEEResult AEE_ENOTOWNER          = 41; ///< Not an owner authorized to
+                                             ///< perform the operation
+const AEEResult AEE_EINVALIDITEM       = 42; ///< Current item is invalid
+const AEEResult AEE_ENOTALLOWED        = 43; ///< Not allowed to perform the
+                                             ///< operation
+const AEEResult AEE_EINVHANDLE         = 44; ///< Invalid handle
+const AEEResult AEE_EOUTOFHANDLES      = 45; ///< Out of handles
+const AEEResult AEE_EINTERRUPTED       = 46; ///< Waitable call is interrupted
+const AEEResult AEE_ENOMORE            = 47; ///< No more items available --
+                                             ///< reached end
+const AEEResult AEE_ECPUEXCEPTION      = 48; ///< A CPU exception occurred
+const AEEResult AEE_EREADONLY          = 49; ///< Cannot change read-only
+                                             ///< object or parameter
+const AEEResult AEE_ECONNRESET         =104; ///< Connection reset by peer
+const AEEResult AEE_EWOULDBLOCK        =516; ///< Operation would block if not
+                                             ///< non-blocking; wait and try
+                                             ///< again
+
+/*@}*/
+
+#endif /* #ifndef AEESTDERR_IDL */

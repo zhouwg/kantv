@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_welcome_page">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="350dp"
+        android:orientation="vertical">
+
+        <com.kantvai.kantvplayer.ui.weight.anim.path.TextPathAnimView
+            android:id="@+id/text_path_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:duration="2000"
+            app:loop="false"
+            app:text="Kan TV"
+            app:text_bg_color="@color/splash_text_bg_color"
+            app:text_fg_color="@color/splash_text_fg_color"
+            app:text_interval="8dp"
+            app:text_size_scale="1.2"
+            app:text_stoke_width="5" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/address_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/app_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="18sp"
+            android:textColor="@color/splash_text_fg_color"
+            android:text=""/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/splash_text_fg_color"
+            android:text=""/>
+
+    </LinearLayout>
+
+</RelativeLayout>

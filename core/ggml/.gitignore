@@ -14,6 +14,7 @@ out/
 obj/
 make/
 out.*/
+*.bk
 
 whispercpp/bench
 whispercpp/main

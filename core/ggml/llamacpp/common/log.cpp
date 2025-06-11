@@ -1,5 +1,6 @@
 #include "log.h"
 
+#include <chrono>
 #include <condition_variable>
 #include <cstdarg>
 #include <cstdio>
@@ -13,16 +14,6 @@ int common_log_verbosity_thold = LOG_DEFAULT_LLAMA;
 void common_log_set_verbosity_thold(int verbosity) {
     common_log_verbosity_thold = verbosity;
 }
-
-#define LOG_COL_DEFAULT "\033[0m"
-#define LOG_COL_BOLD    "\033[1m"
-#define LOG_COL_RED     "\033[31m"
-#define LOG_COL_GREEN   "\033[32m"
-#define LOG_COL_YELLOW  "\033[33m"
-#define LOG_COL_BLUE    "\033[34m"
-#define LOG_COL_MAGENTA "\033[35m"
-#define LOG_COL_CYAN    "\033[36m"
-#define LOG_COL_WHITE   "\033[37m"
 
 static int64_t t_us() {
     return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -53,16 +44,6 @@ static std::vector<const char *> g_col = {
     "",
     "",
 };
-
-extern "C" {
-#if (defined __ANDROID__) || (defined ANDROID)
-extern int __android_log_print(int prio, const char *tag, const char *fmt, ...)
-#if defined(__GNUC__)
-__attribute__ ((format(printf, 3, 4)))
-#endif
-;
-#endif
-}
 
 struct common_log_entry {
     enum ggml_log_level level;
@@ -113,12 +94,8 @@ struct common_log_entry {
                     break;
             }
         }
-#if (defined __ANDROID__) || (defined ANDROID)
-        __android_log_print(GGML_LOG_LEVEL_INFO, "KANTV", "%s", msg.data());
 
-#else
         fprintf(fcur, "%s", msg.data());
-#endif
 
         if (level == GGML_LOG_LEVEL_WARN || level == GGML_LOG_LEVEL_ERROR || level == GGML_LOG_LEVEL_DEBUG) {
             fprintf(fcur, "%s", g_col[COMMON_LOG_COL_DEFAULT]);
@@ -220,6 +197,7 @@ public:
                 vsnprintf(entry.msg.data(), entry.msg.size(), ss.str().c_str(), args_copy);
             }
 #endif
+            va_end(args_copy);
         }
 
         entry.level = level;

@@ -1,0 +1,206 @@
+apply from: '../constants.gradle'
+apply plugin: 'com.android.application'
+
+android.buildFeatures.buildConfig true
+
+android {
+    compileSdkVersion = project.ext.compileSdkVersion
+    buildToolsVersion = project.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.kantvai.kantvplayer"
+        flavorDimensions = ["versionCode"]
+
+        externalNativeBuild {
+            cmake {
+                //modify to -DCMAKE_BUILD_TYPE=Release before prepare release apk
+                arguments += "-DCMAKE_BUILD_TYPE=Release"
+                //2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
+                arguments += "-DCMAKE_ANDROID_STL_TYPE=c++_shared"
+                arguments += "-DANDROID_STL=c++_shared"
+                arguments += "-DANDROID_CPP_FEATURES=exceptions"
+                cppFlags "-fexceptions"
+                //end added
+            }
+        }
+        ndk {
+            //abiFilters  "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+            abiFilters  "arm64-v8a"
+        }
+
+        packagingOptions {
+            //native libs packing,legacy mode is used for better compatibility
+            jniLibs {
+                useLegacyPackaging = true
+            }
+
+            pickFirst 'lib/arm64-v8a/libkantv-media.so'
+            pickFirst 'lib/arm64-v8a/libggml-jni.so'
+            //pickFirst 'lib/arm64-v8a/libQnn*.so'
+            exclude   'lib/arm64-v8a/libcdsprpc.so'
+        }
+
+        versionName project.ext.releaseVersion
+        versionCode project.ext.releaseVersionCode
+        minSdkVersion project.ext.minSdkVersion
+        targetSdkVersion project.ext.appTargetSdkVersion
+        multiDexEnabled true
+        buildConfigField("String", "BUILD_TIME", getBuildTime())
+    }
+
+    externalNativeBuild {
+        cmake {
+            version "3.22.1" //make llama.cpp happy
+            path "../../core/CMakeLists.txt"
+        }
+    }
+
+    ndkVersion  '26.2.11394342'
+
+    sourceSets {
+        main {
+            res.srcDirs = ['src/main/res', 'src/main/res-night']
+        }
+    }
+
+    productFlavors {
+        //all32 { minSdkVersion project.ext.minSdkVersion }
+        all64 { minSdkVersion project.ext.minSdkVersion }
+    }
+    sourceSets {
+        main {
+            jniLibs.srcDirs  = ['src/main/jniLibs']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            //shrinkResources true
+        }
+    }
+
+    //FranzKafka:2025-02-22, add version/compiletime in apk name
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "kantv-${variant.buildType.name}-v${project.ext.releaseVersion}-unsigned.apk"
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+
+    lintOptions {
+        lintConfig file("lint.xml")
+    }
+    configurations {
+        all {
+            exclude module: 'httpclient'
+            exclude module: 'commons-logging'
+        }
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+    namespace 'com.kantvai.kantvplayer'
+}
+
+static String getBuildTime() {
+    Date date = new Date()
+    String dataStr = "\"" + date.format("yyyy-MM-dd,HH:mm") + "\""
+    return dataStr
+}
+
+def skin_support_version = "4.0.5"
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.appcompat:appcompat-resources:1.7.0'
+    implementation "androidx.activity:activity:1.9.0"
+    implementation "androidx.core:core:1.13.0"
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "androidx.preference:preference:1.2.1"
+    implementation "androidx.legacy:legacy-support-core-ui:1.0.0"
+    implementation "androidx.fragment:fragment:1.8.7"
+    implementation "androidx.viewpager:viewpager:1.1.0"
+    implementation "androidx.viewpager2:viewpager2:1.1.0"
+    implementation 'androidx.multidex:multidex:2.0.1'
+    //implementation 'androidx.multidex:multidex:' + androidxMultidexVersion
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'com.google.zxing:core:3.5.3'
+
+    //https://github.com/alibaba/fastjson2
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.57'
+    //https://github.com/greenrobot/EventBus
+    implementation 'org.greenrobot:eventbus:3.3.1'
+
+    //https://jsoup.org/download
+    implementation 'org.jsoup:jsoup:1.20.1'
+
+    //https://github.com/typetools/checker-framework
+    compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
+
+    //https://github.com/square/okhttp
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.1'
+    //https://github.com/square/okio
+    implementation 'com.squareup.okio:okio:1.15.0'
+    //https://github.com/square/retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.2.0'
+    //https://github.com/square/otto
+    implementation 'com.squareup:otto:1.3.8'
+    //https://github.com/ReactiveX/RxJava
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.0'
+
+    //https://github.com/uber/AutoDispose
+    implementation 'com.uber.autodispose:autodispose:1.0.0-RC3'
+    implementation 'com.uber.autodispose:autodispose-android-archcomponents:1.0.0-RC3'
+    //https://github.com/gyf-dev/ImmersionBar
+    implementation 'com.gyf.immersionbar:immersionbar:3.0.0'
+    //https://github.com/huanghaibin-dev/CalendarView
+    implementation 'com.haibin:calendarview:3.7.1'
+    //https://github.com/bumptech/glide
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    //https://github.com/albfernandez/juniversalchardet
+    implementation 'com.github.albfernandez:juniversalchardet:2.4.0'
+    //https://github.com/Ereza/CustomActivityOnCrash
+    implementation 'cat.ereza:customactivityoncrash:2.4.0'
+    //https://github.com/Bigkoo/Android-PickerView
+    implementation 'com.contrarywind:Android-PickerView:4.1.9'
+    //https://github.com/JakeWharton/butterknife
+    implementation 'com.jakewharton:butterknife:10.2.3'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+
+    //https://github.com/noties/Markwon
+    implementation "io.noties.markwon:core:4.6.2"
+    implementation "io.noties.markwon:ext-strikethrough:4.6.2"
+    implementation "io.noties.markwon:ext-tables:4.6.2"
+
+    //TODO
+    //https://github.com/H07000223/FlycoTabLayout
+    implementation 'io.github.h07000223:flycoTabLayout:3.0.0'
+
+    //TODO
+    //https://github.com/youth5201314/banner
+    //implementation 'io.github.youth5201314:banner:2.2.3'
+    implementation 'com.youth.banner:banner:1.4.10'
+
+    //TODO
+    //https://github.com/CymChad/BaseRecyclerViewAdapterHelper
+    implementation "io.github.cymchad:BaseRecyclerViewAdapterHelper4:4.1.4"
+    api 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.49-androidx'
+
+    api project(':kantvplayer-lib')
+}
+

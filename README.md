@@ -1,293 +1,127 @@
 # KanTV
 
-KanTV("Kan", aka Chinese PinYin "Kan" or Chinese HanZi "看" or English "watch/listen") , an open source project focus on study and practise state-of-the-art AI technology in <b>real scenario</b>(such as online-TV playback and online-TV transcription(real-time subtitle) and online-TV language translation and online-TV video&audio recording works at the same time) on **Android phone/device**, derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) , with much enhancements and new features:
-
-- Watch online TV and local media by my customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg), source code of my customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>
-
-- Record online TV to automatically generate videos (useful for short video creators to generate short video materials but pls respect IPR of original content creator/provider); record online TV's video / audio content for gather video / audio data which might be required of/useful for AI R&D activity
-
-- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) by the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>), pls attention Xiaomi 14 or other powerful Android mobile phone is HIGHLY required/recommended for AI subtitle feature otherwise unexpected behavior would happen
-
-- 2D graphic performance
-
-- Set up a customized playlist and then use this software to watch the content of the customized playlist for R&D activity
-
-- UI refactor(closer to real commercial Android application and only English is supported in UI language currently)
-
-- Well-maintained "workbench" for ASR(Automatic Speech Recognition) researchers/developers/programmers who was interested in practise state-of-the-art AI tech(such as [whisper.cpp](https://github.com/ggerganov/whisper.cpp)) in <b>real scenario on Android phone/device</b>(<a href="https://github.com/zhouwg/kantv/issues/64">PoC: realtime AI subtitle for online-TV(aka OTT TV) on Xiaomi 14 finished from 03/05/2024 to 03/16/2024</a>)
+KanTV("Kan", aka English "watch") , an open source project focus on study and practise on-device AI technology in <b>real scenario</b>(such as perform <b>online-TV playback</b> and <b>realtime transcription</b> and <b>online-TV record</b> at the same time) on Android phone:
 
 
-- Well-maintained "workbench" for LLM(Large Language Model) researchers/developers who was interested in practise state-of-the-art AI tech(such as [llama.cpp](https://github.com/ggerganov/llama.cpp)) in real scenario on Android phone/device, or Run/experience LLM model(such as llama-2-7b, baichuan2-7b, qwen1_5-1_8b, gemma-2b, DeepSeek) on Android phone/device using the magic llama.cpp
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/kantv-ai/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/kantv-ai/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features. source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. source code of FFmpeg 6.1's all dependent libraries could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/external/ffmpeg-deps"> external/ffmpeg-deps </a>.
 
-- Well-maintained "workbench" for <a href="https://github.com/ggerganov/ggml">GGML</a> beginners to study internal mechanism of GGML inference framework on Android phone/device(<a href="https://github.com/zhouwg/kantv/issues/121">PoC:Qualcomm QNN backend for ggml finished from 03/29/2024 to 04/26/2024</a>)
+- Watch online TV by customized ![Google Exoplayer 2.15.1](https://github.com/google/ExoPlayer), source code of customized Exoplayer2.15.1 could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/android/kantvplayer-exo2"> android/kantvplayer-exo2 </a>.
 
-- Well-maintained <b>turn-key / self-contained</b> project for AI researchers(whom mightbe not familiar with <b>regular Android software development</b>)/developers/beginners focus on edge/device-side AI learning / R&D activity, some AI R&D activities (AI algorithm validation / AI model validation / performance benchmark in ASR, LLM, TTS, NLP, CV......field) could be done by Android Studio IDE + a powerful Android phone very easily
+- Record online TV to local file on phone.
 
-### Highlight
+- 2D graphic performance benchmark.
 
-As far as I know, probably be the first <a href="https://github.com/zhouwg/kantv/issues/246">open-source implmentation of ggml-qnn</a>
+- AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
+
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers whom focus on highly-value on-device AI R&D activity on Android. some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/Text2Image/LLM on Android) could be done via this project easily.
+
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
+
+- Built-in [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma3-12B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Alibaba's Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B), [Nvidia's Llama-3.1-Nemotron-Nano-4B](https://huggingface.co/lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF), [Microsoft's Phi-4-mini-reasoning](https://huggingface.co/unsloth/Phi-4-mini-reasoning-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimoda text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF), [DeepSeek's DeepSeek-R1-0528-Qwen3-8B](https://huggingface.co/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B), [Xiaomi's MiMo-VL-7B](https://huggingface.co/XiaomiMiMo/MiMo-VL-7B-RL) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloadded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java#L284](https://github.com/kantv-ai/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java#L284).
+
+- Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
+
+- The [ggml-hexagon(original name is ggml-qnn)](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp)  in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone.
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/0ee33100-92da-43f7-baa6-7c4129525aba)
+![Image](https://github.com/user-attachments/assets/32227392-abdf-4760-be3d-a19d48d478ff)
 
+### Building the project
 
-### How to build project
-
-
-#### Fetch source codes
-
-```
-
-git clone https://github.com/zhouwg/kantv.git
-
-cd kantv
-
-git checkout master
-
-cd kantv
-
-```
-
-#### Setup development environment
-
-##### Option 1: Setup docker environment
-
-- Build docker image
-  ```shell
-  docker build build -t kantv --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) --build-arg USER_NAME=$(whoami)
-  ```
-
-- Run docker container
-  ```shell
-  # map source code directory into docker container
-  docker run -it --name=kantv --volume=`pwd`:/home/`whoami`/kantv kantv
-
-  # in docker container
-  . build/envsetup.sh
-
-  ./build/prebuild-download.sh
-  ```
-
-##### Option 2: Setup local environment
-
-
-  - <details>
-      <summary>Prerequisites</summary>
-
-      <ol>
-
-        Host OS information:
-
-    ```
-    uname -a
-
-    Linux 5.8.0-43-generic #49~20.04.1-Ubuntu SMP Fri Feb 5 09:57:56 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
-
-    cat /etc/issue
-
-    Ubuntu 20.04.2 LTS \n \l
-
-    ```
-    - tools & utilities
-    ```
-    sudo apt-get update
-    sudo apt-get install build-essential -y
-    sudo apt-get install cmake -y
-    sudo apt-get install curl -y
-    sudo apt-get install wget -y
-    sudo apt-get install python -y
-    sudo apt-get install tcl expect -y
-    sudo apt-get install nginx -y
-    sudo apt-get install git -y
-    sudo apt-get install vim -y
-    sudo apt-get install spawn-fcgi -y
-    sudo apt-get install u-boot-tools -y
-    sudo apt-get install ffmpeg -y
-    sudo apt-get install openssh-client -y
-    sudo apt-get install nasm -y
-    sudo apt-get install yasm -y
-    sudo apt-get install openjdk-17-jdk -y
-
-    sudo dpkg --add-architecture i386
-    sudo apt-get install lib32z1 -y
-
-    sudo apt-get install -y android-tools-adb android-tools-fastboot autoconf \
-            automake bc bison build-essential ccache cscope curl device-tree-compiler \
-            expect flex ftp-upload gdisk acpica-tools libattr1-dev libcap-dev \
-            libfdt-dev libftdi-dev libglib2.0-dev libhidapi-dev libncurses5-dev \
-            libpixman-1-dev libssl-dev libtool make \
-            mtools netcat python-crypto python3-crypto python-pyelftools \
-            python3-pycryptodome python3-pyelftools python3-serial \
-            rsync unzip uuid-dev xdg-utils xterm xz-utils zlib1g-dev
-
-    sudo apt-get install python3-pip -y
-    sudo apt-get install indent -y
-    pip3 install meson ninja
-
-    echo "export PATH=/home/`whoami`/.local/bin:\$PATH" >> ~/.bashrc
-
-    ```
-
-    or run below script accordingly after fetch project's source code
-
-    ```
-
-    ./build/prebuild.sh
-
-
-    ```
-
-    - Android Studio
-
-      download and install Android Studio manually
-
-      [Android Studio 4.2.1 or latest Android Studio](https://developer.android.google.cn/studio)
-
-
-    - vim settings
-
-
-    borrow from http://ffmpeg.org/developer.html#Editor-configuration
-
-    ```
-    set ai
-    set nu
-    set expandtab
-    set tabstop=4
-    set shiftwidth=4
-    set softtabstop=4
-    set noundofile
-    set nobackup
-    set fileformat=unix
-    set undodir=~/.undodir
-    set cindent
-    set cinoptions=(0
-    " Allow tabs in Makefiles.
-    autocmd FileType make,automake set noexpandtab shiftwidth=8 softtabstop=8
-    " Trailing whitespace and tabs are forbidden, so highlight them.
-    highlight ForbiddenWhitespace ctermbg=red guibg=red
-    match ForbiddenWhitespace /\s\+$\|\t/
-    " Do not highlight spaces at the end of line while typing on that line.
-    autocmd InsertEnter * match ForbiddenWhitespace /\t\|\s\+\%#\@<!$/
-
-    ```
-      </ol>
-    </details>
-
-
- - Download android-ndk-r26c to prebuilts/toolchain, skip this step if android-ndk-r26c is already exist
-    ```
-    . build/envsetup.sh
-
-    ./build/prebuild-download.sh
-
-    ```
-
-
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt</a> accordingly if target Android device is Xiaomi 14 or Qualcomm Snapdragon 8 Gen 3 SoC based Android phone
-
- - Modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L15">ggml/CMakeLists.txt</a> accordingly if target Android phone is Qualcomm SoC based Android phone and enable QNN backend for inference framework on Qualcomm SoC based Android phone
-
- - Remove the hardcoded debug flag in Android NDK <a href="https://github.com/android-ndk/ndk/issues/243">android-ndk issue</a>
-
-    ```
-
-    # open $ANDROID_NDK/build/cmake/android.toolchain.cmake for ndk < r23
-    # or $ANDROID_NDK/build/cmake/android-legacy.toolchain.cmake for ndk >= r23
-    # delete "-g" line
-    list(APPEND ANDROID_COMPILER_FLAGS
-    -g
-    -DANDROID
-
-    ```
-
-
-
-#### Build native codes
-
-```shell
-. build/envsetup.sh
-
-```
-
-![Screenshot from 2024-04-07 09-45-04](https://github.com/zhouwg/kantv/assets/6889919/44a1f614-902c-48c1-babc-a73511c3a0f6)
-
-
-#### Build Android APK
-
-- Option 1: Build APK from source code by Android Studio IDE
-
-- Option 2: Build APK from source code by command line
-
-        . build/envsetup.sh
-        lunch 1
-        ./build-all.sh android
-
-<!--
-- Latest prebuit APK could be found here [![Github](https://user-images.githubusercontent.com/6889919/122489234-c13db400-d011-11eb-9d8c-8e4b2555dabe.png)](https://github.com/zhouwg/kantv/raw/master/release/kantv-latest.apk)(the prebuilt APK sometimes might be not available because generate APK from source code is preferrred).
--->
-
+- Clone this repository and build locally, see [how to build](./docs/how-to-build.md)
+- Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
+- Download pre-built Android APK from Github CI-build: https://github.com/kantv-ai/kantv/actions/
 
 ### Run Android APK on Android phone
+- Android 8.0(2017.08) --- Android 15(2024.10) and higher version with <b>ANY</b> mainstream arm64 mobile SoC.
+- Android smartphone equipped with <b>ANY</b> mainstream <b>high-end</b> mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen.
+- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm's state-of-the-art high-end mobile SoC <b>Snapdragon 8Gen3 series and Snapdragon 8Elite series</b> are highly recommended) <b>is required</b> for verify/running ggml-hexagon backend on Android phone:
+```
+    Snapdragon 8 Gen 1
+    Snapdragon 8 Gen 1+
+    Snapdragon 8 Gen 2
+    Snapdragon 8 Gen 3
+    Snapdragon 8 Elite
+```
 
-This project is a <b>pure AI learning&study</b> project, so the Android APK is a green Android APP and will not collect/upload user data in Android device. The Android APK should be works well on any Qualcomm mobile SoC equipped <b>mainstream</b> Android phone and the following permissions are required:
 
-- Access to storage is required for ASR inference and LLM inference(read/load models from storage)
-- Access to device information is required to obtain phone's network status information, distinguishing whether the current network is Wi-Fi or mobile when playing online TV
+### Screenshots
 
-<hr>
-here is a short video to demostrate AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+here is a short video to demostrate realtime AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Gen3 mobile SoC - <b>fully offline, on-device</b>.
 
-https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
+https://github.com/kantv-ai/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
 
 ----
 
-here is a screenshot to demostrate LLM inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
+a screenshot to demostrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
 
-
-![Image](https://github.com/user-attachments/assets/1eeade87-8e9b-4ca9-b730-4c27a6d01a8e)
+![Image](https://github.com/user-attachments/assets/c406951a-383a-4943-a58d-cda401148f9e)
 
 ----
+a screenshot to demostrate realtime-video-recognition via [MTMD from llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) + a lightweight multimodal model [SmolVLM2-256M from Huggingface](https://huggingface.co/HuggingFaceTB/SmolVLM2-256M-Video-Instruct) on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
 
-here is a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on a Xiaomi 14 device - <b>fully offline, on-device</b>.
-
-
-![Image](https://github.com/user-attachments/assets/9bf4fb00-9b7a-4bca-ac84-2c11babd69a2)
-
+![Image](https://github.com/user-attachments/assets/35841e4d-150f-4163-bc58-ada1e9b1a065)
 
 <details>
   <summary>some other screenshots</summary>
   <ol>
 
-![Image](https://github.com/user-attachments/assets/2d95bd5e-bd02-4810-aa70-a81cc0469fcc)
+![Image](https://github.com/user-attachments/assets/d9c9bc39-d0d8-4d50-b74d-59152de28d6d)
+
+![Image](https://github.com/user-attachments/assets/025a8ff0-7584-4df2-97a5-f4e655a52e0f)
+
+
+----
+
+a screenshot to demostrate ASR inference by running the excellent <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Gen3 mobile SoC - <b>fully offline, on-device</b>.
+
+![Image](https://github.com/user-attachments/assets/46856bf2-cc4b-4b0a-9209-d07825fba2e7)
+
+
+----
+a screenshot to demostrate Text-2-Image inference by running the amazaing <a href="https://github.com/leejet/stable-diffusion.cpp"> stable-diffusion.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC - <b>fully offline, on-divice</b>.
+
+![713992135](https://github.com/user-attachments/assets/fd6de03a-1f26-45b9-8336-078f928a98b6)
+
+----
+a screenshot to demostrate download LLM model in APK.
+
+![1213951738](https://github.com/user-attachments/assets/5a0a965e-1752-475e-a2c1-63e6f60a9009)
+![1242080159](https://github.com/user-attachments/assets/32586234-4b2c-4d43-b0ab-498c56de44b3)
 
   </ol>
 </details>
 
-### Hot topics
 
-- bugfix in UI layer(Java)
 
-- bugfix in native layer(C/C++)
-
-### Contribution
-
-Be sure to review the [opening issues](https://github.com/zhouwg/kantv/issues?q=is%3Aopen+is%3Aissue) before contribute to project KanTV, We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking requests and bugs, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
-
-Report issue in various Android-based phone or even submit PR to this project is greatly welcomed.
-
-<!--
- **English** is preferred in this project(avoid similar comments in this project:<a href="https://github.com/torvalds/linux/pull/818" target="_blank">https://github.com/torvalds/linux/pull/818</a>). thanks for cooperation and understanding.
--->
 
 ### Docs
-
-- [How to verify ggml-qnn backend on Qualcomm mobile SoC equipped Android phone](./README-qnn.md)
-- [How to integrate proprietary/open source codes to project KanTV for personal/proprietary/commercial R&D activity](https://github.com/zhouwg/kantv/issues/74)
+- [How to build](./docs/how-to-build.md)
+- [How to customize tv.xml for personal needs](./docs/how-to-customize-tv-xml.md)
+- [How to download supported AI models in the APK](./docs/how-to-download-ai-models.md)
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
+- [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
+- [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
+- [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
+
+
+### Contribution
+
+Report issue in Android phone equipped with <b>mainstream</b> mobile SoC or submit PR to this project is greatly welcomed.
+
+We use [GitHub issues](https://github.com/kantv-ai/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/kantv-ai/kantv/issues/1).
+
+<!--
+comment out this section because some contributors in the upstream project might-be don't want to be appeared here
+
+### Contributors
+
+[![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
+
+-->
 
 
 ### Special Acknowledgement
@@ -296,7 +130,7 @@ Report issue in various Android-based phone or even submit PR to this project is
 
    <ul>
   <li>
-   <a href="https://github.com/ggerganov/ggml">GGML</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   <a href="https://github.com/ggml-org/ggml">GGML</a>
    </li>
 
 
@@ -308,24 +142,25 @@ Report issue in various Android-based phone or even submit PR to this project is
 
   <ul>
   <li>
-   ASR engine <a href="https://github.com/ggerganov/whisper.cpp">whisper.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+   ASR engine <a href="https://github.com/ggml-org/whisper.cpp">whisper.cpp</a>
   </li>
 
    <li>
-  LLM engine <a href="https://github.com/ggerganov/llama.cpp">llama.cpp</a> by <a href="https://github.com/ggerganov">Georgi Gerganov</a>
+  LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>
+  </li>
+
+  <li>
+   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stable-diffusion.cpp</a>
+  </li>
+
+  <li>
+   CV engine <a href="https://github.com/nihui/opencv-mobile">opencv-mobile</a>
+  </li>
+
+  <li>
+   MTMD(multimodal) engine <a href="https://github.com/ggml-org/llama.cpp/blob/master/tools/mtmd/README.md">MTMD subsystem in llama.cpp</a>
   </li>
 
   </ul>
 
   </ul>
-
-
-
-### License
-
-```
-
-Copyright (c) 2021 -  Authors of Project KanTV
-
-Licensed under Apachev2.0 or later
-```

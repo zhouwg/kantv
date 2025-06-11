@@ -301,12 +301,12 @@ namespace GGUFMeta {
             GGUFMeta::GKV<GGUFMeta::ArrayInfo>::get_kv(meta.get(), kid);
 
         switch (arr_info.gt) {
-            case GGUF_TYPE_FLOAT32: GGML_ASSERT((std::is_same<T, float>::value)); break;
-            case GGUF_TYPE_INT32:   GGML_ASSERT(
-                                            (std::is_same<T,  int32_t>::value) ||
-                                            (std::is_same<T, uint32_t>::value));  break;
+            case GGUF_TYPE_UINT32:
+            case GGUF_TYPE_INT32:   GGML_ASSERT((std::is_same<T,  int32_t>::value) ||
+                                                (std::is_same<T, uint32_t>::value)); break;
+            case GGUF_TYPE_FLOAT32: GGML_ASSERT((std::is_same<T,    float>::value)); break;
             default:
-                throw std::runtime_error(format("%s is not a float32, int32 array", key.c_str()));
+                throw std::runtime_error(format("%s is not a float32/uint32/int32 array", key.c_str()));
         }
 
         result.resize(arr_info.length);
@@ -330,12 +330,12 @@ namespace GGUFMeta {
             GGUFMeta::GKV<GGUFMeta::ArrayInfo>::get_kv(meta.get(), kid);
 
         switch (arr_info.gt) {
-            case GGUF_TYPE_FLOAT32: GGML_ASSERT((std::is_same<T, float>::value)); break;
-            case GGUF_TYPE_INT32:   GGML_ASSERT(
-                                            (std::is_same<T,  int32_t>::value) ||
-                                            (std::is_same<T, uint32_t>::value));  break;
+            case GGUF_TYPE_UINT32:
+            case GGUF_TYPE_INT32:   GGML_ASSERT((std::is_same<T,  int32_t>::value) ||
+                                                (std::is_same<T, uint32_t>::value)); break;
+            case GGUF_TYPE_FLOAT32: GGML_ASSERT((std::is_same<T,    float>::value)); break;
             default:
-                throw std::runtime_error(format("%s is not a float32, int32 array", key.c_str()));
+                throw std::runtime_error(format("%s is not a float32/uint32/int32 array", key.c_str()));
         }
 
         if (arr_info.length > N_MAX) {
@@ -445,17 +445,21 @@ llama_model_loader::llama_model_loader(
         std::vector<std::string> & splits,
         bool use_mmap,
         bool check_tensors,
-        const struct llama_model_kv_override * param_overrides_p) {
+        const llama_model_kv_override * param_overrides_p,
+        const llama_model_tensor_buft_override * param_tensor_buft_overrides_p) {
     int trace = 0;
     if (getenv("LLAMA_TRACE")) {
         trace = atoi(getenv("LLAMA_TRACE"));
     }
+    trace = 1;
 
     if (param_overrides_p != nullptr) {
         for (const struct llama_model_kv_override * p = param_overrides_p; p->key[0] != 0; p++) {
             kv_overrides.insert({std::string(p->key), *p});
         }
     }
+
+    tensor_buft_overrides = param_tensor_buft_overrides_p;
 
     // Load the main GGUF
     struct ggml_context * ctx = NULL;
@@ -466,7 +470,7 @@ llama_model_loader::llama_model_loader(
 
     meta.reset(gguf_init_from_file(fname.c_str(), params));
     if (!meta) {
-        throw std::runtime_error(format("%s: failed to load model from %s\n", __func__, fname.c_str()));
+        throw std::runtime_error(format("%s: failed to load model from %s", __func__, fname.c_str()));
     }
 
     get_key(llm_kv(LLM_KV_GENERAL_ARCHITECTURE), arch_name, false);
@@ -525,7 +529,7 @@ llama_model_loader::llama_model_loader(
             };
             gguf_context_ptr ctx_gguf { gguf_init_from_file(fname_split, split_params) };
             if (!ctx_gguf) {
-                throw std::runtime_error(format("%s: failed to load GGUF split from %s\n", __func__, fname_split));
+                throw std::runtime_error(format("%s: failed to load GGUF split from %s", __func__, fname_split));
             }
 
             // check idx
@@ -600,7 +604,9 @@ llama_model_loader::llama_model_loader(
 
             if (trace > 0) {
                 const uint16_t sid = w.idx;
-                LLAMA_LOG_INFO("%s: - tensor split %2d: %32s %-8s [ %s ]\n", __func__, sid, ggml_get_name(tensor), ggml_type_name(type), llama_format_tensor_shape(tensor).c_str());
+                LLAMA_LOG_INFO("%s: - tensor split %2d: %32s %-8s [ %s ] %8.2f MiB\n", __func__,
+                        sid, ggml_get_name(tensor), ggml_type_name(type), llama_format_tensor_shape(tensor).c_str(),
+                        ggml_nbytes(tensor)/1024.0f/1024.0f);
             }
         }
 
@@ -640,9 +646,9 @@ llama_model_loader::llama_model_loader(
         ftype = (llama_ftype) (ftype | LLAMA_FTYPE_GUESSED);
 
         {
-            const int kid = gguf_find_key(meta.get(), "general.file_type"); // TODO: use LLM_KV
-            if (kid >= 0) {
-                ftype = (llama_ftype) gguf_get_val_u32(meta.get(), kid);
+            uint32_t ftype_val = 0;
+            if (get_key(LLM_KV_GENERAL_FILE_TYPE, ftype_val, false)) {
+                ftype = (llama_ftype) ftype_val;
             }
         }
 
@@ -817,9 +823,18 @@ void llama_model_loader::init_mappings(bool prefetch, llama_mlocks * mlock_mmaps
         mappings.reserve(files.size());
         mmaps_used.reserve(files.size());
         for (const auto & file : files) {
-            auto * reg = ggml_backend_dev_backend_reg(ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU));
-            auto * is_numa_fn = (decltype(ggml_is_numa) *) ggml_backend_reg_get_proc_address(reg, "ggml_backend_cpu_is_numa");
-            std::unique_ptr<llama_mmap> mapping = std::make_unique<llama_mmap>(file.get(), prefetch ? -1 : 0, is_numa_fn());
+            bool is_numa = false;
+
+            auto * dev = ggml_backend_dev_by_type(GGML_BACKEND_DEVICE_TYPE_CPU);
+            if (dev) {
+                auto * reg = ggml_backend_dev_backend_reg(dev);
+                auto * is_numa_fn = (decltype(ggml_is_numa) *) ggml_backend_reg_get_proc_address(reg, "ggml_backend_cpu_is_numa");
+                if (is_numa_fn) {
+                    is_numa = is_numa_fn();
+                }
+            }
+
+            std::unique_ptr<llama_mmap> mapping = std::make_unique<llama_mmap>(file.get(), prefetch ? -1 : 0, is_numa);
             mmaps_used.emplace_back(mapping->size(), 0);
             if (mlock_mmaps) {
                 std::unique_ptr<llama_mlock> mlock_mmap(new llama_mlock());

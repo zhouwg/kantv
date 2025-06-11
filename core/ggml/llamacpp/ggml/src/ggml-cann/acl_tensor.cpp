@@ -31,6 +31,8 @@ aclDataType ggml_cann_type_mapping(ggml_type type) {
             return ACL_FLOAT;
         case GGML_TYPE_F16:
             return ACL_FLOAT16;
+        case GGML_TYPE_BF16:
+            return ACL_BF16;
         case GGML_TYPE_I8:
             return ACL_INT8;
         case GGML_TYPE_I16:
@@ -41,6 +43,8 @@ aclDataType ggml_cann_type_mapping(ggml_type type) {
             return ACL_INT4;
         case GGML_TYPE_Q8_0:
             return ACL_INT8;
+        case GGML_TYPE_I64:
+            return ACL_INT64;
         default:
             return ACL_DT_UNDEFINED;
     }
@@ -54,9 +58,7 @@ aclTensor* ggml_cann_create_tensor(const ggml_tensor* tensor, int64_t* ne,
     // added.
     int64_t acl_ne[GGML_MAX_DIMS * 2], acl_stride[GGML_MAX_DIMS * 2];
 
-    int64_t acl_storage_len = 0;
     if (ne == nullptr) {
-        acl_storage_len = ggml_nbytes(tensor);
         for (int i = 0; i < GGML_MAX_DIMS; i++) {
             acl_ne[i] = tensor->ne[i];
             // The step size of acl is in elements.
@@ -65,14 +67,18 @@ aclTensor* ggml_cann_create_tensor(const ggml_tensor* tensor, int64_t* ne,
     } else {
         // With bcast
         for (int i = 0; i < dims; i++) {
-            acl_storage_len += (ne[i] - 1) * nb[i];
             acl_ne[i] = ne[i];
             acl_stride[i] = nb[i] / ggml_element_size(tensor);
         }
     }
 
-    // Reverse ne and stride.
     int64_t final_dims = (dims == 0 ? GGML_MAX_DIMS : dims);
+    int64_t acl_storage_len = 1;
+    for (int i = 0; i < final_dims; i++) {
+        acl_storage_len += (acl_ne[i] - 1) * acl_stride[i];
+    }
+
+    // Reverse ne and stride.
     std::reverse(acl_ne, acl_ne + final_dims);
     std::reverse(acl_stride, acl_stride + final_dims);
 

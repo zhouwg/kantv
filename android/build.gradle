@@ -1,0 +1,23 @@
+buildscript {
+    repositories {
+        maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+        google()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.4.0'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+    }
+}
+
+allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+        maven { url 'https://jitpack.io' }
+        google()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.getLayout().getBuildDirectory()
+}
