@@ -11,7 +11,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
 # set it to OFF if target Android phone is not Qualcomm SoC based phone
-set(GGML_HEXAGON ON)
+
+option(GGML_HEXAGON "Enable Hexagon backend for GGML" ON)
 
 if (GGML_HEXAGON)
     #build apk for phone with qcom mobile SoC

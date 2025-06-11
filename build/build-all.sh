@@ -116,9 +116,9 @@ function build_kantv_androidapk()
     cd ${PROJECT_ROOT_PATH}/android
 
     if [ ${is_build_for_qcom} -eq 1 ]; then
-        ./gradlew assembleRelease -PGGML_HEXAGON=ON
+        ./gradlew assembleRelease -PGGML_HEXAGON
     else
-        ./gradlew assembleRelease -PGGML_HEXAGON=OFF
+        ./gradlew assembleRelease
     fi
 
     if [ $? -eq 0 ]; then
@@ -303,10 +303,7 @@ case "$user_command" in
     ;;
     android_non_qcom)
         is_build_for_qcom=0
-        #FIXME:better approach rather than workaround approach
-        sed -i 's/set(GGML_HEXAGON ON)/set(GGML_HEXAGON OFF)/' ${PROJECT_ROOT_PATH}/core/ggml/CMakeLists.txt
         do_buildandroid
-        sed -i 's/set(GGML_HEXAGON OFF)/set(GGML_HEXAGON ON)/' ${PROJECT_ROOT_PATH}/core/ggml/CMakeLists.txt
     ;;
     linux)
         do_buildlinux
