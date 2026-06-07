@@ -165,27 +165,36 @@ function check_and_download_androidsdk()
 }
 
 
-function check_and_download_hexagon_llvm_toolchain()
+function check_and_download_hexagon_sdk()
 {
+    set -e
     is_hexagon_llvm_exist=1
     if [ ! -f ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/8.8.06/NOTICE.txt ]; then
-        echo -e "${TEXT_RED}hexagon LLVM toolchain not exist, pls check...${TEXT_RESET}\n"
+        echo -e "${TEXT_RED}minimal-hexagon-sdk not exist...${TEXT_RESET}\n"
         is_hexagon_llvm_exist=0
-    else
-        printf "hexagon LLVM toolchain already exist\n\n"
     fi
 
-    #download customized LLVM toolchain HEXAGON_TOOLs_8.8.06.tar.gz
     if [ ${is_hexagon_llvm_exist} -eq 0 ]; then
-        echo -e "begin downloading hexagon LLVM toolchain \n"
-        wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz https://github.com/kantv-ai/toolchain/raw/refs/heads/main/HEXAGON_TOOLs_8.8.06.tar.gz
-        if [ $? -ne 0 ]; then
-            printf "failed to download hexagon LLVM toolchain\n"
-            exit 1
+        if [ -f ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/minimal-hexagon-sdk-6.2.0.1.xz ]; then
+            echo -e "minimal-hexagon-sdk-6.2.0.1.xz already exist\n"
         else
-            zcat ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools/HEXAGON_TOOLs_8.8.06.tar.gz | tar -C ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.2.0.1/tools/HEXAGON_Tools -xvf -
-            printf "install hexagon LLVM toolchain successfully\n\n"
+            echo -e "begin downloading minimal-hexagon-sdk-6.2.0.1.xz \n"
+            wget --no-config --quiet --show-progress -O ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/minimal-hexagon-sdk-6.2.0.1.xz https://github.com/zhouwg/toolchain/raw/refs/heads/master/minimal-hexagon-sdk-6.2.0.1.xz
+            if [ $? -ne 0 ]; then
+                printf "failed to download minimal-hexagon-sdk-6.2.0.1.xz\n"
+                exit 1
+            fi
         fi
+
+        echo -e "begin decompressing minimal-hexagon-sdk-6.2.0.1.xz \n"
+        xzcat ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/minimal-hexagon-sdk-6.2.0.1.xz | tar -C ${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/ -xf -
+        if [ $? -ne 0 ]; then
+            printf "failed to decompress minimal-hexagon-sdk-6.2.0.1.xz\n"
+            exit 1
+        fi
+        printf "install minimal-hexagon-sdk successfully\n\n"
+    else
+        printf "Qualcomm Hexagon SDK already exist\n\n"
     fi
 }
 
@@ -194,4 +203,4 @@ function check_and_download_hexagon_llvm_toolchain()
 check_and_download_qnn_sdk
 check_and_download_androidndk
 check_and_download_androidsdk
-check_and_download_hexagon_llvm_toolchain
+check_and_download_hexagon_sdk
