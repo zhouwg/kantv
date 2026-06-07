@@ -62,7 +62,7 @@ build the entire project by Android Studio IDE
 
 #### How to enable/disable debug build
 
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/build.gradle#L17">kantvplayer/build.gradle#L17</a> accordingly
+- modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/build.gradle#L22">kantvplayer/build.gradle#L22</a> accordingly
 
 #### How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC in AndroidStudio
 

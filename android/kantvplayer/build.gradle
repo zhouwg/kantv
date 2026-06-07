@@ -18,7 +18,7 @@ android {
                 } else {
                     arguments += "-DGGML_HEXAGON=OFF"
                 }
-                //modify to -DCMAKE_BUILD_TYPE=Release before prepare release apk
+                //modify to -DCMAKE_BUILD_TYPE=Debug before prepare for debug build
                 arguments += "-DCMAKE_BUILD_TYPE=Release"
                 //2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
                 arguments += "-DCMAKE_ANDROID_STL_TYPE=c++_shared"

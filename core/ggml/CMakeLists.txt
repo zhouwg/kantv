@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD              20)
 set(CMAKE_CXX_STANDARD_REQUIRED     ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 # set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
 # set it to OFF if target Android phone is not Qualcomm SoC based phone
 

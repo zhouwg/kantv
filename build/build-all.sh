@@ -190,13 +190,28 @@ function sign_kantv_androidapk()
         echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"
         ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk
         if [ ${is_build_for_qcom} -eq 1 ]; then
-            echo "build apk for qcom"
             mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk
+
+            echo -e "\n\n========================================================================"
+            echo -e "${TEXT_GREEN}install the APK manually:${TEXT_RESET}"
+            ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk
+            echo -e "${TEXT_GREEN}adb push ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk /sdcard ${TEXT_RESET}"
+            echo -e "${TEXT_GREEN}install the APK accordingly in the phone${TEXT_RESET}"
+            echo -e "========================================================================"
+
         else
-            echo "build apk for non-qcom"
             mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk
+
+
+            echo -e "\n\n========================================================================"
+            echo -e "${TEXT_GREEN}install the APK manually:${TEXT_RESET}"
+            ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk
+            echo -e "${TEXT_GREEN}adb push ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk /sdcard ${TEXT_RESET}"
+            echo -e "${TEXT_GREEN}install the APK accordingly in the phone${TEXT_RESET}"
+            echo -e "========================================================================"
         fi
-        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-*-signed.apk
+
+
     fi
 }
 
