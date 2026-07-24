@@ -96,24 +96,21 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     int llm_inference_interrupted = 0;
     common_params params;
     g_params = &params;
-    if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_MAIN, print_usage)) {
+    if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_CLI, print_usage)) {
         return 1;
     }
 
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
-    if (backend_type != HEXAGON_BACKEND_GGML) {
 #ifdef GGML_USE_HEXAGON
-        LOGGD("using hexagon backend %d", backend_type);
-        params.main_gpu = backend_type;
-        params.n_gpu_layers = 99;
+    //build-time decision: use hexagon CDSP backend
+    LOGGD("using hexagon CDSP backend (compile-time decision)");
+    params.main_gpu = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
+    params.n_gpu_layers = 99;
 #else
-        LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        return 1;
+    //build-time decision: use default ggml CPU backend
+    LOGGD("using default ggml CPU backend (compile-time decision)");
+    params.main_gpu = 0;
 #endif
-    } else {
-        params.main_gpu = backend_type;
-    }
     LOGGD("model path %s", params.model.path.c_str());
     if (params.model.path.find("gemma-3") != std::string::npos) {
         LOGGD("gemma-3");
@@ -170,10 +167,10 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     // load the model and apply lora adapter, if any
     LOG_INF("%s: load the model and apply lora adapter, if any\n", __func__);
-    common_init_result llama_init = common_init_from_params(params);
+    common_init_result_ptr llama_init = common_init_from_params(params);
 
-    model = llama_init.model.get();
-    ctx = llama_init.context.get();
+    model = llama_init->model();
+    ctx = llama_init->context();
 
     if (model == NULL) {
         LOG_ERR("%s: error: unable to load model\n", __func__);
@@ -253,7 +250,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 LOG_WRN("*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?\n");
             }
 
-            LOG_INF("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja).c_str());
+            LOG_INF("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja, params.default_template_kwargs).c_str());
         } else {
             LOG_INF("%s: in-suffix/prefix is specified, chat template will be disabled\n", __func__);
         }
@@ -386,7 +383,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
 
         // remove any "future" tokens that we might have inherited from the previous session
-        llama_kv_self_seq_rm(ctx, -1, n_matching_session_tokens, -1);
+        llama_memory_seq_rm(llama_get_memory(ctx), -1, n_matching_session_tokens, -1);
     }
 
     LOG_DBG("recalculate the cached logits (check): embd_inp.size() %zu, n_matching_session_tokens %zu, embd_inp.size() %zu, session_tokens.size() %zu\n",
@@ -538,6 +535,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     int n_remain           = params.n_predict;
     int n_consumed         = 0;
     int n_session_consumed = 0;
+    int n_generated        = 0; // Diagnostic: count generated tokens
 
     std::vector<int>   input_tokens;  g_input_tokens  = &input_tokens;
     std::vector<int>   output_tokens; g_output_tokens = &output_tokens;
@@ -545,7 +543,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     std::ostringstream assistant_ss; // for storing current assistant message, used in conversation mode
 
     // the first thing we will do is to output the prompt, so set color accordingly
-    console::set_display(console::prompt);
+    console::set_display(DISPLAY_TYPE_PROMPT);
     display = params.display_prompt;
 
     std::vector<llama_token> embd;
@@ -590,9 +588,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 const int skipped_tokens = (int) embd.size() - max_embd_size;
                 embd.resize(max_embd_size);
 
-                console::set_display(console::error);
+                console::set_display(DISPLAY_TYPE_ERROR);
                 LOG_WRN("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
-                console::set_display(console::reset);
+                console::set_display(DISPLAY_TYPE_RESET);
             }
 
             if (ga_n == 1) {
@@ -618,8 +616,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     LOG_DBG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
                             n_past, n_left, n_ctx, params.n_keep, n_discard);
 
-                    llama_kv_self_seq_rm (ctx, 0, params.n_keep            , params.n_keep + n_discard);
-                    llama_kv_self_seq_add(ctx, 0, params.n_keep + n_discard, n_past, -n_discard);
+                    llama_memory_seq_rm(llama_get_memory(ctx), 0, params.n_keep            , params.n_keep + n_discard);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, params.n_keep + n_discard, n_past, -n_discard);
 
                     n_past -= n_discard;
 
@@ -642,9 +640,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     LOG_DBG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib*bd, ga_i + ib*bd + ga_w, ga_n, (ga_i + ib*bd)/ga_n, (ga_i + ib*bd + ga_w)/ga_n);
                     LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib*bd + ga_w, n_past + ib*bd, dd, ga_i + ib*bd + ga_w + dd, n_past + ib*bd + dd);
 
-                    llama_kv_self_seq_add(ctx, 0, ga_i,                n_past,              ib*bd);
-                    llama_kv_self_seq_div(ctx, 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
-                    llama_kv_self_seq_add(ctx, 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, ga_i,                n_past,              ib*bd);
+                    llama_memory_seq_div(llama_get_memory(ctx), 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
 
                     n_past -= bd;
 
@@ -721,6 +719,15 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
             // LOG_DBG("last: %s\n", string_from(ctx, smpl->prev.to_vector()).c_str());
 
+            // Diagnostic: log first 5 generated tokens
+            if (n_generated < 5) {
+                std::string token_str = common_token_to_piece(ctx, id);
+                bool is_eog = llama_vocab_is_eog(vocab, id);
+                LOGGD("generated[%d]: id=%d, is_eog=%d, str='%s', n_past=%d",
+                      n_generated, (int)id, (int)is_eog, token_str.c_str(), n_past);
+            }
+            n_generated++;
+
             embd.push_back(id);
 
             // echo this to console
@@ -778,7 +785,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
         // reset color to default if there is no pending user input
         if (input_echo && (int) embd_inp.size() == n_consumed) {
-            console::set_display(console::reset);
+            console::set_display(DISPLAY_TYPE_RESET);
             display = true;
         }
 
@@ -875,7 +882,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 }
 
                 // color user input only
-                console::set_display(console::user_input);
+                console::set_display(DISPLAY_TYPE_USER_INPUT);
                 display = params.display_prompt;
 
                 std::string line;
@@ -886,7 +893,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 } while (another_line);
 
                 // done taking input, reset color
-                console::set_display(console::reset);
+                console::set_display(DISPLAY_TYPE_RESET);
                 display = true;
 
                 if (buffer.empty()) { // Ctrl+D on empty line exits

@@ -10,10 +10,8 @@ package kantvai.ai;
  public final class ggmljava {
     private static final String TAG = ggmljava.class.getName();
 
-    //keep sync with ggml-hexagon.cpp
-    public static final int HEXAGON_BACKEND_QNNCPU = 0;
-    public static final int HEXAGON_BACKEND_QNNGPU = 1;
-    public static final int HEXAGON_BACKEND_QNNNPU = 2;
+    //keep sync with HEXAGONBackend enum in ggml-jni.h
+    //upstream ggml-hexagon only supports CDSP; QNN_CPU/GPU/NPU are no longer supported
     public static final int HEXAGON_BACKEND_CDSP   = 3;
     public static final int HEXAGON_BACKEND_GGML   = 4;//"fake" HEXAGON backend for compare performance between HEXAGON backend and ggml backend
 
@@ -51,7 +49,7 @@ package kantvai.ai;
      * @param userData      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
      * @param nBenchType    0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp)
      * @param nThreadCounts 1 - 8
-     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nBackendType  3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
      */
@@ -65,7 +63,7 @@ package kantvai.ai;
      * @param prompt        user input from UI
      * @param nLLMType      not used currently
      * @param nThreadCounts 1 - 8
-     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nBackendType  3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
      */
@@ -91,7 +89,7 @@ package kantvai.ai;
      * @param prompt        user input from UI
      * @param nLLMType      1: MTMD image, 2: MTMD audio
      * @param nThreadCounts 1 - 8
-     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nBackendType  3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
      */
@@ -103,7 +101,7 @@ package kantvai.ai;
      * @param prompt        user input from UI
      * @param nLLMType      not used currently
      * @param nThreadCounts 1 - 8
-     * @param nBackendType  0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+     * @param nBackendType  3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param nHWAccelType  0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
      */

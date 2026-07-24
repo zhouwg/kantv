@@ -28,6 +28,26 @@ extern "C" {
  */
 #define AI_INFERENCE_INTERRUPTED             8
 
+// kantv-specific backend type enum (used by JNI layer)
+// these are kantv-internal constants, NOT part of upstream ggml-hexagon API
+// NOTE: values are kept stable for Java-layer compatibility (offset=3 in AIResearchFragment)
+enum HEXAGONBackend {
+    HEXAGON_BACKEND_CDSP    = 3,  // default Hexagon backend (upstream ggml-hexagon only supports CDSP)
+    HEXAGON_BACKEND_GGML    = 4,  //"fake" HEXAGON backend for compare performance between HEXAGON backend and ggml backend
+};
+
+enum hwaccel_approach_type {
+     HWACCEL_QNN            = 0,
+     HWACCEL_QNN_SINGLEGRAPH= 1,
+     HWACCEL_CDSP           = 2,
+};
+
+// kantv-specific helper: returns devname for the given backend type
+// when GGML_USE_HEXAGON is NOT defined, implemented in ggml-jni-context.cpp
+// when GGML_USE_HEXAGON IS defined, the hexagon backend provides the real implementation
+const char * ggml_backend_hexagon_get_devname(size_t dev_num);
+void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach);
+
 //=============================================================================================
 // available bench type in ggml-jni, keep sync with KANTVAIUtils.java
 enum ggml_jni_bench_type {
@@ -60,7 +80,7 @@ enum ggml_jni_bench_type {
      * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
      * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
      * @param n_threads         1 - 8
-     * @param n_backend_type    0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU/HEXAGON_BACKEND_CDSP 3: ggml
+     * @param n_backend_type    3: HEXAGON_BACKEND_CDSP 4: ggml
      * @param n_accel_type      0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
      * @return
     */
@@ -83,7 +103,7 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_backend            3: HEXAGON_BACKEND_CDSP 4: ggml
     */
     int          whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
     void         whisper_asr_finalize(void);
@@ -94,7 +114,7 @@ enum ggml_jni_bench_type {
     * @param sz_model_path
     * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_backend            3: HEXAGON_BACKEND_CDSP 4: ggml
     */
     int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
 
@@ -108,7 +128,7 @@ enum ggml_jni_bench_type {
     * @param prompt
     * @param llm_type           not used currently
     * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param backend_type       3: HEXAGON_BACKEND_CDSP 4: ggml
     * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
     */
@@ -146,7 +166,7 @@ enum ggml_jni_bench_type {
     * @param prompt
     * @param llm_type           1: MTMD image, 2: MTMD audio
     * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param backend_type       3: HEXAGON_BACKEND_CDSP 4: ggml
     * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
     */
@@ -161,7 +181,7 @@ enum ggml_jni_bench_type {
     * @param prompt
     * @param llm_type           not used currently
     * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param backend_type       3: HEXAGON_BACKEND_CDSP 4: ggml
     * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
     */

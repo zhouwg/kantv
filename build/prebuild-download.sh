@@ -21,50 +21,6 @@ show_pwd
 
 echo "ANDROID_NDK: ${ANDROID_NDK}"
 
-#QNN SDK can be found at:
-#https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
-QNN_SDK_URL=https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
-QNN_SDK_INSTALL_PATH=/opt/qcom/aistack/qairt
-QNN_SDK_VERSION=2.32.0.250228
-QNN_SDK_VERSION=2.33.0.250327
-QNN_SDK_VERSION=2.34.0.250424
-QNN_SDK_PATH=${QNN_SDK_INSTALL_PATH}/${QNN_SDK_VERSION}
-
-
-function check_and_download_qnn_sdk()
-{
-    is_qnn_sdk_exist=1
-
-    if [ ! -d ${QNN_SDK_PATH} ]; then
-        echo -e "QNN_SDK_PATH ${QNN_SDK_PATH} not exist, download it from ${QNN_SDK_URL}...\n"
-        is_qnn_sdk_exist=0
-    fi
-
-    if [ ! -f ${QNN_SDK_PATH}/sdk.yaml ]; then
-        is_qnn_sdk_exist=0
-    fi
-
-    if [ ${is_qnn_sdk_exist} -eq 0 ]; then
-        echo "sudo mkdir -p ${QNN_SDK_INSTALL_PATH}"
-        sudo mkdir -p ${QNN_SDK_INSTALL_PATH}
-        if [ ! -f v${QNN_SDK_VERSION}.zip ]; then
-            wget --no-config --quiet --show-progress -O v${QNN_SDK_VERSION}.zip https://softwarecenter.qualcomm.com/api/download/software/sdks/Qualcomm_AI_Runtime_Community/All/${QNN_SDK_VERSION}/v${QNN_SDK_VERSION}.zip
-        fi
-        unzip v${QNN_SDK_VERSION}.zip
-        if [ $? -ne 0 ]; then
-            printf "failed to download Qualcomm QNN SDK to %s \n" "${QNN_SDK_PATH}"
-            exit 1
-        fi
-        sudo mv qairt/${QNN_SDK_VERSION} ${QNN_SDK_INSTALL_PATH}/
-        printf "Qualcomm QNN SDK saved to ${QNN_SDK_PATH} \n\n"
-        sudo rm -rf qairt
-        sudo mv v${QNN_SDK_VERSION}.zip /tmp/
-    else
-        printf "Qualcomm QNN SDK already exist:${QNN_SDK_PATH} \n\n"
-    fi
-}
-
-
 function check_and_download_androidndk()
 {
     is_android_ndk_exist=1
@@ -200,7 +156,6 @@ function check_and_download_hexagon_sdk()
 
 
 
-check_and_download_qnn_sdk
 check_and_download_androidndk
 check_and_download_androidsdk
 check_and_download_hexagon_sdk

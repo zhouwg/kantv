@@ -68,38 +68,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         goto failure;
     }
 
-    if (backend_type > HEXAGON_BACKEND_GGML) {
-        LOGGW("pls check backend type\n");
-        goto failure;
-    }
-
-    if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
-        if (HEXAGON_BACKEND_CDSP == backend_type) {
-            LOGGD("StableDiffusion via cDSP cann't works correct currently");
-            GGML_JNI_NOTIFY("StableDiffusion via cDSP cann't works correct currently");
-            goto failure;
-        }
-    }
-
-#if !defined GGML_USE_HEXAGON
-    if (HEXAGON_BACKEND_GGML != backend_type) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
-        goto failure;
-    }
-#endif
-
-#if !defined SD_USE_HEXAGON
-    if (bench_type == GGML_BENCHMARK_TEXT2IMAGE) {
-        if (HEXAGON_BACKEND_GGML != backend_type) {
-            LOGGW("ggml-hexagon backend %s is disabled with stablediffusion\n",
-                  ggml_backend_hexagon_get_devname(backend_type));
-            GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled with stablediffusion\n",
-                            ggml_backend_hexagon_get_devname(backend_type));
-            goto failure;
-        }
-    }
-#endif
+    //backend is decided at build time (GGML_USE_HEXAGON), backend_type param is ignored at runtime
 
     if (0 == num_threads)
         num_threads = 1;
@@ -266,13 +235,7 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
     LOGGV("backend type:%d\n", n_backend);
     LOGGV("accel type:%d\n", n_hwaccel_type);
 
-#if !defined GGML_USE_HEXAGON
-    if (n_backend != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
-        goto failure;
-    }
-#endif
+    //backend is decided at build time (GGML_USE_HEXAGON), n_backend param is ignored at runtime
 
     if (0 == n_thread_counts)
         n_thread_counts = 1;
@@ -359,14 +322,7 @@ Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring mod
     LOGGV("backend type:%d\n", n_backend_type);
     LOGGV("accel type:%d\n", n_hwaccel_type);
 
-
-#if !defined GGML_USE_HEXAGON
-    if (n_backend_type != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        goto failure;
-    }
-#endif
+    //backend is decided at build time (GGML_USE_HEXAGON), n_backend_type param is ignored at runtime
 
     if (0 == n_thread_counts)
         n_thread_counts = 1;

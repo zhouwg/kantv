@@ -53,6 +53,7 @@
 
 //libmtmd
 #include "mtmd.h"
+#include "mtmd-helper.h"
 
 //ncnn
 #include "platform.h"
@@ -134,7 +135,7 @@ private:
     
 private:
     common_params      params;
-    common_init_result llama_init;
+    common_init_result_ptr llama_init;
 
     llama_model * model          = nullptr;
     llama_context * lctx         = nullptr;
@@ -181,24 +182,22 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     };
     params.sampling.temp        = 0.2; // lower temp by default for better quality
     params.cpuparams.n_threads  = thread_counts;
-    if (!common_params_parse(argc, const_cast<char **>(argv), params, LLAMA_EXAMPLE_SERVER)) {
+    params.cpuparams_batch.n_threads = thread_counts;
+    if (!common_params_parse(argc, const_cast<char **>(argv), params, LLAMA_EXAMPLE_MTMD)) {
         LOGGD("common params parse failure\n");
         return false;
     }
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
-    if (backend_type != HEXAGON_BACKEND_GGML) {
 #ifdef GGML_USE_HEXAGON
-        LOGGD("using hexagon backend %d", backend_type);
-        params.main_gpu = backend_type;
-        params.n_gpu_layers = 99;
+    //build-time decision: use hexagon CDSP backend
+    LOGGD("using hexagon CDSP backend (compile-time decision)");
+    params.main_gpu = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
+    params.n_gpu_layers = 99;
 #else
-        LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        return false;
+    //build-time decision: use default ggml CPU backend
+    LOGGD("using default ggml CPU backend (compile-time decision)");
+    params.main_gpu = 0;
 #endif
-    } else {
-        params.main_gpu = backend_type;
-    }
     common_init();
 
     llama_backend_init();
@@ -213,8 +212,8 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     //step-2: load LLM model
     LOGGD("loading model '%s'\n", params.model.path.c_str());
     llama_init = common_init_from_params(params);
-    model = llama_init.model.get();
-    lctx = llama_init.context.get();
+    model = llama_init->model();
+    lctx = llama_init->context();
     if (model == nullptr) {
         LOGGD("failed to load model, '%s'\n", params.model.path.c_str());
         llama_backend_free();
@@ -235,7 +234,6 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     mparams.use_gpu = false;
     mparams.print_timings = false;
     mparams.n_threads = thread_counts;
-    mparams.verbosity = GGML_LOG_LEVEL_DEBUG;
     mctx = mtmd_init_from_file(mmproj_path.c_str(), model, mparams);
     if (mctx == nullptr) {
         LOGGD("failed to load multimodal model, '%s'\n", mmproj_path.c_str());
@@ -248,17 +246,18 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     //step-4: init chat template
     chat_templates = common_chat_templates_init(model, params.chat_template);
     try {
-        common_chat_format_example(chat_templates.get(), params.use_jinja);
+        common_chat_format_example(chat_templates.get(), params.use_jinja, params.default_template_kwargs);
     } catch (const std::exception &e) {
         LOGGD("%s: Chat template parsing error: %s\n", __func__, e.what());
         LOGGD("%s: The chat template that comes with this model is not yet supported, falling back to chatml. This may cause the model to output suboptimal responses\n",
               __func__);
         chat_templates = common_chat_templates_init(model, "chatml");
     }
-    LOGGD("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja).c_str());
+    LOGGD("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja, params.default_template_kwargs).c_str());
     params.prompt = prompt_str;
-    if (params.prompt.find("<__image__>") == std::string::npos) {
-        params.prompt += " <__image__>";
+    if (params.prompt.find(mtmd_default_marker()) == std::string::npos) {
+        params.prompt += " ";
+        params.prompt += mtmd_default_marker();
     }
 
     return true;
@@ -345,6 +344,7 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
     LOGGD("formatted_chat.prompt: %s\n", formatted_chat.prompt.c_str());
     mtmd_input_text inp_txt = {
             formatted_chat.prompt.c_str(),
+            /* text_len */       formatted_chat.prompt.size(),
             /* add_special */   true,
             /* parse_special */ true,
     };
@@ -396,17 +396,19 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
             break; // end of generation
         }
 
-        tmp = common_token_to_piece(lctx, token_id).c_str();
+        {
+            std::string token_str = common_token_to_piece(lctx, token_id);
 #if (defined __ANDROID__) || (defined ANDROID)
-        if (ggml_jni_is_valid_utf8(tmp)) {
-            if (0 == realtimemtmd_is_running_state()) {
-                llm_inference_interrupted = 1;
-                break;
-            } else {
-                GGML_JNI_NOTIFY(tmp);
+            if (ggml_jni_is_valid_utf8(token_str.c_str())) {
+                if (0 == realtimemtmd_is_running_state()) {
+                    llm_inference_interrupted = 1;
+                    break;
+                } else {
+                    GGML_JNI_NOTIFY(token_str.c_str());
+                }
             }
-        }
 #endif
+        }
         // eval the token
         common_batch_clear(batch);
         common_batch_add(batch, token_id, n_past++, {0}, true);

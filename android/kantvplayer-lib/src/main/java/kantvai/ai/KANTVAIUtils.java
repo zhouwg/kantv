@@ -174,21 +174,15 @@ import kantvai.media.player.KANTVLog;
      }
 
      public static String getGGMLBackendDesc(int n_backend_type) {
-         switch (n_backend_type) {
-             case ggmljava.HEXAGON_BACKEND_QNNCPU:
-                 return "QNN-CPU";
-             case ggmljava.HEXAGON_BACKEND_QNNGPU:
-                 return "QNN-GPU";
-             case ggmljava.HEXAGON_BACKEND_QNNNPU:
-                 return "QNN-NPU";
-             case ggmljava.HEXAGON_BACKEND_CDSP:
-                 return "Hexagon-CDSP";
-             case ggmljava.HEXAGON_BACKEND_GGML:
-                 return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
-             default:
-                 return "unknown";
-         }
-     }
+        switch (n_backend_type) {
+            case ggmljava.HEXAGON_BACKEND_CDSP:
+                return "Hexagon-CDSP";
+            case ggmljava.HEXAGON_BACKEND_GGML:
+                return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
+            default:
+                return "unknown";
+        }
+    }
 
      public static String getNCNNBackendDesc(int n_backend_type) {
          switch (n_backend_type) {

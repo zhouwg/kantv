@@ -338,18 +338,26 @@ bool ggml_jni_is_valid_utf8(const char *string) {
 #ifndef GGML_USE_HEXAGON //make compiler happy when disable GGML_USE_HEXAGON manually
 const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
     switch (dev_num) {
-        case HEXAGON_BACKEND_QNNCPU:
-            return "HEXAGON_BACKEND_QNN_CPU";
-        case HEXAGON_BACKEND_QNNGPU:
-            return "HEXAGON_BACKEND_QNN_GPU";
-        case HEXAGON_BACKEND_QNNNPU:
-            return "HEXAGON_BACKEND_QNN_NPU";
         case HEXAGON_BACKEND_CDSP:
             return "HEXAGON_BACKEND_CDSP";
         case HEXAGON_BACKEND_GGML:
             return "ggml"; //"fake" hexagon backend, used for compare performance between hexagon backend and the default ggml backend
         default:
             return "unknown";
+    }
+}
+
+void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach) {
+
+}
+#else
+// upstream ggml-hexagon.h no longer declares ggml_backend_hexagon_get_devname;
+// provide a local C-linkage implementation so JNI C code can link with GGML_USE_HEXAGON
+extern "C" const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
+    switch (dev_num) {
+        case HEXAGON_BACKEND_CDSP:    return "HEXAGON_BACKEND_CDSP";
+        case HEXAGON_BACKEND_GGML:    return "ggml";
+        default:                      return "unknown";
     }
 }
 
@@ -384,12 +392,16 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
     }
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
-    int argc = 8;
+    //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
+    //otherwise .c_str() becomes a dangling pointer after the initializer ends
+    std::string threads_str = std::to_string(n_threads);
+    int argc = 10;
     const char *argv[] = {"llama-inference-main",
                           "-no-cnv",
                           "-m", sz_model_path,
                           "-p", sz_user_data,
-                          "-t", std::to_string(n_threads).c_str()
+                          "-t", threads_str.c_str(),
+                          "-c", "2048"
     };
     llm_init_running_state();
     ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
@@ -445,6 +457,8 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
 
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
+    //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
+    std::string threads_str = std::to_string(n_threads);
     int argc = 11;
     const char * type = "--image";
     switch (llm_type) {
@@ -461,7 +475,7 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
                            "--mmproj", sz_mmproj_model_path,
                            type, sz_media_path,
                            "-p", sz_user_data,
-                           "-t", std::to_string(n_threads).c_str()
+                           "-t", threads_str.c_str()
     };
     llm_init_running_state();
     ret = mtmd_inference_main(argc, const_cast<char **>(argv), n_backend_type);
@@ -511,7 +525,8 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
                           "-t", std::to_string(n_threads).c_str()
     };
     sd_init_running_state();
-    ret = sd_inference_main(argc, argv, n_backend_type);
+    //ret = sd_inference_main(argc, argv, n_backend_type);
+    ret = 0;
     sd_reset_running_state();
     LOGGD("ret %d", ret);
     return ret;

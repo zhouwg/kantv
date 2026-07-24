@@ -159,7 +159,7 @@ public class KANTVAIModelMgr {
      }
 
      public String getModelUrl(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getUrl();
+         return replaceHFEndpoint(AIModels[index + NON_LLM_MODEL_COUNTS].getUrl());
      }
 
      public String getMMProjmodelName(int index) {
@@ -167,7 +167,22 @@ public class KANTVAIModelMgr {
      }
 
      public String getMMProjmodelUrl(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjUrl();
+         return replaceHFEndpoint(AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjUrl());
+     }
+
+     // Replace the HF endpoint domain in the stored URL with the currently configured one.
+     // This is necessary because initAIModels() runs only once (singleton), so when the user
+     // switches between huggingface.co and hf-mirror.com in Settings, the stored URLs are
+     // not regenerated. Returning a rewritten copy here ensures downloads always use the
+     // endpoint the user currently selected, without re-running initAIModels().
+     private String replaceHFEndpoint(String url) {
+         if (url == null) {
+             return null;
+         }
+         String currentEndpoint = KANTVAIUtils.getHFEndPointUrl(KANTVAIUtils.getHFEndpoint());
+         url = url.replace("https://huggingface.co/", currentEndpoint);
+         url = url.replace("https://hf-mirror.com/", currentEndpoint);
+         return url;
      }
 
      public int getDefaultModelIndex() {
@@ -211,12 +226,9 @@ public class KANTVAIModelMgr {
          boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
          KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
 
-         arrayBenchType = new String[5];
-         arrayBenchType[0] = "memcpy";
-         arrayBenchType[1] = "mulmat";
-         arrayBenchType[2] = "ASR";
-         arrayBenchType[3] = "LLM";
-         arrayBenchType[4] = "Text2Image";
+         arrayBenchType = new String[2];
+         arrayBenchType[0] = "ASR";
+         arrayBenchType[1] = "LLM";
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
                  hf_endpoint + "ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
