@@ -602,15 +602,8 @@ static const char * ggml_jni_transcribe_from_file(const char * sz_model_path, co
     } else {
         whisper_free(p_asr_ctx->p_context);
         struct whisper_context_params wcp = whisper_context_default_params();
-#ifdef GGML_USE_HEXAGON
-        //build-time decision: use hexagon CDSP backend
-        wcp.gpu_device  = 0;  // device index 0 = CDSP
-        wcp.use_gpu     = true;
-#else
-        //build-time decision: use default ggml CPU backend
         wcp.gpu_device  = 0;
-        wcp.use_gpu     = false;
-#endif
+        wcp.use_gpu     = (p_asr_ctx->n_backend == HEXAGON_BACKEND_CDSP);
         context = whisper_init_from_file_with_params(sz_model_path, wcp);
         p_asr_ctx->p_context = context;
         if (nullptr == context) {
@@ -795,15 +788,9 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             return;
         }
 
-#ifdef GGML_USE_HEXAGON
-        //build-time decision: use hexagon CDSP backend
-        p_asr_ctx->b_use_gpu = true;
-        p_asr_ctx->gpu_device = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
-#else
-        //build-time decision: use default ggml CPU backend
-        p_asr_ctx->b_use_gpu = false;
-        p_asr_ctx->gpu_device = 0;
-#endif
+        //runtime decision based on n_backend_type
+        p_asr_ctx->b_use_gpu   = (n_backend_type == HEXAGON_BACKEND_CDSP);
+        p_asr_ctx->gpu_device  = 0;
 
         p_asr_ctx->n_threads = 6;
         p_asr_ctx->n_benchmark_type = n_bench_type;
@@ -1413,17 +1400,19 @@ int whisper_asr_init(const char * sz_model_path, int n_asrmode, int n_backend_ty
 
      p_asr_ctx->n_asr_mode = n_asrmode;
      p_asr_ctx->n_threads  = 6;
+     p_asr_ctx->n_backend  = n_backend_type;  // save for runtime backend selection
 
      LOGGD("calling whisper_init_from_file");
-#ifdef GGML_USE_HEXAGON
-     //build-time decision: use hexagon CDSP backend
-     c_params.gpu_device  = 0;  // device index 0 = CDSP
-     c_params.use_gpu     = true;
-#else
-     //build-time decision: use default ggml CPU backend
-     c_params.gpu_device  = 0;
-     c_params.use_gpu     = false;
-#endif
+     //runtime decision based on n_backend_type:
+     //  HEXAGON_BACKEND_CDSP: use hexagon CDSP backend
+     //  HEXAGON_BACKEND_GGML: use default ggml CPU backend
+     if (n_backend_type == HEXAGON_BACKEND_CDSP) {
+         c_params.gpu_device  = 0;  // device index 0 = CDSP
+         c_params.use_gpu     = true;
+     } else {
+         c_params.gpu_device  = 0;
+         c_params.use_gpu     = false;
+     }
      p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, c_params);
 
      if (nullptr == p_asr_ctx->p_context) {
@@ -1599,28 +1588,16 @@ int whisper_asr_reset(const char * sz_model_path, int n_asrmode, int n_backend_t
             whisper_free(p_asr_ctx->p_context);
         }
         struct whisper_context_params wcp = whisper_context_default_params();
-        wcp.gpu_device  = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
-#ifdef GGML_USE_HEXAGON
-        //build-time decision: use hexagon CDSP backend
-        wcp.use_gpu     = true;
-#else
-        //build-time decision: use default ggml CPU backend
-        wcp.use_gpu     = false;
-#endif
+        wcp.gpu_device  = 0;
+        wcp.use_gpu     = (n_backend_type == HEXAGON_BACKEND_CDSP);
         p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, wcp);
         memset(p_asr_ctx->sz_model_path, 0, MAX_PATH_LEN);
         memcpy(p_asr_ctx->sz_model_path, sz_model_path, strlen(sz_model_path));
     } else if (nullptr == p_asr_ctx->p_context) {
         LOGGD("re-init whispercpp instance");
         struct whisper_context_params wcp = whisper_context_default_params();
-        wcp.gpu_device  = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
-#ifdef GGML_USE_HEXAGON
-        //build-time decision: use hexagon CDSP backend
-        wcp.use_gpu     = true;
-#else
-        //build-time decision: use default ggml CPU backend
-        wcp.use_gpu     = false;
-#endif
+        wcp.gpu_device  = 0;
+        wcp.use_gpu     = (n_backend_type == HEXAGON_BACKEND_CDSP);
         p_asr_ctx->p_context = whisper_init_from_file_with_params(sz_model_path, wcp);
     } else {
         LOGGD("using cached whispercpp instance\n");
