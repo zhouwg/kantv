@@ -68,8 +68,6 @@
      private String remoteModleFileA;
      private String remoteModleFileB;
 
-     private long sizeOfLocalModelFileA = 0; //expected size of the main model for a specified LLM model
-     private long sizeOfLocalModelFileB = 0; //expected size of the mmproj model for a specified LLM model
      private String errorString = "";
 
      public DownloadModel(Context context) {
@@ -127,11 +125,6 @@
          mIsDownloadLLMModel = true;
 
          KANTVLog.j(TAG, "remote model url:" + remoteModleFileA);
-     }
-
-     public void setLLMModelSize(long modelSize, long mmprojModelSize) {
-         sizeOfLocalModelFileA = modelSize;
-         sizeOfLocalModelFileB = mmprojModelSize;
      }
 
      public void showUpdateDialog() {
@@ -195,91 +188,99 @@
      }
 
 
-     private int doDownloadFile(String remoteFileUrl, String localFileUrl, long expectedSize, boolean showUIProgress) {
-         URL url;
-         mTextInfo.setText("Downloading from " + remoteFileUrl + " to " + localFileUrl + ", expectedSize:" + expectedSize + " bytes");
-         try {
-             url = new URL(remoteFileUrl);
-             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-             conn.connect();
-             int length = conn.getContentLength();
-             InputStream ins = conn.getInputStream();
-             File file = new File(savePath);
-             if (!file.exists()) {
-                 file.mkdir();
-             }
-             File localFile = new File(localFileUrl);
-             FileOutputStream fos = new FileOutputStream(localFile);
-             int count = 0;
-             int numread = 0;
-             byte[] buf = new byte[1024];
-             long beginTime = 0;
-             long endTime = 0;
-             long downloadBytes = 0;
-             beginTime = System.currentTimeMillis();
+     // Download a file from remoteUrl to localFileUrl.
+    // The expected size is obtained from the HTTP Content-Length response header at runtime,
+    // so callers no longer need to hardcode model sizes. If the server does not provide
+    // Content-Length (-1), size verification is skipped and success is determined by
+    // whether the stream completed without exceptions.
+    private int doDownloadFile(String remoteFileUrl, String localFileUrl, boolean showUIProgress) {
+        URL url;
+        mTextInfo.setText("Downloading from " + remoteFileUrl + " to " + localFileUrl);
+        try {
+            url = new URL(remoteFileUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.connect();
+            long contentLength = conn.getContentLengthLong();
+            InputStream ins = conn.getInputStream();
+            File file = new File(savePath);
+            if (!file.exists()) {
+                file.mkdir();
+            }
+            File localFile = new File(localFileUrl);
+            FileOutputStream fos = new FileOutputStream(localFile);
+            int numread = 0;
+            byte[] buf = new byte[1024];
+            long beginTime = 0;
+            long endTime = 0;
+            long downloadBytes = 0;
+            beginTime = System.currentTimeMillis();
 
-             while (!intercept) {
-                 numread = ins.read(buf);
-                 count += numread;
-                 downloadBytes += numread;
-                 progress = (int) (((float) count / length) * 100);
+            while (!intercept) {
+                numread = ins.read(buf);
+                if (numread <= 0) {
+                    KANTVLog.g(TAG, "download file succeed:remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
+                    break;
+                }
+                downloadBytes += numread;
+                if (contentLength > 0) {
+                    progress = (int) (((float) downloadBytes / contentLength) * 100);
+                } else {
+                    progress = -1;
+                }
 
-                 if (showUIProgress) {
-                     mHandler.sendEmptyMessage(DOWN_UPDATE);
-                     endTime = System.currentTimeMillis();
-                     float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
-                     //String speedString = mContext.getString(R.string.download_speed) + ":" + String.format("%-8.2f", speed) + " KBytes/s";
-                     String speedString  = mContext.getString(R.string.download_speed) + ":" +
-                             String.format(Locale.US, "%s", KANTVUtils.formatedBitRate(downloadBytes, (endTime - beginTime)));
-                     mTextSpeed.setText(speedString);
-                 }
+                if (showUIProgress) {
+                    mHandler.sendEmptyMessage(DOWN_UPDATE);
+                    endTime = System.currentTimeMillis();
+                    float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
+                    //String speedString = mContext.getString(R.string.download_speed) + ":" + String.format("%-8.2f", speed) + " KBytes/s";
+                    String speedString  = mContext.getString(R.string.download_speed) + ":" +
+                            String.format(Locale.US, "%s", KANTVUtils.formatedBitRate(downloadBytes, (endTime - beginTime)));
+                    mTextSpeed.setText(speedString);
+                }
 
-                 if (numread <= 0) {
-                     KANTVLog.g(TAG, "download file succeed:remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
-                     break;
-                 }
-                 fos.write(buf, 0, numread);
-             }
-             fos.close();
-             ins.close();
-             endTime = System.currentTimeMillis();
-             KANTVLog.g(TAG, "download file succeed: remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
-             KANTVLog.g(TAG, "download bytes:" + downloadBytes);
-             KANTVLog.g(TAG, "download cost: " + (endTime - beginTime) + " milliseconds");
-             float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
-             KANTVLog.g(TAG, "download speed:" + String.format("%-8.2f", speed) + "KBytes/s");
-             //FIXME: better approach to check whether the AI model has downloaded successfully
-             KANTVLog.g(TAG, "expectedSize :" + expectedSize);
-             boolean download_ok      = ((expectedSize - downloadBytes) == 1);
-             boolean download_failure = ((expectedSize - downloadBytes) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
-             if (download_ok) {
-                 KANTVLog.g(TAG, "download ok");
-                 return 0;
-             }
-             if (download_failure) {
-                 KANTVLog.g(TAG, "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize);
-                 //errorString = "download bytes " + downloadBytes + " is not equal to the expected size " + expectedSize;
-                 checkDownloadedModels();
-                 return 2;
-             }
-             return 0;
-         } catch (Exception e) {
-             checkDownloadedModels();
-             e.printStackTrace();
-             KANTVLog.g(TAG, "download file failed,reason:" + e.toString());
-             errorString ="download file failed,reason:" + e.toString();
-             return 1;
-         }
-     }
+                fos.write(buf, 0, numread);
+            }
+            fos.close();
+            ins.close();
+            endTime = System.currentTimeMillis();
+            KANTVLog.g(TAG, "download file succeed: remote url(" + remoteFileUrl + "),local file(" + localFileUrl + ")");
+            KANTVLog.g(TAG, "download bytes:" + downloadBytes);
+            KANTVLog.g(TAG, "download cost: " + (endTime - beginTime) + " milliseconds");
+            float speed = ((downloadBytes * 1.0f) / ((endTime - beginTime) / 1000.0f) / 1024);
+            KANTVLog.g(TAG, "download speed:" + String.format("%-8.2f", speed) + "KBytes/s");
+
+            // Verify download using the actual Content-Length from the HTTP response.
+            // If the server did not provide Content-Length, trust the stream completion.
+            if (contentLength > 0) {
+                if (downloadBytes == contentLength) {
+                    KANTVLog.g(TAG, "download ok, size verified: " + downloadBytes + " bytes");
+                    return 0;
+                } else {
+                    KANTVLog.g(TAG, "download size mismatch: got " + downloadBytes + ", expected " + contentLength);
+                    errorString = "download size mismatch: got " + downloadBytes + ", expected " + contentLength;
+                    checkDownloadedModels();
+                    return 2;
+                }
+            }
+            KANTVLog.g(TAG, "download ok (Content-Length unavailable, stream completed): " + downloadBytes + " bytes");
+            return 0;
+        } catch (Exception e) {
+            checkDownloadedModels();
+            e.printStackTrace();
+            KANTVLog.g(TAG, "download file failed,reason:" + e.toString());
+            errorString ="download file failed,reason:" + e.toString();
+            return 1;
+        }
+    }
 
 
      private Runnable modelDownloadRunnable = new Runnable() {
          @Override
          public void run() {
              int result = 0;
-             result = doDownloadFile(remoteModleFileA, localModleFileA, sizeOfLocalModelFileA, true);
+             result = doDownloadFile(remoteModleFileA, localModleFileA, true);
              if (localModleFileB != null)
-                result = doDownloadFile(remoteModleFileB, localModleFileB, sizeOfLocalModelFileB, true);
+                result = doDownloadFile(remoteModleFileB, localModleFileB, true);
              downloadDialog.dismiss();
              KANTVLog.g(TAG, "result= " + result);
              if (0 == result) {
@@ -329,56 +330,31 @@
          }
      };
 
+     // Check whether the downloaded model files exist on local storage.
+     // Size verification is now performed in doDownloadFile using the HTTP Content-Length
+     // response header, so this method only checks file existence. A file that exists but
+     // is incomplete (e.g. download was cancelled) will be detected on the next download
+     // attempt because doDownloadFile overwrites it from scratch.
      private int checkDownloadedModels() {
          int result = 0;
          try {
              File modelFile = new File(localModleFileA);
-             if (modelFile.exists()) {
-                 if (mIsDownloadLLMModel) {
-                     KANTVLog.g(TAG, "sizeOfLocalModelFileA:" + sizeOfLocalModelFileA);
-                     KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
-                     //FIXME: better approach to check whether the AI model has downloaded successfully
-                     boolean download_failure = ((sizeOfLocalModelFileA - modelFile.length()) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
-                     if (sizeOfLocalModelFileA == modelFile.length()) {
-                         //do nothing
-                     }
-                     if (download_failure) {
-                         KANTVLog.g(TAG, "file: " + localModleFileA + " exist but not complete, remove it");
-                         errorString = "file: " + localModleFileA + " exist but file size " + modelFile.length()
-                                 + " is not equal to the expected size " + sizeOfLocalModelFileA + ", remove it";
-                         modelFile.delete();
-                         result = 1;
-                     }
-                 }
-             } else {
+             if (!modelFile.exists()) {
                  KANTVLog.g(TAG, "file " + localModleFileA + " not exist");
                  errorString = "file " + localModleFileA + " not exist";
                  result = 1;
+             } else {
+                 KANTVLog.g(TAG, "file " + localModleFileA + " exists, size: " + modelFile.length() + " bytes");
              }
 
              if (modelFileNameB != null) {
                  modelFile = new File(localModleFileB);
-                 if (modelFile.exists()) {
-                     if (mIsDownloadLLMModel) {
-                         KANTVLog.g(TAG, "sizeOfLocalModelFileB:" + sizeOfLocalModelFileB);
-                         KANTVLog.g(TAG, "modelFile.length():" + modelFile.length());
-                         //FIXME: better approach to check whether the AI model has downloaded successfully
-                         boolean download_failure = ((sizeOfLocalModelFileB - modelFile.length()) > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE);
-                         if (sizeOfLocalModelFileB == modelFile.length()) {
-                             //do nothing
-                         }
-                         if (download_failure) {
-                             KANTVLog.g(TAG, "file: " + localModleFileB + " exist but not complete, remove it");
-                             errorString += " file: " + localModleFileB + " exist but file size " + modelFile.length()
-                                     + " is not equal to the expected size " + sizeOfLocalModelFileB + ", remove it";
-                             modelFile.delete();
-                             result = 2;
-                         }
-                     }
-                 } else {
+                 if (!modelFile.exists()) {
                      KANTVLog.g(TAG, "file " + localModleFileB + " not exist");
                      errorString += ",file " + localModleFileB + " not exist";
                      result = 2;
+                 } else {
+                     KANTVLog.g(TAG, "file " + localModleFileB + " exists, size: " + modelFile.length() + " bytes");
                  }
              }
          } catch (Exception e) {

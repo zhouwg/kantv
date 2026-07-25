@@ -24,7 +24,8 @@
 
  import com.google.android.exoplayer2.C;
  import com.google.android.exoplayer2.DefaultLivePlaybackSpeedControl;
- import com.google.android.exoplayer2.DefaultRenderersFactory;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.DefaultRenderersFactory;
  import com.google.android.exoplayer2.ExoPlaybackException;
  import com.google.android.exoplayer2.ExoPlayer;
  import com.google.android.exoplayer2.Format;
@@ -483,6 +484,15 @@
                rebuffers and the number of format changes went down significantly. At the same time, battery usage increased only very slightly.
                */
 
+                 // Custom LoadControl to mitigate HLS segment duration drift and rebuffering.
+                 // Without this, the player uses defaults that may cause stuttering after
+                 // extended playback due to accumulated HLS segment duration errors.
+                 DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
+                         .setBufferDurationsMs(60_000, 120_000, 2500, 5000)
+                         .setPrioritizeTimeOverSizeThresholds(true)
+                         .setBackBuffer(30_000, true)
+                         .build();
+
                  LivePlaybackSpeedControl speedControl = new DefaultLivePlaybackSpeedControl.Builder()
                          .setFallbackMinPlaybackSpeed(1f)
                          .setFallbackMaxPlaybackSpeed(1f)
@@ -490,6 +500,7 @@
                  if (KANTVUtils.getHLSPlaylistType() == KANTVUtils.PLAYLIST_TYPE_LIVE) {
                      player =
                              new SimpleExoPlayer.Builder(/* context= */ mActivity, renderersFactory)
+                                     .setLoadControl(loadControl)
                                      .setMediaSourceFactory(mediaSourceFactory)
                                      .setTrackSelector(trackSelector)
                                      .setLivePlaybackSpeedControl(speedControl)
@@ -497,6 +508,7 @@
                  } else {
                      player =
                              new SimpleExoPlayer.Builder(/* context= */ mActivity, renderersFactory)
+                                     .setLoadControl(loadControl)
                                      .setMediaSourceFactory(mediaSourceFactory)
                                      .setTrackSelector(trackSelector)
                                      .build();

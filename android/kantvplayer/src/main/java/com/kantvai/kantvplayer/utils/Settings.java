@@ -76,16 +76,7 @@ public class Settings {
         }
     }
 
-    public int getASRThreadCounts() {
-        String key = mAppContext.getString(R.string.pref_key_asrthreadcounts);
-        String value = mSharedPreferences.getString(key, "3"); // actual thread counts is 3 + 1 = 4
-        try {
-            return Integer.valueOf(value).intValue() + 1;
-        } catch (NumberFormatException e) {
-            KANTVLog.j(TAG, "exception occurred");
-            return 4;
-        }
-    }
+    // getASRThreadCounts() removed: thread count is fixed to 6 to match DSP-side worker count
 
 
     public int getASRModel() {
@@ -449,6 +440,10 @@ public class Settings {
         return mSharedPreferences.getBoolean(key, true);
     }
 
+    // getLLMbackend() returns backend type for inference parameter selection:
+    //   HEXAGON_BACKEND_CDSP (3): offload to DSP (-ngl 99, flash attention)
+    //   HEXAGON_BACKEND_GGML (4): CPU only (-ngl 0)
+    // The actual backend implementation is decided at build time (GGML_USE_HEXAGON).
     public int getLLMbackend() {
         String key = mAppContext.getString(R.string.pref_key_backend);
         String value = mSharedPreferences.getString(key, "1"); //actual backend is 1 + 3 = 4
@@ -460,16 +455,7 @@ public class Settings {
         }
     }
 
-    public int getLLMThreadCounts() {
-        String key = mAppContext.getString(R.string.pref_key_llmthreadcounts);
-        String value = mSharedPreferences.getString(key, "3"); // actual thread counts is 3 + 1 = 4
-        try {
-            return Integer.valueOf(value).intValue() + 1;
-        } catch (NumberFormatException e) {
-            KANTVLog.j(TAG, "exception occurred");
-            return 4;
-        }
-    }
+    // getLLMThreadCounts() removed: thread count is fixed to 6 to match DSP-side worker count
 
     public int getLLMModel() {
         String key = mAppContext.getString(R.string.pref_key_llmmodel);

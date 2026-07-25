@@ -54,8 +54,6 @@ import kantvai.media.player.KANTVLog;
      //
      //keep sync with ggml_jni_bench_type in ggml-jni.h & ncnn_jni_bench_type in ncnn-jni.h
      public enum bench_type {
-         GGML_BENCHMARK_MEMCPY,                    //memcpy  benchmark
-         GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
          GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
          GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
@@ -174,21 +172,15 @@ import kantvai.media.player.KANTVLog;
      }
 
      public static String getGGMLBackendDesc(int n_backend_type) {
-         switch (n_backend_type) {
-             case ggmljava.HEXAGON_BACKEND_QNNCPU:
-                 return "QNN-CPU";
-             case ggmljava.HEXAGON_BACKEND_QNNGPU:
-                 return "QNN-GPU";
-             case ggmljava.HEXAGON_BACKEND_QNNNPU:
-                 return "QNN-NPU";
-             case ggmljava.HEXAGON_BACKEND_CDSP:
-                 return "Hexagon-CDSP";
-             case ggmljava.HEXAGON_BACKEND_GGML:
-                 return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
-             default:
-                 return "unknown";
-         }
-     }
+        switch (n_backend_type) {
+            case ggmljava.HEXAGON_BACKEND_CDSP:
+                return "Hexagon-CDSP";
+            case ggmljava.HEXAGON_BACKEND_GGML:
+                return "ggml";      //fake backend, just used to compare performance between Hexagon and original GGML
+            default:
+                return "unknown";
+        }
+    }
 
      public static String getNCNNBackendDesc(int n_backend_type) {
          switch (n_backend_type) {

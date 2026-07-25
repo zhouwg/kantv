@@ -218,20 +218,20 @@
 - v1.6.0, 2025-02-13,
                     <ul>
                         <li>bug-fix of <a href="https://github.com/zhouwg/kantv/issues/246">the refined implmentation of ggml-qnn</a></li>
-                        <li>create <a href="https://github.com/kantv-ai">kantv.ai</a> and ready for the second PR to the upstream llama.cpp community</li>
+                        <li>create <a href="https://github.com/zhouwg">kantv.ai</a> and ready for the second PR to the upstream llama.cpp community</li>
                         <li>update doc</a>
                     </ul>
 
 - v1.6.1, 2025-03-09,
                     <ul>
-                        <li>sync code from https://github.com/kantv-ai/ggml-qnn</li>
+                        <li>sync code from https://github.com/zhouwg/ggml-qnn</li>
                     </ul>
 
 - v1.6.2, 2025-03-20,
                     <ul>
                         <li>upgrade Qualcommon QNN SDK to 2.32.0.250228</li>
                         <li>upgrade llama.cpp to upstream</li>
-                        <li>sync ggml-qnn implementation from https://github.com/kantv-ai/ggml-qnn</li>
+                        <li>sync ggml-qnn implementation from https://github.com/zhouwg/ggml-qnn</li>
                     </ul>
 
 - v1.6.3-pre, 2025-04-03,
@@ -259,15 +259,15 @@
                     </ul>
 - v1.6.5, 2025-04-26,
                     <ul>
-                       <li>fix a very long-term issue of "2D graphic benchmark does not work properly on Android phone": https://github.com/kantv-ai/kantv/issues/163</li>
-                       <li>fix a stability issue of "AI-subtitle can't works" which introduced in https://github.com/kantv-ai/kantv/pull/281
+                       <li>fix a very long-term issue of "2D graphic benchmark does not work properly on Android phone": https://github.com/zhouwg/kantv/issues/163</li>
+                       <li>fix a stability issue of "AI-subtitle can't works" which introduced in https://github.com/zhouwg/kantv/pull/281
                        <li>release v1.6.5</li>
                     </ul>
 - v1.6.6, 2025-04-28,
                     <ul>
-                       <li>fix a very long-term stability issue of <a href="https://github.com/kantv-ai/kantv/pull/288">APP would crash during toggle back and forth in different UI frequently when LLM inference is running</a>
+                       <li>fix a very long-term stability issue of <a href="https://github.com/zhouwg/kantv/pull/288">APP would crash during toggle back and forth in different UI frequently when LLM inference is running</a>
                        <li>change main license from Apache2.0 to MIT</li>
-                       <li>refine <a href="https://github.com/kantv-ai/kantv/blob/master/docs/how-to-customize.md">how to integrate proprietary / open-source codes to project KanTV for personal/proprietary/commercial R&D activity</a></li>
+                       <li>refine <a href="https://github.com/zhouwg/kantv/blob/master/docs/how-to-customize.md">how to integrate proprietary / open-source codes to project KanTV for personal/proprietary/commercial R&D activity</a></li>
                        <li>refine toplevel README.md</li>
                        <li>write <a href="https://www.kantvai.com/posts/Convert-safetensors-to-gguf.html">Convert safetensors to GGUF</a></li>
                        <li>release v1.6.6</li>
@@ -276,8 +276,8 @@
                     <ul>
                        <li>change project's license from Apache2.0 to MIT</li>
                        <li>try Qwen3-4B, Qwen3-8B, DeepSeek-R1-Distill-Qwen-7B, Gemma3-4B, Gemma3-12B on Android phone</li>
-                       <li>[make DeepSeek-R1-Distill-Qwen-1.5B can works fine](https://github.com/kantv-ai/kantv/issues/287) on Android phone</li>
-                       <li>[multi-modal inference supportive through Gemma3](https://github.com/kantv-ai/kantv/pull/295) on Android phone</li>
+                       <li>[make DeepSeek-R1-Distill-Qwen-1.5B can works fine](https://github.com/zhouwg/kantv/issues/287) on Android phone</li>
+                       <li>[multi-modal inference supportive through Gemma3](https://github.com/zhouwg/kantv/pull/295) on Android phone</li>
                        <li>refine and simplify UI code</li>
                     </ul>
 - v1.6.8, 2025-05-02,
@@ -300,11 +300,11 @@
 - v1.6.10, 2025-05-23,
                     <ul>
                         <li>enable Markdown rendering for LLM inference result</li>
-                        <li>enable self-contained build with internal customized toolchains https://github.com/kantv-ai/kantv/pull/325</li>
+                        <li>enable self-contained build with internal customized toolchains https://github.com/zhouwg/kantv/pull/325</li>
                         <li>sync with upstream llama.cpp</li>
-                        <li>ggml-hexagon: fix bug "LLM inference with cDSP cann't works" https://github.com/kantv-ai/kantv/pull/330 </li>
+                        <li>ggml-hexagon: fix bug "LLM inference with cDSP cann't works" https://github.com/zhouwg/kantv/pull/330 </li>
                         <li>add prebult-apk for Android phone equipped without Qualcomm mobile SoC</li>
-                        <li>realtime video recognition on Android phone,powered by MTMD in llama.cpp https://github.com/kantv-ai/kantv/pull/341 </li>
+                        <li>realtime video recognition on Android phone,powered by MTMD in llama.cpp https://github.com/zhouwg/kantv/pull/341 </li>
                         <li> improve stability </li>
                         <li> refine docs </li>
                     </ul>

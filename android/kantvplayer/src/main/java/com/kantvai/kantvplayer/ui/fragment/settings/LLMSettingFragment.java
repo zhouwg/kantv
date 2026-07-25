@@ -145,14 +145,17 @@
          @Override
          public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
              KANTVLog.g(TAG, "key : " + key);
-             if (
-                     (key.contains("pref.backend"))
-                             || (key.contains("pref.llmthreadcounts"))
-                             || (key.contains("pref.llmmodel"))
-             ) {
+             if (key.contains("pref.backend")) {
                  try {
                      KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
-                     KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
+                 } catch (Exception ex) {
+                     KANTVLog.g(TAG, "error: " + ex.toString());
+                     KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());
+                 }
+             }
+
+             if (key.contains("pref.llmmodel")) {
+                 try {
                      KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
                      KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
                      String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
@@ -234,34 +237,13 @@
              KANTVLog.g(TAG, "mmproj model url:" + KANTVAIModelMgr.getInstance().getMMProjmodelUrl(mSettings.getLLMModel()));
 
              if (mmprojModelName != null) {
-                 long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
-                 //FIXME: better approach to check whether the AI model has downloaded successfully
-                 if (realModelSize - llmModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
-                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
-                     llmModelFile.delete();
-                 }
-                 realModelSize = AIModelMgr.getMMProjmodelSize(userSelectIndex);
-                 //FIXME: better approach to check whether the AI model has downloaded successfully
-                 if (realModelSize - mmprojModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
-                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
-                     mmprojModelFile.delete();
-                 }
                  if (llmModelFile.exists() && mmprojModelFile.exists()) {
                      KANTVLog.g(TAG, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
-                     //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
                      KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
                      return true;
                  }
              } else {
-                 long realModelSize = AIModelMgr.getModelSize(userSelectIndex);
-                 //FIXME: better approach to check whether the AI model has downloaded successfully
-                 if (realModelSize - llmModelFile.length() > KANTVAIUtils.DOWNLOAD_SIZE_CHECK_RANGE) {
-                     KANTVLog.g(TAG, "it seems this model is partial downloaded, remove it");
-                     llmModelFile.delete();
-                 }
-
                  if (llmModelFile.exists()) {
-                     //Toast.makeText(mContext, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelFileName, Toast.LENGTH_SHORT).show();
                      KANTVUtils.showMsgBox(mActivity, "LLM model file already exist: " + KANTVUtils.getSDCardDataPath() + userChooseModelName);
                      return true;
                  }
@@ -274,8 +256,6 @@
                      KANTVAIModelMgr.getInstance().getMMProjmodelName(mSettings.getLLMModel()),
                      KANTVAIModelMgr.getInstance().getModelUrl(mSettings.getLLMModel()),
                      KANTVAIModelMgr.getInstance().getMMProjmodelUrl(mSettings.getLLMModel()));
-             manager.setLLMModelSize(KANTVAIModelMgr.getInstance().getModelSize(mSettings.getLLMModel()),
-                     KANTVAIModelMgr.getInstance().getMMProjmodelSize(mSettings.getLLMModel()));
              manager.showUpdateDialog();
          }
 

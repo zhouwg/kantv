@@ -13,14 +13,25 @@ android {
 
         externalNativeBuild {
             cmake {
-                if (project.hasProperty('GGML_HEXAGON')) {
-                    arguments += "-DGGML_HEXAGON=ON"
-                } else {
+                // Hexagon DSP backend (Qualcomm SoC). Default ON for qcom devices.
+                // Use -PGGML_HEXAGON=OFF when building for non-Qualcomm devices.
+                if (project.hasProperty('GGML_HEXAGON') && project.getProperty('GGML_HEXAGON') == 'OFF') {
                     arguments += "-DGGML_HEXAGON=OFF"
+                } else {
+                    arguments += "-DGGML_HEXAGON=ON"
+                    // JZ's ggml-hexagon implementation (FastRPC-based, no QNN dependency)
+                    arguments += "-DGGML_HEXAGON_JZ=ON"
+                    // HTP arch version: v73=8Gen2, v75=8Gen3, v79=8Elite, v81=8Gen5
+                    // override with -PHTP_ARCH_VERSION=v75 if needed
+                    if (project.hasProperty('HTP_ARCH_VERSION')) {
+                        arguments += "-DHTP_ARCH_VERSION=${project.getProperty('HTP_ARCH_VERSION')}"
+                    } else {
+                        arguments += "-DHTP_ARCH_VERSION=v79"
+                    }
                 }
                 //modify to -DCMAKE_BUILD_TYPE=Debug before prepare for debug build
                 arguments += "-DCMAKE_BUILD_TYPE=Release"
-                //2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
+                //2024-05-28, added for fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
                 arguments += "-DCMAKE_ANDROID_STL_TYPE=c++_shared"
                 arguments += "-DANDROID_STL=c++_shared"
                 arguments += "-DANDROID_CPP_FEATURES=exceptions"

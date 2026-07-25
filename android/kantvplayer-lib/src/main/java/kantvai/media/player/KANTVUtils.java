@@ -2074,9 +2074,11 @@
          mKANTVDRM.ANDROID_JNI_SetRecordConfig(recordPath, recordMode, recordFormat, recordVideoCodec, recordMaxDuration, recordMaxSize);
      }
 
-     public static void setASRConfig(String engineName, String modelPath, int asrThreadCounts, int asrMode) {
-         KANTVLog.j(TAG, "model path " + modelPath + ", asrThreadCounts: " + asrThreadCounts + " , asrMode: " + asrMode);
-         mKANTVDRM.ANDROID_JNI_SetASRConfig(engineName, modelPath, asrThreadCounts, asrMode);
+     public static void setASRConfig(String engineName, String modelPath, int asrMode) {
+         KANTVLog.j(TAG, "model path " + modelPath + " , asrMode: " + asrMode);
+         // nThreadCounts hardcoded to 6 to match the precompiled .so ABI;
+         // actual thread count is managed by ggml-hexagon.cfg
+         mKANTVDRM.ANDROID_JNI_SetASRConfig(engineName, modelPath, 6, asrMode);
      }
 
      public static KANTVDRM getKANTVDRMInstance() {

@@ -12,14 +12,7 @@
             android:title="@string/pref_title_asrmode"
             app:entrySummaries="@array/pref_entry_summaries_asrmode" />
 
-        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="3"
-            android:entries="@@array/pref_entries_asrthreadcounts"
-            android:entryValues="@array/pref_entry_values_asrthreadcounts"
-            android:key="@string/pref_key_asrthreadcounts"
-            android:persistent="true"
-            android:title="@string/pref_title_asrthreadcounts"
-             />
+        <!-- Thread count setting removed: fixed to 6 to match DSP-side worker count -->
 
         <!-- not implemented currently
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference

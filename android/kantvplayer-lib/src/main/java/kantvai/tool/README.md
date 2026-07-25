@@ -1,6 +1,6 @@
 ### Overview
 
-integrate following Android Java libraries to this project to upgrade AndroidX and JetPack(PR: https://github.com/kantv-ai/kantv/pull/347)
+integrate following Android Java libraries to this project to upgrade AndroidX and JetPack(PR: https://github.com/zhouwg/kantv/pull/347)
 
 ### RxPermissions
 

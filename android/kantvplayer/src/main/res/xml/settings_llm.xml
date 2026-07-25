@@ -12,14 +12,7 @@
             android:title="@string/pref_title_backend"
             app:entrySummaries="@array/pref_entry_summaries_backend" />
 
-        <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="3"
-            android:entries="@@array/pref_entries_llmthreadcounts"
-            android:entryValues="@array/pref_entry_values_llmthreadcounts"
-            android:key="@string/pref_key_llmthreadcounts"
-            android:persistent="true"
-            android:title="@string/pref_title_llmthreadcounts"
-             />
+        <!-- Thread count setting removed: fixed to 6 to match DSP-side worker count -->
 
         <SeekBarPreference
             android:id="@+id/seekbarTemperature"

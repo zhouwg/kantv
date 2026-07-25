@@ -35,7 +35,7 @@ Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv * env, jclass clazz
 
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_path,
-                                       jstring user_data, jint bench_type, jint num_threads, jint backend_type, jint accel_type) {
+                                       jstring user_data, jint bench_type, jint n_backend_type) {
     UNUSED(clazz);
 
     const char * sz_model_path = NULL;
@@ -58,9 +58,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("user_data:%s\n", sz_user_data);
     LOGGV("bench type: %d\n", bench_type);
-    LOGGV("thread counts:%d\n", num_threads);
-    LOGGV("backend type:%d\n", backend_type);
-    LOGGV("accel type:%d\n", accel_type);
+    LOGGV("backend type: %d\n", n_backend_type);
 
     if (bench_type >= GGML_BENCHMARK_MAX) {
         LOGGW("pls check bench type\n");
@@ -68,43 +66,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         goto failure;
     }
 
-    if (backend_type > HEXAGON_BACKEND_GGML) {
-        LOGGW("pls check backend type\n");
-        goto failure;
-    }
-
-    if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
-        if (HEXAGON_BACKEND_CDSP == backend_type) {
-            LOGGD("StableDiffusion via cDSP cann't works correct currently");
-            GGML_JNI_NOTIFY("StableDiffusion via cDSP cann't works correct currently");
-            goto failure;
-        }
-    }
-
-#if !defined GGML_USE_HEXAGON
-    if (HEXAGON_BACKEND_GGML != backend_type) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(backend_type));
-        goto failure;
-    }
-#endif
-
-#if !defined SD_USE_HEXAGON
-    if (bench_type == GGML_BENCHMARK_TEXT2IMAGE) {
-        if (HEXAGON_BACKEND_GGML != backend_type) {
-            LOGGW("ggml-hexagon backend %s is disabled with stablediffusion\n",
-                  ggml_backend_hexagon_get_devname(backend_type));
-            GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled with stablediffusion\n",
-                            ggml_backend_hexagon_get_devname(backend_type));
-            goto failure;
-        }
-    }
-#endif
-
-    if (0 == num_threads)
-        num_threads = 1;
-
-    ggml_jni_bench(sz_model_path, sz_user_data, bench_type, num_threads, backend_type, accel_type);
+    ggml_jni_bench(sz_model_path, sz_user_data, bench_type, n_backend_type);
 
     if (GGML_BENCHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
@@ -139,7 +101,7 @@ Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv * env, jclass clazz) {
 
 
 JNIEXPORT jint JNICALL
-Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_path, jint n_threads, jint n_asrmode, jint n_backend) {
+Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_path, jint n_asrmode, jint n_backend_type) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -153,11 +115,10 @@ Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_pat
     }
 
     LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("thread counts:%d\n", n_threads);
     LOGGV("asr mode:%d\n", n_asrmode);
-    LOGGV("backend type: %d\n", n_backend);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    result = whisper_asr_init(sz_model_path, n_threads, n_asrmode, n_backend);
+    result = whisper_asr_init(sz_model_path, n_asrmode, n_backend_type);
 
 failure:
     if (NULL != sz_model_path) {
@@ -178,7 +139,7 @@ Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv * env, jclass clazz) {
 
 JNIEXPORT jint JNICALL
 Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv * env, jclass clazz, jstring str_model_path,
-                                               jint n_thread_counts, jint n_asrmode, jint n_backend) {
+                                               jint n_asrmode, jint n_backend_type) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -192,11 +153,10 @@ Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv * env, jclass clazz, jstring str_mode
     }
 
     LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("thread counts:%d\n", n_thread_counts);
     LOGGV("asr mode:%d\n", n_asrmode);
-    LOGGV("backend type: %d\n", n_backend);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    result = whisper_asr_reset(sz_model_path, n_thread_counts, n_asrmode, n_backend);
+    result = whisper_asr_reset(sz_model_path, n_asrmode, n_backend_type);
 
 failure:
     if (NULL != sz_model_path) {
@@ -239,7 +199,7 @@ Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv * env, jclass clazz) {
 
 JNIEXPORT jstring  JNICALL
 Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring model_path, jstring prompt,
-                                               jint n_llm_type, jint n_thread_counts, jint n_backend, jint n_hwaccel_type) {
+                                               jint n_llm_type, jint n_backend_type) {
     UNUSED(clazz);
 
     const char * sz_model_path   = NULL;
@@ -262,26 +222,13 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llm_type);
-    LOGGV("thread counts:%d\n", n_thread_counts);
-    LOGGV("backend type:%d\n", n_backend);
-    LOGGV("accel type:%d\n", n_hwaccel_type);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-#if !defined GGML_USE_HEXAGON
-    if (n_backend != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend));
-        goto failure;
-    }
-#endif
-
-    if (0 == n_thread_counts)
-        n_thread_counts = 1;
-
-    result = llama_inference(sz_model_path, sz_prompt, n_llm_type, n_thread_counts, n_backend, n_hwaccel_type);
+    result = llama_inference(sz_model_path, sz_prompt, n_llm_type, n_backend_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend);
+            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
         }
     }
 
@@ -317,8 +264,7 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring model_path,
                                           jstring mmproj_model_path, jstring img_path,
-                                          jstring prompt, jint n_llmtype, jint n_thread_counts,
-                                          jint n_backend_type, jint n_hwaccel_type) {
+                                          jstring prompt, jint n_llmtype, jint n_backend_type) {
     const char * sz_model_path   = NULL;
     const char * sz_mmproj_path  = NULL;
     const char * sz_img_path     = NULL;
@@ -355,23 +301,9 @@ Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring mod
     LOGGV("img path:%s\n", sz_img_path);
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llmtype);
-    LOGGV("thread counts:%d\n", n_thread_counts);
-    LOGGV("backend type:%d\n", n_backend_type);
-    LOGGV("accel type:%d\n", n_hwaccel_type);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-
-#if !defined GGML_USE_HEXAGON
-    if (n_backend_type != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        goto failure;
-    }
-#endif
-
-    if (0 == n_thread_counts)
-        n_thread_counts = 1;
-
-    result = mtmd_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
+    result = mtmd_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_backend_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {
@@ -404,8 +336,7 @@ failure:
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, jstring model_path,
                                                     jstring aux_model_path, jstring prompt,
-                                                    jint n_llmtype, jint n_thread_counts,
-                                                    jint n_backend_type, jint n_hwaccel_type) {
+                                                    jint n_llmtype) {
     const char * sz_model_path   = NULL;
     const char * sz_auxmodel_path  = NULL;
     const char * sz_prompt       = NULL;
@@ -434,27 +365,14 @@ Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, j
     LOGGV("aux model path:%s\n", sz_auxmodel_path);
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llmtype);
-    LOGGV("thread counts:%d\n", n_thread_counts);
-    LOGGV("backend type:%d\n", n_backend_type);
-    LOGGV("accel type:%d\n", n_hwaccel_type);
 
+    //backend is decided at build time (GGML_USE_HEXAGON), backend_type param is ignored at runtime
 
-#if !defined GGML_USE_HEXAGON
-    if (n_backend_type != HEXAGON_BACKEND_GGML) {
-        LOGGW("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        GGML_JNI_NOTIFY("ggml-hexagon backend %s is disabled or not supported in this device\n", ggml_backend_hexagon_get_devname(n_backend_type));
-        goto failure;
-    }
-#endif
-
-    if (0 == n_thread_counts)
-        n_thread_counts = 1;
-
-    result = sd_inference(sz_model_path, sz_auxmodel_path, sz_prompt, n_llmtype, n_thread_counts, n_backend_type, n_hwaccel_type);
+    result = sd_inference(sz_model_path, sz_auxmodel_path, sz_prompt, n_llmtype);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("StableDiffusion inference with backend %d failure", n_backend_type);
+            GGML_JNI_NOTIFY("StableDiffusion inference failure");
         }
     }
 
@@ -496,6 +414,28 @@ Java_kantvai_ai_ggmljava_isGGMLHexagonEnabled(JNIEnv *env, jclass clazz) {
     return JNI_TRUE;
 #else
     return JNI_FALSE;
+#endif
+}
+
+// Tell the hexagon backend where to find DSP skeleton .so files
+// (libggmldsp-skel-v*.so) and ggml-hexagon.cfg. Must be called before any
+// inference (asr_init / llm_inference) so the path is set prior to backend
+// registration. No-op when hexagon backend is not compiled in.
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setHexagonRuntimeLibpath(JNIEnv *env, jclass clazz, jstring path) {
+    UNUSED(clazz);
+#ifdef GGML_USE_HEXAGON
+    const char * sz_path = (*env)->GetStringUTFChars(env, path, NULL);
+    if (NULL == sz_path) {
+        LOGGW("setHexagonRuntimeLibpath: failed to get path string\n");
+        return;
+    }
+    LOGGD("setHexagonRuntimeLibpath: %s", sz_path);
+    ggml_hexagon_set_runtime_libpath(sz_path);
+    (*env)->ReleaseStringUTFChars(env, path, sz_path);
+#else
+    UNUSED(env);
+    UNUSED(path);
 #endif
 }
 

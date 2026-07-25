@@ -105,6 +105,8 @@ public final class KANTVDRM {
 
     public native void ANDROID_JNI_StopRecord();
 
+    // nThreadCounts is kept in the signature to match the precompiled .so ABI,
+    // but the value is hardcoded to 6 (thread count is now managed by ggml-hexagon.cfg)
     public native void ANDROID_JNI_SetASRConfig(String engineName, String modelPath, int nThreadCounts, int nASRMode);
 
     public native void ANDROID_JNI_StopASR();

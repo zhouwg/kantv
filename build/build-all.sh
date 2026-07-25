@@ -78,10 +78,10 @@ function build_jni()
     cd ${PROJECT_ROOT_PATH}/core/
     if [ ${is_build_for_qcom} -eq 1 ]; then
         echo "build jni qcom"
-        ./build-android-jni-lib.sh qcom
+        ./build-android-jni-lib.sh qcom || echo -e "${TEXT_RED}WARNING: build-android-jni-lib.sh qcom failed, will rely on Gradle externalNativeBuild${TEXT_RESET}"
     else
         echo "build jni non_qcom"
-        ./build-android-jni-lib.sh non_qcom
+        ./build-android-jni-lib.sh non_qcom || echo -e "${TEXT_RED}WARNING: build-android-jni-lib.sh non_qcom failed, will rely on Gradle externalNativeBuild${TEXT_RESET}"
     fi
     cd ${PROJECT_ROOT_PATH}
 }
@@ -116,35 +116,35 @@ function build_kantv_androidapk()
     cd ${PROJECT_ROOT_PATH}/android
 
     if [ ${is_build_for_qcom} -eq 1 ]; then
-        ./gradlew assembleRelease -PGGML_HEXAGON
+        ./gradlew assembleRelease -PGGML_HEXAGON=ON
     else
-        ./gradlew assembleRelease
+        ./gradlew assembleRelease -PGGML_HEXAGON=OFF
     fi
+    local gradle_ret=$?
 
-    if [ $? -eq 0 ]; then
-        echo ""
-        echo ""
-
-        printf "succeed to build apk in dir:${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release by cmdline-tools\n"
-        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/*.apk
-        sign_kantv_androidapk
+    if [ ${gradle_ret} -ne 0 ]; then
         cd ${PROJECT_ROOT_PATH}
         echo ""
+        echo -e "${TEXT_RED}FAILED to build apk (gradlew exited with ${gradle_ret})${TEXT_RESET}"
         echo ""
-        exit 0
+        echo "------------------------------------------------------------------------------------------"
+        echo "APK output directory contents (if any):"
+        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/ 2>/dev/null || echo "(directory does not exist)"
+        echo "------------------------------------------------------------------------------------------"
+        echo ""
+        exit 1
     fi
 
-    cd ${PROJECT_ROOT_PATH}
+    echo ""
+    echo ""
 
+    printf "succeed to build apk in dir:${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release by cmdline-tools\n"
+    ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/*.apk
+    sign_kantv_androidapk
+    cd ${PROJECT_ROOT_PATH}
     echo ""
-    echo "------------------------------------------------------------------------------------------"
-    echo -e "[*] to continue to build project KanTV Android APK for ${TEXT_RED} target ${BUILD_TARGET} with arch ${BUILD_ARCHS} in ${PROJECT_BUILD_TYPE} mode on host ${BUILD_HOST} ${TEXT_RESET}, pls\n"
     echo ""
-    echo -e "${TEXT_BLUE}build KanTV apk by latest Android Studio IDE ${TEXT_RESET}\n"
-    echo ""
-    echo ""
-    echo "------------------------------------------------------------------------------------------"
-    echo ""
+    exit 0
 }
 
 
@@ -167,7 +167,7 @@ function sign_kantv_androidapk()
             -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
             -storepass "$KANTV_KEYSTORE_PASSWORD" \
             -keypass "$KANTV_KEY_PASSWORD" \
-            -dname "CN=kantv authors, OU=kantv-ai, O=kantv-ai, L=China, ST=China, C=China"
+            -dname "CN=kantv authors, OU=zhouwg, O=zhouwg, L=China, ST=China, C=China"
     #check whether jks file is generated
     if [ -f "${PROJECT_ROOT_PATH}/kantv.jks" ]; then
         echo "succeed to generate keystore ${PROJECT_ROOT_PATH}/kantv.jks"

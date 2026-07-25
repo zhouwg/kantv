@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -96,23 +97,33 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     int llm_inference_interrupted = 0;
     common_params params;
     g_params = &params;
-    if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_MAIN, print_usage)) {
+    if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_CLI, print_usage)) {
         return 1;
     }
 
+    // Timing: measure TTFT breakdown to identify bottleneck
+    auto t_start = std::chrono::high_resolution_clock::now();
+    auto t_prev  = t_start;
+    auto log_timing = [&](const char * tag) {
+        auto t_now = std::chrono::high_resolution_clock::now();
+        auto since_start = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - t_start).count();
+        auto since_prev  = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - t_prev).count();
+        LOGGD("[TTFT timing] %-28s total=%lldms  step=%lldms", tag, (long long)since_start, (long long)since_prev);
+        t_prev = t_now;
+    };
+
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
-    if (backend_type != HEXAGON_BACKEND_GGML) {
-#ifdef GGML_USE_HEXAGON
-        LOGGD("using hexagon backend %d", backend_type);
-        params.main_gpu = backend_type;
+    //runtime decision based on backend_type:
+    //  HEXAGON_BACKEND_CDSP: offload all layers to DSP
+    //  HEXAGON_BACKEND_GGML: CPU only, no offload
+    if (backend_type == HEXAGON_BACKEND_CDSP) {
+        LOGGD("using hexagon CDSP backend (runtime decision, -ngl 99)");
+        params.main_gpu = 0;
         params.n_gpu_layers = 99;
-#else
-        LOGGW("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        GGML_JNI_NOTIFY("hexagon backend %s is disabled and only ggml backend is supported\n", ggml_backend_hexagon_get_devname(backend_type));
-        return 1;
-#endif
     } else {
-        params.main_gpu = backend_type;
+        LOGGD("using default ggml CPU backend (runtime decision, -ngl 0)");
+        params.main_gpu = 0;
+        params.n_gpu_layers = 0;
     }
     LOGGD("model path %s", params.model.path.c_str());
     if (params.model.path.find("gemma-3") != std::string::npos) {
@@ -154,9 +165,24 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG_INF("%s: llama backend init\n", __func__);
-
+    // Diagnostic: print registered backends before init
+    {
+        size_t dev_count = ggml_backend_dev_count();
+        LOGGD("ggml backend dev count: %zu", dev_count);
+        for (size_t i = 0; i < dev_count; i++) {
+            ggml_backend_dev_t dev = ggml_backend_dev_get(i);
+            if (dev) {
+                const char * name = ggml_backend_dev_name(dev);
+                const char * desc = ggml_backend_dev_description(dev);
+                LOGGD("  backend[%zu]: name=%s, desc=%s", i, name ? name : "(null)", desc ? desc : "(null)");
+            }
+        }
+    }
+    // hexagon backend is statically linked into libkantv-core.so, no need to
+    // load separate .so via ggml_backend_load_all_from_path()
     llama_backend_init();
     llama_numa_init(params.numa);
+    log_timing("after llama_backend_init");
 
     llama_model * model = nullptr;
     llama_context * ctx = nullptr;
@@ -170,10 +196,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     // load the model and apply lora adapter, if any
     LOG_INF("%s: load the model and apply lora adapter, if any\n", __func__);
-    common_init_result llama_init = common_init_from_params(params);
+    common_init_result_ptr llama_init = common_init_from_params(params);
 
-    model = llama_init.model.get();
-    ctx = llama_init.context.get();
+    model = llama_init->model();
+    ctx = llama_init->context();
+    log_timing("after model load (common_init)");
 
     if (model == NULL) {
         LOG_ERR("%s: error: unable to load model\n", __func__);
@@ -222,6 +249,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     llama_attach_threadpool(ctx, threadpool, threadpool_batch);
+    log_timing("after threadpool init");
 
     const int n_ctx_train = llama_model_n_ctx_train(model);
     const int n_ctx = llama_n_ctx(ctx);
@@ -253,7 +281,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 LOG_WRN("*** User-specified prompt will pre-start conversation, did you mean to set --system-prompt (-sys) instead?\n");
             }
 
-            LOG_INF("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja).c_str());
+            LOG_INF("%s: chat template example:\n%s\n", __func__, common_chat_format_example(chat_templates.get(), params.use_jinja, params.default_template_kwargs).c_str());
         } else {
             LOG_INF("%s: in-suffix/prefix is specified, chat template will be disabled\n", __func__);
         }
@@ -346,6 +374,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         LOG_DBG("prompt: \"%s\"\n", prompt.c_str());
         LOG_DBG("tokens: %s\n", string_from(ctx, embd_inp).c_str());
     }
+    log_timing("after prompt tokenize");
 
     // Should not run without any tokens
     if (!waiting_for_first_input && embd_inp.empty()) {
@@ -386,7 +415,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
 
         // remove any "future" tokens that we might have inherited from the previous session
-        llama_kv_self_seq_rm(ctx, -1, n_matching_session_tokens, -1);
+        llama_memory_seq_rm(llama_get_memory(ctx), -1, n_matching_session_tokens, -1);
     }
 
     LOG_DBG("recalculate the cached logits (check): embd_inp.size() %zu, n_matching_session_tokens %zu, embd_inp.size() %zu, session_tokens.size() %zu\n",
@@ -538,6 +567,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     int n_remain           = params.n_predict;
     int n_consumed         = 0;
     int n_session_consumed = 0;
+    int n_generated        = 0; // Diagnostic: count generated tokens
 
     std::vector<int>   input_tokens;  g_input_tokens  = &input_tokens;
     std::vector<int>   output_tokens; g_output_tokens = &output_tokens;
@@ -545,7 +575,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     std::ostringstream assistant_ss; // for storing current assistant message, used in conversation mode
 
     // the first thing we will do is to output the prompt, so set color accordingly
-    console::set_display(console::prompt);
+    console::set_display(DISPLAY_TYPE_PROMPT);
     display = params.display_prompt;
 
     std::vector<llama_token> embd;
@@ -590,9 +620,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 const int skipped_tokens = (int) embd.size() - max_embd_size;
                 embd.resize(max_embd_size);
 
-                console::set_display(console::error);
+                console::set_display(DISPLAY_TYPE_ERROR);
                 LOG_WRN("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
-                console::set_display(console::reset);
+                console::set_display(DISPLAY_TYPE_RESET);
             }
 
             if (ga_n == 1) {
@@ -618,8 +648,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     LOG_DBG("context full, swapping: n_past = %d, n_left = %d, n_ctx = %d, n_keep = %d, n_discard = %d\n",
                             n_past, n_left, n_ctx, params.n_keep, n_discard);
 
-                    llama_kv_self_seq_rm (ctx, 0, params.n_keep            , params.n_keep + n_discard);
-                    llama_kv_self_seq_add(ctx, 0, params.n_keep + n_discard, n_past, -n_discard);
+                    llama_memory_seq_rm(llama_get_memory(ctx), 0, params.n_keep            , params.n_keep + n_discard);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, params.n_keep + n_discard, n_past, -n_discard);
 
                     n_past -= n_discard;
 
@@ -642,9 +672,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                     LOG_DBG("div:   [%6d, %6d] / %6d -> [%6d, %6d]\n", ga_i + ib*bd, ga_i + ib*bd + ga_w, ga_n, (ga_i + ib*bd)/ga_n, (ga_i + ib*bd + ga_w)/ga_n);
                     LOG_DBG("shift: [%6d, %6d] + %6d -> [%6d, %6d]\n", ga_i + ib*bd + ga_w, n_past + ib*bd, dd, ga_i + ib*bd + ga_w + dd, n_past + ib*bd + dd);
 
-                    llama_kv_self_seq_add(ctx, 0, ga_i,                n_past,              ib*bd);
-                    llama_kv_self_seq_div(ctx, 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
-                    llama_kv_self_seq_add(ctx, 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, ga_i,                n_past,              ib*bd);
+                    llama_memory_seq_div(llama_get_memory(ctx), 0, ga_i + ib*bd,        ga_i + ib*bd + ga_w, ga_n);
+                    llama_memory_seq_add(llama_get_memory(ctx), 0, ga_i + ib*bd + ga_w, n_past + ib*bd,      dd);
 
                     n_past -= bd;
 
@@ -719,7 +749,21 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
             common_sampler_accept(smpl, id, /* accept_grammar= */ true);
 
+            // Log TTFT (time to first token) on the first generated token
+            if (n_generated == 0) {
+                log_timing("first token generated (TTFT)");
+            }
+
             // LOG_DBG("last: %s\n", string_from(ctx, smpl->prev.to_vector()).c_str());
+
+            // Diagnostic: log first 5 generated tokens
+            if (n_generated < 5) {
+                std::string token_str = common_token_to_piece(ctx, id);
+                bool is_eog = llama_vocab_is_eog(vocab, id);
+                LOGGD("generated[%d]: id=%d, is_eog=%d, str='%s', n_past=%d",
+                      n_generated, (int)id, (int)is_eog, token_str.c_str(), n_past);
+            }
+            n_generated++;
 
             embd.push_back(id);
 
@@ -778,7 +822,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
         // reset color to default if there is no pending user input
         if (input_echo && (int) embd_inp.size() == n_consumed) {
-            console::set_display(console::reset);
+            console::set_display(DISPLAY_TYPE_RESET);
             display = true;
         }
 
@@ -875,7 +919,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 }
 
                 // color user input only
-                console::set_display(console::user_input);
+                console::set_display(DISPLAY_TYPE_USER_INPUT);
                 display = params.display_prompt;
 
                 std::string line;
@@ -886,7 +930,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 } while (another_line);
 
                 // done taking input, reset color
-                console::set_display(console::reset);
+                console::set_display(DISPLAY_TYPE_RESET);
                 display = true;
 
                 if (buffer.empty()) { // Ctrl+D on empty line exits
@@ -1001,6 +1045,26 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     if (1 == llm_is_running_state()) {
         llm_inference_interrupted = 0;
         common_perf_print(ctx, smpl);
+#if (defined __ANDROID__) || (defined ANDROID)
+        //send PP/TG timing data to Java UI for display
+        {
+            llama_perf_context_data perf_data = llama_perf_context(ctx);
+            char perf_str[512];
+            double pp_ms_per_tok = perf_data.n_p_eval > 0 ? perf_data.t_p_eval_ms / perf_data.n_p_eval : 0.0;
+            double pp_tok_per_s   = perf_data.t_p_eval_ms > 0 ? 1e3 / perf_data.t_p_eval_ms * perf_data.n_p_eval : 0.0;
+            double tg_ms_per_tok = perf_data.n_eval > 0 ? perf_data.t_eval_ms / perf_data.n_eval : 0.0;
+            double tg_tok_per_s   = perf_data.t_eval_ms > 0 ? 1e3 / perf_data.t_eval_ms * perf_data.n_eval : 0.0;
+            snprintf(perf_str, sizeof(perf_str),
+                "llama-timings:\n"
+                "  prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n"
+                "         eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+                perf_data.t_p_eval_ms, perf_data.n_p_eval, pp_ms_per_tok, pp_tok_per_s,
+                perf_data.t_eval_ms,   perf_data.n_eval,   tg_ms_per_tok, tg_tok_per_s
+            );
+            GGML_JNI_NOTIFY("%s", perf_str);
+            LOGGD("%s", perf_str);
+        }
+#endif
     } else {
         llm_inference_interrupted = 1;
     }

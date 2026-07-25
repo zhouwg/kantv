@@ -88,17 +88,11 @@ export ANDROID_SDK_ROOT=${ANDROID_HOME} # build with github actions, this is req
 export PATH=${ANDROID_HOME}/cmdline-tools/latest/bin:${PATH}
 export PATH=${ANDROID_HOME}/cmake/3.22.1/bin:${PATH}
 
+export HEXAGON_SDK_PATH=${PROJECT_ROOT_PATH}/prebuilts/Hexagon_SDK/6.6.0.0
 
 #the following is required for project's maintainers
 export UPSTREAM_WHISPERCPP_PATH=~/github/whisper.cpp
 export UPSTREAM_LLAMACPP_PATH=~/github/llama.cpp
-
-#the following is required for project's maintainers
-export QNN_SDK_ROOT=/opt/qcom/aistack/qnn/2.20.0.240223
-export HEXAGON_SDK_ROOT=/opt/qcom/Hexagon_SDK/3.5.0
-export TENSORFLOW_HOME=~/.local/lib/python3.8/site-packages/tensorflow/
-export PYTHONPATH=${QNN_SDK_ROOT}/lib/python/:${PYTHONPATH}
-
 
 . ${PROJECT_ROOT_PATH}/build/public.sh || (echo "can't find public.sh"; exit 1)
 if [ $? != 0 ]; then

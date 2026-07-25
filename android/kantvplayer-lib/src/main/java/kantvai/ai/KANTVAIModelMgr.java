@@ -13,19 +13,19 @@ public class KANTVAIModelMgr {
 
      private int defaultLLMModelIndex       = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
      private final int LLM_MODEL_COUNTS     = 8; // default counts of LLM models, might-be not the real counts of all LLM models
-     private int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
+     private int NON_LLM_MODEL_COUNTS = 1; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin
 
      private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS; // default capacity of all AI models
 
 
-     private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
+     private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin
      private String[] arrayModelName;           //space/memory ---> time/performance
      private String[] arrayBenchType;
      private static KANTVAIModelMgr instance      = null;
      private static volatile boolean isInitModels = false;
 
      private int modelIndex  = 0;
-     private int modelCounts = 0;              //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
+     private int modelCounts = 0;              //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin
 
      private KANTVAIModelMgr() {
          AIModels = new KANTVAIModel[capacity];
@@ -60,17 +60,10 @@ public class KANTVAIModelMgr {
          modelIndex++;
      }
 
-     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String url, long size) {
-         KANTVLog.g(TAG,"modelIndex " + modelIndex + " capacity " + capacity);
-         checkCapacity();
-         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, url, size);
-         modelIndex++;
-     }
 
-
-     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl, long modelSize, long mmprojModelSize) {
+     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl) {
          checkCapacity();
-         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, mmprojName, url, mmprojUrl, modelSize, mmprojModelSize);
+         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, mmprojName, url, mmprojUrl);
          modelIndex++;
      }
 
@@ -159,7 +152,7 @@ public class KANTVAIModelMgr {
      }
 
      public String getModelUrl(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getUrl();
+         return replaceHFEndpoint(AIModels[index + NON_LLM_MODEL_COUNTS].getUrl());
      }
 
      public String getMMProjmodelName(int index) {
@@ -167,7 +160,22 @@ public class KANTVAIModelMgr {
      }
 
      public String getMMProjmodelUrl(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjUrl();
+         return replaceHFEndpoint(AIModels[index + NON_LLM_MODEL_COUNTS].getMMProjUrl());
+     }
+
+     // Replace the HF endpoint domain in the stored URL with the currently configured one.
+     // This is necessary because initAIModels() runs only once (singleton), so when the user
+     // switches between huggingface.co and hf-mirror.com in Settings, the stored URLs are
+     // not regenerated. Returning a rewritten copy here ensures downloads always use the
+     // endpoint the user currently selected, without re-running initAIModels().
+     private String replaceHFEndpoint(String url) {
+         if (url == null) {
+             return null;
+         }
+         String currentEndpoint = KANTVAIUtils.getHFEndPointUrl(KANTVAIUtils.getHFEndpoint());
+         url = url.replace("https://huggingface.co/", currentEndpoint);
+         url = url.replace("https://hf-mirror.com/", currentEndpoint);
+         return url;
      }
 
      public int getDefaultModelIndex() {
@@ -176,14 +184,6 @@ public class KANTVAIModelMgr {
 
      public void setDefaultModelIndex(int index) {
          defaultLLMModelIndex = index;
-     }
-
-     public long getModelSize(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getSize();
-     }
-
-     public long getMMProjmodelSize(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getMMprojSize();
      }
 
      private void initAIModels() {
@@ -207,108 +207,45 @@ public class KANTVAIModelMgr {
              return;
          }
 
-         boolean isStableDiffusionHexagonEnabled = ggmljava.isStableDiffusionHexagonEnabled();
          boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
          KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
 
-         arrayBenchType = new String[5];
-         arrayBenchType[0] = "memcpy";
-         arrayBenchType[1] = "mulmat";
-         arrayBenchType[2] = "ASR";
-         arrayBenchType[3] = "LLM";
-         arrayBenchType[4] = "Text2Image";
+         arrayBenchType = new String[2];
+         arrayBenchType[0] = "ASR";
+         arrayBenchType[1] = "LLM";
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
-                 hf_endpoint + "ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
-                 43550795 //the built-in and default ASR model, size is 42 MiB
+                 hf_endpoint + "ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin"
          );
          //there are only one Whisper model currently
-         AIModels[0].setSample("jfk.wav", 43550795,
+         AIModels[0].setSample("jfk.wav",
                  hf_endpoint + "datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav");
 
 
-         //there are only one StableDiffusion model currently
-         addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
-                 hf_endpoint + "CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
-                 4265380512L); // size of the StableDiffusion model, about 4.0 GiB
-
-
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true",
-                 1120235360L // size of LLM model, in bytes
+                 hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true"
                  );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true",
-                 1997879712L // size of LLM model, in bytes
+                 hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true"
                  );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-4B", "Qwen3-4B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true",
-                 4280404640L // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true",
-                 8709518464L  // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-14B", "Qwen3-14B-Q4_K_M.gguf",
-                 hf_endpoint + "Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true",
-                 9001752960L // size of LLM model, in bytes
-         );
 
          //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
                  hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
-                 4130226336L,//size of the main model in bytes, 4.13 GiB
-                 851251104L //size of the mmproj model in bytes, 851 MiB
+                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
          );
 
-         //LLM + MTMD-image
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf",
-                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
-                 7300574976L,
-                 854200224L
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "Llama-3.1-Nemotron-Nano-4B",
-                 "Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf",
-                 hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true",
-                 2778285312L // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "Phi-4-mini-reasoning",
-                 "Phi-4-mini-reasoning-Q4_0.gguf",
-                 hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true",
-                 2331443104L // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "DeepSeek-R1-0528-Qwen3-8B",
-                 "DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf?download=true",
-                 5027782720L // size of LLM model, in bytes
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "MiMo-VL-7B-RL",
-                 "MiMo-VL-7B-RL-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/MiMo-VL-7B-RL-q4_k_m.gguf?download=true",
-                 4684340192L // size of LLM model, in bytes
+         //LLM (text-only)
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma-4-E2B", "gemma-4-E2B-it-Q4_0.gguf",
+                 hf_endpoint + "unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf?download=true"
          );
 
          //MTMD-image(for realtime-video-inference)
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
                  "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
                  hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
-                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
-                 327811552L,
-                 190033440L
+                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true"
          );
 
          //MTMD-audio
@@ -316,9 +253,7 @@ public class KANTVAIModelMgr {
                  "Qwen2.5-Omni-3B-Q4_K_M.gguf",
                  "mmproj-Qwen2.5-Omni-3B-Q8_0.gguf",
                  hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/Qwen2.5-Omni-3B-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true",
-                 2104931648L,
-                 1538031328L
+                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true"
          );
 
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models
@@ -328,12 +263,8 @@ public class KANTVAIModelMgr {
              arrayModelName[i] = AIModels[i].getNickname();
          }
 
-         if (getKANTVAIModelFromName("Gemma3-4B") != null) {
-             setDefaultModelIndex(getKANTVAIModelFromName("Gemma3-4B").getIndex() - NON_LLM_MODEL_COUNTS);
+         if (getKANTVAIModelFromName("Gemma-4-E2B") != null) {
+             setDefaultModelIndex(getKANTVAIModelFromName("Gemma-4-E2B").getIndex() - NON_LLM_MODEL_COUNTS);
          }
-
-         //UT for download the default LLM model in APK
-         //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
-         //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
      }
  }

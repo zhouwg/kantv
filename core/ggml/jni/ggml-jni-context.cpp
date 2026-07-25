@@ -137,165 +137,9 @@ float llm_get_top_p() {
     return g_jni_ctx.get_top_p();
 }
 
-//ref:https://github.com/ggml-org/whisper.cpp/blob/master/src/whisper.cpp#L8046
-const char * ggml_jni_bench_memcpy(int n_threads) {
-    std::string s;
-    s = "";
-    char strbuf[256];
+// ggml_jni_bench_memcpy() removed
 
-    GGML_JNI_NOTIFY("calling ggml_time_init\n\n");
-    ggml_time_init();
-
-    size_t n = 20;
-    size_t arr = n_threads > 0 ? 1024llu : n_threads; // trick to avoid compiler optimizations
-
-    // 1GB array
-    const size_t size = arr * 1e6;
-
-    double sum = 0.0;
-
-    // heat-up
-    {
-        char *src = (char *) malloc(size);
-        char *dst = (char *) malloc(size);
-
-        for (size_t i = 0; i < size; i++) src[i] = i;
-
-        memcpy(dst, src, size); // heat-up
-
-        double tsum = 0.0;
-
-        for (size_t i = 0; i < n; i++) {
-            const int64_t t0 = ggml_time_us();
-
-            memcpy(dst, src, size);
-
-            const int64_t t1 = ggml_time_us();
-
-            tsum += (t1 - t0) * 1e-6;
-
-            src[rand() % size] = rand() % 256;
-        }
-
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (heat-up)\n\n",
-                 (double) (n * size) / (tsum * 1e9));
-        GGML_JNI_NOTIFY(strbuf);
-        s += strbuf;
-
-
-        // needed to prevent the compiler from optimizing the memcpy away
-        {
-            for (size_t i = 0; i < size; i++) sum += dst[i];
-        }
-
-        free(src);
-        free(dst);
-    }
-
-    // single-thread
-    {
-        char *src = (char *) malloc(size);
-        char *dst = (char *) malloc(size);
-
-        for (size_t i = 0; i < size; i++) src[i] = i;
-
-        memcpy(dst, src, size); // heat-up
-
-        double tsum = 0.0;
-
-        for (size_t i = 0; i < n; i++) {
-            const int64_t t0 = ggml_time_us();
-
-            memcpy(dst, src, size);
-
-            const int64_t t1 = ggml_time_us();
-
-            tsum += (t1 - t0) * 1e-6;
-
-            src[rand() % size] = rand() % 256;
-        }
-
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s ( 1 thread)\n\n",
-                 (double) (n * size) / (tsum * 1e9));
-        GGML_JNI_NOTIFY(strbuf);
-        s += strbuf;
-
-
-        // needed to prevent the compiler from optimizing the memcpy away
-        {
-            for (size_t i = 0; i < size; i++) sum += dst[i];
-        }
-
-        free(src);
-        free(dst);
-    }
-
-    // multi-thread
-
-    for (int32_t k = 1; k <= n_threads; k++) {
-        char *src = (char *) malloc(size);
-        char *dst = (char *) malloc(size);
-
-        for (size_t i = 0; i < size; i++) src[i] = i;
-
-        memcpy(dst, src, size); // heat-up
-
-        double tsum = 0.0;
-
-        auto helper = [&](int th) {
-            const int64_t i0 = (th + 0) * size / k;
-            const int64_t i1 = (th + 1) * size / k;
-
-            for (size_t i = 0; i < n; i++) {
-                memcpy(dst + i0, src + i0, i1 - i0);
-
-                src[i0 + rand() % (i1 - i0)] = rand() % 256;
-            };
-        };
-
-        const int64_t t0 = ggml_time_us();
-
-        std::vector<std::thread> threads(k - 1);
-        for (int32_t th = 0; th < k - 1; ++th) {
-            threads[th] = std::thread(helper, th);
-        }
-
-        helper(k - 1);
-
-        for (int32_t th = 0; th < k - 1; ++th) {
-            threads[th].join();
-        }
-
-        const int64_t t1 = ggml_time_us();
-
-        tsum += (t1 - t0) * 1e-6;
-
-        snprintf(strbuf, sizeof(strbuf), "memcpy: %7.2f GB/s (%2d thread)\n\n",
-                 (double) (n * size) / (tsum * 1e9), k);
-        GGML_JNI_NOTIFY(strbuf);
-        s += strbuf;
-
-
-        // needed to prevent the compiler from optimizing the memcpy away
-        {
-            for (size_t i = 0; i < size; i++) sum += dst[i];
-        }
-
-        free(src);
-        free(dst);
-    }
-
-    snprintf(strbuf, sizeof(strbuf), "sum:    %f\n\n", sum);
-    GGML_JNI_NOTIFY(strbuf);
-    s += strbuf;
-
-    return s.c_str();
-}
-
-const char * ggml_jni_bench_mulmat(int n_threads, int n_backend) {
-    GGML_JNI_NOTIFY("this function removed/deprecated since 05/30/2025");
-    return "deprecated";
-}
+// ggml_jni_bench_memcpy() and ggml_jni_bench_mulmat() removed
 
 // ref:https://github.com/ggerganov/llama.cpp/pull/5935/
 bool ggml_jni_is_valid_utf8(const char *string) {
@@ -338,18 +182,26 @@ bool ggml_jni_is_valid_utf8(const char *string) {
 #ifndef GGML_USE_HEXAGON //make compiler happy when disable GGML_USE_HEXAGON manually
 const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
     switch (dev_num) {
-        case HEXAGON_BACKEND_QNNCPU:
-            return "HEXAGON_BACKEND_QNN_CPU";
-        case HEXAGON_BACKEND_QNNGPU:
-            return "HEXAGON_BACKEND_QNN_GPU";
-        case HEXAGON_BACKEND_QNNNPU:
-            return "HEXAGON_BACKEND_QNN_NPU";
         case HEXAGON_BACKEND_CDSP:
             return "HEXAGON_BACKEND_CDSP";
         case HEXAGON_BACKEND_GGML:
             return "ggml"; //"fake" hexagon backend, used for compare performance between hexagon backend and the default ggml backend
         default:
             return "unknown";
+    }
+}
+
+void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach) {
+
+}
+#else
+// upstream ggml-hexagon.h no longer declares ggml_backend_hexagon_get_devname;
+// provide a local C-linkage implementation so JNI C code can link with GGML_USE_HEXAGON
+extern "C" const char * ggml_backend_hexagon_get_devname(size_t dev_num) {
+    switch (dev_num) {
+        case HEXAGON_BACKEND_CDSP:    return "HEXAGON_BACKEND_CDSP";
+        case HEXAGON_BACKEND_GGML:    return "ggml";
+        default:                      return "unknown";
     }
 }
 
@@ -363,20 +215,20 @@ void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach) {
  * @param sz_model_path
  * @param sz_user_data
  * @param llm_type
- * @param n_threads
- * @param n_backend_type
- * @param n_hwaccel_type
+ * @param n_backend_type   HEXAGON_BACKEND_CDSP: offload all layers to DSP (-ngl 99)
+ *                         HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
  * @return
+ * Backend type selects inference parameters at runtime. The actual backend
+ * implementation is decided at build time (GGML_USE_HEXAGON), but -ngl controls
+ * whether layers are offloaded to the DSP (CDSP) or run on CPU (GGML).
  */
 int llama_inference(const char * sz_model_path, const char * sz_user_data, int llm_type,
-                    int n_threads, int n_backend_type, int n_hwaccel_type) {
+                    int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
-    LOGGD("num_threads:%d\n", n_threads);
     LOGGD("backend type:%d\n", n_backend_type);
-    LOGGD("hwaccel type:%d\n", n_hwaccel_type);
 
     if (nullptr == sz_model_path || nullptr == sz_user_data) {
         LOGGD("pls check params\n");
@@ -384,15 +236,49 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
     }
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
-    int argc = 8;
-    const char *argv[] = {"llama-inference-main",
-                          "-no-cnv",
-                          "-m", sz_model_path,
-                          "-p", sz_user_data,
-                          "-t", std::to_string(n_threads).c_str()
-    };
+    //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
+    //otherwise .c_str() becomes a dangling pointer after the initializer ends
+    std::string threads_str = "6";
+
+    // Build argv based on backend type:
+    //   CDSP: offload all layers to DSP with flash attention + DSP-optimized params
+    //   GGML: CPU only, no offload
+    std::vector<std::string> args_storage;
+    std::vector<const char *> argv_vec;
+    argv_vec.push_back("llama-inference-main");
+    argv_vec.push_back("-no-cnv");
+    argv_vec.push_back("-m");
+    argv_vec.push_back(sz_model_path);
+    argv_vec.push_back("-p");
+    argv_vec.push_back(sz_user_data);
+    argv_vec.push_back("-t");
+    args_storage.push_back(threads_str);
+    argv_vec.push_back(args_storage.back().c_str());
+
+    if (n_backend_type == HEXAGON_BACKEND_CDSP) {
+        // DSP offload: large context, all layers on DSP, flash attention, poll mode
+        argv_vec.push_back("-c");
+        argv_vec.push_back("8192");
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("99");
+        argv_vec.push_back("-fa");
+        argv_vec.push_back("on");
+        argv_vec.push_back("--ubatch-size");
+        argv_vec.push_back("64");
+        argv_vec.push_back("--poll");
+        argv_vec.push_back("1000");
+        argv_vec.push_back("--no-mmap");
+    } else {
+        // CPU only: small context, no offload
+        argv_vec.push_back("-c");
+        argv_vec.push_back("2048");
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("0");
+    }
+
+    int argc = (int)argv_vec.size();
     llm_init_running_state();
-    ret = llama_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    ret = llama_inference_main(argc, const_cast<char **>(argv_vec.data()), n_backend_type);
     llm_reset_running_state();
 
     return ret;
@@ -405,22 +291,22 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
  * @param sz_media_path
  * @param sz_user_data
  * @param llm_type
- * @param n_threads
- * @param n_backend_type
- * @param n_hwaccel_type
+ * @param n_backend_type   HEXAGON_BACKEND_CDSP: offload all layers to DSP (-ngl 99)
+ *                         HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
  * @return
+ * Backend type selects inference parameters at runtime. The actual backend
+ * implementation is decided at build time (GGML_USE_HEXAGON), but -ngl controls
+ * whether layers are offloaded to the DSP (CDSP) or run on CPU (GGML).
  */
 int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path, const char * sz_media_path,
-                   const char * sz_user_data, int llm_type, int n_threads, int n_backend_type, int n_hwaccel_type) {
+                   const char * sz_user_data, int llm_type, int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("mmproj path:%s\n", sz_mmproj_model_path);
     LOGGD("media path:%s\n", sz_media_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
-    LOGGD("num_threads:%d\n", n_threads);
     LOGGD("backend type:%d\n", n_backend_type);
-    LOGGD("hwaccel type:%d\n", n_hwaccel_type);
 
     if (nullptr == sz_model_path || nullptr == sz_user_data) {
         LOGGD("pls check params\n");
@@ -445,7 +331,8 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
 
     //this is a lazy/dirty method for merge latest source codes of upstream llama.cpp on Android port
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
-    int argc = 11;
+    //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
+    std::string threads_str = "6";
     const char * type = "--image";
     switch (llm_type) {
         case 1:
@@ -456,15 +343,41 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
         default:
             break;
     }
-    const char * argv[] = {"mtmd-inference-main",
-                           "-m", sz_model_path,
-                           "--mmproj", sz_mmproj_model_path,
-                           type, sz_media_path,
-                           "-p", sz_user_data,
-                           "-t", std::to_string(n_threads).c_str()
-    };
+
+    // Build argv based on backend type
+    std::vector<std::string> args_storage;
+    std::vector<const char *> argv_vec;
+    argv_vec.push_back("mtmd-inference-main");
+    argv_vec.push_back("-m");
+    argv_vec.push_back(sz_model_path);
+    argv_vec.push_back("--mmproj");
+    argv_vec.push_back(sz_mmproj_model_path);
+    argv_vec.push_back(type);
+    argv_vec.push_back(sz_media_path);
+    argv_vec.push_back("-p");
+    argv_vec.push_back(sz_user_data);
+    argv_vec.push_back("-t");
+    args_storage.push_back(threads_str);
+    argv_vec.push_back(args_storage.back().c_str());
+
+    if (n_backend_type == HEXAGON_BACKEND_CDSP) {
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("99");
+        argv_vec.push_back("-fa");
+        argv_vec.push_back("on");
+        argv_vec.push_back("--ubatch-size");
+        argv_vec.push_back("64");
+        argv_vec.push_back("--poll");
+        argv_vec.push_back("1000");
+        argv_vec.push_back("--no-mmap");
+    } else {
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("0");
+    }
+
+    int argc = (int)argv_vec.size();
     llm_init_running_state();
-    ret = mtmd_inference_main(argc, const_cast<char **>(argv), n_backend_type);
+    ret = mtmd_inference_main(argc, const_cast<char **>(argv_vec.data()), n_backend_type);
     llm_reset_running_state();
 
     LOGGD("mtmd_inference return %d", ret);
@@ -477,21 +390,15 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
  * @param sz_aux_model_path
  * @param sz_user_data
  * @param llm_type
- * @param n_threads
- * @param n_backend_type
- * @param n_hwaccel_type
  * @return
+ * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param.
  */
-int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const char *sz_user_data, int llm_type,
-                 int n_threads, int n_backend_type, int n_hwaccel_type) {
+int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const char *sz_user_data, int llm_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("aux path:%s\n", sz_aux_model_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
-    LOGGD("num_threads:%d\n", n_threads);
-    LOGGD("backend type:%d\n", n_backend_type);
-    LOGGD("hwaccel type:%d\n", n_hwaccel_type);
 
     if (nullptr == sz_model_path) {
         LOGGD("pls check params\n");
@@ -508,10 +415,11 @@ int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const
                           "-p", sz_user_data,
                           "--width", "512",
                           "--height", "512",
-                          "-t", std::to_string(n_threads).c_str()
+                          "-t", "6"
     };
     sd_init_running_state();
-    ret = sd_inference_main(argc, argv, n_backend_type);
+    //ret = sd_inference_main(argc, argv, HEXAGON_BACKEND_GGML);
+    ret = 0;
     sd_reset_running_state();
     LOGGD("ret %d", ret);
     return ret;

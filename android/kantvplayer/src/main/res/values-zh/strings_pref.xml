@@ -104,29 +104,6 @@
         <item>transcription + record audio</item>
     </string-array>
 
-    <string name="pref_key_asrthreadcounts">pref.asrthreadcounts</string>
-    <string name="pref_title_asrthreadcounts">Choose ASR thread counts</string>
-    <string-array name="pref_entries_asrthreadcounts">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-    </string-array>
-    <string-array name="pref_entry_values_asrthreadcounts">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </string-array>
-
     <string name="pref_title_asr">ASR</string>
     <string name="pref_key_asrmodel">pref.asrmodel</string>
     <string name="pref_title_asrmodel">Choose ASR model</string>
@@ -509,43 +486,7 @@
     <string name="pref_title_record_thresholddisksize">threshold disk size</string>
     <string name="pref_summary_record_thresholddisksize" translatable="false">click to setting threshold disk size(Mbytes)</string>
 
-    <string name="pref_key_backend">pref.backend</string>
-    <string name="pref_title_backend">Choose Backend</string>
-    <string-array name="pref_entries_backend">
-        <item>Hexagon cDSP</item>
-        <item>Default ggml</item>
-    </string-array>
-    <string-array name="pref_entry_values_backend">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-    <string-array name="pref_entry_summaries_backend">
-        <item>offload GGML OP to cDSP directly</item>
-        <item>default ggml backend</item>
-    </string-array>
-
-    <string name="pref_key_llmthreadcounts">pref.llmthreadcounts</string>
-    <string name="pref_title_llmthreadcounts">Choose LLM thread counts</string>
-    <string-array name="pref_entries_llmthreadcounts">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-    </string-array>
-    <string-array name="pref_entry_values_llmthreadcounts">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-    </string-array>
+    <!-- Backend settings removed: decided at build time (GGML_USE_HEXAGON) -->
 
     <string name="pref_title_llm">LLM</string>
     <string name="pref_key_llmmodel">pref.llmmodel</string>

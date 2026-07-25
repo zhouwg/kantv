@@ -24,6 +24,9 @@ struct ggml_compute_params {
     void * wdata;
 
     struct ggml_threadpool * threadpool;
+
+    // use reference implementation
+    bool use_ref;
 };
 
 
@@ -62,13 +65,13 @@ struct ggml_compute_params {
 #if defined(__s390x__) && defined(__VEC__)
 #ifndef __VXE__
 #define __VXE__
-#endif
+#endif  // __VXE__
 #ifndef __VXE2__
 #define __VXE2__
-#endif
-#endif
+#endif  // __VXE2__
+#endif  // __s390x__ && __VEC__
 
-#if defined(__ARM_FEATURE_SVE)
+#if defined(__ARM_FEATURE_SVE) && defined(__linux__)
 #include <sys/prctl.h>
 #endif
 
@@ -303,6 +306,7 @@ inline static uint8x16_t ggml_vqtbl1q_u8(uint8x16_t a, uint8x16_t b) {
 
 #if !defined(__ARM_FEATURE_DOTPROD)
 
+// NOTE: this fallback produces the same total sum as native vdotq_s32 but with different per-lane grouping — do not use when individual lane values matter.
 inline static int32x4_t ggml_vdotq_s32(int32x4_t acc, int8x16_t a, int8x16_t b) {
     const int16x8_t p0 = vmull_s8(vget_low_s8 (a), vget_low_s8 (b));
     const int16x8_t p1 = vmull_s8(vget_high_s8(a), vget_high_s8(b));
@@ -316,6 +320,15 @@ inline static int32x4_t ggml_vdotq_s32(int32x4_t acc, int8x16_t a, int8x16_t b) 
 
 #endif // !defined(__ARM_FEATURE_DOTPROD)
 
+static inline int32x4_t ggml_nvfp4_dot8(const int8x8_t q4_lo, const int8x8_t q8_lo,
+                                         const int8x8_t q4_hi, const int8x8_t q8_hi) {
+    const int16x8_t p_lo = vmull_s8(q4_lo, q8_lo);
+    const int16x8_t p_hi = vmull_s8(q4_hi, q8_hi);
+    const int32x4_t sum_lo = vpaddlq_s16(p_lo);
+    const int32x4_t sum_hi = vpaddlq_s16(p_hi);
+    return vaddq_s32(sum_lo, sum_hi);
+}
+
 #endif // defined(__ARM_NEON)
 
 #ifdef __wasm_simd128__
@@ -328,7 +341,7 @@ inline static int32x4_t ggml_vdotq_s32(int32x4_t acc, int8x16_t a, int8x16_t b) 
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <intrin.h>
-#elif defined(__AVX__) || defined(__AVX2__) || defined(__AVX512F__) || defined(__SSSE3__) || defined(__SSE3__) || defined(__SSE__)
+#elif defined(__SSE__) || defined(__SSE3__) || defined(__SSSE3__) || defined(__AVX__) || defined(__F16C__) || defined(__AVX2__) || defined(__AVX512F__) || defined(__AVX512BF16__)
 #include <immintrin.h>
 #endif
 
@@ -371,7 +384,7 @@ inline static int32x4_t ggml_vdotq_s32(int32x4_t acc, int8x16_t a, int8x16_t b) 
 #define vec_xor(a, b) ((a) ^ (b)) // Vector XOR
 #endif
 
-typedef signed char char8x16_t __attribute__((vector_size(16)));
+typedef signed   char char8x16_t  __attribute__((vector_size(16)));
 typedef unsigned char uchar8x16_t __attribute__((vector_size(16)));
 
 typedef int8_t  int8x16_t __attribute__((vector_size(16)));
@@ -382,10 +395,10 @@ typedef uint8_t  uint8x16_t __attribute__((vector_size(16)));
 typedef uint16_t uint16x8_t __attribute__((vector_size(16)));
 typedef uint32_t uint32x4_t __attribute__((vector_size(16)));
 
-typedef float float32x4_t __attribute__((vector_size(16)));
-typedef double double64x2_t __attribute((vector_size(16)));
+typedef float  float32x4_t  __attribute__((vector_size(16)));
+typedef double double64x2_t __attribute__((vector_size(16)));
 
-typedef signed long long long64x2_t __attribute((vector_size(16)));
+typedef signed   long long long64x2_t  __attribute__((vector_size(16)));
 typedef unsigned long long ulong64x2_t __attribute__((vector_size(16)));
 
 typedef struct ggml_uint8x16x2_t {
@@ -480,6 +493,19 @@ inline static int16x8_t vec_padd_s16(int16x8_t a, int16x8_t b) {
     return v_abo + v_abe;
 }
 
+/**
+ * @see https://github.com/ggml-org/llama.cpp/pull/14037
+ */
+inline static float vec_hsum_f32x4(float32x4_t v) {
+    float32x4_t v_temp = v + vec_reve(v);
+    return v_temp[0] + v_temp[1];
+}
+
+inline static int32_t vec_hsum_i32x4(int32x4_t v) {
+    int32x4_t v_temp = v + vec_reve(v);
+    return v_temp[0] + v_temp[1];
+}
+
 inline static int32x4_t ggml_vec_dot(int32x4_t acc, int8x16_t a, int8x16_t b) {
     const int16x8_t p = vec_mule(a, b) + vec_mulo(a, b);
     return acc + (vec_unpackh(p) + vec_unpackl(p));
@@ -487,13 +513,15 @@ inline static int32x4_t ggml_vec_dot(int32x4_t acc, int8x16_t a, int8x16_t b) {
 
 #endif
 
-#if defined(__loongarch_asx)
+#if defined(__loongarch_sx)
 /* float type data load instructions */
 static __m128 __lsx_vreplfr2vr_s(const float val) {
     v4f32 res = {val, val, val, val};
     return (__m128)res;
 }
+#endif
 
+#if defined(__loongarch_asx)
 static __m256 __lasx_xvreplfr2vr_s(const float val) {
     v8f32 res = {val, val, val, val, val, val, val, val};
     return (__m256)res;
@@ -502,6 +530,9 @@ static __m256 __lasx_xvreplfr2vr_s(const float val) {
 
 // TODO: move to ggml-threading
 void ggml_barrier(struct ggml_threadpool * tp);
+
+void ggml_threadpool_chunk_set(struct ggml_threadpool * tp, int value);
+int  ggml_threadpool_chunk_add(struct ggml_threadpool * tp, int value);
 
 #ifdef __cplusplus
 }

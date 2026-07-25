@@ -60,23 +60,11 @@
     </string-array>
 
     <string-array name="benchType">
-        <item>memcpy</item>                 <!-- memcopy benchmark -->
-        <item>mulmat</item>                 <!-- mulmat benchmark -->
         <item>ASR</item>                    <!-- ASR(whisper.cpp based on ggml)benchmark -->
         <item>LLM</item>                    <!-- LLM(llama.cpp based on ggml)benchmark -->
-        <item>Text2Image</item>             <!-- Text2Image(stablediffusion.cpp based on ggml)benchmark -->
     </string-array>
 
-    <string-array name="threadCounts">
-        <item>8</item>
-        <item>7</item>
-        <item>6</item>
-        <item>5</item>
-        <item>4</item>
-        <item>3</item>
-        <item>2</item>
-        <item>1</item>
-    </string-array>
+    <!-- threadCounts array removed: thread count is fixed to 6 to match DSP-side worker count -->
 
 
     <!-- all ASR models and LLM models -->

@@ -35,7 +35,7 @@
                 android:layout_marginTop="1dp"
                 android:background="@drawable/textview_border"
                 android:gravity="top"
-                android:hint="introduce the movie Once Upon a Time in America briefly, less then 100 words" />
+                android:hint="introduce the movie Once Upon a Time in America briefly" />
         </LinearLayout>
 
         <LinearLayout
@@ -54,18 +54,6 @@
                 android:layout_height="wrap_content"
                 android:dropDownSelector="#63D81B60"
                 android:spinnerMode="dropdown" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Threads" />
-
-            <Spinner
-                android:id="@+id/spinnerThreadCounts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dropDownSelector="#63D81B60"
-                android:spinnerMode="dropdown" />
         </LinearLayout>
 
 
@@ -73,18 +61,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Back:" />
-
-            <Spinner
-                android:id="@+id/spinnerBackend"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dropDownSelector="#63D81B60"
-                android:spinnerMode="dropdown" />
 
             <TextView
                 android:layout_width="wrap_content"

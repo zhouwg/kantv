@@ -28,12 +28,30 @@ extern "C" {
  */
 #define AI_INFERENCE_INTERRUPTED             8
 
+// kantv-specific backend type enum (used by JNI layer)
+// these are kantv-internal constants, NOT part of upstream ggml-hexagon API
+// NOTE: values are kept stable for Java-layer compatibility (offset=3 in AIResearchFragment)
+enum HEXAGONBackend {
+    HEXAGON_BACKEND_CDSP    = 3,  // default Hexagon backend (upstream ggml-hexagon only supports CDSP)
+    HEXAGON_BACKEND_GGML    = 4,  //"fake" HEXAGON backend for compare performance between HEXAGON backend and ggml backend
+};
+
+enum hwaccel_approach_type {
+     HWACCEL_QNN            = 0,
+     HWACCEL_QNN_SINGLEGRAPH= 1,
+     HWACCEL_CDSP           = 2,
+};
+
+// kantv-specific helper: returns devname for the given backend type
+// when GGML_USE_HEXAGON is NOT defined, implemented in ggml-jni-context.cpp
+// when GGML_USE_HEXAGON IS defined, the hexagon backend provides the real implementation
+const char * ggml_backend_hexagon_get_devname(size_t dev_num);
+void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach);
+
 //=============================================================================================
 // available bench type in ggml-jni, keep sync with KANTVAIUtils.java
 enum ggml_jni_bench_type {
-    GGML_BENCHMARK_MEMCPY = 0,                //memcpy  benchmark
-    GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
-    GGML_BENCHMARK_ASR,                       //ASR benchmark through whisper.cpp
+    GGML_BENCHMARK_ASR = 0,                   //ASR benchmark through whisper.cpp
     GGML_BENCHMARK_LLM,                       //LLM benchmark through llama.cpp
     GGML_BENCHMARK_TEXT2IMAGE,                //Text2Image benchmark through stablediffusion.cpp
     GGML_BENCHMARK_MAX
@@ -58,18 +76,13 @@ enum ggml_jni_bench_type {
      *
      * @param sz_model_path     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
      * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
-     * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
-     * @param n_threads         1 - 8
-     * @param n_backend_type    0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU/HEXAGON_BACKEND_CDSP 3: ggml
-     * @param n_accel_type      0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+     * @param n_bench_type      0: ASR(whisper.cpp) 1: LLM(llama.cpp) 2: Text2Image(stablediffusion.cpp)
+     * @param n_backend_type    HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
      * @return
     */
-    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type,
-                                int num_threads, int n_backend_type, int n_accel_type);
+    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int n_backend_type);
 
-    const char * ggml_jni_bench_memcpy(int n_threads);
-
-    const char * ggml_jni_bench_mulmat(int n_threads, int n_backend);
+    // ggml_jni_bench_memcpy() and ggml_jni_bench_mulmat() removed
 
     const char * ggml_jni_get_ggmltype_str(enum ggml_type wtype);
 
@@ -81,22 +94,20 @@ enum ggml_jni_bench_type {
 // =================================================================================================
     /**
     * @param sz_model_path
-    * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
     */
-    int          whisper_asr_init(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
+    int          whisper_asr_init(const char * sz_model_path, int n_asrmode, int n_backend_type);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
     void         whisper_asr_stop(void);
     /**
     * @param sz_model_path
-    * @param n_threads
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * @param n_backend            0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
+    * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
     */
-    int          whisper_asr_reset(const char * sz_model_path, int n_threads, int n_asrmode, int n_backend);
+    int          whisper_asr_reset(const char * sz_model_path, int n_asrmode, int n_backend_type);
 
 
 // =================================================================================================
@@ -107,13 +118,11 @@ enum ggml_jni_bench_type {
     * @param model_path         /sdcard/xxxxxx.gguf
     * @param prompt
     * @param llm_type           not used currently
-    * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
-    * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+    * @param n_backend_type     HEXAGON_BACKEND_CDSP: offload to DSP (-ngl 99)
+    *                           HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
     * @return
     */
-    int          llama_inference(const char * model_path, const char * prompt, int llm_type,
-                                 int num_threads, int backend_type, int hwaccel_type);
+    int          llama_inference(const char * model_path, const char * prompt, int llm_type, int n_backend_type);
 
     int          llama_inference_main(int argc, char * argv[], int backend);
 
@@ -145,13 +154,12 @@ enum ggml_jni_bench_type {
     * @param img_path
     * @param prompt
     * @param llm_type           1: MTMD image, 2: MTMD audio
-    * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
-    * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
+    * @param n_backend_type     HEXAGON_BACKEND_CDSP: offload to DSP (-ngl 99)
+    *                           HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
     * @return
     */
     int          mtmd_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
-                                 const char * prompt, int llm_type, int num_threads, int backend_type, int hwaccel_type);
+                                 const char * prompt, int llm_type, int n_backend_type);
     int          mtmd_inference_main(int argc, char * argv[], int backend);
 
     /**
@@ -160,13 +168,11 @@ enum ggml_jni_bench_type {
     * @param aux_model_path
     * @param prompt
     * @param llm_type           not used currently
-    * @param num_threads        1 - 8
-    * @param backend_type       0: HEXAGON_BACKEND_QNNCPU 1: HEXAGON_BACKEND_QNNGPU 2: HEXAGON_BACKEND_QNNNPU, 3: HEXAGON_BACKEND_CDSP 4: ggml
-    * @param accel_type         0: HWACCEL_QNN 1: HWACCEL_QNN_SINGLEGRAPH 2: HWACCEL_CDSP
     * @return
+    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
     */
     int          sd_inference(const char * model_path, const char * aux_model_path,
-                             const char * prompt, int llm_type, int num_threads, int backend_type, int hwaccel_type);
+                             const char * prompt, int llm_type);
     int          sd_inference_main(int argc, const char * argv[], int backend);
 
     int          write_bmp(const char * filename, int width, int height, int bpp, const unsigned char * data);
