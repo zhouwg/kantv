@@ -6,7 +6,7 @@ follow the steps below to generate the specified Android APK in a <b>fresh and c
 
 ### Fetch source codes
 ```
-git clone https://github.com/kantv-ai/kantv.git
+git clone https://github.com/zhouwg/kantv.git
 
 cd kantv
 

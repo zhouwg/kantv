@@ -167,7 +167,7 @@ function sign_kantv_androidapk()
             -keystore "${PROJECT_ROOT_PATH}/kantv.jks" \
             -storepass "$KANTV_KEYSTORE_PASSWORD" \
             -keypass "$KANTV_KEY_PASSWORD" \
-            -dname "CN=kantv authors, OU=kantv-ai, O=kantv-ai, L=China, ST=China, C=China"
+            -dname "CN=kantv authors, OU=zhouwg, O=zhouwg, L=China, ST=China, C=China"
     #check whether jks file is generated
     if [ -f "${PROJECT_ROOT_PATH}/kantv.jks" ]; then
         echo "succeed to generate keystore ${PROJECT_ROOT_PATH}/kantv.jks"

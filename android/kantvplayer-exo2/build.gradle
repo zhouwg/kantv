@@ -58,9 +58,9 @@ android {
             attributes(
                     'Implementation-Title': "kantvplayer-exo2",
                     'Implementation-Version': "2.15",
-                    'Built-By':"kantv-ai",
+                    'Built-By':"zhouwg",
                     'Bundle-Description':"Exoplayer engine for project KanTV",
-                    'Bundle-Vendor': "kantv-ai",
+                    'Bundle-Vendor': "zhouwg",
                     'Built-Date': new Date().getDateTimeString(),
                     'Built-With':
                             "gradle-${project.getGradle().getGradleVersion()},groovy-${GroovySystem.getVersion()}",

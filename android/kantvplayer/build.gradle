@@ -31,7 +31,7 @@ android {
                 }
                 //modify to -DCMAKE_BUILD_TYPE=Debug before prepare for debug build
                 arguments += "-DCMAKE_BUILD_TYPE=Release"
-                //2024-05-28, added for fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
+                //2024-05-28, added for fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
                 arguments += "-DCMAKE_ANDROID_STL_TYPE=c++_shared"
                 arguments += "-DANDROID_STL=c++_shared"
                 arguments += "-DANDROID_CPP_FEATURES=exceptions"

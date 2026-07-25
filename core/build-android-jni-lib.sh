@@ -2,7 +2,7 @@
 
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build kantv-ai jni for target Android
+# Description: build jni for target Android
 #
 
 set -e

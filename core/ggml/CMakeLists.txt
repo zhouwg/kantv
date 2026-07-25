@@ -111,7 +111,7 @@ if (GGML_ENABLE_HEXAGON)
     if(DEFINED HTP_ARCH_VERSION)
         if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
             set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -ffp-model=fast -fno-finite-math-only")
-            #refer to:https://github.com/kantv-ai/kantv/issues/287
+            #refer to:https://github.com/zhouwg/kantv/issues/287
             #set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
         else()
             set(OPT_FLAG " -O3 -march=armv8.7-a -ffp-model=fast -fno-finite-math-only")
@@ -383,7 +383,7 @@ else()
             "-Wno-unused-command-line-argument")
 endif()
 
-#2024-05-28, fix issue in this PR:https://github.com/kantv-ai/kantv/pull/204
+#2024-05-28, fix issue in this PR:https://github.com/zhouwg/kantv/pull/204
 add_definitions(-fexceptions)
 add_definitions(-D_LIBCPP_EXCEPTIONS)
 add_definitions(-D_LIBCXXABI_EXCEPTIONS)

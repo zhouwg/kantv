@@ -3,9 +3,9 @@
 KanTV("Kan", aka English "watch") , an open source project focus on study and practise on-device AI technology in <b>real scenario</b>(such as perform <b>online-TV playback</b> and <b>realtime transcription</b> and <b>online-TV record</b> at the same time) on Android phone:
 
 
-- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/kantv-ai/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/kantv-ai/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features. source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. source code of FFmpeg 6.1's all dependent libraries could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/external/ffmpeg-deps"> external/ffmpeg-deps </a>.
+- Watch online TV and local media by customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). this project is derived from original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial)(that project has stopped maintenance since 2021), with much enhancements and new features. source code of customized FFmpeg 6.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a>according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. source code of FFmpeg 6.1's all dependent libraries could be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-deps"> external/ffmpeg-deps </a>.
 
-- Watch online TV by customized ![Google Exoplayer 2.15.1](https://github.com/google/ExoPlayer), source code of customized Exoplayer2.15.1 could be found in <a href="https://github.com/kantv-ai/kantv/tree/master/android/kantvplayer-exo2"> android/kantvplayer-exo2 </a>.
+- Watch online TV by customized ![Google Exoplayer 2.15.1](https://github.com/google/ExoPlayer), source code of customized Exoplayer2.15.1 could be found in <a href="https://github.com/zhouwg/kantv/tree/master/android/kantvplayer-exo2"> android/kantvplayer-exo2 </a>.
 
 - Record online TV to local file on phone.
 
@@ -17,9 +17,9 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimodal text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloaded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java](https://github.com/kantv-ai/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java).
+- Built-in [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimodal text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloaded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java](https://github.com/zhouwg/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java).
 
-- The [ggml-hexagon](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
+- The [ggml-hexagon](https://github.com/zhouwg/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
 
 ### Software architecture of KanTV Android
 
@@ -28,8 +28,8 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 ### Building the project
 
 - Clone this repository and build locally, see [how to build](./docs/how-to-build.md)
-- Download pre-built Android APK from https://github.com/kantv-ai/kantv/releases
-- Download pre-built Android APK from Github CI-build: https://github.com/kantv-ai/kantv/actions/
+- Download pre-built Android APK from https://github.com/zhouwg/kantv/releases
+- Download pre-built Android APK from Github CI-build: https://github.com/zhouwg/kantv/actions/
 
 ### Run Android APK on Android phone
 - Android 8.0(2017.08) --- Android 15(2024.10) and higher version with <b>ANY</b> mainstream arm64 mobile SoC.
@@ -48,7 +48,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 here is a short video to demostrate realtime AI subtitle by running the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Gen3 mobile SoC - <b>fully offline, on-device</b>.
 
-https://github.com/kantv-ai/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
+https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd22b8
 
 ----
 
@@ -98,21 +98,21 @@ a screenshot to demostrate download LLM model in APK.
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
-- [Roadmap](https://github.com/kantv-ai/kantv/discussions/262)
+- [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
 
 
 ### Contribution
 
 Report issue in Android phone equipped with <b>mainstream</b> mobile SoC or submit PR to this project is greatly welcomed.
 
-We use [GitHub issues](https://github.com/kantv-ai/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/kantv-ai/kantv/issues/1).
+We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
 
 <!--
 comment out this section because some contributors in the upstream project might-be don't want to be appeared here
 
 ### Contributors
 
-[![Contributors](http://contrib.nn.ci/api?repo=kantv-ai/kantv)](https://github.com/kantv-ai/kantv/graphs/contributors)
+[![Contributors](http://contrib.nn.ci/api?repo=zhouwg/kantv)](https://github.com/zhouwg/kantv/graphs/contributors)
 
 -->
 
