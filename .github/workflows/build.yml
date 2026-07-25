@@ -88,6 +88,14 @@ jobs:
           lunch 1
           ./build/build-all.sh android
 
+      - name: list apk output (diagnostic)
+        if: always()
+        run: |
+          echo "=== APK output directory ==="
+          ls -lah android/kantvplayer/build/outputs/apk/all64/release/ 2>/dev/null || echo "(directory does not exist)"
+          echo "=== find all apk files ==="
+          find android/kantvplayer/build/outputs -name "*.apk" 2>/dev/null || echo "(no apk found)"
+
       - name: upload qcom apk
         uses: actions/upload-artifact@v4
         if: success()
@@ -160,6 +168,14 @@ jobs:
           source build/envsetup.sh
           lunch 1
           ./build/build-all.sh android_non_qcom
+
+      - name: list apk output (diagnostic)
+        if: always()
+        run: |
+          echo "=== APK output directory ==="
+          ls -lah android/kantvplayer/build/outputs/apk/all64/release/ 2>/dev/null || echo "(directory does not exist)"
+          echo "=== find all apk files ==="
+          find android/kantvplayer/build/outputs -name "*.apk" 2>/dev/null || echo "(no apk found)"
 
       - name: upload non-qcom apk
         uses: actions/upload-artifact@v4
