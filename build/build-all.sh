@@ -116,9 +116,9 @@ function build_kantv_androidapk()
     cd ${PROJECT_ROOT_PATH}/android
 
     if [ ${is_build_for_qcom} -eq 1 ]; then
-        ./gradlew assembleRelease -PGGML_HEXAGON
+        ./gradlew assembleRelease -PGGML_HEXAGON=ON
     else
-        ./gradlew assembleRelease
+        ./gradlew assembleRelease -PGGML_HEXAGON=OFF
     fi
 
     if [ $? -eq 0 ]; then

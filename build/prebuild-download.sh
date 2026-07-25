@@ -273,5 +273,11 @@ function check_and_download_opencl_sdk()
 check_commands_in_host
 check_and_download_androidndk
 check_and_download_androidsdk
-check_and_download_hexagon_sdk
-check_and_download_opencl_sdk
+# Hexagon SDK and OpenCL SDK are only needed for Qualcomm DSP builds.
+# Set SKIP_HEXAGON_SDK=1 (e.g. for non-qcom builds) to skip downloading them.
+if [ "${SKIP_HEXAGON_SDK}" != "1" ]; then
+    check_and_download_hexagon_sdk
+fi
+if [ "${SKIP_OPENCL_SDK}" != "1" ]; then
+    check_and_download_opencl_sdk
+fi
