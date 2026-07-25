@@ -60,18 +60,6 @@ build the entire project by Android Studio IDE
   ./build/build-all.sh android_non_qcom
 ```
 
-#### How to enable/disable debug build
-
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/android/kantvplayer/build.gradle#L22">kantvplayer/build.gradle#L22</a> accordingly
-
-#### How to build project for Android phone equipped <b>without</b> Qualcomm mobile SoC in AndroidStudio
-
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L14">ggml/CMakeLists.txt#L14</a> accordingly if target Android phone is <b>NOT</b> equipped with Qualcomm mobile SoC
-
-#### How to build project for Android phone equipped with Qualcomm high-end mobile SoC
-
-- modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L99">ggml/CMakeLists.txt#L99</a> accordingly if target Android phone is equipped with Qualcomm Snapdragon 8Gen3 series SoC or Qualcomm Snapdragon 8Elite series mobile SoC
-
 #### How to enable/disable JZ's ggml-hexagon backend
 
 the `core/ggml/llamacpp/` directory is synced from the [ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) project (branch `self-build-jz`), which provides a complete JZ alternative AP-side implementation of the ggml-hexagon backend for Qualcomm Snapdragon cDSP (HTP/HMX).
@@ -81,29 +69,9 @@ the `core/ggml/llamacpp/` directory is synced from the [ggml-hexagon](https://gi
 
 to switch implementation, modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L31">ggml/CMakeLists.txt#L31</a> (`GGML_HEXAGON_JZ` option).
 
-#### Hexagon Tools path
-
-JZ's `htp/Makefile` uses `HEXAGON_TOOLS_PATH` to locate the `hexagon-clang` cross-compiler:
-
-```
-HEXAGON_TOOLS_PATH = ${HEXAGON_SDK_PATH}/tools/HEXAGON_Tools/8.8.06
-```
-
-if your Hexagon Tools is installed elsewhere (e.g. Hexagon SDK 6.6.0.0 with Tools 19.0.07), override it in `core/build-android-jni-lib.sh`:
-
-```bash
-HEXAGON_TOOLS_PATH=/opt/qcom/Hexagon_SDK/6.6.0.0/tools/HEXAGON_Tools/19.0.07
-```
-
-or pass via CMake directly:
-
-```bash
-cmake ... -DHEXAGON_TOOLS_PATH=/path/to/Hexagon_Tools
-```
-
 #### Runtime configuration
 
-the `scripts/ggml-hexagon.cfg` file controls JZ's ggml-hexagon runtime behavior (cDSP thread count, cache mode, op fusion, flash attention kernel selection, etc.). key settings:
+the `ggml-hexagon.cfg` file controls JZ's ggml-hexagon runtime behavior (cDSP thread count, cache mode, op fusion, flash attention kernel selection, etc.). key settings:
 
 - `ndev`: number of Hexagon devices (PDs) to use
 - `thread_counts`: cDSP-side thread count (2-8)
@@ -113,7 +81,7 @@ the `scripts/ggml-hexagon.cfg` file controls JZ's ggml-hexagon runtime behavior 
 - `dsp_cache_mode`: DSP-side cache optimization bitmask (default 5)
 - `enabled_types`: weight types to offload for MUL_MAT
 
-refer to `scripts/ggml-hexagon.cfg` for full documentation of each option.
+refer to `ggml-hexagon.cfg` for full documentation of each option.
 
 #### Supported HTP arch versions
 
@@ -121,5 +89,5 @@ refer to `scripts/ggml-hexagon.cfg` for full documentation of each option.
 |----------|-----|------------|
 | v73 | Snapdragon 8 Gen2 | yes |
 | v75 | Snapdragon 8 Gen3 | yes |
-| v79 | Snapdragon 8 Elite | yes |
+| v79 | Snapdragon 8 Elite(aka 8 Gen4) | yes |
 | v81 | Snapdragon 8 Elite Gen5 | yes |

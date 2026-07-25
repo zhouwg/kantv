@@ -34,13 +34,12 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 ### Run Android APK on Android phone
 - Android 8.0(2017.08) --- Android 15(2024.10) and higher version with <b>ANY</b> mainstream arm64 mobile SoC.
 - Android smartphone equipped with <b>ANY</b> mainstream <b>high-end</b> mobile SoC is highly <b>recommented</b> for realtime AI-subtitle feature otherwise unexpected behavior would happen.
-- Android smartphone equipped with one of below Qualcomm mobile SoCs(Qualcomm's state-of-the-art high-end mobile SoC <b>Snapdragon 8Gen3 series and Snapdragon 8Elite series</b> are highly recommended) <b>is required</b> for verify/running ggml-hexagon backend on Android phone:
+- Android smartphone equipped with one of below Qualcomm mobile SoCs is required for verify/running ggml-hexagon backend on Android phone:
 ```
-    Snapdragon 8 Gen 1
-    Snapdragon 8 Gen 1+
     Snapdragon 8 Gen 2
     Snapdragon 8 Gen 3
-    Snapdragon 8 Elite
+    Snapdragon 8 Elite(aka 8 Gen 4)
+    Snapdragon 8 Elite Gen 5(aka 8 Gen 5)
 ```
 
 
@@ -105,7 +104,7 @@ a screenshot to demostrate download LLM model in APK.
 
 Report issue in Android phone equipped with <b>mainstream</b> mobile SoC or submit PR to this project is greatly welcomed.
 
-We use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
+I use [GitHub issues](https://github.com/zhouwg/kantv/issues) for tracking feature requests and issue reports, please see [how to submit issue in this project ](https://github.com/zhouwg/kantv/issues/1).
 
 <!--
 comment out this section because some contributors in the upstream project might-be don't want to be appeared here
