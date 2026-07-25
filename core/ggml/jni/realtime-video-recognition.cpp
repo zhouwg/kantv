@@ -75,6 +75,9 @@ public:
     }
 
     void init() {
+        // DEBUG: model loading disabled — preview only
+        LOGGD("init: model loading disabled (preview-only mode)");
+#if 0
         if (!initialized) {
             LOGGD("init model");
             bool result = model_init("/sdcard/SmolVLM2-256M-Video-Instruct-f16.gguf",
@@ -82,16 +85,21 @@ public:
             if (result)
                 initialized = true;
         }
+#endif
     }
 
     //TODO:for further usage: select different multimodal model in UI
     void init(const char * llm_model_name, const char * mmproj_model_name) {
+        // DEBUG: model loading disabled — preview only
+        LOGGD("init: model loading disabled (preview-only mode)");
+#if 0
         if (!initialized) {
             LOGGD("init model");
             bool result = model_init(llm_model_name, mmproj_model_name);
             if (result)
                 initialized = true;
         }
+#endif
     }
 
     void camera_init();
@@ -318,6 +326,11 @@ void multimodal_inference::camera_set_outputwindow(ANativeWindow * win) {
 }
 
 void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
+    // DEBUG: inference disabled — preview only
+    (void)rgb;
+    LOGGD("mtmd_inference: disabled (preview-only mode)");
+    return;
+#if 0
     llm_inference_interrupted = 0;
     //load image from memory
     mtmd_bitmap * bitmap = mtmd_bitmap_init(rgb.cols, rgb.rows, rgb.data);
@@ -422,10 +435,13 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
         llama_perf_context_print(lctx);
     }
     LOGGD("return");
+#endif
 }
 
 void multimodal_inference::finalize() {
     LOGGD("finalize");
+    // DEBUG: model cleanup disabled — preview only
+#if 0
     if (initialized) {
         if (nullptr != smpl)
             common_sampler_free(smpl);
@@ -441,6 +457,8 @@ void multimodal_inference::finalize() {
     } else {
         LOGGD("already finalize");
     }
+#endif
+    camera_finalize();
 }
 
 void multimodal_inference::do_inference(cv::Mat & rgb) {

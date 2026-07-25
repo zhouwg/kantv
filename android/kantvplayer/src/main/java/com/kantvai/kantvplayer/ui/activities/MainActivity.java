@@ -232,7 +232,7 @@ package com.kantvai.kantvplayer.ui.activities;
                 case R.id.navigation_aiagent:
                     //setTitle("Realtime Inference");
                     //switchFragment(AIAgentFragment.class);
-                    setTitle("LLM Inference");
+                    setTitle("Realtime Video Inference");
                     switchFragment(LLMResearchFragment.class);
                     //menuNetItem.setVisible(false);
                     //showAIAgentMenu();
