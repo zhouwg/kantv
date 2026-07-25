@@ -369,7 +369,6 @@ public class IApplication extends Application {
         KANTVUtils.setTVRecording(false);
 
         int asrMode = mSettings.getASRMode();  //default is normal transcription
-        int asrThreadCounts = mSettings.getASRThreadCounts(); //default is 4
         KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
         KANTVLog.j(TAG, "ASR model name: " + KANTVAIUtils.getASRModelString(mSettings.getASRModel()));
         String modelPath = KANTVUtils.getDataPath(mContext) + "ggml-" + KANTVAIUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
@@ -386,11 +385,11 @@ public class IApplication extends Application {
             KANTVLog.j(TAG, "asr mode: " + mSettings.getASRMode());
             KANTVLog.g(TAG, "asr mode string: " + KANTVAIUtils.getASRModeString(mSettings.getASRMode()));
             if ((KANTVAIUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_NORMAL);
             } else {
-                result = ggmljava.asr_init(modelPath, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_PRESURETEST);
             }
-            KANTVUtils.setASRConfig("whispercpp", modelPath, asrThreadCounts + 1, asrMode);
+            KANTVUtils.setASRConfig("whispercpp", modelPath, asrMode);
             KANTVUtils.setTVASR(false);
             if (0 == result) {
                 KANTVAIUtils.setASRSubsystemInit(true);

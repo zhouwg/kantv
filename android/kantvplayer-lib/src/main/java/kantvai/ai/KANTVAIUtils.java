@@ -54,8 +54,6 @@ import kantvai.media.player.KANTVLog;
      //
      //keep sync with ggml_jni_bench_type in ggml-jni.h & ncnn_jni_bench_type in ncnn-jni.h
      public enum bench_type {
-         GGML_BENCHMARK_MEMCPY,                    //memcpy  benchmark
-         GGML_BENCHMARK_MULMAT,                    //mulmat  benchmark
          GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
          GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML

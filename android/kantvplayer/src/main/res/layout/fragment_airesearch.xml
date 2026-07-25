@@ -54,18 +54,6 @@
                 android:layout_height="wrap_content"
                 android:dropDownSelector="#63D81B60"
                 android:spinnerMode="dropdown" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Threads" />
-
-            <Spinner
-                android:id="@+id/spinnerThreadCounts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dropDownSelector="#63D81B60"
-                android:spinnerMode="dropdown" />
         </LinearLayout>
 
 

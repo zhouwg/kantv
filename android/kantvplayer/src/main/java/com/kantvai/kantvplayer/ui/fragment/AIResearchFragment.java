@@ -100,7 +100,12 @@
      private static final int SELECT_IMAGE = 1;
      private static final int SELECT_AUDIO = 2;
 
-     private int nThreadCounts = 1;
+     // Thread count is no longer configurable from UI. It's fixed to 6 to match
+    // the DSP-side worker thread count (max_hw_threads - 2 on 8Elite). The value
+    // is also read from ggml-hexagon's config file (default: 6) on the DSP side.
+    // Mismatch between CPU-side and DSP-side thread counts causes inference
+    // corruption (garbled output) due to timing races.
+    private final int nThreadCounts = 6;
      private int nBenchmarkIndex = KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal();
      private int nPreviousBenchmakrIndex = 0;
      private String strModeName = "tiny.en-q8_0";
@@ -108,8 +113,7 @@
      private boolean bASROK = true;
 
      //backend is decided at build time (android_qcom vs android_non_qcom), no runtime selection
-     private int backendIndex = ggmljava.HEXAGON_BACKEND_CDSP;
-     private int accelIndex = ggmljava.HEXAGON_BACKEND_CDSP;
+     // backendIndex and accelIndex removed: backend is decided at build time (GGML_USE_HEXAGON)
 
      //mapping: UI spinner position → bench_type ordinal
      //arrays.xml benchType: [ASR, LLM]
@@ -272,24 +276,8 @@
         });
         spinnerBenchType.setSelection(0); // ASR
 
-         Spinner spinnerThreadsCounts = mActivity.findViewById(R.id.spinnerThreadCounts);
-         String[] arrayThreadCounts = getResources().getStringArray(R.array.threadCounts);
-         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mActivity, android.R.layout.simple_spinner_dropdown_item, arrayThreadCounts);
-         spinnerThreadsCounts.setAdapter(adapter);
-         spinnerThreadsCounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-             @Override
-             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                 KANTVLog.j(TAG, "thread counts:" + arrayThreadCounts[position]);
-                 nThreadCounts = Integer.valueOf(arrayThreadCounts[position]);
-             }
-
-             @Override
-             public void onNothingSelected(AdapterView<?> parent) {
-
-             }
-         });
-         spinnerThreadsCounts.setSelection(2); // 4 threads (index 2 in [6,5,4,3,2,1])
-
+         // Thread count spinner removed: nThreadCounts is fixed to 6 to match
+         // the DSP-side worker thread count. See comment at nThreadCounts declaration.
          //backend spinner removed: backend is decided at build time (android_qcom vs android_non_qcom)
 
          btnSelectImage.setOnClickListener(v -> {
@@ -344,21 +332,15 @@
                  setTextGGMLInfo(selectModeFileName);
                  KANTVLog.g(TAG, "selectModeFileName:" + selectModeFileName);
 
-                 if ((KANTVAIUtils.bench_type.GGML_BENCHMARK_MEMCPY.ordinal() == nBenchmarkIndex)
-                         || (KANTVAIUtils.bench_type.GGML_BENCHMARK_MULMAT.ordinal() == nBenchmarkIndex)) {
-                     //reset to ASR model name
-                     setTextGGMLInfo(AIModelMgr.getKANTVAIModelFromIndex(0).getName());
-                 } else {
-                     if (isASRModel && (nBenchmarkIndex != KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                         KANTVLog.j(TAG, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         return;
-                     }
-                     if ((!isASRModel) && (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
-                         KANTVLog.j(TAG, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         KANTVUtils.showMsgBox(mActivity, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
-                         return;
-                     }
+                 if (isASRModel && (nBenchmarkIndex != KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                     KANTVLog.j(TAG, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "1-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     return;
+                 }
+                 if ((!isASRModel) && (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal())) {
+                     KANTVLog.j(TAG, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     KANTVUtils.showMsgBox(mActivity, "2-mismatch between model file:" + selectModeFileName + " and bench type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex));
+                     return;
                  }
 
                  //FIXME: refine logic here
@@ -471,7 +453,7 @@
              ggmlModelFileName = selectModelFilePath;
              KANTVLog.j(TAG, "model file:" + ggmlModelFileName);
              if (isASRModel) { //avoid crash
-                 int result = ggmljava.asr_reset(selectModelFilePath, ggmljava.get_cpu_core_counts() / 2, KANTVAIUtils.ASR_MODE_BECHMARK, backendIndex);
+                 int result = ggmljava.asr_reset(selectModelFilePath, KANTVAIUtils.ASR_MODE_BECHMARK);
                  if (0 != result) {
                      KANTVLog.j(TAG, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
                      KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
@@ -516,16 +498,14 @@
                                          KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
                                          pathSelectedMedia,
                                          strUserInput,
-                                         1,
-                                         nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                                         1);
                              } else if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
                                  strBenchmarkInfo = ggmljava.mtmd_inference(
                                          KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
                                          KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
                                          pathSelectedMedia,
                                          strUserInput,
-                                         2,
-                                         nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                                         2);
                              } else {
                                  endTime = System.currentTimeMillis();
                                  duration = (endTime - beginTime);
@@ -538,30 +518,26 @@
                              strBenchmarkInfo = ggmljava.llm_inference(
                                      KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
                                      strUserInput,
-                                     1,
-                                     nThreadCounts, backendIndex, ggmljava.HWACCEL_CDSP);
+                                     1);
                          }
                      } else if (isMNISTModel) {
                          //MNIST inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
                                  ggmlModelFileName,
                                  KANTVUtils.getDataPath() + ggmlMNISTImageFile,
-                                 nBenchmarkIndex,
-                                nThreadCounts, backendIndex, accelIndex);
+                                 nBenchmarkIndex);
                     } else if (isTTSModel) {
                          //TTS inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
                                  ggmlModelFileName,
                                  "this is an audio generated by bark.cpp"/*strUserInput*/,
-                                 nBenchmarkIndex,
-                                 nThreadCounts, backendIndex, accelIndex);
+                                 nBenchmarkIndex);
                      } else {
                          //ASR inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
                                  ggmlModelFileName,
                                  KANTVUtils.getDataPath() + ggmlSampleFileName,
-                                 nBenchmarkIndex,
-                                 nThreadCounts, backendIndex, accelIndex);
+                                 nBenchmarkIndex);
                      }
 
                      endTime = System.currentTimeMillis();
@@ -1049,13 +1025,11 @@
      }
 
      private String getBenchmarkTip() {
-         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
-         endTime = System.currentTimeMillis();
-         duration = (endTime - beginTime);
-         String benchmarkTip = "\nBench:" + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
-                 + " ,threads: " + nThreadCounts
-                 + " ,backend: " + backendDesc
-                 + " ) cost " + duration + " milliseconds";
+        endTime = System.currentTimeMillis();
+        duration = (endTime - beginTime);
+        String benchmarkTip = "\nBench:" + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
+                + " ,threads: " + nThreadCounts
+                + " ) cost " + duration + " milliseconds";
          //04-07-2024(April,7,2024), add timestamp
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");
@@ -1073,12 +1047,10 @@
          if (strBenchmarkInfo.startsWith("unknown")) {
              return;
          }
-         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
          /*
-         String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
-                 + " ,threads: " + nThreadCounts
-                 + " ,backend: " + backendDesc
-                 + " ) cost " + duration + " milliseconds";
+        String benchmarkTip = "\nBench:" + KANTVUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
+                + " ,threads: " + nThreadCounts
+                + " ) cost " + duration + " milliseconds";
          //04-07-2024(April,7,2024), add timestamp
          String timestamp = "";
          SimpleDateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd,HH:mm:ss");

@@ -110,16 +110,14 @@
              KANTVLog.j(TAG, "key : " + key);
              if (
                  (key.contains("pref.asrmode"))
-                 || (key.contains("pref.asrthreadcounts"))
                  || (key.contains("pref.asrmodel"))
              ) {
                  KANTVLog.j(TAG, "asrmode: " + mSettings.getASRMode());
-                 KANTVLog.j(TAG, "asrthreadCounts " + mSettings.getASRThreadCounts());
                  KANTVLog.j(TAG, "ASR model: " + mSettings.getASRModel());
                  KANTVLog.j(TAG, "ASR model name: " + KANTVAIUtils.getASRModelString(mSettings.getASRModel()));
                  String modelPath = KANTVUtils.getDataPath() + "ggml-" + KANTVAIUtils.getASRModelString(mSettings.getASRModel()) + ".bin";
                  KANTVLog.j(TAG, "modelPath:" + modelPath);
-                 KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRThreadCounts(), mSettings.getASRMode());
+                 KANTVUtils.setASRConfig("whispercpp", modelPath, mSettings.getASRMode());
              }
          }
      };

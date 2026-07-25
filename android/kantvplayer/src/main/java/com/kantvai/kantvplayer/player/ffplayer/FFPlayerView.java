@@ -1572,9 +1572,9 @@ public class FFPlayerView extends FrameLayout implements PlayerViewListener {
             int result = 0;
             KANTVLog.j(TAG, "asr mode string: " + KANTVAIUtils.getASRModeString(mSettings.getASRMode()));
             if ((KANTVAIUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_NORMAL, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, KANTVAIUtils.ASR_MODE_NORMAL);
             } else {
-                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, mSettings.getASRThreadCounts(), KANTVAIUtils.ASR_MODE_PRESURETEST, ggmljava.HEXAGON_BACKEND_GGML);
+                result = ggmljava.asr_reset(KANTVUtils.getDataPath(mAppContext) + ggmlModelFileName, KANTVAIUtils.ASR_MODE_PRESURETEST);
             }
             if (0 == result) {
                 ggmljava.asr_start();

@@ -207,7 +207,6 @@ public class KANTVAIModelMgr {
              return;
          }
 
-         boolean isStableDiffusionHexagonEnabled = ggmljava.isStableDiffusionHexagonEnabled();
          boolean isGGMLHexagonEnabled = ggmljava.isGGMLHexagonEnabled();
          KANTVLog.g(TAG, "isGGMLHexagonEnabled: " + isGGMLHexagonEnabled);
 
@@ -235,13 +234,6 @@ public class KANTVAIModelMgr {
                  hf_endpoint + "ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true"
          );
 
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true"
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-14B", "Qwen3-14B-Q4_K_M.gguf",
-                 hf_endpoint + "Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true"
-         );
 
          //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
@@ -249,39 +241,9 @@ public class KANTVAIModelMgr {
                  hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
          );
 
-         //LLM + MTMD-image
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf",
-                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
-         );
-
-         //LLM (text-only, verified with JZ's ggml-hexagon on Snapdragon 8Elite)
+         //LLM (text-only)
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma-4-E2B", "gemma-4-E2B-it-Q4_0.gguf",
                  hf_endpoint + "unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf?download=true"
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "Llama-3.1-Nemotron-Nano-4B",
-                 "Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf",
-                 hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true"
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "Phi-4-mini-reasoning",
-                 "Phi-4-mini-reasoning-Q4_0.gguf",
-                 hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true"
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "DeepSeek-R1-0528-Qwen3-8B",
-                 "DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf?download=true"
-         );
-
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
-                 "MiMo-VL-7B-RL",
-                 "MiMo-VL-7B-RL-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/MiMo-VL-7B-RL-q4_k_m.gguf?download=true"
          );
 
          //MTMD-image(for realtime-video-inference)
@@ -306,12 +268,8 @@ public class KANTVAIModelMgr {
              arrayModelName[i] = AIModels[i].getNickname();
          }
 
-         if (getKANTVAIModelFromName("Gemma3-4B") != null) {
-             setDefaultModelIndex(getKANTVAIModelFromName("Gemma3-4B").getIndex() - NON_LLM_MODEL_COUNTS);
+         if (getKANTVAIModelFromName("Gemma-4-E2B") != null) {
+             setDefaultModelIndex(getKANTVAIModelFromName("Gemma-4-E2B").getIndex() - NON_LLM_MODEL_COUNTS);
          }
-
-         //UT for download the default LLM model in APK
-         //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setUrl("http://192.168.0.200/gemma-3-4b-it-Q8_0.gguf"); //download url of the LLM main model
-         //AIModels[defaultLLMModelIndex + NON_LLM_MODEL_COUNTS].setMMprojUrl("http://192.168.0.200/mmproj-gemma3-4b-f16.gguf");//download url of the LLM mmproj model
      }
  }

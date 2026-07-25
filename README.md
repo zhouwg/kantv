@@ -13,15 +13,13 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - AI subtitle(real-time English subtitle for English online-TV(aka OTT TV) via the great & excellent & amazing<a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
-- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers whom focus on highly-value on-device AI R&D activity on Android. some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/Text2Image/LLM on Android) could be done via this project easily.
+- Well-maintained <b>turn-key / self-contained</b> workbench for AI experts/researchers whom focus on highly-value on-device AI R&D activity on Android. some on-device AI R&D activities (AI algorithm validation and AI model validation and performance benchmark with ASR/LLM/MTMD(multimodal) on Android) could be done via this project easily.
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma3-12B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/) , [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Alibaba's Qwen3-8B](https://huggingface.co/Qwen/Qwen3-8B), [Nvidia's Llama-3.1-Nemotron-Nano-4B](https://huggingface.co/lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF), [Microsoft's Phi-4-mini-reasoning](https://huggingface.co/unsloth/Phi-4-mini-reasoning-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimoda text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF), [DeepSeek's DeepSeek-R1-0528-Qwen3-8B](https://huggingface.co/deepseek-ai/DeepSeek-R1-0528-Qwen3-8B), [Xiaomi's MiMo-VL-7B](https://huggingface.co/XiaomiMiMo/MiMo-VL-7B-RL) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloadded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java#L284](https://github.com/kantv-ai/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java#L284).
+- Built-in [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimodal text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloaded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java](https://github.com/kantv-ai/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java).
 
-- Text2Image on Android phone via the amazing [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
-
-- The [ggml-hexagon(original name is ggml-qnn)](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon.cpp)  in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone.
+- The [ggml-hexagon](https://github.com/kantv-ai/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
 
 ### Software architecture of KanTV Android
 
@@ -80,11 +78,6 @@ a screenshot to demostrate ASR inference by running the excellent <a href="https
 
 
 ----
-a screenshot to demostrate Text-2-Image inference by running the amazaing <a href="https://github.com/leejet/stable-diffusion.cpp"> stable-diffusion.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC - <b>fully offline, on-divice</b>.
-
-![713992135](https://github.com/user-attachments/assets/fd6de03a-1f26-45b9-8336-078f928a98b6)
-
-----
 a screenshot to demostrate download LLM model in APK.
 
 ![1213951738](https://github.com/user-attachments/assets/5a0a965e-1752-475e-a2c1-63e6f60a9009)
@@ -131,7 +124,7 @@ comment out this section because some contributors in the upstream project might
    <ul>
   <li>
    <a href="https://github.com/ggml-org/ggml">GGML</a>
-   </li>
+  </li>
 
 
   </ul>
@@ -145,12 +138,8 @@ comment out this section because some contributors in the upstream project might
    ASR engine <a href="https://github.com/ggml-org/whisper.cpp">whisper.cpp</a>
   </li>
 
-   <li>
-  LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>
-  </li>
-
   <li>
-   Text2Image engine <a href="https://github.com/leejet/stable-diffusion.cpp">stable-diffusion.cpp</a>
+   LLM engine <a href="https://github.com/ggml-org/llama.cpp">llama.cpp</a>
   </li>
 
   <li>

@@ -96,11 +96,6 @@
          }
 
          KANTVLog.g(TAG, "getHexagonEnabled:" + mSettings.getHexagonEnabled());
-         if (!mSettings.getHexagonEnabled()) {
-             if (findPreference("pref.backend") != null) {
-                 findPreference("pref.backend").setEnabled(false);
-             }
-         }
 
          int value = mSharedPreferences.getInt("pref.temperature", 40); //default temperature is 0.8, 40.0 / 50.0 = 0.8
          float realvalue = (float) (value / 50.0);
@@ -146,13 +141,9 @@
          public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
              KANTVLog.g(TAG, "key : " + key);
              if (
-                     (key.contains("pref.backend"))
-                             || (key.contains("pref.llmthreadcounts"))
-                             || (key.contains("pref.llmmodel"))
+                     (key.contains("pref.llmmodel"))
              ) {
                  try {
-                     KANTVLog.g(TAG, "LLM backend: " + mSettings.getLLMbackend());
-                     KANTVLog.g(TAG, "LLM threadCounts " + mSettings.getLLMThreadCounts());
                      KANTVLog.g(TAG, "LLM model: " + mSettings.getLLMModel());
                      KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
                      String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
