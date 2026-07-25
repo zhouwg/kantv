@@ -8,7 +8,6 @@ import kantvai.media.player.KANTVLog;
 public class KANTVAIModel {
      public enum AIModelType {
          TYPE_ASR,
-         TYPE_TEXT2IMAGE,
          TYPE_LLM,
      };
     private static final String TAG = KANTVAIModel.class.getSimpleName();

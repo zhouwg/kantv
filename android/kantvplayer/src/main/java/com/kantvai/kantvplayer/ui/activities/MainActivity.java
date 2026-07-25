@@ -180,12 +180,8 @@ package com.kantvai.kantvplayer.ui.activities;
         navigationView.setOnNavigationItemSelectedListener(item -> {
             KANTVLog.g(TAG, "System.currentTimeMillis() - switchTime " + (System.currentTimeMillis() - switchTime));
             if (previousMenuItem != null) {
-                //FIXME:workaround to fix potential issue when the time-consuming stablediffusion & MTMD inference is running
+                //FIXME:workaround to fix potential issue when the time-consuming MTMD inference is running
                 if (previousMenuItem.getItemId() == R.id.navigation_asr) {
-                    if (airesearchFragment.isStableDiffusionInference()) {
-                        ToastUtils.showShort("cann't switch when benchmark type is stablediffusion inference");
-                        return false;
-                    }
                     if (airesearchFragment.isMTMDInference()) {
                         ToastUtils.showShort("cann't switch when benchmark type is MTMD(multimodal) inference");
                         return false;

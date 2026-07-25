@@ -13,19 +13,19 @@ public class KANTVAIModelMgr {
 
      private int defaultLLMModelIndex       = 4; //index of the default LLM model, default index is 4 (gemma-3-4b)
      private final int LLM_MODEL_COUNTS     = 8; // default counts of LLM models, might-be not the real counts of all LLM models
-     private int NON_LLM_MODEL_COUNTS = 2; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin + 1 StableDiffusion model sd-v1-4.ckpt
+     private int NON_LLM_MODEL_COUNTS = 1; // counts of non LLM models:1 ASR model ggml-tiny.en-q8_0.bin
 
      private int capacity                   = LLM_MODEL_COUNTS + NON_LLM_MODEL_COUNTS; // default capacity of all AI models
 
 
-     private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
+     private KANTVAIModel[] AIModels;           //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin
      private String[] arrayModelName;           //space/memory ---> time/performance
      private String[] arrayBenchType;
      private static KANTVAIModelMgr instance      = null;
      private static volatile boolean isInitModels = false;
 
      private int modelIndex  = 0;
-     private int modelCounts = 0;              //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin + StableDiffusion model sd-v1-4.ckpt
+     private int modelCounts = 0;              //contains all LLM models + ASR model ggml-tiny.en-q8_0.bin
 
      private KANTVAIModelMgr() {
          AIModels = new KANTVAIModel[capacity];
@@ -221,11 +221,6 @@ public class KANTVAIModelMgr {
          //there are only one Whisper model currently
          AIModels[0].setSample("jfk.wav",
                  hf_endpoint + "datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav");
-
-
-         //there are only one StableDiffusion model currently
-         addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
-                 hf_endpoint + "CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt");
 
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",

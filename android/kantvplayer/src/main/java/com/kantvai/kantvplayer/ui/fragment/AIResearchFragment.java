@@ -128,7 +128,6 @@
      private String strBenchmarkInfo;
      private long nLogCounts = 0;
      private boolean isLLMModel = false;
-     private boolean isSDModel = false;
      private boolean isMNISTModel = false;
      private boolean isTTSModel = false;
      private boolean isASRModel = false;
@@ -153,7 +152,7 @@
 
      private KANTVAIModelMgr AIModelMgr = KANTVAIModelMgr.getInstance();
      private int selectModelIndex = KANTVAIModelMgr.getInstance().getDefaultModelIndex(); //index of the default LLM model
-     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model, StableDiffusion model and LLM model)
+     private int selectedUIIndex  = 0; //index of user's selected model in all models(ASR model and LLM models)
 
      //=============================================================================================
      private String[]        arrayModelName;
@@ -289,7 +288,7 @@
 
              }
          });
-         spinnerThreadsCounts.setSelection(4); // 4 threads
+         spinnerThreadsCounts.setSelection(2); // 4 threads (index 2 in [6,5,4,3,2,1])
 
          //backend spinner removed: backend is decided at build time (android_qcom vs android_non_qcom)
 
@@ -770,14 +769,6 @@
                      if (content.startsWith("llama-timings")) {
                          KANTVLog.j(TAG, "LLM timings");
                          displayInferenceResult(content, true);
-                     } else if (content.startsWith("text2image-timings")) {
-                         KANTVLog.g(TAG, "text2image timings");
-                         try {
-                             displayImage("/sdcard/output.png");
-                         } catch (Exception ex) {
-                             KANTVLog.g(TAG, "error: " + ex.toString());
-                             KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());
-                         }
                      } else {
                          nLogCounts++;
                          if (nLogCounts > 100) {
@@ -860,11 +851,6 @@
 
          resetUIAndStatus(null,true, false);
      }
-
-     public boolean isStableDiffusionInference() {
-        //Text2Image/stablediffusion was removed, always return false
-        return false;
-    }
 
      public boolean isMTMDInference() {
          if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
@@ -1047,18 +1033,12 @@
                  bitmapSelectedImage = null;
                  pathSelectedMedia = null;
              }
-
-             if (isSDModel) {
-                 if ((strBenchmarkInfo != null) && (!strBenchmarkInfo.startsWith("unknown")))
-                    displayImage("/sdcard/output.png");
-             }
          }
 
          if (removeInferenceResult)
              txtInferenceResult.setText("");
 
          isLLMModel = false;
-         isSDModel = false;
          isMNISTModel = false;
          isTTSModel = false;
          isASRModel = false;
