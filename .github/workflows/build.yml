@@ -42,9 +42,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential cmake ninja-build \
-            xz-utils unzip wget curl git libtinfo5 libtinfo-dev
-          # hexagon-clang needs libtinfo.so.5
-          if [ ! -f /lib/x86_64-linux-gnu/libtinfo.so.5 ]; then
+            xz-utils unzip wget curl git libtinfo-dev
+          # hexagon-clang may need libtinfo.so.5 (removed from Ubuntu 24.04)
+          # create symlink from libtinfo.so.6 as fallback
+          if [ ! -f /lib/x86_64-linux-gnu/libtinfo.so.5 ] && [ -f /lib/x86_64-linux-gnu/libtinfo.so.6 ]; then
             sudo ln -sf /lib/x86_64-linux-gnu/libtinfo.so.6 /lib/x86_64-linux-gnu/libtinfo.so.5
           fi
 
