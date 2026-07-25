@@ -60,17 +60,10 @@ public class KANTVAIModelMgr {
          modelIndex++;
      }
 
-     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String url, long size) {
-         KANTVLog.g(TAG,"modelIndex " + modelIndex + " capacity " + capacity);
-         checkCapacity();
-         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, url, size);
-         modelIndex++;
-     }
 
-
-     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl, long modelSize, long mmprojModelSize) {
+     private void addAIModel(KANTVAIModel.AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl) {
          checkCapacity();
-         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, mmprojName, url, mmprojUrl, modelSize, mmprojModelSize);
+         AIModels[modelIndex] = new KANTVAIModel(modelIndex, type, nick, name, mmprojName, url, mmprojUrl);
          modelIndex++;
      }
 
@@ -193,14 +186,6 @@ public class KANTVAIModelMgr {
          defaultLLMModelIndex = index;
      }
 
-     public long getModelSize(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getSize();
-     }
-
-     public long getMMProjmodelSize(int index) {
-         return AIModels[index + NON_LLM_MODEL_COUNTS].getMMprojSize();
-     }
-
      private void initAIModels() {
          String hf_endpoint = "https://huggingface.co/"; //the official default HuggingFace site
          KANTVLog.g(TAG, "init AI Models");
@@ -231,96 +216,84 @@ public class KANTVAIModelMgr {
          arrayBenchType[1] = "LLM";
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_ASR, "tiny.en-q8_0", "ggml-tiny.en-q8_0.bin",
-                 hf_endpoint + "ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin",
-                 43550795 //the built-in and default ASR model, size is 42 MiB
+                 hf_endpoint + "ggerganov/whisper.cpp/resolve/main/ggml-tiny.en-q8_0.bin"
          );
          //there are only one Whisper model currently
-         AIModels[0].setSample("jfk.wav", 43550795,
+         AIModels[0].setSample("jfk.wav",
                  hf_endpoint + "datasets/Xenova/transformers.js-docs/resolve/main/jfk.wav");
 
 
          //there are only one StableDiffusion model currently
          addAIModel(KANTVAIModel.AIModelType.TYPE_TEXT2IMAGE, "sd-v1.4", "sd-v1-4.ckpt",
-                 hf_endpoint + "CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt",
-                 4265380512L); // size of the StableDiffusion model, about 4.0 GiB
+                 hf_endpoint + "CompVis/stable-diffusion-v-1-4-original/resolve/main/sd-v1-4.ckpt");
 
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true",
-                 1120235360L // size of LLM model, in bytes
+                 hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true"
                  );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true",
-                 1997879712L // size of LLM model, in bytes
+                 hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true"
                  );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-4B", "Qwen3-4B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true",
-                 4280404640L // size of LLM model, in bytes
+                 hf_endpoint + "ggml-org/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q8_0.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-8B", "Qwen3-8B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true",
-                 8709518464L  // size of LLM model, in bytes
+                 hf_endpoint + "ggml-org/Qwen3-8B-GGUF/resolve/main/Qwen3-8B-Q8_0.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen3-14B", "Qwen3-14B-Q4_K_M.gguf",
-                 hf_endpoint + "Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true",
-                 9001752960L // size of LLM model, in bytes
+                 hf_endpoint + "Qwen/Qwen3-14B-GGUF/resolve/main/Qwen3-14B-Q4_K_M.gguf?download=true"
          );
 
          //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
                  hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
-                 4130226336L,//size of the main model in bytes, 4.13 GiB
-                 851251104L //size of the mmproj model in bytes, 851 MiB
+                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
          );
 
          //LLM + MTMD-image
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-12B", "gemma-3-12b-it-Q4_K_M.gguf", "mmproj-gemma3-12b-f16.gguf",
                  hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true",
-                 7300574976L,
-                 854200224L
+                 hf_endpoint + "ggml-org/gemma-3-12b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
+         );
+
+         //LLM (text-only, verified with JZ's ggml-hexagon on Snapdragon 8Elite)
+         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma-4-E2B", "gemma-4-E2B-it-Q4_0.gguf",
+                 hf_endpoint + "unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
                  "Llama-3.1-Nemotron-Nano-4B",
                  "Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf",
-                 hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true",
-                 2778285312L // size of LLM model, in bytes
+                 hf_endpoint + "lmstudio-community/Llama-3.1-Nemotron-Nano-4B-v1.1-GGUF/resolve/main/Llama-3.1-Nemotron-Nano-4B-v1.1-Q4_K_M.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
                  "Phi-4-mini-reasoning",
                  "Phi-4-mini-reasoning-Q4_0.gguf",
-                 hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true",
-                 2331443104L // size of LLM model, in bytes
+                 hf_endpoint + "unsloth/Phi-4-mini-reasoning-GGUF/resolve/main/Phi-4-mini-reasoning-Q4_0.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
                  "DeepSeek-R1-0528-Qwen3-8B",
                  "DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf?download=true",
-                 5027782720L // size of LLM model, in bytes
+                 hf_endpoint + "zhouwg/kantv/resolve/main/DeepSeek-R1-0528-Qwen3-8B-q4_k_m.gguf?download=true"
          );
 
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM,
                  "MiMo-VL-7B-RL",
                  "MiMo-VL-7B-RL-q4_k_m.gguf",
-                 hf_endpoint + "zhouwg/kantv/resolve/main/MiMo-VL-7B-RL-q4_k_m.gguf?download=true",
-                 4684340192L // size of LLM model, in bytes
+                 hf_endpoint + "zhouwg/kantv/resolve/main/MiMo-VL-7B-RL-q4_k_m.gguf?download=true"
          );
 
          //MTMD-image(for realtime-video-inference)
          addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
                  "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
                  hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
-                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
-                 327811552L,
-                 190033440L
+                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true"
          );
 
          //MTMD-audio
@@ -328,9 +301,7 @@ public class KANTVAIModelMgr {
                  "Qwen2.5-Omni-3B-Q4_K_M.gguf",
                  "mmproj-Qwen2.5-Omni-3B-Q8_0.gguf",
                  hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/Qwen2.5-Omni-3B-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true",
-                 2104931648L,
-                 1538031328L
+                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true"
          );
 
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models

@@ -24,11 +24,8 @@ public class KANTVAIModel {
 
     private String quality;     //quality of model on Android phone
 
-    private long size;          //size of model, in bytes
-    private long mmproj_size;   //size of mmproj model, in bytes
-
     private String sample_name;
-    private long sample_size;
+    private String sample_url;
 
     private boolean downloadAble;
 
@@ -38,23 +35,13 @@ public class KANTVAIModel {
         this.nickname  = nick;
         this.name  = name;
         this.url   = url;
-        this.downloadAble = false;
+        this.downloadAble = true;
     }
 
-     public KANTVAIModel(int index, AIModelType type, String nick, String name, String url, long size) {
-         this(index, type, nick, name, url);
-         this.size = size;
-         this.downloadAble = true;
-     }
-
-
-     public KANTVAIModel(int index, AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl, long modelSize, long mmprojModelSize) {
+     public KANTVAIModel(int index, AIModelType type, String nick, String name, String mmprojName, String url, String mmprojUrl) {
          this(index, type, nick, name, url);
          this.mmproj_name = mmprojName;
          this.mmproj_url  = mmprojUrl;
-         this.size = modelSize;
-         this.mmproj_size = mmprojModelSize;
-         this.downloadAble = true;
          KANTVLog.j(TAG, "init");
      }
 
@@ -82,16 +69,9 @@ public class KANTVAIModel {
         this.quality = quality;
     }
 
-    public void setSize(long size) { this.size = size; }
-    public long getSize() { return size; }
-
-    public void setMMprojSize(long size) { this.mmproj_size = size; }
-    public long getMMprojSize() { return mmproj_size; }
-
-    public void setSample(String sampleName, long sampleSize, String url) {
+    public void setSample(String sampleName, String url) {
         this.sample_name = sampleName;
-        this.sample_size = sampleSize;
-        this.url = url;
+        this.sample_url = url;
     }
 
     public boolean isDownloadAble() {

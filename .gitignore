@@ -99,4 +99,4 @@ core/ggml/llamacpp.bak.20260724150435/
 core/ggml/llamacpp/ggml/src/ggml-hexagon/htp/ggml_dsp.h
 core/ggml/llamacpp/ggml/src/ggml-hexagon/htp/ggml_dsp_skel.c
 core/ggml/llamacpp/ggml/src/ggml-hexagon/htp/ggml_dsp_stub.c
-log_build_kantv.txt
+log*.txt
