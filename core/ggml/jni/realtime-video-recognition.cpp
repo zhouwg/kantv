@@ -75,9 +75,6 @@ public:
     }
 
     void init() {
-        // DEBUG: model loading disabled — preview only
-        LOGGD("init: model loading disabled (preview-only mode)");
-#if 0
         if (!initialized) {
             LOGGD("init model");
             bool result = model_init("/sdcard/SmolVLM2-256M-Video-Instruct-f16.gguf",
@@ -85,21 +82,16 @@ public:
             if (result)
                 initialized = true;
         }
-#endif
     }
 
     //TODO:for further usage: select different multimodal model in UI
     void init(const char * llm_model_name, const char * mmproj_model_name) {
-        // DEBUG: model loading disabled — preview only
-        LOGGD("init: model loading disabled (preview-only mode)");
-#if 0
         if (!initialized) {
             LOGGD("init model");
             bool result = model_init(llm_model_name, mmproj_model_name);
             if (result)
                 initialized = true;
         }
-#endif
     }
 
     void camera_init();
@@ -217,6 +209,10 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     LOGGD("%s\n", common_params_get_system_info(params).c_str());
     LOGGD("\n");
 
+    // === DEBUG: step-by-step re-enable ===
+    // Currently testing: llama_backend_init() + llama_numa_init()
+    // Next steps are commented out to isolate whether backend init alone breaks camera
+#if 0
     //step-2: load LLM model
     LOGGD("loading model '%s'\n", params.model.path.c_str());
     llama_init = common_init_from_params(params);
@@ -267,6 +263,7 @@ bool multimodal_inference::model_init(const char * llm_model_name,
         params.prompt += " ";
         params.prompt += mtmd_default_marker();
     }
+#endif
 
     return true;
 }
