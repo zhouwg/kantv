@@ -112,8 +112,12 @@
 
      private boolean bASROK = true;
 
-     //backend is decided at build time (android_qcom vs android_non_qcom), no runtime selection
-     // backendIndex and accelIndex removed: backend is decided at build time (GGML_USE_HEXAGON)
+     // Backend type for inference parameter selection:
+     //   HEXAGON_BACKEND_CDSP (3): offload to DSP (-ngl 99, flash attention)
+     //   HEXAGON_BACKEND_GGML (4): CPU only (-ngl 0)
+     // The actual backend implementation is decided at build time (GGML_USE_HEXAGON),
+     // but backendIndex selects inference parameters at runtime.
+     private int backendIndex = ggmljava.HEXAGON_BACKEND_CDSP;
 
      //mapping: UI spinner position → bench_type ordinal
      //arrays.xml benchType: [ASR, LLM]
@@ -195,6 +199,7 @@
          mContext = mActivity.getBaseContext();
          mSettings = new Settings(mContext);
          mSettings.updateUILang((AppCompatActivity) getActivity());
+         backendIndex = mSettings.getLLMbackend();
          Resources res = mActivity.getResources();
 
          txtInferenceResult = mActivity.findViewById(R.id.asrInfo);
@@ -456,7 +461,7 @@
              ggmlModelFileName = selectModelFilePath;
              KANTVLog.j(TAG, "model file:" + ggmlModelFileName);
              if (isASRModel) { //avoid crash
-                 int result = ggmljava.asr_reset(selectModelFilePath, KANTVAIUtils.ASR_MODE_BECHMARK);
+                 int result = ggmljava.asr_reset(selectModelFilePath, KANTVAIUtils.ASR_MODE_BECHMARK, backendIndex);
                  if (0 != result) {
                      KANTVLog.j(TAG, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
                      KANTVUtils.showMsgBox(mActivity, "failed to initialize ASR, pls restart APP before ensure necessary permission has granted to APP and ensure select tiny.en-q8_0 in ASR Setting");
@@ -485,6 +490,11 @@
              public void run() {
                  strBenchmarkInfo = "";
 
+                 // Refresh backendIndex from Settings in case user changed it in LLM Settings
+                 // after initView() was called
+                 backendIndex = mSettings.getLLMbackend();
+                 KANTVLog.g(TAG, "backendIndex: " + backendIndex);
+
                  initKANTVMgr();
 
                  while (isBenchmarking.get()) {
@@ -497,18 +507,20 @@
                              KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedMedia);
                              if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
                                  strBenchmarkInfo = ggmljava.mtmd_inference(
-                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                         pathSelectedMedia,
-                                         strUserInput,
-                                         1);
-                             } else if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
-                                 strBenchmarkInfo = ggmljava.mtmd_inference(
-                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                         KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                         pathSelectedMedia,
-                                         strUserInput,
-                                         2);
+                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                        pathSelectedMedia,
+                                        strUserInput,
+                                        1,
+                                        backendIndex);
+                            } else if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
+                                strBenchmarkInfo = ggmljava.mtmd_inference(
+                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                        pathSelectedMedia,
+                                        strUserInput,
+                                        2,
+                                        backendIndex);
                              } else {
                                  endTime = System.currentTimeMillis();
                                  duration = (endTime - beginTime);
@@ -518,29 +530,33 @@
                              }
                          } else {
                              //general LLM inference
-                             strBenchmarkInfo = ggmljava.llm_inference(
-                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                     strUserInput,
-                                     1);
+                            strBenchmarkInfo = ggmljava.llm_inference(
+                                    KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                    strUserInput,
+                                    1,
+                                    backendIndex);
                          }
                      } else if (isMNISTModel) {
                          //MNIST inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
-                                 ggmlModelFileName,
-                                 KANTVUtils.getDataPath() + ggmlMNISTImageFile,
-                                 nBenchmarkIndex);
+                                ggmlModelFileName,
+                                KANTVUtils.getDataPath() + ggmlMNISTImageFile,
+                                nBenchmarkIndex,
+                                backendIndex);
                     } else if (isTTSModel) {
                          //TTS inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
-                                 ggmlModelFileName,
-                                 "this is an audio generated by bark.cpp"/*strUserInput*/,
-                                 nBenchmarkIndex);
+                                ggmlModelFileName,
+                                "this is an audio generated by bark.cpp"/*strUserInput*/,
+                                nBenchmarkIndex,
+                                backendIndex);
                      } else {
                          //ASR inference
                          strBenchmarkInfo = ggmljava.ggml_bench(
-                                 ggmlModelFileName,
-                                 KANTVUtils.getDataPath() + ggmlSampleFileName,
-                                 nBenchmarkIndex);
+                                ggmlModelFileName,
+                                KANTVUtils.getDataPath() + ggmlSampleFileName,
+                                nBenchmarkIndex,
+                                backendIndex);
                      }
 
                      endTime = System.currentTimeMillis();
@@ -1029,10 +1045,12 @@
      }
 
      private String getBenchmarkTip() {
+         String backendDesc = KANTVAIUtils.getGGMLBackendDesc(backendIndex);
         endTime = System.currentTimeMillis();
         duration = (endTime - beginTime);
         String benchmarkTip = "\nBench:" + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex) + " (model: " + selectModeFileName
                 + " ,threads: " + nThreadCounts
+                + " ,backend: " + backendDesc
                 + " ) cost " + duration + " milliseconds";
          //04-07-2024(April,7,2024), add timestamp
          String timestamp = "";

@@ -215,16 +215,20 @@ void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach) {
  * @param sz_model_path
  * @param sz_user_data
  * @param llm_type
+ * @param n_backend_type   HEXAGON_BACKEND_CDSP: offload all layers to DSP (-ngl 99)
+ *                         HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
  * @return
- * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param.
- * llama_inference_main still takes a backend arg for internal use; pass fixed
- * HEXAGON_BACKEND_GGML to preserve its existing behaviour.
+ * Backend type selects inference parameters at runtime. The actual backend
+ * implementation is decided at build time (GGML_USE_HEXAGON), but -ngl controls
+ * whether layers are offloaded to the DSP (CDSP) or run on CPU (GGML).
  */
-int llama_inference(const char * sz_model_path, const char * sz_user_data, int llm_type) {
+int llama_inference(const char * sz_model_path, const char * sz_user_data, int llm_type,
+                    int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
+    LOGGD("backend type:%d\n", n_backend_type);
 
     if (nullptr == sz_model_path || nullptr == sz_user_data) {
         LOGGD("pls check params\n");
@@ -235,16 +239,46 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
     //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
     //otherwise .c_str() becomes a dangling pointer after the initializer ends
     std::string threads_str = "6";
-    int argc = 10;
-    const char *argv[] = {"llama-inference-main",
-                          "-no-cnv",
-                          "-m", sz_model_path,
-                          "-p", sz_user_data,
-                          "-t", threads_str.c_str(),
-                          "-c", "2048"
-    };
+
+    // Build argv based on backend type:
+    //   CDSP: offload all layers to DSP with flash attention + DSP-optimized params
+    //   GGML: CPU only, no offload
+    std::vector<std::string> args_storage;
+    std::vector<const char *> argv_vec;
+    argv_vec.push_back("llama-inference-main");
+    argv_vec.push_back("-no-cnv");
+    argv_vec.push_back("-m");
+    argv_vec.push_back(sz_model_path);
+    argv_vec.push_back("-p");
+    argv_vec.push_back(sz_user_data);
+    argv_vec.push_back("-t");
+    args_storage.push_back(threads_str);
+    argv_vec.push_back(args_storage.back().c_str());
+
+    if (n_backend_type == HEXAGON_BACKEND_CDSP) {
+        // DSP offload: large context, all layers on DSP, flash attention, poll mode
+        argv_vec.push_back("-c");
+        argv_vec.push_back("8192");
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("99");
+        argv_vec.push_back("-fa");
+        argv_vec.push_back("on");
+        argv_vec.push_back("--ubatch-size");
+        argv_vec.push_back("64");
+        argv_vec.push_back("--poll");
+        argv_vec.push_back("1000");
+        argv_vec.push_back("--no-mmap");
+    } else {
+        // CPU only: small context, no offload
+        argv_vec.push_back("-c");
+        argv_vec.push_back("2048");
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("0");
+    }
+
+    int argc = (int)argv_vec.size();
     llm_init_running_state();
-    ret = llama_inference_main(argc, const_cast<char **>(argv), HEXAGON_BACKEND_GGML);
+    ret = llama_inference_main(argc, const_cast<char **>(argv_vec.data()), n_backend_type);
     llm_reset_running_state();
 
     return ret;
@@ -257,19 +291,22 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
  * @param sz_media_path
  * @param sz_user_data
  * @param llm_type
+ * @param n_backend_type   HEXAGON_BACKEND_CDSP: offload all layers to DSP (-ngl 99)
+ *                         HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
  * @return
- * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param.
- * mtmd_inference_main still takes a backend arg for internal use; pass fixed
- * HEXAGON_BACKEND_GGML to preserve its existing behaviour.
+ * Backend type selects inference parameters at runtime. The actual backend
+ * implementation is decided at build time (GGML_USE_HEXAGON), but -ngl controls
+ * whether layers are offloaded to the DSP (CDSP) or run on CPU (GGML).
  */
 int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path, const char * sz_media_path,
-                   const char * sz_user_data, int llm_type) {
+                   const char * sz_user_data, int llm_type, int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("mmproj path:%s\n", sz_mmproj_model_path);
     LOGGD("media path:%s\n", sz_media_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
+    LOGGD("backend type:%d\n", n_backend_type);
 
     if (nullptr == sz_model_path || nullptr == sz_user_data) {
         LOGGD("pls check params\n");
@@ -296,7 +333,6 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
     //easily and quickly,so we can do everything in native C/C++ layer rather than write a complicated Java wrapper
     //attention: std::to_string returns a temporary std::string, must keep it alive in a local variable
     std::string threads_str = "6";
-    int argc = 11;
     const char * type = "--image";
     switch (llm_type) {
         case 1:
@@ -307,15 +343,41 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
         default:
             break;
     }
-    const char * argv[] = {"mtmd-inference-main",
-                           "-m", sz_model_path,
-                           "--mmproj", sz_mmproj_model_path,
-                           type, sz_media_path,
-                           "-p", sz_user_data,
-                           "-t", threads_str.c_str()
-    };
+
+    // Build argv based on backend type
+    std::vector<std::string> args_storage;
+    std::vector<const char *> argv_vec;
+    argv_vec.push_back("mtmd-inference-main");
+    argv_vec.push_back("-m");
+    argv_vec.push_back(sz_model_path);
+    argv_vec.push_back("--mmproj");
+    argv_vec.push_back(sz_mmproj_model_path);
+    argv_vec.push_back(type);
+    argv_vec.push_back(sz_media_path);
+    argv_vec.push_back("-p");
+    argv_vec.push_back(sz_user_data);
+    argv_vec.push_back("-t");
+    args_storage.push_back(threads_str);
+    argv_vec.push_back(args_storage.back().c_str());
+
+    if (n_backend_type == HEXAGON_BACKEND_CDSP) {
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("99");
+        argv_vec.push_back("-fa");
+        argv_vec.push_back("on");
+        argv_vec.push_back("--ubatch-size");
+        argv_vec.push_back("64");
+        argv_vec.push_back("--poll");
+        argv_vec.push_back("1000");
+        argv_vec.push_back("--no-mmap");
+    } else {
+        argv_vec.push_back("-ngl");
+        argv_vec.push_back("0");
+    }
+
+    int argc = (int)argv_vec.size();
     llm_init_running_state();
-    ret = mtmd_inference_main(argc, const_cast<char **>(argv), HEXAGON_BACKEND_GGML);
+    ret = mtmd_inference_main(argc, const_cast<char **>(argv_vec.data()), n_backend_type);
     llm_reset_running_state();
 
     LOGGD("mtmd_inference return %d", ret);

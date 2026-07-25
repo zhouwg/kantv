@@ -767,11 +767,11 @@ int ggml_jni_get_cpu_core_counts() {
   *
   * @param sz_model_path   /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
   * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
-  * @param n_bench_type    0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
+  * @param n_bench_type    0: ASR(whisper.cpp) 1: LLM(llama.cpp) 2: Text2Image(stablediffusion.cpp)
+  * @param n_backend_type  HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
   * @return
-  * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
 */
-void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type) {
+void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int n_backend_type) {
     int result = 0;
 
     if (NULL == sz_model_path) {
@@ -787,6 +787,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("user data: %s\n", sz_user_data);
     LOGGD("bench type:%d\n", n_bench_type);
+    LOGGD("backend type:%d\n", n_backend_type);
 
     if (GGML_BENCHMARK_ASR == n_bench_type) {
         if (NULL == p_asr_ctx) {
@@ -818,7 +819,7 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
             break;
 
         case GGML_BENCHMARK_LLM:
-            llama_inference(sz_model_path, sz_user_data, n_bench_type);
+            llama_inference(sz_model_path, sz_user_data, n_bench_type, n_backend_type);
             break;
 
         case GGML_BENCHMARK_TEXT2IMAGE:
@@ -1342,18 +1343,17 @@ failure:
   *
   * @param model_path
   * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-  * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
+  * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
   */
-int whisper_asr_init(const char * sz_model_path, int n_asrmode) {
+int whisper_asr_init(const char * sz_model_path, int n_asrmode, int n_backend_type) {
      LOGGV("enter whisper_asr_init\n");
      int result         = 0;
 
      struct whisper_full_params params;
      struct whisper_context_params c_params = whisper_context_default_params();
 
-     //FIXME:hardcoded binary ggml backend path
-     char * backend_lib_path = "/data/data/com.kantvai.kantvplayer/";
-     ggml_backend_load_all_from_path(backend_lib_path);
+     // hexagon backend is statically linked into libkantv-core.so, no need to
+     // load separate .so via ggml_backend_load_all_from_path()
 
      if ((NULL == sz_model_path) || (n_asrmode > 3)) {
          LOGGW("invalid param\n");
@@ -1572,9 +1572,9 @@ void whisper_asr_stop() {
  *
  * @param sz_model_path
  * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
- * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
+ * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
  */
-int whisper_asr_reset(const char * sz_model_path, int n_asrmode) {
+int whisper_asr_reset(const char * sz_model_path, int n_asrmode, int n_backend_type) {
     int result = 0;
 
     LOGGD("enter asr reset\n");

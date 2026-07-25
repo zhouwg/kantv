@@ -465,7 +465,14 @@ function(ggml_hexagon_build_kernel KNAME)
 
     if (GGML_HEXAGON_JZ)
         # JZ path: use htp/Makefile with HEXAGON_TOOLS_PATH
-        # regenerate IDL stubs before build (in case ggml_dsp.idl changed)
+        # Build ALL supported HTP arch versions (v73, v75, v79, v81) so the APK
+        # can run on any Qualcomm SoC. Each version is built separately because
+        # the Hexagon compiler flags (-m v73, -m v75, etc.) differ per arch.
+        # The resulting .so files are copied to assets/models/ with versioned names
+        # (libggmldsp-skel-v75.so, etc.) so IApplication.java can extract them to
+        # the app's data directory at runtime.
+
+        # Regenerate IDL stubs once (shared across all arch versions)
         add_custom_command(
                 TARGET ${PROJECT_NAME}
                 POST_BUILD
@@ -475,21 +482,29 @@ function(ggml_hexagon_build_kernel KNAME)
                     -I${HEXAGON_SDK_PATH}/incs/stddef
                     -I${HEXAGON_SDK_PATH}/ipc/fastrpc/incs
                     ${HTP_SKEL_DIR}/ggml_dsp.idl
-                COMMAND make -C ${HTP_SKEL_DIR} clean
-                COMMAND make -C ${HTP_SKEL_DIR}
-                    HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH}
-                    HEXAGON_TOOLS_PATH=${HEXAGON_TOOLS_PATH}
-                    HTP_ARCH_VERSION=${HTP_ARCH_VERSION}
-                    DEBUG_FLAG=${DEBUG_FLAG}
                 COMMAND ${CMAKE_COMMAND} -E make_directory ${ASSETS_DIR}
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    ${HTP_SKEL_DIR}/libggmldsp-skel.so ${ASSETS_DIR}/
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    ${HTP_SKEL_DIR}/libggmldsp-skel.so
-                    ${ASSETS_DIR}/libggmldsp-skel-${HTP_ARCH_VERSION}.so
-                COMMAND echo "current working path:`pwd`\n"
-                COMMENT "build JZ hexagon DSP skel (${HTP_ARCH_VERSION})"
+                COMMENT "regenerate IDL stubs for hexagon DSP skel"
         )
+
+        # Build each HTP arch version and copy to assets with versioned name
+        set(HTP_ARCH_VERSIONS v73 v75 v79 v81)
+        foreach(HTP_VER ${HTP_ARCH_VERSIONS})
+            add_custom_command(
+                    TARGET ${PROJECT_NAME}
+                    POST_BUILD
+                    COMMAND make -C ${HTP_SKEL_DIR} clean
+                    COMMAND make -C ${HTP_SKEL_DIR}
+                        HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH}
+                        HEXAGON_TOOLS_PATH=${HEXAGON_TOOLS_PATH}
+                        HTP_ARCH_VERSION=${HTP_VER}
+                        DEBUG_FLAG=${DEBUG_FLAG}
+                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        ${HTP_SKEL_DIR}/libggmldsp-skel.so
+                        ${ASSETS_DIR}/libggmldsp-skel-${HTP_VER}.so
+                    COMMENT "build JZ hexagon DSP skel (${HTP_VER})"
+            )
+            message(STATUS "ggml_hexagon: will build DSP skel for ${HTP_VER}")
+        endforeach()
     else()
         # Qualcomm path: use kernels/Makefile (legacy)
         add_custom_command(

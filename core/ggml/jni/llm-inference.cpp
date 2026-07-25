@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -100,17 +101,30 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         return 1;
     }
 
+    // Timing: measure TTFT breakdown to identify bottleneck
+    auto t_start = std::chrono::high_resolution_clock::now();
+    auto t_prev  = t_start;
+    auto log_timing = [&](const char * tag) {
+        auto t_now = std::chrono::high_resolution_clock::now();
+        auto since_start = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - t_start).count();
+        auto since_prev  = std::chrono::duration_cast<std::chrono::milliseconds>(t_now - t_prev).count();
+        LOGGD("[TTFT timing] %-28s total=%lldms  step=%lldms", tag, (long long)since_start, (long long)since_prev);
+        t_prev = t_now;
+    };
+
     LOGGD("enter llama_inference_main backend_type %d", backend_type);
-#ifdef GGML_USE_HEXAGON
-    //build-time decision: use hexagon CDSP backend
-    LOGGD("using hexagon CDSP backend (compile-time decision)");
-    params.main_gpu = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
-    params.n_gpu_layers = 99;
-#else
-    //build-time decision: use default ggml CPU backend
-    LOGGD("using default ggml CPU backend (compile-time decision)");
-    params.main_gpu = 0;
-#endif
+    //runtime decision based on backend_type:
+    //  HEXAGON_BACKEND_CDSP: offload all layers to DSP
+    //  HEXAGON_BACKEND_GGML: CPU only, no offload
+    if (backend_type == HEXAGON_BACKEND_CDSP) {
+        LOGGD("using hexagon CDSP backend (runtime decision, -ngl 99)");
+        params.main_gpu = 0;
+        params.n_gpu_layers = 99;
+    } else {
+        LOGGD("using default ggml CPU backend (runtime decision, -ngl 0)");
+        params.main_gpu = 0;
+        params.n_gpu_layers = 0;
+    }
     LOGGD("model path %s", params.model.path.c_str());
     if (params.model.path.find("gemma-3") != std::string::npos) {
         LOGGD("gemma-3");
@@ -151,9 +165,24 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     LOG_INF("%s: llama backend init\n", __func__);
-
+    // Diagnostic: print registered backends before init
+    {
+        size_t dev_count = ggml_backend_dev_count();
+        LOGGD("ggml backend dev count: %zu", dev_count);
+        for (size_t i = 0; i < dev_count; i++) {
+            ggml_backend_dev_t dev = ggml_backend_dev_get(i);
+            if (dev) {
+                const char * name = ggml_backend_dev_name(dev);
+                const char * desc = ggml_backend_dev_description(dev);
+                LOGGD("  backend[%zu]: name=%s, desc=%s", i, name ? name : "(null)", desc ? desc : "(null)");
+            }
+        }
+    }
+    // hexagon backend is statically linked into libkantv-core.so, no need to
+    // load separate .so via ggml_backend_load_all_from_path()
     llama_backend_init();
     llama_numa_init(params.numa);
+    log_timing("after llama_backend_init");
 
     llama_model * model = nullptr;
     llama_context * ctx = nullptr;
@@ -171,6 +200,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     model = llama_init->model();
     ctx = llama_init->context();
+    log_timing("after model load (common_init)");
 
     if (model == NULL) {
         LOG_ERR("%s: error: unable to load model\n", __func__);
@@ -219,6 +249,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     llama_attach_threadpool(ctx, threadpool, threadpool_batch);
+    log_timing("after threadpool init");
 
     const int n_ctx_train = llama_model_n_ctx_train(model);
     const int n_ctx = llama_n_ctx(ctx);
@@ -343,6 +374,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         LOG_DBG("prompt: \"%s\"\n", prompt.c_str());
         LOG_DBG("tokens: %s\n", string_from(ctx, embd_inp).c_str());
     }
+    log_timing("after prompt tokenize");
 
     // Should not run without any tokens
     if (!waiting_for_first_input && embd_inp.empty()) {
@@ -716,6 +748,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             const llama_token id = common_sampler_sample(smpl, ctx, -1);
 
             common_sampler_accept(smpl, id, /* accept_grammar= */ true);
+
+            // Log TTFT (time to first token) on the first generated token
+            if (n_generated == 0) {
+                log_timing("first token generated (TTFT)");
+            }
 
             // LOG_DBG("last: %s\n", string_from(ctx, smpl->prev.to_vector()).c_str());
 

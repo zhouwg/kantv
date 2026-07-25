@@ -82,6 +82,7 @@ android-ndk-*
 crash.log
 kantv.jks
 libggmlop-skel*.so
+libggmldsp-skel*.so
 CMakeLists.txt
 
 prebuilts/

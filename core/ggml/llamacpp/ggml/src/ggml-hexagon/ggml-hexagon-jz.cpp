@@ -451,6 +451,41 @@ static struct hexagon_appcfg_t g_hexagon_appcfg = {
         .version                = {"0.99.3"},
 };
 
+// External API: allow JNI layer to override the runtime libpath before hexagon
+// backend registration. This must be called before ggmlhexagon_load_cfg() runs
+// (i.e. before llama_backend_init / asr_init) so that DSP skeleton .so files
+// and ggml-hexagon.cfg are searched in the correct directory.
+//
+// On Android the default "/data/local/tmp/" is only writable via adb push;
+// APK-bundled skeletons are copied to the app data dir at startup, so the
+// JNI layer calls this to redirect the lookup to /data/data/<pkg>/.
+static char g_runtime_libpath_buf[512] = {0};
+
+// Forward declaration: ggmlhexagon_log_always_internal is defined later in this file
+// but ggml_hexagon_set_runtime_libpath (below) uses GGMLHEXAGON_LOG_* macros that
+// depend on it.
+static void ggmlhexagon_log_always_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
+
+void ggml_hexagon_set_runtime_libpath(const char * path) {
+    if (nullptr == path || path[0] == '\0') {
+        return;
+    }
+    // Truncate to buffer size - 1, ensure trailing '/'
+    size_t n = strlen(path);
+    bool has_slash = (n > 0 && path[n - 1] == '/');
+    if (n + (has_slash ? 0 : 1) >= sizeof(g_runtime_libpath_buf)) {
+        GGMLHEXAGON_LOG_ERROR("runtime libpath too long: %s", path);
+        return;
+    }
+    if (has_slash) {
+        snprintf(g_runtime_libpath_buf, sizeof(g_runtime_libpath_buf), "%s", path);
+    } else {
+        snprintf(g_runtime_libpath_buf, sizeof(g_runtime_libpath_buf), "%s/", path);
+    }
+    g_hexagon_appcfg.runtime_libpath = g_runtime_libpath_buf;
+    GGMLHEXAGON_LOG_ALWAYS("runtime libpath set to %s", g_runtime_libpath_buf);
+}
+
 //supported Snapdragon devices with Hexagon DSP
 static struct qcom_socinfo g_hexagon_soc_info_table[] = {
         /* Qualcomm SnapDragon 8 Gen 1 */
@@ -6712,8 +6747,10 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
     static ggml_backend_reg reg;
     static bool initialized = false;
 
+    GGMLHEXAGON_LOG_ALWAYS("enter ggml_backend_hexagon_reg");
     ggmlhexagon_load_cfg();
     if (!ggmlhexagon_check_valid_appcfg()) {
+        GGMLHEXAGON_LOG_ALWAYS("ggmlhexagon_check_valid_appcfg returned false, abort hexagon registration");
         return nullptr;
     }
 
@@ -6721,7 +6758,9 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
         static std::mutex mutex;
         std::lock_guard<std::mutex> lock(mutex);
         if (!initialized) {
+            GGMLHEXAGON_LOG_ALWAYS("calling htpdrv_init");
             int ret = htpdrv_init();
+            GGMLHEXAGON_LOG_ALWAYS("htpdrv_init returned %d (AEE_SUCCESS=%d)", ret, AEE_SUCCESS);
             if (AEE_SUCCESS != ret) {
                 GGMLHEXAGON_LOG_ERROR("htpdrv_init failed with error %d", ret);
                 return nullptr;
@@ -6729,7 +6768,7 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
 
             int ndev = g_hexagon_appcfg.ndev;
             ggml_backend_hexagon_reg_context * ctx = new ggml_backend_hexagon_reg_context;
-            GGMLHEXAGON_LOG_VERBOSE("registering %d Hexagon device(s), ndev=%d", ndev, g_hexagon_appcfg.ndev);
+            GGMLHEXAGON_LOG_ALWAYS("registering %d Hexagon device(s), ndev=%d", ndev, g_hexagon_appcfg.ndev);
 
             for (int i = 0; i < ndev; i++) {
                 if (i >= GGML_HEXAGON_MAX_DEVICES) {

@@ -76,11 +76,11 @@ enum ggml_jni_bench_type {
      *
      * @param sz_model_path     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
      * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
-     * @param n_bench_type      0: memcpy 1: mulmat 2: ASR(whisper.cpp) 3: LLM(llama.cpp) 4: Text2Image(stablediffusion.cpp)
+     * @param n_bench_type      0: ASR(whisper.cpp) 1: LLM(llama.cpp) 2: Text2Image(stablediffusion.cpp)
+     * @param n_backend_type    HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
      * @return
-     * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
     */
-    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type);
+    void         ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n_bench_type, int n_backend_type);
 
     // ggml_jni_bench_memcpy() and ggml_jni_bench_mulmat() removed
 
@@ -95,9 +95,9 @@ enum ggml_jni_bench_type {
     /**
     * @param sz_model_path
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
+    * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
     */
-    int          whisper_asr_init(const char * sz_model_path, int n_asrmode);
+    int          whisper_asr_init(const char * sz_model_path, int n_asrmode, int n_backend_type);
     void         whisper_asr_finalize(void);
 
     void         whisper_asr_start(void);
@@ -105,9 +105,9 @@ enum ggml_jni_bench_type {
     /**
     * @param sz_model_path
     * @param n_asrmode            0: normal transcription  1: asr pressure test 2:benchmark 3: transcription + audio record
-    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
+    * @param n_backend_type       HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
     */
-    int          whisper_asr_reset(const char * sz_model_path, int n_asrmode);
+    int          whisper_asr_reset(const char * sz_model_path, int n_asrmode, int n_backend_type);
 
 
 // =================================================================================================
@@ -118,10 +118,11 @@ enum ggml_jni_bench_type {
     * @param model_path         /sdcard/xxxxxx.gguf
     * @param prompt
     * @param llm_type           not used currently
+    * @param n_backend_type     HEXAGON_BACKEND_CDSP: offload to DSP (-ngl 99)
+    *                           HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
     * @return
-    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
     */
-    int          llama_inference(const char * model_path, const char * prompt, int llm_type);
+    int          llama_inference(const char * model_path, const char * prompt, int llm_type, int n_backend_type);
 
     int          llama_inference_main(int argc, char * argv[], int backend);
 
@@ -153,11 +154,12 @@ enum ggml_jni_bench_type {
     * @param img_path
     * @param prompt
     * @param llm_type           1: MTMD image, 2: MTMD audio
+    * @param n_backend_type     HEXAGON_BACKEND_CDSP: offload to DSP (-ngl 99)
+    *                           HEXAGON_BACKEND_GGML: CPU only (-ngl 0)
     * @return
-    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
     */
     int          mtmd_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
-                                 const char * prompt, int llm_type);
+                                 const char * prompt, int llm_type, int n_backend_type);
     int          mtmd_inference_main(int argc, char * argv[], int backend);
 
     /**

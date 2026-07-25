@@ -35,7 +35,7 @@ Java_kantvai_ai_ggmljava_ggml_1set_1benchmark_1status(JNIEnv * env, jclass clazz
 
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_path,
-                                       jstring user_data, jint bench_type) {
+                                       jstring user_data, jint bench_type, jint n_backend_type) {
     UNUSED(clazz);
 
     const char * sz_model_path = NULL;
@@ -58,6 +58,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("user_data:%s\n", sz_user_data);
     LOGGV("bench type: %d\n", bench_type);
+    LOGGV("backend type: %d\n", n_backend_type);
 
     if (bench_type >= GGML_BENCHMARK_MAX) {
         LOGGW("pls check bench type\n");
@@ -65,9 +66,7 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         goto failure;
     }
 
-    //backend is decided at build time (GGML_USE_HEXAGON), backend_type param is ignored at runtime
-
-    ggml_jni_bench(sz_model_path, sz_user_data, bench_type);
+    ggml_jni_bench(sz_model_path, sz_user_data, bench_type, n_backend_type);
 
     if (GGML_BENCHMARK_ASR == bench_type) { // asr
         //just return "asr_result" even get correct asr result because I'll try to do everything in native layer
@@ -102,7 +101,7 @@ Java_kantvai_ai_ggmljava_get_1cpu_1core_1counts(JNIEnv * env, jclass clazz) {
 
 
 JNIEXPORT jint JNICALL
-Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_path, jint n_asrmode) {
+Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_path, jint n_asrmode, jint n_backend_type) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -117,8 +116,9 @@ Java_kantvai_ai_ggmljava_asr_1init(JNIEnv * env, jclass clazz, jstring model_pat
 
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("asr mode:%d\n", n_asrmode);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    result = whisper_asr_init(sz_model_path, n_asrmode);
+    result = whisper_asr_init(sz_model_path, n_asrmode, n_backend_type);
 
 failure:
     if (NULL != sz_model_path) {
@@ -139,7 +139,7 @@ Java_kantvai_ai_ggmljava_asr_1finalize(JNIEnv * env, jclass clazz) {
 
 JNIEXPORT jint JNICALL
 Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv * env, jclass clazz, jstring str_model_path,
-                                               jint n_asrmode) {
+                                               jint n_asrmode, jint n_backend_type) {
     UNUSED(clazz);
 
     int result  = 0;
@@ -154,8 +154,9 @@ Java_kantvai_ai_ggmljava_asr_1reset(JNIEnv * env, jclass clazz, jstring str_mode
 
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("asr mode:%d\n", n_asrmode);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    result = whisper_asr_reset(sz_model_path, n_asrmode);
+    result = whisper_asr_reset(sz_model_path, n_asrmode, n_backend_type);
 
 failure:
     if (NULL != sz_model_path) {
@@ -198,7 +199,7 @@ Java_kantvai_ai_ggmljava_llm_1get_1systeminfo(JNIEnv * env, jclass clazz) {
 
 JNIEXPORT jstring  JNICALL
 Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring model_path, jstring prompt,
-                                               jint n_llm_type) {
+                                               jint n_llm_type, jint n_backend_type) {
     UNUSED(clazz);
 
     const char * sz_model_path   = NULL;
@@ -221,14 +222,13 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
     LOGGV("model path:%s\n", sz_model_path);
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llm_type);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    //backend is decided at build time (GGML_USE_HEXAGON)
-
-    result = llama_inference(sz_model_path, sz_prompt, n_llm_type);
+    result = llama_inference(sz_model_path, sz_prompt, n_llm_type, n_backend_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("LLM inference failure");
+            GGML_JNI_NOTIFY("LLM inference with backend %d failure", n_backend_type);
         }
     }
 
@@ -264,7 +264,7 @@ void  ggml_jni_notify_c_impl(const char * format,  ...) {
 JNIEXPORT jstring JNICALL
 Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring model_path,
                                           jstring mmproj_model_path, jstring img_path,
-                                          jstring prompt, jint n_llmtype) {
+                                          jstring prompt, jint n_llmtype, jint n_backend_type) {
     const char * sz_model_path   = NULL;
     const char * sz_mmproj_path  = NULL;
     const char * sz_img_path     = NULL;
@@ -301,14 +301,13 @@ Java_kantvai_ai_ggmljava_mtmd_1inference(JNIEnv * env, jclass clazz, jstring mod
     LOGGV("img path:%s\n", sz_img_path);
     LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llmtype);
+    LOGGV("backend type: %d\n", n_backend_type);
 
-    //backend is decided at build time (GGML_USE_HEXAGON)
-
-    result = mtmd_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype);
+    result = mtmd_inference(sz_model_path, sz_mmproj_path, sz_img_path, sz_prompt, n_llmtype, n_backend_type);
     LOGGD("result %d", result);
     if (0 != result) {
         if (result != AI_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("LLAVA inference failure");
+            GGML_JNI_NOTIFY("LLAVA inference with backend %d failure", n_backend_type);
         }
     }
 
@@ -415,6 +414,28 @@ Java_kantvai_ai_ggmljava_isGGMLHexagonEnabled(JNIEnv *env, jclass clazz) {
     return JNI_TRUE;
 #else
     return JNI_FALSE;
+#endif
+}
+
+// Tell the hexagon backend where to find DSP skeleton .so files
+// (libggmldsp-skel-v*.so) and ggml-hexagon.cfg. Must be called before any
+// inference (asr_init / llm_inference) so the path is set prior to backend
+// registration. No-op when hexagon backend is not compiled in.
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_setHexagonRuntimeLibpath(JNIEnv *env, jclass clazz, jstring path) {
+    UNUSED(clazz);
+#ifdef GGML_USE_HEXAGON
+    const char * sz_path = (*env)->GetStringUTFChars(env, path, NULL);
+    if (NULL == sz_path) {
+        LOGGW("setHexagonRuntimeLibpath: failed to get path string\n");
+        return;
+    }
+    LOGGD("setHexagonRuntimeLibpath: %s", sz_path);
+    ggml_hexagon_set_runtime_libpath(sz_path);
+    (*env)->ReleaseStringUTFChars(env, path, sz_path);
+#else
+    UNUSED(env);
+    UNUSED(path);
 #endif
 }
 

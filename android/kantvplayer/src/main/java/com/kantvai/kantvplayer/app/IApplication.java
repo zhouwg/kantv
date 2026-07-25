@@ -224,7 +224,24 @@ public class IApplication extends Application {
         KANTVAssetLoader.copyAssetFile(mContext, "config.json", KANTVAssetLoader.getDataPath(mContext) + "config.json");
 
         KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
-        KANTVAssetLoader.copyAssetFile(mContext, "models/libggmlop-skel.so", KANTVAssetLoader.getDataPath(mContext) + "libggmlop-skel.so");
+
+        // Copy versioned DSP skeleton .so files from APK assets to app data directory.
+        // The build system (CMakeLists.txt ggml_hexagon_build_kernel) builds all 4 HTP arch
+        // versions (v73/v75/v79/v81) and copies them to assets/models/.
+        // ggml-hexagon-jz.cpp looks for libggmldsp-skel-v<v>.so via file:/// URI at runtime,
+        // which resolves to the app's data directory.
+        {
+            String[] skelNames = {
+                "libggmldsp-skel-v73.so",  // Snapdragon 8 Gen 1/2
+                "libggmldsp-skel-v75.so",  // Snapdragon 8 Gen 3
+                "libggmldsp-skel-v79.so",  // Snapdragon 8 Elite(aka 8Gen 4)
+                "libggmldsp-skel-v81.so"   // Snapdragon 8 Gen 5
+            };
+            String dataPath = KANTVAssetLoader.getDataPath(mContext);
+            for (String name : skelNames) {
+                KANTVAssetLoader.copyAssetFile(mContext, "models/" + name, dataPath + name);
+            }
+        }
         //copy asset files to /sdcard/kantv/, this file is needed for ASR benchmark
         KANTVAssetLoader.copyAssetFile(mContext, "models/jfk.wav", KANTVUtils.getDataPath() + "jfk.wav");
         KANTVAssetLoader.copyAssetFile(mContext, "models/jfk.wav", KANTVUtils.getDataPath(mContext) + "jfk.wav");
@@ -381,13 +398,18 @@ public class IApplication extends Application {
         try {
             int result = 0;
             KANTVLibraryLoader.load("ggml-jni");
+            // Tell hexagon backend where DSP skeleton .so files and ggml-hexagon.cfg
+            // live (app data dir, copied from APK assets above). Must be set before
+            // asr_init / llama_backend_init so hexagon backend registration picks up
+            // the correct path. No-op when hexagon backend is disabled at build time.
+            ggmljava.setHexagonRuntimeLibpath(KANTVAssetLoader.getDataPath(mContext));
             KANTVLog.d(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
             KANTVLog.j(TAG, "asr mode: " + mSettings.getASRMode());
             KANTVLog.g(TAG, "asr mode string: " + KANTVAIUtils.getASRModeString(mSettings.getASRMode()));
             if ((KANTVAIUtils.ASR_MODE_NORMAL == mSettings.getASRMode()) || (KANTVAIUtils.ASR_MODE_TRANSCRIPTION_RECORD == mSettings.getASRMode())) {
-                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_NORMAL);
+                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_NORMAL, mSettings.getLLMbackend());
             } else {
-                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_PRESURETEST);
+                result = ggmljava.asr_init(modelPath, KANTVAIUtils.ASR_MODE_PRESURETEST, mSettings.getLLMbackend());
             }
             KANTVUtils.setASRConfig("whispercpp", modelPath, asrMode);
             KANTVUtils.setTVASR(false);

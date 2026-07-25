@@ -487,7 +487,20 @@
     <string name="pref_summary_record_thresholddisksize" translatable="false">click to setting threshold disk size(Mbytes)</string>
 
 
-    <!-- Backend settings removed: decided at build time (GGML_USE_HEXAGON) -->
+    <string name="pref_key_backend">pref.backend</string>
+    <string name="pref_title_backend">Choose Backend</string>
+    <string-array name="pref_entries_backend">
+        <item>Hexagon cDSP</item>
+        <item>Default ggml</item>
+    </string-array>
+    <string-array name="pref_entry_values_backend">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+    <string-array name="pref_entry_summaries_backend">
+        <item>offload all layers to cDSP (-ngl 99, flash attention)</item>
+        <item>CPU only (-ngl 0, no DSP offload)</item>
+    </string-array>
 
     <string name="pref_title_llm">LLM</string>
 

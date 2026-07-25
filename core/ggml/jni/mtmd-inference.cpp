@@ -106,22 +106,25 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     params.sampling.temp = 0.2; // lower temp by default for better quality
     params.cpuparams.n_threads  = thread_counts;
     LOGGD("mtmd_inference_main backend_type %d", backend_type);
-#ifdef GGML_USE_HEXAGON
-    //build-time decision: use hexagon CDSP backend
-    LOGGD("using hexagon CDSP backend (compile-time decision)");
-    params.main_gpu = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
-    params.n_gpu_layers = 99;
-#else
-    //build-time decision: use default ggml CPU backend
-    LOGGD("using default ggml CPU backend (compile-time decision)");
-    params.main_gpu = 0;
-#endif
+    //runtime decision based on backend_type:
+    //  HEXAGON_BACKEND_CDSP: offload all layers to DSP
+    //  HEXAGON_BACKEND_GGML: CPU only, no offload
+    if (backend_type == HEXAGON_BACKEND_CDSP) {
+        LOGGD("using hexagon CDSP backend (runtime decision, -ngl 99)");
+        params.main_gpu = 0;
+        params.n_gpu_layers = 99;
+    } else {
+        LOGGD("using default ggml CPU backend (runtime decision, -ngl 0)");
+        params.main_gpu = 0;
+        params.n_gpu_layers = 0;
+    }
     if (!common_params_parse(argc, const_cast<char **>(argv), params, LLAMA_EXAMPLE_MTMD)) {
         LOGGD("common params parse failure\n");
         return 2;
     }
     common_init();
-
+    // hexagon backend is statically linked into libkantv-core.so, no need to
+    // load separate .so via ggml_backend_load_all_from_path()
     llama_backend_init();
     llama_numa_init(params.numa);
     LOGGD("system info: n_threads = %d, n_threads_batch = %d, total_threads = %d\n",
