@@ -129,14 +129,6 @@ public final class DemoUtil {
         if (httpDataSourceFactory == null) {
             if (USE_CRONET_FOR_NETWORKING) {
                 KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
-                KANTVLog.d(TAG, "USE_CRONET_FOR_NETWORKING");
                 context = context.getApplicationContext();
                 @Nullable
                 CronetEngine cronetEngine =
@@ -151,7 +143,12 @@ public final class DemoUtil {
                 CookieManager cookieManager = new CookieManager();
                 cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ORIGINAL_SERVER);
                 CookieHandler.setDefault(cookieManager);
-                httpDataSourceFactory = new DefaultHttpDataSource.Factory().setUserAgent(USER_AGENT);
+                // Increase timeouts for streaming live TV: the default 8s readTimeout
+                // is too short and causes frequent reconnections on unstable networks.
+                httpDataSourceFactory = new DefaultHttpDataSource.Factory()
+                        .setUserAgent(USER_AGENT)
+                        .setConnectTimeoutMs(15_000)
+                        .setReadTimeoutMs(30_000);
             }
         }
         return httpDataSourceFactory;
