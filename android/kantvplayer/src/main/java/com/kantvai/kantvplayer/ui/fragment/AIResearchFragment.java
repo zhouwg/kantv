@@ -263,7 +263,7 @@
                 if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
                     //hardcode to gemma-3-4b-it-Q8_0.gguf for purpose of validate LLM multimodal more easily on Android phone
                     spinnerModelName.setSelection(AIModelMgr.getDefaultModelIndex() + AIModelMgr.getNonLLMModelCounts());
-                    txtUserInput.setText("introduce the movie Once Upon a Time in America briefly, less then 100 words\n");
+                    txtUserInput.setText("introduce the movie Once Upon a Time in America briefly\n");
                 }
 
                 nPreviousBenchmakrIndex = nBenchmarkIndex;
@@ -350,7 +350,10 @@
                          if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
                              txtUserInput.setText("Pls help transcribe this file:" + pathSelectedMedia);
                          } else {
-                             txtUserInput.setText("What is in the image?");
+                             //only set default prompt if user hasn't entered anything
+                             if (txtUserInput.getText().toString().trim().isEmpty()) {
+                                 txtUserInput.setText("What is in the image?");
+                             }
                          }
                          File mmprModelFile = new File(KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex));
                          if (!mmprModelFile.exists()) {
@@ -1006,8 +1009,9 @@
                  if (pathSelectedMedia != null && !pathSelectedMedia.isEmpty()) {
                      displayImage(pathSelectedMedia);
                  }
-                 bitmapSelectedImage = null;
-                 pathSelectedMedia = null;
+                 //keep pathSelectedMedia and bitmapSelectedImage for potential re-runs
+                 //they will be cleared when user clicks "Select Image", "Select Audio", "Stop"
+                 //or when a non-MTMD model is selected (via the isMTMDModel=false path below)
              }
          }
 

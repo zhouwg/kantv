@@ -34,7 +34,7 @@
                 android:layout_height="90dp"
                 android:background="@drawable/textview_border"
                 android:gravity="top"
-                android:hint="introduce the movie Once Upon a Time in America briefly, less then 100 words" />
+                android:hint="introduce the movie Once Upon a Time in America briefly" />
         </LinearLayout>
 
         <LinearLayout

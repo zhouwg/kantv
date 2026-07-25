@@ -1008,6 +1008,26 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     if (1 == llm_is_running_state()) {
         llm_inference_interrupted = 0;
         common_perf_print(ctx, smpl);
+#if (defined __ANDROID__) || (defined ANDROID)
+        //send PP/TG timing data to Java UI for display
+        {
+            llama_perf_context_data perf_data = llama_perf_context(ctx);
+            char perf_str[512];
+            double pp_ms_per_tok = perf_data.n_p_eval > 0 ? perf_data.t_p_eval_ms / perf_data.n_p_eval : 0.0;
+            double pp_tok_per_s   = perf_data.t_p_eval_ms > 0 ? 1e3 / perf_data.t_p_eval_ms * perf_data.n_p_eval : 0.0;
+            double tg_ms_per_tok = perf_data.n_eval > 0 ? perf_data.t_eval_ms / perf_data.n_eval : 0.0;
+            double tg_tok_per_s   = perf_data.t_eval_ms > 0 ? 1e3 / perf_data.t_eval_ms * perf_data.n_eval : 0.0;
+            snprintf(perf_str, sizeof(perf_str),
+                "llama-timings:\n"
+                "  prompt eval time = %10.2f ms / %5d tokens (%8.2f ms per token, %8.2f tokens per second)\n"
+                "         eval time = %10.2f ms / %5d runs   (%8.2f ms per token, %8.2f tokens per second)\n",
+                perf_data.t_p_eval_ms, perf_data.n_p_eval, pp_ms_per_tok, pp_tok_per_s,
+                perf_data.t_eval_ms,   perf_data.n_eval,   tg_ms_per_tok, tg_tok_per_s
+            );
+            GGML_JNI_NOTIFY("%s", perf_str);
+            LOGGD("%s", perf_str);
+        }
+#endif
     } else {
         llm_inference_interrupted = 1;
     }
