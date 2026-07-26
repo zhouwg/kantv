@@ -72,7 +72,7 @@
                  //03-30-2024 17:15:23.949 25507 25796 D KANTV   : [LogUtils.cpp, logStdoutCallback, 48]:
                  // 6.5ms [ ERROR ] Unable to load model. pal::dynamicloading::dlError():
                  // dlopen failed: library "/sdcard/kantv/libInception_v3.so" needed or dlopened by
-                 // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.kantvai.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libggml-jni.so"
+                 // "/data/app/~~70peMvcNIhRmzhm-PhmfRg==/com.kantvai.kantv-bUwy7gbMeCP0JFLe1J058g==/base.apk!/lib/arm64-v8a/libkantv-ai.so"
                  // is not accessible for the namespace "clns-4"
 
                  KANTVLog.j(TAG, "dst file already exist");

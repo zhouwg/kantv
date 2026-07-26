@@ -20,7 +20,7 @@ package kantvai.ai;
 
 
      static {
-       KANTVLibraryLoader.load("ggml-jni");
+       KANTVLibraryLoader.load("kantv-ai");
     }
 
     public static native int asr_init(String strModelPath, int nASRMode, int nBackendType);

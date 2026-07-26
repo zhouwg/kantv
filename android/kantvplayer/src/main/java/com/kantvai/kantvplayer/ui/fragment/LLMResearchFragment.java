@@ -119,7 +119,7 @@
          initLLMModels();
 
          try {
-             KANTVLibraryLoader.load("ggml-jni");
+             KANTVLibraryLoader.load("kantv-ai");
              KANTVLog.j(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
          } catch (Exception e) {
              KANTVLog.j(TAG, "failed to initialize ggml jni");

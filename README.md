@@ -29,7 +29,7 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
   | [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) | LLM | text + image (realtime-video-recognition) | Huggingface |
   | [Qwen2.5-Omni-3B](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) | LLM | text + audio (MTMD) | Alibaba |
 
-- The [ggml-hexagon](https://github.com/zhouwg/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
+- The [ggml-hexagon](https://github.com/zhouwg/kantv/blob/master/core/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
 
 ### Software architecture of KanTV Android
 
@@ -127,21 +127,12 @@ comment out this section because some contributors in the upstream project might
 
 ### Special Acknowledgement
 
- <ul>AI inference framework
+  <ul>
 
-   <ul>
   <li>
-   <a href="https://github.com/ggml-org/ggml">GGML</a>
+   Inference engine <a href="https://github.com/ggml-org/ggml">GGML</a>
   </li>
 
-
-  </ul>
-
-  </ul>
-
- <ul>AI application engine
-
-  <ul>
   <li>
    ASR engine <a href="https://github.com/ggml-org/whisper.cpp">whisper.cpp</a>
   </li>
@@ -160,4 +151,3 @@ comment out this section because some contributors in the upstream project might
 
   </ul>
 
-  </ul>

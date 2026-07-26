@@ -284,7 +284,7 @@ public class IApplication extends Application {
         //   QNN issue:
         //   can not open QNN library /sdcard/kantv/qnnlib/libQnnSystem.so,
         //   error: dlopen failed: library "/sdcard/kantv/qnnlib/libQnnSystem.so"
-        //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.kantvai.kantvplayer-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
+        //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.kantvai.kantvplayer-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libkantv-ai.so" is not accessible for the namespace "clns-4"
         KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", KANTVUtils.getDataPath(mContext) + "qnnlib");
         KANTVLog.j(TAG, "qnn lib path:" + KANTVUtils.getDataPath(mContext) + "qnnlib");
 
@@ -416,7 +416,7 @@ public class IApplication extends Application {
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         try {
             int result = 0;
-            KANTVLibraryLoader.load("ggml-jni");
+            KANTVLibraryLoader.load("kantv-ai");
             // Tell hexagon backend where DSP skeleton .so files and ggml-hexagon.cfg
             // live (app data dir, copied from APK assets above). Must be set before
             // asr_init / llama_backend_init so hexagon backend registration picks up

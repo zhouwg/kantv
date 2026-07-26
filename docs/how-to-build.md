@@ -62,12 +62,12 @@ build the entire project by Android Studio IDE
 
 #### How to enable/disable JZ's ggml-hexagon backend
 
-the `core/ggml/llamacpp/` directory is synced from the [ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) project (branch `self-build-jz`), which provides a complete JZ alternative AP-side implementation of the ggml-hexagon backend for Qualcomm Snapdragon cDSP (HTP/HMX).
+the `core/llamacpp/` directory is synced from the [ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) project (branch `self-build-jz`), which provides a complete JZ alternative AP-side implementation of the ggml-hexagon backend for Qualcomm Snapdragon cDSP (HTP/HMX).
 
-- JZ implementation (default, `GGML_HEXAGON_JZ=ON`): builds `ggml-hexagon-jz.cpp` + `htp/` DSP skel via Makefile, outputs `libggmldsp-skel.so`
+- JZ implementation (default, `GGML_HEXAGON_JZ=ON`): builds `ggml-hexagon-jz.cpp` + `kernels/` DSP skel via Makefile, outputs `libggmldsp-skel.so`
 - Qualcomm implementation (`GGML_HEXAGON_JZ=OFF`): falls back to the official `ggml-hexagon.cpp` + CMake-based HTP skel build
 
-to switch implementation, modify <a href="https://github.com/zhouwg/kantv/blob/master/core/ggml/CMakeLists.txt#L31">ggml/CMakeLists.txt#L31</a> (`GGML_HEXAGON_JZ` option).
+to switch implementation, modify <a href="https://github.com/zhouwg/kantv/blob/master/core/CMakeLists.txt#L31">core/CMakeLists.txt#L31</a> (`GGML_HEXAGON_JZ` option).
 
 #### Runtime configuration
 

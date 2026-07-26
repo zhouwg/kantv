@@ -50,8 +50,8 @@ export PROJECT_OUT_PATH=${PROJECT_ROOT_PATH}/out
 export FF_PREFIX=${PROJECT_OUT_PATH}/${BUILD_TARGET}/
 #export KANTV_TOOLCHAIN_PATH=/opt/kantv-toolchain
 export KANTV_TOOLCHAIN_PATH=${PROJECT_ROOT_PATH}/prebuilts/toolchain
-export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/core/ggml/whispercpp
-export LOCAL_LLAMACPP_PATH=${PROJECT_ROOT_PATH}/core/ggml/llamacpp
+export LOCAL_WHISPERCPP_PATH=${PROJECT_ROOT_PATH}/core/whispercpp
+export LOCAL_LLAMACPP_PATH=${PROJECT_ROOT_PATH}/core/llamacpp
 
 
 export KANTV_PROJECTS="kantv-android kantv-linux kantv-ios"
