@@ -490,8 +490,8 @@
     <string name="pref_key_backend">pref.backend</string>
     <string name="pref_title_backend">Choose Backend</string>
     <string-array name="pref_entries_backend">
-        <item>Hexagon cDSP</item>
-        <item>Default ggml</item>
+        <item>NPU</item>
+        <item>CPU</item>
     </string-array>
     <string-array name="pref_entry_values_backend">
         <item>0</item>
