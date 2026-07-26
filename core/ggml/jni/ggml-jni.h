@@ -53,7 +53,6 @@ void set_hexagon_cfg(int new_hexagon_backend, int new_hwaccel_approach);
 enum ggml_jni_bench_type {
     GGML_BENCHMARK_ASR = 0,                   //ASR benchmark through whisper.cpp
     GGML_BENCHMARK_LLM,                       //LLM benchmark through llama.cpp
-    GGML_BENCHMARK_TEXT2IMAGE,                //Text2Image benchmark through stablediffusion.cpp
     GGML_BENCHMARK_MAX
 };
 //=============================================================================================
@@ -76,7 +75,7 @@ enum ggml_jni_bench_type {
      *
      * @param sz_model_path     /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
      * @param sz_user_data      ASR: /sdcard/kantv/jfk.wav or LLM: user input from UI
-     * @param n_bench_type      0: ASR(whisper.cpp) 1: LLM(llama.cpp) 2: Text2Image(stablediffusion.cpp)
+     * @param n_bench_type      0: ASR(whisper.cpp) 1: LLM(llama.cpp)
      * @param n_backend_type    HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
      * @return
     */
@@ -141,13 +140,6 @@ enum ggml_jni_bench_type {
     void         realtimemtmd_init_running_state(void);
 
     /**
-    *helper functions to check whether stablediffusion inference is running, these helper functions is useful&necessary for UI in Java layer
-    */
-    void         sd_reset_running_state(void);
-    int          sd_is_running_state(void);
-    void         sd_init_running_state(void);
-
-    /**
     * multi-modal inference
     * @param model_path         /sdcard/xxxxxx.gguf
     * @param mmproj_model_path  /sdcard/mmproj_xxxxxx.gguf
@@ -161,19 +153,6 @@ enum ggml_jni_bench_type {
     int          mtmd_inference(const char * model_path, const char * mmproj_model_path, const char * img_path,
                                  const char * prompt, int llm_type, int n_backend_type);
     int          mtmd_inference_main(int argc, char * argv[], int backend);
-
-    /**
-    * text-2-image inference
-    * @param model_path         /sdcard/xxxxxx.ckpt or /sdcard/safetensors or other name of SD model
-    * @param aux_model_path
-    * @param prompt
-    * @param llm_type           not used currently
-    * @return
-    * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param
-    */
-    int          sd_inference(const char * model_path, const char * aux_model_path,
-                             const char * prompt, int llm_type);
-    int          sd_inference_main(int argc, const char * argv[], int backend);
 
     int          write_bmp(const char * filename, int width, int height, int bpp, const unsigned char * data);
 

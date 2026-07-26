@@ -10,7 +10,6 @@ Project KanTV has used/tried following open-source projects(list in here is inco
      <li><a href="https://github.com/ggerganov/whisper.cpp" target="_blank" rel="noopener">GGML whisper.cpp</a></li>
      <li><a href="https://github.com/ggerganov/llama.cpp" target="_blank" rel="noopener">GGML llama.cpp</a></li>
      <li><a href="https://github.com/PABannier/bark.cpp" target="_blank" rel="noopener">GGML bark.cpp</a></li>
-     <li><a href="https://github.com/leejet/stable-diffusion.cpp" target="_blank" rel="noopener">GGML stablediffusion.cpp</a></li>
      <li><a href="https://github.com/Tencent/ncnn" target="_blank" rel="noopener">Tencent ncnn</a></li>
      <li><a href="https://github.com/nihui/opencv-mobile" target="_blank" rel="noopener">opencv-mobile</a></li>
      <li><a href="https://github.com/k2-fsa/sherpa-ncnn" target="_blank" rel="noopener">sherpa-ncnn</a></li>

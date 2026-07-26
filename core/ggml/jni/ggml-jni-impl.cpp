@@ -759,8 +759,8 @@ int ggml_jni_get_cpu_core_counts() {
 /**
   *
   * @param sz_model_path   /sdcard/kantv/ggml-xxxxxx.bin or  /sdcard/xxxxxx.gguf
-  * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / TEXT2IMAGE: user input / MNIST: image path / TTS: user input
-  * @param n_bench_type    0: ASR(whisper.cpp) 1: LLM(llama.cpp) 2: Text2Image(stablediffusion.cpp)
+  * @param sz_user_data    ASR: /sdcard/kantv/jfk.wav / LLM: user input / MNIST: image path / TTS: user input
+  * @param n_bench_type    0: ASR(whisper.cpp) 1: LLM(llama.cpp)
   * @param n_backend_type  HEXAGON_BACKEND_CDSP or HEXAGON_BACKEND_GGML
   * @return
 */
@@ -807,10 +807,6 @@ void ggml_jni_bench(const char * sz_model_path, const char * sz_user_data, int n
 
         case GGML_BENCHMARK_LLM:
             llama_inference(sz_model_path, sz_user_data, n_bench_type, n_backend_type);
-            break;
-
-        case GGML_BENCHMARK_TEXT2IMAGE:
-            sd_inference(sz_model_path, NULL, sz_user_data, n_bench_type);
             break;
 
         default:

@@ -83,18 +83,6 @@ public:
         return realtimemtmd_inference_is_running.load();
     }
 
-    void sd_init_running_state() {
-        sd_inference_is_running.store(1);
-    }
-
-    void sd_reset_running_state() {
-        sd_inference_is_running.store(0);
-    }
-
-    int sd_is_running_state() {
-        return sd_inference_is_running.load();
-    }
-
 private:
     ggml_jni_context();
 
@@ -111,7 +99,6 @@ private:
 
     std::atomic<uint32_t> llm_inference_is_running;
     std::atomic<uint32_t> realtimemtmd_inference_is_running;
-    std::atomic<uint32_t> sd_inference_is_running;
 
     bool initialized;
 };

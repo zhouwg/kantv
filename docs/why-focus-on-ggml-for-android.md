@@ -13,11 +13,10 @@
 - [all in one source file](https://github.com/ggerganov/ggml/blob/master/src/ggml.c) and similar to [imgui](https://github.com/ocornut/imgui/blob/master/imgui.cpp)(this is just personal opinion and I really like it, this is a NEW coding style and the requirements for programmer is relatively high and very helpful for experienced programmer, this coding style may not be acceptable in large commercial IT companies because it violates some <b>principles of modern software engineering</b>)
 
 
- There are four "killer/heavyweight" open-source AI application engines based on GGML:
+ There are three "killer/heavyweight" open-source AI application engines based on GGML:
 
 - ASR(Automatic Speech Recognition, or Audio2Text)[whisper.cpp](https://github.com/ggerganov/whisper.cpp)
 - LLM [ llama.cpp](https://github.com/ggerganov/llama.cpp)
-- TTI(Text2Image) [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
 - TTS(Text2Speech) [ bark.cpp](https://github.com/PABannier/bark.cpp)
 
 

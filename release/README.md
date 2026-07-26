@@ -318,4 +318,5 @@
                         <li>refine logic of AI model download</li>
                         <li>improve stability</li>
                         <li>refine docs</li>
+                        <li>remove stable-diffusion due to limited resource</li>
                     </ul>

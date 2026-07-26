@@ -71,10 +71,6 @@ package kantvai.ai;
     public static native void    realtimemtmd_reset_running_state();
     public static native boolean realtimemtmd_is_running_state();
 
-    public static native void    sd_init_running_state();
-    public static native void    sd_reset_running_state();
-    public static native boolean sd_is_running_state();
-
 
     /**
      * @param modelPath            /sdcard/xxxxxx.gguf
@@ -87,24 +83,11 @@ package kantvai.ai;
      */
     public static native String mtmd_inference(String modelPath, String mmprojModelPath, String mediaPath, String prompt, int nLLMType, int nBackendType);
 
-    /**
-     * @param modelPath     /sdcard/xxxxxx.ckpt or /sdcard/safetensors or other name of SD model
-     * @param auxModePath
-     * @param prompt        user input from UI
-     * @param nLLMType      not used currently
-     * @return
-     */
-    public static native String stablediffusion_inference(String modelPath, String auxModePath, String prompt, int nLLMType);
-
-    public static native byte[] jni_text2image(String text);
-
     public static native boolean openCamera(int facing);
 
     public static native void closeCamera();
 
     public static native void setOutputWindow(Surface surface);
-
-    public static native boolean isStableDiffusionHexagonEnabled();
 
     public static native boolean isGGMLHexagonEnabled();
 

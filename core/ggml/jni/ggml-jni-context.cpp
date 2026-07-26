@@ -104,22 +104,8 @@ int realtimemtmd_is_running_state() {
 }
 
 /**
-*helper functions to check whether stablediffusion inference is running
+*helper functions to check whether LLM inference is running
 */
-void sd_init_running_state() {
-    LOGGD("here");
-    g_jni_ctx.sd_init_running_state();
-}
-
-void sd_reset_running_state() {
-    LOGGD("here");
-    g_jni_ctx.sd_reset_running_state();
-}
-
-int sd_is_running_state() {
-    return g_jni_ctx.sd_is_running_state();
-}
-
 //helper functions for adjust LLM inference parameters
 void llm_set_temperature(float temperature) {
     g_jni_ctx.set_temperature(temperature);
@@ -381,46 +367,5 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
     llm_reset_running_state();
 
     LOGGD("mtmd_inference return %d", ret);
-    return ret;
-}
-
-/**
- * helper function to perform stable-diffusion inference in native layer
- * @param sz_model_path
- * @param sz_aux_model_path
- * @param sz_user_data
- * @param llm_type
- * @return
- * backend is decided at build time (GGML_USE_HEXAGON), no runtime backend param.
- */
-int sd_inference(const char *sz_model_path, const char *sz_aux_model_path, const char *sz_user_data, int llm_type) {
-    int ret = 0;
-    LOGGD("model path:%s\n", sz_model_path);
-    LOGGD("aux path:%s\n", sz_aux_model_path);
-    LOGGD("user data: %s\n", sz_user_data);
-    LOGGD("llm_type: %d\n", llm_type);
-
-    if (nullptr == sz_model_path) {
-        LOGGD("pls check params\n");
-        return 1;
-    }
-    if (nullptr == sz_user_data) {
-        LOGGD("pls check params\n");
-        return 2;
-    }
-    //this is a lazy/dirty method to integrate stable-diffusion.cpp quickly
-    int argc = 11;
-    const char *argv[] = {"sd-inference-main",
-                          "-m", sz_model_path,
-                          "-p", sz_user_data,
-                          "--width", "512",
-                          "--height", "512",
-                          "-t", "6"
-    };
-    sd_init_running_state();
-    //ret = sd_inference_main(argc, argv, HEXAGON_BACKEND_GGML);
-    ret = 0;
-    sd_reset_running_state();
-    LOGGD("ret %d", ret);
     return ret;
 }

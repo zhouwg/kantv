@@ -73,10 +73,6 @@ Java_kantvai_ai_ggmljava_ggml_1bench(JNIEnv * env, jclass clazz, jstring model_p
         sz_bench_result = "asr_result";
     }
 
-    if (GGML_BENCHMARK_TEXT2IMAGE == bench_type) {
-        sz_bench_result = "text2image_result";
-    }
-
 failure:
     if (NULL != sz_model_path) {
         (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
@@ -333,81 +329,6 @@ failure:
     return string;
 }
 
-JNIEXPORT jstring JNICALL
-Java_kantvai_ai_ggmljava_stablediffusion_1inference(JNIEnv *env, jclass clazz, jstring model_path,
-                                                    jstring aux_model_path, jstring prompt,
-                                                    jint n_llmtype) {
-    const char * sz_model_path   = NULL;
-    const char * sz_auxmodel_path  = NULL;
-    const char * sz_prompt       = NULL;
-    const char * sz_bench_result = "unknown";
-    int result = 0;
-
-    sz_model_path = (*env)->GetStringUTFChars(env, model_path, NULL);
-    if (NULL == sz_model_path) {
-        LOGGW("JNI failure, pls check why?");
-        goto failure;
-    }
-
-    sz_auxmodel_path = (*env)->GetStringUTFChars(env, aux_model_path, NULL);
-    if (NULL == sz_auxmodel_path) {
-        LOGGW("JNI failure, pls check why?");
-        goto failure;
-    }
-
-    sz_prompt = (*env)->GetStringUTFChars(env, prompt, NULL);
-    if (NULL == sz_prompt) {
-        LOGGW("JNI failure, pls check why?");
-        goto failure;
-    }
-
-    LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("aux model path:%s\n", sz_auxmodel_path);
-    LOGGV("prompt:%s\n", sz_prompt);
-    LOGGV("llm type: %d\n", n_llmtype);
-
-    //backend is decided at build time (GGML_USE_HEXAGON), backend_type param is ignored at runtime
-
-    result = sd_inference(sz_model_path, sz_auxmodel_path, sz_prompt, n_llmtype);
-    LOGGD("result %d", result);
-    if (0 != result) {
-        if (result != AI_INFERENCE_INTERRUPTED) {
-            GGML_JNI_NOTIFY("StableDiffusion inference failure");
-        }
-    }
-
-failure:
-    if (NULL != sz_prompt) {
-        (*env)->ReleaseStringUTFChars(env, prompt, sz_prompt);
-    }
-
-    if (NULL != sz_auxmodel_path) {
-        (*env)->ReleaseStringUTFChars(env, aux_model_path, sz_auxmodel_path);
-    }
-
-    if (NULL != sz_model_path) {
-        (*env)->ReleaseStringUTFChars(env, model_path, sz_model_path);
-    }
-
-    jstring string = (*env)->NewStringUTF(env, sz_bench_result);
-
-    return string;
-}
-
-JNIEXPORT jbyteArray JNICALL
-Java_kantvai_ai_ggmljava_jni_1text2image(JNIEnv *env, jclass clazz, jstring text) {
-    // TODO: implement jni_text2image() through StableDiffusion.cpp
-}
-
-JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_isStableDiffusionHexagonEnabled(JNIEnv *env, jclass clazz) {
-#ifdef SD_USE_HEXAGON
-    return JNI_TRUE;
-#else
-    return JNI_FALSE;
-#endif
-}
-
 JNIEXPORT jboolean JNICALL
 Java_kantvai_ai_ggmljava_isGGMLHexagonEnabled(JNIEnv *env, jclass clazz) {
 #ifdef GGML_USE_HEXAGON
@@ -513,21 +434,5 @@ Java_kantvai_ai_ggmljava_realtimemtmd_1reset_1running_1state(JNIEnv *env, jclass
 JNIEXPORT jboolean JNICALL
 Java_kantvai_ai_ggmljava_realtimemtmd_1is_1running_1state(JNIEnv *env, jclass clazz) {
     int result = realtimemtmd_is_running_state();
-    return (0 == result) ? JNI_FALSE : JNI_TRUE;
-}
-
-JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_sd_1init_1running_1state(JNIEnv *env, jclass clazz) {
-    sd_init_running_state();
-}
-
-JNIEXPORT void JNICALL
-Java_kantvai_ai_ggmljava_sd_1reset_1running_1state(JNIEnv *env, jclass clazz) {
-    sd_reset_running_state();
-}
-
-JNIEXPORT jboolean JNICALL
-Java_kantvai_ai_ggmljava_sd_1is_1running_1state(JNIEnv *env, jclass clazz) {
-    int result = sd_is_running_state();
     return (0 == result) ? JNI_FALSE : JNI_TRUE;
 }
