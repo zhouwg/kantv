@@ -890,13 +890,6 @@
              return false;
      }
 
-     private boolean isNCNNInference() {
-         if (nBenchmarkIndex >= KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
-             return true;
-         else
-             return false;
-     }
-
      private void displayImage(String imgPath) {
          if (KANTVAIUtils.isAudioFile(imgPath)) {
              return;
