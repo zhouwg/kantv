@@ -1,6 +1,6 @@
 # KanTV
 
-KanTV ("Kan", which means "watch" in English), an open source project focusing on studying and practicing on-device AI technology in <b>real scenarios</b> (such as performing <b>online-TV playback</b>, <b>realtime transcription</b>, and <b>online-TV recording</b> at the same time) on Android phones:
+KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source project focusing on studying and practicing on-device AI technology in <b>real scenarios</b> (such as performing <b>online-TV playback</b>, <b>realtime transcription</b>, and <b>online-TV recording</b> at the same time) on Android phones:
 
 
 - Watch online TV and local media using a customized ![FFmpeg 6.1](https://github.com/zhouwg/FFmpeg). This project is derived from the original ![ijkplayer](https://github.com/zhouwg/kantv/tree/kantv-initial) (that project has stopped maintenance since 2021), with many enhancements and new features. Source code of the customized FFmpeg 6.1 can be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-6.1"> external/ffmpeg </a> according to <a href="https://ffmpeg.org/legal.html">FFmpeg's license</a>. Source code of all FFmpeg 6.1's dependent libraries can be found in <a href="https://github.com/zhouwg/kantv/tree/master/external/ffmpeg-deps"> external/ffmpeg-deps </a>.
@@ -48,8 +48,8 @@ KanTV ("Kan", which means "watch" in English), an open source project focusing o
 ```
     Snapdragon 8 Gen 2
     Snapdragon 8 Gen 3
-    Snapdragon 8 Elite(aka 8 Gen 4)
-    Snapdragon 8 Elite Gen 5(aka 8 Gen 5)
+    Snapdragon 8 Elite (aka 8 Gen 4)
+    Snapdragon 8 Elite Gen 5 (aka 8 Gen 5)
 ```
 
 

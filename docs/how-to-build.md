@@ -27,7 +27,7 @@ git checkout master
     ./build/prebuild.sh
     ```
 
- - download Android-NDK and Android-SDK and necessary LLVM toolchain for **command-line mode build**
+ - download Android-NDK, Android-SDK, Hexagon SDK, and necessary LLVM toolchain for **command-line mode build** (set `SKIP_HEXAGON_SDK=1` to skip Hexagon SDK download for non-Qualcomm builds)
 
    run below script accordingly
     ```
