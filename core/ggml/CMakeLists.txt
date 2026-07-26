@@ -110,7 +110,7 @@ if (GGML_ENABLE_HEXAGON)
     #check optimization flags
     if(DEFINED HTP_ARCH_VERSION)
         if (${HTP_ARCH_VERSION} STREQUAL "v75" OR ${HTP_ARCH_VERSION} STREQUAL "v79")
-            set(OPT_FLAG " -O3 -march=armv8.7-a -mcpu=cortex-x1 -mtune=cortex-x1 -ffp-model=fast -fno-finite-math-only")
+            set(OPT_FLAG " -O3 -march=armv8.7-a -ffp-model=fast -fno-finite-math-only")
             #refer to:https://github.com/zhouwg/kantv/issues/287
             #set(OPT_FLAG " -O3 -march=armv8.7-a -flto -D_GNU_SOURCE -fvectorize -ffp-model=fast -fno-finite-math-only")
         else()
