@@ -33,7 +33,8 @@ KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source p
 
 ### Software architecture of KanTV Android
 
-![Image](https://github.com/user-attachments/assets/32227392-abdf-4760-be3d-a19d48d478ff)
+<img width="803" height="517" alt="kantv-arch" src="https://github.com/user-attachments/assets/59e62514-0c1d-44fb-a4fe-dd8d805e17cb" />
+
 
 ### Building the project
 
