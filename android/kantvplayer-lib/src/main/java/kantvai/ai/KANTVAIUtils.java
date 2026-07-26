@@ -50,39 +50,20 @@ import kantvai.media.player.KANTVLog;
 
     private static int mHFEndpoint = 0;
      //=============================================================================================
-     //add new AI benchmark type / new backend / new realtime inference type for GGML/NCNN here
-     //
-     //keep sync with ggml_jni_bench_type in ggml-jni.h & ncnn_jni_bench_type in ncnn-jni.h
-     public enum bench_type {
+    //add new AI benchmark type / new backend / new realtime inference type for GGML here
+    //
+    //keep sync with ggml_jni_bench_type in ggml-jni.h
+    public enum bench_type {
          GGML_BENCHMARK_ASR,                       //ASR(whisper.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM,                       //LLM(llama.cpp) benchmark using GGML
-         GGML_BENCHMARK_TEXT2IMAGE,                //TEXT2IMAGE(stablediffusion.cpp) benchmark using GGML
          GGML_BENCHMARK_LLM_V,                     //A GPT-4V style Multimodal LLM benchmark using llama.cpp based on GGML
          GGML_BENCHMARK_LLM_O,                     //A GPT-4o style Multimodal LLM benchmark using llama.cpp based on GGML
 
          GGML_BENCHMARK_CV_MNIST,                  //MNIST inference using GGML
          GGML_BENCHMARK_TTS,                       //TTS(bark.cpp) benchmark using GGML
-         GGML_BENCHMARK_MAX,                       //used for separate GGML and NCNN
-         NCNN_BENCHMARK_RESNET,
-         NCNN_BENCHMARK_SQUEEZENET,
-         NCNN_BENCHMARK_MNIST,
-         NCNN_BENCHMARK_ASR,
-         NCNN_BENCHMARK_TTS,
-         NCNN_BENCHARK_YOLOV5,
-         NCNN_BENCHARK_YOLOV10,
-         NCNN_BENCHMARK_MAX,
+         GGML_BENCHMARK_MAX,
      };
-
-     //keep sync with ncnn-jni.h, realtime inference with live camera / online TV using NCNN
-     public enum ncnn_realtimeinference_type {
-         NCNN_REALTIMEINFERENCE_FACEDETECT,
-         NCNN_REALTIMEINFERENCE_NANODAT,
-         NCNN_REALTIMEINFERENCE_YOLOV10
-     };
-     //keep sync with ncnn-jni.h, ncnn backend
-     public static final int NCNN_BACKEND_CPU           = 0;
-     public static final int NCNN_BACKEND_GPU           = 1;
-     //=============================================================================================
+    //=============================================================================================
 
      public static String getDeviceInfo(Activity activity, int inference_type) {
          ActivityManager am = (ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE);
@@ -181,17 +162,6 @@ import kantvai.media.player.KANTVLog;
                 return "unknown";
         }
     }
-
-     public static String getNCNNBackendDesc(int n_backend_type) {
-         switch (n_backend_type) {
-             case 0:
-                 return "CPU";
-             case 1:
-                 return "GPU";
-             default:
-                 return "unknown";
-         }
-     }
 
      public static String getASRModelString(int asrModelType) {
          switch (asrModelType) {

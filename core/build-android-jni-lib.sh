@@ -2,12 +2,12 @@
 
 # Copyright (c) 2024- KanTV Authors
 
-# Description: build jni for target Android
+# Description: build libkantv-ai.so for target Android
 #
 
 set -e
 
-TARGET=kantvai-jni
+TARGET=kantv-ai
 BUILD_TYPE=Release
 
 # Hexagon SDK is provided via prebuilts/Hexagon_SDK symlink (from ggml-hexagon project)

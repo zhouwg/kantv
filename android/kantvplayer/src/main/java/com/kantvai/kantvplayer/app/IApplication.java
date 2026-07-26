@@ -8,6 +8,7 @@ import android.content.res.AssetManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import java.io.File;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -225,6 +226,24 @@ public class IApplication extends Application {
 
         KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
 
+        // Also copy ggml-hexagon.cfg to /data/local/tmp/ for user-editable access.
+        // ggmlhexagon_load_cfg() prefers /data/local/tmp/ggml-hexagon.cfg over the app data copy,
+        // so users can tweak dsp_cache_mode, thread_counts, rpc_mmap_mode etc. via adb shell
+        // without rebuilding the APK. Only copy if the file doesn't exist, to preserve user edits.
+        {
+            String userCfgPath = "/data/local/tmp/ggml-hexagon.cfg";
+            File userCfgFile = new File(userCfgPath);
+            if (!userCfgFile.exists()) {
+                KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", userCfgPath);
+                // Set world-writable so adb shell can modify it
+                try {
+                    Runtime.getRuntime().exec(new String[]{"chmod", "666", userCfgPath}).waitFor();
+                } catch (Exception e) {
+                    KANTVLog.j(TAG, "chmod failed for " + userCfgPath + ": " + e.toString());
+                }
+            }
+        }
+
         // Copy versioned DSP skeleton .so files from APK assets to app data directory.
         // The build system (CMakeLists.txt ggml_hexagon_build_kernel) builds all 4 HTP arch
         // versions (v73/v75/v79/v81) and copies them to assets/models/.
@@ -265,7 +284,7 @@ public class IApplication extends Application {
         //   QNN issue:
         //   can not open QNN library /sdcard/kantv/qnnlib/libQnnSystem.so,
         //   error: dlopen failed: library "/sdcard/kantv/qnnlib/libQnnSystem.so"
-        //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.kantvai.kantvplayer-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libggml-jni.so" is not accessible for the namespace "clns-4"
+        //   needed or dlopened by "/data/app/~~clbTlTogBUHAPF5Da52Cfw==/com.kantvai.kantvplayer-k2X0NpXfzg9uT10HNFGVDQ==/base.apk!/lib/arm64-v8a/libkantv-ai.so" is not accessible for the namespace "clns-4"
         KANTVAssetLoader.copyAssetDir(mContext, "qnnlib", KANTVUtils.getDataPath(mContext) + "qnnlib");
         KANTVLog.j(TAG, "qnn lib path:" + KANTVUtils.getDataPath(mContext) + "qnnlib");
 
@@ -397,7 +416,7 @@ public class IApplication extends Application {
         //preload GGML model and initialize asr_subsystem as early as possible for purpose of ASR real-time performance
         try {
             int result = 0;
-            KANTVLibraryLoader.load("ggml-jni");
+            KANTVLibraryLoader.load("kantv-ai");
             // Tell hexagon backend where DSP skeleton .so files and ggml-hexagon.cfg
             // live (app data dir, copied from APK assets above). Must be set before
             // asr_init / llama_backend_init so hexagon backend registration picks up

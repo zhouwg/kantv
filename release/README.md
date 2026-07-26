@@ -308,3 +308,17 @@
                         <li> improve stability </li>
                         <li> refine docs </li>
                     </ul>
+- v1.7.0, 2026-07-25,
+                    <ul>
+                        <li>sync with upstream llama.cpp and whisper.cpp</li>
+                        <li>sync with project ggml-hexagon</li>
+                        <li>decouple ggml-hexagon.cfg config file from runtime libpath: config file is now copied to /data/local/tmp/ (user-editable via adb shell), DSP skeleton libraries remain in app data directory</li>
+                        <li>update built-in AI model list: remove Qwen3-4B, add ASR model ggml-tiny.en-q8_0 to README, mark Gemma-4-E2B as default LLM model</li>
+                        <li>refine GitHub Actions CI: add Gradle dependency cache, add APK output diagnostic step, consolidate to single qcom build target</li>
+                        <li>refine logic of AI model download</li>
+                        <li>improve stability</li>
+                        <li>refine docs</li>
+                        <li>remove stable-diffusion due to limited resource</li>
+                        <li>remove `-mcpu=cortex-x1 -mtune=cortex-x1` for better compatibility with Snapdragon 8 Gen 2 & 8 Gen 3</li>
+                        <li>reorganize source directory structure</li>
+                    </ul>

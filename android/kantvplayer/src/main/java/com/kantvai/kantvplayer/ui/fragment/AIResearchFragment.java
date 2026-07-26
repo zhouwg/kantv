@@ -63,6 +63,7 @@
 
  import butterknife.BindView;
  import io.noties.markwon.Markwon;
+ import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
@@ -216,7 +217,7 @@
          initLLMModels();
 
          try {
-             KANTVLibraryLoader.load("ggml-jni");
+             KANTVLibraryLoader.load("kantv-ai");
              KANTVLog.j(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
          } catch (Exception e) {
              KANTVLog.j(TAG, "failed to initialize ggml jni");
@@ -224,7 +225,14 @@
          }
 
          KANTVLog.j(TAG, "set ggml's whisper.cpp info");
-         setTextGGMLInfo(AIModelMgr.getKANTVAIModelFromName("Gemma3-4B").getName());
+         {
+             KANTVAIModel defaultModel = AIModelMgr.getKANTVAIModelFromName("Gemma3-4B");
+             if (defaultModel != null) {
+                 setTextGGMLInfo(defaultModel.getName());
+             } else {
+                 KANTVLog.j(TAG, "warning: Gemma3-4B not found in model list, skip setTextGGMLInfo");
+             }
+         }
 
         //initialize spinnerModelName BEFORE spinnerBenchType to avoid NPE when
         //spinnerBenchType.setSelection(0) triggers onItemSelected which references spinnerModelName
@@ -885,13 +893,6 @@
 
      private boolean isGGMLInfernce() {
          if (nBenchmarkIndex < KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
-             return true;
-         else
-             return false;
-     }
-
-     private boolean isNCNNInference() {
-         if (nBenchmarkIndex >= KANTVAIUtils.bench_type.GGML_BENCHMARK_MAX.ordinal())
              return true;
          else
              return false;

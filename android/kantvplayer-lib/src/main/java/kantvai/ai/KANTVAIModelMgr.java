@@ -200,7 +200,7 @@ public class KANTVAIModelMgr {
          }
 
          try {
-             KANTVLibraryLoader.load("ggml-jni");
+             KANTVLibraryLoader.load("kantv-ai");
              KANTVLog.g(TAG, "cpu core counts:" + ggmljava.get_cpu_core_counts());
          } catch (Exception e) {
              KANTVLog.g(TAG, "failed to initialize ggml jni");

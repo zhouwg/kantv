@@ -26,12 +26,6 @@ echo "HEXAGON_SDK_PATH: ${HEXAGON_SDK_PATH}"
 HEXAGON_SDK_VERSION=6.6.0.0
 HEXAGON_TOOLS_VERSION=19.0.07
 
-# OpenCL SDK paths
-OPENCL_SDK_PATH=${PROJECT_ROOT_PATH}/prebuilts/OpenCL_SDK
-NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include"
-NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH="${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android"
-
-
 function check_command_in_host()
 {
     set +e
@@ -203,81 +197,10 @@ function check_and_download_hexagon_sdk()
 }
 
 
-# Download OpenCL headers and build libOpenCL.so for the Android NDK sysroot.
-# ggml-hexagon's OpenCL path (when enabled) needs:
-#   - CL/ headers in ${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}
-#   - libOpenCL.so in ${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}
-function check_and_download_opencl_sdk()
-{
-    is_opencl_sdk_exist=1
-
-    if [ ! -d ${OPENCL_SDK_PATH} ]; then
-        echo -e "${TEXT_RED}OPENCL_SDK_PATH ${OPENCL_SDK_PATH} not exist, download it from github...${TEXT_RESET}\n"
-        is_opencl_sdk_exist=0
-    fi
-    if [ ! -f ${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}/libOpenCL.so ]; then
-        echo -e "${TEXT_RED}${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}/libOpenCL.so not exist...${TEXT_RESET}\n"
-        is_opencl_sdk_exist=0
-    fi
-
-    if [ ${is_opencl_sdk_exist} -eq 0 ]; then
-        mkdir -p ${OPENCL_SDK_PATH}
-        cd ${OPENCL_SDK_PATH}
-
-        if [ ! -d OpenCL-Headers ]; then
-            echo "Cloning OpenCL-Headers..."
-            git clone https://github.com/KhronosGroup/OpenCL-Headers
-            if [ $? -ne 0 ]; then
-                printf "failed to download OpenCL-Headers to %s \n" "${OPENCL_SDK_PATH}"
-                exit 1
-            fi
-        fi
-        cd ${OPENCL_SDK_PATH}/OpenCL-Headers
-        printf "Copying OpenCL Headers to Android NDK sysroot include: ${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}"
-        mkdir -p ${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}
-        /bin/cp -r -fv CL ${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}
-
-        cd ${OPENCL_SDK_PATH}
-        if [ ! -d OpenCL-ICD-Loader ]; then
-            echo "Cloning OpenCL-ICD-Loader..."
-            git clone https://github.com/KhronosGroup/OpenCL-ICD-Loader
-            if [ $? -ne 0 ]; then
-                printf "failed to download OpenCL-ICD-Loader to %s \n" "${OPENCL_SDK_PATH}"
-                exit 1
-            fi
-        fi
-        cd ${OPENCL_SDK_PATH}/OpenCL-ICD-Loader
-        mkdir -p build
-        cd build
-        cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${ANDROID_NDK}/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_PLATFORM=latest -DANDROID_STL=c++_shared -DOPENCL_ICD_LOADER_HEADERS_DIR=${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}
-        echo "Building OpenCL-ICD-Loader with ninja..."
-        ninja
-        if [ $? -ne 0 ]; then
-            printf "failed to build OpenCL-ICD-Loader\n"
-            exit 1
-        fi
-        mkdir -p ${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}
-        /bin/cp -fv libOpenCL.so ${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}
-
-        echo "OpenCL components setup complete"
-        echo "OpenCL Headers are in: ${NDK_TOOLCHAIN_SYSROOT_INCLUDE_PATH}/CL"
-        echo "libOpenCL.so is in:    ${NDK_TOOLCHAIN_SYSROOT_ARM64_LIB_PATH}/libOpenCL.so"
-
-        cd ${PROJECT_ROOT_PATH}
-    else
-        printf "OpenCL SDK already exist:    ${OPENCL_SDK_PATH} \n\n"
-    fi
-}
-
-
 check_commands_in_host
 check_and_download_androidndk
 check_and_download_androidsdk
-# Hexagon SDK and OpenCL SDK are only needed for Qualcomm DSP builds.
 # Set SKIP_HEXAGON_SDK=1 (e.g. for non-qcom builds) to skip downloading them.
 if [ "${SKIP_HEXAGON_SDK}" != "1" ]; then
     check_and_download_hexagon_sdk
-fi
-if [ "${SKIP_OPENCL_SDK}" != "1" ]; then
-    check_and_download_opencl_sdk
 fi

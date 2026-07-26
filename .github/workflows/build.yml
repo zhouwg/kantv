@@ -23,7 +23,7 @@ jobs:
     name: Build APK (Qualcomm DSP)
     runs-on: ubuntu-latest
     env:
-      ANDROID_APK_VERSION: 1.6.10
+      ANDROID_APK_VERSION: 1.7.0
 
     steps:
       - name: checkout code
@@ -121,7 +121,7 @@ jobs:
     name: Build APK (non-Qualcomm)
     runs-on: ubuntu-latest
     env:
-      ANDROID_APK_VERSION: 1.6.10
+      ANDROID_APK_VERSION: 1.7.0
       SKIP_HEXAGON_SDK: "1"
       SKIP_OPENCL_SDK: "1"
 
