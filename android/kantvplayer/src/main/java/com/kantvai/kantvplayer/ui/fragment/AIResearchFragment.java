@@ -63,6 +63,7 @@
 
  import butterknife.BindView;
  import io.noties.markwon.Markwon;
+ import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
  import kantvai.ai.KANTVAIUtils;
  import kantvai.ai.ggmljava;
@@ -224,7 +225,14 @@
          }
 
          KANTVLog.j(TAG, "set ggml's whisper.cpp info");
-         setTextGGMLInfo(AIModelMgr.getKANTVAIModelFromName("Gemma3-4B").getName());
+         {
+             KANTVAIModel defaultModel = AIModelMgr.getKANTVAIModelFromName("Gemma3-4B");
+             if (defaultModel != null) {
+                 setTextGGMLInfo(defaultModel.getName());
+             } else {
+                 KANTVLog.j(TAG, "warning: Gemma3-4B not found in model list, skip setTextGGMLInfo");
+             }
+         }
 
         //initialize spinnerModelName BEFORE spinnerBenchType to avoid NPE when
         //spinnerBenchType.setSelection(0) triggers onItemSelected which references spinnerModelName

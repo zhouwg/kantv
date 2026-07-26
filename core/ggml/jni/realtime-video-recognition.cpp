@@ -55,12 +55,6 @@
 #include "mtmd.h"
 #include "mtmd-helper.h"
 
-//ncnn
-#include "platform.h"
-#include "benchmark.h"
-#include "net.h"
-#include "gpu.h"
-
 //opencv-android
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -271,7 +265,7 @@ bool multimodal_inference::model_init(const char * llm_model_name,
 void multimodal_inference::camera_init() {
     LOGGD("initialize camera");
     if (nullptr == ndkcamera_instance) {
-        ncnn::create_gpu_instance();
+        // ncnn GPU instance removed: image_utils has no GPU dependency.
         ndkcamera_instance = new MyNdkCamera;
     } else {
         LOGGD("camera already initialized");
@@ -296,7 +290,7 @@ bool multimodal_inference::camera_open(int facing) {
 void multimodal_inference::camera_finalize() {
     LOGGD("finalize camera");
     if (nullptr != ndkcamera_instance) {
-        ncnn::destroy_gpu_instance();
+        // ncnn GPU instance removed: image_utils has no GPU dependency.
         delete ndkcamera_instance;
         ndkcamera_instance = nullptr;
     } else {

@@ -21,7 +21,7 @@
 
 #include <opencv2/core/core.hpp>
 
-#include "mat.h"
+#include "image_utils.h"
 
 #include "ggml-jni.h"
 
@@ -430,11 +430,11 @@ void NdkCamera::on_image(const unsigned char* nv21, int nv21_width, int nv21_hei
     }
 
     cv::Mat nv21_rotated(h + h / 2, w, CV_8UC1);
-    ncnn::kanna_rotate_yuv420sp(nv21, nv21_width, nv21_height, nv21_rotated.data, w, h, rotate_type);
+    image_utils::kanna_rotate_yuv420sp(nv21, nv21_width, nv21_height, nv21_rotated.data, w, h, rotate_type);
 
     // nv21_rotated to rgb
     cv::Mat rgb(h, w, CV_8UC3);
-    ncnn::yuv420sp2rgb(nv21_rotated.data, w, h, rgb.data);
+    image_utils::yuv420sp2rgb(nv21_rotated.data, w, h, rgb.data);
 
     on_image(rgb);
 }
@@ -727,22 +727,22 @@ void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv
     {
         const unsigned char* srcY = nv21 + nv21_roi_y * nv21_width + nv21_roi_x;
         unsigned char* dstY = nv21_croprotated.data;
-        ncnn::kanna_rotate_c1(srcY, nv21_roi_w, nv21_roi_h, nv21_width, dstY, roi_w, roi_h, roi_w, rotate_type);
+        image_utils::kanna_rotate_c1(srcY, nv21_roi_w, nv21_roi_h, nv21_width, dstY, roi_w, roi_h, roi_w, rotate_type);
 
         const unsigned char* srcUV = nv21 + nv21_width * nv21_height + nv21_roi_y * nv21_width / 2 + nv21_roi_x;
         unsigned char* dstUV = nv21_croprotated.data + roi_w * roi_h;
-        ncnn::kanna_rotate_c2(srcUV, nv21_roi_w / 2, nv21_roi_h / 2, nv21_width, dstUV, roi_w / 2, roi_h / 2, roi_w, rotate_type);
+        image_utils::kanna_rotate_c2(srcUV, nv21_roi_w / 2, nv21_roi_h / 2, nv21_width, dstUV, roi_w / 2, roi_h / 2, roi_w, rotate_type);
     }
 
     // nv21_croprotated to rgb
     cv::Mat rgb(roi_h, roi_w, CV_8UC3);
-    ncnn::yuv420sp2rgb(nv21_croprotated.data, roi_w, roi_h, rgb.data);
+    image_utils::yuv420sp2rgb(nv21_croprotated.data, roi_w, roi_h, rgb.data);
 
     on_image_render(rgb);
 
     // rotate to native window orientation
     cv::Mat rgb_render(render_h, render_w, CV_8UC3);
-    ncnn::kanna_rotate_c3(rgb.data, roi_w, roi_h, rgb_render.data, render_w, render_h, render_rotate_type);
+    image_utils::kanna_rotate_c3(rgb.data, roi_w, roi_h, rgb_render.data, render_w, render_h, render_rotate_type);
 
     ANativeWindow_setBuffersGeometry(win, render_w, render_h, AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM);
 

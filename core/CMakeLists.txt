@@ -8,4 +8,3 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(ggml)
-add_subdirectory(ncnn/ncnn-src)

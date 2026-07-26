@@ -24,17 +24,20 @@
 #include <android/bitmap.h>
 #include <android/log.h>
 
-//ncnn
-#include "platform.h"
-#include "benchmark.h"
-#include "net.h"
-#include "gpu.h"
+#include <chrono>
 
 //opencv-android
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
 #include "myndkcamera.h"
+
+// Replaces ncnn::get_current_time() with a std::chrono-based equivalent.
+static double get_current_time() {
+    auto now = std::chrono::steady_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return static_cast<double>(ms.count());
+}
 
 static int draw_unsupported(cv::Mat & rgb) {
     const char text[] = "unsupported";
@@ -62,7 +65,7 @@ static int draw_fps(cv::Mat & rgb) {
         static double t0 = 0.f;
         static float fps_history[10] = {0.f};
 
-        double t1 = ncnn::get_current_time();
+        double t1 = get_current_time();
         if (t0 == 0.f) {
             t0 = t1;
             return 0;

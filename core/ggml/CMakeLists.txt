@@ -52,8 +52,6 @@ if (NOT DEFINED HEXAGON_TOOLS_PATH)
 endif()
 
 set(OpenCV_DIR                  ${PREBUILT_PATH}/opencv-mobile-4.9.0-android/sdk/native/jni)
-set(NCNN_DIR                    ${CMAKE_SOURCE_DIR}/ncnn)
-set(NCNN_SRC_DIR                ${CMAKE_SOURCE_DIR}/ncnn/ncnn-src)
 
 set(OPT_FLAG                    " ")
 
@@ -69,8 +67,6 @@ message("build target         : ${BUILD_TARGET}")
 message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
 message("HEXAGON_TOOLS_PATH   : ${HEXAGON_TOOLS_PATH}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
-message("NCNN_DIR             : ${NCNN_DIR}")
-message("NCNN_SRC_DIR         : ${NCNN_SRC_DIR}")
 message("GGML_ENABLE_HEXAGON  : ${GGML_ENABLE_HEXAGON}")
 message("GGML_HEXAGON_JZ      : ${GGML_HEXAGON_JZ}")
 
@@ -145,7 +141,6 @@ include_directories(${LLAMACPP_SRC_DIR}/vendor)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 #include_directories(${SDCPP_SRC_DIR}/)
 include_directories(${OpenCV_DIR}/include/)
-include_directories(${NCNN_SRC_DIR}/include/)
 
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
@@ -331,6 +326,7 @@ set(SOURCE_FILES
         ${KANTV_GGMLJNI_SRC_DIR}/realtime-video-recognition.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/mtmd-inference.cpp
         ${KANTV_GGMLJNI_SRC_DIR}/ggml-jni-context.cpp
+        ${KANTV_GGMLJNI_SRC_DIR}/image_utils.cpp
 )
 
 add_definitions(-DTARGET_ANDROID)
@@ -449,9 +445,9 @@ function(build_library target_name)
     )
 
     if (GGML_ENABLE_HEXAGON)
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc ${OpenCV_LIBS} camera2ndk mediandk ncnn)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android cdsprpc ${OpenCV_LIBS} camera2ndk mediandk)
     else()
-        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android ${OpenCV_LIBS} camera2ndk mediandk ncnn)
+        target_link_libraries(${target_name} ${LOG_LIB} kantvmedia android ${OpenCV_LIBS} camera2ndk mediandk)
     endif()
 
 endfunction()
