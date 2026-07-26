@@ -107,7 +107,6 @@ a screenshot to demostrate download LLM model in APK.
 - [ChangeLog](./release/README.md)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
-- [Roadmap](https://github.com/zhouwg/kantv/discussions/262)
 
 
 ### Contribution
