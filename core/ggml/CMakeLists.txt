@@ -149,7 +149,11 @@ include_directories(${NCNN_SRC_DIR}/include/)
 
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
+if (GGML_HEXAGON_JZ)
+    include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
+else()
+    include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
+endif()
 include_directories(${HEXAGON_SDK_PATH}/incs)
 include_directories(${HEXAGON_SDK_PATH}/incs/stddef)
 include_directories(${HEXAGON_SDK_PATH}/libs/qprintf/inc)
@@ -160,23 +164,21 @@ include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/remote/ship/android_Debug_aa
 include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/rtld/ship/android_aarch64)
 include_directories(${HEXAGON_SDK_PATH}/libs/atomic/inc)
 include_directories(${HEXAGON_SDK_PATH}/libs/atomic/android_Debug_aarch64/ship)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/)
-include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/)
 
 # Generate ggml_dsp_{stub.c,skel.c,h} from ggml_dsp.idl via qaic (JZ only)
 if (GGML_HEXAGON_JZ)
-    set(GGML_DSP_STUB ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/ggml_dsp_stub.c)
-    set(GGML_DSP_HEADER ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/ggml_dsp.h)
+    set(GGML_DSP_STUB ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp_stub.c)
+    set(GGML_DSP_HEADER ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp.h)
     set(QAIC_BIN ${HEXAGON_SDK_PATH}/ipc/fastrpc/qaic/bin/qaic)
     if ((NOT EXISTS "${GGML_DSP_STUB}" OR NOT EXISTS "${GGML_DSP_HEADER}") AND EXISTS "${QAIC_BIN}")
         message(STATUS "hexagon-jz: generating ggml_dsp stubs from ggml_dsp.idl")
         execute_process(
             COMMAND ${QAIC_BIN} -mdll
-                -o ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp
+                -o ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels
                 -I${HEXAGON_SDK_PATH}/incs
                 -I${HEXAGON_SDK_PATH}/incs/stddef
                 -I${HEXAGON_SDK_PATH}/ipc/fastrpc/incs
-                ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/ggml_dsp.idl
+                ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp.idl
             RESULT_VARIABLE QAIC_RESULT)
         if (NOT QAIC_RESULT EQUAL 0)
             message(FATAL_ERROR "hexagon-jz: qaic failed to generate ggml_dsp stubs")
@@ -460,17 +462,17 @@ build_library("ggml-jni")
 function(ggml_hexagon_build_kernel KNAME)
     message(STATUS "ggml_hexagon: build hexagon DSP skel ${KNAME}")
 
-    set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
     set(ASSETS_DIR   ${GGML_SRC_DIR}/../../android/kantvplayer/src/main/assets/models/)
 
     if (GGML_HEXAGON_JZ)
-        # JZ path: use htp/Makefile with HEXAGON_TOOLS_PATH
+        # JZ path: use kernels/Makefile with HEXAGON_TOOLS_PATH
         # Build ALL supported HTP arch versions (v73, v75, v79, v81) so the APK
         # can run on any Qualcomm SoC. Each version is built separately because
         # the Hexagon compiler flags (-m v73, -m v75, etc.) differ per arch.
         # The resulting .so files are copied to assets/models/ with versioned names
         # (libggmldsp-skel-v75.so, etc.) so IApplication.java can extract them to
         # the app's data directory at runtime.
+        set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
 
         # Regenerate IDL stubs once (shared across all arch versions)
         add_custom_command(
@@ -506,12 +508,13 @@ function(ggml_hexagon_build_kernel KNAME)
             message(STATUS "ggml_hexagon: will build DSP skel for ${HTP_VER}")
         endforeach()
     else()
-        # Qualcomm path: use kernels/Makefile (legacy)
+        # Qualcomm path: use htp/Makefile
+        set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
         add_custom_command(
                 TARGET ${PROJECT_NAME}
                 POST_BUILD
-                COMMAND make -C ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ clean
-                COMMAND make -C ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH} HTP_ARCH_VERSION=${HTP_ARCH_VERSION} DEBUG_FLAG=${DEBUG_FLAG}
+                COMMAND make -C ${HTP_SKEL_DIR} clean
+                COMMAND make -C ${HTP_SKEL_DIR} HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH} HTP_ARCH_VERSION=${HTP_ARCH_VERSION} DEBUG_FLAG=${DEBUG_FLAG}
                 COMMAND echo "current working path:`pwd`\n"
                 COMMENT "build hexagon-kernel"
         )

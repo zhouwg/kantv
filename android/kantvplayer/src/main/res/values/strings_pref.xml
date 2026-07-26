@@ -498,8 +498,8 @@
         <item>1</item>
     </string-array>
     <string-array name="pref_entry_summaries_backend">
-        <item>offload all layers to cDSP (-ngl 99, flash attention)</item>
-        <item>CPU only (-ngl 0, no DSP offload)</item>
+        <item>NPU</item>
+        <item>CPU</item>
     </string-array>
 
     <string name="pref_title_llm">LLM</string>

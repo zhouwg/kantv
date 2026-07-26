@@ -1,7 +1,9 @@
 /*
- * 2024-2026 The ggml authors
- *
- * this single-source-file is part of jz's ggml-hexagon
+ * This single-source file is part of JZ's ggml-hexagon.
+ * 2024--2026 The ggml authors
+ * GitHub:  https://github.com/zhouwg/ggml-hexagon
+ * Any copies or derivative works of this file shall preserve the above attribution information,
+ * including the copyright notice and the GitHub repository URL.
  *
  * this file has 8 sections:
  * section-1  forward declarations, global vars, macros
@@ -80,14 +82,14 @@
 #include "ggml-common.h"
 #include "ggml-quants.h"
 
-#include "htp/ggml_dsp.h"
-#include "htp/dsp-ctx.h"
-#include "htp/htp-ops.h"
-#include "htp/hex-common.h"
-#include "htp/hex-fastdiv.h"
-#include "htp/matmul-ops.h"
-#include "htp/flash-attn-ops.h"
-#include "htp/unary-ops.h"
+#include "kernels/ggml_dsp.h"
+#include "kernels/dsp-ctx.h"
+#include "kernels/htp-ops.h"
+#include "kernels/hex-common.h"
+#include "kernels/hex-fastdiv.h"
+#include "kernels/matmul-ops.h"
+#include "kernels/flash-attn-ops.h"
+#include "kernels/unary-ops.h"
 
 // =================================================================================================
 //  section-1: forward declarations, global vars, macros
@@ -448,42 +450,22 @@ static struct hexagon_appcfg_t g_hexagon_appcfg = {
 #if defined(__ANDROID__)
         .runtime_libpath        = "/data/local/tmp/",
 #endif
-        .version                = {"0.99.3"},
+        .version                = {"0.99.4"},
 };
 
-// External API: allow JNI layer to override the runtime libpath before hexagon
-// backend registration. This must be called before ggmlhexagon_load_cfg() runs
-// (i.e. before llama_backend_init / asr_init) so that DSP skeleton .so files
-// and ggml-hexagon.cfg are searched in the correct directory.
-//
-// On Android the default "/data/local/tmp/" is only writable via adb push;
-// APK-bundled skeletons are copied to the app data dir at startup, so the
-// JNI layer calls this to redirect the lookup to /data/data/<pkg>/.
-static char g_runtime_libpath_buf[512] = {0};
+// Static buffer for runtime libpath (updated via ggml_hexagon_set_runtime_libpath API)
+static char g_runtime_libpath_buf[512] = "/data/local/tmp/";
 
-// Forward declaration: ggmlhexagon_log_always_internal is defined later in this file
-// but ggml_hexagon_set_runtime_libpath (below) uses GGMLHEXAGON_LOG_* macros that
-// depend on it.
-static void ggmlhexagon_log_always_internal(ggml_log_level level, const char * file, const char * func, int line, const char * format, ...);
-
-void ggml_hexagon_set_runtime_libpath(const char * path) {
-    if (nullptr == path || path[0] == '\0') {
+// Set the runtime library path where DSP skeleton .so files (libggmldsp-skel-v*.so)
+// and ggml-hexagon.cfg are located. Must be called before any hexagon backend
+// registration (i.e. before llama_backend_init / asr_init) to take effect.
+GGML_BACKEND_API void ggml_hexagon_set_runtime_libpath(const char * path) {
+    if (path == nullptr) {
         return;
     }
-    // Truncate to buffer size - 1, ensure trailing '/'
-    size_t n = strlen(path);
-    bool has_slash = (n > 0 && path[n - 1] == '/');
-    if (n + (has_slash ? 0 : 1) >= sizeof(g_runtime_libpath_buf)) {
-        GGMLHEXAGON_LOG_ERROR("runtime libpath too long: %s", path);
-        return;
-    }
-    if (has_slash) {
-        snprintf(g_runtime_libpath_buf, sizeof(g_runtime_libpath_buf), "%s", path);
-    } else {
-        snprintf(g_runtime_libpath_buf, sizeof(g_runtime_libpath_buf), "%s/", path);
-    }
+    strncpy(g_runtime_libpath_buf, path, sizeof(g_runtime_libpath_buf) - 1);
+    g_runtime_libpath_buf[sizeof(g_runtime_libpath_buf) - 1] = '\0';
     g_hexagon_appcfg.runtime_libpath = g_runtime_libpath_buf;
-    GGMLHEXAGON_LOG_ALWAYS("runtime libpath set to %s", g_runtime_libpath_buf);
 }
 
 //supported Snapdragon devices with Hexagon DSP
@@ -1028,6 +1010,14 @@ static void ggmlhexagon_load_cfg() {
     ggmlhexagon_get_timestring(time_string);
     GGMLHEXAGON_LOG_DEBUG("program running start time:%s", time_string);
     std::string cfg_filename = std::string(g_hexagon_appcfg.runtime_libpath) + std::string(g_hexagon_appcfg.cfgfilename);
+    // Prefer user-editable copy in /data/local/tmp/ (accessible via adb shell),
+    // fall back to runtime_libpath/ggml-hexagon.cfg (app data dir, copied from APK assets).
+    {
+        std::string user_cfg = "/data/local/tmp/" + std::string(g_hexagon_appcfg.cfgfilename);
+        if (access(user_cfg.c_str(), F_OK) == 0) {
+            cfg_filename = user_cfg;
+        }
+    }
 
     hexagon_appcfg hexagoncfg_instance;
     hexagoncfg_instance.load(cfg_filename);
@@ -3635,6 +3625,30 @@ static bool hexagon_validate_pad(ggml_backend_hexagon_context *ctx, const ggml_t
     return true;
 }
 
+static bool hexagon_validate_im2col(ggml_backend_hexagon_context *ctx, const ggml_tensor *op) {
+    GGML_UNUSED(ctx);
+    const struct ggml_tensor * src1 = op->src[1];
+    const struct ggml_tensor * dst  = op;
+    const bool is_2D = ((const int32_t *) op->op_params)[6] == 1;
+    if (!is_2D) {
+        return false;
+    }
+    // F32 image -> F16/F32 columns only
+    if (src1->type != GGML_TYPE_F32 || (dst->type != GGML_TYPE_F16 && dst->type != GGML_TYPE_F32)) {
+        return false;
+    }
+    if (!ggml_is_contiguous(src1) || !ggml_is_contiguous(dst)) {
+        return false;
+    }
+    // padded im2col stays on CPU; DSP path only covers patch-embed shape
+    const int32_t p0 = ((const int32_t *) op->op_params)[2];
+    const int32_t p1 = ((const int32_t *) op->op_params)[3];
+    if (p0 != 0 || p1 != 0) {
+        return false;
+    }
+    return true;
+}
+
 static bool hexagon_validate_tri(ggml_backend_hexagon_context *ctx, const ggml_tensor *op) {
     GGML_UNUSED(ctx);
     if (op->src[0]->type != GGML_TYPE_F32)
@@ -3690,6 +3704,7 @@ static void init_op_validators(void) {
     s_op_validators[GGML_OP_DIAG]           = hexagon_validate_diag;
     s_op_validators[GGML_OP_ARGSORT]        = hexagon_validate_argsort;
     s_op_validators[GGML_OP_PAD]            = hexagon_validate_pad;
+    s_op_validators[GGML_OP_IM2COL]         = hexagon_validate_im2col;
     s_op_validators[GGML_OP_TRI]            = hexagon_validate_tri;
     s_op_validators[GGML_OP_FILL]           = hexagon_validate_fill;
     s_op_validators[GGML_OP_FLASH_ATTN_EXT] = hexagon_validate_flash_attn;
@@ -4972,16 +4987,13 @@ static const char * ggml_backend_hexagon_name(ggml_backend_t backend) {
 
 static void ggml_backend_hexagon_free(ggml_backend_t backend) {
     GGMLHEXAGON_LOG_DEBUG("enter %s", __func__ );
+    // only delete the backend here; the context (including buffer types)
+    // must persist across inferences so that model tensors which reference
+    // buffer types remain valid. The context is owned by the device and
+    // freed during registry shutdown.
     ggml_backend_hexagon_context * ctx = (ggml_backend_hexagon_context *)backend->context;
-
-    GGMLHEXAGON_LOG_ALWAYS("freeing backend %d (%s), destroying context", ctx->device, ctx->name);
-
-    if (backend->device) {
-        backend->device->context = nullptr;
-    }
-
+    ctx->backend = nullptr;
     delete backend;
-    delete ctx;
 
     GGMLHEXAGON_LOG_DEBUG("leave %s", __func__ );
 }
@@ -6445,18 +6457,29 @@ static void ggml_backend_hexagon_graph_optimize(ggml_backend_t backend, struct g
     }
 }
 
-static const char * ggml_backend_hexagon_device_get_name(ggml_backend_dev_t dev) {
-    ggml_backend_hexagon_context * ctx = ggml_backend_hexagon_ensure_context(dev);
-    return ctx->name;
-}
-
 static const char * ggml_backend_hexagon_device_get_description(ggml_backend_dev_t dev) {
     GGML_UNUSED(dev);
     return "Hexagon-cDSP";
 }
 
+static const char * ggml_backend_hexagon_device_get_name(ggml_backend_dev_t dev) {
+    struct ggml_backend_hexagon_context * ctx = static_cast<ggml_backend_hexagon_context *>(dev->context);
+    if (nullptr == ctx) {
+        GGMLHEXAGON_LOG_ALWAYS("pls check why ctx is null");
+        return "unknown";
+    }
+    return ctx->name;
+}
+
 static void ggml_backend_hexagon_device_get_memory(ggml_backend_dev_t dev, size_t * free, size_t * total) {
-    ggml_backend_hexagon_context * ctx = ggml_backend_hexagon_ensure_context(dev);
+    struct ggml_backend_hexagon_context * ctx = static_cast<ggml_backend_hexagon_context *>(dev->context);
+    if ((nullptr == ctx) || (ctx->device >= GGML_HEXAGON_MAX_DEVICES)) {
+        GGMLHEXAGON_LOG_ALWAYS("pls check params");
+        *free = 0;
+        *total = 0;
+        return;
+    }
+
     GGMLHEXAGON_LOG_WARN("get_memory: enter device=%d domain_id=%d", ctx->device, ctx->domain_id);
 
     // ggml backend has domain_id == -1 (not a real CDSP PD)
@@ -6528,8 +6551,8 @@ struct ggml_backend_hexagon_reg_context {
     std::vector<ggml_backend_dev_t> devices;
     ~ggml_backend_hexagon_reg_context() {
         for (auto * dev : devices) {
-            // dev->context may be nullptr if the backend was already freed
-            // via ggml_backend_hexagon_free (which clears dev->context).
+            // context persists across inferences (not freed in ggml_backend_hexagon_free),
+            // so it is always present and must be cleaned up here.
             if (dev->context) {
                 auto * hctx = static_cast<ggml_backend_hexagon_context *>(dev->context);
                 delete hctx;
@@ -6543,8 +6566,8 @@ struct ggml_backend_hexagon_reg_context {
 // The ggml framework calls get_buffer_type / supports_buft BEFORE init_backend
 // during model loading, so the context must exist by then.
 // Called from get_buffer_type, get_repack_buffer_type, supports_buft, and
-// device_init_backend. Context is deleted by ggml_backend_hexagon_free
-// (which clears dev->context = nullptr), so the next inference recreates it.
+// device_init_backend. Context persists across inferences (ggml_backend_hexagon_free
+// only deletes the backend, not the context) and is freed during registry shutdown.
 static ggml_backend_hexagon_context * ggml_backend_hexagon_ensure_context(ggml_backend_dev_t dev) {
     if (nullptr != dev && nullptr != dev->context) {
         return (ggml_backend_hexagon_context *)dev->context;
@@ -6747,10 +6770,8 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
     static ggml_backend_reg reg;
     static bool initialized = false;
 
-    GGMLHEXAGON_LOG_ALWAYS("enter ggml_backend_hexagon_reg");
     ggmlhexagon_load_cfg();
     if (!ggmlhexagon_check_valid_appcfg()) {
-        GGMLHEXAGON_LOG_ALWAYS("ggmlhexagon_check_valid_appcfg returned false, abort hexagon registration");
         return nullptr;
     }
 
@@ -6758,9 +6779,7 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
         static std::mutex mutex;
         std::lock_guard<std::mutex> lock(mutex);
         if (!initialized) {
-            GGMLHEXAGON_LOG_ALWAYS("calling htpdrv_init");
             int ret = htpdrv_init();
-            GGMLHEXAGON_LOG_ALWAYS("htpdrv_init returned %d (AEE_SUCCESS=%d)", ret, AEE_SUCCESS);
             if (AEE_SUCCESS != ret) {
                 GGMLHEXAGON_LOG_ERROR("htpdrv_init failed with error %d", ret);
                 return nullptr;
@@ -6768,7 +6787,7 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
 
             int ndev = g_hexagon_appcfg.ndev;
             ggml_backend_hexagon_reg_context * ctx = new ggml_backend_hexagon_reg_context;
-            GGMLHEXAGON_LOG_ALWAYS("registering %d Hexagon device(s), ndev=%d", ndev, g_hexagon_appcfg.ndev);
+            GGMLHEXAGON_LOG_VERBOSE("registering %d Hexagon device(s), ndev=%d", ndev, g_hexagon_appcfg.ndev);
 
             for (int i = 0; i < ndev; i++) {
                 if (i >= GGML_HEXAGON_MAX_DEVICES) {
@@ -6780,8 +6799,8 @@ ggml_backend_reg_t ggml_backend_hexagon_reg() {
                 GGMLHEXAGON_LOG_VERBOSE("register backend device %d (context created lazily)", i);
                 // Only register the device struct here. Context (DSP session,
                 // ION pool) is created lazily by ggml_backend_hexagon_ensure_context
-                // (called from get_buffer_type or init_backend) and destroyed in
-                // ggml_backend_hexagon_free, so each inference gets a fresh context.
+                // (called from get_buffer_type or init_backend) and persists across
+                // inferences. It is freed during registry shutdown.
                 ggml_backend_dev_t dev = new ggml_backend_device{
                         /* .iface       = */ ggml_backend_hexagon_device_interface,
                         /* .reg         = */ &reg,

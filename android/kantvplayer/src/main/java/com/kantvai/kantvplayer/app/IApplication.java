@@ -8,6 +8,7 @@ import android.content.res.AssetManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import java.io.File;
 import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -224,6 +225,24 @@ public class IApplication extends Application {
         KANTVAssetLoader.copyAssetFile(mContext, "config.json", KANTVAssetLoader.getDataPath(mContext) + "config.json");
 
         KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", KANTVAssetLoader.getDataPath(mContext) + "ggml-hexagon.cfg");
+
+        // Also copy ggml-hexagon.cfg to /data/local/tmp/ for user-editable access.
+        // ggmlhexagon_load_cfg() prefers /data/local/tmp/ggml-hexagon.cfg over the app data copy,
+        // so users can tweak dsp_cache_mode, thread_counts, rpc_mmap_mode etc. via adb shell
+        // without rebuilding the APK. Only copy if the file doesn't exist, to preserve user edits.
+        {
+            String userCfgPath = "/data/local/tmp/ggml-hexagon.cfg";
+            File userCfgFile = new File(userCfgPath);
+            if (!userCfgFile.exists()) {
+                KANTVAssetLoader.copyAssetFile(mContext, "models/ggml-hexagon.cfg", userCfgPath);
+                // Set world-writable so adb shell can modify it
+                try {
+                    Runtime.getRuntime().exec(new String[]{"chmod", "666", userCfgPath}).waitFor();
+                } catch (Exception e) {
+                    KANTVLog.j(TAG, "chmod failed for " + userCfgPath + ": " + e.toString());
+                }
+            }
+        }
 
         // Copy versioned DSP skeleton .so files from APK assets to app data directory.
         // The build system (CMakeLists.txt ggml_hexagon_build_kernel) builds all 4 HTP arch

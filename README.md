@@ -17,7 +17,17 @@ KanTV("Kan", aka English "watch") , an open source project focus on study and pr
 
 - Well-maintained <b>turn-key / self-contained</b> workbench for AI beginners to learning on-device AI technology on Android.
 
-- Built-in [Alibaba's Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF), [Alibaba's Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF), [Alibaba's Qwen3-4B](https://huggingface.co/Qwen/Qwen3-4B/tree/main), [Google's Gemma3-4B(multimodal text + image)](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main), [Google's Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF), [Huggingface's SmolVLM2-256M(highly-optimized multimodal for realtime-video-recognition)](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF), [Alibaba's Qwen2.5-Omni-3B(multimodal text + audio)](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) supportive and runs entirely <b>offline(no Internet required)</b>. these supported LLM models can be [downloaded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these LLM models on the Android phone. developers can add other LLM models manually in source code [KANTVAIModelMgr.java](https://github.com/zhouwg/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java).
+- Built-in AI models supportive and runs entirely <b>offline(no Internet required)</b>. these supported AI models can be [downloaded in the Android APK directly](./docs/how-to-download-ai-models.md) without manually preparation. APK's users can compare the <b>real experience</b> of these AI models on the Android phone. developers can add other AI models manually in source code [KANTVAIModelMgr.java](https://github.com/zhouwg/kantv/blob/master/android/kantvplayer-lib/src/main/java/kantvai/ai/KANTVAIModelMgr.java).
+
+  | Model | Type | Capability | Source |
+  |-------|------|-----------|--------|
+  | ggml-tiny.en-q8_0 | ASR | speech-to-text | [whisper.cpp](https://github.com/ggerganov/whisper.cpp) |
+  | [Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF) | LLM | text-only | Alibaba |
+  | [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF) | LLM | text-only | Alibaba |
+  | [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) | LLM | text + image (MTMD) | Google |
+  | [Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF) | LLM | text-only (default) | Google |
+  | [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) | LLM | text + image (realtime-video-recognition) | Huggingface |
+  | [Qwen2.5-Omni-3B](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) | LLM | text + audio (MTMD) | Alibaba |
 
 - The [ggml-hexagon](https://github.com/zhouwg/kantv/blob/master/core/ggml/llamacpp/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp) in this project is probably the first open-source reference implementation of a specified llama.cpp backend for Qualcomm Hexagon NPU on Android phone. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3).
 
