@@ -319,4 +319,5 @@
                         <li>improve stability</li>
                         <li>refine docs</li>
                         <li>remove stable-diffusion due to limited resource</li>
+                        <li>remove `-mcpu=cortex-x1 -mtune=cortex-x1` for better compatibility with Snapdragon 8 Gen 2 & 8 Gen 3</li>
                     </ul>
