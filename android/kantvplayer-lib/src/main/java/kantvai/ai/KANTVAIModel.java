@@ -10,6 +10,14 @@ public class KANTVAIModel {
          TYPE_ASR,
          TYPE_LLM,
      };
+    /**
+     * Modality bitmask. A model can advertise any combination of text / image / audio
+     * support. Default is text-only so that legacy code paths that never set the
+     * modality still get a sane value.
+     */
+    public static final int MODALITY_TEXT  = 1 << 0;   //1
+    public static final int MODALITY_IMAGE = 1 << 1;   //2
+    public static final int MODALITY_AUDIO = 1 << 2;   //4
     private static final String TAG = KANTVAIModel.class.getSimpleName();
     private int index;
 
@@ -27,6 +35,9 @@ public class KANTVAIModel {
     private String sample_url;
 
     private boolean downloadAble;
+
+    /** Modality bitmask, default text-only. */
+    private int modality = MODALITY_TEXT;
 
     public KANTVAIModel(int index, AIModelType type, String nick, String name, String url) {
         this.index = index;
@@ -75,5 +86,43 @@ public class KANTVAIModel {
 
     public boolean isDownloadAble() {
         return downloadAble;
+    }
+
+    // ---------------------------------------------------------------------
+    // Modality (text / image / audio) - bitmask API
+    // ---------------------------------------------------------------------
+
+    /**
+     * Set the modality bitmask. Caller passes a bitwise OR of
+     * {@link #MODALITY_TEXT}, {@link #MODALITY_IMAGE}, {@link #MODALITY_AUDIO}.
+     */
+    public void setModality(int modality) {
+        KANTVLog.j(TAG, "setModality " + modality + " for " + (nickname != null ? nickname : ""));
+        this.modality = modality;
+    }
+
+    /** @return the raw modality bitmask. */
+    public int getModality() {
+        return modality;
+    }
+
+    public boolean supportsText()  { return (modality & MODALITY_TEXT)  != 0; }
+    public boolean supportsImage() { return (modality & MODALITY_IMAGE) != 0; }
+    public boolean supportsAudio() { return (modality & MODALITY_AUDIO) != 0; }
+
+    /**
+     * Human-readable tag for display in preference dropdowns / chat UI.
+     * Examples: {@code [text]}, {@code [text+image]}, {@code [text+image+audio]}.
+     * Order is fixed (text, image, audio) so users can scan the list
+     * consistently.
+     */
+    public String getModalityTag() {
+        StringBuilder sb = new StringBuilder("[");
+        boolean first = true;
+        if (supportsText())  { sb.append("text");      first = false; }
+        if (supportsImage()) { sb.append(first ? "image"      : "+image"); first = false; }
+        if (supportsAudio()) { sb.append(first ? "audio"      : "+audio");                    }
+        sb.append("]");
+        return sb.toString();
     }
 }

@@ -51,6 +51,19 @@ static std::vector<llama_token> * g_output_tokens;
 static bool is_interacting  = false;
 static bool need_insert_eot = false;
 
+// =============================================================================================
+// Singleton-aware gating flags for llm_bench_inference (see class below).
+// When the same model is re-used across multiple inference calls, we want to skip the
+// (expensive) model load / init phase and the (expensive) backend / threadpool / sampler
+// free phase, while still executing the (cheap) inference phase inside llama_inference_main().
+// Default: both phases execute (the original llama-cli one-shot semantics).
+// The wrapper class flips these flags around its call to llama_inference_main().
+// =============================================================================================
+static bool g_llm_bench_skip_init_phase      = false;  // true => skip lines from common_params_parse through sampler init
+static bool g_llm_bench_skip_finalize_phase  = false;  // true => skip common_sampler_free / llama_backend_free / threadpool free
+static std::string g_llm_bench_active_model_path;      // tracked by wrapper for debug / re-entry checks
+static int         g_llm_bench_active_backend_type = -1;
+
 static void print_usage(int argc, char ** argv) {
     (void) argc;
 

@@ -459,12 +459,24 @@ public class Settings {
 
     public int getLLMModel() {
         String key = mAppContext.getString(R.string.pref_key_llmmodel);
-        String value = mSharedPreferences.getString(key, "6"); //Gemma3-4B
+        // Default LLM index must point at a real model. Keep in sync with
+        // KANTVAIModelMgr.initAIModels():
+        //   AIModels[0]   = ASR (ggml-tiny.en-q8_0.bin)
+        //   AIModels[1]   = Qwen1.5-1.8B            (LLM idx 0)
+        //   AIModels[2]   = Qwen2.5-3B              (LLM idx 1)
+        //   AIModels[3]   = Gemma3-4B               (LLM idx 2)
+        //   AIModels[4]   = Gemma-4-E2B             (LLM idx 3)  <-- setDefaultModelIndex target
+        //   AIModels[5]   = SmolVLM2-256M           (LLM idx 4)
+        //   AIModels[6]   = Qwen2.5-Omni-3B         (LLM idx 5)
+        // So the safe default LLM index is 3 (Gemma-4-E2B). Historically this
+        // string was "6" which is out of range and caused KANTVAIModelMgr.
+        // getModelName() to NPE for first-launch users.
+        String value = mSharedPreferences.getString(key, "3");
         try {
             return Integer.valueOf(value).intValue();
         } catch (NumberFormatException e) {
             KANTVLog.j(TAG, "exception occurred");
-            return 6;
+            return 3;
         }
     }
 

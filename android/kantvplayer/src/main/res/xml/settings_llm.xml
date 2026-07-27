@@ -2,6 +2,17 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--
+        Non-selectable header that shows device info, currently selected LLM model,
+        and the in-memory resident status of the model. Populated from
+        LLMSettingFragment.onCreatePreferences() and refreshed in the
+        SharedPreferences change listener.
+    -->
+    <com.kantvai.kantvplayer.ui.fragment.settings.LLMSettingHeaderPreference
+        android:key="pref.llm.header"
+        android:title=""
+        android:selectable="false" />
+
     <PreferenceCategory android:title="@string/pref_title_general">
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
             android:defaultValue="1"
@@ -57,7 +68,7 @@
         app:entrySummaries="@array/pref_entry_summaries_llmmodel"
         -->
         <com.kantvai.kantvplayer.ui.fragment.settings.IjkListPreference
-            android:defaultValue="6"
+            android:defaultValue="3"
             android:key="@string/pref_key_llmmodel"
             android:persistent="true"
             android:title="@string/pref_title_llmmodel"
