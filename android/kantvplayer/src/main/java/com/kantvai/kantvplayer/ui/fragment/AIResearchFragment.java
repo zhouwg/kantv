@@ -1167,8 +1167,14 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
         String prompt = txtUserInput.getText().toString().trim();
 
         //for self-test
-        if (prompt.isEmpty())
-            prompt = strDefaultPrompt;
+        if (nBenchmarkIndex == KANTVAIUtils.bench_type.GGML_BENCHMARK_LLM.ordinal()) {
+            if (prompt.isEmpty())
+                prompt = strDefaultPrompt;
+        } else {
+            if (prompt.isEmpty()) {
+                prompt = "help to transcribe the audio file";
+            }
+        }
 
         if (prompt.isEmpty() && (pathSelectedMedia == null || pathSelectedMedia.isEmpty())) {
             Toast.makeText(mContext, "Please enter a prompt or attach a file", Toast.LENGTH_SHORT).show();
