@@ -117,12 +117,10 @@ public class KANTVAIModel {
      * consistently.
      */
     public String getModalityTag() {
-        StringBuilder sb = new StringBuilder("[");
-        boolean first = true;
-        if (supportsText())  { sb.append("text");      first = false; }
-        if (supportsImage()) { sb.append(first ? "image"      : "+image"); first = false; }
-        if (supportsAudio()) { sb.append(first ? "audio"      : "+audio");                    }
-        sb.append("]");
-        return sb.toString();
+        java.util.List<String> parts = new java.util.ArrayList<>(3);
+        if (supportsText())  parts.add("text");
+        if (supportsImage()) parts.add("image");
+        if (supportsAudio()) parts.add("audio");
+        return "[" + String.join("+", parts) + "]";
     }
 }

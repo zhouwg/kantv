@@ -135,6 +135,14 @@ import java.util.Locale;
                 // so subsequent reads via Settings.getLLMModel() return the
                 // healed value. This also keeps SharedPreferences in sync with
                 // whatever the dropdown currently shows.
+                //
+                // Side effect: this is a "heal on access" pattern. Every time
+                // the user opens the LLM Setting page, if the stored value is
+                // out of range it gets silently overwritten with a valid one.
+                // The previous default of "6" was out of range (only 0..5 LLM
+                // models exist as of this writing) and caused first-launch
+                // users to hit an NPE in KANTVAIModelMgr.getModelName(); the
+                // healing below makes that class of crash unreproducible.
             } else {
                 KANTVLog.g(TAG, "can't find preference");
             }
