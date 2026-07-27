@@ -121,6 +121,7 @@ import kantvai.media.player.KANTVLog;
                      + "Arch:" + Build.CPU_ABI + " "
                      + "(" + systemInfo + ")" + " ";
          } else {
+             /*
              deviceInfo = "Device info:" + " "
                      + Build.BRAND + " "
                      + Build.HARDWARE + " "
@@ -130,6 +131,12 @@ import kantvai.media.player.KANTVLog;
                      + "Mem:total " + (totalMem >> 20) + "MB" + " "
                      + "available " + (availMem >> 20) + "MB" + " "
                      + "usage " + (totalUsageMemory >> 10) + "MB";
+              */
+             deviceInfo = "Device info:" + " "
+                     + Build.BRAND + " "
+                     + Build.HARDWARE + " "
+                     + "Android " + Build.VERSION.RELEASE + " "
+                     + "Arch:" + Build.CPU_ABI + " ";
          }
 
          return deviceInfo;

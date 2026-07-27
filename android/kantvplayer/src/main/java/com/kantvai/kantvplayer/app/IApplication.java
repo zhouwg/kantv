@@ -54,6 +54,17 @@ public class IApplication extends Application {
     private final static String TAG = IApplication.class.getName();
     public static boolean startCorrectlyFlag = false;
 
+    /**
+     * SharedPreferences key for the "ASR subsystem init failed" flag.
+     * Written by IApplication.onCreate() when ggml_jni.asr_init() does
+     * not return 0 (typically because the whisper model file selected in
+     * ASRSettingFragment is missing or corrupt on disk). Read by
+     * AIResearchFragment to surface an actionable toast on entry instead
+     * of letting the cryptic JNI "asr instance not initialized" error
+     * bubble appear after the user clicks Send.
+     */
+    public static final String KEY_ASR_INIT_FAILED = "asr_init_failed";
+
     private static Handler mainHandler;
     private static ThreadPoolExecutor executor;
     private static ExecutorService sqlExecutor;
@@ -434,15 +445,31 @@ public class IApplication extends Application {
             KANTVUtils.setTVASR(false);
             if (0 == result) {
                 KANTVAIUtils.setASRSubsystemInit(true);
+                // Clear any previously stored "ASR init failed" flag.
+                // The flag is only meaningful when asr_init fails; once
+                // init succeeds the user no longer needs to be warned.
+                mSharedPreferences.edit()
+                        .putBoolean(KEY_ASR_INIT_FAILED, false)
+                        .apply();
             } else {
                 KANTVLog.j(TAG, "********************************************\n");
                 KANTVLog.j(TAG, " pls check why failed to initialize ggml jni\n");
                 KANTVLog.j(TAG, "********************************************\n");
+                // Persist the failure so AIResearchFragment can surface an
+                // actionable toast on entry instead of letting the cryptic
+                // JNI "asr instance not initialized" bubble appear later.
+                mSharedPreferences.edit()
+                        .putBoolean(KEY_ASR_INIT_FAILED, true)
+                        .apply();
             }
         } catch (Exception e) {
             KANTVLog.j(TAG, "********************************************\n");
             KANTVLog.j(TAG, " pls check why failed to initialize ggml jni: " + e.toString() + "\n");
             KANTVLog.j(TAG, "********************************************\n");
+            // Same as above: surface the failure to the UI layer.
+            mSharedPreferences.edit()
+                    .putBoolean(KEY_ASR_INIT_FAILED, true)
+                    .apply();
         }
 
         int thresoldsize = Integer.valueOf(mSettings.getThresholddisksize());

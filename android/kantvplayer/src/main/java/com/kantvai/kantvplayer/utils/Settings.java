@@ -481,6 +481,21 @@ public class Settings {
     }
 
 
+    /**
+     * Persist the user's LLM model selection. The chat screen writes
+     * here when the user picks a model from the settings dialog so
+     * the LLM Setting page and the next launch reflect the choice.
+     *
+     * @param llmIndex LLM index in KANTVAIModelMgr (NOT the global
+     *                 AIModels index - non-LLM models are not counted).
+     */
+    public void updateLLMModelIndex(int llmIndex) {
+        String key = mAppContext.getString(R.string.pref_key_llmmodel);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(key, String.valueOf(llmIndex));
+        editor.apply();
+    }
+
     public int getHFEndpoint() {
         String key = mAppContext.getString(R.string.pref_key_hfendpoint);
         String value = mSharedPreferences.getString(key, "0"); //default is official HuggingFace site
