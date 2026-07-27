@@ -16,6 +16,7 @@
 #include "ndkcamera.h"
 
 #include <string>
+#include <climits>
 
 #include <android/log.h>
 
@@ -39,16 +40,17 @@ static void onError(void* context, ACameraDevice* device, int error)
 
 static void onImageAvailable(void* context, AImageReader* reader)
 {
-    //LOGGD("NdkCamera: onImageAvailable %p", reader);
-    if (0 == realtimemtmd_is_running_state())
-        return;
+    // NOTE: do NOT check realtimemtmd_is_running_state() here.
+    // That flag gates INFERENCE (see do_inference / mtmd_inference), not preview.
+    // Checking it here causes black screen when openCamera() resets the flag
+    // before surfaceChanged/onSessionActive re-init it.
 
     AImage* image = 0;
     media_status_t status = AImageReader_acquireLatestImage(reader, &image);
 
     if (status != AMEDIA_OK)
     {
-        // error
+        LOGGW("onImageAvailable: acquireLatestImage failed status=%d", status);
         return;
     }
 
@@ -188,22 +190,6 @@ NdkCamera::NdkCamera()
     capture_session_output_container = 0;
     capture_session_output = 0;
     capture_session = 0;
-
-
-    // setup imagereader and its surface
-    {
-        AImageReader_new(640, 480, AIMAGE_FORMAT_YUV_420_888, /*maxImages*/2, &image_reader);
-
-        AImageReader_ImageListener listener;
-        listener.context = this;
-        listener.onImageAvailable = onImageAvailable;
-
-        AImageReader_setImageListener(image_reader, &listener);
-
-        AImageReader_getWindow(image_reader, &image_reader_surface);
-
-        ANativeWindow_acquire(image_reader_surface);
-    }
 }
 
 NdkCamera::~NdkCamera()
@@ -213,9 +199,6 @@ NdkCamera::~NdkCamera()
     if (image_reader)
     {
         LOGGD("calling AImageReader_delete");
-        //attention: deadlock here if used improperly
-        //source code of NDKCamera API AImageReader_delete refer to:
-        //https://github.com/yuchuangu85/Android-framework-code/blob/master/av/media/ndk/NdkImageReader.cpp#L750
         AImageReader_delete(image_reader);
         image_reader = 0;
         LOGGD("after calling AImageReader_delete");
@@ -229,32 +212,108 @@ NdkCamera::~NdkCamera()
     LOGGD("leave %s", __func__);
 }
 
+// Pick a YUV_420_888 output size closest to the preferred size.
+// The previous hardcoded 640x480 image reader could fail for the rear camera
+// on some devices if that size is not published in the camera's available
+// stream configurations. Query ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS
+// and fall back to the closest supported size.
+static bool find_best_yuv_size(ACameraMetadata* camera_metadata, int preferred_w, int preferred_h,
+                               int* out_w, int* out_h)
+{
+    ACameraMetadata_const_entry e = { 0 };
+    camera_status_t status = ACameraMetadata_getConstEntry(camera_metadata,
+            ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS, &e);
+    if (status != ACAMERA_OK || e.count == 0 || e.data.i32 == nullptr) {
+        LOGGW("find_best_yuv_size: failed to get stream configs, status=%d count=%u",
+              status, e.count);
+        return false;
+    }
+
+    int best_w = 0;
+    int best_h = 0;
+    int best_diff = INT_MAX;
+    const int preferred_area = preferred_w * preferred_h;
+
+    for (uint32_t i = 0; i + 3 < e.count; i += 4) {
+        int32_t format = e.data.i32[i];
+        int32_t w = e.data.i32[i + 1];
+        int32_t h = e.data.i32[i + 2];
+        int32_t input = e.data.i32[i + 3]; // 0 = output, 1 = input
+
+        if (format != AIMAGE_FORMAT_YUV_420_888 || input != ACAMERA_SCALER_AVAILABLE_STREAM_CONFIGURATIONS_OUTPUT) {
+            continue;
+        }
+
+        int diff = w * h - preferred_area;
+        if (diff < 0) diff = -diff;
+        if (diff < best_diff) {
+            best_diff = diff;
+            best_w = w;
+            best_h = h;
+        }
+    }
+
+    if (best_w == 0 || best_h == 0) {
+        LOGGW("find_best_yuv_size: no YUV_420_888 output config found");
+        return false;
+    }
+
+    *out_w = best_w;
+    *out_h = best_h;
+    return true;
+}
+
 int NdkCamera::open(int _camera_facing)
 {
     LOGGI("NdkCamera: open camera %d", _camera_facing);
+
+    // skip if already opened with the same facing — repeated open() calls
+    // (e.g. from multiple UI events during slow model_init) cause camera device conflict
+    // return 1 so the caller knows it was a no-op and must NOT reset the running state
+    if (camera_device && camera_facing == _camera_facing) {
+        LOGGI("NdkCamera: camera already opened with facing %d, skip", _camera_facing);
+        return 1;
+    }
+
+    // close any existing camera device/session/image reader before opening a new one.
+    close();
 
     camera_facing = _camera_facing;
 
     camera_manager = ACameraManager_create();
 
-    // find front camera
+    // find camera with requested facing
     std::string camera_id;
     {
         ACameraIdList* camera_id_list = 0;
-        ACameraManager_getCameraIdList(camera_manager, &camera_id_list);
+        camera_status_t id_status = ACameraManager_getCameraIdList(camera_manager, &camera_id_list);
+        if (id_status != ACAMERA_OK || !camera_id_list) {
+            LOGGW("NdkCamera: getCameraIdList failed status=%d", id_status);
+            return -1;
+        }
 
         for (int i = 0; i < camera_id_list->numCameras; ++i)
         {
             const char* id = camera_id_list->cameraIds[i];
             ACameraMetadata* camera_metadata = 0;
-            ACameraManager_getCameraCharacteristics(camera_manager, id, &camera_metadata);
+            camera_status_t c_status = ACameraManager_getCameraCharacteristics(camera_manager, id, &camera_metadata);
+            if (c_status != ACAMERA_OK || !camera_metadata) {
+                LOGGW("NdkCamera: getCameraCharacteristics failed for %s status=%d", id, c_status);
+                continue;
+            }
 
-            // query faceing
+            // query facing
             acamera_metadata_enum_android_lens_facing_t facing = ACAMERA_LENS_FACING_FRONT;
             {
                 ACameraMetadata_const_entry e = { 0 };
-                ACameraMetadata_getConstEntry(camera_metadata, ACAMERA_LENS_FACING, &e);
-                facing = (acamera_metadata_enum_android_lens_facing_t)e.data.u8[0];
+                camera_status_t f_status = ACameraMetadata_getConstEntry(camera_metadata, ACAMERA_LENS_FACING, &e);
+                if (f_status == ACAMERA_OK && e.count > 0 && e.data.u8) {
+                    facing = (acamera_metadata_enum_android_lens_facing_t)e.data.u8[0];
+                } else {
+                    LOGGW("NdkCamera: get LENS_FACING failed for %s status=%d", id, f_status);
+                    ACameraMetadata_free(camera_metadata);
+                    continue;
+                }
             }
 
             if (camera_facing == 0 && facing != ACAMERA_LENS_FACING_FRONT)
@@ -275,19 +334,63 @@ int NdkCamera::open(int _camera_facing)
             int orientation = 0;
             {
                 ACameraMetadata_const_entry e = { 0 };
-                ACameraMetadata_getConstEntry(camera_metadata, ACAMERA_SENSOR_ORIENTATION, &e);
+                camera_status_t o_status = ACameraMetadata_getConstEntry(camera_metadata, ACAMERA_SENSOR_ORIENTATION, &e);
+                if (o_status == ACAMERA_OK && e.count > 0 && e.data.i32) {
+                    orientation = (int)e.data.i32[0];
+                } else {
+                    LOGGW("NdkCamera: get SENSOR_ORIENTATION failed for %s status=%d", id, o_status);
+                }
+            }
 
-                orientation = (int)e.data.i32[0];
+            // query supported stream configurations and create image reader
+            // with a size that is guaranteed to be supported by this camera.
+            int image_reader_w = 640;
+            int image_reader_h = 480;
+            if (!find_best_yuv_size(camera_metadata, 640, 480, &image_reader_w, &image_reader_h)) {
+                LOGGW("NdkCamera: cannot query stream configs for %s, fallback to 640x480", id);
+                image_reader_w = 640;
+                image_reader_h = 480;
             }
 
             camera_orientation = orientation;
 
             ACameraMetadata_free(camera_metadata);
 
+            // create image reader and its surface for this camera
+            LOGGI("NdkCamera: selected image reader size %dx%d for %s", image_reader_w, image_reader_h, id);
+            media_status_t mr_status = AImageReader_new(image_reader_w, image_reader_h,
+                    AIMAGE_FORMAT_YUV_420_888, /*maxImages*/2, &image_reader);
+            if (mr_status != AMEDIA_OK || !image_reader) {
+                LOGGW("NdkCamera: AImageReader_new(%d,%d) failed status=%d reader=%p",
+                      image_reader_w, image_reader_h, mr_status, image_reader);
+                camera_id.clear();
+                break;
+            }
+
+            AImageReader_ImageListener listener;
+            listener.context = this;
+            listener.onImageAvailable = onImageAvailable;
+            AImageReader_setImageListener(image_reader, &listener);
+
+            AImageReader_getWindow(image_reader, &image_reader_surface);
+            if (!image_reader_surface) {
+                LOGGW("NdkCamera: AImageReader_getWindow returned null");
+                AImageReader_delete(image_reader);
+                image_reader = 0;
+                camera_id.clear();
+                break;
+            }
+            ANativeWindow_acquire(image_reader_surface);
+
             break;
         }
 
         ACameraManager_deleteCameraIdList(camera_id_list);
+    }
+
+    if (camera_id.empty()) {
+        LOGGW("NdkCamera: no matching camera found for facing %d", camera_facing);
+        return -1;
     }
 
     LOGGI("NdkCamera: open %s %d", camera_id.c_str(), camera_orientation);
@@ -299,15 +402,33 @@ int NdkCamera::open(int _camera_facing)
         camera_device_state_callbacks.onDisconnected = onDisconnected;
         camera_device_state_callbacks.onError = onError;
 
-        ACameraManager_openCamera(camera_manager, camera_id.c_str(), &camera_device_state_callbacks, &camera_device);
+        camera_status_t open_status = ACameraManager_openCamera(camera_manager, camera_id.c_str(),
+                                                                &camera_device_state_callbacks, &camera_device);
+        if (open_status != ACAMERA_OK || !camera_device) {
+            LOGGW("NdkCamera: openCamera failed status=%d device=%p", open_status, camera_device);
+            return -1;
+        }
     }
 
     // capture request
     {
-        ACameraDevice_createCaptureRequest(camera_device, TEMPLATE_PREVIEW, &capture_request);
+        camera_status_t cr_status = ACameraDevice_createCaptureRequest(camera_device, TEMPLATE_PREVIEW, &capture_request);
+        if (cr_status != ACAMERA_OK || !capture_request) {
+            LOGGW("NdkCamera: createCaptureRequest failed status=%d request=%p", cr_status, capture_request);
+            return -1;
+        }
 
-        ACameraOutputTarget_create(image_reader_surface, &image_reader_target);
-        ACaptureRequest_addTarget(capture_request, image_reader_target);
+        camera_status_t ot_status = ACameraOutputTarget_create(image_reader_surface, &image_reader_target);
+        if (ot_status != ACAMERA_OK || !image_reader_target) {
+            LOGGW("NdkCamera: createOutputTarget failed status=%d target=%p", ot_status, image_reader_target);
+            return -1;
+        }
+
+        camera_status_t at_status = ACaptureRequest_addTarget(capture_request, image_reader_target);
+        if (at_status != ACAMERA_OK) {
+            LOGGW("NdkCamera: addTarget failed status=%d", at_status);
+            return -1;
+        }
     }
 
     // capture session
@@ -324,7 +445,12 @@ int NdkCamera::open(int _camera_facing)
 
         ACaptureSessionOutputContainer_add(capture_session_output_container, capture_session_output);
 
-        ACameraDevice_createCaptureSession(camera_device, capture_session_output_container, &camera_capture_session_state_callbacks, &capture_session);
+        camera_status_t cs_status = ACameraDevice_createCaptureSession(camera_device, capture_session_output_container, &camera_capture_session_state_callbacks, &capture_session);
+        LOGGI("NdkCamera: createCaptureSession status=%d session=%p", cs_status, capture_session);
+        if (cs_status != ACAMERA_OK || !capture_session) {
+            LOGGW("NdkCamera: createCaptureSession failed");
+            return -1;
+        }
 
         ACameraCaptureSession_captureCallbacks camera_capture_session_capture_callbacks;
         camera_capture_session_capture_callbacks.context = this;
@@ -336,7 +462,13 @@ int NdkCamera::open(int _camera_facing)
         camera_capture_session_capture_callbacks.onCaptureSequenceAborted = onCaptureSequenceAborted;
         camera_capture_session_capture_callbacks.onCaptureBufferLost = 0;
 
-        ACameraCaptureSession_setRepeatingRequest(capture_session, &camera_capture_session_capture_callbacks, 1, &capture_request, nullptr);
+        int seqId = -1;
+        camera_status_t sr_status = ACameraCaptureSession_setRepeatingRequest(capture_session, &camera_capture_session_capture_callbacks, 1, &capture_request, &seqId);
+        LOGGI("NdkCamera: setRepeatingRequest status=%d seqId=%d", sr_status, seqId);
+        if (sr_status != ACAMERA_OK) {
+            LOGGW("NdkCamera: setRepeatingRequest failed");
+            return -1;
+        }
     }
 
     return 0;
@@ -383,6 +515,23 @@ void NdkCamera::close()
     {
         ACameraOutputTarget_free(image_reader_target);
         image_reader_target = 0;
+    }
+
+    if (image_reader)
+    {
+        LOGGD("calling AImageReader_delete");
+        //attention: deadlock here if used improperly
+        //source code of NDKCamera API AImageReader_delete refer to:
+        //https://github.com/yuchuangu85/Android-framework-code/blob/master/av/media/ndk/NdkImageReader.cpp#L750
+        AImageReader_delete(image_reader);
+        image_reader = 0;
+        LOGGD("after calling AImageReader_delete");
+    }
+
+    if (image_reader_surface)
+    {
+        ANativeWindow_release(image_reader_surface);
+        image_reader_surface = 0;
     }
 
     if (camera_manager)
@@ -477,13 +626,17 @@ NdkCameraWindow::~NdkCameraWindow()
 
 void NdkCameraWindow::set_window(ANativeWindow* _win)
 {
+    LOGGI("set_window: old win=%p new win=%p", win, _win);
     if (win)
     {
         ANativeWindow_release(win);
     }
 
     win = _win;
-    ANativeWindow_acquire(win);
+    if (win) {
+        ANativeWindow_acquire(win);
+        LOGGI("set_window: acquired win=%p", win);
+    }
 }
 
 void NdkCameraWindow::on_image_render(cv::Mat& rgb) const
@@ -492,6 +645,13 @@ void NdkCameraWindow::on_image_render(cv::Mat& rgb) const
 
 void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv21_height) const
 {
+    // win may be NULL if frames arrive before set_window() is called
+    // (e.g. during reload() in initView before surfaceChanged). Skip silently.
+    if (!win)
+    {
+        return;
+    }
+
     // resolve orientation from camera_orientation and accelerometer_sensor
     {
         if (!sensor_event_queue)
@@ -747,7 +907,11 @@ void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv
     ANativeWindow_setBuffersGeometry(win, render_w, render_h, AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM);
 
     ANativeWindow_Buffer buf;
-    ANativeWindow_lock(win, &buf, NULL);
+    int lock_ret = ANativeWindow_lock(win, &buf, NULL);
+    if (lock_ret != 0) {
+        LOGGW("on_image: ANativeWindow_lock failed ret=%d win=%p", lock_ret, win);
+        return;
+    }
 
     // scale to target size
     if (buf.format == AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM || buf.format == AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM)
@@ -787,4 +951,10 @@ void NdkCameraWindow::on_image(const unsigned char* nv21, int nv21_width, int nv
     }
 
     ANativeWindow_unlockAndPost(win);
+
+    static int render_count = 0;
+    render_count++;
+    if (render_count <= 5 || render_count % 100 == 0) {
+        LOGGD("on_image: render ok frame %d win=%p %dx%d", render_count, win, render_w, render_h);
+    }
 }

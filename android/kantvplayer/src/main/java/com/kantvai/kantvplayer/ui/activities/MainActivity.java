@@ -443,6 +443,12 @@ package com.kantvai.kantvplayer.ui.activities;
                 getFragmentTransaction().add(R.id.fragment_container, llmFragment).commit();
             } else {
                 getFragmentTransaction().show(llmFragment).commit();
+                // Default to front camera. The rear camera on SD 8 Elite has a HAL
+                // bug that disconnects the device within ~0.7s of streaming start
+                // when the Hexagon DSP session is active (see
+                // debug-rear-camera-preview-fail.md). The toggle button in the
+                // fragment can still switch to the rear camera; it just shows a
+                // warning because the preview will fail.
                 llmFragment.reload(0);
             }
             previousFragment = llmFragment;
