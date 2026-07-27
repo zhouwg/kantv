@@ -160,6 +160,10 @@ private:
 
     MyNdkCamera *    ndkcamera_instance        = nullptr;
 
+    // serializes camera_init/camera_open/camera_close/camera_finalize which may
+    // run on the UI thread (lifecycle events) or other Java threads
+    std::mutex       camera_mutex;
+
     long long        frame_index       = 0;
 
     bool initialized = false;
@@ -187,6 +191,11 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     LOGGD("using hexagon CDSP backend (compile-time decision)");
     params.main_gpu = 0;  // device index 0 = CDSP (upstream ggml-hexagon only has device 0)
     params.n_gpu_layers = 99;
+    // fit_params would load the model up to 4 times to auto-fit n_ctx, which
+    // re-initializes the hexagon backend each time and slows down startup
+    params.fit_params = false;
+    // skip warmup so no DSP computation happens during model loading
+    params.warmup = false;
 #else
     //build-time decision: use default ggml CPU backend
     LOGGD("using default ggml CPU backend (compile-time decision)");
@@ -203,10 +212,6 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     LOGGD("%s\n", common_params_get_system_info(params).c_str());
     LOGGD("\n");
 
-    // === DEBUG: step-by-step re-enable ===
-    // Currently testing: llama_backend_init() + llama_numa_init()
-    // Next steps are commented out to isolate whether backend init alone breaks camera
-#if 0
     //step-2: load LLM model
     LOGGD("loading model '%s'\n", params.model.path.c_str());
     llama_init = common_init_from_params(params);
@@ -257,13 +262,13 @@ bool multimodal_inference::model_init(const char * llm_model_name,
         params.prompt += " ";
         params.prompt += mtmd_default_marker();
     }
-#endif
 
     return true;
 }
 
 void multimodal_inference::camera_init() {
     LOGGD("initialize camera");
+    std::lock_guard<std::mutex> lock(camera_mutex);
     if (nullptr == ndkcamera_instance) {
         // ncnn GPU instance removed: image_utils has no GPU dependency.
         ndkcamera_instance = new MyNdkCamera;
@@ -274,13 +279,21 @@ void multimodal_inference::camera_init() {
 
 bool multimodal_inference::camera_open(int facing) {
     LOGGD("open camera");
+    std::lock_guard<std::mutex> lock(camera_mutex);
     if (facing < 0 || facing > 1) {
         LOGGD("invalid param");
         return false;
     }
     if (nullptr != ndkcamera_instance) {
-        ndkcamera_instance->open(facing);
-        realtimemtmd_reset_running_state();
+        int rc = ndkcamera_instance->open(facing);
+        // rc == 1 means the identical camera is already open and open() did nothing.
+        // Do NOT reset the running state in that case: duplicate openCamera() calls
+        // from onStart/onResume would otherwise stop inference until the next
+        // surfaceChanged/onSessionActive event (which never comes without a reopen),
+        // leaving inference permanently disabled after entering this UI.
+        if (rc != 1) {
+            realtimemtmd_reset_running_state();
+        }
     } else {
         LOGGD("camera already opened");
     }
@@ -289,6 +302,7 @@ bool multimodal_inference::camera_open(int facing) {
 
 void multimodal_inference::camera_finalize() {
     LOGGD("finalize camera");
+    std::lock_guard<std::mutex> lock(camera_mutex);
     if (nullptr != ndkcamera_instance) {
         // ncnn GPU instance removed: image_utils has no GPU dependency.
         delete ndkcamera_instance;
@@ -300,6 +314,7 @@ void multimodal_inference::camera_finalize() {
 
 void multimodal_inference::camera_close() {
     LOGGD("close camera");
+    std::lock_guard<std::mutex> lock(camera_mutex);
     if (nullptr != ndkcamera_instance) {
         realtimemtmd_reset_running_state();
         ndkcamera_instance->close();
@@ -311,17 +326,13 @@ void multimodal_inference::camera_close() {
 
 void multimodal_inference::camera_set_outputwindow(ANativeWindow * win) {
     LOGGD("setOutputWindow %p", win);
+    std::lock_guard<std::mutex> lock(camera_mutex);
     if (nullptr != ndkcamera_instance) {
         ndkcamera_instance->set_window(win);
     }
 }
 
 void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
-    // DEBUG: inference disabled — preview only
-    (void)rgb;
-    LOGGD("mtmd_inference: disabled (preview-only mode)");
-    return;
-#if 0
     llm_inference_interrupted = 0;
     //load image from memory
     mtmd_bitmap * bitmap = mtmd_bitmap_init(rgb.cols, rgb.rows, rgb.data);
@@ -426,13 +437,10 @@ void multimodal_inference::mtmd_inference(cv::Mat & rgb) {
         llama_perf_context_print(lctx);
     }
     LOGGD("return");
-#endif
 }
 
 void multimodal_inference::finalize() {
     LOGGD("finalize");
-    // DEBUG: model cleanup disabled — preview only
-#if 0
     if (initialized) {
         if (nullptr != smpl)
             common_sampler_free(smpl);
@@ -442,13 +450,10 @@ void multimodal_inference::finalize() {
 
         llama_backend_free();
 
-        camera_finalize();
-
         initialized = false;
     } else {
         LOGGD("already finalize");
     }
-#endif
     camera_finalize();
 }
 
@@ -472,11 +477,17 @@ void multimodal_inference::do_inference(cv::Mat & rgb) {
 static class multimodal_inference & g_mmi_instance = multimodal_inference::get_instance();
 
 bool jni_open_camera(int facing) {
-    LOGGD("open camera");
+    LOGGD("open camera, facing %d", facing);
+    if (facing < 0 || facing > 1) {
+        LOGGD("invalid param");
+        return false;
+    }
+    // synchronous model load + camera open: works correctly on 8gen3; the
+    // background-init variant caused black screens and camera-toggle bugs on
+    // other devices, so we keep the original sequential flow.
     g_mmi_instance.init();
     g_mmi_instance.camera_init();
-    bool result = g_mmi_instance.camera_open(facing);
-    return result;
+    return g_mmi_instance.camera_open(facing);
 }
 
 void jni_close_camera() {

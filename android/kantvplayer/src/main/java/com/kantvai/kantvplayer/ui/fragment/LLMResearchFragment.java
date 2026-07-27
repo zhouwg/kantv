@@ -63,7 +63,11 @@
      private MyEventListener mEventListener = new MyEventListener();
      private KANTVAIModelMgr LLMModelMgr = KANTVAIModelMgr.getInstance();
 
-     private int facing = 0; //default is back camera
+     // C++ NdkCamera convention: 0 = front, 1 = back
+     private static final int CAMERA_FACING_FRONT = 0;
+     private static final int CAMERA_FACING_BACK = 1;
+
+     private int facing = CAMERA_FACING_FRONT; //default is front camera (rear camera has HAL bug on SD 8 Elite)
 
      private SurfaceView cameraView;
 
@@ -142,12 +146,12 @@
          cameraView.getHolder().setFixedSize(480, 640);
 
          Button buttonSwitchCamera = mActivity.findViewById(R.id.buttonSwitchCamera);
-         buttonSwitchCamera.setOnClickListener(arg0 -> {
-            reload();
-         });
+        buttonSwitchCamera.setOnClickListener(arg0 -> {
+           reload();
+        });
 
-         reload();
-         mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        reload(CAMERA_FACING_FRONT);
+        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
          checkLLMModelExist();
          endTime = System.currentTimeMillis();
@@ -161,23 +165,31 @@
      }
 
      private void reload() {
-         KANTVLog.g(TAG, "reload");
-         int new_facing = 1 - facing;
-         ggmljava.closeCamera();
-         ggmljava.openCamera(new_facing);
-         if (cameraView.getHolder().getSurface().isValid())
+        KANTVLog.g(TAG, "reload");
+        int new_facing = (facing == CAMERA_FACING_BACK) ? CAMERA_FACING_FRONT : CAMERA_FACING_BACK;
+        if (new_facing == CAMERA_FACING_BACK) {
+            // Known issue: the rear camera HAL on SD 8 Elite reports ERROR_CAMERA_DEVICE
+            // within ~0.7s of streaming start when the Hexagon DSP session is active
+            // (see debug-rear-camera-preview-fail.md). Surface the limitation to the user
+            // instead of silently going black.
+            android.widget.Toast.makeText(getContext(),
+                    "Rear camera is unstable on this device while inference is running",
+                    android.widget.Toast.LENGTH_LONG).show();
+        }
+        ggmljava.closeCamera();
+        ggmljava.openCamera(new_facing);
+        if (cameraView.getHolder().getSurface().isValid())
             ggmljava.setOutputWindow(cameraView.getHolder().getSurface());
-         facing = new_facing;
-     }
+        facing = new_facing;
+    }
 
-     public void reload(int back_camera) {
-         KANTVLog.g(TAG, "reload: " + back_camera);
-         int new_facing = 1 - back_camera;
+     public void reload(int camera_facing) {
+         KANTVLog.g(TAG, "reload: " + camera_facing);
          ggmljava.closeCamera();
-         ggmljava.openCamera(new_facing);
+         ggmljava.openCamera(camera_facing);
          if (cameraView.getHolder().getSurface().isValid())
             ggmljava.setOutputWindow(cameraView.getHolder().getSurface());
-         facing = new_facing;
+         facing = camera_facing;
 
          initKANTVMgr();
          txtLLMInfo.setText("");

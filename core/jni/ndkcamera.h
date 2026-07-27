@@ -35,6 +35,7 @@ public:
     virtual ~NdkCamera();
 
     // facing 0=front 1=back
+    // returns 0 on success, 1 if skipped (already opened with same facing), -1 on failure
     int open(int camera_facing = 0);
     void close();
 
