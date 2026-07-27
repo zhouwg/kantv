@@ -91,6 +91,14 @@ dependencies {
     //api 'androidx.media:media:' + androidxMediaVersion
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     compileOnly 'org.jetbrains.kotlin:kotlin-annotations-jvm:' + kotlinAnnotationsVersion
+
+    //https://github.com/noties/Markwon (vendored)
+    //Source moved to kantvai/tool/markwon/; transitive deps
+    //(org.commonmark.*) provided as raw JARs in libs/ since the
+    //commonmark library is pure Java and we don't need to modify it.
+    implementation files('libs/commonmark-0.13.0.jar')
+    implementation files('libs/commonmark-ext-gfm-strikethrough-0.13.0.jar')
+    implementation files('libs/commonmark-ext-gfm-tables-0.13.0.jar')
 }
 
 apply from: new File(rootProject.projectDir, "tools/gradle-on-demand.gradle");

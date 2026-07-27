@@ -24,7 +24,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.net.Uri;
-import android.text.Editable;
+import android.text.Spannable;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
@@ -52,8 +52,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import io.noties.markwon.Markwon;
 import kantvai.media.player.KANTVLog;
+import kantvai.tool.markwon.io.noties.markwon.Markwon;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = ChatAdapter.class.getSimpleName();
@@ -247,21 +247,41 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    // Top-level debug switch. 0 = all debug code is compiled out
+    // (dump skipped, header-stripping off). 1 = write streaming
+    // snapshots to /sdcard/Android/data/.../chat_dumps/ AND strip
+    // `## ...` markdown headers so they don't render as huge text
+    // in the chat bubble. The two are intentionally tied together:
+    // when something looks wrong in the chat, flip this to 1, pull
+    // the dump, debug, flip back to 0.
+    private static final int debug = 0;
+
+    // Strip leading "#" / "##" / "###" markers so the LLM's
+    // markdown headings (which Markwon would render as 1.5-2x sized
+    // bold, breaking the chat bubble layout) collapse to plain text.
+    // Only applied to the text that goes to Markwon; the original
+    // msg.getText() in the dump is untouched. The regex is bounded
+    // to line start + 1-6 hashes + spaces so it does NOT eat '#'
+    // chars in the middle of a sentence (e.g. "issue #123" or
+    // "C# language"). Lives on the outer class because non-static
+    // inner classes can't have static non-constant fields.
+    private static final java.util.regex.Pattern HEADER_STRIP =
+            java.util.regex.Pattern.compile("(?m)^#{1,6}\\s+");
+
     class AssistantViewHolder extends RecyclerView.ViewHolder {
         final TextView textView;
         final TextView timeView;
 
-        // Debug dump state. When enabled, every bind() writes a snapshot
-        // of the rendered text + span list to DUMP_DIR/state.txt and a
-        // PNG of the TextView's current pixels to DUMP_DIR/frame_*.png,
-        // throttled to one sample per DUMP_INTERVAL_MS. The user pulls
-        // these files off-device to diagnose transient streaming render
-        // bugs (e.g. headers being rendered at the wrong size during
-        // mid-stream rebinds). Toggle the flag here to disable; old
-        // files can be cleared with
+        // Debug dump state. When debug == 1, every bind() writes a
+        // snapshot of the rendered text + span list to
+        // DUMP_DIR/state.txt and a PNG of the TextView's current
+        // pixels to DUMP_DIR/frame_*.png, throttled to one sample
+        // per DUMP_INTERVAL_MS. The user pulls these files off-device
+        // to diagnose transient streaming render bugs (e.g. headers
+        // being rendered at the wrong size during mid-stream
+        // rebinds). Old files can be cleared with
         //   adb shell rm -rf <DUMP_DIR>
         // from a host shell.
-        private static final boolean DUMP_ENABLED   = true;
         private static final long   DUMP_INTERVAL_MS = 200L; // 5 fps
         // DUMP_DIR lives under the app's external files dir so we don't
         // need WRITE_EXTERNAL_STORAGE on Android 10+. Pull with:
@@ -270,6 +290,18 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private final File mDumpDir;
         private long mLastDumpTime = 0L;
         private int  mDumpFrameSeq = 0;
+
+        // Strip leading "#" / "##" / "###" markers so the LLM's
+        // markdown headings (which Markwon would render as 1.5-2x
+        // sized bold, breaking the chat bubble layout) collapse to
+        // plain text. Only applied to the text that goes to Markwon;
+        // the original msg.getText() in the dump is untouched. The
+        // regex is bounded to line start + 1-6 hashes + spaces so it
+        // does NOT eat '#' chars in the middle of a sentence (e.g.
+        // "issue #123" or "C# language").
+        // (debug dump state below. HEADER_STRIP itself lives on the
+        // outer ChatAdapter class because Java doesn't allow `static`
+        // non-constant fields in non-static inner classes.)
 
         AssistantViewHolder(View itemView) {
             super(itemView);
@@ -299,13 +331,25 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (msg.state == State.ERROR) {
                 textView.setText("⚠ " + msg.getText());
             } else if (mMarkwon != null) {
-                mMarkwon.setMarkdown(textView, msg.getText());
+                if (debug == 1) {
+                    // Strip leading '#'/##'/###' header markers so the
+                    // LLM's markdown headings don't render as 1.5-2x
+                    // sized bold. The original text is preserved in
+                    // the dump (see maybeDumpStreamingState) so this
+                    // preprocessing is reversible for inspection.
+                    String stripped = HEADER_STRIP.matcher(msg.getText()).replaceAll("");
+                    mMarkwon.setMarkdown(textView, stripped);
+                } else {
+                    mMarkwon.setMarkdown(textView, msg.getText());
+                }
             } else {
                 textView.setText(msg.getText());
             }
             String caret = (msg.state == State.STREAMING) ? " ▌" : "";
             timeView.setText(formatTime(msg.timestamp) + caret);
-            maybeDumpStreamingState(msg);
+            if (debug == 1) {
+                maybeDumpStreamingState(msg);
+            }
         }
 
         // -----------------------------------------------------------------
@@ -313,7 +357,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // -----------------------------------------------------------------
 
         private void maybeDumpStreamingState(ChatMessage msg) {
-            if (!DUMP_ENABLED || mDumpDir == null) {
+            if (mDumpDir == null) {
                 return;
             }
             long now = System.currentTimeMillis();
@@ -344,55 +388,57 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 fw.write("TEXT: " + body + "\n");
 
-                // Spans live on the TextView's Editable, not on the
-                // ChatMessage's buffer. We dump whatever Markwon or our
-                // own code has applied at this point.
+                // Spans live on the TextView's CharSequence, not on
+                // the ChatMessage's buffer. We accept any Spannable
+                // (Editable / SpannableString / SpannableStringBuilder)
+                // since Markwon hands us back a SpannableString after
+                // setMarkdown(). Dump whatever it has applied.
                 CharSequence cs = textView.getText();
-                if (cs instanceof Editable) {
-                    Editable editable = (Editable) cs;
-                    int len = editable.length();
+                if (cs instanceof Spannable) {
+                    Spannable sp = (Spannable) cs;
+                    int len = sp.length();
 
-                    StyleSpan[] styles = editable.getSpans(0, len, StyleSpan.class);
+                    StyleSpan[] styles = sp.getSpans(0, len, StyleSpan.class);
                     fw.write("StyleSpan count=" + styles.length + "\n");
                     for (StyleSpan s : styles) {
-                        int st = editable.getSpanStart(s);
-                        int en = editable.getSpanEnd(s);
+                        int st = sp.getSpanStart(s);
+                        int en = sp.getSpanEnd(s);
                         fw.write("  style=" + styleName(s.getStyle())
                                 + " [" + st + "," + en + ")"
                                 + " text=\"" + safeSlice(text, st, en) + "\"\n");
                     }
 
-                    RelativeSizeSpan[] sizes = editable.getSpans(0, len, RelativeSizeSpan.class);
+                    RelativeSizeSpan[] sizes = sp.getSpans(0, len, RelativeSizeSpan.class);
                     fw.write("RelativeSizeSpan count=" + sizes.length + "\n");
                     for (RelativeSizeSpan s : sizes) {
-                        int st = editable.getSpanStart(s);
-                        int en = editable.getSpanEnd(s);
+                        int st = sp.getSpanStart(s);
+                        int en = sp.getSpanEnd(s);
                         fw.write("  scale=" + s.getSizeChange()
                                 + " [" + st + "," + en + ")"
                                 + " text=\"" + safeSlice(text, st, en) + "\"\n");
                     }
 
-                    TypefaceSpan[] faces = editable.getSpans(0, len, TypefaceSpan.class);
+                    TypefaceSpan[] faces = sp.getSpans(0, len, TypefaceSpan.class);
                     fw.write("TypefaceSpan count=" + faces.length + "\n");
                     for (TypefaceSpan s : faces) {
-                        int st = editable.getSpanStart(s);
-                        int en = editable.getSpanEnd(s);
+                        int st = sp.getSpanStart(s);
+                        int en = sp.getSpanEnd(s);
                         fw.write("  family=\"" + s.getFamily() + "\""
                                 + " [" + st + "," + en + ")"
                                 + " text=\"" + safeSlice(text, st, en) + "\"\n");
                     }
 
-                    BackgroundColorSpan[] bgs = editable.getSpans(0, len, BackgroundColorSpan.class);
+                    BackgroundColorSpan[] bgs = sp.getSpans(0, len, BackgroundColorSpan.class);
                     fw.write("BackgroundColorSpan count=" + bgs.length + "\n");
                     for (BackgroundColorSpan s : bgs) {
-                        int st = editable.getSpanStart(s);
-                        int en = editable.getSpanEnd(s);
+                        int st = sp.getSpanStart(s);
+                        int en = sp.getSpanEnd(s);
                         fw.write("  color=" + Integer.toHexString(s.getBackgroundColor())
                                 + " [" + st + "," + en + ")"
                                 + " text=\"" + safeSlice(text, st, en) + "\"\n");
                     }
                 } else {
-                    fw.write("(textView.getText() is not Editable: " + cs.getClass().getName() + ")\n");
+                    fw.write("(textView.getText() is not Spannable: " + cs.getClass().getName() + ")\n");
                 }
                 fw.write("\n");
             } catch (Throwable t) {

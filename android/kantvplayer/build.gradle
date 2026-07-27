@@ -198,10 +198,8 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.2.3'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
 
-    //https://github.com/noties/Markwon
-    implementation "io.noties.markwon:core:4.6.2"
-    implementation "io.noties.markwon:ext-strikethrough:4.6.2"
-    implementation "io.noties.markwon:ext-tables:4.6.2"
+    //https://github.com/noties/Markwon - vendored in kantvplayer-lib
+    //(see kantvplayer-lib/src/main/java/kantvai/tool/markwon/)
 
     //TODO
     //https://github.com/H07000223/FlycoTabLayout
