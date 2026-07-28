@@ -51,6 +51,13 @@ import java.util.Locale;
 
     private LLMSettingHeaderPreference mHeaderPreference;
 
+    // Tracks the model path that was last seen by the pref.llmmodel
+    // change listener. The listener fires both for the user's dropdown
+    // choice AND for the "heal on access" setValue() during fragment
+    // creation (see line 133), so we need to compare against the last
+    // seen value to avoid spurious unloadModel() calls.
+    private String mLastSelectedModelPath = null;
+
 
      @Override
      public String getTitle() {
@@ -221,6 +228,34 @@ import java.util.Locale;
                     KANTVLog.g(TAG, "LLM model name: " + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel()));
                     String modelPath = KANTVUtils.getSDCardDataPath() + KANTVAIModelMgr.getInstance().getModelName(mSettings.getLLMModel());
                     KANTVLog.g(TAG, "modelPath:" + modelPath);
+
+                    // If the user actually switched to a *different* model
+                    // (not just the heal-on-access setValue that fires
+                    // during fragment creation) and no inference is
+                    // currently running, unload the model on the native
+                    // side right now.
+                    //
+                    // Why here and not in ensure_model_loaded: the C++
+                    // cache-miss path also has an unload + 500ms sleep
+                    // (Phase 2.5 / A), so the safety net is in place.
+                    // The point of doing it here is *latency* - by the
+                    // time the user navigates back to AI Research and
+                    // fires an inference, the 4GB has already been
+                    // released and the page-reclaimer has had seconds
+                    // (not milliseconds) to give those pages back to
+                    // the OS. The inference itself then takes the
+                    // cache-miss path's fast new-load branch instead
+                    // of unloading+loading in one go (which used to
+                    // OOM on a 12GB OnePlus, see project memory).
+                    if (mLastSelectedModelPath != null
+                            && !mLastSelectedModelPath.equals(modelPath)
+                            && !ggmljava.llm_is_running_state()) {
+                        KANTVLog.j(TAG, "Model changed from '"
+                                + mLastSelectedModelPath + "' to '" + modelPath
+                                + "', unloading old model proactively");
+                        ggmljava.unloadModel();
+                    }
+                    mLastSelectedModelPath = modelPath;
                 } catch (Exception ex) {
                     KANTVLog.g(TAG, "error: " + ex.toString());
                     KANTVUtils.showMsgBox(mActivity, "error: " + ex.toString());

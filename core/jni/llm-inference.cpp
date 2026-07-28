@@ -38,6 +38,9 @@ extern "C" {
 #include "libavutil/cde_assert.h"
 }
 #include "ggml-jni.h"
+// For Phase 2 model singleton: brings in g_jni_ctx extern declaration
+// and the accessors used by ensure_model_loaded() below.
+#include "ggml-jni-context.h"
 #include "llamacpp/ggml/include/ggml-hexagon.h"
 #endif
 
@@ -153,7 +156,12 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         params.sampling.top_p = llm_get_top_p();
         LOGGD("top_p %.2f\n", params.sampling.top_p);
     }
-    common_init();
+    // NOTE: common_init() and llama_backend_init() used to be called here.
+    // They are now installed exactly once in ggml_jni_context::init() and
+    // torn down in ggml_jni_context::cleanup() (called from
+    // AIResearchFragment.onDestroy() via ggmljava.backendCleanup()).
+    // The previous per-call cycle tore the Hexagon DSP down and back up on
+    // every LLM inference, which was the dominant heat source.
 
     auto & sparams = params.sampling;
     if (params.embedding) {
@@ -193,7 +201,12 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
     // hexagon backend is statically linked into libkantv-core.so, no need to
     // load separate .so via ggml_backend_load_all_from_path()
-    llama_backend_init();
+    // NOTE: llama_backend_init() used to be called here. It is now installed
+    // once for the whole JNI lifetime in ggml_jni_context::init() and torn
+    // down in ggml_jni_context::cleanup() (called from
+    // AIResearchFragment.onDestroy() via ggmljava.backendCleanup()).
+    // The previous per-call cycle tore the Hexagon DSP down and back up on
+    // every LLM inference, which was the dominant heat source.
     llama_numa_init(params.numa);
     log_timing("after llama_backend_init");
 
@@ -207,18 +220,41 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     std::vector<common_chat_msg> chat_msgs;
 
-    // load the model and apply lora adapter, if any
+    // load the model via the singleton (Phase 2). On a cache hit this
+    // returns in microseconds and skips the multi-second 4GB read that
+    // common_init_from_params() used to do here. On a cache miss
+    // (first call, or model path / backend mismatch) it loads the
+    // model into the singleton and we borrow the pointer.
     LOG_INF("%s: load the model and apply lora adapter, if any\n", __func__);
-    common_init_result_ptr llama_init = common_init_from_params(params);
-
-    model = llama_init->model();
-    ctx = llama_init->context();
-    log_timing("after model load (common_init)");
-
-    if (model == NULL) {
+    int load_rc = g_jni_ctx.ensure_model_loaded(
+        params.model.path.c_str(),
+        /* mmproj_path */ "",
+        /* n_gpu_layers */ params.n_gpu_layers); // LLM path; pass the actual ngl
+                                                 // so a CPU LLM (-ngl 0) does NOT
+                                                 // reuse a model previously loaded
+                                                 // with -ngl 99 into Hexagon ION
+    if (load_rc != 0) {
+        LOG_ERR("%s: ensure_model_loaded failed (rc=%d) for '%s'\n",
+                __func__, load_rc, params.model.path.c_str());
+        return 1;
+    }
+    model = g_jni_ctx.get_loaded_model();
+    if (model == nullptr) {
         LOG_ERR("%s: error: unable to load model\n", __func__);
         return 1;
     }
+    // Per-call llama_context from the cached model. Fresh KV cache per
+    // inference, with n_ctx / n_threads / batch settings from the
+    // caller's params.
+    {
+        llama_context_params ctx_params = common_context_params_to_llama(params);
+        ctx = llama_init_from_model(model, ctx_params);
+    }
+    if (ctx == nullptr) {
+        LOG_ERR("%s: failed to create llama_context from cached model\n", __func__);
+        return 1;
+    }
+    log_timing("after model load (singleton cache)");
 
     const llama_vocab * vocab = llama_model_get_vocab(model);
     auto chat_templates = common_chat_templates_init(model, params.chat_template);
@@ -1084,7 +1120,22 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     common_sampler_free(smpl);
 
-    llama_backend_free();
+    // lctx is per-call: it owns the KV cache for this conversation,
+    // so we always free it on exit. The cached llama_model lives in
+    // the ggml_jni_context singleton and is NOT freed here - it will
+    // be reused on the next LLM inference call (assuming the same
+    // model path) and is finally released by
+    // ggml_jni_context::unload_model() / cleanup() on app exit or
+    // explicit model switch.
+    if (ctx != nullptr) {
+        llama_free(ctx);
+        ctx = nullptr;
+    }
+
+    // llama_backend_free() used to be called here. The DSP backend is now
+    // owned by ggml_jni_context and released in cleanup(); calling free
+    // here would tear down the DSP that the next inference call (and the
+    // MTMD path) depends on.
 
     ggml_threadpool_free_fn(threadpool);
     ggml_threadpool_free_fn(threadpool_batch);
