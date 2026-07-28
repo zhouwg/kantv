@@ -679,14 +679,13 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                 if (chatAdapter != null) {
                     chatAdapter.appendToLast(chunk);
                 }
-                // Use scrollToPosition (instant) instead of
-                // smoothScrollToPosition. Smooth-scroll is the main source
-                // of the up-down jitter the user observed, because each
-                // token would otherwise start a fresh 250ms animation that
-                // never gets to finish.
-                if (chatRecyclerView != null && chatAdapter != null) {
-                    chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
-                }
+                // Pin the bottom of the streaming row to the bottom
+                // of the viewport. scrollStreamingToBottom() handles
+                // the "row is already on screen, just keep its
+                // growing bottom edge in view" case that the old
+                // scrollToPosition() couldn't (scrollToPosition is a
+                // no-op once the row is visible).
+                scrollStreamingToBottom();
             }
         };
 
@@ -1470,10 +1469,12 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
     }
 
     /**
-     * Keep the chat list pinned to the most recent row. Posting through
+     * Keep the chat list pinned to the most recent row, used when
+     * starting a new turn (a brand-new row is added). Posting through
      * the RecyclerView makes sure we run after the layout pass, so the
-     * item count is up-to-date and smoothScrollToPosition() can land on
-     * a valid index.
+     * item count is up-to-date and smoothScrollToPosition() can land
+     * on a valid index. The animation is fine here because the row
+     * count just changed - there's no "scrolling up" to fight against.
      */
     private void scrollToBottom() {
         if (chatRecyclerView == null || chatAdapter == null) {
@@ -1483,6 +1484,60 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
             int count = chatAdapter.getItemCount();
             if (count > 0) {
                 chatRecyclerView.smoothScrollToPosition(count - 1);
+            }
+        });
+    }
+
+    /**
+     * Pin the bottom of the last (streaming) row to the bottom of the
+     * RecyclerView as the row grows. Replaces the old
+     * `scrollToPosition(count-1)` call, which is a no-op once the
+     * last row is already on screen: scrollToPosition only guarantees
+     * the row is at the top of the viewport, but during streaming
+     * the row is the same item - its position in the list never
+     * changes, so scrollToPosition stops doing anything after the
+     * first call. Result: the user sees the new text appear at the
+     * bottom of the row while the viewport stays scrolled to the top
+     * of the row, which the user described as "the text doesn't
+     * auto-scroll".
+     *
+     * The fix is to measure how far the last child's bottom edge
+     * sticks out below the RecyclerView's bottom, and scrollBy() by
+     * exactly that amount. Posted so we run after the row's layout
+     * pass (otherwise getBottom() returns stale values).
+     */
+    private void scrollStreamingToBottom() {
+        if (chatRecyclerView == null || chatAdapter == null) {
+            return;
+        }
+        chatRecyclerView.post(() -> {
+            int count = chatAdapter.getItemCount();
+            if (count == 0) {
+                return;
+            }
+            RecyclerView.LayoutManager lm = chatRecyclerView.getLayoutManager();
+            if (!(lm instanceof LinearLayoutManager)) {
+                return;
+            }
+            LinearLayoutManager llm = (LinearLayoutManager) lm;
+            View lastChild = llm.findViewByPosition(count - 1);
+            if (lastChild == null) {
+                // Row not laid out yet (e.g. first chunk). Fall back
+                // to scrollToPosition which will at least bring the
+                // row into view.
+                llm.scrollToPosition(count - 1);
+                return;
+            }
+            int recyclerBottom = chatRecyclerView.getHeight()
+                    - chatRecyclerView.getPaddingBottom();
+            int childBottom = lastChild.getBottom();
+            int dy = childBottom - recyclerBottom;
+            if (dy > 0) {
+                // Only scroll down. If the user has manually
+                // scrolled up to read earlier text, leave them
+                // alone - the streaming row just keeps growing
+                // below the viewport.
+                chatRecyclerView.scrollBy(0, dy);
             }
         });
     }
