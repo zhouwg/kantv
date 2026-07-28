@@ -40,6 +40,9 @@
 
 //ggml-jni
 #include "ggml-jni.h"
+// For Phase 2 model singleton: brings in g_jni_ctx extern declaration
+// and the accessors used by ensure_model_loaded() below.
+#include "ggml-jni-context.h"
 
 //libllama
 #include "llama.h"
@@ -129,7 +132,10 @@ private:
     
 private:
     common_params      params;
-    common_init_result_ptr llama_init;
+    // llama_init was removed in Phase 2: model loading now goes through
+    // ggml_jni_context::ensure_model_loaded() which caches the
+    // llama_model in the singleton. The local `model` pointer is
+    // borrowed from the singleton and is NOT owned by this class.
 
     llama_model * model          = nullptr;
     llama_context * lctx         = nullptr;
@@ -201,9 +207,15 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     LOGGD("using default ggml CPU backend (compile-time decision)");
     params.main_gpu = 0;
 #endif
-    common_init();
-
-    llama_backend_init();
+    // NOTE: common_init() and llama_backend_init() used to be called here.
+    // They are now installed exactly once in ggml_jni_context::init() and
+    // torn down in ggml_jni_context::cleanup() (called from
+    // AIResearchFragment.onDestroy() via ggmljava.backendCleanup()).
+    // The previous per-call cycle tore the Hexagon DSP down and back up on
+    // every MTMD inference, which was the dominant heat source and
+    // contributed to the "2 succeed, 2 crash" intermittent abort on
+    // CDSP. We keep llama_numa_init() here because it depends on the
+    // n_threads value chosen by the user for *this* inference.
     llama_numa_init(params.numa);
     LOGGD("system info: n_threads = %d, n_threads_batch = %d, total_threads = %d\n",
           params.cpuparams.n_threads, params.cpuparams_batch.n_threads,
@@ -212,14 +224,34 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     LOGGD("%s\n", common_params_get_system_info(params).c_str());
     LOGGD("\n");
 
-    //step-2: load LLM model
+    //step-2: ensure model is loaded via the singleton (Phase 2).
+    //On a cache hit this skips the 4GB read.
     LOGGD("loading model '%s'\n", params.model.path.c_str());
-    llama_init = common_init_from_params(params);
-    model = llama_init->model();
-    lctx = llama_init->context();
+    int load_rc = g_jni_ctx.ensure_model_loaded(
+        params.model.path.c_str(),
+        params.mmproj.path.c_str(),
+        params.n_gpu_layers);
+    if (load_rc != 0) {
+        LOGGD("ensure_model_loaded failed (rc=%d) for '%s'\n",
+              load_rc, params.model.path.c_str());
+        return false;
+    }
+    model = g_jni_ctx.get_loaded_model();
+    mctx  = g_jni_ctx.get_loaded_mctx();
     if (model == nullptr) {
-        LOGGD("failed to load model, '%s'\n", params.model.path.c_str());
-        llama_backend_free();
+        LOGGD("cached model is null after ensure_model_loaded\n");
+        return false;
+    }
+    // Per-call llama_context from the cached model. Fresh KV cache per
+    // inference, with n_ctx / n_threads / batch settings from the
+    // caller's params. llama_init_from_model is the modern
+    // (non-deprecated) replacement for llama_new_context_with_model.
+    {
+        llama_context_params ctx_params = common_context_params_to_llama(params);
+        lctx = llama_init_from_model(model, ctx_params);
+    }
+    if (lctx == nullptr) {
+        LOGGD("failed to create llama_context from cached model\n");
         return false;
     }
     vocab = llama_model_get_vocab(model);
@@ -241,7 +273,7 @@ bool multimodal_inference::model_init(const char * llm_model_name,
     if (mctx == nullptr) {
         LOGGD("failed to load multimodal model, '%s'\n", mmproj_path.c_str());
         common_sampler_free(smpl);
-        llama_backend_free();
+        // llama_backend_free() removed: backend is owned by ggml_jni_context.
         return false;
     }
     LOGGD("loaded multimodal model, '%s'\n", mmproj_path.c_str());
@@ -445,10 +477,28 @@ void multimodal_inference::finalize() {
         if (nullptr != smpl)
             common_sampler_free(smpl);
 
-        if (nullptr != mctx)
-            mtmd_free(mctx);
+        // lctx is per-call (in the realtime path each frame's inference
+        // reuses the same lctx for KV cache, so we free it here too).
+        if (nullptr != lctx)
+            llama_free(lctx);
 
-        llama_backend_free();
+        // batch is a llama_batch value (not a pointer), so a nullptr
+        // check would not type-check. llama_batch_free() is safe to
+        // call on a default-initialized llama_batch{} because the
+        // three owned pointers (token / pos / logits) are all null
+        // and free(NULL) is a no-op. We always free here so the
+        // n_batch-sized heap arrays do not leak across finalizes.
+        llama_batch_free(batch);
+
+        // model and mctx are NOT freed: they are owned by the
+        // ggml_jni_context singleton and are reused across calls.
+        // They are released by ggml_jni_context::unload_model() /
+        // cleanup() on app exit or explicit model switch.
+
+        // llama_backend_free() removed: backend is owned by ggml_jni_context
+        // and released in its cleanup() (called from Java onDestroy via
+        // ggmljava.backendCleanup()). Calling free here would tear down the
+        // DSP that subsequent inference calls depend on.
 
         initialized = false;
     } else {

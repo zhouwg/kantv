@@ -24,6 +24,23 @@ extern "C" {
 #endif
 
 /**
+ * Release the llama backend (DSP + quant tables) installed by
+ * ggml_jni_context::init(). Called from ggml-java's backendCleanup()
+ * JNI method, which in turn is invoked from AIResearchFragment.onDestroy().
+ * Implementation lives in ggml-jni-context.cpp (extern "C" wrapper around
+ * the C++ singleton). Idempotent: safe to call multiple times.
+ */
+void ggml_jni_context_cleanup(void);
+
+/**
+ * Release the currently loaded model + mtmd context (mmproj) held by the
+ * ggml_jni_context singleton. Subsequent inference calls will trigger a
+ * fresh load from disk. Implementation in ggml-jni-context.cpp; the
+ * matching JNI method is Java_kantvai_ai_ggmljava_unloadModel.
+ */
+void ggml_jni_unload_model(void);
+
+/**
  * AI inference in native layer was stopped/interrupted from Java layer
  */
 #define AI_INFERENCE_INTERRUPTED             8

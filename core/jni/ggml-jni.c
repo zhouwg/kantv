@@ -448,6 +448,27 @@ Java_kantvai_ai_ggmljava_llm_1is_1running_1state(JNIEnv *env, jclass clazz) {
     return (0 == result) ? JNI_FALSE : JNI_TRUE;
 }
 
+// Release the llama backend (DSP + quant tables) installed once in
+// ggml_jni_context::init(). Called from AIResearchFragment.onDestroy() so
+// the DSP gets released on activity teardown rather than living until
+// process death. Idempotent; safe to call multiple times.
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_backendCleanup(JNIEnv *env, jclass clazz) {
+    ggml_jni_context_cleanup();
+}
+
+// Release the currently loaded model + mmproj. The next inference call
+// will trigger a fresh load. Intended call sites:
+//   * LLMSettingFragment when the user picks a different model
+//   * AIResearchFragment.onDestroy() (paired with backendCleanup()) so
+//     the 4GB model is returned to the OS as soon as the page is left
+//     rather than sitting in memory until the process dies.
+// Idempotent; safe to call when nothing is loaded.
+JNIEXPORT void JNICALL
+Java_kantvai_ai_ggmljava_unloadModel(JNIEnv *env, jclass clazz) {
+    ggml_jni_unload_model();
+}
+
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_realtimemtmd_1init_1running_1state(JNIEnv *env, jclass clazz) {
     realtimemtmd_init_running_state();

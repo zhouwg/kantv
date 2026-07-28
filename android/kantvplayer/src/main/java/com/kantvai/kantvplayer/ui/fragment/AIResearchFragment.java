@@ -394,32 +394,43 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                      ggmljava.ggml_set_benchmark_status(0);
 
                      if (isLLMModel) {
-                         if (isMTMDModel) {
-                             //LLM multimodal inference
-                             KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedMedia);
-                             if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
-                                 strBenchmarkInfo = ggmljava.mtmd_inference(
-                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                        pathSelectedMedia,
-                                        strUserInput,
-                                        1,
-                                        backendIndex);
+                        if (isMTMDModel) {
+                            //LLM multimodal inference
+                            KANTVLog.g(TAG, "multimodal model, media path:" + pathSelectedMedia);
+                            if (KANTVAIUtils.isImageFile(pathSelectedMedia)) {
+                                strBenchmarkInfo = ggmljava.mtmd_inference(
+                                       KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                       KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                       pathSelectedMedia,
+                                       strUserInput,
+                                       1,
+                                       backendIndex);
                             } else if (KANTVAIUtils.isAudioFile(pathSelectedMedia)) {
                                 strBenchmarkInfo = ggmljava.mtmd_inference(
-                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                        KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
-                                        pathSelectedMedia,
-                                        strUserInput,
-                                        2,
-                                        backendIndex);
-                             } else {
-                                 endTime = System.currentTimeMillis();
-                                 duration = (endTime - beginTime);
-                                 isBenchmarking.set(false);
-                                 KANTVUtils.showMsgBox(mActivity, "only support MTMD audio and image currently");
-                                 return;
-                             }
+                                       KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                       KANTVUtils.getSDCardDataPath() + AIModelMgr.getMMProjmodelName(selectModelIndex),
+                                       pathSelectedMedia,
+                                       strUserInput,
+                                       2,
+                                       backendIndex);
+                            } else {
+                                endTime = System.currentTimeMillis();
+                                duration = (endTime - beginTime);
+                                isBenchmarking.set(false);
+                                KANTVUtils.showMsgBox(mActivity, "only support MTMD audio and image currently");
+                                return;
+                            }
+                            // NOTE: pathSelectedMedia /
+                            // bitmapSelectedImage are NOT reset
+                            // here - the unified cleanup at the
+                            // endTime block below resets them after
+                            // the inference has read the image.
+                            // Resetting them here too would
+                            // double-clear, and clearing them too
+                            // early broke the MTMD branch decision
+                            // (line 1668) and the image-validity
+                            // check (line 1699) which read these
+                            // fields in the same `if` block.
                          } else {
                              //general LLM inference
                             strBenchmarkInfo = ggmljava.llm_inference(
@@ -454,6 +465,21 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                      endTime = System.currentTimeMillis();
                      duration = (endTime - beginTime);
                      isBenchmarking.set(false);
+
+                     // Clear the attachment state after inference
+                     // returns, regardless of which branch ran. We
+                     // intentionally leave these populated for the
+                     // duration of inference (clearAttachment() in
+                     // handleSend no longer touches them) so the
+                     // MTMD branch decision at line 1668 and the
+                     // image-validity check at line 1699 see the
+                     // right state. For non-MTMD paths (regular
+                     // LLM, ASR, MNIST, TTS) the fields were never
+                     // read, but we still clear them here so the
+                     // next user turn doesn't carry over a stale
+                     // path / bitmap.
+                     pathSelectedMedia = "";
+                     bitmapSelectedImage = null;
 
                      mActivity.runOnUiThread(new Runnable() {
                          @Override
@@ -534,6 +560,12 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
      @Override
      public void onDestroy() {
          super.onDestroy();
+         // Release the cached model first (4GB) then the llama backend
+         // (DSP + quant tables). Order matters: unload_model() must run
+         // before llama_backend_free() because freeing the DSP backend
+         // would leave the model with dangling backend references.
+         kantvai.ai.ggmljava.unloadModel();
+         kantvai.ai.ggmljava.backendCleanup();
      }
 
      @Override
@@ -1423,12 +1455,32 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
     }
 
     /**
-     * Clear the pending attachment (image / audio) and hide the
-     * preview row above the input.
+     * Clear the pending attachment's UI state (preview row, thumbnail,
+     * cached bitmap) and reset the data-model reference.
+     *
+     * <p>Note: we intentionally <b>do not</b> null out
+     * {@code pathSelectedMedia} OR {@code bitmapSelectedImage}
+     * here, because this method is called from
+     * {@code handleSend()} BEFORE {@code runInference()}, and
+     * runInference() needs BOTH fields to:
+     * <ul>
+     *   <li>decide whether to take the MTMD path (line 1668:
+     *       {@code if ((pathSelectedMedia != null) && (!pathSelectedMedia.isEmpty()))})</li>
+     *   <li>feed the image path to {@code mtmd_inference()} (via
+     *       {@code pathSelectedMedia})</li>
+     *   <li>validate the image at line 1712:
+     *       {@code if ((bitmapSelectedImage == null) || (pathSelectedMedia.isEmpty()))}
+     *       &mdash; clearing bitmapSelectedImage here would
+     *       trigger the misleading "please select a image for
+     *       LLM multimodal inference" dialog even when the user
+     *       just attached a picture.</li>
+     * </ul>
+     * Both fields are reset to null/"" later, in runInference()
+     * right before the endTime block (so all inference branches
+     * - MTMD / plain LLM / ASR / MNIST / TTS - end up clean for
+     * the next user turn).
      */
     private void clearAttachment() {
-        pathSelectedMedia = "";
-        bitmapSelectedImage = null;
         if (attachmentPreview != null) {
             attachmentPreview.setVisibility(View.GONE);
         }

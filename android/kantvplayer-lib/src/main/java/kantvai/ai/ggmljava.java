@@ -112,6 +112,24 @@ package kantvai.ai;
 
     public static native void  llm_finalize();
 
+    /**
+     * Release the llama backend (DSP + quant tables) installed at JNI init.
+     * Pair of {@link #backendInit()}. Safe to call multiple times. The
+     * intended call site is AIResearchFragment.onDestroy() so the Hexagon
+     * DSP gets released on activity teardown instead of holding resources
+     * until the OS kills the process.
+     */
+    public static native void  backendCleanup();
+
+    /**
+     * Release the currently loaded model (and mtmd/vision context if any).
+     * Subsequent inference calls will trigger a fresh 4GB read from disk
+     * - use this to free RAM when the user switches models in
+     * LLMSettingFragment, or to drop the model on activity teardown
+     * alongside {@link #backendCleanup()}. Idempotent.
+     */
+    public static native void  unloadModel();
+
     // ============================================================================================
     // LLM/MTMD benchmark singleton state queries (UI helpers).
     //
