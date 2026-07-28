@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Header view for the LLM Setting page.
+
+    Displayed at the top of the preference list (just below the toolbar).
+    Shows:
+      - ggml logo
+      - current device info (phone, Android version, arch, backend, memory)
+      - currently selected / loaded LLM model info (name, file size, resident status)
+
+    Updated from LLMSettingFragment.onCreatePreferences and the
+    SharedPreferences change listener.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:paddingBottom="8dp">
+
+    <!--
+        Banner image: spans the full screen width (x = match_parent after
+        the horizontal padding was moved off the parent) and a fixed 100dp
+        height (y). scaleType=fitXY fills the whole rectangle so there is
+        no top/bottom whitespace. The source PNG is 515x90 (5.72:1), so
+        fitXY introduces a small vertical squash, which is acceptable for a
+        flat logo; use centerCrop if you would rather crop the sides than
+        squash the artwork.
+    -->
+    <ImageView
+        android:id="@+id/llmHeaderLogo"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:contentDescription="@string/app_name"
+        android:scaleType="fitXY"
+        android:src="@drawable/ggml_logo" />
+
+    <TextView
+        android:id="@+id/llmHeaderDeviceInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="monospace"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/text_black"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/llmHeaderModelInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:fontFamily="monospace"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/text_black"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/llmHeaderResidentStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="monospace"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="@color/text_gray"
+        android:textSize="11sp" />
+</LinearLayout>

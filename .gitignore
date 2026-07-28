@@ -100,3 +100,10 @@ ggml_dsp.h
 ggml_dsp_skel.c
 ggml_dsp_stub.c
 log*.txt
+
+# Screenshots / one-off visual artifacts: keep this blanket rule narrow.
+# Convention: dump these into the out/ directory (already ignored above at
+# line 18) so the rule only ever matches the build-artifact tree. Any PNG
+# that needs to be tracked (UI asset, model preview, logo, ...) must be
+# added with `git add -f` or live outside this rule's scope.
+*.png

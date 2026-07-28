@@ -24,12 +24,13 @@ KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source p
   | ggml-tiny.en-q8_0 | ASR | speech-to-text | [whisper.cpp](https://github.com/ggerganov/whisper.cpp) |
   | [Qwen1.5-1.8B](https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF) | LLM | text-only | Alibaba |
   | [Qwen2.5-3B](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF) | LLM | text-only | Alibaba |
-  | [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) | LLM | text + image (MTMD) (known issue: garbled output) | Google |
+  | [Gemma3-4B](https://huggingface.co/ggml-org/gemma-3-4b-it-GGUF/tree/main) | LLM | text + image (MTMD) | Google |
   | [Gemma-4-E2B](https://huggingface.co/unsloth/gemma-4-E2B-it-GGUF) | LLM | text-only (default) | Google |
-  | [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) | LLM | text + image (realtime-video-recognition) (known issue on Snapdragon 8 Elite(aka 8Gen4): back camera preview fails after merging upstream code --- use front camera as a workaround; no such issue on 8Gen3; likely a Qualcomm driver bug. Full analysis in [docs/debug-rear-camera-preview-fail.md](docs/debug-rear-camera-preview-fail.md)) | Huggingface |
+  | [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) | LLM | text + image (realtime-video-recognition) | Huggingface |
   | [Qwen2.5-Omni-3B](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) | LLM | text + audio (MTMD) | Alibaba |
 
 - The [JZ's ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) used in this project is probably the first open-source reference implementation of a specific llama.cpp backend for Qualcomm Hexagon NPU on Android phones. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3). Its PP (prompt processing) and TG (token generation) performance comprehensively surpasses [Qualcomm's official implementation](https://github.com/ggml-org/llama.cpp/tree/master/ggml/src/ggml-hexagon) on Snapdragon 8Elite (aka 8Gen4); benchmark comparisons can be found [here](https://github.com/zhouwg/ggml-hexagon/blob/self-build-jz/docs/backend/jz-ggml-hexagon/ion-mempool-vs-perbuffer-analysis-20260713.md).
+
 
 ### Software architecture of KanTV Android
 
@@ -62,15 +63,15 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-A screenshot to demonstrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
-
-![Image](https://github.com/user-attachments/assets/c406951a-383a-4943-a58d-cda401148f9e)
-
-----
 A screenshot to demonstrate realtime-video-recognition via [MTMD from llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) + a lightweight multimodal model [SmolVLM2-256M from Huggingface](https://huggingface.co/HuggingFaceTB/SmolVLM2-256M-Video-Instruct) on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
 
 ![Image](https://github.com/user-attachments/assets/35841e4d-150f-4163-bc58-ada1e9b1a065)
 
+----
+
+<img width="1080" height="2376" alt="Screenshot_2026-07-27-20-43-06-88_d67cb27b45d33330ede3b063fe7603d2" src="https://github.com/user-attachments/assets/47b33f27-dc93-43d6-ac67-b51dfc200ad8" />
+
+<img width="1080" height="2824" alt="Screenshot_2026-07-27-20-53-28-91" src="https://github.com/user-attachments/assets/6b728ea6-6af6-43bd-a242-b4fff77fdca6" />
 
 ### Docs
 - [How to build](./docs/how-to-build.md)
@@ -79,6 +80,7 @@ A screenshot to demonstrate realtime-video-recognition via [MTMD from llama.cpp]
 - [Authors](./AUTHORS)
 - [Acknowledgement](./docs/acknowledgement.md)
 - [ChangeLog](./release/README.md)
+- [Known issues](https://github.com/zhouwg/kantv/discussions/361)
 - [ggml-hexagon:history of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/18)
 - [ggml-hexagon:high-level data path of ggml-hexagon](https://github.com/zhouwg/ggml-hexagon/discussions/33)
 

@@ -111,4 +111,25 @@ package kantvai.ai;
     public static native float getLLMTopP();
 
     public static native void  llm_finalize();
+
+    // ============================================================================================
+    // LLM/MTMD benchmark singleton state queries (UI helpers).
+    //
+    // These let the LLM Setting page show which model is currently resident in memory
+    // (or "not loaded" if the benchmark path has not been turned into a singleton yet).
+    //
+    // - llm_get_loaded_model_path(): returns the absolute path of the model currently
+    //   resident in the LLM/MTMD benchmark singleton, or empty string if nothing is loaded.
+    // - llm_is_model_loaded():       returns 1 if a model is resident, 0 otherwise.
+    // - llm_get_loaded_mmproj_path(): same as above for the mmproj model used by MTMD.
+    //
+    // Implemented as no-ops (returning empty / 0) in the current one-shot benchmark path.
+    // Once the LLM/MTMD benchmark path is refactored to a singleton these will start
+    // returning the actually loaded paths.
+    // ============================================================================================
+    public static native String llm_get_loaded_model_path();
+
+    public static native int    llm_is_model_loaded();
+
+    public static native String llm_get_loaded_mmproj_path();
 }

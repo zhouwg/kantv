@@ -405,6 +405,33 @@ Java_kantvai_ai_ggmljava_llm_1finalize(JNIEnv *env, jclass clazz) {
     jni_cleanup_llm_resource();
 }
 
+// =============================================================================================
+// LLM/MTMD benchmark singleton state queries (UI helpers).
+//
+// Currently the LLM/MTMD benchmark path is one-shot: it loads the model on every call and
+// frees it on return. So no model is "resident" between calls. Return empty/0 to make
+// the UI's resident-status line read "not loaded (reloaded on every benchmark)".
+//
+// Once the LLM/MTMD benchmark path is refactored into a singleton (see project memory and
+// the discussion around the LLM/MTMD benchmark UI), these will return the actually loaded
+// paths.
+// =============================================================================================
+
+JNIEXPORT jstring JNICALL
+Java_kantvai_ai_ggmljava_llm_1get_1loaded_1model_1path(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, "");
+}
+
+JNIEXPORT jint JNICALL
+Java_kantvai_ai_ggmljava_llm_1is_1model_1loaded(JNIEnv *env, jclass clazz) {
+    return 0;
+}
+
+JNIEXPORT jstring JNICALL
+Java_kantvai_ai_ggmljava_llm_1get_1loaded_1mmproj_1path(JNIEnv *env, jclass clazz) {
+    return (*env)->NewStringUTF(env, "");
+}
+
 JNIEXPORT void JNICALL
 Java_kantvai_ai_ggmljava_llm_1init_1running_1state(JNIEnv *env, jclass clazz) {
     llm_init_running_state();

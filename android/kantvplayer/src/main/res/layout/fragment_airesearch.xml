@@ -1,152 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+<!--
+    Chat-style AI research screen.
+
+    Three vertical bands:
+      1. Top bar    : logo, model / device info, overflow (settings / clear)
+      2. Middle     : RecyclerView that holds the running conversation
+      3. Bottom bar : sticky input row (attach image, attach audio, prompt,
+                      send/stop, clear). An attachment-preview row slides
+                      in above the input row when the user picks a file.
+
+    The old ScrollView + giant asrInfo TextView + 4 spinners/buttons is
+    gone. The bench-type / model spinners live in a settings dialog now
+    (opened from the overflow button on the top bar) so the main surface
+    stays focused on the conversation.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/layout_bg_color">
 
+    <!-- ============================================================ -->
+    <!-- Top bar                                                     -->
+    <!-- ============================================================ -->
+    <!--
+        Top bar. minHeight matches the ggml logo height below so the
+        top bar can't shrink below that even on devices where the
+        system would otherwise pick the smaller button height. The
+        actual height is still wrap_content (driven by whichever child
+        is tallest: logo, text, or button).
+    -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:minHeight="64dp"
+        android:orientation="horizontal"
+        android:background="@color/item_bg_color"
+        android:padding="1dp"
+        android:gravity="center_vertical">
 
-        <LinearLayout
-            android:id="@+id/airesearchLayout"
+        <!--
+            ggml logo. Width 120dp / height 64dp is the largest we
+            can fit alongside the text + Bench button on a typical
+            360dp-wide phone without crowding. fitCenter preserves
+            the logo's native aspect ratio (it has wide black bars
+            built in), so the visible glyph is centered inside the
+            120x64 slot. If we ever want the logo to truly dominate
+            the top bar, drop the Bench button to overflow and grow
+            the slot to 144x72 or similar.
+        -->
+        <ImageView
+            android:id="@+id/ggmlLogo"
+            android:layout_width="120dp"
+            android:layout_height="64dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ggml_logo" />
+
+        <TextView
+            android:id="@+id/ggmlInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:textSize="11sp"
+            android:textColor="@color/text_black"
+            android:maxLines="6"
+            android:ellipsize="end" />
+
+        <!--
+            Bench / Model button. Opens the settings dialog directly
+            (showSettingsDialog()). The 3-dot overflow + PopupMenu was
+            overkill for a single-item menu and made the affordance
+            harder to discover.
+        -->
+        <Button
+            android:id="@+id/btnSettings"
+            android:layout_width="60dp"
+            android:layout_height="32dp"
+            android:background="@drawable/button_drawable"
+            android:text="Bench"
+            android:textAllCaps="false"
+            android:textColor="#ffffff"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/text_gray"
+        android:alpha="0.3" />
+
+    <!-- ============================================================ -->
+    <!-- Chat history                                                -->
+    <!-- ============================================================ -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:clipToPadding="false" />
+
+    <!-- ============================================================ -->
+    <!-- Sticky input bar                                            -->
+    <!-- ============================================================ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/item_bg_color">
+
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="1dp"
+            android:background="@color/text_gray"
+            android:alpha="0.3" />
+
+        <!-- Attachment preview row (visible only when an image / audio
+             is attached to the next user turn). -->
+        <LinearLayout
+            android:id="@+id/attachmentPreview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
 
             <ImageView
-                android:id="@+id/ggmlLogo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:layout_gravity="center_horizontal"
-                android:src="@drawable/ggml_logo" />
+                android:id="@+id/attachmentThumb"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:scaleType="centerCrop"
+                android:background="@color/layout_bg_color" />
 
             <TextView
-                android:id="@+id/ggmlInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:id="@+id/attachmentPath"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:textColor="@color/text_gray"
+                android:maxLines="1"
+                android:ellipsize="middle" />
 
-            <EditText
-                android:id="@+id/txtPrompt"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:layout_marginTop="1dp"
-                android:background="@drawable/textview_border"
-                android:gravity="top"
-                android:hint="introduce the movie Once Upon a Time in America briefly" />
+            <Button
+                android:id="@+id/btnRemoveAttachment"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/button_drawable"
+                android:text="X"
+                android:textAllCaps="false"
+                android:textColor="#ffffff"
+                android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- Input row -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bench type:" />
-
-            <Spinner
-                android:id="@+id/spinnerBenchType"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dropDownSelector="#63D81B60"
-                android:spinnerMode="dropdown" />
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Model:" />
-
-            <Spinner
-                android:id="@+id/spinnerModelName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:dropDownSelector="#63D81B60"
-                android:spinnerMode="dropdown" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:gravity="center_vertical">
 
             <Button
                 android:id="@+id/btnSelectImage"
-                android:layout_width="90dp"
+                android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="5dp"
                 android:background="@drawable/button_drawable"
+                android:text="IMG"
                 android:textAllCaps="false"
                 android:textColor="#ffffff"
-                android:text="Select Image" />
+                android:textSize="12sp" />
 
             <Button
                 android:id="@+id/btnSelectAudio"
-                android:layout_width="90dp"
+                android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginStart="4dp"
                 android:background="@drawable/button_drawable"
+                android:text="AUD"
                 android:textAllCaps="false"
                 android:textColor="#ffffff"
-                android:text="Select Audio" />
+                android:textSize="12sp" />
 
+            <EditText
+                android:id="@+id/txtPrompt"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/textview_border"
+                android:gravity="center_vertical"
+                android:hint="Ask AI..."
+                android:imeOptions="actionSend"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textSize="14sp" />
+
+            <!--
+                Single Send/Stop toggle button. The text is flipped to
+                "Stop" while inference is running and back to "Send" once
+                the response is complete (or on error). This collapses the
+                two old buttons into one and keeps the bottom row narrow
+                enough to leave room for the input EditText.
+            -->
             <Button
                 android:id="@+id/btnBenchmark"
                 android:layout_width="60dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="5dp"
                 android:background="@drawable/button_drawable"
-                android:text="Start"
+                android:text="Send"
                 android:textAllCaps="false"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:textSize="12sp" />
 
             <Button
-                android:id="@+id/btnStop"
-                android:layout_width="60dp"
+                android:id="@+id/btnClear"
+                android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:layout_marginRight="5dp"
+                android:layout_marginStart="4dp"
                 android:background="@drawable/button_drawable"
-                android:text="Stop"
+                android:text="CLR"
                 android:textAllCaps="false"
-                android:textColor="#ffffff" />
-
+                android:textColor="#ffffff"
+                android:textSize="12sp" />
         </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/llInfoLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"></LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/asrInfo"
-                android:layout_width="match_parent"
-                android:layout_height="3000dp"
-                android:layout_marginTop="5dp"
-
-                android:fadeScrollbars="false"
-                android:scrollIndicators="right"
-                android:scrollbarFadeDuration="0"
-                android:scrollbars="vertical" />
-
-        </LinearLayout>
-
     </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
