@@ -63,12 +63,6 @@ https://github.com/zhouwg/kantv/assets/6889919/2fabcb24-c00b-4289-a06e-05b98ecd2
 
 ----
 
-A screenshot to demonstrate multi-modal inference by running the magic <a href="https://github.com/ggerganov/llama.cpp"> llama.cpp </a> on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
-
-![Image](https://github.com/user-attachments/assets/c406951a-383a-4943-a58d-cda401148f9e)
-
-----
-
 A screenshot to demonstrate realtime-video-recognition via [MTMD from llama.cpp](https://github.com/ggml-org/llama.cpp/blob/master/docs/multimodal.md) + a lightweight multimodal model [SmolVLM2-256M from Huggingface](https://huggingface.co/HuggingFaceTB/SmolVLM2-256M-Video-Instruct) on an Android phone equipped with Qualcomm Snapdragon 8Elite mobile SoC  - <b>fully offline, on-device</b>.
 
 ![Image](https://github.com/user-attachments/assets/35841e4d-150f-4163-bc58-ada1e9b1a065)
