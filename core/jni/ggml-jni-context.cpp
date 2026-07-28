@@ -7,6 +7,9 @@
 #include "ggml-cpu.h"
 #include "llamacpp/ggml/include/ggml-hexagon.h"
 
+#include <chrono>
+#include <thread>
+
 // common.h provides common_init() which used to be called at the top of
 // mtmd_inference_main / llm_inference_main; now it is called once from
 // ggml_jni_context::init() and must be in scope here.
@@ -210,10 +213,43 @@ int ggml_jni_context::ensure_model_loaded(const char * model_path,
     // Slow path: either nothing is loaded yet, or the key changed.
     // Unload any old model first so the new load starts from a clean
     // state. unload_model() is a no-op if loaded_model == nullptr.
+    //
+    // The unload also has a forced sleep before the new load: freeing
+    // a 4GB llama_model gives the C++ heap the memory back, but the
+    // kernel is under no obligation to release the anonymous pages
+    // back to the page pool / ION allocator immediately. If we jump
+    // straight into llama_model_load_from_file (which mmaps the next
+    // 4GB model file) we end up with peak RSS of OLD_FREEING +
+    // NEW_MAPPING, which on a 12GB phone is enough to trigger
+    // OOM-killer (signal 9) before the new model finishes loading
+    // (this happened on a gemma-3-4b cache miss right after a
+    // Qwen2.5-Omni audio run, see project memory).
+    //
+    // 500ms is a heuristic - long enough for the page reclaimer to
+    // finish the unmap, short enough that the user doesn't notice.
+    // malloc_trim(0) below actively nudges glibc to release the freed
+    // heap back to the OS so the next 4GB allocation doesn't have to
+    // compete with the just-freed pages.
     if (loaded_model != nullptr) {
         LOGGD("ensure_model_loaded: cache miss, unloading previous model '%s' (ngl=%d)",
               loaded_model_path.c_str(), loaded_ngl);
-        unload_model();
+        // Call the _unlocked variant because this function already holds
+        // m_model_mutex (line 184). Calling unload_model() here would
+        // re-acquire the same non-recursive std::mutex and deadlock the
+        // worker thread forever -- which is exactly what we saw on the
+        // Qwen2.5-Omni -> gemma-3-4b cache miss after a successful
+        // audio run: native inference stalled at the first cache-miss
+        // switch, the Java side never got a "starting media encoding"
+        // event, and the chat RecyclerView sat on "..." until force-stop.
+        // 2026-07-28 fix.
+        unload_model_unlocked();
+#if defined(__GLIBC__)
+        // glibc-specific: actively release freed heap back to OS.
+        // No-op on Android bionic (malloc_trim is a stub there).
+        extern int malloc_trim(size_t);
+        malloc_trim(0);
+#endif
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     // Actually load the model. The full loading sequence is identical to
@@ -241,6 +277,44 @@ int ggml_jni_context::ensure_model_loaded(const char * model_path,
         common_params params;
         params.model.path    = req_model_path;
         params.n_gpu_layers  = n_gpu_layers;
+        // CRITICAL WARNING (do not repeat the previous fix):
+        // llama's `llama_load_mode` enum does NOT control whether the
+        // model file is mmap'd. The actual decision is hardcoded in
+        // `llama_model_base::load_tensors()` at llama-model.cpp:1252
+        // as `const bool use_mmap_buffer = true;` regardless of
+        // load_mode. So setting `params.load_mode = LLAMA_LOAD_MODE_NONE`
+        // here does nothing for our peak-RSS problem.
+        //
+        // The `load_mode` enum actually only controls:
+        //   LLAMA_LOAD_MODE_MLOCK -> use_mlock = true (force RAM, no swap)
+        //   everything else       -> uses the default mmap path
+        //
+        // The real peak-RSS driver on a 12GB phone is the 4GB Hexagon
+        // ION pool that gets allocated unconditionally by
+        // ggmlhexagon_init_rpcmempool() at ggml-hexagon-jz.cpp:1721
+        // during llama_backend_init(), plus the mmap 4GB file +
+        // separate CPU-side weights copy for a Q8 model. That is
+        // >8GB, which on this device triggers the Oplus ION
+        // memory_leak alert (ion=4063MB, threshold=2048MB, see
+        // 18:17:08-18:17:10 logcat) and SurfaceFlinger removes the
+        // app's surfaces, freezing the UI.
+        //
+        // Practical mitigations to discuss:
+        //  (1) use a Q4_K_M model instead of Q8_0 (cuts the CPU copy
+        //      in half, ~2.5GB vs 4.5GB)
+        //  (2) make Hexagon backend init conditional (e.g. skip
+        //      ggml_backend_hexagon_init_ext() when the inference
+        //      path is MTMD/CPU-only, so the 4GB ION pool is never
+        //      reserved at app startup). This is a deeper change
+        //      and may affect LLM/ASR paths.
+        //  (3) drop the use_mmap_buffer = true hardcode in
+        //      llama-model.cpp to honor a new params flag - this is
+        //      upstream territory, not practical here.
+        //
+        // We deliberately do NOT set load_mode here. Leaving the
+        // default (MMAP) is correct for this llama.cpp version; any
+        // change would have to be at the hardcode site above.
+
         llama_model_params mparams = common_model_params_to_llama(params);
         loaded_model = llama_model_load_from_file(req_model_path.c_str(), mparams);
         if (loaded_model == nullptr) {
@@ -255,7 +329,13 @@ int ggml_jni_context::ensure_model_loaded(const char * model_path,
     // loaded_mctx as nullptr.
     if (!req_mmproj_path.empty()) {
         mtmd_context_params mparams = mtmd_context_params_default();
-        mparams.use_gpu = false; // see ggml-jni-context.cpp mtmd_inference
+        // mparams.use_gpu = false to match the "force ngl=0" policy
+        // applied in mtmd-inference.cpp: the Hexagon DSP backend does
+        // not fully implement the vision encoder (mmproj) op patterns
+        // (convolutions + image-shaped attention) and aborts
+        // intermittently. Keeping the mmproj on the CPU here makes the
+        // backend choice consistent between the model and the mmproj.
+        mparams.use_gpu = false;
         mparams.print_timings = false;
         mparams.n_threads = std::thread::hardware_concurrency();
         loaded_mctx = mtmd_init_from_file(req_mmproj_path.c_str(),
@@ -284,6 +364,15 @@ int ggml_jni_context::ensure_model_loaded(const char * model_path,
 
 void ggml_jni_context::unload_model() {
     std::lock_guard<std::mutex> lock(m_model_mutex);
+    unload_model_unlocked();
+}
+
+// Internal helper. Assumes the caller already holds m_model_mutex (this
+// is the case when called from ensure_model_loaded() which is the
+// primary call site). Exposed separately so that ensure_model_loaded()
+// can call it without re-locking m_model_mutex and deadlocking on the
+// non-recursive std::mutex (the original bug).
+void ggml_jni_context::unload_model_unlocked() {
     if (loaded_mctx != nullptr) {
         LOGGD("unload_model: freeing mmproj context '%s'", loaded_mmproj_path.c_str());
         mtmd_free(loaded_mctx);

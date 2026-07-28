@@ -244,7 +244,12 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
             return 5;
         }
         // calculate bitmap hash (for KV caching)
-        std::string hash = fnv_hash(bmp.data(), bmp.nx() * bmp.ny() * 3);
+        // Use bmp.n_bytes() rather than nx*ny*3: nx*ny*3 is image-specific
+        // (RGB), but audio bitmaps store PCM f32 in 1D (nx=samples, ny=1,
+        // data size = nx*sizeof(float)) — the old formula would either
+        // over-read the buffer (unrelated memory) or compute a hash of
+        // unrelated bytes, silently breaking audio KV cache tracking.
+        std::string hash = fnv_hash(bmp.data(), bmp.n_bytes());
         bmp.set_id(hash.c_str());
         bitmaps.entries.push_back(std::move(bmp));
     }

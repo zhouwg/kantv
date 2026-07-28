@@ -89,6 +89,11 @@ public:
     // nothing is loaded (no-op). Called explicitly from the Java side on
     // model switch (LLMSettingFragment) and from process exit (cleanup()).
     void    unload_model();
+    // Internal: same as unload_model() but assumes the caller already
+    // holds m_model_mutex. Used by ensure_model_loaded() which is
+    // itself holding the lock; calling unload_model() from there
+    // would re-acquire a non-recursive std::mutex and deadlock.
+    void    unload_model_unlocked();
 
     bool    is_model_loaded() const { return loaded_model != nullptr; }
 

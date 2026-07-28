@@ -387,7 +387,29 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                  backendIndex = mSettings.getLLMbackend();
                  KANTVLog.g(TAG, "backendIndex: " + backendIndex);
 
-                 initKANTVMgr();
+                 // BUGFIX (regression from the Phase 2 refactor):
+                 //   The naive fix of skipping initKANTVMgr() entirely on
+                 //   non-ASR bench types breaks the GGML_JNI_NOTIFY event
+                 //   pipe: KANTVMgr's constructor (native_setup) and
+                 //   initASR() are what build the libkantv-media.so side
+                 //   of the JNI->Java dispatch. Without them, the "starting
+                 //   media encoding" hint, per-token streaming, and
+                 //   llama-timings perf string that C++ emits via
+                 //   GGML_JNI_NOTIFY() never reach Java's
+                 //   MyEventListener.onEvent(), and the chat RecyclerView
+                 //   stays empty ("..." with no progress) even though the
+                 //   native inference completes successfully.
+                 //
+                 //   The actual deadlock source was startASR(), which
+                 //   spins up a permanent ASR listen thread that the
+                 //   following release() then waits for. Skipping that
+                 //   alone (while still doing new KANTVMgr + initASR)
+                 //   is the safe fix: event pipe is rebuilt every send,
+                 //   but no permanent listen thread is created, so
+                 //   release() returns immediately.
+                 int benchType = nBenchmarkIndex;
+                 boolean isAsrBench = (KANTVAIUtils.bench_type.GGML_BENCHMARK_ASR.ordinal() == benchType);
+                 setupKANTVMgr(isAsrBench);
 
                  while (isBenchmarking.get()) {
                      beginTime = System.currentTimeMillis();
@@ -587,7 +609,24 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
              backendIndex = storedBackend;
              setTextGGMLInfo(strModeName);
          }
-     }
+
+         // NOTE: do NOT re-read the LLM model selection from Settings here.
+         // LLM Settings and AI Research are intentionally decoupled:
+         //   * LLM Settings owns the download/preference for which model
+         //     files are available on disk and which one is the "default"
+         //     for the next cold start.
+         //   * AI Research owns the inference-time model selection via
+         //     its Bench/Model dialog, which writes back to Settings for
+         //     cross-restart persistence but is the source of truth
+         //     while the user is interacting with this page.
+         // A previous onResume() sync tried to pull the LLM index from
+         // Settings on every tab-switch, which caused regressions
+         // (MTMD audio silently became pure-text inference because the
+         // sync raced the Bench dialog). The send-time fallback in
+         // runInference() (comparing llm_get_loaded_model_path with
+         // strModeName) is the single source of truth for "is the
+         // loaded model the one the user wants to run with".
+    }
 
      @Override
      public void onStop() {
@@ -836,6 +875,12 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                         // appended to the bubble so the user sees the
                         // timing numbers, but it's also the cue to flip
                         // the bubble into COMPLETE state.
+                        //
+                        // The native side emits "llama-timings:\n..." with
+                        // no leading blank line, so it would visually run
+                        // into the previous token. We prepend "\n\n" here
+                        // (UI concern) rather than in the C++ perf_str
+                        // format, so logcat / file output stays raw.
                         KANTVLog.j(TAG, "LLM timings");
                         // Flush any still-buffered streaming tokens so the
                         // last 80ms-worth of text lands in the bubble
@@ -844,7 +889,7 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                         flushStreamingChunk();
                         if (chatAdapter != null) {
                             strInferenceResult += content;
-                            chatAdapter.appendToLast("\n" + content);
+                            chatAdapter.appendToLast("\n\n" + content);
                             chatAdapter.markLastComplete();
                         }
                         if (isBenchmarking.compareAndSet(true, false)) {
@@ -879,7 +924,25 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
     }
 
 
-     private void initKANTVMgr() {
+     // Split out from initKANTVMgr() so callers can decide whether the
+     // permanent ASR listening thread should be started.
+     //
+     // `new KANTVMgr(...)` + `initASR()` are required for ALL bench types
+     // because the libkantv-media.so side of the GGML_JNI_NOTIFY event
+     // pipe is wired by KANTVMgr's constructor (native_setup) and
+     // initASR() builds the native dispatch state. Without them, tokens,
+     // perf data, and the "starting media encoding" hint that the C++
+     // mtmd / llm code emits via GGML_JNI_NOTIFY never reach Java's
+     // MyEventListener.onEvent(), so the chat RecyclerView stays empty
+     // even though the inference completes successfully in native.
+     //
+     // `startASR()` is the part that actually starts the permanent
+     // listen loop. It is the one piece that is safe to gate on
+     // bench type: only ASR needs the always-on capture thread. LLM /
+     // MTMD / TTS / realtime-vision bench types don't want it because
+     // release() then deadlocks waiting for that thread to exit on the
+     // next send.
+     private void setupKANTVMgr(boolean startAsrListening) {
          if (mKANTVMgr != null) {
              release();
              mKANTVMgr = null;
@@ -889,7 +952,9 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
              mKANTVMgr = new KANTVMgr(mEventListener);
              if (mKANTVMgr != null) {
                  mKANTVMgr.initASR();
-                 mKANTVMgr.startASR();
+                 if (startAsrListening) {
+                     mKANTVMgr.startASR();
+                 }
              }
              KANTVLog.j(TAG, "KANTVMgr version:" + mKANTVMgr.getMgrVersion());
          } catch (KANTVException ex) {
@@ -898,6 +963,12 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
              KANTVUtils.showMsgBox(mActivity, errorMsg);
              ex.printStackTrace();
          }
+     }
+
+     // Backwards-compatible alias used by ASR-only callers that want
+     // the full pipeline including the always-on listening thread.
+     private void initKANTVMgr() {
+         setupKANTVMgr(true);
      }
 
 
@@ -1423,6 +1494,20 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                                 setTextGGMLInfo(m.getName());
                             }
                         }
+                        // NOTE: no unloadModel() here in the Bench dialog
+                        // OK callback. The original B (proactive unload at
+                        // model-switch time) was rejected because it has a
+                        // UX cost: if the user picks a model, the dialog
+                        // is closed, and then the user backs out of the
+                        // AI Research page (without running any
+                        // inference), the 4GB model has already been
+                        // freed and needs to be reloaded on the next
+                        // session start. The new design is to do the
+                        // unload at Send time only, in runInference()
+                        // (line ~1684), and only if the selected model
+                        // is actually different from what's loaded.
+                        // The C++ ensure_model_loaded() cache-miss path
+                        // is the safety net for any race we miss.
                     }
                     // When the user switches bench types in the dialog we
                     // bring the prompt box into the expected default
@@ -1628,6 +1713,51 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
         }
         KANTVLog.j(TAG, "exec ggml benchmark: type: " + KANTVAIUtils.getBenchmarkDesc(nBenchmarkIndex)
                 + ", threads:" + nThreadCounts + ", model:" + strModeName);
+
+        // Fallback "B" at Send time: if the model selected in the Bench
+        // dialog (or in LLM Setting) does not match what's currently
+        // loaded on the native side, proactively unload the old model
+        // *before* calling mtmd_inference / llm_inference. The C++
+        // cache-miss path will then take the fast new-load branch
+        // (since loaded_model == nullptr) instead of unloading+loading
+        // in one shot, which on a 12GB phone was OOM-killing the
+        // process when switching from Qwen2.5-Omni (3GB) to
+        // gemma-3-4b Q8 (4.5GB), see project memory.
+        //
+        // This is a safety net for cases where the Bench-dialog B
+        // unload (line 1433) was skipped. Originally the Bench-dialog
+        // B was guarded by `nBenchmarkIndex == LLM`, so MTMD/ASR bench
+        // type selections never triggered it. Even after removing
+        // that guard, there are other ways B can be missed (e.g. a
+        // dialog Cancel, a stale strModeName from a previous bench
+        // type, a JNI exception, etc.) - so doing one last check here
+        // at the actual inference trigger is the safest place.
+        try {
+            if (!ggmljava.llm_is_running_state()
+                    && strModeName != null && !strModeName.isEmpty()) {
+                String currentLoaded = ggmljava.llm_get_loaded_model_path();
+                String newModelPath = KANTVUtils.getSDCardDataPath() + strModeName;
+                if (currentLoaded != null
+                        && !currentLoaded.isEmpty()
+                        && !currentLoaded.equals(newModelPath)) {
+                    KANTVLog.j(TAG, "Send-time fallback: model changed from '"
+                            + currentLoaded + "' to '" + newModelPath
+                            + "', unloading old model proactively");
+                    ggmljava.unloadModel();
+                    // Give the kernel a moment to start reclaiming the
+                    // 4GB before the C++ load fires. The 500ms matches
+                    // the in-C++ sleep in ensure_model_loaded's slow
+                    // path so total latency is bounded at ~1s.
+                    try { Thread.sleep(500); }
+                    catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            KANTVLog.j(TAG, "Send-time unload fallback failed: " + ex.toString());
+        }
+
         String selectModelFilePath = "";
 
         resetUIAndStatus(null, true, true);

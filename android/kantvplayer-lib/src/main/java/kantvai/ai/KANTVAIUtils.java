@@ -316,6 +316,13 @@ import kantvai.media.player.KANTVLog;
 
      public static boolean isAudioFile(String filename) {
          //naive method
+         //IMPORTANT: must match what mtmd-helper actually supports.
+         //mtmd-helper.cpp uses miniaudio to decode audio and only accepts
+         //wav/mp3/flac. aac and ac3 (e.g. from m4a containers) are NOT
+         //decoded by miniaudio and will be rejected inside mtmd, so we
+         //should not even route them to the audio MTMD path. If a future
+         //build adds aac support, add it here and update the list of
+         //supported audio types accordingly.
          String suffix = filename.substring(filename.lastIndexOf(".") + 1);
          if (suffix.contains("wav")) {
              return true;
@@ -325,11 +332,7 @@ import kantvai.media.player.KANTVLog;
              return true;
          }
 
-         if (suffix.contains("aac")) {
-             return true;
-         }
-
-         if (suffix.contains("ac3")) {
+         if (suffix.contains("flac")) {
              return true;
          }
 
