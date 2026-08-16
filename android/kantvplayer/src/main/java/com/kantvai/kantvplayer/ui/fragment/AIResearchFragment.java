@@ -62,7 +62,7 @@
  import java.nio.ByteOrder;
  import java.text.SimpleDateFormat;
  import java.util.Date;
- import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicBoolean;
 
  import kantvai.ai.KANTVAIModel;
  import kantvai.ai.KANTVAIModelMgr;
@@ -94,6 +94,67 @@
         "thinking:", "Thinking:", "thought:", "Thought:",
         "thinking\n", "Thinking\n", "thought\n", "Thought\n",
         "thinking\r\n", "Thinking\r\n", "thought\r\n", "Thought\r\n"
+    };
+
+    // -----------------------------------------------------------------
+    // Multi-model thinking suppression (shared constants and pattern list)
+    // -----------------------------------------------------------------
+    // Modern LLMs may emit a "thinking" block before the final answer,
+    // using model-specific marker pairs. We support multiple marker
+    // patterns so that any model family can be handled without
+    // per-model Java code.
+    //
+    //   Family          | Thinking Marker           | Answer Marker          | Close Marker
+    //   ----------------+---------------------------+------------------------+-------------------
+    //   Gemma-3/4       | <|channel>thought         | <|channel>final        | <channel|>
+    //   Qwen 2.5/3      | <|im_start|>thinking      | <|im_start|>answer     | <|im_end|>
+    //   Generic <think>  | <think>                   | (content after </think>)| </think>
+    //
+    // Primary defense: native layer sets enable_thinking=false for
+    // Qwen/DeepSeek/GLM models, suppressing thinking at the template
+    // level. This Java filter is the SECONDARY defense.
+    // -----------------------------------------------------------------
+
+    /**
+     * Describes a thinking/answer marker pattern for a model family.
+     * Adding a new model family = adding a new entry to PATTERNS.
+     *
+     * With the native-side fix (input_echo=false), the Java layer
+     * only receives the model's generated tokens - never the echoed
+     * prompt tokens that contain template markers from the history.
+     * This means we can use simple prefix matching without any
+     * false-positive detection.
+     */
+    static class ThinkingPattern {
+        final String thinkingMarker;
+        final String answerMarker;
+        final String closeMarker;
+        final String displayName;
+
+        ThinkingPattern(String thinkingMarker, String answerMarker,
+                        String closeMarker, String displayName) {
+            this.thinkingMarker = thinkingMarker;
+            this.answerMarker   = answerMarker;
+            this.closeMarker    = closeMarker;
+            this.displayName    = displayName;
+        }
+    }
+
+    // Known marker patterns for generated output. Order matters: first match wins.
+    // Add new model families here without changing any filter logic.
+    static final ThinkingPattern[] THINKING_PATTERNS = {
+        // Gemma-3/4: <|channel>thought ... <|channel>final ... <channel|>
+        new ThinkingPattern(
+                "<|channel>thought", "<|channel>final", "<channel|>",
+                "Gemma"),
+        // Qwen 2.5/3 (thinking enabled): <|im_start|>thinking ... <|im_start|>answer ... <|im_end|>
+        new ThinkingPattern(
+                "<|im_start|>thinking", "<|im_start|>answer", "<|im_end|>",
+                "Qwen"),
+        // Generic <think> pattern: <think>...</think>answer
+        new ThinkingPattern(
+                "<think>", null, "</think>",
+                "Generic <think>"),
     };
 
     TextView txtGGMLInfo;
@@ -798,54 +859,50 @@
         private boolean mFlushScheduled = false;
 
         // -----------------------------------------------------------------
-        // Gemma 2 thinking-mode suppression
+        // Multi-model thinking suppression
         // -----------------------------------------------------------------
-        // Gemma 2 models emit a "thinking" block before the final answer:
-        //   <|channel>thought\n ...thinking process... <|channel>final\n ...answer...
-        // We suppress the thinking block and only show the final answer.
-        // For non-Gemma models, content is passed through directly after
-        // a short detection window (first 50 chars) if no think marker
-        // is found.
+        // Modern LLMs may emit a "thinking" block before the final answer,
+        // using model-specific marker pairs. The pattern definitions and
+        // pattern list live on the outer AIResearchFragment class (see
+        // THINKING_PATTERNS) so they can be shared across all inner
+        // instances and don't need to be re-declared here.
+        //
+        // Strategy:
+        //   1. Buffer streaming content and scan for ANY known marker pattern
+        //   2. Once a pattern's prefix is detected, lock onto that pattern
+        //   3. Use lastIndexOf() to find the CURRENT round's markers
+        //   4. If no pattern detected within a generous window, passthrough
         // -----------------------------------------------------------------
-        // Gemma 2 uses <|channel>thought ... <|channel>final to wrap the
-        // model's private thinking process. The channel prefix "<|channel>"
-        // is the common prefix for BOTH markers and is emitted by the model
-        // as the very first token (id=100). We use it as the anchor to
-        // detect Gemma output reliably, then look for the specific
-        // <|channel>thought or <|channel>final suffix within the buffer.
-        private static final String GEMMA_CHANNEL_PREFIX = "<|channel>";
-        private static final String GEMMA_THINK_MARKER  = "<|channel>thought";
-        private static final String GEMMA_FINAL_MARKER  = "<|channel>final";
-        private static final String GEMMA_CHANNEL_CLOSE = "<channel|>";
 
-        // Display prefixes for thinking content and answer separator
+        // Display prefix for thinking content and answer separator
         private static final String THINKING_PREFIX = "💭 **Thinking:** ";
         private static final String ANSWER_SEPARATOR = "\n\n---\n\n";
 
         // The raw native stream is buffered until one of three things
-        // happens: (a) we see <|channel>thought -> suppress the think
-        // block; (b) we see <|channel>final or <channel|> -> emit content
-        // after the marker as the visible answer; (c) the buffer exceeds
-        // DETECT_WINDOW chars without finding a channel marker -> this
-        // is a non-Gemma model, switch to passthrough mode and flush
-        // everything we've buffered so far.
+        // happens: (a) we see a thinking marker -> suppress the think
+        // block; (b) we see an answer marker or close marker -> emit
+        // content after the marker as the visible answer; (c) the
+        // buffer exceeds DETECT_WINDOW chars without finding any
+        // known marker -> switch to passthrough mode.
         //
-        // ROBUSTNESS: Once <|channel is seen at ANY point in the buffer,
-        // mGemmaChannelSeen is set to true and NEVER reset during this
-        // inference. This means the filter will buffer indefinitely
-        // waiting for the complete marker, regardless of how large the
-        // echoed prompt grows. This prevents the "4th/8th question
-        // leakage" bug where the echoed template exceeds the window.
+        // ROBUSTNESS: Once a pattern's prefix is seen at ANY point in
+        // the buffer, mThinkingPatternSeen is set to the matching
+        // pattern index and NEVER reset during this inference. This
+        // means the filter will buffer indefinitely waiting for the
+        // complete marker, regardless of how large the echoed prompt
+        // grows. This prevents the "4th/8th question leakage" bug.
         //
-        // For genuine non-Gemma models (no <|channel prefix ever seen),
-        // a generous fallback threshold is used to switch to passthrough.
-        private static final int GEMMA_DETECT_WINDOW    = 65536;
-        private final StringBuilder mGemmaThinkBuffer = new StringBuilder();
-        private boolean mGemmaThinkSuppressed = false;  // true once we're past the final/close marker
-        private boolean mGemmaThinkActive     = false;  // true while we're inside a <|channel> block
-        private boolean mGemmaPassthrough     = false;  // true for non-Gemma models (no channel marker found)
-        private boolean mGemmaChannelSeen     = false;  // true once <|channel prefix is detected; never reset during inference
-        private boolean mGemmaFirstThinkingChunkForwarded = false;  // true after first thinking chunk forwarded
+        // With the native-side fix (input_echo=false), only generated tokens
+        // reach this filter. Thinking markers appear in the first few tokens
+        // of generated output for models that support them. For models that
+        // don't emit thinking markers, we switch to passthrough quickly.
+        private static final int THINKING_DETECT_WINDOW    = 256;
+        private final StringBuilder mThinkBuffer = new StringBuilder();
+        private boolean mThinkSuppressed = false;  // true once past the final/close marker
+        private boolean mThinkActive     = false;  // true while inside a thinking block
+        private boolean mPassthrough     = false;  // true for non-thinking models
+        private int     mThinkingPatternSeen = -1; // index into THINKING_PATTERNS, -1 = not yet seen
+        private boolean mFirstThinkingChunkForwarded = false;  // true after first thinking chunk forwarded
 
         private final Runnable mFlushChunk = new Runnable() {
              @Override
@@ -878,19 +935,19 @@
         }
 
         /**
-         * Reset Gemma thinking-mode filter state. Called at the start of
+         * Reset multi-model thinking filter state. Called at the start of
          * each new inference so that thinking blocks from previous
          * responses don't leak into the next turn. Also clears any
          * leftover pending-chunk buffer from the previous inference so
          * stale tokens are not flushed into the new assistant bubble.
          */
-        public void resetGemmaThinkState() {
-            mGemmaThinkBuffer.setLength(0);
-            mGemmaThinkSuppressed = false;
-            mGemmaThinkActive = false;
-            mGemmaPassthrough = false;
-            mGemmaChannelSeen = false;
-            mGemmaFirstThinkingChunkForwarded = false;
+        public void resetThinkState() {
+            mThinkBuffer.setLength(0);
+            mThinkSuppressed = false;
+            mThinkActive = false;
+            mPassthrough = false;
+            mThinkingPatternSeen = -1;
+            mFirstThinkingChunkForwarded = false;
             // Clear any still-pending token chunk from the previous turn.
             synchronized (mPendingChunk) {
                 mPendingChunk.setLength(0);
@@ -916,214 +973,254 @@
         }
 
         /**
-         * Filter Gemma thinking-mode tokens from the streaming content.
-         * Returns the filtered content that should be displayed, or an
-         * empty string if the content should be hidden.
+         * Filter thinking-mode tokens from the streaming content using
+         * a multi-model pattern list. Returns the filtered content
+         * that should be displayed, or an empty string if the content
+         * should be hidden.
          *
-         * Gemma model output format (two variants):
-         *   Variant A: <|channel>thought\n...thinking...<channel|>\n...answer...
-         *   Variant B: <|channel>thought\n...thinking...<|channel>final\n...answer...
+         * The native layer's enable_thinking=false is the PRIMARY defense
+         * - it suppresses thinking at the template level for Qwen/DeepSeek/
+         * GLM models. This Java filter is the SECONDARY defense for models
+         * where template suppression doesn't work (e.g. Gemma), and acts
+         * as a safety net for any model that emits unexpected markers.
          *
-         * The model may also echo back the chat template before the
-         * channel block (e.g., "system\nuser\n...model\n..."). This
-         * echoed template is detected and suppressed before the channel
-         * marker.
-         *
-         * Strategy (state-machine based, robust to any conversation length):
-         * 0. Passthrough mode (non-Gemma model) or past the final/close marker
-         *    -> return content unchanged.
-         * 1. Buffer content. Check for complete <|channel>thought/<|channel>final
-         *    -> handle accordingly.
-         * 2. If <|channel prefix is detected at any point, set
-         *    mGemmaChannelSeen = true. This permanently marks the stream
-         *    as Gemma-like and disables the size-based passthrough fallback.
-         * 3. Only when mGemmaChannelSeen is false AND buffer exceeds the
-         *    detection window do we switch to passthrough (genuine non-Gemma).
-         * 4. In thinking mode, forward thinking content incrementally
-         *    and look for end markers to emit the final answer.
+         * Strategy (pattern-agnostic state machine):
+         *   0. Passthrough mode or past the final/close marker -> return unchanged
+         *   1. Buffer content, scan for any known pattern's prefix
+         *   2. Once a pattern is detected, lock onto it for the rest of the stream
+         *   3. Look for that pattern's thinking/answer/close markers
+         *   4. Use lastIndexOf() to match the CURRENT round's markers
+         *   5. If no pattern detected within window, switch to passthrough
          */
-        private String filterGemmaThinking(String content) {
-            final int channelLen = GEMMA_CHANNEL_PREFIX.length();
-            final int keepTail = Math.max(
-                    Math.max(GEMMA_THINK_MARKER.length(), GEMMA_FINAL_MARKER.length()),
-                    GEMMA_CHANNEL_CLOSE.length()) - 1;
+        private String filterThinking(String content) {
+            // Diagnostic: log raw content at entry point to understand
+            // what tokens the native layer is actually sending us.
+            int rawLen = content.length();
+            if (rawLen > 0) {
+                String rawPreview = content.length() > 200
+                        ? content.substring(0, 200) + "...(+" + (content.length() - 200) + ")"
+                        : content;
+                KANTVLog.j(TAG, "filterThinking ENTRY: rawLen=" + rawLen
+                        + " raw='" + rawPreview.replace("\n", "\\n") + "'"
+                        + " bufLen=" + mThinkBuffer.length()
+                        + " passthrough=" + mPassthrough
+                        + " thinkSuppressed=" + mThinkSuppressed
+                        + " thinkActive=" + mThinkActive);
+            }
 
-            // Case 0: Passthrough mode (non-Gemma model or already past final marker)
-            if (mGemmaPassthrough || mGemmaThinkSuppressed) {
+            // Case 0: Passthrough mode or past the final marker
+            if (mPassthrough || mThinkSuppressed) {
                 return content;
             }
 
-            mGemmaThinkBuffer.append(content);
-            String bufStr = mGemmaThinkBuffer.toString();
+            mThinkBuffer.append(content);
+            String bufStr = mThinkBuffer.toString();
 
-            if (!mGemmaThinkActive) {
-                // Case 1a: Check for the LAST <|channel>thought marker.
-                // We use lastIndexOf() instead of indexOf() because the
-                // model's echoed template may contain <|channel> markers
-                // from previous rounds' assistant messages. Using the
-                // LAST occurrence ensures we match the CURRENT round's
-                // marker, not an echoed copy from history.
-                int thinkIdx = bufStr.lastIndexOf(GEMMA_THINK_MARKER);
+            // Find the locked pattern (or -1 if not yet locked)
+            final int patternIdx = mThinkingPatternSeen;
+
+            if (!mThinkActive) {
+                // --- Determine which pattern to use ---
+                ThinkingPattern activePattern = null;
+
+                if (patternIdx >= 0 && patternIdx < THINKING_PATTERNS.length) {
+                    activePattern = THINKING_PATTERNS[patternIdx];
+                } else {
+                    // Simple scan: check if any known thinking marker
+                    // appears in the generated content. With the native
+                    // fix (input_echo=false), only generated tokens reach
+                    // this filter, so we don't need false-positive logic.
+                    for (int i = 0; i < THINKING_PATTERNS.length; i++) {
+                        ThinkingPattern pat = THINKING_PATTERNS[i];
+                        // Search for the thinking marker directly
+                        if (bufStr.indexOf(pat.thinkingMarker) >= 0) {
+                            mThinkingPatternSeen = i;
+                            activePattern = pat;
+                            KANTVLog.g(TAG, activePattern.displayName
+                                    + " thinking marker found in generated output"
+                                    + " (bufLen=" + bufStr.length()
+                                    + "), locking onto this pattern");
+                            break;
+                        }
+                    }
+
+                    if (activePattern == null) {
+                        // No thinking marker found yet. Check detection window.
+                        if (mThinkBuffer.length() > THINKING_DETECT_WINDOW) {
+                            mPassthrough = true;
+                            KANTVLog.g(TAG, "No thinking pattern found in first "
+                                    + THINKING_DETECT_WINDOW
+                                    + " chars of generated output,"
+                                    + " switching to passthrough mode"
+                                    + " (bufLen=" + mThinkBuffer.length() + ")");
+                            String remaining = mThinkBuffer.toString();
+                            mThinkBuffer.setLength(0);
+                            return remaining;
+                        }
+                        if (!content.isEmpty()) {
+                            KANTVLog.g(TAG, "filterThinking: buffering '"
+                                    + content + "', bufferLen="
+                                    + mThinkBuffer.length()
+                                    + ", waiting for thinking marker");
+                        }
+                        return "";
+                    }
+                }
+
+                // --- Pattern found: look for specific markers ---
+                // Case 1a: Check for the LAST thinking marker.
+                // Use lastIndexOf() because the echoed template may
+                // contain markers from previous rounds' messages.
+                int thinkIdx = bufStr.lastIndexOf(activePattern.thinkingMarker);
                 if (thinkIdx >= 0) {
-                    mGemmaThinkActive = true;
-                    KANTVLog.g(TAG, "Gemma think marker detected at idx=" + thinkIdx
+                    mThinkActive = true;
+                    KANTVLog.g(TAG, activePattern.displayName
+                            + " think marker detected at idx=" + thinkIdx
                             + " (last occurrence), bufferLen=" + bufStr.length());
-                    mGemmaThinkBuffer.delete(0, thinkIdx);
-                    KANTVLog.g(TAG, "Gemma: suppressing " + thinkIdx
+                    mThinkBuffer.delete(0, thinkIdx);
+                    KANTVLog.g(TAG, activePattern.displayName
+                            + ": suppressing " + thinkIdx
                             + " chars of echoed template before think marker");
                     return THINKING_PREFIX;
                 }
 
-                // Case 1b: Check for the LAST <|channel>final marker
-                //          (model may respond directly with a final block if it
-                //          has no thinking step for this query).
-                //          Same lastIndexOf rationale as Case 1a.
-                int finalIdx = bufStr.lastIndexOf(GEMMA_FINAL_MARKER);
-                if (finalIdx >= 0) {
-                    mGemmaThinkSuppressed = true;
-                    KANTVLog.g(TAG, "Gemma final (direct) marker detected at idx=" + finalIdx
-                            + " (last occurrence), bufferLen=" + bufStr.length());
-                    int afterMarkerIdx = finalIdx + GEMMA_FINAL_MARKER.length();
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\r') afterMarkerIdx++;
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\n') afterMarkerIdx++;
-                    mGemmaThinkBuffer.setLength(0);
-                    String afterContent = bufStr.substring(afterMarkerIdx);
-                    if (!afterContent.isEmpty()) {
-                        KANTVLog.g(TAG, "Gemma: forwarding after final marker, len=" + afterContent.length());
+                // Case 1b: Check for the LAST answer marker
+                // (model may respond directly without thinking step).
+                if (activePattern.answerMarker != null) {
+                    int answerIdx = bufStr.lastIndexOf(activePattern.answerMarker);
+                    if (answerIdx >= 0) {
+                        mThinkSuppressed = true;
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + " answer (direct) marker detected at idx=" + answerIdx
+                                + " (last occurrence), bufferLen=" + bufStr.length());
+                        int afterIdx = answerIdx + activePattern.answerMarker.length();
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\r') afterIdx++;
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\n') afterIdx++;
+                        mThinkBuffer.setLength(0);
+                        String afterContent = bufStr.substring(afterIdx);
+                        if (!afterContent.isEmpty()) {
+                            KANTVLog.g(TAG, activePattern.displayName
+                                    + ": forwarding after answer marker, len="
+                                    + afterContent.length());
+                        }
+                        return afterContent;
                     }
-                    return afterContent;
                 }
 
-                // Case 1c: Partial channel marker arrived. The native
-                // tokenizer can split "<|channel>" across tokens
-                // (e.g. "<|channel" first, then ">"). Detecting the
-                // prefix alone is enough to identify this as a Gemma-
-                // family model; we set mGemmaChannelSeen permanently
-                // so that even if the echoed prompt is huge, we never
-                // fall back to passthrough mode.
-                int channelIdx = bufStr.indexOf(GEMMA_CHANNEL_PREFIX);
-                if (channelIdx >= 0) {
-                    if (!mGemmaChannelSeen) {
-                        mGemmaChannelSeen = true;
-                        KANTVLog.g(TAG, "Gemma channel prefix detected at idx="
-                                + channelIdx + " (bufLen=" + bufStr.length()
-                                + "), marking stream as Gemma-like (no passthrough fallback)");
+                // Case 1c: Check for close marker (for patterns where
+                // close marker ends the answer block, e.g. <channel|>
+                // or </think>)
+                if (activePattern.closeMarker != null) {
+                    int closeIdx = bufStr.lastIndexOf(activePattern.closeMarker);
+                    if (closeIdx >= 0) {
+                        mThinkSuppressed = true;
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + " close marker detected at idx=" + closeIdx
+                                + " (last occurrence), bufferLen=" + bufStr.length());
+                        int afterIdx = closeIdx + activePattern.closeMarker.length();
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\r') afterIdx++;
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\n') afterIdx++;
+                        mThinkBuffer.setLength(0);
+                        String answerContent = bufStr.substring(afterIdx);
+                        StringBuilder result = new StringBuilder();
+                        result.append(ANSWER_SEPARATOR);
+                        result.append(answerContent);
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + ": forwarding answer via close marker, answerLen="
+                                + answerContent.length());
+                        return result.toString();
                     }
-                    // If the complete marker has arrived, Case 1a/1b
-                    // already returned. Here we just keep buffering for
-                    // the next token. Also reset passthrough flag in case
-                    // a previous (still-buffered) pass had set it.
-                    mGemmaPassthrough = false;
-                    return "";
                 }
 
-                // Case 1d: Size-based fallback ONLY for non-Gemma models.
-                // If mGemmaChannelSeen is true, we know this stream uses
-                // channel markers (Gemma-family) so we NEVER time out.
-                // If mGemmaChannelSeen is false after a generous buffer,
-                // this genuinely looks like a non-Gemma model.
-                if (!mGemmaChannelSeen
-                        && mGemmaThinkBuffer.length() > GEMMA_DETECT_WINDOW) {
-                    mGemmaPassthrough = true;
-                    KANTVLog.g(TAG, "No Gemma channel prefix found in first "
-                            + GEMMA_DETECT_WINDOW + " chars, switching to passthrough mode"
-                            + " (bufLen=" + mGemmaThinkBuffer.length() + ")");
-                    String remaining = mGemmaThinkBuffer.toString();
-                    mGemmaThinkBuffer.setLength(0);
-                    return remaining;
-                }
-
-                // Case 1e: Still buffering, haven't found any channel marker yet
-                if (!content.isEmpty()) {
-                    KANTVLog.g(TAG, "Gemma: buffering content='" + content + "', bufferLen=" + mGemmaThinkBuffer.length()
-                            + ", wait channel marker"
-                            + (mGemmaChannelSeen ? " (channel prefix seen, Gemma-like)" : ""));
-                }
+                // Still waiting for complete markers, keep buffering
                 return "";
             }
 
             // Case 2: In thinking mode -> forward thinking content, look for end markers
-            if (mGemmaThinkActive) {
-                // Use lastIndexOf to find the LAST occurrence of end markers.
-                // If thinking content happens to contain "<|channel>final"
-                // or "<channel|>" as literal text, lastIndexOf ensures
-                // we still find the model's actual end marker.
-                int finalIdx = bufStr.lastIndexOf(GEMMA_FINAL_MARKER);
-                if (finalIdx >= 0) {
-                    mGemmaThinkSuppressed = true;
-                    KANTVLog.g(TAG, "Gemma final marker detected at idx=" + finalIdx
-                            + " (last occurrence), bufferLen=" + bufStr.length());
-                    int afterMarkerIdx = finalIdx + GEMMA_FINAL_MARKER.length();
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\r') afterMarkerIdx++;
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\n') afterMarkerIdx++;
-                    mGemmaThinkBuffer.setLength(0);
-                    String answerContent = bufStr.substring(afterMarkerIdx);
+            if (mThinkActive) {
+                ThinkingPattern activePattern = (patternIdx >= 0 && patternIdx < THINKING_PATTERNS.length)
+                        ? THINKING_PATTERNS[patternIdx] : null;
 
-                    StringBuilder result = new StringBuilder();
-                    result.append(ANSWER_SEPARATOR);
-                    result.append(answerContent);
-                    KANTVLog.g(TAG, "Gemma: forwarding answer via final marker, answerLen=" + answerContent.length());
-                    return result.toString();
+                if (activePattern == null) {
+                    // Shouldn't happen, but guard anyway
+                    KANTVLog.g(TAG, "filterThinking: in thinking mode but no pattern locked, "
+                            + "falling back to passthrough");
+                    mThinkSuppressed = true;
+                    return content;
                 }
 
-                // Also check for the LAST <channel|> which closes the channel
-                // block. The actual answer content follows this marker.
-                int closeIdx = bufStr.lastIndexOf(GEMMA_CHANNEL_CLOSE);
-                if (closeIdx >= 0) {
-                    mGemmaThinkSuppressed = true;
-                    KANTVLog.g(TAG, "Gemma channel-close marker detected at idx=" + closeIdx
-                            + " (last occurrence), bufferLen=" + bufStr.length());
-                    int afterMarkerIdx = closeIdx + GEMMA_CHANNEL_CLOSE.length();
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\r') afterMarkerIdx++;
-                    if (afterMarkerIdx < bufStr.length() && bufStr.charAt(afterMarkerIdx) == '\n') afterMarkerIdx++;
-                    mGemmaThinkBuffer.setLength(0);
-                    String answerContent = bufStr.substring(afterMarkerIdx);
+                // Check for answer marker
+                if (activePattern.answerMarker != null) {
+                    int answerIdx = bufStr.lastIndexOf(activePattern.answerMarker);
+                    if (answerIdx >= 0) {
+                        mThinkSuppressed = true;
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + " answer marker detected at idx=" + answerIdx
+                                + " (last occurrence), bufferLen=" + bufStr.length());
+                        int afterIdx = answerIdx + activePattern.answerMarker.length();
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\r') afterIdx++;
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\n') afterIdx++;
+                        mThinkBuffer.setLength(0);
+                        String answerContent = bufStr.substring(afterIdx);
+                        StringBuilder result = new StringBuilder();
+                        result.append(ANSWER_SEPARATOR);
+                        result.append(answerContent);
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + ": forwarding answer via answer marker, answerLen="
+                                + answerContent.length());
+                        return result.toString();
+                    }
+                }
 
-                    StringBuilder result = new StringBuilder();
-                    result.append(ANSWER_SEPARATOR);
-                    result.append(answerContent);
-                    KANTVLog.g(TAG, "Gemma: forwarding answer via channel-close, answerLen="
-                            + answerContent.length()
-                            + ", prefix='" + (answerContent.length() > 40
-                                ? answerContent.substring(0, 40) + "..." : answerContent) + "'");
-                    return result.toString();
+                // Check for close marker
+                if (activePattern.closeMarker != null) {
+                    int closeIdx = bufStr.lastIndexOf(activePattern.closeMarker);
+                    if (closeIdx >= 0) {
+                        mThinkSuppressed = true;
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + " close marker detected at idx=" + closeIdx
+                                + " (last occurrence), bufferLen=" + bufStr.length());
+                        int afterIdx = closeIdx + activePattern.closeMarker.length();
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\r') afterIdx++;
+                        if (afterIdx < bufStr.length() && bufStr.charAt(afterIdx) == '\n') afterIdx++;
+                        mThinkBuffer.setLength(0);
+                        String answerContent = bufStr.substring(afterIdx);
+                        StringBuilder result = new StringBuilder();
+                        result.append(ANSWER_SEPARATOR);
+                        result.append(answerContent);
+                        KANTVLog.g(TAG, activePattern.displayName
+                                + ": forwarding answer via close marker, answerLen="
+                                + answerContent.length()
+                                + ", prefix='" + (answerContent.length() > 40
+                                    ? answerContent.substring(0, 40) + "..." : answerContent) + "'");
+                        return result.toString();
+                    }
                 }
 
                 // Still in thinking mode, forward content for display
-                // CRITICAL: Trim forwarded content from buffer to prevent
-                // double-display when end marker is found later.
                 if (!content.isEmpty()) {
                     String thinkingContent = content;
 
-                    // For the first thinking chunk, strip any leading
-                    // "thinking:"/"Thought:" labels from the model output
-                    if (!mGemmaFirstThinkingChunkForwarded) {
+                    if (!mFirstThinkingChunkForwarded) {
                         thinkingContent = stripThinkingLabels(thinkingContent);
-                        mGemmaFirstThinkingChunkForwarded = true;
+                        mFirstThinkingChunkForwarded = true;
                     }
 
-                    // Remove trailing newlines for cleaner display
                     if (thinkingContent.endsWith("\n")) {
                         thinkingContent = thinkingContent.substring(0, thinkingContent.length() - 1);
                     }
                     if (thinkingContent.endsWith("\r")) {
                         thinkingContent = thinkingContent.substring(0, thinkingContent.length() - 1);
                     }
-                    // Trim the forwarded content from buffer to prevent
-                    // it being re-forwarded when end marker is found
                     int contentLen = content.length();
-                    if (mGemmaThinkBuffer.length() > contentLen) {
-                        mGemmaThinkBuffer.delete(0, mGemmaThinkBuffer.length() - contentLen);
+                    if (mThinkBuffer.length() > contentLen) {
+                        mThinkBuffer.delete(0, mThinkBuffer.length() - contentLen);
                     } else {
-                        mGemmaThinkBuffer.setLength(0);
+                        mThinkBuffer.setLength(0);
                     }
                     if (!thinkingContent.isEmpty()) {
                         return thinkingContent;
                     }
-                }
-                // Keep buffer for marker detection but don't forward if empty
-                if (mGemmaThinkBuffer.length() > keepTail) {
-                    mGemmaThinkBuffer.delete(0, mGemmaThinkBuffer.length() - keepTail);
                 }
                 return "";
             }
@@ -1138,7 +1235,7 @@
         // path cancels a still-pending runnable on every fast token and
         // the buffer is then never flushed in real-time.
         private void enqueueStreamingChunk(String content) {
-            String filtered = filterGemmaThinking(content);
+            String filtered = filterThinking(content);
             if (filtered.isEmpty()) {
                 return;
             }
@@ -1159,40 +1256,38 @@
          // stop) so the user never sees a 80ms "tail" of pending text after
          // the inference finishes.
          private void flushStreamingChunk() {
-            // First, flush any remaining content in the Gemma think buffer
+            // First, flush any remaining content in the think buffer
             // that was held back for boundary detection.
-            if (mGemmaPassthrough || mGemmaThinkSuppressed) {
-                // Non-Gemma model or past final marker - forward everything
-                if (mGemmaThinkBuffer.length() > 0) {
-                    String remaining = mGemmaThinkBuffer.toString();
-                    mGemmaThinkBuffer.setLength(0);
+            if (mPassthrough || mThinkSuppressed) {
+                // Non-thinking model or past final marker - forward everything
+                if (mThinkBuffer.length() > 0) {
+                    String remaining = mThinkBuffer.toString();
+                    mThinkBuffer.setLength(0);
                     KANTVLog.g(TAG, "flushStreamingChunk: forwarding " + remaining.length()
                             + " chars from think buffer (passthrough/suppressed mode)");
                     synchronized (mPendingChunk) {
                         mPendingChunk.append(remaining);
                     }
                 }
-            } else if (!mGemmaThinkActive && mGemmaThinkBuffer.length() > 0) {
+            } else if (!mThinkActive && mThinkBuffer.length() > 0) {
                 // Not in any mode yet but stream ended (edge case).
                 // Forward everything since we never found a think marker.
-                String remaining = mGemmaThinkBuffer.toString();
-                mGemmaThinkBuffer.setLength(0);
+                String remaining = mThinkBuffer.toString();
+                mThinkBuffer.setLength(0);
                 KANTVLog.g(TAG, "flushStreamingChunk: forwarding " + remaining.length()
                         + " chars from think buffer (pre-think mode)");
                 synchronized (mPendingChunk) {
                     mPendingChunk.append(remaining);
                 }
-            } else if (mGemmaThinkActive && mGemmaThinkBuffer.length() > 0) {
-                // Still in thinking mode at stream end: this means the model
-                // finished generating without ever emitting a proper end
-                // marker (<|channel>final or <channel|>). Forward whatever
-                // is left in the buffer as a fallback so the user sees the
-                // content rather than losing it entirely.
-                String remaining = mGemmaThinkBuffer.toString();
-                mGemmaThinkBuffer.setLength(0);
+            } else if (mThinkActive && mThinkBuffer.length() > 0) {
+                // Still in thinking mode at stream end: the model finished
+                // generating without emitting a proper end marker. Forward
+                // whatever is left as fallback so the user sees content.
+                String remaining = mThinkBuffer.toString();
+                mThinkBuffer.setLength(0);
                 KANTVLog.g(TAG, "flushStreamingChunk: stream ended in thinking mode, forwarding "
                         + remaining.length() + " chars as fallback");
-                mGemmaThinkSuppressed = true;  // prevent further suppression
+                mThinkSuppressed = true;
                 synchronized (mPendingChunk) {
                     mPendingChunk.append(remaining);
                 }
@@ -1731,8 +1826,8 @@
          // Reserve the assistant bubble and reset the streaming buffer.
         chatAdapter.addAssistantPlaceholder();
         strInferenceResult = "";
-        // Reset Gemma 2 thinking-mode filter state for the new inference.
-        mEventListener.resetGemmaThinkState();
+        // Reset multi-model thinking filter state for the new inference.
+        mEventListener.resetThinkState();
         scrollToBottom();
         KANTVLog.g(TAG, "handleSend: EXIT size=" + chatAdapter.getMessageCount());
 

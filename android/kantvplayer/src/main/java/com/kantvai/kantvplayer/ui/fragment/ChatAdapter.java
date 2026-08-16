@@ -460,13 +460,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             String msgPreview = text.length() > 100 ? text.substring(0, 100) + "..." : text;
             KANTVLog.g("KANTV", "formatHistoryForNative [" + idx + "] " + roleStr + " (len=" + text.length() + "): " + msgPreview.replace("\n", "\\n"));
 
-            // Sanitize assistant history of Gemma-2 <|channel> blocks so
-            // the model does not see the private thinking process or the
-            // channel markers from previous turns. For models that don't
-            // emit such markers this is a no-op (the markers are not
-            // present in the text).
+            // Sanitize assistant history of any thinking blocks so
+            // the model does not see private thinking content or
+            // channel markers from previous turns. For models that
+            // don't emit such markers this is a no-op (the markers
+            // are not present in the text).
             if (msg.role == Role.ASSISTANT) {
-                text = sanitizeGemmaChannelBlocks(text);
+                text = sanitizeThinkingBlocks(text);
                 // Debug: log after sanitization
                 String sanitizedPreview = text.length() > 100 ? text.substring(0, 100) + "..." : text;
                 KANTVLog.g("KANTV", "formatHistoryForNative [" + idx + "] sanitized (len=" + text.length() + "): " + sanitizedPreview.replace("\n", "\\n"));
@@ -478,174 +478,240 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         KANTVLog.g("KANTV", "formatHistoryForNative: final history length=" + sb.length());
-        return sb.toString();
+        // Diagnostic: log the FULL packed history to see exactly what
+        // the native layer receives. This is critical for debugging
+        // multi-turn Q&A leakage.
+        String fullHistory = sb.toString();
+        String historyPreview = fullHistory.length() > 2000
+                ? fullHistory.substring(0, 2000) + "...(+" + (fullHistory.length() - 2000) + ")"
+                : fullHistory;
+        KANTVLog.g("KANTV", "formatHistoryForNative FULL: "
+                + historyPreview.replace("\n", "\\n").replace("\u001E", "\\x1E"));
+        return fullHistory;
     }
 
+    // -----------------------------------------------------------------
+    // Multi-model thinking block sanitization
+    // -----------------------------------------------------------------
+    // These patterns mirror the ones in AIResearchFragment for the Java-
+    // side filter. They are used to clean assistant history before
+    // sending it back to the LLM, so the model doesn't see stale
+    // thinking markers from previous turns.
+    // -----------------------------------------------------------------
+
     /**
-     * Strip Gemma-2 / Gemma-4 thinking blocks from an assistant response.
-     * Returns clean answer text only (thinking content is stripped).
-     * This text is used as conversation history sent back to the LLM.
-     *
-     * Gemma format (raw, before Java-side filtering):
-     *   <|channel>thought\n...thinking...<channel|>\n...answer...
-     *   <|channel>final\n...answer...<channel|>
-     *
-     * After Java-side filtering, the text may look like:
-     *   💭 **Thinking:** \n...thinking...\n\n---\n\n...answer...
-     *
-     * This function handles BOTH formats and returns ONLY the clean answer.
-     * Thinking content is DISCARDED (not sent back to the model).
-     *
-     * ROBUSTNESS: After sanitization, if any <|channel prefix remains
-     * in the result (indicating the filter missed some markers), the
-     * raw-format stripper is applied recursively as a safety net.
+     * Describes a thinking/answer marker pattern for sanitization.
+     * Different from AIResearchFragment's ThinkingPattern - this one
+     * focuses on identifying which blocks to DISCARD (thinking) vs
+     * which to PRESERVE (answer).
      */
-    static String sanitizeGemmaChannelBlocks(String text) {
+    private static class SanitizePattern {
+        final String blockOpen;      // e.g., "<|channel>"
+        final String blockClose;     // e.g., "<channel|>"
+        final String thinkingTag;    // e.g., "thought" - blocks starting with this are DISCARDED
+        final String answerTag;      // e.g., "final" - blocks starting with this are PRESERVED
+        final String prefix;         // partial prefix for recursive safety check
+        final String displayName;
+
+        SanitizePattern(String blockOpen, String blockClose,
+                       String thinkingTag, String answerTag,
+                       String prefix, String displayName) {
+            this.blockOpen   = blockOpen;
+            this.blockClose  = blockClose;
+            this.thinkingTag = thinkingTag;
+            this.answerTag   = answerTag;
+            this.prefix       = prefix;
+            this.displayName  = displayName;
+        }
+    }
+
+    // Known sanitization patterns. Add new model families here.
+    private static final SanitizePattern[] SANITIZE_PATTERNS = {
+        // Gemma-3/4: <|channel>thought ... <channel|> (discard)
+        //             <|channel>final ... <channel|> (preserve)
+        new SanitizePattern("<|channel>", "<channel|>",
+                "thought", "final", "<|channel", "Gemma"),
+        // Qwen 2.5/3: <|im_start|>thinking ... <|im_end|> (discard)
+        //             <|im_start|>answer ... <|im_end|> (preserve)
+        new SanitizePattern("<|im_start|>", "<|im_end|>",
+                "thinking", "answer", "<|im_start|>", "Qwen"),
+    };
+
+    // Display format markers (matches AIResearchFragment's output format)
+    private static final String DISPLAY_PREFIX  = "💭 **Thinking:** ";
+    private static final String DISPLAY_SEPARATOR = "\n\n---\n\n";
+    // Generic thinking tag for patterns that use <think>...</think>
+    private static final String GENERIC_THINK_OPEN  = "<think>";
+    private static final String GENERIC_THINK_CLOSE = "</think>";
+
+    /**
+     * Strip thinking blocks from an assistant response, returning only
+     * the clean answer text. Used to sanitize conversation history
+     * before sending it back to the LLM.
+     *
+     * Handles three formats:
+     *   1. Display format (after Java-side filtering):
+     *      💭 **Thinking:** \n...thinking...\n\n---\n\n...answer...
+     *   2. Raw format with known markers (Gemma, Qwen, etc.)
+     *   3. Generic <think>...</think> format
+     *
+     * Thinking content is DISCARDED (not sent back to the model).
+     */
+    static String sanitizeThinkingBlocks(String text) {
         if (text == null || text.isEmpty()) {
             return "";
         }
-        final String channelOpen    = "<|channel>";
-        final String channelPrefix  = "<|channel";  // partial prefix for detection
-        final String thoughtLiteral  = "thought";
-        final String finalLiteral    = "final";
-        final String channelClose    = "<channel|>";
 
-        // Debug: log input
         String inputPreview = text.length() > 300 ? text.substring(0, 300) + "..." : text;
-        KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks input (len=" + text.length() + "): " + inputPreview.replace("\n", "\\n"));
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks input (len=" + text.length() + "): " + inputPreview.replace("\n", "\\n"));
 
-        // First, handle the display format (after Java-side filtering):
-        // Strip "💭 **Thinking:** " prefix and "\n\n---\n\n" separator
-        String displayPrefix = "💭 **Thinking:** ";
-        String separator = "\n\n---\n\n";
-
-        // Check if text contains our display format
-        if (text.contains(separator)) {
-            KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: found separator, using display format path");
-            // Use lastIndexOf to handle the edge case where the answer
-            // content itself might contain the separator string
-            int sepIdx = text.lastIndexOf(separator);
-            String answerPart = text.substring(sepIdx + separator.length());
-
-            // Trim leading newlines from answer
+        // Step 1: Handle display format (after Java-side filtering)
+        // If the text contains the separator, the answer is everything after it
+        if (text.contains(DISPLAY_SEPARATOR)) {
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks: found display separator");
+            int sepIdx = text.lastIndexOf(DISPLAY_SEPARATOR);
+            String answerPart = text.substring(sepIdx + DISPLAY_SEPARATOR.length());
             if (answerPart.startsWith("\n")) answerPart = answerPart.substring(1);
             if (answerPart.startsWith("\r")) answerPart = answerPart.substring(1);
-
             String result = answerPart.trim();
 
-            // VERIFICATION: Ensure no <|channel prefix remains in the result.
-            // If the display-format sanitization missed some markers
-            // (e.g., the answer was incomplete or format was unexpected),
-            // fall back to the raw-format stripper.
-            if (result.contains(channelPrefix)) {
-                KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: WARNING - channel prefix remains"
-                        + " after display-format sanitization, applying raw stripper as fallback");
-                result = stripRawChannelBlocks(result, channelOpen, thoughtLiteral,
-                        finalLiteral, channelClose, channelPrefix);
-            }
+            // Verify no raw markers remain
+            result = sanitizeWithAllPatterns(result);
 
             String outputPreview = result.length() > 300 ? result.substring(0, 300) + "..." : result;
-            KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks output (len=" + result.length() + "): " + outputPreview.replace("\n", "\\n"));
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (display, len=" + result.length() + "): " + outputPreview.replace("\n", "\\n"));
             return result;
         }
 
-        // If text has display prefix but no separator (incomplete response),
-        // strip the prefix and return what's left
-        if (text.contains(displayPrefix)) {
-            KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: found display prefix but no separator");
-            int prefixIdx = text.indexOf(displayPrefix);
+        // Step 1b: Display prefix without separator (incomplete response)
+        if (text.contains(DISPLAY_PREFIX)) {
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks: found display prefix but no separator");
+            int prefixIdx = text.indexOf(DISPLAY_PREFIX);
             StringBuilder out = new StringBuilder();
             if (prefixIdx > 0) {
                 out.append(text, 0, prefixIdx);
             }
             String result = out.toString().trim();
+            result = sanitizeWithAllPatterns(result);
 
-            // VERIFICATION: Check for channel markers in remaining text
-            if (result.contains(channelPrefix)) {
-                KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: WARNING - channel prefix remains"
-                        + " after prefix-only sanitization, applying raw stripper");
-                result = stripRawChannelBlocks(result, channelOpen, thoughtLiteral,
-                        finalLiteral, channelClose, channelPrefix);
-            }
-
-            KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks output (prefix only, len=" + result.length() + "): " + result.replace("\n", "\\n"));
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (prefix only, len=" + result.length() + "): " + result.replace("\n", "\\n"));
             return result;
         }
 
-        // Handle raw format (if any channel markers remain)
-        KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: using raw format path (no display format found)");
-        String result = stripRawChannelBlocks(text, channelOpen, thoughtLiteral,
-                finalLiteral, channelClose, channelPrefix);
+        // Step 2: Handle raw format (any known marker pattern)
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks: using raw format path");
+        String result = sanitizeWithAllPatterns(text);
+
+        // Step 3: Handle generic <think>...</think> pattern
+        result = stripGenericThinkTags(result);
 
         String outputPreview2 = result.length() > 300 ? result.substring(0, 300) + "..." : result;
-        KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks output (raw, len=" + result.length() + "): " + outputPreview2.replace("\n", "\\n"));
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (raw, len=" + result.length() + "): " + outputPreview2.replace("\n", "\\n"));
         return result;
     }
 
     /**
-     * Core raw-format stripper. Walks through the text, removes all
-     * <|channel>thought blocks, preserves <|channel>final content,
-     * and returns the clean result.
-     *
-     * Also recursively strips any remaining channel markers until
-     * none remain, as a defense against nested or repeated markers.
+     * Apply all known sanitization patterns sequentially.
+     * Each pattern strips its thinking blocks and preserves answer blocks.
      */
-    private static String stripRawChannelBlocks(String text, String channelOpen,
-                                                 String thoughtLiteral, String finalLiteral,
-                                                 String channelClose, String channelPrefix) {
+    private static String sanitizeWithAllPatterns(String text) {
+        String result = text;
+        for (SanitizePattern pattern : SANITIZE_PATTERNS) {
+            result = stripPatternBlocks(result, pattern);
+            // Recursive safety check
+            if (result.contains(pattern.prefix)) {
+                KANTVLog.g("KANTV", "sanitizeThinkingBlocks: recursive pass for "
+                        + pattern.displayName + " pattern");
+                result = stripPatternBlocks(result, pattern);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Strip thinking blocks for a specific pattern. Walks through the text,
+     * removes all thinking-tagged blocks, preserves answer-tagged blocks,
+     * and returns the clean result.
+     */
+    private static String stripPatternBlocks(String text, SanitizePattern pattern) {
         StringBuilder out = new StringBuilder(text.length());
         int i = 0;
         while (i < text.length()) {
-            int openIdx = text.indexOf(channelOpen, i);
+            int openIdx = text.indexOf(pattern.blockOpen, i);
             if (openIdx < 0) {
                 out.append(text, i, text.length());
                 break;
             }
-            // Append text between current position and channel marker
+            // Append text between current position and block marker
             out.append(text, i, openIdx);
 
-            // Check block type
-            String afterOpen = text.substring(openIdx + channelOpen.length(),
-                    Math.min(openIdx + channelOpen.length() + 20, text.length()));
-            int closeIdx = text.indexOf(channelClose, openIdx + channelOpen.length());
+            // Check block type by looking at the tag after the open marker
+            String afterOpen = text.substring(openIdx + pattern.blockOpen.length(),
+                    Math.min(openIdx + pattern.blockOpen.length() + 30, text.length()));
+            int closeIdx = text.indexOf(pattern.blockClose, openIdx + pattern.blockOpen.length());
             if (closeIdx < 0) {
                 // Unclosed block - just append and break
                 out.append(text, openIdx, text.length());
                 break;
             }
-            boolean isThought = afterOpen.startsWith(thoughtLiteral);
-            boolean isFinal   = afterOpen.startsWith(finalLiteral);
 
-            if (isFinal) {
-                // Keep the content inside <|channel>final...<channel|>
-                int afterFinalTag = openIdx + channelOpen.length() + finalLiteral.length();
-                if (afterFinalTag < text.length() && text.charAt(afterFinalTag) == '\n') {
-                    afterFinalTag++;
-                } else if (afterFinalTag < text.length() && text.charAt(afterFinalTag) == '\r') {
-                    afterFinalTag++;
-                    if (afterFinalTag < text.length() && text.charAt(afterFinalTag) == '\n') afterFinalTag++;
+            boolean isThinking = afterOpen.startsWith(pattern.thinkingTag);
+            boolean isAnswer   = afterOpen.startsWith(pattern.answerTag);
+
+            if (isAnswer) {
+                // Keep the content inside the answer block
+                int afterTag = openIdx + pattern.blockOpen.length() + pattern.answerTag.length();
+                // Skip newlines after the tag
+                while (afterTag < text.length()
+                        && (text.charAt(afterTag) == '\n' || text.charAt(afterTag) == '\r')) {
+                    afterTag++;
                 }
-                out.append(text, afterFinalTag, closeIdx);
+                out.append(text, afterTag, closeIdx);
+            } else if (isThinking) {
+                // For thinking blocks: DISCARD entirely
+            } else {
+                // Unrecognized block type (e.g. <|im_start|>assistant in
+                // Qwen templates) - PRESERVE as-is since it's valid
+                // conversation context, not a thinking block.
+                out.append(text, openIdx, closeIdx);
             }
-            // For thought blocks: DISCARD entirely (do not include in history)
 
-            i = closeIdx + channelClose.length();
+            i = closeIdx + pattern.blockClose.length();
             if (i < text.length() && text.charAt(i) == '\r') i++;
             if (i < text.length() && text.charAt(i) == '\n') i++;
         }
-        String result = out.toString().trim();
+        return out.toString().trim();
+    }
 
-        // RECURSIVE SAFETY: If channel markers still remain, apply the
-        // stripper again. This handles the case where the first pass
-        // left markers behind (e.g., nested or non-standard format).
-        if (result.contains(channelPrefix)) {
-            KANTVLog.g("KANTV", "sanitizeGemmaChannelBlocks: recursive pass needed,"
-                    + " channel prefix still present after raw stripper (len=" + result.length() + ")");
-            result = stripRawChannelBlocks(result, channelOpen, thoughtLiteral,
-                    finalLiteral, channelClose, channelPrefix);
+    /**
+     * Strip generic <think>...</think> blocks.
+     * These are used by some model families (e.g., some open-source models).
+     */
+    private static String stripGenericThinkTags(String text) {
+        if (!text.contains(GENERIC_THINK_OPEN)) {
+            return text;
         }
-
-        return result;
+        StringBuilder out = new StringBuilder(text.length());
+        int i = 0;
+        while (i < text.length()) {
+            int openIdx = text.indexOf(GENERIC_THINK_OPEN, i);
+            if (openIdx < 0) {
+                out.append(text, i, text.length());
+                break;
+            }
+            out.append(text, i, openIdx);
+            int closeIdx = text.indexOf(GENERIC_THINK_CLOSE, openIdx + GENERIC_THINK_OPEN.length());
+            if (closeIdx < 0) {
+                // Unclosed think block - discard from open to end
+                KANTVLog.g("KANTV", "sanitizeThinkingBlocks: unclosed <think> tag, discarding from idx=" + openIdx);
+                break;
+            }
+            // Skip the think block content entirely
+            i = closeIdx + GENERIC_THINK_CLOSE.length();
+            if (i < text.length() && text.charAt(i) == '\r') i++;
+            if (i < text.length() && text.charAt(i) == '\n') i++;
+        }
+        return out.toString().trim();
     }
 
     public int getMessageCount() {

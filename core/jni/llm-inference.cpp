@@ -118,19 +118,76 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         params.n_gpu_layers = 0;
     }
     LOGGD("model path %s", params.model.path.c_str());
-    if (params.model.path.find("gemma-3") != std::string::npos) {
-        LOGGD("gemma-3");
-        // according to the Gemma team, the optimal config for inference is
-        // temperature = 1.0, top_k = 64, top_p = 0.95, min_p = 0.0
-        params.sampling.temp = 1.0;
-        params.sampling.top_k = 64;
-        params.sampling.top_p = 0.95;
-        params.sampling.min_p = 0.0;
-    } else {
-        params.sampling.temp = llm_get_temperature();
-        LOGGD("temp %.2f\n", params.sampling.temp);
-        params.sampling.top_p = llm_get_top_p();
-        LOGGD("top_p %.2f\n", params.sampling.top_p);
+    // ---------------------------------------------------------------
+    // Model-type detection and per-family configuration
+    // ---------------------------------------------------------------
+    // We detect the model family from the file path (case-insensitive)
+    // so that we can apply the right sampling parameters and
+    // enable_thinking flag. This avoids hard-coding a single model
+    // family's behaviour and makes the pipeline robust to any model
+    // that llama.cpp's chat templates support.
+    //
+    //   Family          | enable_thinking | Notes
+    //   ----------------+-----------------+----------------------------
+    //   gemma-3/4       | true            | Gemma uses <|channel> markers
+    //                   |                 | which are handled by the
+    //                   |                 | Java-side filter. Setting
+    //                   |                 | enable_thinking=false
+    //                   |                 | for Gemma causes the template
+    //                   |                 | to produce malformed output,
+    //                   |                 | so we keep it enabled.
+    //   qwen / deepseek | false           | These models respect
+    //   glm / minimax   |                 | enable_thinking in their
+    //   (thinking fam.) |                 | Jinja templates, so we can
+    //                   |                 | suppress thinking at the
+    //                   |                 | source.
+    //   unknown / any   | true            | Safe default; Java side
+    //                   |                 | handles filtering for any
+    //                   |                 | model that emits markers.
+    // ---------------------------------------------------------------
+    bool enable_thinking = true;
+    {
+        const std::string & path = params.model.path;
+        // Lowercase for case-insensitive matching
+        std::string lower_path = path;
+        for (auto & c : lower_path) {
+            if (c >= 'A' && c <= 'Z') { c = (char)(c + ('a' - 'A')); }
+        }
+
+        bool is_gemma     = lower_path.find("gemma") != std::string::npos;
+        bool is_qwen      = lower_path.find("qwen")  != std::string::npos;
+        bool is_deepseek  = lower_path.find("deepseek") != std::string::npos;
+        bool is_glm       = lower_path.find("glm")    != std::string::npos
+                          && lower_path.find("glm-")   != std::string::npos;
+
+        if (is_gemma) {
+            LOGGD("model family: GEMMA (enable_thinking=true, sampling preset)");
+            enable_thinking = true;
+            // according to the Gemma team, the optimal config for inference is
+            // temperature = 1.0, top_k = 64, top_p = 0.95, min_p = 0.0
+            params.sampling.temp = 1.0;
+            params.sampling.top_k = 64;
+            params.sampling.top_p = 0.95;
+            params.sampling.min_p = 0.0;
+        } else if (is_qwen || is_deepseek || is_glm) {
+            LOGGD("model family: THINKING-AWARE (enable_thinking=false, model=%s)",
+                  is_qwen ? "qwen" : (is_deepseek ? "deepseek" : "glm"));
+            // For models that respect enable_thinking, disabling it at the
+            // template level prevents thinking tokens from being generated
+            // at all - the cleanest possible suppression.
+            enable_thinking = false;
+            params.sampling.temp = llm_get_temperature();
+            LOGGD("temp %.2f\n", params.sampling.temp);
+            params.sampling.top_p = llm_get_top_p();
+            LOGGD("top_p %.2f\n", params.sampling.top_p);
+        } else {
+            LOGGD("model family: UNKNOWN (enable_thinking=true, default sampling)");
+            enable_thinking = true;
+            params.sampling.temp = llm_get_temperature();
+            LOGGD("temp %.2f\n", params.sampling.temp);
+            params.sampling.top_p = llm_get_top_p();
+            LOGGD("top_p %.2f\n", params.sampling.top_p);
+        }
     }
     // NOTE: common_init() and llama_backend_init() used to be called here.
     // They are now installed exactly once in ggml_jni_context::init() and
@@ -459,6 +516,15 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 common_chat_templates_inputs inputs;
                 inputs.messages              = chat_msgs;
                 inputs.add_generation_prompt = true;
+                // Propagate the model-family-specific enable_thinking
+                // flag into the template inputs. Without this line the
+                // template always uses its default (true), which means
+                // that disabling thinking at the params level has no
+                // effect - the Jinja template still generates thinking
+                // tokens.
+                inputs.enable_thinking       = enable_thinking;
+                LOGGD("%s: inputs.enable_thinking = %d (model-family flag propagated)",
+                        __func__, inputs.enable_thinking);
                 // Pre-log the chat history so that if the 3rd question
                 // crashes inside the jinja template engine (which can
                 // happen on a longer multi-turn history), we have the
@@ -680,7 +746,10 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     LOG_INF("\n");
 
     bool is_antiprompt        = false;
-    bool input_echo           = true;
+    bool input_echo           = false;  // was true: prompt tokens were leaked to Java
+                                        // via GGML_JNI_NOTIFY, causing the multi-turn
+                                        // "previous Q&A visible in UI" bug. Only the
+                                        // model's generated tokens should be forwarded.
     bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
     int n_past             = 0;
