@@ -320,6 +320,7 @@ common_chat_templates_ptr common_chat_templates_init(const struct llama_model * 
                                                      const std::string &        eos_token_override = "");
 
 bool        common_chat_templates_was_explicit(const struct common_chat_templates * tmpls);
+bool        common_chat_templates_has_default(const struct common_chat_templates * tmpls);
 std::string common_chat_templates_source(const struct common_chat_templates * tmpls, const std::string & variant = "");
 
 struct common_chat_params common_chat_templates_apply(const struct common_chat_templates *        tmpls,

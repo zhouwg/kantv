@@ -673,6 +673,14 @@ bool common_chat_templates_was_explicit(const struct common_chat_templates * tmp
     return tmpls->has_explicit_template;
 }
 
+// Returns true if the templates struct has a default template set.
+// Note: common_chat_templates_init always sets template_default (to either
+// the model's built-in template or the CHATML fallback), so this returns
+// true for all models that support chat templating.
+bool common_chat_templates_has_default(const struct common_chat_templates * tmpls) {
+    return tmpls != nullptr && tmpls->template_default != nullptr;
+}
+
 // LFM2 format detection: template uses <|tool_list_start|>[...]<|tool_list_end|> around the tool list
 // and <|tool_call_start|>[...]<|tool_call_end|> around each tool call
 static bool is_lfm2_template(const std::string & src) {

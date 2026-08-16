@@ -283,20 +283,30 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         LOG_WRN("%s: model was trained on only %d context tokens (%d specified)\n", __func__, n_ctx_train, n_ctx);
     }
 
-    // auto enable conversation mode if chat template is available
-    const bool has_chat_template = common_chat_templates_was_explicit(chat_templates.get());
+    // auto enable conversation mode if chat template is available.
+    // Note: we use common_chat_templates_has_default() rather than just
+    // common_chat_templates_was_explicit(), because common_chat_templates_init
+    // always sets template_default (to either the model's built-in template or
+    // the CHATML fallback). Relying solely on has_explicit_template would
+    // disable conversation mode for models that don't ship with a
+    // built-in template, causing them to echo raw KANTV_CHAT_V1 content
+    // instead of producing a proper chat response.
+    const bool has_explicit_template = common_chat_templates_was_explicit(chat_templates.get());
+    const bool has_any_chat_template = common_chat_templates_has_default(chat_templates.get());
     if (params.conversation_mode == COMMON_CONVERSATION_MODE_AUTO) {
-        if (has_chat_template) {
-            LOG_INF("%s: chat template is available, enabling conversation mode (disable it with -no-cnv)\n", __func__);
+        if (has_any_chat_template) {
+            LOGGD("%s: chat template is available (explicit=%d), enabling conversation mode",
+                    __func__, has_explicit_template ? 1 : 0);
             params.conversation_mode = COMMON_CONVERSATION_MODE_ENABLED;
         } else {
+            LOGGD("%s: no chat template available, disabling conversation mode", __func__);
             params.conversation_mode = COMMON_CONVERSATION_MODE_DISABLED;
         }
     }
 
     // in case user force-activate conversation mode (via -cnv) without proper chat template, we show a warning
-    if (params.conversation_mode && !has_chat_template) {
-        LOG_WRN("%s: chat template is not available or is not supported. This may cause the model to output suboptimal responses\n", __func__);
+    if (params.conversation_mode && !has_any_chat_template) {
+        LOGGD("%s: chat template is not available or is not supported. This may cause the model to output suboptimal responses", __func__);
     }
 
     // print chat template example in conversation mode
@@ -363,6 +373,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
     std::string prompt;
     {
+        LOGGD("%s: conversation_mode=%d, enable_chat_template=%d, prompt_size=%zu",
+                __func__, params.conversation_mode, params.enable_chat_template, params.prompt.size());
         if (params.conversation_mode && params.enable_chat_template) {
             //
             // Multi-turn chat history fast-path (KanTV-specific).
@@ -393,6 +405,9 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             const std::string kantv_chat_magic = "KANTV_CHAT_V1\n";
             bool is_kantv_chat_history = params.prompt.size() >= kantv_chat_magic.size() &&
                                          params.prompt.compare(0, kantv_chat_magic.size(), kantv_chat_magic) == 0;
+            LOGGD("%s: is_kantv_chat_history=%d, prompt_prefix='%s'",
+                    __func__, is_kantv_chat_history,
+                    params.prompt.substr(0, std::min((size_t)50, params.prompt.size())).c_str());
             if (is_kantv_chat_history) {
                 const std::string payload = params.prompt.substr(kantv_chat_magic.size());
                 const char SEP = 0x1E;
@@ -458,7 +473,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                         history_dbg += "[" + std::to_string(mi) + " role=" + m.role + " len=" +
                                        std::to_string(m.content.size()) + "] ";
                     }
-                    LOG_INF("%s: applying chat template to %zu messages; history: %s\n",
+                    LOGGD("%s: applying chat template to %zu messages; history: %s",
                             __func__, chat_msgs.size(), history_dbg.c_str());
                 }
                 // common_chat_templates_apply invokes the jinja engine which
@@ -469,12 +484,26 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 // but the pre-log above means that even if the call does
                 // exit(1) instead of throwing (e.g. via the arg.cpp
                 // exception path), we still have the message list in logcat.
-                prompt = common_chat_templates_apply(chat_templates.get(), inputs).prompt;
-                LOG_INF("%s: chat template applied; %zu messages, prompt length %zu chars\n",
-                        __func__, chat_msgs.size(), prompt.size());
+                LOGGD("%s: calling common_chat_templates_apply...", __func__);
+                try {
+                    prompt = common_chat_templates_apply(chat_templates.get(), inputs).prompt;
+                    LOGGD("%s: chat template applied; %zu messages, prompt length %zu chars",
+                            __func__, chat_msgs.size(), prompt.size());
+                    LOGGD("%s: prompt preview (first 200 chars): '%s'",
+                            __func__, prompt.substr(0, std::min((size_t)200, prompt.size())).c_str());
+                } catch (const std::exception & e) {
+                    LOGGD("%s: EXCEPTION in common_chat_templates_apply: %s", __func__, e.what());
+                    LOGGD("%s: falling back to raw prompt (size=%zu)", __func__, params.prompt.size());
+                    prompt = params.prompt;
+                } catch (...) {
+                    LOGGD("%s: UNKNOWN EXCEPTION in common_chat_templates_apply", __func__);
+                    prompt = params.prompt;
+                }
             }
         } else {
             // otherwise use the prompt as is
+            LOGGD("%s: SKIP chat template (conversation_mode=%d, enable_chat_template=%d), using raw prompt, size=%zu",
+                    __func__, params.conversation_mode, params.enable_chat_template, params.prompt.size());
             prompt = params.prompt;
         }
 
