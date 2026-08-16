@@ -130,6 +130,10 @@ HTPDRV_API int fastrpc_mmap(int domain, int fd, void * addr, int offset, size_t 
 }
 
 HTPDRV_API int fastrpc_munmap(int domain, int fd, void * addr, size_t length) {
+    if (!fastrpc_munmap_pfn) {
+        GGML_LOG_ERROR("ggml-hex: fastrpc_munmap not loaded\n");
+        return -1;
+    }
     return fastrpc_munmap_pfn(domain, fd, addr, length);
 }
 

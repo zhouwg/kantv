@@ -194,10 +194,8 @@ endif()
 
 #aux_source_directory(${GGML_SRC_DIR}/stablediffusioncpp/          stablediffusioncpp)
 
-# glob model implementations (ggml-hexagon splits model archs into src/models/)
+file(GLOB LLAMA_SRC_SOURCES "${LLAMACPP_SRC_DIR}/src/*.cpp")
 file(GLOB LLAMA_MODELS_SOURCES "${LLAMACPP_SRC_DIR}/src/models/*.cpp")
-
-# glob mtmd model implementations (vision/audio model archs in tools/mtmd/models/)
 file(GLOB MTMD_MODELS_SOURCES "${LLAMACPP_SRC_DIR}/tools/mtmd/models/*.cpp")
 
 # Define build-info variables (normally provided by cmake/build-info.cmake)
@@ -242,40 +240,13 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/llamafile/sgemm.cpp
         ${HEXAGON_BACKEND_SRCS}
 
-        ${LLAMACPP_SRC_DIR}/src/llama.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-adapter.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-arch.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-batch.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-chat.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-context.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-cparams.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-grammar.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-hparams.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-impl.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-kv-cache.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-kv-cache-iswa.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-kv-cache-dsa.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-kv-cache-dsv4.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-memory.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-memory-hybrid.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-memory-hybrid-iswa.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-memory-recurrent.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-mmap.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-model.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-model-loader.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-model-saver.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-quant.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-sampler.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-vocab.cpp
-        ${LLAMACPP_SRC_DIR}/src/unicode.cpp
-        ${LLAMACPP_SRC_DIR}/src/unicode-data.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-io.cpp
-        ${LLAMACPP_SRC_DIR}/src/llama-graph.cpp
+        ${LLAMA_SRC_SOURCES}
         ${LLAMA_MODELS_SOURCES}
 
-        ${LLAMACPP_SRC_DIR}/common/arg.cpp
         ${CMAKE_BINARY_DIR}/build-info.cpp
         ${LLAMACPP_SRC_DIR}/vendor/cpp-httplib/httplib.cpp
+
+        ${LLAMACPP_SRC_DIR}/common/arg.cpp
         ${LLAMACPP_SRC_DIR}/common/chat.cpp
         ${LLAMACPP_SRC_DIR}/common/chat-auto-parser-generator.cpp
         ${LLAMACPP_SRC_DIR}/common/chat-auto-parser-helpers.cpp
@@ -300,6 +271,7 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/common/sampling.cpp
         ${LLAMACPP_SRC_DIR}/common/speculative.cpp
         ${LLAMACPP_SRC_DIR}/common/unicode.cpp
+        ${LLAMACPP_SRC_DIR}/common/trie.cpp
         ${LLAMACPP_SRC_DIR}/common/jinja/caps.cpp
         ${LLAMACPP_SRC_DIR}/common/jinja/lexer.cpp
         ${LLAMACPP_SRC_DIR}/common/jinja/parser.cpp
@@ -340,6 +312,7 @@ add_definitions(-D__aarch64__)
 add_definitions(-D__linux__)
 add_definitions(-DGGML_USE_CPU)
 add_definitions(-O3)
+add_definitions(-DLLAMA_VERSION=\"0.1.0-dev\")
 
 # Define GGML_USE_HEXAGON when hexagon backend is enabled (expected by JNI layer)
 if (GGML_ENABLE_HEXAGON)

@@ -13,13 +13,13 @@
 #include "hex-dump.h"
 #include "hex-common.h"
 
-static inline uint64_t hex_get_cycles() {
+static inline uint64_t hex_get_cycles(void) {
     uint64_t cycles = 0;
     asm volatile(" %0 = c15:14\n" : "=r"(cycles));
     return cycles;
 }
 
-static inline uint64_t hex_get_pktcnt() {
+static inline uint64_t hex_get_pktcnt(void) {
     uint64_t pktcnt;
     asm volatile(" %0 = c19:18\n" : "=r"(pktcnt));
     return pktcnt;
@@ -53,7 +53,7 @@ static inline void hex_l2flush(void * addr, size_t size) {
     }
 }
 
-static inline void hex_pause() {
+static inline void hex_pause(void) {
     asm volatile(" pause(#255)\n");
 }
 

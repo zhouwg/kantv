@@ -216,7 +216,7 @@ Java_kantvai_ai_ggmljava_llm_1inference(JNIEnv * env, jclass clazz, jstring mode
     }
 
     LOGGV("model path:%s\n", sz_model_path);
-    LOGGV("prompt:%s\n", sz_prompt);
+    //LOGGV("prompt:%s\n", sz_prompt);
     LOGGV("llm type: %d\n", n_llm_type);
     LOGGV("backend type: %d\n", n_backend_type);
 

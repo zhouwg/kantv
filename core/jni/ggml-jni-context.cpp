@@ -7,7 +7,11 @@
 #include "ggml-cpu.h"
 #include "llamacpp/ggml/include/ggml-hexagon.h"
 
+#include <atomic>
 #include <chrono>
+#include <cstdio>
+#include <csignal>
+#include <cstring>
 #include <thread>
 
 // common.h provides common_init() which used to be called at the top of
@@ -66,6 +70,123 @@ static void kantv_ggml_abort_callback(const char * error_message) {
     }
 }
 
+// =============================================================================
+// Silent-exit safety net
+// =============================================================================
+// The 3rd-question crash that motivated this block was suspected to be a
+// "silent" termination -- no SIGABRT tombstone, no Java stack trace, the APK
+// just disappears. The only ways to leave the process without a visible
+// tombstone in logcat are:
+//
+//   1. exit(code)  / _exit(code)  -- bypasses signal handlers entirely.
+//      llama.cpp's common_params_parse() in arg.cpp:1201 calls exit(1) on
+//      any std::exception (other than std::invalid_argument, which is caught
+//      separately). The fprintf(stderr, ...) message that would normally
+//      identify the exception is dropped by Android's stderr sink, so the
+//      caller sees the process vanish and cannot tell what failed.
+//
+//   2. SIGABRT (raised by std::terminate from noexcept / double-exception /
+//      explicit std::abort) -- writes a tombstone under /data/tombstones but
+//      the stack can be truncated or lost on some devices, and the only
+//      logcat breadcrumb is the abort message if a signal handler is
+//      installed.
+//
+//   3. SIGSEGV / SIGBUS -- does leave a tombstone but the message is
+//      typically uninformative ("fault addr 0x...") and the user's
+//      adb logcat -b crash buffer often rolls over before they get to it.
+//
+//   4. External SIGKILL from the OOM killer / system watchdog. Truly silent
+//      and unobservable from inside the process.
+//
+// This block installs a backstop that catches (1) and (2) at least:
+//   * kantv_silent_exit_atexit_hook -- atexit() handler. atexit() runs on
+//     exit() but NOT on _exit() / abort() / signal. So this catches the
+//     arg.cpp:1201 exit(1) path.
+//   * kantv_silent_exit_signal_handler -- catches SIGABRT, SIGSEGV, SIGBUS,
+//     SIGFPE. The handler writes a tagged FATAL line and then re-raises
+//     with the default disposition so the kernel still produces a tombstone.
+//
+// IMPORTANT: this hook MUST be installed from ggml_jni_context::init()
+// before any other llama.cpp / libmtmd / common_init() call is made,
+// otherwise the very first exit() that happens (during backend init or
+// during the first chat template load) will not be caught. A previous
+// version of this code defined the install function but forgot to call
+// it from init(), which is why the safety net did not catch anything.
+//
+// To get a more specific exit source than the generic "atexit()" we would
+// also need to patch arg.cpp:1201 to call this helper directly. We
+// intentionally do not patch the upstream llama.cpp file (too invasive
+// and rebase-hostile), so all exit(1) calls show up as the generic
+// "silent-exit from atexit() with code -1" line. That is still enough to
+// disambiguate "exit() killed us" (case 1) from "OOM-killer killed us"
+// (case 4) -- case 4 produces no log at all.
+// =============================================================================
+static void kantv_silent_exit_log(const char * source, int code) {
+    // Use a tag that no other code uses so it is trivial to grep:
+    //   adb logcat -s KANTV_FATAL
+    __android_log_print(6 /* ANDROID_LOG_FATAL */, "KANTV_FATAL",
+                        "silent-exit from %s with code %d -- this is the "
+                        "source of the 3rd-question crash if you see no "
+                        "other stack trace. The native code called exit() "
+                        "instead of throwing a catchable exception.",
+                        source, code);
+}
+
+static void kantv_silent_exit_atexit_hook(void) {
+    // atexit() cannot tell us what exit code was used, but the very fact
+    // that this fired tells us exit() (not _exit / abort / signal) was the
+    // cause. Log a tagged FATAL line.
+    kantv_silent_exit_log("atexit()", -1);
+}
+
+static void kantv_silent_exit_signal_handler(int signo, siginfo_t * info, void * /*ucontext*/) {
+    char buf[256];
+    snprintf(buf, sizeof(buf),
+             "FATAL signal %d (%s) at addr=%p, code=%d -- native code aborted. "
+             "This is the most likely cause of the 3rd-question crash.",
+             signo,
+             (signo == SIGABRT) ? "SIGABRT" :
+             (signo == SIGSEGV) ? "SIGSEGV" :
+             (signo == SIGBUS)  ? "SIGBUS"  :
+             (signo == SIGFPE)  ? "SIGFPE"  : "UNKNOWN",
+             info ? info->si_addr : nullptr,
+             info ? info->si_code : 0);
+    __android_log_print(6 /* ANDROID_LOG_FATAL */, "KANTV_FATAL", "%s", buf);
+
+    // Restore default disposition and re-raise so the kernel still produces
+    // a tombstone at /data/tombstones/. We do NOT swallow the signal -- the
+    // goal is to keep the existing crash dump AND add a tagged logcat line.
+    struct sigaction sa_default;
+    memset(&sa_default, 0, sizeof(sa_default));
+    sa_default.sa_handler = SIG_DFL;
+    sigaction(signo, &sa_default, nullptr);
+    raise(signo);
+}
+
+static void kantv_install_silent_exit_hooks(void) {
+    // atexit() is global, install once.
+    static std::atomic<bool> installed{false};
+    bool expected = false;
+    if (!installed.compare_exchange_strong(expected, true)) {
+        return;
+    }
+    std::atexit(kantv_silent_exit_atexit_hook);
+
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = kantv_silent_exit_signal_handler;
+    sa.sa_flags     = SA_SIGINFO | SA_RESETHAND;  // SA_RESETHAND = one-shot
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGABRT, &sa, nullptr);
+    sigaction(SIGSEGV, &sa, nullptr);
+    sigaction(SIGBUS,  &sa, nullptr);
+    sigaction(SIGFPE,  &sa, nullptr);
+
+    __android_log_print(4 /* ANDROID_LOG_INFO */, "KANTV_FATAL",
+                        "silent-exit safety net installed: atexit + SIGABRT/"
+                        "SIGSEGV/SIGBUS/SIGFPE handlers");
+}
+
 void ggml_jni_context::init() {
     if (initialized) {
         LOGGD("already initialize");
@@ -73,6 +194,15 @@ void ggml_jni_context::init() {
     }
     llm_temperature = 0.8;
     llm_top_p       = 0.9;
+    // CRITICAL: install the silent-exit safety net FIRST, before any
+    // llama.cpp / libmtmd / common_init() call that could end up calling
+    // exit() or std::terminate. The 3rd-question crash is silent because
+    // exit(1) inside common_params_parse() (arg.cpp:1201) bypasses our
+    // try-catch wrappers; the only way to make the failure visible is to
+    // have an atexit() handler installed before the crash happens. Once
+    // the handler fires the user can grep logcat for the KANTV_FATAL tag
+    // and see whether exit() / SIGABRT / SIGSEGV was the cause.
+    kantv_install_silent_exit_hooks();
     // Install a custom GGML abort callback so that GGML_ASSERT / GGML_ABORT
     // failures inside libllama/libmtmd (e.g. common_params_parse pre-condition
     // checks) reach logcat *before* the process is killed by abort(). Without
@@ -569,7 +699,15 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
                     int n_backend_type) {
     int ret = 0;
     LOGGD("model path:%s\n", sz_model_path);
-    LOGGD("user data: %s\n", sz_user_data);
+    // sz_user_data is the KANTV_CHAT_V1 multi-turn history payload
+    // (see the KANTV_CHAT_V1 branch in llama_inference_main). Its size
+    // grows linearly with the number of chat turns, and on the 3rd
+    // question it overflows the 4KB cde_log logBuf and triggers
+    // bionic FORTIFY: `vsnprintf: size N > SSIZE_MAX -> abort`.
+    // Commenting the line is the targeted fix; cde_log.c has also
+    // been hardened (clamp len_content to actual remaining space) so
+    // any other call site that logs an unbounded string is safe.
+    //LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
     LOGGD("backend type:%d\n", n_backend_type);
 
@@ -586,10 +724,52 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
     // Build argv based on backend type:
     //   CDSP: offload all layers to DSP with flash attention + DSP-optimized params
     //   GGML: CPU only, no offload
+    //
+    // -no-cnv is conditional: when sz_user_data is a KANTV_CHAT_V1 multi-turn
+    // history payload (the AIResearchFragment chat path), we MUST let the
+    // model's own chat template be applied (params.conversation_mode ->
+    // COMMON_CONVERSATION_MODE_AUTO -> ENABLED), otherwise the chat template
+    // branch in llama_inference_main is dead and the prompt is fed raw. For
+    // ASR callers and any other legacy single-prompt caller, -no-cnv keeps
+    // the existing behavior of treating the prompt as raw completion text.
+    //
+    // -st (--single-turn) is required in the KANTV_CHAT_V1 path. Without it,
+    // llama_inference_main enters *interactive mode* after generating the
+    // first response (because params.conversation_mode is ENABLED and
+    // params.single_turn defaults to false, the code at llm-inference.cpp:553
+    // flips params.interactive_first = true and then params.interactive =
+    // true). Interactive mode drives a console::readline() loop on Android
+    // where stdin is /dev/null, which is normally harmless (getline returns
+    // EOF, the loop breaks), but it ALSO triggers chat_add_and_format() and
+    // the chat template path on every turn. With a longer multi-turn history
+    // (5+ messages on the 3rd question) the chat template's
+    // common_chat_format_single() chain can throw std::runtime_error, which
+    // bubbles up to common_params_parse() in arg.cpp and hits the catch
+    // handler at arg.cpp:1201 that calls exit(1) -- killing the APK
+    // silently because stderr is dropped on Android.
+    //
+    // --single-turn tells llama.cpp: "this is a one-shot generation, do not
+    // enter interactive mode, just generate n_predict tokens and exit". The
+    // chat template is still applied (because we also omit -no-cnv), the
+    // EOG token still terminates the loop, and the readline / antiprompt /
+    // chat_add_and_format post-EOG side effects are skipped. Net result:
+    // each Send is a clean, single-shot inference and the 3rd-question
+    // crash is eliminated.
+    const std::string kantv_chat_magic = "KANTV_CHAT_V1\n";
+    bool is_kantv_chat_history = sz_user_data != nullptr
+                                 && strlen(sz_user_data) >= kantv_chat_magic.size()
+                                 && strncmp(sz_user_data, kantv_chat_magic.c_str(), kantv_chat_magic.size()) == 0;
     std::vector<std::string> args_storage;
     std::vector<const char *> argv_vec;
     argv_vec.push_back("llama-inference-main");
-    argv_vec.push_back("-no-cnv");
+    if (!is_kantv_chat_history) {
+        argv_vec.push_back("-no-cnv");
+    } else {
+        // KANTV_CHAT_V1 path: enable chat template, disable interactive mode
+        // so the inference runs as a single-shot generation (see block
+        // comment above).
+        argv_vec.push_back("--single-turn");
+    }
     argv_vec.push_back("-m");
     argv_vec.push_back(sz_model_path);
     argv_vec.push_back("-p");
@@ -659,7 +839,11 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
     LOGGD("model path:%s\n", sz_model_path);
     LOGGD("mmproj path:%s\n", sz_mmproj_model_path);
     LOGGD("media path:%s\n", sz_media_path);
-    LOGGD("user data: %s\n", sz_user_data);
+    // sz_user_data is the user's text prompt for multimodal inference.
+    // It can be arbitrarily long; logging it triggers the same cde_log
+    // FORTIFY abort that the llama_inference() call site (line ~702)
+    // hit on the 3rd chat question. See the comment there.
+    //LOGGD("user data: %s\n", sz_user_data);
     LOGGD("llm_type: %d\n", llm_type);
     LOGGD("backend type:%d\n", n_backend_type);
 

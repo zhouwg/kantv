@@ -22,6 +22,8 @@
 #include "matmul-ops.h"
 #include "htp-vtcm.h"
 
+#include "dsp-ctx.h"
+
 static void hvx_tensor_add_f32_grid(
     const struct htp_tensor * restrict dst,
     const struct htp_tensor * restrict src2,
@@ -1354,6 +1356,7 @@ static int hvx_mm_matmul(struct htp_ops_context * octx) {
                         src0->type == HTP_TYPE_Q8_0 || src0->type == HTP_TYPE_IQ4_NL ||
                         src0->type == HTP_TYPE_MXFP4);
 
+    GGMLHEXAGON_LOG_DEBUG("ne00 %d, ne01 %d, ne02 %d, ne10 %d, ne11 %d, ne12 %d", src0->ne[0], src0->ne[1], src0->ne[2], src1->ne[0], src1->ne[1], src1->ne[2]);
     // Compute src0_nrows_per_thread
     mmctx->src0_nrows_per_thread  = (src0_nrows + octx->n_threads - 1) / octx->n_threads;
     if (is_repacked) {
@@ -2521,6 +2524,16 @@ static inline void hmx_matmul_job_init(hmx_matmul_job_t * job,
     job->n_dot_tiles = n_dot_tiles;
 }
 
+static uint32_t hmx_dbg_csum2d(const void * base, int rows, int cols_u16, size_t stride_u16) {
+    const uint16_t * p = (const uint16_t *) base;
+    uint32_t s = 0;
+    for (int r = 0; r < rows; r++) {
+        const uint16_t * row = p + (size_t) r * stride_u16;
+        for (int i = 0; i < cols_u16; i++) s = s * 31 + row[i];
+    }
+    return s;
+}
+
 static int hmx_mm_2d_f32(struct htp_context *ctx,
                                   float *restrict dst,
                                   const float *restrict src2,
@@ -2611,12 +2624,15 @@ static int hmx_mm_2d_f32(struct htp_context *ctx,
 
     hmx_init_column_scales(vtcm_scales, Q6_V_vsplat_R(0x3c00));  // scale: 1.0, bias: 0.0 in FP16
 
-    FARF(HIGH, "hmx-mm-2d: m %d k %d n %d wtype %d mc %zu nc %zu vtcm %zu/%zu",
-         m, k, n, weight_type, m_chunk_n_rows, n_chunk_n_cols, vtcm_used, vtcm_budget);
-
     int n_chunk_cnt = hmx_ceil_div(n, n_chunk_n_cols);
 
     htp_trace_event_stop(tr, HTP_TRACE_EVT_INIT, 0);
+
+    GGMLHEXAGON_LOG_DEBUG("hmx-mm-2d: pipeline %d, m %d k %d n %d wtype %d mc %zu nc %zu vtcm %zu/%zu",
+         pipeline, m, k, n, weight_type, m_chunk_n_rows, n_chunk_n_cols, vtcm_used, vtcm_budget);
+    GGMLHEXAGON_LOG_DEBUG("hmx-cs-in: m %d k %d n %d act %08x wt %08x",
+         m, k, n, hmx_dbg_csum2d(activation, m < 16 ? m : 16, k * 2, (size_t) act_stride * 2),
+         hmx_dbg_csum2d(weight, 1, 256, 0));
 
     if (pipeline) {
         // --- Asynchronous Pipelined Loop ---
@@ -2779,6 +2795,9 @@ static int hmx_mm_2d_f32(struct htp_context *ctx,
             }
         }
     }
+
+    GGMLHEXAGON_LOG_DEBUG("hmx-cs-out: m %d k %d n %d dst %08x",
+         m, k, n, hmx_dbg_csum2d(dst, m < 16 ? m : 16, n * 2, (size_t) dst_stride * 2));
 
     return 0;
 }
@@ -3271,6 +3290,8 @@ static int hmx_mm_op_matmul(struct htp_ops_context * octx, const struct htp_mm_k
         src2_nb3 = (src2->ne[3] == 1) ? 0 : src2->nb[3];
     }
 
+    GGMLHEXAGON_LOG_DEBUG("k=%d, n=%d", k, n);
+
     int ret = -1;
     const int n_threads = MIN(kparams->n_threads, (int) octx->n_threads);
     if (kparams->kernel_type == HTP_MM_KERNEL_HMX_F16_BATCHED) {
@@ -3329,6 +3350,7 @@ static int hmx_mm_op_matmul(struct htp_ops_context * octx, const struct htp_mm_k
 int op_matmul(struct htp_ops_context * octx) {
     const struct htp_mm_kernel_params * kparams = (const struct htp_mm_kernel_params *) octx->kernel_params;
 
+    GGMLHEXAGON_LOG_DEBUG("kparams->n_hmx %d", kparams->n_hmx);
     if (kparams->n_hmx) {
         return hmx_mm_op_matmul(octx, kparams);
     }
@@ -3595,6 +3617,13 @@ int op_matmul_qkv(struct htp_ops_context * octx) {
     const size_t src0_row_size = src0->nb[1];
     const size_t src0_row_size_padded = hex_round_up(src0_row_size, 128);
 
+    if (src1_nrows > 4) {
+        GGMLHEXAGON_LOG_DEBUG("fused-qkv: m %d k %d nk %d nv %d nq %d wtype %d ktype %d pip %d mc %d nc %d nhmx %d",
+                         (int) src1_nrows, (int) src1->ne[0], (int) src0->ne[1], (int) src2->ne[1], (int) src3->ne[1],
+                         (int) src0->type, (int) kparams->kernel_type, (int) kparams->pipeline,
+                         (int) kparams->m_chunk, (int) kparams->n_chunk, (int) kparams->n_hmx);
+    }
+
     if (hvx_mm_init_vec_dot(mmctx, src0->type) != 0) {
         return HTP_STATUS_NO_SUPPORT;
     }
@@ -3739,6 +3768,13 @@ int op_matmul_ffn(struct htp_ops_context * octx) {
 
     const size_t src0_row_size = src0->nb[1];
     const size_t src0_row_size_padded = hex_round_up(src0_row_size, 128);
+
+    if (src1_nrows > 4) {
+        GGMLHEXAGON_LOG_DEBUG("fused-ffn: m %d k %d ngate %d nup %d wtype %d ktype %d pip %d mc %d nc %d nhmx %d",
+                         (int) src1_nrows, (int) src1->ne[0], (int) src0->ne[1], (int) src2->ne[1],
+                         (int) src0->type, (int) kparams->kernel_type, (int) kparams->pipeline,
+                         (int) kparams->m_chunk, (int) kparams->n_chunk, (int) kparams->n_hmx);
+    }
 
     if (hvx_mm_init_vec_dot(mmctx, src0->type) != 0) {
         return HTP_STATUS_NO_SUPPORT;

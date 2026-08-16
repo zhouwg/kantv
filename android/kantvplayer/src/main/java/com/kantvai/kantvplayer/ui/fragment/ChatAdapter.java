@@ -52,6 +52,8 @@ import com.kantvai.kantvplayer.ui.fragment.ChatMessage.AttachmentType;
 import com.kantvai.kantvplayer.ui.fragment.ChatMessage.Role;
 import com.kantvai.kantvplayer.ui.fragment.ChatMessage.State;
 
+import kantvai.media.player.KANTVLog;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -117,7 +119,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         msg.attachmentType = attachmentType != null ? attachmentType : AttachmentType.NONE;
         msg.state = State.COMPLETE;
         mMessages.add(msg);
-        notifyItemInserted(mMessages.size() - 1);
+        int idx = mMessages.size() - 1;
+        KANTVLog.g(TAG, "addUserMessage: idx=" + idx
+                + " role=USER state=COMPLETE textLen=" + msg.getText().length()
+                + " att=" + msg.attachmentType
+                + " size=" + mMessages.size());
+        notifyItemInserted(idx);
     }
 
     /**
@@ -126,14 +133,94 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      * chunk already has somewhere to land.
      */
     public int addAssistantPlaceholder() {
+        // Defensive guard: if the previous assistant message is still
+        // in STREAMING state when a new turn starts, force it into
+        // COMPLETE now. This is the root cause of the reported
+        // "second question and answer land in the previous assistant
+        // bubble" symptom:
+        //
+        //   1. markLastComplete() is ONLY called from the native
+        //      callback path that detects a line starting with
+        //      "llama-timings" (see AIResearchFragment L927-L948).
+        //      If the native side never emits that line for a given
+        //      model/backend combination (e.g. the small
+        //      gemma-4-E2B-it-Q4_0 model on a code path that exits
+        //      through a different timing string, or any path that
+        //      errors out before the timings line is printed), A1
+        //      stays in STREAMING state forever.
+        //
+        //   2. A stale STREAMING row is dangerous because it still
+        //      "looks like" the active streaming row to bind() - if
+        //      RecyclerView rebinds it for any reason (layout pass,
+        //      scroll, notifyItemRangeChanged), the STREAMING branch
+        //      in AssistantViewHolder.bind() can re-register
+        //      mStreamingHolder = this on a non-trailing position.
+        //      A subsequent appendToLast() chunk then either lands
+        //      on the wrong TextView (via a race window where the
+        //      safety gate in bind() hasn't fired yet) or triggers
+        //      a rebind storm.
+        //
+        //   3. Forcing the previous STREAMING row to COMPLETE here
+        //      BEFORE we add the new placeholder guarantees:
+        //        - the data model has at most one STREAMING row
+        //          (the new one) at all times
+        //        - mStreamingHolder is null at the moment we add
+        //          the placeholder, so the next bind() on the new
+        //          row has a clean slate to register
+        //        - the markwon.setMarkdown() render fires on the
+        //          stale row's NEXT rebind, so the user still
+        //          sees the previous response fully rendered
+        //
+        // The cost is one extra notifyItemChanged() per turn start
+        // in the rare markLastComplete()-missed case, which is
+        // negligible compared to the bug it fixes.
+        // Scan ALL messages (not just the last one) for any STREAMING
+        // assistant row. This is critical because handleSend() adds the
+        // USER message BEFORE calling addAssistantPlaceholder(), so the
+        // last message is always USER and a naive "check last message"
+        // guard would miss a stale STREAMING assistant from the previous
+        // inference that was never flipped to COMPLETE (e.g. when
+        // markLastComplete() was not called because the native side
+        // didn't emit the "llama-timings" cue).
+        for (int i = mMessages.size() - 1; i >= 0; i--) {
+            ChatMessage msg = mMessages.get(i);
+            if (msg.role == Role.ASSISTANT && msg.state == State.STREAMING) {
+                KANTVLog.g(TAG, "addAssistantPlaceholder: GUARD forcing STREAMING row at idx="
+                        + i + " into COMPLETE (markLastComplete was missed)");
+                msg.state = State.COMPLETE;
+                mStreamingHolder = null;
+                mStreamingPosition = RecyclerView.NO_POSITION;
+                notifyItemChanged(i);
+                break;
+            }
+        }
+
         ChatMessage msg = new ChatMessage(Role.ASSISTANT);
-        msg.text.append("...");
+        msg.text.append("🤔 Thinking...");
         mMessages.add(msg);
         int idx = mMessages.size() - 1;
         notifyItemInserted(idx);
         // The freshly-inserted row hasn't been bound yet, so the streaming
         // VH cache is invalid. AssistantViewHolder.bind() will repopulate
         // it as soon as RecyclerView hands it the new row.
+        //
+        // NOTE: there is a known footgun here - if the previous assistant
+        // row was never flipped to COMPLETE (e.g. the native side skipped
+        // the "llama-timings" cue, or the app was backgrounded mid-stream
+        // and the next turn fires before markLastComplete was delivered),
+        // it is still in STREAMING state. When RecyclerView later rebinds
+        // that older row (e.g. on a layout pass, or on scroll), the
+        // STREAMING branch in bind() used to unconditionally re-register
+        // mStreamingHolder = this, which would point subsequent chunks
+        // at the wrong row. The bind() guard added below
+        // (only register when position == mMessages.size()-1) closes
+        // that hole. We still log here so a fresh repro of the
+        // "Q2 + A2 land in A1's bubble" symptom tells us the
+        // incoming state of the cache.
+        KANTVLog.g(TAG, "addAssistantPlaceholder: idx=" + idx
+                + " size=" + mMessages.size()
+                + " prevStreamingHolder=" + (mStreamingHolder != null ? "non-null" : "null")
+                + " prevStreamingPos=" + mStreamingPosition);
         mStreamingHolder = null;
         mStreamingPosition = idx;
         return idx;
@@ -147,7 +234,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      *      so any future re-bind gets the complete picture.
      *   2. immediate raw append: if the holder is alive, append the
      *      chunk straight to the live TextView so the user sees the
-     *      token grow in real time. This is the "实时增长" half of the
+     *      token grow in real time. This is the "real-time growth" half of the
      *      contract. Without it the TextView only refreshed every
      *      FULL_RENDER_INTERVAL_MS (200ms) and the user perceived that
      *      as "no markdown until inference ends".
@@ -174,20 +261,21 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (chunk == null || chunk.isEmpty() || mMessages.isEmpty()) {
             return;
         }
-        ChatMessage last = mMessages.get(mMessages.size() - 1);
+        int lastIdx = mMessages.size() - 1;
+        ChatMessage last = mMessages.get(lastIdx);
         if (last.role != Role.ASSISTANT) {
             // Out-of-order token; we silently drop. The fragment's contract
             // is to never call append outside an active inference, so this
             // would only happen if a leftover callback fires after a clear.
-            KANTVLog.j(TAG, "appendToLast: last role is not ASSISTANT, drop chunk");
+            KANTVLog.g(TAG, "appendToLast: last role is not ASSISTANT, drop chunk");
             return;
         }
-        // The placeholder is a "..." dot, replace it on the first real chunk
-        // so the user doesn't see the placeholder for too long. This must
-        // run on the data buffer regardless of which render path we take
-        // below, because the data buffer is the source of truth for any
-        // future re-bind.
-        if (last.text.length() == 3 && last.text.toString().equals("...")) {
+        // The placeholder is "🤔 Thinking...", replace it on the first
+        // real chunk so the user doesn't see the placeholder for too long.
+        // This must run on the data buffer regardless of which render path
+        // we take below, because the data buffer is the source of truth
+        // for any future re-bind.
+        if (last.text.toString().startsWith("🤔 Thinking")) {
             last.text.setLength(0);
         }
         last.text.append(chunk);
@@ -203,10 +291,35 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 && mStreamingPosition == mMessages.size() - 1
                 && vh.textView != null
                 && vh.textView.isAttachedToWindow()) {
+            // Throttled happy-path log: only on the first chunk after
+            // a (re)bind, so we can see "this is the chunk that landed
+            // on the trailing-row holder" once per turn, not once per
+            // token. mLastHappyLogPos != lastIdx is our cheap "we've
+            // moved to a new turn" gate.
+            if (vh.mLastHappyLogPos != lastIdx) {
+                vh.mLastHappyLogPos = lastIdx;
+                KANTVLog.g(TAG, "appendToLast: HAPPY path, lastIdx=" + lastIdx
+                        + " cachedPos=" + mStreamingPosition
+                        + " dataLen=" + last.text.length()
+                        + " chunkLen=" + chunk.length());
+            }
             vh.appendRawChunk(chunk);
             vh.maybePeriodicFullRender();
             return;
         }
+        // Direct-update path was rejected. Most common reason: the new
+        // trailing row was just inserted and its bind() hasn't run yet
+        // (mStreamingHolder is null), OR the cached holder is for an
+        // older position. Either way we fall through to notifyItemChanged
+        // which forces a real rebind. Log the cause once per fallback so
+        // a fresh repro of the "second Q+A land in the previous bubble"
+        // symptom gives us data on the path actually being taken.
+        KANTVLog.g(TAG, "appendToLast: fallback to notifyItemChanged, lastIdx=" + lastIdx
+                + " cachedHolder=" + (vh != null ? "non-null" : "null")
+                + " cachedPos=" + mStreamingPosition
+                + " size=" + mMessages.size()
+                + " cachedAttached=" + (vh != null && vh.textView != null
+                        ? vh.textView.isAttachedToWindow() : false));
         // Fallback: the row was just inserted and not yet bound, or the
         // holder was recycled (scrolled off-screen). Either way, we have
         // to go through the normal notify -> bind path so the new row
@@ -223,8 +336,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         ChatMessage last = mMessages.get(mMessages.size() - 1);
         if (last.role != Role.ASSISTANT) {
+            KANTVLog.g(TAG, "markLastComplete: last role is not ASSISTANT, no-op (size="
+                    + mMessages.size() + ")");
             return;
         }
+        KANTVLog.g(TAG, "markLastComplete: lastIdx=" + (mMessages.size() - 1)
+                + " cachedHolder=" + (mStreamingHolder != null ? "non-null" : "null")
+                + " cachedPos=" + mStreamingPosition);
         last.state = State.COMPLETE;
         // The streaming VH cache is now stale: COMPLETE re-binds the
         // row to do a full markwon.setMarkdown, and the old holder
@@ -241,8 +359,13 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
         ChatMessage last = mMessages.get(mMessages.size() - 1);
         if (last.role != Role.ASSISTANT) {
+            KANTVLog.g(TAG, "markLastError: last role is not ASSISTANT, no-op (size="
+                    + mMessages.size() + ")");
             return;
         }
+        KANTVLog.g(TAG, "markLastError: lastIdx=" + (mMessages.size() - 1)
+                + " cachedHolder=" + (mStreamingHolder != null ? "non-null" : "null")
+                + " cachedPos=" + mStreamingPosition);
         last.state = State.ERROR;
         mStreamingHolder = null;
         mStreamingPosition = RecyclerView.NO_POSITION;
@@ -252,6 +375,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     /** Wipe the whole conversation. */
     public void clear() {
         int n = mMessages.size();
+        KANTVLog.g(TAG, "clear: removing " + n + " messages");
         if (n == 0) {
             return;
         }
@@ -265,8 +389,443 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemRangeRemoved(0, n);
     }
 
+    // ---------------------------------------------------------------------
+    // Multi-turn history packaging for native (KANTV_CHAT_V1 protocol)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Pack the conversation history into the KANTV_CHAT_V1 wire format
+     * consumed by the C++ side (llm-inference.cpp). The resulting string
+     * is passed to ggml_jni.llm_inference() as the `prompt` argument;
+     * llama_inference_main detects the "KANTV_CHAT_V1\n" magic prefix,
+     * parses the (role, content) pairs back into common_chat_msg, and
+     * applies the model's own chat template (read from the gguf
+     * metadata) via common_chat_templates_apply().
+     *
+     * Why not just pre-format the prompt on the Java side?
+     *   The previous Java-side manual template approach (see
+     *   getHistoryPrompt()) worked for Gemma-3 / Qwen2.5 but produced
+     *   the "model echoes the entire prompt" regression on the small
+     *   gemma-4-E2B-it-Q4_0 model. The model was in -no-cnv mode
+     *   (raw text completion), so when it received a structured prompt
+     *   like "&lt;start_of_turn&gt;user...&lt;end_of_turn&gt;\n&lt;start_of_turn&gt;model\n"
+     *   it just continued the pattern instead of recognizing the
+     *   "model should respond now" signal. Routing through the C++
+     *   chat-template path puts the model into its native chat mode
+     *   (params.conversation_mode = ENABLED), which fixes this.
+     *
+     * Wire format:
+     *   "KANTV_CHAT_V1\n" + ({role}\x1E{content}\x1E)*
+     *   \x1E is the ASCII Record Separator (0x1E), chosen because
+     *   it is a control character that never appears in normal user
+     *   input. Messages are encoded in order (oldest first), with
+     *   each role and content as plain UTF-8.
+     *
+     * Empty placeholder messages (State.STREAMING with text.length()==0)
+     * and ERROR-state messages are skipped. The caller is expected
+     * to have added a fresh user message (the one being sent) and an
+     * empty assistant placeholder before calling; both will be encoded
+     * or skipped appropriately.
+     *
+     * Returns the packed string, or an empty string if the conversation
+     * has no non-empty, non-error messages.
+     */
+    public String formatHistoryForNative() {
+        StringBuilder sb = new StringBuilder(mMessages.size() * 64);
+        sb.append("KANTV_CHAT_V1\n");
+
+        KANTVLog.g("KANTV", "formatHistoryForNative: processing " + mMessages.size() + " messages");
+
+        for (int idx = 0; idx < mMessages.size(); idx++) {
+            ChatMessage msg = mMessages.get(idx);
+            if (msg.state == ChatMessage.State.ERROR) {
+                KANTVLog.g("KANTV", "formatHistoryForNative: skipping ERROR message at idx=" + idx);
+                continue;
+            }
+            String text = msg.getText();
+            if (text == null || text.isEmpty()) {
+                // Skip the empty assistant placeholder
+                KANTVLog.g("KANTV", "formatHistoryForNative: skipping empty message at idx=" + idx);
+                continue;
+            }
+            String roleStr;
+            switch (msg.role) {
+                case USER:      roleStr = "user";      break;
+                case ASSISTANT: roleStr = "assistant"; break;
+                case SYSTEM:    roleStr = "system";    break;
+                default:        continue;  // unknown role
+            }
+
+            // Debug: log message before sanitization
+            String msgPreview = text.length() > 100 ? text.substring(0, 100) + "..." : text;
+            KANTVLog.g("KANTV", "formatHistoryForNative [" + idx + "] " + roleStr + " (len=" + text.length() + "): " + msgPreview.replace("\n", "\\n"));
+
+            // Sanitize assistant history of any thinking blocks so
+            // the model does not see private thinking content or
+            // channel markers from previous turns. For models that
+            // don't emit such markers this is a no-op (the markers
+            // are not present in the text).
+            if (msg.role == Role.ASSISTANT) {
+                text = sanitizeThinkingBlocks(text);
+                // Debug: log after sanitization
+                String sanitizedPreview = text.length() > 100 ? text.substring(0, 100) + "..." : text;
+                KANTVLog.g("KANTV", "formatHistoryForNative [" + idx + "] sanitized (len=" + text.length() + "): " + sanitizedPreview.replace("\n", "\\n"));
+            }
+            sb.append(roleStr);
+            sb.append('\u001E');
+            sb.append(text);
+            sb.append('\u001E');
+        }
+
+        KANTVLog.g("KANTV", "formatHistoryForNative: final history length=" + sb.length());
+        // Diagnostic: log the FULL packed history to see exactly what
+        // the native layer receives. This is critical for debugging
+        // multi-turn Q&A leakage.
+        String fullHistory = sb.toString();
+        String historyPreview = fullHistory.length() > 2000
+                ? fullHistory.substring(0, 2000) + "...(+" + (fullHistory.length() - 2000) + ")"
+                : fullHistory;
+        KANTVLog.g("KANTV", "formatHistoryForNative FULL: "
+                + historyPreview.replace("\n", "\\n").replace("\u001E", "\\x1E"));
+        return fullHistory;
+    }
+
+    // -----------------------------------------------------------------
+    // Multi-model thinking block sanitization
+    // -----------------------------------------------------------------
+    // These patterns mirror the ones in AIResearchFragment for the Java-
+    // side filter. They are used to clean assistant history before
+    // sending it back to the LLM, so the model doesn't see stale
+    // thinking markers from previous turns.
+    // -----------------------------------------------------------------
+
+    /**
+     * Describes a thinking/answer marker pattern for sanitization.
+     * Different from AIResearchFragment's ThinkingPattern - this one
+     * focuses on identifying which blocks to DISCARD (thinking) vs
+     * which to PRESERVE (answer).
+     */
+    private static class SanitizePattern {
+        final String blockOpen;      // e.g., "<|channel>"
+        final String blockClose;     // e.g., "<channel|>"
+        final String thinkingTag;    // e.g., "thought" - blocks starting with this are DISCARDED
+        final String answerTag;      // e.g., "final" - blocks starting with this are PRESERVED
+        final String prefix;         // partial prefix for recursive safety check
+        final String displayName;
+
+        SanitizePattern(String blockOpen, String blockClose,
+                       String thinkingTag, String answerTag,
+                       String prefix, String displayName) {
+            this.blockOpen   = blockOpen;
+            this.blockClose  = blockClose;
+            this.thinkingTag = thinkingTag;
+            this.answerTag   = answerTag;
+            this.prefix       = prefix;
+            this.displayName  = displayName;
+        }
+    }
+
+    // Known sanitization patterns. Add new model families here.
+    private static final SanitizePattern[] SANITIZE_PATTERNS = {
+        // Gemma-3/4: <|channel>thought ... <channel|> (discard)
+        //             <|channel>final ... <channel|> (preserve)
+        new SanitizePattern("<|channel>", "<channel|>",
+                "thought", "final", "<|channel", "Gemma"),
+        // Qwen 2.5/3: <|im_start|>thinking ... <|im_end|> (discard)
+        //             <|im_start|>answer ... <|im_end|> (preserve)
+        new SanitizePattern("<|im_start|>", "<|im_end|>",
+                "thinking", "answer", "<|im_start|>", "Qwen"),
+    };
+
+    // Display format markers (matches AIResearchFragment's output format)
+    private static final String DISPLAY_PREFIX  = "💭 **Thinking:** ";
+    private static final String DISPLAY_SEPARATOR = "\n\n---\n\n";
+    // Generic thinking tag for patterns that use <think>...</think>
+    private static final String GENERIC_THINK_OPEN  = "<think>";
+    private static final String GENERIC_THINK_CLOSE = "</think>";
+
+    /**
+     * Strip thinking blocks from an assistant response, returning only
+     * the clean answer text. Used to sanitize conversation history
+     * before sending it back to the LLM.
+     *
+     * Handles three formats:
+     *   1. Display format (after Java-side filtering):
+     *      💭 **Thinking:** \n...thinking...\n\n---\n\n...answer...
+     *   2. Raw format with known markers (Gemma, Qwen, etc.)
+     *   3. Generic <think>...</think> format
+     *
+     * Thinking content is DISCARDED (not sent back to the model).
+     */
+    static String sanitizeThinkingBlocks(String text) {
+        if (text == null || text.isEmpty()) {
+            return "";
+        }
+
+        String inputPreview = text.length() > 300 ? text.substring(0, 300) + "..." : text;
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks input (len=" + text.length() + "): " + inputPreview.replace("\n", "\\n"));
+
+        // Step 1: Handle display format (after Java-side filtering)
+        // If the text contains the separator, the answer is everything after it
+        if (text.contains(DISPLAY_SEPARATOR)) {
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks: found display separator");
+            int sepIdx = text.lastIndexOf(DISPLAY_SEPARATOR);
+            String answerPart = text.substring(sepIdx + DISPLAY_SEPARATOR.length());
+            if (answerPart.startsWith("\n")) answerPart = answerPart.substring(1);
+            if (answerPart.startsWith("\r")) answerPart = answerPart.substring(1);
+            String result = answerPart.trim();
+
+            // Verify no raw markers remain
+            result = sanitizeWithAllPatterns(result);
+
+            String outputPreview = result.length() > 300 ? result.substring(0, 300) + "..." : result;
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (display, len=" + result.length() + "): " + outputPreview.replace("\n", "\\n"));
+            return result;
+        }
+
+        // Step 1b: Display prefix without separator (incomplete response)
+        if (text.contains(DISPLAY_PREFIX)) {
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks: found display prefix but no separator");
+            int prefixIdx = text.indexOf(DISPLAY_PREFIX);
+            StringBuilder out = new StringBuilder();
+            if (prefixIdx > 0) {
+                out.append(text, 0, prefixIdx);
+            }
+            String result = out.toString().trim();
+            result = sanitizeWithAllPatterns(result);
+
+            KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (prefix only, len=" + result.length() + "): " + result.replace("\n", "\\n"));
+            return result;
+        }
+
+        // Step 2: Handle raw format (any known marker pattern)
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks: using raw format path");
+        String result = sanitizeWithAllPatterns(text);
+
+        // Step 3: Handle generic <think>...</think> pattern
+        result = stripGenericThinkTags(result);
+
+        String outputPreview2 = result.length() > 300 ? result.substring(0, 300) + "..." : result;
+        KANTVLog.g("KANTV", "sanitizeThinkingBlocks output (raw, len=" + result.length() + "): " + outputPreview2.replace("\n", "\\n"));
+        return result;
+    }
+
+    /**
+     * Apply all known sanitization patterns sequentially.
+     * Each pattern strips its thinking blocks and preserves answer blocks.
+     */
+    private static String sanitizeWithAllPatterns(String text) {
+        String result = text;
+        for (SanitizePattern pattern : SANITIZE_PATTERNS) {
+            result = stripPatternBlocks(result, pattern);
+            // Recursive safety check
+            if (result.contains(pattern.prefix)) {
+                KANTVLog.g("KANTV", "sanitizeThinkingBlocks: recursive pass for "
+                        + pattern.displayName + " pattern");
+                result = stripPatternBlocks(result, pattern);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Strip thinking blocks for a specific pattern. Walks through the text,
+     * removes all thinking-tagged blocks, preserves answer-tagged blocks,
+     * and returns the clean result.
+     */
+    private static String stripPatternBlocks(String text, SanitizePattern pattern) {
+        StringBuilder out = new StringBuilder(text.length());
+        int i = 0;
+        while (i < text.length()) {
+            int openIdx = text.indexOf(pattern.blockOpen, i);
+            if (openIdx < 0) {
+                out.append(text, i, text.length());
+                break;
+            }
+            // Append text between current position and block marker
+            out.append(text, i, openIdx);
+
+            // Check block type by looking at the tag after the open marker
+            String afterOpen = text.substring(openIdx + pattern.blockOpen.length(),
+                    Math.min(openIdx + pattern.blockOpen.length() + 30, text.length()));
+            int closeIdx = text.indexOf(pattern.blockClose, openIdx + pattern.blockOpen.length());
+            if (closeIdx < 0) {
+                // Unclosed block - just append and break
+                out.append(text, openIdx, text.length());
+                break;
+            }
+
+            boolean isThinking = afterOpen.startsWith(pattern.thinkingTag);
+            boolean isAnswer   = afterOpen.startsWith(pattern.answerTag);
+
+            if (isAnswer) {
+                // Keep the content inside the answer block
+                int afterTag = openIdx + pattern.blockOpen.length() + pattern.answerTag.length();
+                // Skip newlines after the tag
+                while (afterTag < text.length()
+                        && (text.charAt(afterTag) == '\n' || text.charAt(afterTag) == '\r')) {
+                    afterTag++;
+                }
+                out.append(text, afterTag, closeIdx);
+            } else if (isThinking) {
+                // For thinking blocks: DISCARD entirely
+            } else {
+                // Unrecognized block type (e.g. <|im_start|>assistant in
+                // Qwen templates) - PRESERVE as-is since it's valid
+                // conversation context, not a thinking block.
+                out.append(text, openIdx, closeIdx);
+            }
+
+            i = closeIdx + pattern.blockClose.length();
+            if (i < text.length() && text.charAt(i) == '\r') i++;
+            if (i < text.length() && text.charAt(i) == '\n') i++;
+        }
+        return out.toString().trim();
+    }
+
+    /**
+     * Strip generic <think>...</think> blocks.
+     * These are used by some model families (e.g., some open-source models).
+     */
+    private static String stripGenericThinkTags(String text) {
+        if (!text.contains(GENERIC_THINK_OPEN)) {
+            return text;
+        }
+        StringBuilder out = new StringBuilder(text.length());
+        int i = 0;
+        while (i < text.length()) {
+            int openIdx = text.indexOf(GENERIC_THINK_OPEN, i);
+            if (openIdx < 0) {
+                out.append(text, i, text.length());
+                break;
+            }
+            out.append(text, i, openIdx);
+            int closeIdx = text.indexOf(GENERIC_THINK_CLOSE, openIdx + GENERIC_THINK_OPEN.length());
+            if (closeIdx < 0) {
+                // Unclosed think block - discard from open to end
+                KANTVLog.g("KANTV", "sanitizeThinkingBlocks: unclosed <think> tag, discarding from idx=" + openIdx);
+                break;
+            }
+            // Skip the think block content entirely
+            i = closeIdx + GENERIC_THINK_CLOSE.length();
+            if (i < text.length() && text.charAt(i) == '\r') i++;
+            if (i < text.length() && text.charAt(i) == '\n') i++;
+        }
+        return out.toString().trim();
+    }
+
     public int getMessageCount() {
         return mMessages.size();
+    }
+
+    /**
+     * @return an unmodifiable view of the underlying message list. Used
+     * by AIResearchFragment to fold the conversation into a single
+     * chat-template-formatted prompt before each inference.
+     */
+    public List<ChatMessage> getMessages() {
+        return java.util.Collections.unmodifiableList(mMessages);
+    }
+
+    // ---------------------------------------------------------------------
+    // Chat-template prompt assembly
+    // ---------------------------------------------------------------------
+
+    /**
+     * Build the full multi-turn prompt string for the given model, ready
+     * to be passed to ggml_jni.llm_inference(). Iterates over the
+     * conversation history ({@link #mMessages}) and emits:
+     *   - BOS prefix if the model requests one (the model's
+     *     {@link KANTVAIModel#getBos()} field)
+     *   - one user/model turn per ChatMessage, formatted with the
+     *     model's per-turn delimiters
+     *   - a trailing generation-prompt suffix so the model knows to
+     *     produce an assistant response (no leading whitespace; the
+     *     model expects the suffix to start a fresh turn)
+     *
+     * The returned String is suitable as the `prompt` argument of
+     * `ggmljava.llm_inference(model_path, prompt, ...)`. The native
+     * side uses -no-cnv (raw text) so this manually-formatted prompt
+     * is the only place the model sees the role markers.
+     *
+     * Stream-in-progress and error messages are included: STREAMING
+     * messages are formatted using whatever text has accumulated so far
+     * (so a user can continue a conversation even if the previous
+     * assistant turn is still rendering); ERROR messages are skipped to
+     * avoid confusing the model with "[error] ..." text.
+     *
+     * If {@code model} is null, falls back to the "User:/Assistant:"
+     * plain-text format (the KANTVAIModel field defaults).
+     */
+    public String getHistoryPrompt(kantvai.ai.KANTVAIModel model) {
+        if (mMessages.isEmpty()) {
+            // No history at all - return an empty prompt with just the
+            // generation suffix so the model still produces output. The
+            // caller (AIResearchFragment) will normally guard against
+            // empty input before calling, so this is a defensive path.
+            return (model != null ? model.getGenerationPrompt() : "Assistant: ");
+        }
+
+        String userOpen   = (model != null) ? model.getUserOpen()   : "User: ";
+        String userClose  = (model != null) ? model.getUserClose()  : "\n";
+        String modelOpen  = (model != null) ? model.getModelOpen()  : "Assistant: ";
+        String modelClose = (model != null) ? model.getModelClose() : "\n";
+        String bos        = (model != null) ? model.getBos()        : "";
+        String genPrompt  = (model != null) ? model.getGenerationPrompt() : "Assistant: ";
+
+        StringBuilder sb = new StringBuilder(mMessages.size() * 64);
+        if (bos != null && !bos.isEmpty()) {
+            sb.append(bos);
+        }
+
+        for (ChatMessage msg : mMessages) {
+            // Skip ERROR messages - their "[error] ..." text would
+            // confuse the model on the next turn.
+            if (msg.state == ChatMessage.State.ERROR) {
+                continue;
+            }
+            // Skip empty messages: the assistant bubble is added as
+            // a placeholder (State.STREAMING with text.length()==0)
+            // right before the inference is fired, and including
+            // it would produce "<start_of_turn>model\n<end_of_turn>\n"
+            // in the prompt - an empty assistant turn that adds no
+            // context and looks like a bug to the model. The
+            // generationPrompt suffix at the end of the formatted
+            // string already tells the model "respond now".
+            String text = msg.getText();
+            if (text == null || text.isEmpty()) {
+                continue;
+            }
+            switch (msg.role) {
+                case USER:
+                    sb.append(userOpen);
+                    sb.append(text);
+                    sb.append(userClose);
+                    break;
+                case ASSISTANT:
+                    sb.append(modelOpen);
+                    sb.append(text);
+                    sb.append(modelClose);
+                    break;
+                case SYSTEM:
+                    // SYSTEM role: prepend the user-content but don't
+                    // wrap in user/model delimiters. The model's
+                    // expected position for system content is before
+                    // the first user turn and the model may or may
+                    // not have a dedicated system marker in its
+                    // template. For now, emit as a leading "user"
+                    // turn so the model at least sees the context -
+                    // the proper system-prompt handling can be added
+                    // later if a specific model needs it.
+                    sb.append(userOpen);
+                    sb.append(text);
+                    sb.append(userClose);
+                    break;
+            }
+        }
+
+        sb.append(genPrompt);
+        return sb.toString();
     }
 
     // ---------------------------------------------------------------------
@@ -282,6 +841,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        KANTVLog.g(TAG, "onCreateViewHolder: viewType=" + viewType);
         if (viewType == TYPE_USER) {
             return new UserViewHolder(inflater.inflate(R.layout.item_chat_user, parent, false));
         }
@@ -291,6 +851,10 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatMessage msg = mMessages.get(position);
+        KANTVLog.g(TAG, "onBindViewHolder: position=" + position
+                + " role=" + msg.role + " state=" + msg.state
+                + " textLen=" + msg.getText().length()
+                + " vhClass=" + holder.getClass().getSimpleName());
         if (holder instanceof UserViewHolder) {
             ((UserViewHolder) holder).bind(msg);
         } else if (holder instanceof AssistantViewHolder) {
@@ -305,6 +869,8 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+        KANTVLog.g(TAG, "onViewRecycled: vhClass=" + holder.getClass().getSimpleName()
+                + " position=" + holder.getAdapterPosition());
         super.onViewRecycled(holder);
         // AssistantViewHolder owns the cleanup of mStreamingHolder
         // because it knows its own identity. Doing the null-out here
@@ -346,7 +912,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     try {
                         attachmentView.setImageURI(Uri.fromFile(new File(msg.attachmentPath)));
                     } catch (Exception e) {
-                        KANTVLog.j(TAG, "failed to load attachment: " + e.toString());
+                        KANTVLog.g(TAG, "failed to load attachment: " + e.toString());
                         attachmentView.setImageResource(android.R.drawable.ic_menu_gallery);
                     }
                 } else {
@@ -549,6 +1115,14 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // COMPLETE path knows to start from a clean slate.
         private int mLastRenderedLength = 0;
 
+        // Diagnostic: tracks which "lastIdx" we last printed a happy-path
+        // appendToLast log for. Used by appendToLast() to print one log
+        // line per turn ("the first chunk of the new turn landed on
+        // the trailing-row holder") instead of one per token. Reset in
+        // onAdapterRecycled() so a recycled holder for a new turn logs
+        // again.
+        private int mLastHappyLogPos = -1;
+
         // Periodic full re-render gate. The maybePeriodicFullRender()
         // method only catches markdown that is SELF-CONTAINED in the
         // data-model text at re-render time (e.g., "**bold**" that
@@ -626,6 +1200,12 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
          *   to. Required so we can register as the streaming holder.
          */
         void bind(ChatMessage msg, int position) {
+            KANTVLog.g(TAG, "AssistantViewHolder.bind: position=" + position
+                    + " state=" + msg.state
+                    + " textLen=" + msg.getText().length()
+                    + " size=" + mMessages.size()
+                    + " cachedHolder=" + (mStreamingHolder != null ? "non-null" : "null")
+                    + " cachedPos=" + mStreamingPosition);
             if (msg.state == State.STREAMING) {
                 // Always do a full setText() in bind(). We used to try to
                 // be clever with "append if currentLen > 0 && fullLen >
@@ -660,15 +1240,45 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 // inheriting a recent mLastFullRenderTime would delay
                 // the first cross-chunk catch-up for up to 200ms.
                 mLastFullRenderTime = 0L;
-                // Register as the "live" streaming holder so future
-                // appendToLast() calls can find this row and update
-                // its TextView directly (no rebind -> no flicker).
-                // Unconditional overwrite is fine: at most one
-                // AssistantViewHolder can be bound to a given position
-                // at a time, and onViewRecycled() clears the cache
-                // when this row scrolls off-screen.
-                mStreamingHolder = this;
-                mStreamingPosition = position;
+                // SAFETY GATE: only register as the "live" streaming
+                // holder if this row is actually the trailing row.
+                //
+                // Background: if the previous assistant row was never
+                // flipped to COMPLETE (e.g. markLastComplete() missed
+                // because the native side skipped the "llama-timings"
+                // detection, or the user fired a second turn before
+                // the first finished), that older row is still in
+                // STREAMING state. When RecyclerView later rebinds it
+                // (on a layout pass, on scroll, on any notify pass),
+                // the STREAMING branch USED to unconditionally
+                // overwrite mStreamingHolder = this with the OLDER
+                // holder and mStreamingPosition = the OLDER position.
+                // Subsequent appendToLast() calls then passed the
+                // direct-update path with the older holder, and the
+                // raw chunks got appended onto the older TextView's
+                // buffer - producing the "Q2 and A2 land at the end
+                // of A1" symptom the user reported.
+                //
+                // The fix is to refuse to claim the streaming-holder
+                // slot when our position is not the trailing row. The
+                // older row still renders correctly (textView.setText
+                // above replaces its content with the data-model
+                // text), but it will not be the destination for new
+                // chunks - those will route through the trailing
+                // row's holder once it binds, or through the
+                // notifyItemChanged fallback in appendToLast.
+                if (position == mMessages.size() - 1) {
+                    mStreamingHolder = this;
+                    mStreamingPosition = position;
+                } else {
+                    KANTVLog.g(TAG, "bind: STREAMING row at position " + position
+                            + " is NOT the trailing row (size=" + mMessages.size()
+                            + "); refusing to register as active streaming holder");
+                    if (mStreamingHolder == this) {
+                        mStreamingHolder = null;
+                        mStreamingPosition = RecyclerView.NO_POSITION;
+                    }
+                }
             } else if (msg.state == State.COMPLETE && mMarkwon != null) {
                 // Two preprocessors run on the COMPLETE text:
                 //   1. HEADER_STRIP (only when debug==1) drops
@@ -676,7 +1286,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 //      doesn't end up with 1.5-2x sized text.
                 //   2. preprocessUnclosedBold auto-closes lone
                 //      `**` on a line so the LLM's
-                //      "**总结:" pattern actually renders bold
+                //      "**Summary:" pattern actually renders bold
                 //      instead of leaking the asterisks.
                 // Both run on the text that goes to markwon; the
                 // data model is untouched.
@@ -845,7 +1455,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return;
             }
             // Auto-close lone `**` on a line so the LLM's
-            // "**总结:" / similar unclosed-bold patterns actually
+            // "**Summary:" / similar unclosed-bold patterns actually
             // render as bold mid-stream instead of leaking the
             // asterisks. The data model is unchanged - this only
             // touches the text we hand to markwon. The cost is one
@@ -873,6 +1483,9 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
          * appendToLast() doesn't accidentally stamp the wrong row.
          */
         void onAdapterRecycled() {
+            KANTVLog.g(TAG, "onAdapterRecycled: wasStreamingHolder="
+                    + (mStreamingHolder == this)
+                    + " cachedPos=" + mStreamingPosition);
             if (mStreamingHolder == this) {
                 mStreamingHolder = null;
                 mStreamingPosition = RecyclerView.NO_POSITION;
@@ -882,6 +1495,28 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // and the existing mLastRenderedLength / Editable state
             // must not bleed across messages.
             mLastRenderedLength = 0;
+            mLastHappyLogPos = -1;
+            // Force the next chunk that lands on this (rebound) holder
+            // to go through the full setText() / setMarkdown() path
+            // instead of the raw-append fast path. Without this reset,
+            // a recycled holder that was previously in STREAMING
+            // state (mLastFullRenderTime recently bumped) would let
+            // the first chunk of the new turn take the "raw append
+            // onto existing TextView contents" branch in
+            // appendRawChunk, which on a holder whose TextView still
+            // shows the previous response's rendered text produces
+            // the "second question and answer land in the previous
+            // bubble" symptom reported by users.
+            mLastFullRenderTime = 0L;
+            // Clear the TextView's editable buffer. bind() will
+            // overwrite this with the new message's text on the
+            // rebound; clearing here just makes the recycled state
+            // honest so a stray appendToLast() between recycling
+            // and rebinding can't stitch new chars onto the old
+            // Spannable.
+            if (textView != null) {
+                textView.setText("");
+            }
         }
 
         // -----------------------------------------------------------------
@@ -974,7 +1609,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
                 fw.write("\n");
             } catch (Throwable t) {
-                KANTVLog.j(TAG, "dumpTextAndSpans failed: " + t);
+                KANTVLog.g(TAG, "dumpTextAndSpans failed: " + t);
             } finally {
                 if (fw != null) {
                     try { fw.close(); } catch (Throwable ignore) {}
@@ -1001,7 +1636,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 fos = new FileOutputStream(out);
                 bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
             } catch (Throwable t) {
-                KANTVLog.j(TAG, "dumpBitmap failed: " + t);
+                KANTVLog.g(TAG, "dumpBitmap failed: " + t);
             } finally {
                 if (fos != null) {
                     try { fos.close(); } catch (Throwable ignore) {}
