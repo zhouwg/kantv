@@ -14,6 +14,7 @@ struct fastdiv_values {
 
 static inline struct fastdiv_values init_fastdiv_values(uint32_t d) {
     struct fastdiv_values result = { 0, 0 };
+    if (d == 0) return result;  // avoid division by zero
     // compute L = ceil(log2(d));
     while (result.l < 32 && ((uint32_t) 1 << result.l) < d) {
         ++(result.l);

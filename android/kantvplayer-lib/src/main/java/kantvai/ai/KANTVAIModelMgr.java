@@ -225,46 +225,105 @@ public class KANTVAIModelMgr {
 
 
          //LLM (text-only)
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true"
-                 );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen1.5-1.8B", "qwen1_5-1_8b-chat-q4_0.gguf",
+                hf_endpoint + "Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_0.gguf?download=true"
+                );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        //Qwen2.5 ChatML chat template (also used by Qwen1.5+):
+        //  user:   <|im_start|>user\n{content}<|im_end|>\n
+        //  model:  <|im_start|>assistant\n{content}<|im_end|>\n
+        //  gen:    <|im_start|>assistant\n
+        // BOS is added by the tokenizer (vocab.add_bos=true) so we don't emit <bos> here.
+        AIModels[modelIndex - 1].setChatTemplate(
+                /* bos */ "",
+                /* userOpen  */ "<|im_start|>user\n",
+                /* userClose */ "<|im_end|>\n",
+                /* modelOpen */ "<|im_start|>assistant\n",
+                /* modelClose*/ "<|im_end|>\n",
+                /* genPrompt */ "<|im_start|>assistant\n");
 
-         //LLM (text-only)
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf",
-                 hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true"
-                 );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        //LLM (text-only)
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-3B", "qwen2.5-3b-instruct-q4_0.gguf",
+                hf_endpoint + "Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/main/qwen2.5-3b-instruct-q4_0.gguf?download=true"
+                );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        //Same ChatML template as Qwen1.5.
+        AIModels[modelIndex - 1].setChatTemplate(
+                "",
+                "<|im_start|>user\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n");
 
-         //LLM + MTMD-image
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
-                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
-                 hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
-         );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE);
+        //LLM + MTMD-image
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma3-4B", "gemma-3-4b-it-Q8_0.gguf", "mmproj-gemma3-4b-f16.gguf",
+                hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q8_0.gguf?download=true",
+                hf_endpoint + "ggml-org/gemma-3-4b-it-GGUF/resolve/main/mmproj-model-f16.gguf?download=true"
+        );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE);
+        //Gemma-3 / Gemma-4 official chat template (matches
+        // https://huggingface.co/google/gemma-3-4b-it chat_template.jinja):
+        //  user:   <start_of_turn>user\n{content}<end_of_turn>\n
+        //  model:  <start_of_turn>model\n{content}<end_of_turn>\n
+        //  gen:    <start_of_turn>model\n
+        // BOS is added by the tokenizer; do NOT emit <bos> in the template
+        // to avoid the "double BOS" tokenization bug.
+        AIModels[modelIndex - 1].setChatTemplate(
+                "",
+                "<start_of_turn>user\n",
+                "<end_of_turn>\n",
+                "<start_of_turn>model\n",
+                "<end_of_turn>\n",
+                "<start_of_turn>model\n");
 
-         //LLM (text-only)
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma-4-E2B", "gemma-4-E2B-it-Q4_0.gguf",
-                 hf_endpoint + "unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf?download=true"
-         );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        //LLM (text-only)
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Gemma-4-E2B", "gemma-4-E2B-it-Q4_0.gguf",
+                hf_endpoint + "unsloth/gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_0.gguf?download=true"
+        );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT);
+        //Same Gemma turn-marker template as Gemma-3.
+        AIModels[modelIndex - 1].setChatTemplate(
+                "",
+                "<start_of_turn>user\n",
+                "<end_of_turn>\n",
+                "<start_of_turn>model\n",
+                "<end_of_turn>\n",
+                "<start_of_turn>model\n");
 
-         //MTMD-image(for realtime-video-inference)
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
-                 "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
-                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
-                 hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true"
-         );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE);
+        //MTMD-image(for realtime-video-inference)
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "SmolVLM2-256M",
+                "SmolVLM2-256M-Video-Instruct-f16.gguf", "mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf",
+                hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/SmolVLM2-256M-Video-Instruct-f16.gguf?download=true",
+                hf_endpoint + "ggml-org/SmolVLM2-256M-Video-Instruct-GGUF/resolve/main/mmproj-SmolVLM2-256M-Video-Instruct-f16.gguf?download=true"
+        );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE);
+        //SmolVLM2 uses ChatML-style turn markers (verified against
+        // https://huggingface.co/HuggingFaceTB/SmolVLM2-256M-Video-Instruct chat_template).
+        AIModels[modelIndex - 1].setChatTemplate(
+                "",
+                "<|im_start|>user\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n");
 
-         //MTMD-audio (text + image + audio, the only omni model)
-         addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-Omni-3B",
-                 "Qwen2.5-Omni-3B-Q4_K_M.gguf",
-                 "mmproj-Qwen2.5-Omni-3B-Q8_0.gguf",
-                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/Qwen2.5-Omni-3B-Q4_K_M.gguf?download=true",
-                 hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true"
-         );
-         AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE | KANTVAIModel.MODALITY_AUDIO);
+        //MTMD-audio (text + image + audio, the only omni model)
+        addAIModel(KANTVAIModel.AIModelType.TYPE_LLM, "Qwen2.5-Omni-3B",
+                "Qwen2.5-Omni-3B-Q4_K_M.gguf",
+                "mmproj-Qwen2.5-Omni-3B-Q8_0.gguf",
+                hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/Qwen2.5-Omni-3B-Q4_K_M.gguf?download=true",
+                hf_endpoint + "ggml-org/Qwen2.5-Omni-3B-GGUF/resolve/main/mmproj-Qwen2.5-Omni-3B-Q8_0.gguf?download=true"
+        );
+        AIModels[modelIndex - 1].setModality(KANTVAIModel.MODALITY_TEXT | KANTVAIModel.MODALITY_IMAGE | KANTVAIModel.MODALITY_AUDIO);
+        //Qwen2.5-Omni uses the same ChatML template as Qwen2.5 text models.
+        AIModels[modelIndex - 1].setChatTemplate(
+                "",
+                "<|im_start|>user\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n",
+                "<|im_end|>\n",
+                "<|im_start|>assistant\n");
 
          modelCounts = modelIndex;  //modelCounts is real counts of all AI models
          //initialize arrayModeName for UI AIResearchFragment.java to display all AI models(1 ASR model + all LLM models + others)

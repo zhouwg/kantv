@@ -1,6 +1,5 @@
 #include "arg.h"
 #include "common.h"
-#include "console.h"
 #include "log.h"
 #include "sampling.h"
 #include "llama.h"
@@ -51,8 +50,6 @@ static common_params            * g_params;
 static std::vector<llama_token> * g_input_tokens;
 static std::ostringstream       * g_output_ss;
 static std::vector<llama_token> * g_output_tokens;
-static bool is_interacting  = false;
-static bool need_insert_eot = false;
 
 // =============================================================================================
 // Singleton-aware gating flags for llm_bench_inference (see class below).
@@ -87,27 +84,6 @@ static bool file_is_empty(const std::string & path) {
     f.open(path.c_str(), std::ios::in | std::ios::binary | std::ios::ate);
     return f.tellg() == 0;
 }
-
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__)) || defined (_WIN32)
-static void sigint_handler(int signo) {
-    if (signo == SIGINT) {
-        if (!is_interacting && g_params->interactive) {
-            is_interacting  = true;
-            need_insert_eot = true;
-        } else {
-            console::cleanup();
-            LOG("\n");
-            common_perf_print(*g_ctx, *g_smpl);
-
-            // make sure all logs are flushed
-            LOG("Interrupted by user\n");
-            common_log_pause(common_log_main());
-
-            _exit(130);
-        }
-    }
-}
-#endif
 
 int llama_inference_main(int argc, char ** argv, int backend_type) {
     int llm_inference_interrupted = 0;
@@ -388,24 +364,114 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     std::string prompt;
     {
         if (params.conversation_mode && params.enable_chat_template) {
-            if (!params.system_prompt.empty()) {
-                // format the system prompt (will use template default if empty)
-                chat_add_and_format("system", params.system_prompt);
-            }
-
-            if (!params.prompt.empty()) {
-                // format and append the user prompt
-                chat_add_and_format("user", params.prompt);
+            //
+            // Multi-turn chat history fast-path (KanTV-specific).
+            //
+            // When the Java caller (AIResearchFragment.runInference) has
+            // an accumulated conversation in its ChatAdapter, it packs
+            // the full role/content history into a single string with
+            // the "KANTV_CHAT_V1\n" magic prefix. Each message is
+            // encoded as "{role}\x1E{content}\x1E" where \x1E is the
+            // ASCII Record Separator (extremely unlikely to appear in
+            // normal user input). This avoids needing a JSON parser
+            // on the C++ side and stays binary-safe for newlines in
+            // the content (the previous Java-side manual template
+            // approach produced the "model echoes the entire prompt"
+            // regression on small Q4_0 models because the model was
+            // being fed raw text in -no-cnv mode, with no knowledge
+            // that the input was a chat history).
+            //
+            // The parsed history is fed into chat_msgs and the
+            // model's own chat template (read from the gguf metadata
+            // by common_chat_templates_init above) is applied via
+            // common_chat_templates_apply(). This is the llama.cpp
+            // native path that the upstream CLI uses for `-cnv`
+            // interactive mode; reusing it gives us correctly-formatted
+            // prompts for Gemma, Qwen, Llama3, SmolVLM2, etc. without
+            // per-model Java templates.
+            //
+            const std::string kantv_chat_magic = "KANTV_CHAT_V1\n";
+            bool is_kantv_chat_history = params.prompt.size() >= kantv_chat_magic.size() &&
+                                         params.prompt.compare(0, kantv_chat_magic.size(), kantv_chat_magic) == 0;
+            if (is_kantv_chat_history) {
+                const std::string payload = params.prompt.substr(kantv_chat_magic.size());
+                const char SEP = 0x1E;
+                size_t pos = 0;
+                while (pos < payload.size()) {
+                    size_t role_end = payload.find(SEP, pos);
+                    if (role_end == std::string::npos) {
+                        break;
+                    }
+                    std::string role = payload.substr(pos, role_end - pos);
+                    pos = role_end + 1;
+                    if (pos > payload.size()) {
+                        break;
+                    }
+                    size_t content_end = payload.find(SEP, pos);
+                    if (content_end == std::string::npos) {
+                        // Final message has no trailing separator; consume the rest
+                        content_end = payload.size();
+                    }
+                    std::string content = payload.substr(pos, content_end - pos);
+                    pos = content_end + 1;
+                    if (role.empty() && content.empty()) {
+                        continue;
+                    }
+                    common_chat_msg new_msg;
+                    new_msg.role    = role;
+                    new_msg.content = content;
+                    chat_msgs.push_back(new_msg);
+                }
+                LOG_INF("%s: parsed %zu chat messages from KANTV_CHAT_V1 payload (last role: '%s')\n",
+                        __func__, chat_msgs.size(),
+                        chat_msgs.empty() ? "<empty>" : chat_msgs.back().role.c_str());
             } else {
-                waiting_for_first_input = true;
+                // Original llama-cli single-prompt flow (system + one user message).
+                if (!params.system_prompt.empty()) {
+                    // format the system prompt (will use template default if empty)
+                    chat_add_and_format("system", params.system_prompt);
+                }
+
+                if (!params.prompt.empty()) {
+                    // format and append the user prompt
+                    chat_add_and_format("user", params.prompt);
+                } else {
+                    waiting_for_first_input = true;
+                }
             }
 
-            if (!params.system_prompt.empty() || !params.prompt.empty()) {
+            if (!chat_msgs.empty()) {
                 common_chat_templates_inputs inputs;
-                inputs.messages = chat_msgs;
-                inputs.add_generation_prompt = !params.prompt.empty();
-
+                inputs.messages              = chat_msgs;
+                inputs.add_generation_prompt = true;
+                // Pre-log the chat history so that if the 3rd question
+                // crashes inside the jinja template engine (which can
+                // happen on a longer multi-turn history), we have the
+                // last known-good inputs in logcat for debugging. The
+                // log line is bounded to 4KB to keep the logcat ring
+                // buffer from filling up with the entire history.
+                {
+                    std::string history_dbg;
+                    history_dbg.reserve(1024);
+                    for (size_t mi = 0; mi < chat_msgs.size() && history_dbg.size() < 4096; ++mi) {
+                        const auto & m = chat_msgs[mi];
+                        history_dbg += "[" + std::to_string(mi) + " role=" + m.role + " len=" +
+                                       std::to_string(m.content.size()) + "] ";
+                    }
+                    LOG_INF("%s: applying chat template to %zu messages; history: %s\n",
+                            __func__, chat_msgs.size(), history_dbg.c_str());
+                }
+                // common_chat_templates_apply invokes the jinja engine which
+                // can throw std::runtime_error (e.g. on malformed templates,
+                // undefined variables, or excessive nesting). We let the
+                // exception propagate up to the ggml-jni-context.cpp top-level
+                // try-catch (which logs the .what() and returns -1 to Java),
+                // but the pre-log above means that even if the call does
+                // exit(1) instead of throwing (e.g. via the arg.cpp
+                // exception path), we still have the message list in logcat.
                 prompt = common_chat_templates_apply(chat_templates.get(), inputs).prompt;
+                LOG_INF("%s: chat template applied; %zu messages, prompt length %zu chars\n",
+                        __func__, chat_msgs.size(), prompt.size());
             }
         } else {
             // otherwise use the prompt as is
@@ -500,7 +566,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
 
     if (params.verbose_prompt) {
-        LOG_INF("%s: prompt: '%s'\n", __func__, params.prompt.c_str());
+        LOG_INF("%s: prompt: '%s'\n", __func__, prompt.c_str());
         LOG_INF("%s: number of tokens in prompt = %zu\n", __func__, embd_inp.size());
         for (int i = 0; i < (int) embd_inp.size(); i++) {
             LOG_INF("%6d -> '%s'\n", embd_inp[i], common_token_to_piece(ctx, embd_inp[i]).c_str());
@@ -584,32 +650,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     }
     LOG_INF("\n");
 
-    if (params.interactive) {
-        const char * control_message;
-        if (params.multiline_input) {
-            control_message = " - To return control to the AI, end your input with '\\'.\n"
-                              " - To return control without starting a new line, end your input with '/'.\n";
-        } else {
-            control_message = " - Press Return to return control to the AI.\n"
-                              " - To return control without starting a new line, end your input with '/'.\n"
-                              " - If you want to submit another line, end your input with '\\'.\n";
-        }
-        LOG_INF("== Running in interactive mode. ==\n");
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__)) || defined (_WIN32)
-        LOG_INF(       " - Press Ctrl+C to interject at any time.\n");
-#endif
-        LOG_INF(       "%s", control_message);
-        if (params.conversation_mode && params.enable_chat_template && params.system_prompt.empty()) {
-            LOG_INF(   " - Not using system message. To change it, set a different value via -sys PROMPT\n");
-        }
-        LOG_INF("\n");
-
-        is_interacting = params.interactive_first;
-    }
-
     bool is_antiprompt        = false;
     bool input_echo           = true;
-    bool display              = true;
     bool need_to_save_session = !path_session.empty() && n_matching_session_tokens < embd_inp.size();
 
     int n_past             = 0;
@@ -621,23 +663,8 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     std::vector<int>   input_tokens;  g_input_tokens  = &input_tokens;
     std::vector<int>   output_tokens; g_output_tokens = &output_tokens;
     std::ostringstream output_ss;     g_output_ss     = &output_ss;
-    std::ostringstream assistant_ss; // for storing current assistant message, used in conversation mode
-
-    // the first thing we will do is to output the prompt, so set color accordingly
-    console::set_display(DISPLAY_TYPE_PROMPT);
-    display = params.display_prompt;
 
     std::vector<llama_token> embd;
-
-    // single-token antiprompts
-    std::vector<llama_token> antiprompt_token;
-
-    for (const std::string & antiprompt : params.antiprompt) {
-        auto ids = ::common_tokenize(ctx, antiprompt, false, true);
-        if (ids.size() == 1) {
-            antiprompt_token.push_back(ids[0]);
-        }
-    }
 
     if (llama_model_has_encoder(model)) {
         int enc_input_size = embd_inp.size();
@@ -657,7 +684,14 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         embd_inp.push_back(decoder_start_token_id);
     }
 
-    while ((n_remain != 0 && !is_antiprompt) || params.interactive) {
+    // Single-shot generation loop. With --single-turn (KANTV_CHAT_V1 path)
+    // the model runs in non-interactive mode: it tokenizes the prompt, runs
+    // the forward pass, samples tokens until EOG or n_predict tokens are
+    // produced, and exits cleanly. There is no readline() loop and no
+    // post-EOG chat_add_and_format() re-entry, so multi-turn history is
+    // processed by the C++ chat template on entry (see KANTV_CHAT_V1
+    // branch above) and not re-injected on every turn.
+    while (n_remain != 0 && !is_antiprompt) {
         // predict
         if (!embd.empty()) {
             // Note: (n_ctx - 4) here is to match the logic for commandline prompt handling via
@@ -669,9 +703,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 const int skipped_tokens = (int) embd.size() - max_embd_size;
                 embd.resize(max_embd_size);
 
-                console::set_display(DISPLAY_TYPE_ERROR);
                 LOG_WRN("<<input too long: skipped %d token%s>>", skipped_tokens, skipped_tokens != 1 ? "s" : "");
-                console::set_display(DISPLAY_TYPE_RESET);
             }
 
             if (ga_n == 1) {
@@ -785,7 +817,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
         embd.clear();
 
-        if ((int) embd_inp.size() <= n_consumed && !is_interacting) {
+        if ((int) embd_inp.size() <= n_consumed) {
             // optionally save the session on first sample (for faster prompt loading next time)
             if (!path_session.empty() && need_to_save_session && !params.prompt_cache_ro) {
                 need_to_save_session = false;
@@ -841,12 +873,11 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
         }
 
         // display text
-        if (input_echo && display) {
+        if (input_echo) {
             for (auto id : embd) {
                 const std::string token_str = common_token_to_piece(ctx, id, params.special);
 
-                // Console/Stream Output
-                //LOG("%s", token_str.c_str());
+                // Stream to Java via JNI notification
 #if (defined __ANDROID__) || (defined ANDROID)
                 if (ggml_jni_is_valid_utf8(token_str.c_str())) {
                     if (0 == llm_is_running_state()) {
@@ -869,12 +900,6 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             }
         }
 
-        // reset color to default if there is no pending user input
-        if (input_echo && (int) embd_inp.size() == n_consumed) {
-            console::set_display(DISPLAY_TYPE_RESET);
-            display = true;
-        }
-
         // if not currently processing queued inputs;
         if ((int) embd_inp.size() <= n_consumed) {
             // check for reverse prompt in the last n_prev tokens
@@ -884,30 +909,16 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
 
                 is_antiprompt = false;
                 // Check if each of the reverse prompts appears at the end of the output.
-                // If we're not running interactively, the reverse prompt might be tokenized with some following characters
-                // so we'll compensate for that by widening the search window a bit.
+                // In single-shot (non-interactive) mode the antiprompt might be
+                // tokenized with some following characters, so widen the search
+                // window by 2 chars to compensate.
                 for (std::string & antiprompt : params.antiprompt) {
-                    size_t extra_padding = params.interactive ? 0 : 2;
+                    size_t extra_padding = 2;
                     size_t search_start_pos = last_output.length() > static_cast<size_t>(antiprompt.length() + extra_padding)
                         ? last_output.length() - static_cast<size_t>(antiprompt.length() + extra_padding)
                         : 0;
 
                     if (last_output.find(antiprompt, search_start_pos) != std::string::npos) {
-                        if (params.interactive) {
-                            is_interacting = true;
-                        }
-                        is_antiprompt = true;
-                        break;
-                    }
-                }
-
-                // check for reverse prompt using special tokens
-                llama_token last_token = common_sampler_last(smpl);
-                for (auto token : antiprompt_token) {
-                    if (token == last_token) {
-                        if (params.interactive) {
-                            is_interacting = true;
-                        }
                         is_antiprompt = true;
                         break;
                     }
@@ -918,149 +929,15 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
                 }
             }
 
-            // deal with end of generation tokens in interactive mode
+            // End of generation: EOG token. In single-shot mode we just break
+            // the loop; the post-loop code sends the EOG marker to Java and
+            // prints perf data. (Previously this block had an
+            // `if (params.interactive)` branch that called
+            // chat_add_and_format("assistant", ...), is_interacting = true,
+            // and re-entered via console::readline - that whole path was
+            // removed when we deleted the terminal code.)
             if (!waiting_for_first_input && llama_vocab_is_eog(vocab, common_sampler_last(smpl))) {
                 LOG_DBG("found an EOG token\n");
-
-                if (params.interactive) {
-                    if (!params.antiprompt.empty()) {
-                        // tokenize and inject first reverse prompt
-                        const auto first_antiprompt = common_tokenize(ctx, params.antiprompt.front(), false, true);
-                        embd_inp.insert(embd_inp.end(), first_antiprompt.begin(), first_antiprompt.end());
-                        is_antiprompt = true;
-                    }
-
-                    if (params.enable_chat_template) {
-                        chat_add_and_format("assistant", assistant_ss.str());
-                    }
-                    is_interacting = true;
-                    LOG("\n");
-                }
-            }
-
-            // if current token is not EOG, we add it to current assistant message
-            if (params.conversation_mode && !waiting_for_first_input) {
-                const auto id = common_sampler_last(smpl);
-                assistant_ss << common_token_to_piece(ctx, id, false);
-
-                if (!prompt.empty()) {
-                    prompt.clear();
-                    is_interacting = false;
-                }
-            }
-
-            if ((n_past > 0 || waiting_for_first_input) && is_interacting) {
-                LOG_DBG("waiting for user input\n");
-
-                if (params.conversation_mode) {
-                    LOG("\n> ");
-                }
-
-                if (params.input_prefix_bos) {
-                    LOG_DBG("adding input prefix BOS token\n");
-                    embd_inp.push_back(llama_vocab_bos(vocab));
-                }
-
-                std::string buffer;
-                if (!params.input_prefix.empty() && !params.conversation_mode) {
-                    LOG_DBG("appending input prefix: '%s'\n", params.input_prefix.c_str());
-                    LOG("%s", params.input_prefix.c_str());
-                }
-
-                // color user input only
-                console::set_display(DISPLAY_TYPE_USER_INPUT);
-                display = params.display_prompt;
-
-                std::string line;
-                bool another_line = true;
-                do {
-                    another_line = console::readline(line, params.multiline_input);
-                    buffer += line;
-                } while (another_line);
-
-                // done taking input, reset color
-                console::set_display(DISPLAY_TYPE_RESET);
-                display = true;
-
-                if (buffer.empty()) { // Ctrl+D on empty line exits
-                    LOG("EOF by user\n");
-                    break;
-                }
-
-                if (buffer.back() == '\n') {
-                    // Implement #587:
-                    // If the user wants the text to end in a newline,
-                    // this should be accomplished by explicitly adding a newline by using \ followed by return,
-                    // then returning control by pressing return again.
-                    buffer.pop_back();
-                }
-
-                if (buffer.empty()) { // Enter key on empty line lets the user pass control back
-                    LOG_DBG("empty line, passing control back\n");
-                } else { // Add tokens to embd only if the input buffer is non-empty
-                    // append input suffix if any
-                    if (!params.input_suffix.empty() && !params.conversation_mode) {
-                        LOG_DBG("appending input suffix: '%s'\n", params.input_suffix.c_str());
-                        LOG("%s", params.input_suffix.c_str());
-                    }
-
-                    LOG_DBG("buffer: '%s'\n", buffer.c_str());
-
-                    const size_t original_size = embd_inp.size();
-
-                    if (params.escape) {
-                        string_process_escapes(buffer);
-                    }
-
-                    bool format_chat = params.conversation_mode && params.enable_chat_template;
-                    std::string user_inp = format_chat
-                        ? chat_add_and_format("user", std::move(buffer))
-                        : std::move(buffer);
-                    // TODO: one inconvenient of current chat template implementation is that we can't distinguish between user input and special tokens (prefix/postfix)
-                    const auto line_pfx = common_tokenize(ctx, params.input_prefix, false, true);
-                    const auto line_inp = common_tokenize(ctx, user_inp,            false, format_chat);
-                    const auto line_sfx = common_tokenize(ctx, params.input_suffix, false, true);
-
-                    LOG_DBG("input tokens: %s\n", string_from(ctx, line_inp).c_str());
-
-                    // if user stop generation mid-way, we must add EOT to finish model's last response
-                    if (need_insert_eot && format_chat) {
-                        llama_token eot = llama_vocab_eot(vocab);
-                        embd_inp.push_back(eot == LLAMA_TOKEN_NULL ? llama_vocab_eos(vocab) : eot);
-                        need_insert_eot = false;
-                    }
-
-                    embd_inp.insert(embd_inp.end(), line_pfx.begin(), line_pfx.end());
-                    embd_inp.insert(embd_inp.end(), line_inp.begin(), line_inp.end());
-                    embd_inp.insert(embd_inp.end(), line_sfx.begin(), line_sfx.end());
-
-                    for (size_t i = original_size; i < embd_inp.size(); ++i) {
-                        const llama_token token = embd_inp[i];
-                        output_tokens.push_back(token);
-                        output_ss << common_token_to_piece(ctx, token);
-                    }
-
-                    // reset assistant message
-                    assistant_ss.str("");
-
-                    n_remain -= line_inp.size();
-                    LOG_DBG("n_remain: %d\n", n_remain);
-                }
-
-                input_echo = false; // do not echo this again
-            }
-
-            if (n_past > 0 || waiting_for_first_input) {
-                if (is_interacting) {
-                    common_sampler_reset(smpl);
-                }
-                is_interacting = false;
-
-                if (waiting_for_first_input && params.single_turn) {
-                    params.interactive = false;
-                    params.interactive_first = false;
-                }
-                waiting_for_first_input = false;
             }
         }
 
@@ -1069,19 +946,12 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
             break;
         }
         // end of generation
-        if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back()) && !(params.interactive)) {
+        if (!embd.empty() && llama_vocab_is_eog(vocab, embd.back())) {
             LOG(" [end of text]\n");
 #if (defined __ANDROID__) || (defined ANDROID)
             GGML_JNI_NOTIFY("\n[end of text]\n\n");
 #endif
             break;
-        }
-
-        // In interactive mode, respect the maximum number of tokens and drop back to user input when reached.
-        // We skip this logic when n_predict == -1 (infinite) or -2 (stop at context size).
-        if (params.interactive && n_remain <= 0 && params.n_predict >= 0) {
-            n_remain = params.n_predict;
-            is_interacting = true;
         }
     }
 

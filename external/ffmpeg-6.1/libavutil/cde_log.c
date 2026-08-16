@@ -256,6 +256,37 @@ void  LOG_PRI_ORIG_IMPL(const char *file, const char *func, unsigned int line,  
         len_prefix = snprintf(logBuf, LOG_BUF_LEN, "[%s, %s, %d]: ",  file, func, line);
 #endif
         len_content = vsnprintf(logBuf + len_prefix, LOG_BUF_LEN - len_prefix, format, va);
+        // CRITICAL: clamp len_content to the actual space available in
+        // logBuf. The C99 contract for vsnprintf is to return the number
+        // of characters that WOULD HAVE been written if the buffer was
+        // large enough, NOT the number actually written. When the
+        // formatted string is longer than (LOG_BUF_LEN - len_prefix),
+        // the raw return value exceeds the available space and the
+        // next snprintf() call computes a negative size argument:
+        //
+        //   snprintf(buf + len_prefix + len_content,
+        //            LOG_BUF_LEN - len_prefix - len_content, "\n");
+        //
+        // The expression `LOG_BUF_LEN - len_prefix - len_content` is
+        // negative in int, but snprintf() takes size_t (unsigned), so
+        // it wraps to a huge value (e.g. 0xFFFFFFFFFFFFFC67 = -921).
+        // Android's bionic libc has FORTIFY checks on snprintf that
+        // abort the process with:
+        //   FORTIFY: vsnprintf: size 18446744073709546871 > SSIZE_MAX
+        // which is what we observed on the 3rd chat question (the
+        // KANTV_CHAT_V1 user_data log line overflowed the 4KB logBuf).
+        //
+        // Clamp len_content to the actual remaining space so the
+        // trailing "\n" snprintf() always gets a sane, non-negative
+        // size (>= 0; size==0 just writes nothing and the NUL
+        // terminator, size==1 writes the "\n" and NUL, etc).
+        if (len_content < 0) {
+            // Encoding error from vsnprintf; treat as no content.
+            len_content = 0;
+        }
+        if (len_content > LOG_BUF_LEN - len_prefix) {
+            len_content = LOG_BUF_LEN - len_prefix;
+        }
         snprintf(logBuf + len_prefix + len_content, LOG_BUF_LEN - len_prefix - len_content, "\n");
 
 #ifndef __KERNEL__
@@ -367,6 +398,37 @@ void  LOG_PRI_ZWG_IMPL(const char *file, const char *func, unsigned int line,  i
         len_prefix = snprintf(logBuf, LOG_BUF_LEN, "[%s, %s, %d]: ",  file, func, line);
 #endif
         len_content = vsnprintf(logBuf + len_prefix, LOG_BUF_LEN - len_prefix, format, va);
+        // CRITICAL: clamp len_content to the actual space available in
+        // logBuf. The C99 contract for vsnprintf is to return the number
+        // of characters that WOULD HAVE been written if the buffer was
+        // large enough, NOT the number actually written. When the
+        // formatted string is longer than (LOG_BUF_LEN - len_prefix),
+        // the raw return value exceeds the available space and the
+        // next snprintf() call computes a negative size argument:
+        //
+        //   snprintf(buf + len_prefix + len_content,
+        //            LOG_BUF_LEN - len_prefix - len_content, "\n");
+        //
+        // The expression `LOG_BUF_LEN - len_prefix - len_content` is
+        // negative in int, but snprintf() takes size_t (unsigned), so
+        // it wraps to a huge value (e.g. 0xFFFFFFFFFFFFFC67 = -921).
+        // Android's bionic libc has FORTIFY checks on snprintf that
+        // abort the process with:
+        //   FORTIFY: vsnprintf: size 18446744073709546871 > SSIZE_MAX
+        // which is what we observed on the 3rd chat question (the
+        // KANTV_CHAT_V1 user_data log line overflowed the 4KB logBuf).
+        //
+        // Clamp len_content to the actual remaining space so the
+        // trailing "\n" snprintf() always gets a sane, non-negative
+        // size (>= 0; size==0 just writes nothing and the NUL
+        // terminator, size==1 writes the "\n" and NUL, etc).
+        if (len_content < 0) {
+            // Encoding error from vsnprintf; treat as no content.
+            len_content = 0;
+        }
+        if (len_content > LOG_BUF_LEN - len_prefix) {
+            len_content = LOG_BUF_LEN - len_prefix;
+        }
         snprintf(logBuf + len_prefix + len_content, LOG_BUF_LEN - len_prefix - len_content, "\n");
 
 #ifndef __KERNEL__

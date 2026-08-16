@@ -25,18 +25,6 @@
 #    include <unistd.h>
 #endif
 
-// Android logcat helper for backend registration diagnostics.
-// GGML_LOG_INFO goes through ggml_log_internal which may not reach logcat
-// on Android, so use __android_log_print directly for the diagnostic messages.
-#if defined(__ANDROID__)
-#    include <android/log.h>
-#    define KANTV_REG_LOG(...)  __android_log_print(ANDROID_LOG_INFO,  "KANTV", __VA_ARGS__)
-#    define KANTV_REG_LOGW(...) __android_log_print(ANDROID_LOG_WARN,  "KANTV", __VA_ARGS__)
-#else
-#    define KANTV_REG_LOG(...)  fprintf(stderr, __VA_ARGS__)
-#    define KANTV_REG_LOGW(...) fprintf(stderr, __VA_ARGS__)
-#endif
-
 // Backend registry
 #ifdef GGML_USE_CPU
 #include "ggml-cpu.h"
@@ -129,19 +117,6 @@ struct ggml_backend_registry {
     std::vector<ggml_backend_dev_t> devices;
 
     ggml_backend_registry() {
-        // Diagnostic: print which backend macros are defined at compile time
-        KANTV_REG_LOG("ggml-backend-reg: constructing backend registry");
-#ifdef GGML_USE_HEXAGON
-        KANTV_REG_LOG("ggml-backend-reg: GGML_USE_HEXAGON is defined");
-#else
-        KANTV_REG_LOG("ggml-backend-reg: GGML_USE_HEXAGON is NOT defined");
-#endif
-#ifdef GGML_USE_CPU
-        KANTV_REG_LOG("ggml-backend-reg: GGML_USE_CPU is defined");
-#else
-        KANTV_REG_LOG("ggml-backend-reg: GGML_USE_CPU is NOT defined");
-#endif
-
 #ifdef GGML_USE_CUDA
         register_backend(ggml_backend_cuda_reg());
 #endif
@@ -176,9 +151,7 @@ struct ggml_backend_registry {
         register_backend(ggml_backend_zendnn_reg());
 #endif
 #ifdef GGML_USE_HEXAGON
-        KANTV_REG_LOG("ggml-backend-reg: calling ggml_backend_hexagon_reg()");
         register_backend(ggml_backend_hexagon_reg());
-        KANTV_REG_LOG("ggml-backend-reg: after hexagon registration, total devices=%zu", devices.size());
 #endif
 #ifdef GGML_USE_CANN
         register_backend(ggml_backend_cann_reg());
@@ -212,7 +185,6 @@ struct ggml_backend_registry {
 
     void register_backend(ggml_backend_reg_t reg, dl_handle_ptr handle = nullptr) {
         if (!reg) {
-            KANTV_REG_LOGW("ggml-backend-reg: register_backend called with NULL reg (backend init failed)");
             return;
         }
 
@@ -222,8 +194,10 @@ struct ggml_backend_registry {
             }
         }
 
-        KANTV_REG_LOG("ggml-backend-reg: registered backend %s (%zu devices)",
-            ggml_backend_reg_name(reg), ggml_backend_reg_dev_count(reg));
+#ifndef NDEBUG
+        GGML_LOG_DEBUG("%s: registered backend %s (%zu devices)\n",
+            __func__, ggml_backend_reg_name(reg), ggml_backend_reg_dev_count(reg));
+#endif
         backends.push_back({ reg, std::move(handle) });
         for (size_t i = 0; i < ggml_backend_reg_dev_count(reg); i++) {
             register_device(ggml_backend_reg_dev_get(reg, i));

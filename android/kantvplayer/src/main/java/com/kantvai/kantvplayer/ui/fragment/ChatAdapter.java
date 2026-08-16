@@ -265,8 +265,188 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         notifyItemRangeRemoved(0, n);
     }
 
+    // ---------------------------------------------------------------------
+    // Multi-turn history packaging for native (KANTV_CHAT_V1 protocol)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Pack the conversation history into the KANTV_CHAT_V1 wire format
+     * consumed by the C++ side (llm-inference.cpp). The resulting string
+     * is passed to ggml_jni.llm_inference() as the `prompt` argument;
+     * llama_inference_main detects the "KANTV_CHAT_V1\n" magic prefix,
+     * parses the (role, content) pairs back into common_chat_msg, and
+     * applies the model's own chat template (read from the gguf
+     * metadata) via common_chat_templates_apply().
+     *
+     * Why not just pre-format the prompt on the Java side?
+     *   The previous Java-side manual template approach (see
+     *   getHistoryPrompt()) worked for Gemma-3 / Qwen2.5 but produced
+     *   the "model echoes the entire prompt" regression on the small
+     *   gemma-4-E2B-it-Q4_0 model. The model was in -no-cnv mode
+     *   (raw text completion), so when it received a structured prompt
+     *   like "&lt;start_of_turn&gt;user...&lt;end_of_turn&gt;\n&lt;start_of_turn&gt;model\n"
+     *   it just continued the pattern instead of recognizing the
+     *   "model should respond now" signal. Routing through the C++
+     *   chat-template path puts the model into its native chat mode
+     *   (params.conversation_mode = ENABLED), which fixes this.
+     *
+     * Wire format:
+     *   "KANTV_CHAT_V1\n" + ({role}\x1E{content}\x1E)*
+     *   \x1E is the ASCII Record Separator (0x1E), chosen because
+     *   it is a control character that never appears in normal user
+     *   input. Messages are encoded in order (oldest first), with
+     *   each role and content as plain UTF-8.
+     *
+     * Empty placeholder messages (State.STREAMING with text.length()==0)
+     * and ERROR-state messages are skipped. The caller is expected
+     * to have added a fresh user message (the one being sent) and an
+     * empty assistant placeholder before calling; both will be encoded
+     * or skipped appropriately.
+     *
+     * Returns the packed string, or an empty string if the conversation
+     * has no non-empty, non-error messages.
+     */
+    public String formatHistoryForNative() {
+        StringBuilder sb = new StringBuilder(mMessages.size() * 64);
+        sb.append("KANTV_CHAT_V1\n");
+
+        for (ChatMessage msg : mMessages) {
+            if (msg.state == ChatMessage.State.ERROR) {
+                continue;
+            }
+            String text = msg.getText();
+            if (text == null || text.isEmpty()) {
+                // Skip the empty assistant placeholder
+                continue;
+            }
+            String roleStr;
+            switch (msg.role) {
+                case USER:      roleStr = "user";      break;
+                case ASSISTANT: roleStr = "assistant"; break;
+                case SYSTEM:    roleStr = "system";    break;
+                default:        continue;  // unknown role
+            }
+            sb.append(roleStr);
+            sb.append('\u001E');
+            sb.append(text);
+            sb.append('\u001E');
+        }
+
+        return sb.toString();
+    }
+
     public int getMessageCount() {
         return mMessages.size();
+    }
+
+    /**
+     * @return an unmodifiable view of the underlying message list. Used
+     * by AIResearchFragment to fold the conversation into a single
+     * chat-template-formatted prompt before each inference.
+     */
+    public List<ChatMessage> getMessages() {
+        return java.util.Collections.unmodifiableList(mMessages);
+    }
+
+    // ---------------------------------------------------------------------
+    // Chat-template prompt assembly
+    // ---------------------------------------------------------------------
+
+    /**
+     * Build the full multi-turn prompt string for the given model, ready
+     * to be passed to ggml_jni.llm_inference(). Iterates over the
+     * conversation history ({@link #mMessages}) and emits:
+     *   - BOS prefix if the model requests one (the model's
+     *     {@link KANTVAIModel#getBos()} field)
+     *   - one user/model turn per ChatMessage, formatted with the
+     *     model's per-turn delimiters
+     *   - a trailing generation-prompt suffix so the model knows to
+     *     produce an assistant response (no leading whitespace; the
+     *     model expects the suffix to start a fresh turn)
+     *
+     * The returned String is suitable as the `prompt` argument of
+     * `ggmljava.llm_inference(model_path, prompt, ...)`. The native
+     * side uses -no-cnv (raw text) so this manually-formatted prompt
+     * is the only place the model sees the role markers.
+     *
+     * Stream-in-progress and error messages are included: STREAMING
+     * messages are formatted using whatever text has accumulated so far
+     * (so a user can continue a conversation even if the previous
+     * assistant turn is still rendering); ERROR messages are skipped to
+     * avoid confusing the model with "[error] ..." text.
+     *
+     * If {@code model} is null, falls back to the "User:/Assistant:"
+     * plain-text format (the KANTVAIModel field defaults).
+     */
+    public String getHistoryPrompt(kantvai.ai.KANTVAIModel model) {
+        if (mMessages.isEmpty()) {
+            // No history at all - return an empty prompt with just the
+            // generation suffix so the model still produces output. The
+            // caller (AIResearchFragment) will normally guard against
+            // empty input before calling, so this is a defensive path.
+            return (model != null ? model.getGenerationPrompt() : "Assistant: ");
+        }
+
+        String userOpen   = (model != null) ? model.getUserOpen()   : "User: ";
+        String userClose  = (model != null) ? model.getUserClose()  : "\n";
+        String modelOpen  = (model != null) ? model.getModelOpen()  : "Assistant: ";
+        String modelClose = (model != null) ? model.getModelClose() : "\n";
+        String bos        = (model != null) ? model.getBos()        : "";
+        String genPrompt  = (model != null) ? model.getGenerationPrompt() : "Assistant: ";
+
+        StringBuilder sb = new StringBuilder(mMessages.size() * 64);
+        if (bos != null && !bos.isEmpty()) {
+            sb.append(bos);
+        }
+
+        for (ChatMessage msg : mMessages) {
+            // Skip ERROR messages - their "[error] ..." text would
+            // confuse the model on the next turn.
+            if (msg.state == ChatMessage.State.ERROR) {
+                continue;
+            }
+            // Skip empty messages: the assistant bubble is added as
+            // a placeholder (State.STREAMING with text.length()==0)
+            // right before the inference is fired, and including
+            // it would produce "<start_of_turn>model\n<end_of_turn>\n"
+            // in the prompt - an empty assistant turn that adds no
+            // context and looks like a bug to the model. The
+            // generationPrompt suffix at the end of the formatted
+            // string already tells the model "respond now".
+            String text = msg.getText();
+            if (text == null || text.isEmpty()) {
+                continue;
+            }
+            switch (msg.role) {
+                case USER:
+                    sb.append(userOpen);
+                    sb.append(text);
+                    sb.append(userClose);
+                    break;
+                case ASSISTANT:
+                    sb.append(modelOpen);
+                    sb.append(text);
+                    sb.append(modelClose);
+                    break;
+                case SYSTEM:
+                    // SYSTEM role: prepend the user-content but don't
+                    // wrap in user/model delimiters. The model's
+                    // expected position for system content is before
+                    // the first user turn and the model may or may
+                    // not have a dedicated system marker in its
+                    // template. For now, emit as a leading "user"
+                    // turn so the model at least sees the context -
+                    // the proper system-prompt handling can be added
+                    // later if a specific model needs it.
+                    sb.append(userOpen);
+                    sb.append(text);
+                    sb.append(userClose);
+                    break;
+            }
+        }
+
+        sb.append(genPrompt);
+        return sb.toString();
     }
 
     // ---------------------------------------------------------------------

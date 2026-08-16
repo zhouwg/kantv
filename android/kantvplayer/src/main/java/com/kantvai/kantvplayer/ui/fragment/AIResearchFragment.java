@@ -455,11 +455,66 @@ import kantvai.tool.markwon.io.noties.markwon.Markwon;
                             // fields in the same `if` block.
                          } else {
                              //general LLM inference
-                            strBenchmarkInfo = ggmljava.llm_inference(
-                                    KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
-                                    strUserInput,
-                                    1,
-                                    backendIndex);
+                             //
+                             // BUGFIX: previously we passed the full
+                             // multi-turn prompt (formatted with
+                             // getHistoryPrompt()) to the native side,
+                             // which fed it to the model as raw text
+                             // with -no-cnv. The result: small Q4
+                             // models (e.g. gemma-4-E2B-it-Q4_0) would
+                             // either echo the entire prompt back, or
+                             // fail to track the conversation across
+                             // turns, because the model was in raw
+                             // completion mode and didn't know the
+                             // "model" turn was the place to respond.
+                             //
+                             // The new design routes the conversation
+                             // history through llama.cpp's NATIVE chat
+                             // path:
+                             //   1. Java packs the history into the
+                             //      "KANTV_CHAT_V1\n" wire format (see
+                             //      ChatAdapter.formatHistoryForNative).
+                             //   2. C++ detects the magic in
+                             //      llama_inference_main, parses the
+                             //      (role, content) pairs back into
+                             //      common_chat_msg, and applies the
+                             //      model's own chat template (read
+                             //      from the gguf metadata) via
+                             //      common_chat_templates_apply.
+                             //   3. ggml-jni-context.cpp omits -no-cnv
+                             //      when the KANTV_CHAT_V1 magic is
+                             //      present, so params.conversation_mode
+                             //      auto-flips to ENABLED and the
+                             //      chat-template branch in
+                             //      llama_inference_main runs.
+                             //
+                             // Net effect: the model receives the
+                             // exact prompt format it was trained for
+                             // (Gemma turn markers, Qwen ChatML, Llama3
+                             // headers, etc.) without any per-model
+                             // Java code, and the "model should respond
+                             // now" signal is unambiguous.
+                             //
+                             // Fallback: when chatAdapter is null
+                             // (shouldn't happen in normal use but
+                             // guard anyway), pass strUserInput as a
+                             // raw prompt. The C++ -no-cnv path then
+                             // behaves the same as the previous Java
+                             // code.
+                             String llmPrompt;
+                             if (chatAdapter != null && chatAdapter.getMessageCount() > 0) {
+                                 llmPrompt = chatAdapter.formatHistoryForNative();
+                             } else {
+                                 llmPrompt = (strUserInput != null) ? strUserInput : "";
+                             }
+                             KANTVLog.j(TAG, "LLM prompt: KANTV_CHAT_V1="
+                                     + (llmPrompt.startsWith("KANTV_CHAT_V1\n") ? "yes" : "no")
+                                     + ", length=" + llmPrompt.length());
+                             strBenchmarkInfo = ggmljava.llm_inference(
+                                     KANTVUtils.getSDCardDataPath() + AIModelMgr.getModelName(selectModelIndex),
+                                     llmPrompt,
+                                     1,
+                                     backendIndex);
                          }
                      } else if (isMNISTModel) {
                          //MNIST inference

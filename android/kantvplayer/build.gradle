@@ -71,7 +71,7 @@ android {
         }
     }
 
-    ndkVersion  '26.2.11394342'
+    ndkVersion "28.0.13004108"
 
     sourceSets {
         main {

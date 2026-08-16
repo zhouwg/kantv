@@ -39,6 +39,45 @@ public class KANTVAIModel {
     /** Modality bitmask, default text-only. */
     private int modality = MODALITY_TEXT;
 
+    /**
+     * Chat template components. Used by ChatAdapter.getHistoryPrompt() to
+     * fold a list of ChatMessage(role, content) into a single string that
+     * the model expects.
+     *
+     * The components are intentionally separate (not a single template
+     * string) because each model has different turn delimiters and the
+     * Java side needs to iterate over an arbitrary-length message list
+     * and produce a deterministic concatenation.
+     *
+     * Defaults are the simplest possible "User: ...\nAssistant: ...\n"
+     * plain-text format that works for any base model but does not
+     * match the official chat template for any specific LLM. Callers
+     * (KANTVAIModelMgr) should override these for each registered model
+     * so the formatted prompt matches the model's expected format.
+     *
+     * Example for Gemma-3:
+     *   bos = "<bos>"
+     *   userOpen = "<start_of_turn>user\n"
+     *   userClose = "<end_of_turn>\n"
+     *   modelOpen = "<start_of_turn>model\n"
+     *   modelClose = "<end_of_turn>\n"
+     *   generationPrompt = "<start_of_turn>model\n"
+     *
+     * Example for Qwen2.5 (ChatML):
+     *   bos = ""
+     *   userOpen = "<|im_start|>user\n"
+     *   userClose = "<|im_end|>\n"
+     *   modelOpen = "<|im_start|>assistant\n"
+     *   modelClose = "<|im_end|>\n"
+     *   generationPrompt = "<|im_start|>assistant\n"
+     */
+    private String bos               = "";
+    private String userOpen          = "User: ";
+    private String userClose         = "\n";
+    private String modelOpen         = "Assistant: ";
+    private String modelClose        = "\n";
+    private String generationPrompt  = "Assistant: ";
+
     public KANTVAIModel(int index, AIModelType type, String nick, String name, String url) {
         this.index = index;
         this.type = type;
@@ -123,4 +162,30 @@ public class KANTVAIModel {
         if (supportsAudio()) parts.add("audio");
         return "[" + String.join("+", parts) + "]";
     }
+
+    // ---------------------------------------------------------------------
+    // Chat template (multi-turn prompt formatting)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Set all 6 chat template components in one call. See
+     * {@link #bos}..{@link #generationPrompt} for the meaning.
+     */
+    public void setChatTemplate(String bos, String userOpen, String userClose,
+                                String modelOpen, String modelClose,
+                                String generationPrompt) {
+        if (bos != null)              this.bos              = bos;
+        if (userOpen != null)         this.userOpen         = userOpen;
+        if (userClose != null)        this.userClose        = userClose;
+        if (modelOpen != null)        this.modelOpen        = modelOpen;
+        if (modelClose != null)       this.modelClose       = modelClose;
+        if (generationPrompt != null) this.generationPrompt = generationPrompt;
+    }
+
+    public String getBos()              { return bos; }
+    public String getUserOpen()         { return userOpen; }
+    public String getUserClose()        { return userClose; }
+    public String getModelOpen()        { return modelOpen; }
+    public String getModelClose()       { return modelClose; }
+    public String getGenerationPrompt() { return generationPrompt; }
 }

@@ -2,11 +2,35 @@
  * This single-source file is part of JZ's ggml-hexagon.
  * 2024--2026 The ggml authors
  * GitHub:  https://github.com/zhouwg/ggml-hexagon
- * Any copies or derivative works of this file shall preserve the above attribution information,
- * including the copyright notice and the GitHub repository URL.
- * 2024-2026 The ggml authors
- *
  */
+
+/*
+   This is free and unencumbered software released into the public domain.
+
+   Anyone is free to copy, modify, publish, use, compile, sell, or
+   distribute this software, either in source code form or as a compiled
+   binary, for any purpose, commercial or non-commercial, and by any
+   means.
+
+   In jurisdictions that recognize copyright laws, the author or authors
+   of this software dedicate any and all copyright interest in the
+   software to the public domain. We make this dedication for the benefit
+   of the public at large and to the detriment of our heirs and
+   successors. We intend this dedication to be an overt act of
+   relinquishment in perpetuity of all present and future rights to this
+   software under copyright law.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+   OTHER DEALINGS IN THE SOFTWARE.
+
+   For more information, please refer to <http://unlicense.org/>
+*/
+
 #ifndef GGMLDSP_CTX_H
 #define GGMLDSP_CTX_H
 
@@ -15,14 +39,22 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#include "ggml.h"
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
+/* Op-level profiling is disabled by default
+ * Compile with -DHEX_OP_PROF=1 to enable */
+#ifndef HEX_OP_PROF
+#define HEX_OP_PROF                     0
+#endif
+
 /* Alignment requirements */
-#define HEX_BATCH_ALIGN     128
-#define HEX_TENSOR_ALIGN    128
-#define HEX_OP_ALIGN        128
+#define HEX_BATCH_ALIGN                 128
+#define HEX_TENSOR_ALIGN                128
+#define HEX_OP_ALIGN                    128
 
 // HTP_TENSOR_FLUSHED was removed in upstream b2dd28a3b: per-tensor flush
 // flags were replaced by htp_context.dirty_map, maintained by Qualcomm's
@@ -31,7 +63,44 @@ extern "C" {
 // htp_tensor.flags is never read on this path. Defined as 0 to keep the
 // legacy assignments in entry.c compiling.
 #ifndef HTP_TENSOR_FLUSHED
-#define HTP_TENSOR_FLUSHED 0
+#define HTP_TENSOR_FLUSHED              0
+#endif
+
+/* Array size limits for per-batch tracking arrays. */
+#ifndef WEIGHT_INVAL_MAX_PTRS
+#define WEIGHT_INVAL_MAX_PTRS           4096
+#endif
+
+#ifndef DSP_OPT_MAX_TENSORS
+#define DSP_OPT_MAX_TENSORS             4096
+#endif
+
+/* max n_ops * HTP_OP_MAX_OUTPUTS; n_ops upper bound = DSP_OPT_MAX_TENSORS * 4 */
+#ifndef DSP_OPT_MAX_BATCH_DSTS
+#define DSP_OPT_MAX_BATCH_DSTS          (DSP_OPT_MAX_TENSORS * 4 * 4)
+#endif
+
+#ifndef HTP_OP_MAX_OUTPUTS
+#define HTP_OP_MAX_OUTPUTS              4
+#endif
+
+#ifndef HEX_OP_PROF_BUCKETS
+#define HEX_OP_PROF_BUCKETS             64
+#endif
+
+#define GGMLHEXAGON_LOGBUF_LEN          4096
+#define GGMLHEXAGON_TMPBUF_LEN          256
+
+#define GGMLHEXAGON_LOG_ALWAYS(...)     ggmlhexagon_log_always_internal(GGML_LOG_LEVEL_NONE , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define GGMLHEXAGON_LOG_ERROR(...)      ggmlhexagon_log_always_internal(GGML_LOG_LEVEL_ERROR, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define GGMLHEXAGON_LOG_VERBOSE(...)    ggmlhexagon_log_always_internal(GGML_LOG_LEVEL_CONT , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define GGMLHEXAGON_LOG_WARN(...)       ggmlhexagon_log_internal(GGML_LOG_LEVEL_WARN , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#define GGMLHEXAGON_LOG_INFO(...)       ggmlhexagon_log_internal(GGML_LOG_LEVEL_INFO , __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+#ifndef NDEBUG
+#define GGMLHEXAGON_LOG_DEBUG(...)      ggmlhexagon_log_internal(GGML_LOG_LEVEL_DEBUG, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+#else
+#define GGMLHEXAGON_LOG_DEBUG(...)
 #endif
 
 // Forward declarations for types used in dsp_context.
@@ -39,6 +108,7 @@ extern "C" {
 // forward declaration must use the _s suffix to match the new Qualcomm API.
 struct hmx_queue_s;
 struct htp_context;
+struct htp_tensor;
 
 typedef struct dsptensor dsptensor;
 
@@ -52,6 +122,12 @@ struct dsptensor {
    void * data;
    int data_len;
 };
+
+typedef struct {
+    void * base;
+    size_t len;
+    uint32_t tensor_idx;
+} dsp_dst_range_t;
 
 typedef struct dsp_op_desc dsp_op_desc;
 struct dsp_op_desc {
@@ -67,13 +143,13 @@ struct dsp_op_desc {
 /*
  * Shared memory batch descriptor for ION-based multi-op offload.
  *
- * Layout in ION mempool:
+ * Layout in mempool:
  *   [hex_batch_hdr]
  *   [hex_op_desc[0..n_ops-1]]
  *   [hex_tensor_desc[0..n_tensors-1]]
  *
- * All data_offset fields are byte offsets from the ION mempool base.
- * DSP side accesses data as: g_ion_dsp_base + tensor->data_offset
+ * All data_offset fields are byte offsets from the mempool base.
+ * DSP side accesses data as: mempool_dsp_base + tensor->data_offset
  */
 
 /* Tensor descriptor - uses offset instead of pointer */
@@ -83,7 +159,7 @@ typedef struct hex_tensor_desc {
     int32_t  nb[4];           /* strides (bytes) per dimension */
     int32_t  op_params[16];   /* operation-specific parameters */
     uint32_t flags;           /* 0=ION tensor, 1=mirrored (heap), 2=weight (skip cache flush) */
-    uint32_t data_offset;     /* byte offset of data in ION mempool */
+    uint32_t data_offset;     /* byte offset of data in mempool */
     uint32_t data_len;        /* data length in bytes */
 } hex_tensor_desc;
 
@@ -135,9 +211,9 @@ struct dsp_context {
     // Allocated via memalign in ggml_dsp_setclocks and freed in ggml_dsp_close.
     void * hmx_queue_buf;
 
-    // ION
-    void * ion_dsp_base;
-    size_t ion_dsp_size;
+    // mempool
+    void * mempool_dsp_base;
+    size_t mempool_dsp_size;
 
     // DSP-side entry.c cache optimization bitmask. Pushed by AP at init via
     // execute_batch(0xFFFC) special mode (no IDL change). All three bits are
@@ -169,10 +245,11 @@ struct dsp_context {
     // When non-zero, INVAL_SRC_IF_NEEDED emits one [DSP-CACHE-TRACE-BIT1] log
     // line per bit 1 decision (SKIP if prior_dst_contains_src, INVAL otherwise)
     // with the same op/src/ptr/len fields as the bit 0 trace. Default 0 (off)
-    // so production perf is unaffected. Set to 1 only when diagnosing why
-    // dsp_cache_mode 5/6/7 garble on the new matmul pipeline (upstream commit
-    // 81ff7abe5). Pair with dsp_cache_trace_bit0 to localize the stale-L2-read
-    // culprit to a specific bit/op combination.
+    // so production perf is unaffected. Set to 1 to measure bit 1 SKIP rate
+    // (how often INVAL_SRC_IF_NEEDED takes the prior-dst skip path). Currently
+    // a no-op: PRIOR_DST_MAX_LEN=64 (entry.c) excludes all real-world cgraph
+    // intermediate tensors (>= 256B). Pair with dsp_cache_trace_bit0 to
+    // cross-check L2 staleness between weight and activation domains.
     uint32_t dsp_cache_trace_bit1;
 
     // htp_context for calling Qualcomm's execute_op.
@@ -189,7 +266,55 @@ struct dsp_context {
     void * work_queue_buf;
     void * dma_queue_bufs[16];  // HTP_MAX_NTHREADS == 10, but use 16 for safety
     void * dma_alias_bufs[16];
+
+    // Per-session state (moved from file-static globals for multi-session isolation).
+    // Small arrays are embedded; large arrays are allocated from arrays_pool.
+
+    // Weight first-touch invalidate tracking (bit 0)
+    const void * weight_inval_ptrs[WEIGHT_INVAL_MAX_PTRS];
+    uint32_t weight_inval_count;
+
+    // Per-batch src invalidation tracking
+    uint8_t batch_tensor_needs_inval[DSP_OPT_MAX_TENSORS];
+
+    // bit 3 last consumer op index per tensor
+    uint32_t tensor_last_use_op[DSP_OPT_MAX_TENSORS];
+
+    // Per-op dst staging buffers
+    dsptensor        dst_dt_buf [HTP_OP_MAX_OUTPUTS];
+    const dsptensor * dst_dt_ptrs[HTP_OP_MAX_OUTPUTS];
+
+    // Large arrays: single mempool allocation for cache locality
+    void * arrays_pool;
+    dsptensor * pre_dt;                     // [DSP_OPT_MAX_TENSORS]
+    struct htp_tensor * pre_ht;             // [DSP_OPT_MAX_TENSORS]
+    dsp_dst_range_t * prior_dst_ranges;     // [DSP_OPT_MAX_BATCH_DSTS]
+    dsp_dst_range_t * bulk_flush_ranges;    // [DSP_OPT_MAX_BATCH_DSTS]
+    int prior_dst_count;
+    int bulk_flush_count;
+
+#if HEX_OP_PROF
+    // Per-op profiling (compiled in when HEX_OP_PROF is non-zero)
+    uint64_t op_prof_dur_us[HEX_OP_PROF_BUCKETS];
+    uint64_t op_prof_count  [HEX_OP_PROF_BUCKETS];
+    uint64_t op_prof_min_us[HEX_OP_PROF_BUCKETS];
+    uint64_t op_prof_max_us[HEX_OP_PROF_BUCKETS];
+    uint32_t op_prof_batch_count;
+    uint64_t op_prof_batch_wall_us;
+    uint64_t nonop_hdr_inval_us;
+    uint64_t nonop_preconvert_us;
+    uint64_t nonop_w_inval_us;
+    uint64_t nonop_w_inval_bytes;
+    uint64_t nonop_a_inval_us;
+    uint64_t nonop_a_inval_bytes;
+    uint64_t nonop_dst_track_us;
+    uint64_t nonop_bulk_flush_us;
+    uint64_t nonop_queue_us;
+#endif
 };
+
+void ggmlhexagon_log_internal(int log_level, const char * file, const char * func, int line, const char * format, ...);
+void ggmlhexagon_log_always_internal(int log_level, const char * file, const char * func, int line, const char * format, ...);
 
 #ifdef  __cplusplus
 }

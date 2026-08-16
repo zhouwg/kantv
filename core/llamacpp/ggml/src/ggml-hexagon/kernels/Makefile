@@ -1,11 +1,3 @@
-# This single-source file is part of JZ's ggml-hexagon.
-# 2024--2026 The ggml authors
-# GitHub:  https://github.com/zhouwg/ggml-hexagon
-# Any copies or derivative works of this file shall preserve the above attribution information,
-# including the copyright notice and the GitHub repository URL.
-#
-#following vars already defined in CMakeLists.txt
-#HTP_ARCH_VERSION=v79
 DEBUG_FLAG=-DNDEBUG -Wall
 
 HEXAGON_COMPUTE=compute${HTP_ARCH_VERSION}
@@ -51,6 +43,12 @@ flash-attn-ops.o: flash-attn-ops.c
 		@echo "${HEXAGON_CC} $(filter-out -O3,$(CFLAGS)) -O2 ${DEBUG_FLAG} -D__FILENAME__=\"$<\" -o $@ -c $<"
 		${HEXAGON_CC} $(filter-out -O3,$(CFLAGS)) -O2 ${DEBUG_FLAG} -D__FILENAME__=\"$<\" -o $@ -c $<
 		@echo "\n"
+
+# -O3 miscompiles the HMX matmul paths (garbled q8_0/q4_0 output on partial m chunks,
+# see docs/backend/jz-ggml-hexagon/garble-matrix.md). Qualcomm's htp toolchain builds
+# release at -O2 only, so align to the validated config. Do not raise back to -O3.
+matmul-ops.o: matmul-ops.c
+		${HEXAGON_CC} $(filter-out -O3,$(CFLAGS)) -ffast-math -O2 ${DEBUG_FLAG} -D__FILENAME__=\"$<\" -o $@ -c $<
 
 %.o:%.S
 		@echo "${HEXAGON_CC} ${CFLAGS} ${DEBUG_FLAG} -D__FILENAME__=\"$<\" -o $@ -c $<"
