@@ -45,14 +45,6 @@ set(PREBUILT_LIB_PATH           ${GGML_SRC_DIR}/../android/kantvplayer/src/main/
 set(PREBUILT_INC_PATH           ${GGML_SRC_DIR}/../prebuilts/include/)
 set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
 
-set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../prebuilts/Hexagon_SDK/6.6.0.0)
-
-# Hexagon Tools path (for hexagon-clang cross-compiler used by ExternalProject)
-# defaults to the Tools subdir inside HEXAGON_SDK_PATH; override with -DHEXAGON_TOOLS_PATH=...
-if (NOT DEFINED HEXAGON_TOOLS_PATH)
-    set(HEXAGON_TOOLS_PATH ${HEXAGON_SDK_PATH}/tools/HEXAGON_Tools/19.0.07)
-endif()
-
 set(OpenCV_DIR                  ${PREBUILT_PATH}/opencv-mobile-4.9.0-android/sdk/native/jni)
 
 set(OPT_FLAG                    " ")
@@ -66,8 +58,6 @@ message("PREBUILT_LIB_PATH    : ${PREBUILT_LIB_PATH}")
 message("PROJECT_ROOT_PATH    : ${PROJECT_ROOT_PATH}")
 message("target name          : ${TARGET_NAME}")
 message("build target         : ${BUILD_TARGET}")
-message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
-message("HEXAGON_TOOLS_PATH   : ${HEXAGON_TOOLS_PATH}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
 message("GGML_ENABLE_HEXAGON  : ${GGML_ENABLE_HEXAGON}")
 message("GGML_HEXAGON_USE_MEMPOOL : ${GGML_HEXAGON_USE_MEMPOOL}")
@@ -84,6 +74,18 @@ else()
 endif()
 
 if (GGML_ENABLE_HEXAGON)
+    # Hexagon SDK path
+    set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../prebuilts/Hexagon_SDK/6.6.0.0)
+
+    # Hexagon Tools path (for hexagon-clang cross-compiler used by ExternalProject)
+    # defaults to the Tools subdir inside HEXAGON_SDK_PATH; override with -DHEXAGON_TOOLS_PATH=...
+    if (NOT DEFINED HEXAGON_TOOLS_PATH)
+        set(HEXAGON_TOOLS_PATH ${HEXAGON_SDK_PATH}/tools/HEXAGON_Tools/19.0.07)
+    endif()
+
+    message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
+    message("HEXAGON_TOOLS_PATH   : ${HEXAGON_TOOLS_PATH}")
+
     #available htp arch version:
     #v73 --- Snapdragon 8 Gen2
     #v75 --- Snapdragon 8 Gen3
