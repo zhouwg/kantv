@@ -1,6 +1,6 @@
 ### Overview
 
-the steps here has verified on Ubutun 20.04, Ubutun 24.04:
+the steps here has verified on Ubutun 20.04, Ubutun 24.04, Ubuntu 26.04:
 
 follow the steps below to generate the specified Android APK in a <b>fresh and clean</b> Ubuntu 24.04. the generated Android APK can be installed and run properly on Android phones equipped with Qualcomm Snapdragon 8Gen3 and 8Elite.
 
@@ -18,7 +18,7 @@ git checkout master
 #### Prerequisites
 
 - OS
-    Ubuntu 20.04(EOL on 31 May 2025), 22.04, 24.04 is recommended.
+    Ubuntu 20.04(EOL on 31 May 2025), 24.04, 26.04 is recommended.
 
 - tools & utilities
 
