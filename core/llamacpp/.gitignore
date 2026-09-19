@@ -154,21 +154,20 @@ a.out.*
 AGENTS.local.md
 .pi/SYSTEM.md
 
-# for jz's ggml-hexagon
+# for the mempool/FastRPC ggml-hexagon variant
 prebuilts/
 CMakeUserPresets.json
 ggml/src/ggml-hexagon/htp/ggml_dsp.h
 ggml/src/ggml-hexagon/htp/ggml_dsp_skel.c
 ggml/src/ggml-hexagon/htp/ggml_dsp_stub.c
-ggml/src/ggml-hexagon/kernels/ggml_dsp.h
-ggml/src/ggml-hexagon/kernels/ggml_dsp_skel.c
-ggml/src/ggml-hexagon/kernels/ggml_dsp_stub.c
 libggmldsp-skel*.so
+libggml-htp*.so
 x86-build/
 refs/
 .ccache/
-.ccache_qcom/
+.ccache_dspqueue/
 .ccache_cpu/
+.ccache_vulkan_x86_linux/
 tags
 *.me
 *.bk
@@ -178,3 +177,5 @@ ubatchtest_*.log
 stability_logs*
 docs/backend/jz-ggml-hexagon/*.md
 scripts/*.py
+pgo-data/
+pkg-adb/

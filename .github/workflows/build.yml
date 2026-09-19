@@ -19,11 +19,11 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  build-qcom:
-    name: Build APK (Qualcomm DSP)
+  build-android:
+    name: Build APK
     runs-on: ubuntu-latest
     env:
-      ANDROID_APK_VERSION: 1.7.0
+      ANDROID_APK_VERSION: 1.8.0
 
     steps:
       - name: checkout code
@@ -82,7 +82,7 @@ jobs:
           source build/envsetup.sh
           ./build/prebuild-download.sh
 
-      - name: build android release (qcom)
+      - name: build android release
         run: |
           source build/envsetup.sh
           lunch 1
@@ -96,102 +96,21 @@ jobs:
           echo "=== find all apk files ==="
           find android/kantvplayer/build/outputs -name "*.apk" 2>/dev/null || echo "(no apk found)"
 
-      - name: upload qcom apk
+      - name: upload apk
         uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: kantv-qcom-apk
+          name: kantv-apk
           compression-level: 0
           retention-days: 30
-          path: |
-            android/kantvplayer/build/outputs/apk/all64/release/*qcom-signed.apk
-            android/kantvplayer/build/outputs/apk/all64/release/*-signed.apk
+          path: android/kantvplayer/build/outputs/apk/all64/release/*-signed.apk
 
-      - name: upload qcom apk to release
+      - name: upload apk to release
         uses: svenstaro/upload-release-action@v2
         if: github.event_name == 'release'
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: android/kantvplayer/build/outputs/apk/all64/release/
-          file_glob: true
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  build-non-qcom:
-    name: Build APK (non-Qualcomm)
-    runs-on: ubuntu-latest
-    env:
-      ANDROID_APK_VERSION: 1.7.0
-      SKIP_HEXAGON_SDK: "1"
-      SKIP_OPENCL_SDK: "1"
-
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-          fetch-depth: '0'
-
-      - name: setup JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential cmake ninja-build \
-            xz-utils unzip wget curl git
-
-      - name: cache android ndk
-        id: cache-ndk
-        uses: actions/cache@v4
-        with:
-          path: prebuilts/toolchain/android-ndk-r28
-          key: android-ndk-r28-linux-v1
-
-      - name: cache android sdk
-        id: cache-sdk
-        uses: actions/cache@v4
-        with:
-          path: prebuilts/toolchain/android-sdk
-          key: android-sdk-cmdline-tools-34-v1
-
-      - name: download prebuilts (skip hexagon/opencl)
-        run: |
-          source build/envsetup.sh
-          ./build/prebuild-download.sh
-
-      - name: build android release (non-qcom)
-        run: |
-          source build/envsetup.sh
-          lunch 1
-          ./build/build-all.sh android_non_qcom
-
-      - name: list apk output (diagnostic)
-        if: always()
-        run: |
-          echo "=== APK output directory ==="
-          ls -lah android/kantvplayer/build/outputs/apk/all64/release/ 2>/dev/null || echo "(directory does not exist)"
-          echo "=== find all apk files ==="
-          find android/kantvplayer/build/outputs -name "*.apk" 2>/dev/null || echo "(no apk found)"
-
-      - name: upload non-qcom apk
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: kantv-non-qcom-apk
-          compression-level: 0
-          retention-days: 30
-          path: android/kantvplayer/build/outputs/apk/all64/release/*non-qcom-signed.apk
-
-      - name: upload non-qcom apk to release
-        uses: svenstaro/upload-release-action@v2
-        if: github.event_name == 'release'
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: android/kantvplayer/build/outputs/apk/all64/release/*non-qcom-signed.apk
+          file: android/kantvplayer/build/outputs/apk/all64/release/*-signed.apk
           tag: ${{ github.ref }}
           file_glob: true
           overwrite: true

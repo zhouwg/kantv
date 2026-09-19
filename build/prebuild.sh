@@ -2,7 +2,7 @@
 
 # Description: prerequisites for build project KanTV in command-line mode
 
-# verified on Ubuntu 20.04, Ubuntu 24.04
+# verified on Ubuntu 20.04, Ubuntu 24.04, Ubuntu 26.04
 
 sudo apt-get update
 sudo apt-get install build-essential -y

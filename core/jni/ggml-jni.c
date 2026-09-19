@@ -2,6 +2,7 @@
  * Copyright (c) 2024- KanTV Authors
  */
 #include <jni.h>
+#include <stdlib.h>
 #include <android/native_window_jni.h>
 
 #include "whispercpp/whisper.h"
@@ -352,7 +353,17 @@ Java_kantvai_ai_ggmljava_setHexagonRuntimeLibpath(JNIEnv *env, jclass clazz, jst
         return;
     }
     LOGGD("setHexagonRuntimeLibpath: %s", sz_path);
-    ggml_hexagon_set_runtime_libpath(sz_path);
+    // Set ADSP_LIBRARY_PATH so FastRPC can find DSP skel .so files in the app's data directory.
+    // ggml-hexagon-fastrpc.cpp also appends /data/local/tmp during init, but we need the
+    // app data directory included before backend registration.
+    {
+        char adsp_path[1024];
+        snprintf(adsp_path, sizeof(adsp_path),
+                 "%s;/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp",
+                 sz_path);
+        setenv("ADSP_LIBRARY_PATH", adsp_path, 1);
+        LOGGD("ADSP_LIBRARY_PATH: %s", adsp_path);
+    }
     (*env)->ReleaseStringUTFChars(env, path, sz_path);
 #else
     UNUSED(env);

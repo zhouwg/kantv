@@ -135,7 +135,7 @@
      private static String mApiGatewayServerUrl = "http://www.kantvai.com:8888/wiseplay/getlicense";
      private static String mLocalEMS = "http://192.168.0.200:81/ems";
 
-     private static String mKANTVAPKVersion = "1.6.8";
+     private static String mKANTVAPKVersion = "1.8.0";
      private static KANTVDRM mKANTVDRM = KANTVDRM.getInstance();
 
      public static final String INVALID_DEVICE_ID = "000000000000000";

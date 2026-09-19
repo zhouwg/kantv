@@ -19,8 +19,8 @@ android {
                     arguments += "-DGGML_HEXAGON=OFF"
                 } else {
                     arguments += "-DGGML_HEXAGON=ON"
-                    // JZ's ggml-hexagon implementation (FastRPC-based, no QNN dependency)
-                    arguments += "-DGGML_HEXAGON_JZ=ON"
+                    // mempool/FastRPC-invoke implementation (no QNN dependency)
+                    arguments += "-DGGML_HEXAGON_USE_MEMPOOL=ON"
                     // HTP arch version: v73=8Gen2, v75=8Gen3, v79=8Elite, v81=8Gen5
                     // override with -PHTP_ARCH_VERSION=v75 if needed
                     if (project.hasProperty('HTP_ARCH_VERSION')) {
@@ -66,7 +66,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            version "3.22.1" //make llama.cpp happy
+            version "3.22.1"
             path "../../core/CMakeLists.txt"
         }
     }

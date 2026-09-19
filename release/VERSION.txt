@@ -1,1 +1,0 @@
-kantv 1.7.0, based on llama.cpp, whisper.cpp and customized FFmpeg 6.1

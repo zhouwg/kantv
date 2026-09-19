@@ -256,16 +256,15 @@ public class IApplication extends Application {
         }
 
         // Copy versioned DSP skeleton .so files from APK assets to app data directory.
-        // The build system (CMakeLists.txt ggml_hexagon_build_kernel) builds all 4 HTP arch
-        // versions (v73/v75/v79/v81) and copies them to assets/models/.
-        // ggml-hexagon-jz.cpp looks for libggmldsp-skel-v<v>.so via file:/// URI at runtime,
-        // which resolves to the app's data directory.
+        // The build system (CMakeLists.txt) builds all 4 HTP arch versions (v73/v75/v79/v81)
+        // via ExternalProject and places them in assets/models/.
+        // ggml-hexagon-fastrpc.cpp looks for libggml-htp-v<v>.so via ADSP_LIBRARY_PATH at runtime.
         {
             String[] skelNames = {
-                "libggmldsp-skel-v73.so",  // Snapdragon 8 Gen 1/2
-                "libggmldsp-skel-v75.so",  // Snapdragon 8 Gen 3
-                "libggmldsp-skel-v79.so",  // Snapdragon 8 Elite(aka 8Gen 4)
-                "libggmldsp-skel-v81.so"   // Snapdragon 8 Gen 5
+                "libggml-htp-v73.so",  // Snapdragon 8 Gen 1/2
+                "libggml-htp-v75.so",  // Snapdragon 8 Gen 3
+                "libggml-htp-v79.so",  // Snapdragon 8 Elite(aka 8Gen 4)
+                "libggml-htp-v81.so"   // Snapdragon 8 Gen 5
             };
             String dataPath = KANTVAssetLoader.getDataPath(mContext);
             for (String name : skelNames) {

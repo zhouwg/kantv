@@ -1,5 +1,7 @@
 # KanTV
 
+**Version**: 1.8.0, based on [llama.cpp](https://github.com/ggml-org/llama.cpp) (version: 0.4.1-dev (build 11683, commit 84e0079c8)), [whisper.cpp](https://github.com/ggerganov/whisper.cpp) and customized FFmpeg 6.1.
+
 KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source project focusing on studying and practicing on-device AI technology in <b>real scenarios</b> (such as performing <b>online-TV playback</b>, <b>realtime transcription</b>, and <b>online-TV recording</b> at the same time) on Android phones:
 
 
@@ -8,8 +10,6 @@ KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source p
 - Watch online TV using a customized ![Google ExoPlayer 2.15.1](https://github.com/google/ExoPlayer). Source code of the customized ExoPlayer 2.15.1 can be found in <a href="https://github.com/zhouwg/kantv/tree/master/android/kantvplayer-exo2"> android/kantvplayer-exo2 </a>.
 
 - Record online TV to a local file on the phone.
-
-- 2D graphic performance benchmark.
 
 - AI subtitle (real-time English subtitle for English online-TV (aka OTT TV) via the great & excellent & amazing <a href="https://github.com/ggerganov/whisper.cpp"> whisper.cpp </a>).
 
@@ -29,8 +29,9 @@ KanTV ("Kan", meaning "watch" in English and "看" in Chinese), an open source p
   | [SmolVLM2-256M](https://huggingface.co/ggml-org/SmolVLM2-256M-Video-Instruct-GGUF) | LLM | text + image (realtime-video-recognition) | Huggingface |
   | [Qwen2.5-Omni-3B](https://huggingface.co/ggml-org/Qwen2.5-Omni-3B-GGUF) | LLM | text + audio (MTMD) | Alibaba |
 
-- The [JZ's ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) used in this project is probably the first open-source reference implementation of a specific llama.cpp backend for Qualcomm Hexagon NPU on Android phones. The backend type (Hexagon cDSP vs. generic ggml) is decided at build time, and the DSP-side thread count is automatically clamped based on the target SoC (e.g., 6 threads on Snapdragon 8Elite, 4 threads on Snapdragon 8Gen3). Its PP (prompt processing) and TG (token generation) performance comprehensively surpasses [Qualcomm's official implementation](https://github.com/ggml-org/llama.cpp/tree/master/ggml/src/ggml-hexagon) on Snapdragon 8Elite (aka 8Gen4); benchmark comparisons can be found [here](https://github.com/zhouwg/ggml-hexagon/blob/self-build-jz/docs/backend/jz-ggml-hexagon/ion-mempool-vs-perbuffer-analysis-20260713.md).
+- The [FastRPC-based ggml-hexagon](https://github.com/ggml-hexagon/ggml-hexagon) used in this project is probably the first open-source reference implementation of a specific llama.cpp backend for Qualcomm Hexagon NPU on Android phones.
 
+- This is a large-scale Android project built with Java and C++. It can be built entirely from the Linux command line without Android Studio, making it agent-friendly and well-suited for large language model companies to evaluate and benchmark the capabilities of their models.
 
 ### Software architecture of KanTV Android
 

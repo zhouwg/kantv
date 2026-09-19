@@ -76,13 +76,8 @@ function build_thirdparty()
 function build_jni()
 {
     cd ${PROJECT_ROOT_PATH}/core/
-    if [ ${is_build_for_qcom} -eq 1 ]; then
-        echo "build jni qcom"
-        ./build-android-jni-lib.sh qcom || echo -e "${TEXT_RED}WARNING: build-android-jni-lib.sh qcom failed, will rely on Gradle externalNativeBuild${TEXT_RESET}"
-    else
-        echo "build jni non_qcom"
-        ./build-android-jni-lib.sh non_qcom || echo -e "${TEXT_RED}WARNING: build-android-jni-lib.sh non_qcom failed, will rely on Gradle externalNativeBuild${TEXT_RESET}"
-    fi
+    echo "build jni"
+    ./build-android-jni-lib.sh || echo -e "${TEXT_RED}WARNING: build-android-jni-lib.sh failed, will rely on Gradle externalNativeBuild${TEXT_RESET}"
     cd ${PROJECT_ROOT_PATH}
 }
 
@@ -115,11 +110,7 @@ function build_kantv_androidapk()
     echo ""
     cd ${PROJECT_ROOT_PATH}/android
 
-    if [ ${is_build_for_qcom} -eq 1 ]; then
-        ./gradlew assembleRelease -PGGML_HEXAGON=ON
-    else
-        ./gradlew assembleRelease -PGGML_HEXAGON=OFF
-    fi
+    ./gradlew assembleRelease -PGGML_HEXAGON=ON
     local gradle_ret=$?
 
     if [ ${gradle_ret} -ne 0 ]; then
@@ -189,28 +180,13 @@ function sign_kantv_androidapk()
     else
         echo -e "${TEXT_GREEN}succeed to sign apk: ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk${TEXT_RESET}"
         ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk
-        if [ ${is_build_for_qcom} -eq 1 ]; then
-            mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk
 
-            echo -e "\n\n========================================================================"
-            echo -e "${TEXT_GREEN}install the APK manually:${TEXT_RESET}"
-            ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk
-            echo -e "${TEXT_GREEN}adb push ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-qcom-signed.apk /sdcard ${TEXT_RESET}"
-            echo -e "${TEXT_GREEN}install the APK accordingly in the phone${TEXT_RESET}"
-            echo -e "========================================================================"
-
-        else
-            mv ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk
-
-
-            echo -e "\n\n========================================================================"
-            echo -e "${TEXT_GREEN}install the APK manually:${TEXT_RESET}"
-            ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk
-            echo -e "${TEXT_GREEN}adb push ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-non-qcom-signed.apk /sdcard ${TEXT_RESET}"
-            echo -e "${TEXT_GREEN}install the APK accordingly in the phone${TEXT_RESET}"
-            echo -e "========================================================================"
-        fi
-
+        echo -e "\n\n========================================================================"
+        echo -e "${TEXT_GREEN}install the APK manually:${TEXT_RESET}"
+        ls -lah ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk
+        echo -e "${TEXT_GREEN}adb push ${PROJECT_ROOT_PATH}/android/kantvplayer/build/outputs/apk/all64/release/kantv-${PROJECT_BUILD_TYPE}-v${ANDROID_APK_VERSION}-signed.apk /sdcard ${TEXT_RESET}"
+        echo -e "${TEXT_GREEN}install the APK accordingly in the phone${TEXT_RESET}"
+        echo -e "========================================================================"
 
     fi
 }
@@ -264,8 +240,6 @@ function dump_usage()
     echo "Usage:"
     echo "  $0 clean"
     echo "  $0 android"
-    echo "  $0 android_qcom"
-    echo "  $0 android_non_qcom"
     echo "  $0 linux"
     echo "  $0 ios"
 #   echo "  $0 wasm"
@@ -309,15 +283,6 @@ case "$user_command" in
         do_clean
     ;;
     android)
-        is_build_for_qcom=1
-        do_buildandroid
-    ;;
-    android_qcom)
-        is_build_for_qcom=1
-        do_buildandroid
-    ;;
-    android_non_qcom)
-        is_build_for_qcom=0
         do_buildandroid
     ;;
     linux)
@@ -338,7 +303,6 @@ esac
 
 
 unset user_command
-unset is_build_for_qcom
 
 if [ $# == 0 ]; then
     #default target is android
