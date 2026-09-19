@@ -93,7 +93,8 @@ package kantvai.ai;
 
     /**
      * Set the runtime library path where DSP skeleton .so files
-     * (libggmldsp-skel-v*.so) and ggml-hexagon.cfg are located.
+     * (libggml-htp-v*.so) and ggml-hexagon.cfg are located.
+     * Sets ADSP_LIBRARY_PATH so FastRPC can find the skel files.
      * Must be called before asr_init / llm_inference so the path is set
      * prior to hexagon backend registration. No-op when hexagon backend
      * is not compiled in.

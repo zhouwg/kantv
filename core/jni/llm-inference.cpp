@@ -90,6 +90,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     common_params params;
     g_params = &params;
     if (!common_params_parse(argc, argv, params, LLAMA_EXAMPLE_CLI, print_usage)) {
+        LOGGD("error,return 1");
         return 1;
     }
 
@@ -349,7 +350,7 @@ int llama_inference_main(int argc, char ** argv, int backend_type) {
     // built-in template, causing them to echo raw KANTV_CHAT_V1 content
     // instead of producing a proper chat response.
     const bool has_explicit_template = common_chat_templates_was_explicit(chat_templates.get());
-    const bool has_any_chat_template = common_chat_templates_has_default(chat_templates.get());
+    const bool has_any_chat_template = common_chat_templates_was_explicit(chat_templates.get());
     if (params.conversation_mode == COMMON_CONVERSATION_MODE_AUTO) {
         if (has_any_chat_template) {
             LOGGD("%s: chat template is available (explicit=%d), enabling conversation mode",

@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD              20)
 set(CMAKE_CXX_STANDARD_REQUIRED     ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+include(ExternalProject)
+
 # set it to ON to enable ggml-hexagon backend on Qualcomm SoC based Android phone
 # set it to OFF if target Android phone is not Qualcomm SoC based phone
 
@@ -25,10 +27,10 @@ endif()
 
 set(STABLEDIFFUSION_ENABLE_HEXAGON     OFF)
 
-# enable JZ's ggml-hexagon implementation (alternative AP-side implementation)
-# when ON, builds ggml-hexagon-jz.cpp + htp/ DSP skel via Makefile
-# when OFF, falls back to Qualcomm's official ggml-hexagon.cpp
-option(GGML_HEXAGON_JZ "Enable JZ's ggml-hexagon implementation" ON)
+# enable mempool/FastRPC-invoke AP implementation (single mempool, synchronous invoke)
+# when ON, builds ggml-hexagon-fastrpc.cpp + htp/ DSP skel via ExternalProject
+# when OFF, falls back to dspqueue/per-buffer implementation (ggml-hexagon.cpp)
+option(GGML_HEXAGON_USE_MEMPOOL "ggml-hexagon: use mempool/FastRPC-invoke implementation" ON)
 
 # Hexagon SDK is provided via prebuilts/Hexagon_SDK symlink (from ggml-hexagon project)
 # QNN SDK is no longer needed — JZ's ggml-hexagon uses Hexagon SDK FastRPC directly
@@ -45,7 +47,7 @@ set(KANTV_GGMLJNI_SRC_DIR       ${GGML_SRC_DIR}/jni/)
 
 set(HEXAGON_SDK_PATH            ${GGML_SRC_DIR}/../prebuilts/Hexagon_SDK/6.6.0.0)
 
-# Hexagon Tools path (for hexagon-clang cross-compiler used by htp/Makefile)
+# Hexagon Tools path (for hexagon-clang cross-compiler used by ExternalProject)
 # defaults to the Tools subdir inside HEXAGON_SDK_PATH; override with -DHEXAGON_TOOLS_PATH=...
 if (NOT DEFINED HEXAGON_TOOLS_PATH)
     set(HEXAGON_TOOLS_PATH ${HEXAGON_SDK_PATH}/tools/HEXAGON_Tools/19.0.07)
@@ -68,7 +70,7 @@ message("HEXAGON_SDK_PATH     : ${HEXAGON_SDK_PATH}")
 message("HEXAGON_TOOLS_PATH   : ${HEXAGON_TOOLS_PATH}")
 message("OpenCV_DIR           : ${OpenCV_DIR}")
 message("GGML_ENABLE_HEXAGON  : ${GGML_ENABLE_HEXAGON}")
-message("GGML_HEXAGON_JZ      : ${GGML_HEXAGON_JZ}")
+message("GGML_HEXAGON_USE_MEMPOOL : ${GGML_HEXAGON_USE_MEMPOOL}")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(DEBUG_FLAG "-DDEBUG -Wall")
@@ -138,17 +140,15 @@ include_directories(${LLAMACPP_SRC_DIR}/src/)
 # NOTE: do NOT add common/jinja/ to include path — its string.h shadows libc <string.h>
 include_directories(${LLAMACPP_SRC_DIR}/tools/mtmd)
 include_directories(${LLAMACPP_SRC_DIR}/vendor)
+include_directories(${LLAMACPP_SRC_DIR}/vendor/hash)
 include_directories(${KANTV_MEDIA_SRC_DIR}/include) # kantv-asr.h
 #include_directories(${SDCPP_SRC_DIR}/)
 include_directories(${OpenCV_DIR}/include/)
 
 if (GGML_ENABLE_HEXAGON)
 include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon)
-if (GGML_HEXAGON_JZ)
-    include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
-else()
-    include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
-endif()
+include_directories(${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}) # for IDL-generated headers
 include_directories(${HEXAGON_SDK_PATH}/incs)
 include_directories(${HEXAGON_SDK_PATH}/incs/stddef)
 include_directories(${HEXAGON_SDK_PATH}/libs/qprintf/inc)
@@ -160,35 +160,56 @@ include_directories(${HEXAGON_SDK_PATH}/ipc/fastrpc/rtld/ship/android_aarch64)
 include_directories(${HEXAGON_SDK_PATH}/libs/atomic/inc)
 include_directories(${HEXAGON_SDK_PATH}/libs/atomic/android_Debug_aarch64/ship)
 
-# Generate ggml_dsp_{stub.c,skel.c,h} from ggml_dsp.idl via qaic (JZ only)
-if (GGML_HEXAGON_JZ)
-    set(GGML_DSP_STUB ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp_stub.c)
-    set(GGML_DSP_HEADER ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp.h)
-    set(QAIC_BIN ${HEXAGON_SDK_PATH}/ipc/fastrpc/qaic/bin/qaic)
-    if ((NOT EXISTS "${GGML_DSP_STUB}" OR NOT EXISTS "${GGML_DSP_HEADER}") AND EXISTS "${QAIC_BIN}")
-        message(STATUS "hexagon-jz: generating ggml_dsp stubs from ggml_dsp.idl")
+# Generate IDL stubs via qaic (Hexagon SDK IDL compiler)
+set(QAIC_BIN ${HEXAGON_SDK_PATH}/ipc/fastrpc/qaic/bin/qaic)
+if (GGML_HEXAGON_USE_MEMPOOL)
+    set(GGML_HTP_STUB ${CMAKE_CURRENT_BINARY_DIR}/ggml_htp_stub.c)
+    set(GGML_HTP_HEADER ${CMAKE_CURRENT_BINARY_DIR}/ggml_htp.h)
+    if ((NOT EXISTS "${GGML_HTP_STUB}" OR NOT EXISTS "${GGML_HTP_HEADER}") AND EXISTS "${QAIC_BIN}")
+        message(STATUS "hexagon: generating ggml_htp stubs from htp/ggml_htp.idl")
         execute_process(
             COMMAND ${QAIC_BIN} -mdll
-                -o ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels
+                -o ${CMAKE_CURRENT_BINARY_DIR}
                 -I${HEXAGON_SDK_PATH}/incs
                 -I${HEXAGON_SDK_PATH}/incs/stddef
                 -I${HEXAGON_SDK_PATH}/ipc/fastrpc/incs
-                ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels/ggml_dsp.idl
+                ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/ggml_htp.idl
             RESULT_VARIABLE QAIC_RESULT)
         if (NOT QAIC_RESULT EQUAL 0)
-            message(FATAL_ERROR "hexagon-jz: qaic failed to generate ggml_dsp stubs")
+            message(FATAL_ERROR "hexagon: qaic failed to generate ggml_htp stubs")
         endif()
     endif()
-
     set(HEXAGON_BACKEND_SRCS
-        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/ggml-hexagon-jz.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/ggml-hexagon-fastrpc.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp-drv.cpp
     )
-    if (EXISTS "${GGML_DSP_STUB}")
-        list(APPEND HEXAGON_BACKEND_SRCS ${GGML_DSP_STUB})
+    if (EXISTS "${GGML_HTP_STUB}")
+        list(APPEND HEXAGON_BACKEND_SRCS ${GGML_HTP_STUB})
     endif()
 else()
-    file(GLOB HEXAGON_BACKEND_SRCS "${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/*.cpp")
+    set(HTP_IFACE_STUB ${CMAKE_CURRENT_BINARY_DIR}/htp_iface_stub.c)
+    set(HTP_IFACE_HEADER ${CMAKE_CURRENT_BINARY_DIR}/htp_iface.h)
+    if ((NOT EXISTS "${HTP_IFACE_STUB}" OR NOT EXISTS "${HTP_IFACE_HEADER}") AND EXISTS "${QAIC_BIN}")
+        message(STATUS "hexagon: generating htp_iface stubs from htp/htp_iface.idl")
+        execute_process(
+            COMMAND ${QAIC_BIN} -mdll
+                -o ${CMAKE_CURRENT_BINARY_DIR}
+                -I${HEXAGON_SDK_PATH}/incs
+                -I${HEXAGON_SDK_PATH}/incs/stddef
+                -I${HEXAGON_SDK_PATH}/ipc/fastrpc/incs
+                ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp/htp_iface.idl
+            RESULT_VARIABLE QAIC_RESULT)
+        if (NOT QAIC_RESULT EQUAL 0)
+            message(FATAL_ERROR "hexagon: qaic failed to generate htp_iface stubs")
+        endif()
+    endif()
+    set(HEXAGON_BACKEND_SRCS
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/ggml-hexagon.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp-drv.cpp
+    )
+    if (EXISTS "${HTP_IFACE_STUB}")
+        list(APPEND HEXAGON_BACKEND_SRCS ${HTP_IFACE_STUB})
+    endif()
 endif()
 endif()
 
@@ -197,6 +218,7 @@ endif()
 file(GLOB LLAMA_SRC_SOURCES "${LLAMACPP_SRC_DIR}/src/*.cpp")
 file(GLOB LLAMA_MODELS_SOURCES "${LLAMACPP_SRC_DIR}/src/models/*.cpp")
 file(GLOB MTMD_MODELS_SOURCES "${LLAMACPP_SRC_DIR}/tools/mtmd/models/*.cpp")
+file(GLOB LLAMA_PARSERS_SOURCES "${LLAMACPP_SRC_DIR}/common/parsers/*.cpp")
 
 # Define build-info variables (normally provided by cmake/build-info.cmake)
 if(NOT DEFINED LLAMA_BUILD_NUMBER)
@@ -212,6 +234,19 @@ set(BUILD_TARGET "${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}")
 configure_file(
     ${LLAMACPP_SRC_DIR}/common/build-info.cpp.in
     ${CMAKE_BINARY_DIR}/build-info.cpp
+    @ONLY)
+
+# generate ggml-version.h from template (required by ggml.c)
+configure_file(
+    ${LLAMACPP_SRC_DIR}/ggml/src/ggml-version.h.in
+    ${CMAKE_BINARY_DIR}/ggml-version.h
+    @ONLY)
+
+# generate llama-version.h from template (required by llama.cpp)
+set(LLAMA_BUILD_COMMIT "${GGML_BUILD_COMMIT}")
+configure_file(
+    ${LLAMACPP_SRC_DIR}/src/llama-version.h.in
+    ${CMAKE_BINARY_DIR}/llama-version.h
     @ONLY)
 
 set(SOURCE_FILES
@@ -238,6 +273,7 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/arch/arm/quants.c
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/arch/arm/repack.cpp
         ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/llamafile/sgemm.cpp
+        ${LLAMACPP_SRC_DIR}/ggml/src/ggml-cpu/iqp.cpp
         ${HEXAGON_BACKEND_SRCS}
 
         ${LLAMA_SRC_SOURCES}
@@ -245,6 +281,8 @@ set(SOURCE_FILES
 
         ${CMAKE_BINARY_DIR}/build-info.cpp
         ${LLAMACPP_SRC_DIR}/vendor/cpp-httplib/httplib.cpp
+        ${LLAMACPP_SRC_DIR}/vendor/hash/hash.cpp
+        ${LLAMACPP_SRC_DIR}/vendor/hash/sha256/sha256.c
 
         ${LLAMACPP_SRC_DIR}/common/arg.cpp
         ${LLAMACPP_SRC_DIR}/common/chat.cpp
@@ -253,6 +291,9 @@ set(SOURCE_FILES
         ${LLAMACPP_SRC_DIR}/common/chat-diff-analyzer.cpp
         ${LLAMACPP_SRC_DIR}/common/chat-peg-parser.cpp
         ${LLAMACPP_SRC_DIR}/common/common.cpp
+        ${LLAMACPP_SRC_DIR}/common/json.cpp
+        ${LLAMACPP_SRC_DIR}/common/json-schema.cpp
+        ${LLAMA_PARSERS_SOURCES}
         ${LLAMACPP_SRC_DIR}/common/console.cpp
         ${LLAMACPP_SRC_DIR}/common/debug.cpp
         ${LLAMACPP_SRC_DIR}/common/download.cpp
@@ -304,6 +345,7 @@ set(SOURCE_FILES
 add_definitions(-DTARGET_ANDROID)
 add_definitions(-D__ARM_NEON)
 add_definitions(-DGGML_USE_LLAMAFILE)
+add_definitions(-D_GNU_SOURCE)
 
 add_definitions(-DSTANDARD_ANDROID_APP)
 add_definitions(-DPROJECT_NAME=\"KANTV\")
@@ -428,68 +470,35 @@ endfunction()
 build_library("kantv-ai")
 
 #cross compiling source codes of hexagon DSP skel which running on cDSP side
-function(ggml_hexagon_build_kernel KNAME)
-    message(STATUS "ggml_hexagon: build hexagon DSP skel ${KNAME}")
-
-    set(ASSETS_DIR   ${GGML_SRC_DIR}/../android/kantvplayer/src/main/assets/models/)
-
-    if (GGML_HEXAGON_JZ)
-        # JZ path: use kernels/Makefile with HEXAGON_TOOLS_PATH
-        # Build ALL supported HTP arch versions (v73, v75, v79, v81) so the APK
-        # can run on any Qualcomm SoC. Each version is built separately because
-        # the Hexagon compiler flags (-m v73, -m v75, etc.) differ per arch.
-        # The resulting .so files are copied to assets/models/ with versioned names
-        # (libggmldsp-skel-v75.so, etc.) so IApplication.java can extract them to
-        # the app's data directory at runtime.
-        set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/kernels)
-
-        # Regenerate IDL stubs once (shared across all arch versions)
-        add_custom_command(
-                TARGET ${PROJECT_NAME}
-                POST_BUILD
-                COMMAND ${HEXAGON_SDK_PATH}/ipc/fastrpc/qaic/bin/qaic -mdll
-                    -o ${HTP_SKEL_DIR}
-                    -I${HEXAGON_SDK_PATH}/incs
-                    -I${HEXAGON_SDK_PATH}/incs/stddef
-                    -I${HEXAGON_SDK_PATH}/ipc/fastrpc/incs
-                    ${HTP_SKEL_DIR}/ggml_dsp.idl
-                COMMAND ${CMAKE_COMMAND} -E make_directory ${ASSETS_DIR}
-                COMMENT "regenerate IDL stubs for hexagon DSP skel"
-        )
-
-        # Build each HTP arch version and copy to assets with versioned name
-        set(HTP_ARCH_VERSIONS v73 v75 v79 v81)
-        foreach(HTP_VER ${HTP_ARCH_VERSIONS})
-            add_custom_command(
-                    TARGET ${PROJECT_NAME}
-                    POST_BUILD
-                    COMMAND make -C ${HTP_SKEL_DIR} clean
-                    COMMAND make -C ${HTP_SKEL_DIR}
-                        HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH}
-                        HEXAGON_TOOLS_PATH=${HEXAGON_TOOLS_PATH}
-                        HTP_ARCH_VERSION=${HTP_VER}
-                        DEBUG_FLAG=${DEBUG_FLAG}
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${HTP_SKEL_DIR}/libggmldsp-skel.so
-                        ${ASSETS_DIR}/libggmldsp-skel-${HTP_VER}.so
-                    COMMENT "build JZ hexagon DSP skel (${HTP_VER})"
-            )
-            message(STATUS "ggml_hexagon: will build DSP skel for ${HTP_VER}")
-        endforeach()
-    else()
-        # Qualcomm path: use htp/Makefile
-        set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
-        add_custom_command(
-                TARGET ${PROJECT_NAME}
-                POST_BUILD
-                COMMAND make -C ${HTP_SKEL_DIR} clean
-                COMMAND make -C ${HTP_SKEL_DIR} HEXAGON_SDK_PATH=${HEXAGON_SDK_PATH} HTP_ARCH_VERSION=${HTP_ARCH_VERSION} DEBUG_FLAG=${DEBUG_FLAG}
-                COMMAND echo "current working path:`pwd`\n"
-                COMMENT "build hexagon-kernel"
-        )
-    endif()
-endfunction()
-
+#uses ExternalProject_Add to build HTP skels via htp/cmake-toolchain.cmake
 if (GGML_ENABLE_HEXAGON)
-ggml_hexagon_build_kernel("cdsp")
+    set(ASSETS_DIR ${GGML_SRC_DIR}/../android/kantvplayer/src/main/assets/models/)
+    file(MAKE_DIRECTORY ${ASSETS_DIR})
+
+    set(HTP_SKEL_DIR ${LLAMACPP_SRC_DIR}/ggml/src/ggml-hexagon/htp)
+    set(HTP_ARCH_VERSIONS v73 v75 v79 v81)
+
+    foreach(HTP_VER ${HTP_ARCH_VERSIONS})
+        set(HTP_PROJ_NAME htp-${HTP_VER})
+        if (GGML_HEXAGON_USE_MEMPOOL)
+            set(HTP_PROJ_NAME htp-mempool-${HTP_VER})
+        endif()
+
+        ExternalProject_Add(${HTP_PROJ_NAME}
+            SOURCE_DIR ${HTP_SKEL_DIR}
+            BUILD_ALWAYS ON
+            CMAKE_ARGS
+                -DCMAKE_BUILD_TYPE=Release
+                -DCMAKE_TOOLCHAIN_FILE=${HTP_SKEL_DIR}/cmake-toolchain.cmake
+                -DHEXAGON_SDK_ROOT=${HEXAGON_SDK_PATH}
+                -DHEXAGON_TOOLS_ROOT=${HEXAGON_TOOLS_PATH}
+                -DHEXAGON_HTP_DEBUG=OFF
+                -DDSP_VERSION=${HTP_VER}
+                -DGGML_HEXAGON_USE_MEMPOOL=$<IF:$<BOOL:${GGML_HEXAGON_USE_MEMPOOL}>,ON,OFF>
+                -DPREBUILT_LIB_DIR="toolv19_${HTP_VER}"
+            BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR>
+            INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                <BINARY_DIR>/libggml-htp-${HTP_VER}.so
+                ${ASSETS_DIR}/libggml-htp-${HTP_VER}.so)
+    endforeach()
 endif()

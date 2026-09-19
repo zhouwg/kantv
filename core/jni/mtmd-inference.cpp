@@ -231,7 +231,7 @@ int mtmd_inference_main(int argc, char ** argv, int backend_type) {
     //step-4: load media(image / audio)
     for (const auto & image : params.image) {
         //mtmd_bitmap * bitmap = mtmd_helper_bitmap_init_from_file(params.image.front().c_str());
-        auto res = mtmd_helper_bitmap_init_from_file(mctx, image.c_str(), false);
+        auto res = mtmd_helper_bitmap_init_from_file(mctx, image.c_str(), false, mtmd_helper_init_opt_default());
         mtmd::bitmap bmp(res.bitmap);
         if (!bmp.ptr) {
             LOGGD("failed to load media\n");

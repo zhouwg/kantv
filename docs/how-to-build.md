@@ -60,28 +60,18 @@ build the entire project by Android Studio IDE
   ./build/build-all.sh android_non_qcom
 ```
 
-#### How to enable/disable JZ's ggml-hexagon backend
+#### How to enable/disable ggml-hexagon backend
 
-the `core/llamacpp/` directory is synced from the [ggml-hexagon](https://github.com/zhouwg/ggml-hexagon) project (branch `self-build-jz`), which provides a complete JZ alternative AP-side implementation of the ggml-hexagon backend for Qualcomm Snapdragon cDSP (HTP/HMX).
+the `core/llamacpp/` directory is synced from the [ggml-hexagon](https://github.com/ggml-hexagon/ggml-hexagon) project, which provides ggml-hexagon backend for Qualcomm Snapdragon NPU.
 
-- JZ implementation (default, `GGML_HEXAGON_JZ=ON`): builds `ggml-hexagon-jz.cpp` + `kernels/` DSP skel via Makefile, outputs `libggmldsp-skel.so`
-- Qualcomm implementation (`GGML_HEXAGON_JZ=OFF`): falls back to the official `ggml-hexagon.cpp` + CMake-based HTP skel build
+- Mempool/FastRPC-invoke implementation (default, `GGML_HEXAGON_USE_MEMPOOL=ON`): builds `ggml-hexagon-fastrpc.cpp` + `htp/` DSP skel via ExternalProject
+- Dspqueue/per-buffer implementation (`GGML_HEXAGON_USE_MEMPOOL=OFF`): falls back to `ggml-hexagon.cpp` + `htp/` DSP skel via ExternalProject
 
-to switch implementation, modify <a href="https://github.com/zhouwg/kantv/blob/master/core/CMakeLists.txt#L31">core/CMakeLists.txt#L31</a> (`GGML_HEXAGON_JZ` option).
+to switch implementation, modify <a href="https://github.com/zhouwg/kantv/blob/master/core/CMakeLists.txt#L33">core/CMakeLists.txt#L33</a> (`GGML_HEXAGON_USE_MEMPOOL` option).
 
 #### Runtime configuration
 
-the `ggml-hexagon.cfg` file controls JZ's ggml-hexagon runtime behavior (cDSP thread count, cache mode, op fusion, flash attention kernel selection, etc.). key settings:
-
-- `ndev`: number of Hexagon devices (PDs) to use
-- `thread_counts`: cDSP-side thread count (2-8)
-- `enable_graph_optimize`: cgraph reorder pass for MUL_MAT ops
-- `enable_opfusion`: QKV/FFN op fusion (algotype=29)
-- `fa_select`: flash attention kernel selection (0=CPU, 1=HVX, 2=HMX)
-- `dsp_cache_mode`: DSP-side cache optimization bitmask (default 5)
-- `enabled_types`: weight types to offload for MUL_MAT
-
-refer to `ggml-hexagon.cfg` for full documentation of each option.
+the `ggml-hexagon.cfg` file controls FastRPC-based ggml-hexagon runtime behavior, refer to `ggml-hexagon.cfg` for full documentation of each option.
 
 #### Supported HTP arch versions
 

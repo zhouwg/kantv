@@ -512,7 +512,7 @@ void ggmlhexagon_log_internal(int level, const char * file, const char * func, i
         int len = vsnprintf(s_ggmlhexagon_log_internal_buf + len_prefix, GGMLHEXAGON_LOGBUF_LEN - len_prefix, format, args);
         if (len >= 0 && len < (GGMLHEXAGON_LOGBUF_LEN - len_prefix)) {
 #if (defined __ANDROID__) || (defined ANDROID)
-            __android_log_print(ANDROID_LOG_INFO, "ggml-hexagon", "%s\n", s_ggmlhexagon_log_internal_buf);
+            __android_log_print(ANDROID_LOG_INFO, "KANTV", "%s\n", s_ggmlhexagon_log_internal_buf);
             if (GGML_LOG_LEVEL_INFO == level || GGML_LOG_LEVEL_CONT == level) {
                 printf("%s\n", s_ggmlhexagon_log_internal_buf);
             }
@@ -549,7 +549,7 @@ void ggmlhexagon_log_always_internal(int level, const char * file, const char * 
         int len = vsnprintf(s_log_buf + len_prefix, GGMLHEXAGON_LOGBUF_LEN - len_prefix, format, args);
         if (len >= 0 && len < (GGMLHEXAGON_LOGBUF_LEN - len_prefix)) {
 #if (defined __ANDROID__) || (defined ANDROID)
-            __android_log_print(ANDROID_LOG_INFO, "ggml-hexagon", "%s\n", s_log_buf);
+            __android_log_print(ANDROID_LOG_INFO, "KANTV", "%s\n", s_log_buf);
             if (GGML_LOG_LEVEL_ERROR == level || GGML_LOG_LEVEL_CONT == level) {
                 printf("%s\n", s_log_buf);
             }
@@ -615,59 +615,14 @@ static inline bool is_all_token(std::string_view s) {
     return s == "all" || s == "ALL";
 }
 
-// Check if an op is allowed by the enabled_ops config filter.
-// Returns true when:
-//   - enabled_ops is empty or contains "all" or the op name
-static bool ggmlhexagon_op_is_enabled(enum ggml_op op) {
-    if (g_hexagon_appcfg.enabled_ops.empty()) {
-        return true;
-    }
-
-    if (is_all_token(g_hexagon_appcfg.enabled_ops)) {
-        return true;
-    }
-
-    const char * op_name = ggml_op_name(op);
-    // Check if op_name appears as a whole word in the comma-separated list
-    const std::string & list = g_hexagon_appcfg.enabled_ops;
-    size_t pos = 0;
-    while (pos < list.size()) {
-        size_t end = list.find(',', pos);
-        if (end == std::string::npos) end = list.size();
-        std::string token = list.substr(pos, end - pos);
-        // trim whitespace
-        size_t start = token.find_first_not_of(" \t");
-        size_t last = token.find_last_not_of(" \t");
-        if (start != std::string::npos && last != std::string::npos) {
-            token = token.substr(start, last - start + 1);
-        }
-        // "all" keyword enables all ops
-        if (token.size() == 3 &&
-            tolower((unsigned char)token[0]) == 'a' &&
-            tolower((unsigned char)token[1]) == 'l' &&
-            tolower((unsigned char)token[2]) == 'l') {
-            return true;
-        }
-        // case-insensitive compare
-        if (token.size() == strlen(op_name)) {
-            bool match = true;
-            for (size_t i = 0; i < token.size(); ++i) {
-                if (tolower((unsigned char)token[i]) != tolower((unsigned char)op_name[i])) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) return true;
-        }
-        pos = end + 1;
-    }
-    return false;
-}
-
 static void ggmlhexagon_set_runtime_path(const std::string & path) {
 #if defined(__ANDROID__)
     // Android: LD_LIBRARY_PATH uses ':' as separator
+    const char * existing_ld = getenv("LD_LIBRARY_PATH");
     std::string lib_runtime_path = path + ":/vendor/dsp/cdsp:/vendor/lib64:/vendor/dsp/dsp:/vendor/dsp/images";
+    if (existing_ld && existing_ld[0]) {
+        lib_runtime_path = lib_runtime_path + ":" + existing_ld;
+    }
     if (0 == setenv("LD_LIBRARY_PATH", lib_runtime_path.c_str(), 1)) {
         GGMLHEXAGON_LOG_DEBUG("setenv LD_LIBRARY_PATH %s successfully", lib_runtime_path.c_str());
     } else {
@@ -675,7 +630,11 @@ static void ggmlhexagon_set_runtime_path(const std::string & path) {
     }
 
     // ADSP_LIBRARY_PATH uses ';' as separator on all platforms
+    const char * existing_adsp = getenv("ADSP_LIBRARY_PATH");
     std::string adsp_runtime_path = path + ";/vendor/dsp/cdsp;/vendor/lib/rfsa/adsp;/system/lib/rfsa/adsp;/vendor/dsp/dsp;/vendor/dsp/images;/dsp";
+    if (existing_adsp && existing_adsp[0]) {
+        adsp_runtime_path = adsp_runtime_path + ";" + existing_adsp;
+    }
     if (0 == setenv("ADSP_LIBRARY_PATH", adsp_runtime_path.c_str(), 1)) {
         GGMLHEXAGON_LOG_DEBUG("setenv ADSP_LIBRARY_PATH %s successfully", adsp_runtime_path.c_str());
     } else {
@@ -4936,10 +4895,6 @@ static void init_op_validators(void) {
 static bool ggmlhexagon_can_handle_op_through_cdsp(ggml_backend_dev_t dev, const struct ggml_tensor * op_tensor) {
     if (ggmlhexagon_is_metadata_op(op_tensor->op)) {
         return true;
-    }
-
-    if (!ggmlhexagon_op_is_enabled(op_tensor->op)) {
-        return false;
     }
 
     if (!ggmlhexagon_is_op_on_device(dev, op_tensor)) {

@@ -789,8 +789,9 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
         argv_vec.push_back("--ubatch-size");
         argv_vec.push_back("64");
         argv_vec.push_back("--poll");
-        argv_vec.push_back("1000");
-        argv_vec.push_back("--no-mmap");
+        argv_vec.push_back("100");
+        argv_vec.push_back("--load-mode");
+        argv_vec.push_back("none");
     } else {
         // CPU only: small context, no offload
         argv_vec.push_back("-c");
@@ -800,6 +801,10 @@ int llama_inference(const char * sz_model_path, const char * sz_user_data, int l
     }
 
     int argc = (int)argv_vec.size();
+    LOGGD("llama_inference_main argc=%d, backend_type=%d", argc, n_backend_type);
+    for (int i = 0; i < argc; i++) {
+        LOGGD("  argv[%d]: %s", i, argv_vec[i]);
+    }
     llm_init_running_state();
     // Same guard as mtmd_inference: catch uncaught C++ exceptions from the
     // llama.cpp internals so they do not abort() the whole process.
@@ -921,6 +926,10 @@ int mtmd_inference(const char * sz_model_path, const char * sz_mmproj_model_path
     }
 
     int argc = (int)argv_vec.size();
+    LOGGD("mtmd_inference_main argc=%d, backend_type=%d", argc, n_backend_type);
+    for (int i = 0; i < argc; i++) {
+        LOGGD("  argv[%d]: %s", i, argv_vec[i]);
+    }
     llm_init_running_state();
     // Wrap mtmd_inference_main in a top-level try-catch to prevent uncaught C++
     // exceptions (e.g. from mtmd_context constructor when mmproj/text-model

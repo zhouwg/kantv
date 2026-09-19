@@ -322,3 +322,11 @@
                         <li>remove `-mcpu=cortex-x1 -mtune=cortex-x1` for better compatibility with Snapdragon 8 Gen 2 & 8 Gen 3</li>
                         <li>reorganize source directory structure</li>
                     </ul>
+- v1.8.0, 2026-09-19,
+                    <ul>
+                        <li>sync with upstream llama.cpp </li>
+                        <li>sync with project ggml-hexagon: adapt to new ggml-hexagon CMakeLists.txt (ExternalProject-based DSP skel build)</li>
+                        <li>add missing source files from upstream llama.cpp sync (iqp, json, parsers, hash)</li>
+                        <li>improve stability</li>
+                        <li>refine docs</li>
+                    </ul>

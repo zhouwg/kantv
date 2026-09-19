@@ -28,8 +28,8 @@ project.ext {
     appTargetSdkVersion = 29
 
     //version and version code of KanTV Android APP
-    releaseVersion     = '1.7.0'
-    releaseVersionCode = 1007000
+    releaseVersion     = '1.8.0'
+    releaseVersionCode = 1008000
 
     //version and version code of internal customized Exoplayer2
     releaseVersionExoplayer     = '2.15.1'
