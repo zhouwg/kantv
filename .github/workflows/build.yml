@@ -23,7 +23,7 @@ jobs:
     name: Build APK
     runs-on: ubuntu-latest
     env:
-      ANDROID_APK_VERSION: 1.7.0
+      ANDROID_APK_VERSION: 1.8.0
 
     steps:
       - name: checkout code
